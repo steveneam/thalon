@@ -1,0 +1,16 @@
+name: ci-guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci-grep-guard:
+    name: ci-grep-guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Brand-cleanliness guard (zero forbidden tokens in tracked files)
+        shell: pwsh
+        run: ./scripts/ci-grep-guard.ps1
