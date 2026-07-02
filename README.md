@@ -1,6 +1,6 @@
 # Thalon
 
-> **Pre-charter scaffolding.** This repository currently holds the bare foundation only — no feature or application code. Nothing is built until the founder charter is approved from inside this repo (see `.context/PROMPTS.md`, gitignored). Do not add feature code before then.
+> **Charter approved (2026-07-02) — build in progress.** The dependency-ordered bucket list lives in [`CHARTER.md`](CHARTER.md); the build proceeds one bucket at a time with a founder checkpoint between each.
 
 Thalon is a **standalone, generic, multi-tenant content and social-automation engine**:
 
@@ -19,18 +19,33 @@ You give it one input (a URL, a prompt, or a dropped document) plus a tenant pro
 
 This repository must contain **zero references to the two forbidden upstream brand names** — no files, strings, config, dependencies, or wiring — in any git-tracked file. The engine is genuinely generic and needs none of them. The check is `scripts/ci-grep-guard.ps1` (see `CI-GUARD.md`); it must return zero hits over tracked files. Any downstream brand is fed in at runtime as generic tenant data, external to the repo.
 
-## Layout (foundation)
+## Quickstart (dev — zero cloud services needed)
 
 ```
-.gitignore            # ignores build output, secrets, and the vault pointer (.context/)
+npm install          # workspace root; installs apps/web
+npm run dev          # Next.js dev server
+# GET http://localhost:3000/api/health  → status + resolved seams
+npm test             # vitest smoke tests
+npm run guard        # brand-cleanliness check (also required in CI)
+```
+
+Dev runs entirely on local seams: sqlite (`.data/dev.db`) + local object store + inline queue + a dev auth stub. Each seam flips to its cloud driver (Aurora / S3 / SQS / Clerk) via env only — see `apps/web/.env.example`.
+
+## Layout
+
+```
+CHARTER.md            # the approved build charter (buckets B0.1 → B3.6)
 README.md             # this file
 AGENTS.md             # agent operating protocol for this repo (canonical)
 CLAUDE.md             # hardlink/copy of AGENTS.md (Claude Code auto-load convention)
 CI-GUARD.md           # documents the brand-cleanliness CI check
+apps/
+  web/                # Next.js (App Router, TS) + shadcn/ui — app, API routes, seams
 scripts/
   ci-grep-guard.ps1   # the brand-cleanliness guard (tracked-files grep; exits non-zero on any hit)
 proprietary/
   README.md           # the moat/IP folder (judge harness, prompt chains, fan-out profiles)
+.github/workflows/    # CI: brand guard (required check) + tests
 .context/             # GITIGNORED — vault pointer + paste-ready build prompts for the founder
 ```
 
