@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+.next/
+dist/
+build/
+out/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Environment / secrets (NEVER commit real secrets)
+.env
+.env.*
+!.env.example
+
+# Deploy tooling
+.vercel
+.render
+
+# Local eval / trace artifacts
+.langfuse/
+promptfoo-output/
+*.trace.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+
+# ---------------------------------------------------------------------------
+# Vault pointer — MUST stay gitignored.
+# .context/ points at the read-only research vault whose absolute path itself
+# contains a forbidden upstream brand token. Keeping it untracked is what lets
+# the CI grep guard (scripts/ci-grep-guard.ps1) pass over tracked files while
+# the local build agent still has its vault context. Do NOT remove this line.
+# ---------------------------------------------------------------------------
+.context/
