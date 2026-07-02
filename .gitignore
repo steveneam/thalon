@@ -31,6 +31,9 @@ __pycache__/
 promptfoo-output/
 *.trace.json
 
+# Dev-seam data (sqlite db + local object store)
+.data/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

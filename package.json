@@ -1,0 +1,17 @@
+{
+  "name": "thalon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone, generic, multi-tenant content and social-automation engine",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @thalon/web",
+    "build": "npm run build -w @thalon/web",
+    "start": "npm run start -w @thalon/web",
+    "lint": "npm run lint -w @thalon/web",
+    "test": "npm run test -w @thalon/web",
+    "guard": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1"
+  }
+}
