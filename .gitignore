@@ -36,6 +36,9 @@ promptfoo-output/
 Thumbs.db
 *.log
 
+# Personal agent-harness settings (per-machine; never committed)
+.claude/settings.local.json
+
 # ---------------------------------------------------------------------------
 # Vault pointer — MUST stay gitignored.
 # .context/ points at the read-only research vault whose absolute path itself
