@@ -22,6 +22,8 @@ This repository must contain **zero references to the two forbidden upstream bra
 5. **The moat lives in `proprietary/`.** Put the novel artifacts (judge harness, prompt chains, fan-out/niche profiles, tuned heuristics) there, separate from boilerplate and third-party code. See `proprietary/README.md`.
 6. **Dogfood + eval from day one.** Every override/correction becomes one eval row in the same change; a green suite is the ship gate. Use a $0/self-hostable eval stack (MIT/Apache only) — no commercial-gated deps on the hot path.
 7. **Small, verifiable steps.** Plan, then execute one step; write tests with code and run them; keep changes small; stop at each bucket checkpoint for human review.
+8. **Leave a ratchet.** Every expensive lesson becomes a durable artifact **in the same change** — a test, a CI check, a charter amendment, a code seam, or a rule in this file. Route each lesson to exactly one home (link, don't copy) and prune the stale neighbour as you add. A lesson that lives only in chat is lost.
+9. **End every session clear-safe, unprompted.** Reach a verified boundary (never stop mid-edit), run the grep guard, commit and push, then hand the founder a stamped resume prompt (pointer + delta + next action — never a state dump). When upcoming buckets are dependency-independent, proactively propose parallel worktree lanes (branch per bucket, disjoint file sets, merge at each checkpoint) including any pre-requirements.
 
 ## Licensing hygiene
 
