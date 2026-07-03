@@ -7,6 +7,7 @@ export default defineConfig({
     projects: [
       "apps/web/vitest.config.ts",
       "packages/*/vitest.config.ts",
+      "proprietary/*/vitest.config.ts",
       "eval/vitest.config.ts",
       {
         test: {
