@@ -1,7 +1,7 @@
-import { InvariantViolationError } from "@thalon/db";
+import { BudgetExceededError, InvariantViolationError } from "@thalon/db";
 import { afterEach, describe, expect, it } from "vitest";
 import { runJudgePipeline } from "../pipeline";
-import { fixedDriver, withCallCount } from "./fake-drivers";
+import { FAKE_TOKENS_IN, FAKE_TOKENS_OUT, fixedDriver, withCallCount } from "./fake-drivers";
 import { judgeFixture, type JudgeFixture } from "./fixtures";
 
 const PASS = { verdict: "pass" as const, claims: [{ claim: "shipped", supported: true, chunkRef: "c1" }] };
@@ -147,6 +147,44 @@ describe("runJudgePipeline — two-tier orchestration (SPINE §1.1, §2.3)", () 
       finalDriver: fixedDriver(PASS),
     });
     expect(second.status).toBe("queued");
+  });
+
+  it("meters every g3 gateway call through the usage ledger (one choke point, amendment A2)", async () => {
+    fx = await judgeFixture();
+    const outcome = await runJudgePipeline(fx.handle.repos, {
+      ctx: fx.ctx,
+      draftId: fx.draft.id,
+      chunks: [],
+      screenDriver: fixedDriver(PASS),
+      finalDriver: fixedDriver(PASS),
+    });
+    expect(outcome.status).toBe("queued");
+    // g1 spends nothing; screen + final = exactly two metered gateway calls.
+    const totals = await fx.handle.repos.usageLedger.totalForDay(fx.ctx);
+    expect(totals.tokensIn).toBe(2 * FAKE_TOKENS_IN);
+    expect(totals.tokensOut).toBe(2 * FAKE_TOKENS_OUT);
+  });
+
+  it("budget hard-stop: an exhausted tenant cap halts the pipeline loudly before any model call", async () => {
+    fx = await judgeFixture();
+    const screen = withCallCount(fixedDriver(PASS));
+    const final = withCallCount(fixedDriver(PASS));
+    await expect(
+      runJudgePipeline(fx.handle.repos, {
+        ctx: fx.ctx,
+        draftId: fx.draft.id,
+        chunks: [],
+        screenDriver: screen.driver,
+        finalDriver: final.driver,
+        capTokens: 0,
+      }),
+    ).rejects.toThrow(BudgetExceededError);
+    // The stop is an operational halt, not a verdict: no model was ever
+    // invoked and the draft stays in `judging` for a re-run, never queued.
+    expect(screen.count).toBe(0);
+    expect(final.count).toBe(0);
+    const draft = await fx.handle.repos.drafts.get(fx.ctx, fx.draft.id);
+    expect(draft.status).toBe("judging");
   });
 
   it("per-tenant isolation: the denylist is pulled from THIS tenant's active brand profile, never hard-coded", async () => {

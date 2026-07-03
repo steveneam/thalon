@@ -1,4 +1,5 @@
 import type { Verdict } from "@thalon/contracts";
+import { BudgetExceededError } from "@thalon/db";
 import type { JudgeModelDriver, JudgeModelRequest } from "./shell/driver";
 import { shellJudgeOutputSchema, type ShellJudgeOutput } from "./shell/schema";
 
@@ -28,8 +29,12 @@ export async function callTierJudge(
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     let candidate: unknown;
     try {
-      candidate = await driver(req);
-    } catch {
+      candidate = (await driver(req)).candidate;
+    } catch (err) {
+      // A blown tenant budget is an operational hard stop (amendment A2),
+      // not a repairable shell hiccup — retrying it would only re-assert
+      // and re-emit budget.exceeded events. Fail loud, all the way up.
+      if (err instanceof BudgetExceededError) throw err;
       if (attempt === maxAttempts) break;
       continue;
     }

@@ -1,6 +1,6 @@
 import { FINAL_JUDGE_GATE, type TenantCtx } from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
-import { modelTiers } from "@thalon/platform";
+import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
 import { runG1Denylist } from "./g1-denylist";
 import {
   promptVersionFor,
@@ -22,6 +22,8 @@ export interface RunJudgePipelineInput {
   chunks: SourceChunkInput[];
   screenDriver: JudgeModelDriver;
   finalDriver: JudgeModelDriver;
+  /** Overrides the tenant daily token budget cap for this run (tests only; production reads TENANT_DAILY_TOKEN_BUDGET). */
+  capTokens?: number;
 }
 
 export type PipelineOutcome =
@@ -92,8 +94,27 @@ async function runTier(
   const tiers = modelTiers();
   const model = tier === "screen" ? tiers.judgeScreen : tiers.judgeFinal;
   const promptVersion = promptVersionFor(tier);
+  // Core meters the shell: EVERY attempt (including repair retries) routes
+  // through the one gateway choke point — budget asserted before, usage
+  // recorded after, span traced (SPINE §1; amendment A2). The shell driver
+  // itself stays read-only.
+  const capTokens = input.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+  const guarded: JudgeModelDriver = (req) =>
+    withGatewayGuard({
+      usage: {
+        assertWithinBudget: (o) => repos.usageLedger.assertWithinBudget(input.ctx, o),
+        recordUsage: (o) => repos.usageLedger.record(input.ctx, o),
+      },
+      capTokens,
+      model,
+      operation: `judge.${GATE_FOR_TIER[tier]}`,
+      call: async () => {
+        const out = await driver(req);
+        return { result: out, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
+      },
+    });
   const startedAt = Date.now();
-  const result = await callTierJudge(driver, { tier, body: draft.body, chunks: input.chunks });
+  const result = await callTierJudge(guarded, { tier, body: draft.body, chunks: input.chunks });
   const latencyMs = Date.now() - startedAt;
   await repos.judgeResults.append(input.ctx, {
     draftId: draft.id,

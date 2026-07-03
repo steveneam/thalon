@@ -11,6 +11,7 @@ export { callTierJudge, type TierCallResult } from "./validate-shell-output";
 export {
   gatewayJudgeDriver,
   promptVersionFor,
+  type JudgeModelCall,
   type JudgeModelDriver,
   type JudgeModelRequest,
   type JudgeTier,

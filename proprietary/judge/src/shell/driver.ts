@@ -16,13 +16,22 @@ export interface JudgeModelRequest {
   chunks: SourceChunkInput[];
 }
 
+/** One driver invocation = one gateway call: the raw candidate plus its token spend. */
+export interface JudgeModelCall {
+  candidate: unknown;
+  tokensIn: number;
+  tokensOut: number;
+}
+
 /**
  * A shell judge driver: read-only, returns a raw (unvalidated) candidate —
  * only ../validate-shell-output.ts (core) may treat it as trustworthy, and
- * only after it survives the Zod boundary guard. Tests inject scripted
- * fakes so every judge test runs keyless (no AI_GATEWAY_API_KEY).
+ * only after it survives the Zod boundary guard. Token counts ride along so
+ * the core can meter every attempt through the ONE gateway choke point
+ * (`withGatewayGuard`, see pipeline.ts). Tests inject scripted fakes so
+ * every judge test runs keyless (no AI_GATEWAY_API_KEY).
  */
-export type JudgeModelDriver = (req: JudgeModelRequest) => Promise<unknown>;
+export type JudgeModelDriver = (req: JudgeModelRequest) => Promise<JudgeModelCall>;
 
 const PROMPT_FILE_FOR_TIER: Record<JudgeTier, string> = {
   screen: "judge-g3-screen.v1.md",
@@ -35,11 +44,11 @@ export function promptVersionFor(tier: JudgeTier): string {
 }
 
 /**
- * The real driver: routes through this project's OWN gateway wrapper
- * (`packages/platform/src/gateway.ts` — `getGateway`/`modelTiers`), the ONE
- * choke point the engine lane is wiring per-tenant budget checks and tracing
- * onto. Never constructed in tests — see the final report for the exact
- * integration point expected from that lane.
+ * The real driver: routes through this project's OWN gateway wiring
+ * (`getGateway`/`modelTiers`) and reports its token spend. Budget assertion,
+ * usage recording, and tracing are NOT here — the shell stays read-only; the
+ * pipeline (core) wraps every invocation in `withGatewayGuard`. Never
+ * constructed in tests.
  */
 export function gatewayJudgeDriver(): JudgeModelDriver {
   return async (req) => {
@@ -48,12 +57,16 @@ export function gatewayJudgeDriver(): JudgeModelDriver {
     const model = getGateway().languageModel(modelId);
     const system = readPromptFile(PROMPT_FILE_FOR_TIER[req.tier]);
     const sources = req.chunks.map((c) => `[${c.ref}] ${c.text}`).join("\n\n");
-    const { object } = await generateObject({
+    const { object, usage } = await generateObject({
       model,
       schema: shellJudgeOutputSchema,
       system,
       prompt: `DRAFT:\n${req.body}\n\nPROVIDED SOURCES:\n${sources || "(none provided)"}`,
     });
-    return object;
+    return {
+      candidate: object,
+      tokensIn: usage.inputTokens ?? 0,
+      tokensOut: usage.outputTokens ?? 0,
+    };
   };
 }
