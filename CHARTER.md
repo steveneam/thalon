@@ -22,7 +22,7 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
 - Tests ship with the code they verify; small, verifiable steps.
 - Every founder override/correction becomes one eval row in the same change.
 - **No publish path is wired anywhere in Sprints 0–2.** A fan-out can never emit an ungated draft.
-- Dev runs on local seams (SQLite · local object store · inline queue); cloud stacks land only when a bucket needs them.
+- Dev runs on local seams (embedded Postgres/PGlite · local object store · inline queue); cloud stacks land only when a bucket needs them.
 
 ## Buckets
 
@@ -32,7 +32,7 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
 |---|---|---|---|
 | **B0.1 — Remote + CI guard** (first action) | Private GitHub repo created from this directory; push; GitHub Actions workflow running the grep guard as a **required check**; branch protection on `main`. | — | `gh` auth |
 | **B0.2 — App skeleton, dev-seamed** | Next.js (App Router, TypeScript) + shadcn/ui; health endpoint; smoke test; `.env.example` (placeholders only); dev = SQLite + local object store + inline queue behind `sqlite→aurora`, `local→s3`, `inline→sqs` seams; Clerk dev-seamed; own AI-gateway wiring (`ai` ≥5.0.36 + `@ai-sdk/gateway`, v5 `createGateway`, per-call routing). | B0.1 | `AI_GATEWAY_API_KEY` (Clerk keys may trail) |
-| **B0.3 — Schema table 1 + grounding index** | Multi-tenant schema: `tenants` · `brand_profiles` · `sources` · `source_chunks` · `drafts` · `judge_results` · `approvals` · `publish_queue` · `eval_cases`/`edit_diffs`. `tenant_id` on every row; composite hot-path indexes (`(tenant_id,status)`, `(tenant_id,platform,scheduled_at)`, `(tenant_id,created_at)`); grounding index behind the seam (dev = local vector store; prod = Aurora Postgres pgvector HNSW); content-addressed caches (LLM-generation keyed on prompt+model+params+input-hash; grounding-retrieval keyed on source-set-hash+query-hash). | B0.2 | — |
+| **B0.3 — Schema table 1 + grounding index** | Multi-tenant schema: `tenants` · `brand_profiles` · `sources` · `source_chunks` · `drafts` · `judge_results` · `approvals` · `publish_queue` · `eval_cases`/`edit_diffs` **+ `fanout_runs` · `events` · `usage_ledger` (amendment A2)**. `tenant_id` on every row; composite hot-path indexes (`(tenant_id,status)`, `(tenant_id,platform,scheduled_at)`, `(tenant_id,created_at)`); grounding index behind the seam (**dev = embedded Postgres/PGlite with pgvector — amendment A1**; prod = Aurora Postgres pgvector HNSW); content-addressed caches (LLM-generation keyed on prompt+model+params+input-hash; grounding-retrieval keyed on source-set-hash+query-hash); per-tenant daily budget caps enforced in the gateway wrapper; **package extraction + boundary/tenancy/state-machine ratchets (amendment A3)**; draft lifecycle state machine per `docs/SPINE.md` §1.1. | B0.2 | — |
 | **B0.4 — Eval scaffold** (before any draft exists) | $0/self-hostable eval stack (Langfuse self-host + promptfoo + DeepEval — MIT/Apache only); `edit_diff`/override capture wired end-to-end and proven by test; golden-set seed file. | B0.3 | Langfuse keys/host |
 | **B0.5 — AWS bootstrap (own sub-account)** | Organizations sub-account; GitHub-OIDC deploy role (no static keys); `cdk bootstrap` ap-southeast-2; CDK-Python skeleton with Thalon-named stacks. Aurora/S3 stacks land only when a bucket needs them. | B0.1 | AWS sub-account + one-time OIDC/bootstrap; `AWS_DEPLOY_ROLE_ARN` |
 
@@ -71,3 +71,11 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
 - [ ] Sprint-1 vertical: one source → generic-profile fan-out → G1+G3 two-tier gate → Approve queue; no ungated draft can reach the queue (test-proven); no publish path wired.
 - [ ] Eval harness live; `edit_diff`/override captured from the first draft; green suite armed as the ship gate at Sprint-1 exit.
 - [ ] Operational mirror stood up (external to this repo).
+
+## Amendments
+
+- **2026-07-03 — Spine adoption (founder-approved).** Architecture home: `docs/SPINE.md`; decision record: `docs/adr/0001-spine-adoption.md`.
+  - **A1** — dev DB seam driver = **embedded Postgres (PGlite)** replacing SQLite: one SQL dialect dev→prod, dev-side pgvector for the grounding index, per-worktree DB isolation preserved.
+  - **A2** — B0.3 adds `fanout_runs` (idempotency + fan-out batch anchor) · `events` (append-only audit spine) · `usage_ledger` + per-tenant daily budget caps enforced in the gateway wrapper.
+  - **A3** — package extraction at B0.3 (`packages/{contracts,db,platform,engine}`, `proprietary/{judge,prompts,profiles}` skeleton) + three enforcement ratchets: import-boundary lint, tenant-id schema test, draft-state-machine property test.
+  - **A4** — parallel-ready plumbing: `COORDINATION.md` lane board, `.worktreeinclude`, tracked worktree settings, and `agent_handoff/CURRENT.md` (single-file session handoff, overwritten each wrap).

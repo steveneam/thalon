@@ -1,0 +1,7 @@
+# Gitignored files copied into every new worktree (gitignore syntax; only
+# gitignored matches are copied — tracked files come with the checkout).
+# The vault pointer MUST travel with every lane; without it a worktree agent
+# has no product context.
+.env
+.env.*
+.context/

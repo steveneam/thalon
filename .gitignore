@@ -42,6 +42,9 @@ Thumbs.db
 # Personal agent-harness settings (per-machine; never committed)
 .claude/settings.local.json
 
+# Claude Code worktrees (parallel lanes — see COORDINATION.md)
+.claude/worktrees/
+
 # ---------------------------------------------------------------------------
 # Vault pointer — MUST stay gitignored.
 # .context/ points at the read-only research vault whose absolute path itself
