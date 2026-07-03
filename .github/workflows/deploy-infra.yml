@@ -1,8 +1,6 @@
-# Template for .github/workflows/deploy-infra.yml — NOT active from this path.
-#
-# Lane B owns infra/** only, so this ships as an .example here; the lead moves
-# it to .github/workflows/ at the B0.5 merge checkpoint (one rename, no edits).
-# Prerequisites before it can go green:
+# Deploys infra/** from main via the GitHub OIDC role — no static keys.
+# Activated at the B0.5 merge checkpoint (authored in infra/github-workflow/
+# as an .example by Lane B). Prerequisites, all done 2026-07-03:
 #   1. ThalonGithubOidc stack deployed once by a human (see infra/README.md)
 #   2. Repo variable AWS_DEPLOY_ROLE_ARN set to the stack's DeployRoleArn output
 #   3. cdk bootstrap completed in the sub-account (ap-southeast-2)
