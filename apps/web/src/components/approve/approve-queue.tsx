@@ -29,6 +29,24 @@ export function ApproveQueue() {
   const [judgeResults, setJudgeResults] = useState<PanelJudgeResult[]>([]);
   const [busy, setBusy] = useState(false);
 
+  // Selection changes are EVENTS: every synchronous status/selection reset
+  // lives in these handlers, never in an effect body
+  // (react-hooks/set-state-in-effect) — the effects below only fetch and set
+  // state asynchronously when data arrives.
+  const selectDraft = useCallback((draftId: string | null) => {
+    setSelectedDraftId(draftId);
+    setPanelStatus(draftId ? "loading" : "idle");
+  }, []);
+
+  const selectRun = useCallback(
+    (runId: string | null) => {
+      setSelectedRunId(runId);
+      setGridStatus(runId ? "loading" : "idle");
+      selectDraft(null);
+    },
+    [selectDraft],
+  );
+
   useEffect(() => {
     let cancelled = false;
     fetchRunsFeed()
@@ -36,7 +54,7 @@ export function ApproveQueue() {
         if (cancelled) return;
         setRuns(data);
         setFeedStatus("success");
-        if (data.length > 0) setSelectedRunId(data[0].id);
+        if (data.length > 0) selectRun(data[0].id);
       })
       .catch(() => {
         if (!cancelled) setFeedStatus("error");
@@ -44,19 +62,17 @@ export function ApproveQueue() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectRun]);
 
   useEffect(() => {
     if (!selectedRunId) return;
     let cancelled = false;
-    setGridStatus("loading");
-    setSelectedDraftId(null);
     fetchRunDrafts(selectedRunId)
       .then((data) => {
         if (cancelled) return;
         setDrafts(data);
         setGridStatus("success");
-        if (data.length > 0) setSelectedDraftId(data[0].id);
+        if (data.length > 0) selectDraft(data[0].id);
       })
       .catch(() => {
         if (!cancelled) setGridStatus("error");
@@ -64,11 +80,10 @@ export function ApproveQueue() {
     return () => {
       cancelled = true;
     };
-  }, [selectedRunId]);
+  }, [selectedRunId, selectDraft]);
 
   const loadDraftDetail = useCallback((draftId: string) => {
     let cancelled = false;
-    setPanelStatus("loading");
     fetchDraftDetail(draftId)
       .then((data) => {
         if (cancelled) return;
@@ -89,10 +104,7 @@ export function ApproveQueue() {
   }, []);
 
   useEffect(() => {
-    if (!selectedDraftId) {
-      setPanelStatus("idle");
-      return;
-    }
+    if (!selectedDraftId) return;
     return loadDraftDetail(selectedDraftId);
   }, [selectedDraftId, loadDraftDetail]);
 
@@ -113,8 +125,8 @@ export function ApproveQueue() {
 
   return (
     <div className="flex min-h-screen flex-1 flex-col md:flex-row">
-      <FeedPanel status={feedStatus} runs={runs} selectedRunId={selectedRunId} onSelect={setSelectedRunId} />
-      <FanoutGrid status={gridStatus} drafts={drafts} selectedDraftId={selectedDraftId} onSelect={setSelectedDraftId} />
+      <FeedPanel status={feedStatus} runs={runs} selectedRunId={selectedRunId} onSelect={selectRun} />
+      <FanoutGrid status={gridStatus} drafts={drafts} selectedDraftId={selectedDraftId} onSelect={selectDraft} />
       <ApprovePanel
         status={panelStatus}
         draft={panelDraft}

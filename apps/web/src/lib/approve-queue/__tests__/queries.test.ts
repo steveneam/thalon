@@ -43,7 +43,7 @@ describe("approve-queue queries (events-hydrated lists — see B1.4 handoff note
 
   it("tenant scoping: another tenant sees no runs or drafts", async () => {
     seeded = await seedDraft();
-    const { handle, ctx, run } = seeded;
+    const { handle, run } = seeded;
     const other = await handle.repos.tenants.create({ slug: "other", name: "Other" });
     const otherCtx = { tenantId: other.id };
 
