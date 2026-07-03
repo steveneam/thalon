@@ -4,23 +4,22 @@
 
 ## Stamp
 
-2026-07-04 · **Sprint 1 in flight — three lanes launched, then paused mid-run (usage window)**
+2026-07-04 · **Sprint 1: B1.1 + B1.3 + B1.4 merged (PRs #5–#7) — B1.2 fan-out next, then B1.5**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + messages).
+Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + 2026-07-04 wrap message — ratchets and follow-ups live there).
 
 ## Delta (this session)
 
-- Sprint-1 lanes cut and launched as worktree subagents (COORDINATION.md board, commit `40264bd`): engine B1.1 · judge B1.3 · ui B1.4-vs-mock; eval pending. Merge order engine → judge → ui → eval.
-- All three lane agents **paused mid-run** to wait out the usage window — work sits uncommitted in their worktrees under `.claude/worktrees/agent-*` (branches `worktree-agent-*`). They resume with full context from the **original lead session** (resume that session; do not /clear it). Fallback if the session is lost: the worktrees persist on disk — inspect `git status`/log in each and relaunch fresh lane agents pointed at that state.
-- New standing directive (agent memory `lead-drives-lanes`): launching lanes/subagents needs fresh founder approval every time, even when this handoff pre-authorizes it.
-- Housekeeping done: `b05-aws` worktree + local branch GC'd.
+- Three parallel lanes built and merged in order: **B1.1 source-ingest** (grounding index + the `withGatewayGuard` gateway choke point) · **B1.3 judge harness** (G1 + two-tier G3, I1/I3 test-proven; lead commit wired its G3 calls through the choke point) · **B1.4 Approve queue** (3-zone UI, edit⇒capture⇒re-judge; lead commit fixed 2 effect-setState lint errors). 100/100 tests green on main; CI green on every merge.
+- Lanes were paused/resumed once mid-run (usage window) — no loss.
+- Standing rule reaffirmed and in force: launching lanes/subagents needs fresh founder approval each time.
 
 ## Next action
 
-Resume the paused lead session when usage refills and say **“resume the lanes”** — the lead messages all three agents to continue (state re-check first), then drives the merge train (engine → judge → ui) with founder checkpoints.
+**Founder: say go on B1.2 fan-out** (engine lane, one worktree subagent; kickoff spec drafted — profiles-as-data for LinkedIn+X, versioned fan-out prompts, generation through the choke point, drafts land `generated` only). After B1.2 merges: **B1.5** — dogfood on tenant #0, green eval suite arms as the ship gate.
 
 ## [you] — founder-supplied, outstanding
 
-`AI_GATEWAY_API_KEY` — Vercel dashboard → AI Gateway → API Keys → create → paste into `apps/web/.env.local` (copy `.env.example`). Needed only for live model calls (B1.5 dogfood at the latest); all lane tests run keyless. Langfuse keys/host still optional until dogfooding.
+`AI_GATEWAY_API_KEY` — Vercel dashboard → AI Gateway → API Keys → create → paste into `apps/web/.env.local` (copy `.env.example`). Needed for the first live model calls (B1.5 dogfood at the latest). Langfuse keys/host still optional until dogfooding.
