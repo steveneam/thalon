@@ -15,6 +15,8 @@ infra/
 │   ├── config.py                 # all deploy-time config; region constant
 │   └── github_oidc_stack.py      # ThalonGithubOidc: OIDC provider + deploy role
 ├── tests/                        # synth-time assertions — run with NO AWS creds
+├── scripts/
+│   └── sso-login.py              # CLI-free `aws sso login` (device flow via boto3)
 └── github-workflow/
     └── deploy-infra.yml.example  # → .github/workflows/ at the merge checkpoint
 ```
@@ -49,9 +51,13 @@ until then. Order matters:
 
 1. **Create the sub-account** — AWS Organizations → create account (suggested
    name `thalon`, its own billing line). Note the 12-digit account id.
-2. **Get temporary credentials into it** — e.g. IAM Identity Center, or
-   `OrganizationAccountAccessRole` from the management account. Static IAM
-   user keys are not used at any step.
+2. **Get temporary credentials into it** — IAM Identity Center: an SSO
+   profile in `~/.aws/config` (start URL / account id stay out of the repo).
+   On machines where the AWS CLI installer is blocked, log in with
+   `.venv\Scripts\python scripts\sso-login.py <profile>` instead of
+   `aws sso login` — it runs the same device flow via boto3 and writes the
+   token cache both boto3 and the CDK CLI read. Static IAM user keys are
+   not used at any step.
 3. **Bootstrap CDK** (from `infra/`, credentials from step 2):
    ```powershell
    npx aws-cdk@2 bootstrap aws://<ACCOUNT_ID>/ap-southeast-2
