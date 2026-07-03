@@ -17,6 +17,7 @@ describe("resolveSeams", () => {
       queue: "inline",
       auth: "dev",
       gateway: "unconfigured",
+      tracing: "unconfigured",
     });
   });
 
@@ -25,6 +26,10 @@ describe("resolveSeams", () => {
     expect(resolveSeams({ OBJECT_STORE: "s3" }).objectStore).toBe("s3");
     expect(resolveSeams({ QUEUE_DRIVER: "sqs" }).queue).toBe("sqs");
     expect(resolveSeams({ AI_GATEWAY_API_KEY: "k" }).gateway).toBe("configured");
+    expect(
+      resolveSeams({ LANGFUSE_PUBLIC_KEY: "pk", LANGFUSE_SECRET_KEY: "sk" }).tracing,
+    ).toBe("configured");
+    expect(resolveSeams({ LANGFUSE_PUBLIC_KEY: "pk" }).tracing).toBe("unconfigured");
     expect(
       resolveSeams({
         CLERK_SECRET_KEY: "sk",

@@ -1,0 +1,19 @@
+# Keyless scaffold — proves the promptfoo harness runs with zero API keys.
+# Real prompt evals point real providers (via the gateway) at the exported
+# datasets + golden seed from B1.2 (fan-out prompts) and B1.3 (judge prompts).
+# Run: npm run -w @thalon/eval promptfoo
+description: "Thalon eval harness smoke (keyless; real prompt evals land with B1.2/B1.3)"
+
+providers:
+  - echo
+
+prompts:
+  - "{{body}}"
+
+tests:
+  - description: harness smoke — echo returns the input verbatim
+    vars:
+      body: "the harness is alive"
+    assert:
+      - type: contains
+        value: "the harness is alive"

@@ -3,6 +3,7 @@ import { approvalsRepo, type ApprovalsRepo } from "./approvals";
 import { brandProfilesRepo, type BrandProfilesRepo } from "./brand-profiles";
 import { cachesRepo, type CachesRepo } from "./caches";
 import { draftsRepo, type DraftsRepo } from "./drafts";
+import { evalCasesRepo, type EvalCasesRepo } from "./eval-cases";
 import { eventsRepo, type EventsRepo } from "./events";
 import { fanoutRunsRepo, type FanoutRunsRepo } from "./fanout-runs";
 import { judgeResultsRepo, type JudgeResultsRepo } from "./judge-results";
@@ -18,6 +19,7 @@ export interface Repos {
   drafts: DraftsRepo;
   judgeResults: JudgeResultsRepo;
   approvals: ApprovalsRepo;
+  evalCases: EvalCasesRepo;
   usageLedger: UsageLedgerRepo;
   caches: CachesRepo;
   events: EventsRepo;
@@ -34,6 +36,7 @@ export function createRepos(db: Db): Repos {
     drafts: draftsRepo(db),
     judgeResults: judgeResultsRepo(db),
     approvals: approvalsRepo(db),
+    evalCases: evalCasesRepo(db),
     usageLedger: usageLedgerRepo(db),
     caches: cachesRepo(db),
     events: eventsRepo(db),
