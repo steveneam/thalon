@@ -29,5 +29,9 @@ This repository must contain **zero references to the two forbidden upstream bra
 
 No AGPL code embedded in this repo (reference-only patterns must be re-implemented). Prefer public-domain / MIT / Apache / CC0 on the hot path. Record any commercial/cert gate as a launch gate with a swap path — flag, do not silently block — and isolate it behind a clean interface.
 
+## Authorship
+
+Commits and PRs carry **no AI attribution** — no `Co-Authored-By` trailers, no "Generated with" footers, nowhere in git history or on GitHub; the founder is the sole author. The harness-side enforcement is `attribution: {commit: "", pr: ""}` in `.claude/settings.json` (tracked); if attribution ever appears anyway, strip it before merge. (History was rewritten once, 2026-07-03, to scrub earlier trailers — note: force-pushing `main` auto-closes its open PRs and GitHub refuses to reopen them; recreate the PR.)
+
 ---
 *Canonical. Keep this file generic and standalone. Universal agent ground rules and the wiki schema live in the research vault referenced by `.context/READ-ME-FIRST.md`.*

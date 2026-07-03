@@ -1,4 +1,8 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "worktree": {
     "symlinkDirectories": ["node_modules"]
   }

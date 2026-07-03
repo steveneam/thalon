@@ -17,7 +17,8 @@
     "test": "vitest run",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "db:generate": "npm run generate -w @thalon/db",
-    "guard": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1"
+    "guard": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ci-grep-guard.ps1",
+    "guard:pwsh": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1"
   },
   "devDependencies": {
     "@types/node": "^20",
