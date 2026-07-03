@@ -1,0 +1,18 @@
+{
+  "name": "@thalon/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The frozen contract: types, Zod schemas, status enums, tenant-config shape (SPINE §2.2). Frozen per sprint once committed — editing it mid-sprint means the lane partition was wrong.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  }
+}

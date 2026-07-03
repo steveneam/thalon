@@ -1,0 +1,205 @@
+import {
+  assertTransition,
+  DISCLOSURE_GATE,
+  FINAL_JUDGE_GATE,
+  isDraftStatus,
+  type DraftStatus,
+  type TenantCtx,
+} from "@thalon/contracts";
+import { and, eq } from "drizzle-orm";
+import { InvariantViolationError, NotFoundError } from "../errors";
+import { sha256Hex } from "../hash";
+import { approvals, drafts, judgeResults } from "../schema";
+import type { Db, Draft, Executor, Tx } from "../types";
+import { appendEvent } from "./events";
+
+export interface TransitionOpts {
+  actor?: string;
+  reason?: string;
+  approvalId?: string;
+}
+
+export async function getDraftScoped(
+  ex: Executor,
+  ctx: TenantCtx,
+  draftId: string,
+): Promise<Draft> {
+  const [row] = await ex
+    .select()
+    .from(drafts)
+    .where(and(eq(drafts.id, draftId), eq(drafts.tenantId, ctx.tenantId)))
+    .limit(1);
+  if (!row) throw new NotFoundError("draft", draftId);
+  return row;
+}
+
+async function hasPassingVerdict(
+  tx: Tx,
+  ctx: TenantCtx,
+  draft: Draft,
+  gate: string,
+): Promise<boolean> {
+  const [row] = await tx
+    .select({ id: judgeResults.id })
+    .from(judgeResults)
+    .where(
+      and(
+        eq(judgeResults.tenantId, ctx.tenantId),
+        eq(judgeResults.draftId, draft.id),
+        eq(judgeResults.gate, gate),
+        eq(judgeResults.verdict, "pass"),
+        // Verdicts bind to CONTENT: an edit changes body_hash and thereby
+        // invalidates every earlier verdict (invariant I1; SPINE risk 5).
+        eq(judgeResults.bodyHash, draft.bodyHash),
+      ),
+    )
+    .limit(1);
+  return row !== undefined;
+}
+
+/**
+ * THE one writer of drafts.status (SPINE §1.1). Every transition is
+ * validated against the contracts state machine, enforces I1/I2, and appends
+ * exactly one events row (I4) in the same transaction.
+ */
+export async function transitionInTx(
+  tx: Tx,
+  ctx: TenantCtx,
+  draftId: string,
+  to: DraftStatus,
+  opts: TransitionOpts = {},
+): Promise<Draft> {
+  const draft = await getDraftScoped(tx, ctx, draftId);
+  if (!isDraftStatus(draft.status)) {
+    throw new Error(`draft ${draftId} has unknown status "${draft.status}"`);
+  }
+  const from = draft.status;
+  assertTransition(from, to);
+
+  if (to === "queued" && !(await hasPassingVerdict(tx, ctx, draft, FINAL_JUDGE_GATE))) {
+    throw new InvariantViolationError(
+      "I1",
+      `draft ${draftId} cannot be queued: no passing ${FINAL_JUDGE_GATE} verdict for its current body hash`,
+    );
+  }
+
+  if (to === "published") {
+    // Sprint 3+: an approve row AND a passing disclosure verdict for the
+    // current body hash. Neither can exist in Sprints 0–2, which is exactly
+    // what keeps the publish path unreachable now.
+    const [approved] = await tx
+      .select({ id: approvals.id })
+      .from(approvals)
+      .where(
+        and(
+          eq(approvals.tenantId, ctx.tenantId),
+          eq(approvals.draftId, draftId),
+          eq(approvals.action, "approve"),
+        ),
+      )
+      .limit(1);
+    if (!approved || !(await hasPassingVerdict(tx, ctx, draft, DISCLOSURE_GATE))) {
+      throw new InvariantViolationError(
+        "I2",
+        `draft ${draftId} cannot be published without an approval and a passing ${DISCLOSURE_GATE} disclosure verdict`,
+      );
+    }
+  }
+
+  const [updated] = await tx
+    .update(drafts)
+    .set({ status: to, updatedAt: new Date() })
+    .where(and(eq(drafts.id, draftId), eq(drafts.tenantId, ctx.tenantId)))
+    .returning();
+
+  await appendEvent(tx, ctx, {
+    entityType: "draft",
+    entityId: draftId,
+    event: "draft.transition",
+    payload: {
+      from,
+      to,
+      ...(opts.reason ? { reason: opts.reason } : {}),
+      ...(opts.approvalId ? { approvalId: opts.approvalId } : {}),
+    },
+    actor: opts.actor,
+  });
+
+  return updated;
+}
+
+export function draftsRepo(db: Db) {
+  return {
+    /** Idempotent by generation_key, like the run that spawns it. */
+    async create(
+      ctx: TenantCtx,
+      input: {
+        fanoutRunId: string;
+        sourceId: string;
+        platform: string;
+        body: string;
+        generationKey: string;
+        format?: string;
+        meta?: Record<string, unknown>;
+      },
+    ): Promise<Draft> {
+      return db.transaction(async (tx) => {
+        const [inserted] = await tx
+          .insert(drafts)
+          .values({
+            tenantId: ctx.tenantId,
+            fanoutRunId: input.fanoutRunId,
+            sourceId: input.sourceId,
+            platform: input.platform,
+            format: input.format,
+            body: input.body,
+            bodyHash: sha256Hex(input.body),
+            meta: input.meta ?? {},
+            generationKey: input.generationKey,
+          })
+          .onConflictDoNothing({ target: drafts.generationKey })
+          .returning();
+        if (!inserted) {
+          const [existing] = await tx
+            .select()
+            .from(drafts)
+            .where(
+              and(
+                eq(drafts.generationKey, input.generationKey),
+                eq(drafts.tenantId, ctx.tenantId),
+              ),
+            )
+            .limit(1);
+          if (!existing) {
+            throw new Error(
+              `generation_key "${input.generationKey}" exists under another tenant — keys must be tenant-salted`,
+            );
+          }
+          return existing;
+        }
+        await appendEvent(tx, ctx, {
+          entityType: "draft",
+          entityId: inserted.id,
+          event: "draft.created",
+          payload: { generationKey: input.generationKey, platform: input.platform },
+        });
+        return inserted;
+      });
+    },
+
+    async get(ctx: TenantCtx, id: string): Promise<Draft> {
+      return getDraftScoped(db, ctx, id);
+    },
+
+    async transition(
+      ctx: TenantCtx,
+      draftId: string,
+      to: DraftStatus,
+      opts: TransitionOpts = {},
+    ): Promise<Draft> {
+      return db.transaction((tx) => transitionInTx(tx, ctx, draftId, to, opts));
+    },
+  };
+}
+
+export type DraftsRepo = ReturnType<typeof draftsRepo>;

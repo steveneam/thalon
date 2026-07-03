@@ -1,0 +1,81 @@
+import type { TenantCtx } from "@thalon/contracts";
+import { and, eq } from "drizzle-orm";
+import { fanoutRuns } from "../schema";
+import type { Db, FanoutRun } from "../types";
+import { appendEvent } from "./events";
+
+export function fanoutRunsRepo(db: Db) {
+  return {
+    /**
+     * Idempotent by generation_key (SPINE §1 doctrine: run it twice, get one
+     * result) — a retried invocation returns the original row untouched.
+     */
+    async create(
+      ctx: TenantCtx,
+      input: {
+        sourceId: string;
+        brandProfileId: string;
+        brandProfileVersion: number;
+        platforms: string[];
+        promptVersion: string;
+        model: string;
+        params?: Record<string, unknown>;
+        generationKey: string;
+      },
+    ): Promise<FanoutRun> {
+      return db.transaction(async (tx) => {
+        const [inserted] = await tx
+          .insert(fanoutRuns)
+          .values({
+            tenantId: ctx.tenantId,
+            sourceId: input.sourceId,
+            brandProfileId: input.brandProfileId,
+            brandProfileVersion: input.brandProfileVersion,
+            platforms: input.platforms,
+            promptVersion: input.promptVersion,
+            model: input.model,
+            params: input.params ?? {},
+            generationKey: input.generationKey,
+          })
+          .onConflictDoNothing({ target: fanoutRuns.generationKey })
+          .returning();
+        if (inserted) {
+          await appendEvent(tx, ctx, {
+            entityType: "fanout_run",
+            entityId: inserted.id,
+            event: "fanout_run.created",
+            payload: { generationKey: input.generationKey },
+          });
+          return inserted;
+        }
+        const [existing] = await tx
+          .select()
+          .from(fanoutRuns)
+          .where(
+            and(
+              eq(fanoutRuns.generationKey, input.generationKey),
+              eq(fanoutRuns.tenantId, ctx.tenantId),
+            ),
+          )
+          .limit(1);
+        if (!existing) {
+          throw new Error(
+            `generation_key "${input.generationKey}" exists under another tenant — keys must be tenant-salted`,
+          );
+        }
+        return existing;
+      });
+    },
+
+    async get(ctx: TenantCtx, id: string): Promise<FanoutRun | null> {
+      const [row] = await db
+        .select()
+        .from(fanoutRuns)
+        .where(and(eq(fanoutRuns.id, id), eq(fanoutRuns.tenantId, ctx.tenantId)))
+        .limit(1);
+      return row ?? null;
+    },
+  };
+}
+
+export type FanoutRunsRepo = ReturnType<typeof fanoutRunsRepo>;

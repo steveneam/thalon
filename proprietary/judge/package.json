@@ -1,0 +1,19 @@
+{
+  "name": "@thalon/judge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The moat: shared judge harness — G1 denylist (pure fn) + G3 two-tier grounding now; G2/G4/G5 later (B1.3). Verdicts are shell; enforcement is core.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@thalon/contracts": "*",
+    "@thalon/db": "*",
+    "@thalon/platform": "*"
+  }
+}

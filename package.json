@@ -4,14 +4,23 @@
   "private": true,
   "description": "Standalone, generic, multi-tenant content and social-automation engine",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*",
+    "proprietary/*"
   ],
   "scripts": {
     "dev": "npm run dev -w @thalon/web",
     "build": "npm run build -w @thalon/web",
     "start": "npm run start -w @thalon/web",
     "lint": "npm run lint -w @thalon/web",
-    "test": "npm run test -w @thalon/web",
+    "test": "vitest run",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:generate": "npm run generate -w @thalon/db",
     "guard": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }
