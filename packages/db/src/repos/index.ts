@@ -7,6 +7,7 @@ import { evalCasesRepo, type EvalCasesRepo } from "./eval-cases";
 import { eventsRepo, type EventsRepo } from "./events";
 import { fanoutRunsRepo, type FanoutRunsRepo } from "./fanout-runs";
 import { judgeResultsRepo, type JudgeResultsRepo } from "./judge-results";
+import { sourceChunksRepo, type SourceChunksRepo } from "./source-chunks";
 import { sourcesRepo, type SourcesRepo } from "./sources";
 import { tenantsRepo, type TenantsRepo } from "./tenants";
 import { usageLedgerRepo, type UsageLedgerRepo } from "./usage-ledger";
@@ -15,6 +16,7 @@ export interface Repos {
   tenants: TenantsRepo;
   brandProfiles: BrandProfilesRepo;
   sources: SourcesRepo;
+  sourceChunks: SourceChunksRepo;
   fanoutRuns: FanoutRunsRepo;
   drafts: DraftsRepo;
   judgeResults: JudgeResultsRepo;
@@ -32,6 +34,7 @@ export function createRepos(db: Db): Repos {
     tenants: tenantsRepo(db),
     brandProfiles: brandProfilesRepo(db),
     sources: sourcesRepo(db),
+    sourceChunks: sourceChunksRepo(db),
     fanoutRuns: fanoutRunsRepo(db),
     drafts: draftsRepo(db),
     judgeResults: judgeResultsRepo(db),

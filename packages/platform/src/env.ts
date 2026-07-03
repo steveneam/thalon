@@ -26,6 +26,7 @@ const envSchema = z.object({
   MODEL_DRAFT: z.string().default("meta/llama-3.3-70b"),
   MODEL_JUDGE_SCREEN: z.string().default("meta/llama-3.3-70b"),
   MODEL_JUDGE_FINAL: z.string().default("anthropic/claude-sonnet-4.5"),
+  MODEL_EMBEDDING: z.string().default("openai/text-embedding-3-small"),
   TENANT_DAILY_TOKEN_BUDGET: z.coerce.number().int().positive().default(2_000_000),
 });
 

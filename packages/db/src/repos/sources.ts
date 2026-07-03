@@ -37,6 +37,16 @@ export function sourcesRepo(db: Db) {
         .limit(1);
       return row ?? null;
     },
+
+    /** Fast-path idempotency check (B1.1): lets a caller skip extraction/chunking/embedding entirely on a repeat ingest before ever reaching the gateway. */
+    async getByContentHash(ctx: TenantCtx, contentHash: string): Promise<Source | null> {
+      const [row] = await db
+        .select()
+        .from(sources)
+        .where(and(eq(sources.tenantId, ctx.tenantId), eq(sources.contentHash, contentHash)))
+        .limit(1);
+      return row ?? null;
+    },
   };
 }
 
