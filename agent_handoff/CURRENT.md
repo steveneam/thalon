@@ -4,23 +4,23 @@
 
 ## Stamp
 
-2026-07-03 · **Sprint 0 complete** (B0.1–B0.5 all merged to main)
+2026-07-04 · **Sprint 1 in flight — three lanes launched, then paused mid-run (usage window)**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (§ Amendments) → `docs/SPINE.md` → `COORDINATION.md` (board + wrap messages) → `eval/README.md`.
+Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + messages).
 
 ## Delta (this session)
 
-- **B0.4 merged** (PR #4): `eval/` package — override capture proven end-to-end by test (draft → judge → queued → operator edit → `eval_cases` → exported JSONL with provenance), golden seed (only-grows floor test), promptfoo + DeepEval proven keyless, Langfuse `tracing` seam in platform, `evalCases.list` read repo (contract freeze intact).
-- Earlier same day: B0.3 (PR #2) and B0.5 (PR #3) merged; first OIDC deploy green.
-- Standing directives in force (agent memory): lead drives lane/merge mechanics end-to-end; no AI attribution anywhere on GitHub.
-- Housekeeping owed: remove `.claude/worktrees/b05-aws` + local `worktree-b05-aws` branch once the Lane B terminal is closed (was file-locked at wrap).
+- Sprint-1 lanes cut and launched as worktree subagents (COORDINATION.md board, commit `40264bd`): engine B1.1 · judge B1.3 · ui B1.4-vs-mock; eval pending. Merge order engine → judge → ui → eval.
+- All three lane agents **paused mid-run** to wait out the usage window — work sits uncommitted in their worktrees under `.claude/worktrees/agent-*` (branches `worktree-agent-*`). They resume with full context from the **original lead session** (resume that session; do not /clear it). Fallback if the session is lost: the worktrees persist on disk — inspect `git status`/log in each and relaunch fresh lane agents pointed at that state.
+- New standing directive (agent memory `lead-drives-lanes`): launching lanes/subagents needs fresh founder approval every time, even when this handoff pre-authorizes it.
+- Housekeeping done: `b05-aws` worktree + local branch GC'd.
 
 ## Next action
 
-**Founder: Sprint-0 exit glance** (charter exit boxes for B0.x are all deliverable-complete; remaining exit criteria are Sprint-1 items). Then **cut Sprint-1 lanes** per SPINE §5 lane map — engine (`packages/engine/**`, B1.1→B1.2) · judge (`proprietary/judge/**`, B1.3) · ui (`apps/web/**`, B1.4 vs MSW mock) · eval (`eval/**`, arms at B1.5); merge order engine → judge → ui → eval. B1.1 (source-ingest) starts first — it has no upstream dependency now.
+Resume the paused lead session when usage refills and say **“resume the lanes”** — the lead messages all three agents to continue (state re-check first), then drives the merge train (engine → judge → ui) with founder checkpoints.
 
 ## [you] — founder-supplied, outstanding
 
-`AI_GATEWAY_API_KEY` (first real model calls, B1.1 embeddings / B1.2 generation) · Langfuse keys/host (optional until dogfooding).
+`AI_GATEWAY_API_KEY` — Vercel dashboard → AI Gateway → API Keys → create → paste into `apps/web/.env.local` (copy `.env.example`). Needed only for live model calls (B1.5 dogfood at the latest); all lane tests run keyless. Langfuse keys/host still optional until dogfooding.
