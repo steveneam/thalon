@@ -19,6 +19,9 @@ const envSchema = z.object({
   AI_GATEWAY_BASE_URL: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
+  LANGFUSE_PUBLIC_KEY: z.string().optional(),
+  LANGFUSE_SECRET_KEY: z.string().optional(),
+  LANGFUSE_HOST: z.string().optional(),
   THALON_DATA_DIR: z.string().default(".data"),
   MODEL_DRAFT: z.string().default("meta/llama-3.3-70b"),
   MODEL_JUDGE_SCREEN: z.string().default("meta/llama-3.3-70b"),
@@ -51,6 +54,8 @@ export interface SeamConfig {
   queue: QueueDriver;
   auth: AuthDriver;
   gateway: "configured" | "unconfigured";
+  /** Langfuse (self-host) — traces attach at the gateway wrapper from B1.1. */
+  tracing: "configured" | "unconfigured";
   dataDir: string;
 }
 
@@ -69,6 +74,8 @@ export function resolveSeams(env: EnvSource = process.env): SeamConfig {
     auth:
       e.CLERK_SECRET_KEY && e.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "clerk" : "dev",
     gateway: e.AI_GATEWAY_API_KEY ? "configured" : "unconfigured",
+    tracing:
+      e.LANGFUSE_PUBLIC_KEY && e.LANGFUSE_SECRET_KEY ? "configured" : "unconfigured",
     dataDir: e.THALON_DATA_DIR,
   };
 }

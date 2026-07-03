@@ -1,0 +1,25 @@
+{
+  "name": "@thalon/eval",
+  "version": "0.1.0",
+  "private": true,
+  "description": "B0.4 eval scaffold: edit_diff/override capture -> datasets, golden sets, promptfoo + DeepEval harnesses, Langfuse wiring. $0/self-hostable, MIT/Apache only.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "export": "tsx src/export-eval-cases.ts",
+    "promptfoo": "npx promptfoo@latest eval -c promptfoo/promptfooconfig.yaml"
+  },
+  "dependencies": {
+    "@thalon/contracts": "*",
+    "@thalon/db": "*",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

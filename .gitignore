@@ -30,6 +30,9 @@ __pycache__/
 .langfuse/
 promptfoo-output/
 *.trace.json
+# Exported eval datasets are DERIVED from the db (regenerate any time);
+# only the golden seed is committed.
+eval/datasets/
 
 # Dev-seam data (sqlite db + local object store)
 .data/
