@@ -59,6 +59,7 @@ describe("readEnv / modelTiers", () => {
       draft: "meta/llama-3.3-70b",
       judgeScreen: "meta/llama-3.3-70b",
       judgeFinal: "anthropic/claude-sonnet-4.5",
+      embedding: "openai/text-embedding-3-small",
     });
     expect(modelTiers({ MODEL_JUDGE_FINAL: "acme/strong-1" }).judgeFinal).toBe(
       "acme/strong-1",

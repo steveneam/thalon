@@ -9,11 +9,14 @@
   },
   "types": "./src/index.ts",
   "scripts": {
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@thalon/contracts": "*",
     "@thalon/db": "*",
-    "@thalon/platform": "*"
+    "@thalon/platform": "*",
+    "ai": "^5.0.209",
+    "zod": "^4.1.0"
   }
 }

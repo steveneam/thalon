@@ -10,7 +10,9 @@ let cached: ReturnType<typeof createGateway> | null = null;
  *
  * Every shell call must route through this wrapper so the per-tenant daily
  * budget check (usage_ledger, amendment A2) and tracing sit on ONE choke
- * point — the enforcement call lands with the first shell caller (B1.1).
+ * point. The enforcement itself is `withGatewayGuard` (gateway-guard.ts),
+ * generic over any gateway-touching call — B1.1's embeddings are the first
+ * caller; the judge lane's generateObject-style calls are the next.
  */
 export function getGateway(): ReturnType<typeof createGateway> {
   if (cached) return cached;
@@ -32,7 +34,8 @@ export function getGateway(): ReturnType<typeof createGateway> {
  * per call: `judgeScreen` pre-screens every draft cheaply; `judgeFinal` (a
  * stronger model) is the FINAL gate; disagreement blocks the draft and queues
  * it for the operator. Never collapse the two onto one cheap model — the judge
- * is the safety mechanism (charter, ratified decision 2).
+ * is the safety mechanism (charter, ratified decision 2). `embedding` is B1.1's
+ * tier (ingest's grounding-index embeddings).
  */
 export function modelTiers(env?: EnvSource) {
   const e = readEnv(env);
@@ -40,5 +43,6 @@ export function modelTiers(env?: EnvSource) {
     draft: e.MODEL_DRAFT,
     judgeScreen: e.MODEL_JUDGE_SCREEN,
     judgeFinal: e.MODEL_JUDGE_FINAL,
+    embedding: e.MODEL_EMBEDDING,
   };
 }
