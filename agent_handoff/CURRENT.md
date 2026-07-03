@@ -4,23 +4,23 @@
 
 ## Stamp
 
-2026-07-03 · B0.3 built — at the founder checkpoint
+2026-07-03 · B0.3 + B0.5 merged to main — Sprint 0 remaining: B0.4
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (§ Amendments) → `docs/SPINE.md` → `COORDINATION.md` (lane board).
+Read in order: `CLAUDE.md` → `CHARTER.md` (§ Amendments) → `docs/SPINE.md` → `COORDINATION.md` (lane board + wrap messages).
 
 ## Delta (this session)
 
-- **B0.3 landed on `agent/a/b03-schema`** (Lane A): package extraction per A3 (`packages/{contracts,db,platform,engine}` + `proprietary/{judge,prompts,profiles}` skeleton); PGlite seam swap per A1 (better-sqlite3 gone, one SQL dialect dev→prod, dev pgvector); full 15-table schema per SPINE §2.5 with CHECK-constrained statuses, hot-path composite indexes, HNSW grounding index, committed migration; draft state machine §1.1 with `transitionInTx` as the ONLY writer of `drafts.status` enforcing I1/I2/I4; approvals repo with edit → edit_diffs + eval_cases **same-transaction**; usage_ledger with hard budget stop + event; content-addressed llm/retrieval caches; all three A3 ratchets (tenancy test, exhaustive state-machine test, boundary lint + repo-wide boundary scan in `tests/`). 34 tests green; typecheck green; next build green; guard green.
-- `.worktreeinclude` now also carries `.claude/settings.local.json` into worktrees (bypass-permissions + allowlist follow the lanes).
-- CI now runs `npm run typecheck` before tests.
+- **B0.3 merged** (PR #2): packages/{contracts,db,platform,engine} + proprietary skeleton, PGlite seam, 15-table schema, state machine (I1/I2/I4 enforced + tested), budget ledger, caches, all three A3 ratchets. Contract now **frozen for the sprint**.
+- **B0.5 merged** (PR #3, Lane B): CDK-Python skeleton, `ThalonGithubOidc` stack live, SSO-only human access (static-key IAM user deleted), deploy workflow activated, infra pytest in CI, **first OIDC deploy run from main green — bucket closed**.
+- GitHub authorship scrubbed to founder-only (history rewritten; `attribution` disabled in settings.local.json — never re-add).
+- Standing founder directives (also in agent memory): lead drives lane mechanics end-to-end (merges included); no AI attribution anywhere.
 
 ## Next action
 
-**Founder: review the B0.3 checkpoint** (branch `agent/a/b03-schema`; merge to `main` per COORDINATION merge gate). After merge: **B0.4 — eval scaffold** (Langfuse self-host + promptfoo + DeepEval, `eval/**`, before any draft exists).
-**Lane B (parallel, optional): B0.5** — second terminal, `claude --worktree b05-aws`, owns `infra/**` only; see `COORDINATION.md`.
+**B0.4 — eval scaffold** (last Sprint-0 bucket, `eval/**` + `apps/web` glue only; contract is frozen): $0/self-hostable stack (Langfuse self-host + promptfoo + DeepEval, MIT/Apache), `edit_diff`→eval capture wired end-to-end **and proven by test** (the db mechanism from B0.3 already writes `eval_cases` — B0.4 consumes them), golden-set seed file. Then the Sprint-0 exit review.
 
 ## [you] — founder-supplied, outstanding
 
-B0.3 checkpoint review · AWS sub-account (unblocks Lane B deploy role) · `AI_GATEWAY_API_KEY` · Langfuse keys (B0.4).
+Langfuse keys/host (B0.4; scaffold proceeds without them) · `AI_GATEWAY_API_KEY` (first needed B1.1).
