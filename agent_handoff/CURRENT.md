@@ -18,7 +18,7 @@ Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORD
 
 ## Next action
 
-**Founder: say go on B1.2 fan-out** (engine lane, one worktree subagent; kickoff spec drafted — profiles-as-data for LinkedIn+X, versioned fan-out prompts, generation through the choke point, drafts land `generated` only). After B1.2 merges: **B1.5** — dogfood on tenant #0, green eval suite arms as the ship gate.
+**Session start: present the B1.2 fan-out launch plan to the founder as an explicit approve/defer choice** (founder-requested 2026-07-04; launching lanes always needs fresh approval). The plan: engine lane, one worktree subagent, branch `agent/engine/b12-fanout` — one source → N drafts in `packages/engine/src/fanout/`; LinkedIn+X niche profiles as pure data in `proprietary/profiles/`; versioned fan-out prompts; generation through `withGatewayGuard`; run-twice idempotency; drafts land `generated` only (negative test: can't reach queue without judge). On approval, launch; after B1.2 merges: **B1.5** — dogfood on tenant #0, green eval suite arms as the ship gate.
 
 ## [you] — founder-supplied, outstanding
 
