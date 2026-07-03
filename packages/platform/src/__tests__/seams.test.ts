@@ -125,7 +125,9 @@ describe("InlineQueue", () => {
 });
 
 describe("embedded-Postgres db client (amendment A1)", () => {
-  it("answers SQL and has pgvector available", async () => {
+  // PGlite cold boot (WASM load + init) exceeds the 5s default under disk
+  // contention, e.g. parallel worktree lanes; 30s still catches real hangs.
+  it("answers SQL and has pgvector available", { timeout: 30_000 }, async () => {
     const client = createMemoryDbClient();
     try {
       const one = await client.query<{ one: number }>("select 1 as one");
