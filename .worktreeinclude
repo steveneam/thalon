@@ -5,3 +5,4 @@
 .env
 .env.*
 .context/
+.claude/settings.local.json

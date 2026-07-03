@@ -29,7 +29,7 @@ npm test             # vitest smoke tests
 npm run guard        # brand-cleanliness check (also required in CI)
 ```
 
-Dev runs entirely on local seams: sqlite (`.data/dev.db`) + local object store + inline queue + a dev auth stub. Each seam flips to its cloud driver (Aurora / S3 / SQS / Clerk) via env only — see `apps/web/.env.example`.
+Dev runs entirely on local seams: embedded Postgres (PGlite, `.data/pg/`) + local object store + inline queue + a dev auth stub. Each seam flips to its cloud driver (Aurora / S3 / SQS / Clerk) via env only — see `apps/web/.env.example`.
 
 ## Layout
 
@@ -40,11 +40,19 @@ AGENTS.md             # agent operating protocol for this repo (canonical)
 CLAUDE.md             # hardlink/copy of AGENTS.md (Claude Code auto-load convention)
 CI-GUARD.md           # documents the brand-cleanliness CI check
 apps/
-  web/                # Next.js (App Router, TS) + shadcn/ui — app, API routes, seams
+  web/                # Next.js (App Router, TS) + shadcn/ui — thin routes + UI only
+packages/
+  contracts/          # types, Zod schemas, status enums — THE frozen contract
+  db/                 # drizzle schema, migrations, tenant-scoped repositories
+  platform/           # dev→prod seams: env, embedded-Postgres db client, store, queue, gateway, auth
+  engine/             # ingest/ + fanout/ (B1.x; core orchestration + quarantined shell/)
+tests/                # repo-wide ratchet tests (import boundaries)
 scripts/
   ci-grep-guard.ps1   # the brand-cleanliness guard (tracked-files grep; exits non-zero on any hit)
 proprietary/
-  README.md           # the moat/IP folder (judge harness, prompt chains, fan-out profiles)
+  judge/              # the moat: shared judge harness (B1.3)
+  prompts/            # versioned prompt files (data, never inline strings)
+  profiles/           # demo-tenant niche/brand profile data
 .github/workflows/    # CI: brand guard (required check) + tests
 .context/             # GITIGNORED — vault pointer + paste-ready build prompts for the founder
 ```

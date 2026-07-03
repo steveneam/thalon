@@ -1,0 +1,19 @@
+{
+  "name": "@thalon/engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ingest (B1.1) and fan-out (B1.2): deterministic core orchestration with quarantined shell/ subfolders for the LLM calls (SPINE §1).",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@thalon/contracts": "*",
+    "@thalon/db": "*",
+    "@thalon/platform": "*"
+  }
+}

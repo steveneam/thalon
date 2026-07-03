@@ -6,9 +6,10 @@
 
 | lane | owner | owns (glob) | branch | status | depends-on | merge-order |
 |------|-------|-------------|--------|--------|------------|-------------|
-| a-core | lead terminal | `packages/**`, `proprietary/**`, `apps/web/**`, `eval/**` (B0.3 → B0.4) | `agent/a/b03-schema` | pending | — | 1 |
+| a-core | lead terminal | `packages/**`, `proprietary/**`, `apps/web/**`, `eval/**` (B0.3 → B0.4) | `agent/a/b03-schema` | review | — | 1 |
 | b-aws | second terminal (`claude --worktree b05-aws`) | `infra/**` (B0.5) | `worktree-b05-aws` | pending | AWS sub-account ([you]) | 2 |
 
 ## Messages (append-only)
 
 - 2026-07-03 lead: board created. B0.3→B0.4 vs B0.5 are file-disjoint per the charter; Lane B is inert until the founder opens the second terminal (or we fall back to sequential). Worktree prereqs landed: `.worktreeinclude`, `.claude/settings.json` symlinks `node_modules`, dev DB/store/queue isolate per worktree via the local seams.
+- 2026-07-03 lead: B0.3 complete on `agent/a/b03-schema` → at the founder checkpoint (status `review`). Contract (`packages/contracts` + drizzle schema) is now committed — **frozen for the sprint**. Lane B unaffected (`infra/**` untouched).

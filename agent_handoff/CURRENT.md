@@ -4,23 +4,23 @@
 
 ## Stamp
 
-2026-07-03 · spine design phase (pre-B0.3)
+2026-07-03 · B0.3 built — at the founder checkpoint
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (note § Amendments) → `docs/SPINE.md` (approved architecture) → `COORDINATION.md` (lane board).
+Read in order: `CLAUDE.md` → `CHARTER.md` (§ Amendments) → `docs/SPINE.md` → `COORDINATION.md` (lane board).
 
 ## Delta (this session)
 
-- `docs/SPINE.md` written and **founder-approved**: DCPS doctrine, draft state machine, elaborated B0.3 schema, target package layout, operating + maintenance model.
-- Amendments A1–A4 ratified → `CHARTER.md § Amendments` + `docs/adr/0001-spine-adoption.md`.
-- Parallel plumbing landed: `COORDINATION.md` stub · `.worktreeinclude` · `.claude/settings.json` (worktree node_modules symlink) · this handoff file · AGENTS.md rule 9 now mirrors the resume prompt here.
+- **B0.3 landed on `agent/a/b03-schema`** (Lane A): package extraction per A3 (`packages/{contracts,db,platform,engine}` + `proprietary/{judge,prompts,profiles}` skeleton); PGlite seam swap per A1 (better-sqlite3 gone, one SQL dialect dev→prod, dev pgvector); full 15-table schema per SPINE §2.5 with CHECK-constrained statuses, hot-path composite indexes, HNSW grounding index, committed migration; draft state machine §1.1 with `transitionInTx` as the ONLY writer of `drafts.status` enforcing I1/I2/I4; approvals repo with edit → edit_diffs + eval_cases **same-transaction**; usage_ledger with hard budget stop + event; content-addressed llm/retrieval caches; all three A3 ratchets (tenancy test, exhaustive state-machine test, boundary lint + repo-wide boundary scan in `tests/`). 34 tests green; typecheck green; next build green; guard green.
+- `.worktreeinclude` now also carries `.claude/settings.local.json` into worktrees (bypass-permissions + allowlist follow the lanes).
+- CI now runs `npm run typecheck` before tests.
 
 ## Next action
 
-**Lane A (this terminal): B0.3** — package extraction (A3) + PGlite seam swap (A1) + full schema per SPINE §2.5 + state machine §1.1 + caches + budget ledger + the three ratchet tests. Then B0.4.
-**Lane B (proposed, founder opens second terminal: `claude --worktree b05-aws`): B0.5** — CDK-Python/OIDC skeleton, `infra/**` only. See `COORDINATION.md`.
+**Founder: review the B0.3 checkpoint** (branch `agent/a/b03-schema`; merge to `main` per COORDINATION merge gate). After merge: **B0.4 — eval scaffold** (Langfuse self-host + promptfoo + DeepEval, `eval/**`, before any draft exists).
+**Lane B (parallel, optional): B0.5** — second terminal, `claude --worktree b05-aws`, owns `infra/**` only; see `COORDINATION.md`.
 
 ## [you] — founder-supplied, outstanding
 
-AWS sub-account (unblocks Lane B deploy role) · `AI_GATEWAY_API_KEY` · Langfuse keys.
+B0.3 checkpoint review · AWS sub-account (unblocks Lane B deploy role) · `AI_GATEWAY_API_KEY` · Langfuse keys (B0.4).
