@@ -75,6 +75,21 @@ export function fanoutRunsRepo(db: Db) {
         .limit(1);
       return row ?? null;
     },
+
+    /** Fast-path idempotency check (mirrors sourcesRepo.getByContentHash): lets a caller skip every generation call entirely on a repeat fan-out before ever reaching the gateway. */
+    async getByGenerationKey(ctx: TenantCtx, generationKey: string): Promise<FanoutRun | null> {
+      const [row] = await db
+        .select()
+        .from(fanoutRuns)
+        .where(
+          and(
+            eq(fanoutRuns.generationKey, generationKey),
+            eq(fanoutRuns.tenantId, ctx.tenantId),
+          ),
+        )
+        .limit(1);
+      return row ?? null;
+    },
   };
 }
 
