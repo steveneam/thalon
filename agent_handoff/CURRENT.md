@@ -4,70 +4,43 @@
 
 ## Stamp
 
-2026-07-05 (session 7) · **B3.8 + B3.9 code-complete. Build strategy pivoted to BREADTH-FIRST / two-pass (A9): materialize all 3 output families in pass 1 with fake drivers, defer all live dogfood/verify/real-tenant to pass 2. Next: pass-1 breadth — B3.10 (thin render seam) → B3.15 (web family) → B3.12 (intel skeleton).** Amendments A6/A7/A8/A9 chartered; pulled B3.12–B3.15 recorded. Pillar-#1 tenant name IS grep-guard token A — never in tracked files; profile drafted+PARKED at gitignored `.context/tenants/<company>.v1.json` for pass 2. Pass 1 = zero gateway spend.
+2026-07-05 (session 8) · **PASS-1 BREADTH COMPLETE (A9): all three output families + supporting skeletons are materialized.** B3.10 thin render seam (`77820b3`) → B3.15 web/landing-page family (`c3ac987`) → B3.12 trend-intel skeleton (`cc692f9`), all fake-driver/keyless, zero gateway spend. Suite 362 passed / 2 skipped; typecheck + lint + grep guard green. Next: founder picks — thin B3.13 (last chartered Sprint-3 skeleton) or start pass 2 (needs founder inputs below).
 
 ## Resume prompt (paste verbatim to resume next session)
 
-> Stamped 2026-07-05 02:41 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
+> Stamped 2026-07-05 03:19 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
 
-**Resume · Thalon** — stamped **2026-07-05 02:41 (UTC+10:00)** · Sprint 3 in progress, now **BREADTH-FIRST (two-pass, amendment A9).** B3.8 (profile spine) + B3.9 (pillar origination) code-complete. E:\thalon, main @ `cb151e4`.
+**Resume · Thalon** — stamped **2026-07-05 03:19 (UTC+10:00)** · Sprint 3, **pass-1 breadth COMPLETE (A9)**. B3.8/B3.9/B3.10/B3.15/B3.12 all code-complete. E:\thalon, main @ `cc692f9`.
 
-▎ ▸ Read `CLAUDE.md` → `CHARTER.md` (Sprint-3 table + amendments **A6–A9**; pulled B3.12–B3.15) → `agent_handoff/CURRENT.md`. Skim `docs/adr/0003-sprint3-origination.md` for the origination rationale.
+▎ ▸ Read `CLAUDE.md` → `CHARTER.md` (Sprint-3 table + amendments A6–A9) → `agent_handoff/CURRENT.md`. The three new modules: `packages/engine/src/render/` (B3.10), `packages/engine/src/webpage/` (B3.15), `packages/engine/src/trend/` (B3.12) — each module's doc comments carry the design decisions.
 
-▎ ▸ **STRATEGY (A9, locked):** materialize all **three output families** — social (done), video (B3.9 done), **web (B3.15, not started)** — plus supporting skeletons (trend-intel B3.12, profiles B3.8 done) end-to-end in **pass 1** using **fake/keyless drivers → zero gateway spend**. Render/deploy seams may be **thin stubs**. Keep cheap inline unit tests (green-suite ratchet); **defer ALL live dogfood, real-tenant setup, chromium drives, exit reviews, eval refinement, UI polish, TTS, full Remotion, and full trend pollers to pass 2.** Don't stop for a live-verify gate between buckets.
+▎ ▸ **STATE:** all three output families exist end-to-end behind fake/keyless drivers — social (B1.2), video (B3.9 origination → B3.10 approved `pillar_script` → deterministic SRT + content-addressed manifest behind `RenderTarget`; SRT round-trips through B2.2 caption ingest, test-proven, so B2.3 can waterfall a generated pillar), web (B3.15 `web_page` drafts: body = the artifact's extracted visible text via a quote-aware tokenizer, self-containment structurally enforced, judged on the unchanged spine, shipped via `DeployTarget`), plus trend intel (B3.12 `TrendSource` seam → deterministic outlier ratios → auto-exemplar ingest through B2.4, G1-screened, snapshots into `source_metrics`). Engine now depends on `@thalon/judge` (reuses `runG1Denylist`).
 
-▎ ▸ **FIRST ACTION (pass-1 breadth, recommended order):** (1) **B3.10 thin render seam** — approved `pillar_script` → deterministic SRT from the authored beats + a preview/manifest artifact behind a `RenderTarget` seam (real Remotion MP4 = pass 2); (2) **B3.15 web/landing-page** — new `web_page` draft format, profile+prompt → self-contained landing page → same judge spine → approve queue → thin `DeployTarget`/Vercel seam; (3) **B3.12 trend-intel skeleton** — `TrendSource` seam + watchlist config + deterministic outlier math over `source_metrics` → auto-exemplar ingest, against a fake source. Guard-gate every commit (`if ($LASTEXITCODE -eq 0)` — never `;`).
+▎ ▸ **NEXT ACTION (founder decision):** (a) **thin B3.13** — the last chartered Sprint-3 skeleton: video-URL ingest surface + the two `TranscriptProvider` drivers (Whisper, hosted-vendor) as seam wiring with fakes (real binaries/keys = pass 2); or (b) **start pass 2** — live gateway dogfood across all families, real-tenant setup, chromium drives, exit reviews, UI (approve-queue rendering for `pillar_script`/`web_page` currently uses the generic fallback), real Remotion/Vercel/poller drivers. (b) is blocked on the [you] items below; (a) is not. B3.11 is inherently pass-2-heavy (dogfood + profile UX). Guard-gate every commit (`if ($LASTEXITCODE -eq 0)` — never `;`).
 
-▎ ▸ **[you] — pass-2 inputs only (not needed for pass 1):** pillar-#1 topic/angle + confirm the parked tenant profile draft at gitignored `.context/tenants/<company>.v1.json`; gateway credit top-up; LinkedIn/X OAuth apps; whether to scrub the guard token from historical commit `0b11d48` (needs a one-time branch-protection relax; HEAD already clean).
+▎ ▸ **[you] — pass-2 inputs (unchanged):** pillar-#1 topic/angle + confirm the parked tenant profile draft at gitignored `.context/tenants/<company>.v1.json`; gateway credit top-up; LinkedIn/X OAuth apps; decision on scrubbing the guard token from historical commit `0b11d48` (one-time branch-protection relax; HEAD clean).
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote (`cb151e4`), grep guard passing, no mid-edit state.
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote (`cc692f9`), grep guard passing, no mid-edit state.
 
 ---
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (new Sprint-3 table + amendment A6) → `docs/adr/0003-sprint3-origination.md` (why origination, dogfood flywheel, Remotion growth-gate downgrade) → `COORDINATION.md` (Sprint-2 board; Sprint-3 lanes not yet cut).
+Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-3 table + A6–A9) → the three new module directories (`render/`, `webpage/`, `trend/` under `packages/engine/src/`) → `docs/adr/0003-sprint3-origination.md` (origination rationale). `COORDINATION.md` unchanged (no lanes used this session).
 
-## Delta (this session)
+## Delta (this session — session 8)
 
-- **Founder correction that re-framed the exit review:** no pillar video/caption/SRT exists or will ever be founder-supplied — generating it is the product. Product frame: (1) content creation + posting from prompt + saved profile, (2) viral/trend intel for format re-use, (3) pre-saved switchable operator profiles. All in agent memory (`content-origination-goal`, `product-feature-framing`, `publisher-test-accounts`).
-- **A6 chartered** (founder approved, shape delegated to lead): B3.8 profile spine (data first, UI deferred) → B3.9 pillar origination (`pillar_script` format; reuses B2.5 crawl + B1.2/1.3/1.4 machinery; adds GitHub ingest) → B3.10 Remotion render seam (MP4 + deterministic SRT from the authored script; licence corrected to **growth gate** — free ≤3-person co. incl. for-profit) → B3.11 loop closure + profile editor UX. ADR 0003.
-- Repo fixes: dropped deprecated `baseUrl` from `packages/engine` + `proprietary/judge` tsconfigs (TS7 removal); `npm install` on main picked up playwright from PR #15; full typecheck green (`716881d`).
-- Harness: `Grep`/`Glob` added to global `~/.claude/settings.json` permissions allow.
+- **B3.10 thin render seam** (`77820b3`): approved `pillar_script` → deterministic SRT from the authored beats (hook → beats by beatIndex → cta, contiguous timeline; authored `durationHintMs` trusted, derived durations clamped; **round-trips through the B2.2 caption ingest unchanged, test-proven** — the generated pillar is waterfall-able) + content-addressed render manifest (`renders/pillar/<sha256>/`, manifest.json written last as the cache commit marker) behind a `RenderTarget` seam. `pillar_script` meta extended additively: `renderStatus`/`renderRef` with defaults (pre-B3.10 drafts parse unchanged). Real Remotion target = pass 2.
+- **B3.15 web family** (`c3ac987`): `web_page` draft format (contracts `DRAFT_FORMATS`); `runWebPageGeneration` mirrors B3.9 (idempotent, gateway-guarded, identity-threaded); HTML artifact content-addressed in the object store BEFORE the draft exists; **body = extracted visible text of the artifact** (quote-aware tokenizer in `webpage/html.ts` — naive tag regexes were an invariant hazard: a `>` inside a quoted attribute could hide text from the judge or an external URL from the scanner, test-pinned); **self-containment ratchet** (full document, no script/iframe/object/embed, no external src/srcset/href/CSS-url; violations consume shell repair attempts); judge unchanged (grounds via `meta.groundingSourceIds`); thin `DeployTarget` seam + `deployWebPage` (approved-only, ships the exact judged bytes; Vercel adapter = pass 2). Prompt file `proprietary/prompts/web-page-generate.v1.md`.
+- **B3.12 trend-intel skeleton** (`cc692f9`): `watchlistSchema` runtime config; `TrendSource` seam (official-API drivers = pass 2; ADR-0002 scraper rejection restated at the seam); `detectOutliers` pure math (velocity vs account-peer median, share-to-view, bookmark-efficiency; metric names are config; minViews/minAgeHours/minBaselinePeers guards; nowMs is an argument); `runTrendIntake` — outliers auto-ingest via the existing B2.4 `ingestExemplar` (PII strip + `source_metrics` snapshots; re-sweeps content-idempotent while history accrues), **G1 denylist screens candidates before they can enter the library**; non-outliers leave no residue. Engine gains `@thalon/judge` dep. Cross-sweep longitudinal baselines = pass 2 with live pollers.
+- 41 new inline tests across the three modules (green-suite ratchet held per A9).
 
-## B3.8 delta (code-complete, at checkpoint)
+## Next action
 
-- Contract: `brandIdentitySchema` (company/oneLiner/philosophy/audience/offers/links/facts/topics + catchall) + `renderBrandIdentity` — the ONE canonical rendering used by both the prompt and the judge; `BrandProfileConfigInput` for pre-parse boundaries.
-- DB: `brand_profiles.identity` jsonb (migration `0002_open_scarlet_witch.sql`, additive); repo writes it.
-- Fan-out: identity block threads automatically from the active profile (B2.4 exemplar pattern — separate `fanout-identity-context.v1.md` system block only when non-empty; identity-less prompts byte-identical to before; `identityPromptVersion` in draft meta; no generation-key change — `brandProfileVersion` already covers it). Waterfall untouched by design (clip plans ground to the transcript; its meta contract is pinned for the UI).
-- Judge: identity grounding appended INSIDE `runJudgePipeline` (current ACTIVE identity, ref `profile:v<N>:identity`) — structural, no caller can skip it; stale facts fail on re-judge by design.
-- Seeds: `TENANT_ZERO` (eval/src/dogfood.ts) + `proprietary/profiles/tenants/fernwood.v1.json` both carry identity.
-- Suite 310 passed / 2 skipped; lint 0 errors (1 pre-existing `_dataDir` warning); typecheck green.
+Founder decision (see resume prompt): thin B3.13 skeleton (unblocked) vs. start pass 2 (blocked on [you] inputs). Approve-queue UI for the two new formats renders via the existing generic fallback — real format panels are pass-2 UI polish.
 
-## B3.9 delta (code-complete)
+## [you] — founder-supplied, needed for PASS 2 (unchanged)
 
-`packages/engine/src/origination/` — `runOrigination`: operator prompt source + active-profile identity (B3.8) + optional grounding sources → ONE judged `pillar_script` draft (pinned `pillarScriptDraftMetaSchema`: title/hook/beats/cta/groundingSourceIds); reuses B2.5 storyboard's idempotency/backfill (N=1). `ingest-github.ts` — public README via official API behind the fetcher seam → doc source. Structural: multi-source grounding assembly moved INTO the judge pipeline (`@thalon/judge` `collectGroundingChunks`, run by default when no explicit chunks passed) — apps/web judge-runner + eval dogfood simplified to not pass chunks; a caller can no longer under-ground a multi-source draft. New draft format `pillar_script`. Suite 321 passed / 2 skipped; typecheck + guard green (`fd1d2e2`).
-
-## Pulled buckets added this session
-
-B3.12 trend-intel intake (A7) · B3.13 transcription engine (A8, Whisper + hosted-vendor drivers) · B3.14 per-tenant model-provider choice (gateway/BYOK/local-CLI) · **B3.15 web/landing-page generation** — the third output family (social · video · web), same spine, Vercel deploy seam. All in CHARTER.md "Pulled" table + `product-feature-framing` memory.
-
-## BUILD STRATEGY — breadth-first, two-pass (A9, founder direction 2026-07-05)
-
-Materialize all three output families end-to-end in **pass 1** using fake/keyless drivers (**zero gateway spend** — the ~$4.90 credit is NOT blocking pass 1). Keep cheap inline unit tests (green-suite ratchet); **defer ALL live dogfood / real-tenant (the founder's #1 company) / chromium drives / exit reviews / eval refinement / UI polish / TTS / full Remotion / full trend pollers to pass 2.** Render/deploy seams may be thin stubs in pass 1. The pillar-#1 tenant profile draft at gitignored `.context/tenants/<company>.v1.json` is PARKED for pass 2, not used now. Don't stop for a live-verify gate between buckets. Full rationale: CHARTER.md amendment A9 + `build-strategy-breadth-first` memory.
-
-## Next action (pass 1, breadth)
-
-Continue materializing the three families. Recommended order:
-1. **B3.10 render seam (THIN):** approved `pillar_script` → deterministic SRT (from the authored beats) + a preview/manifest artifact behind a `RenderTarget` seam. Real Remotion MP4 render = pass 2. Fake driver, keyless test.
-2. **B3.15 web/landing-page generation:** new `web_page` draft format; brand profile + prompt → self-contained landing page → same judge spine → approve queue → thin Vercel `DeployTarget` seam (stub in pass 1). This stands up the missing third family.
-3. **B3.12 trend-intel skeleton:** `TrendSource` seam + watchlist config + deterministic outlier math over `source_metrics` → auto-exemplar ingest, all against a fake source. Live pollers = pass 2.
-
-No live gateway runs, no chromium, no real-tenant setup this pass.
-
-## [you] — founder-supplied, needed for PASS 2 (not pass 1)
-
-Pass 1 is self-contained (fake drivers). Everything below is a pass-2 input:
 - Pillar #1 topic/angle + confirm the pillar-#1 tenant profile draft (`.context/tenants/<company>.v1.json`).
 - Gateway credit top-up (pass-2 live dogfood + judge tier).
 - LinkedIn + X OAuth developer apps (B3.1 long pole — paperwork, start anytime).
