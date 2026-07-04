@@ -4,7 +4,7 @@
 
 ## Stamp
 
-2026-07-05 (session 7) · **Sprint 3 chartered (A6) AND B3.8 profile spine (lean) code-complete in the same session; at the B3.8 checkpoint — founder review, then B3.9 pillar origination. B2.5 dogfood opener still pending (chromium installed; needs founder's flow confirmation).**
+2026-07-05 (session 7) · **B3.8 approved at checkpoint · A7 chartered (B3.12 trend-intel promoted to bucket — founder direction: automated acquisition IS feature 2, operator never curates manually; B3.13 Whisper driver pulled) · B3.9 pillar origination IN PROGRESS.** Pillar-#1 tenant = the founder's first company — **its name is a guarded token: never in tracked files or commit messages; its profile JSON goes in gitignored `.context/tenants/`** (template: fernwood.v1.json). Gateway budget: ~$4.90 free credit until top-up — keep dogfood runs frugal. B2.5 dogfood opener still pending founder's flow confirmation (chromium installed).
 
 ## Pointer
 
