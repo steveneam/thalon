@@ -4,24 +4,23 @@
 
 ## Stamp
 
-2026-07-04 (session 3) · **SPRINT 1 COMPLETE — B1.2 (PR #8) + B1.5 (PR #9) merged, dogfooded live end to end; claude-cli dev transport added (PR #10)**
+2026-07-04 (session 4) · **Sprint-1 exit signed off · amendment A5 landed · B2.1 merged (PR #11) — Sprint 2 underway**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + the 2026-07-04 B1.5 wrap message — live-run ratchets and follow-ups live there).
+Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table + amendment A5) → `docs/adr/0002-sprint2-expansion.md` → `COORDINATION.md` (Sprint-2 planned lanes + the two 2026-07-04 messages).
 
 ## Delta (this session)
 
-- **B1.2 fan-out merged (PR #8)**: one source → N drafts, profiles/prompts as versioned data, idempotent + self-healing replay (lead review caught the silent-partial-replay bug pre-merge).
-- **B1.5 exit gate merged (PR #9)**: dogfood slice runner (`npm run -w @thalon/eval dogfood`), keyless chain test, CI `eval-gate` job armed (deterministic suite = ship gate), golden-G3 live runner (first run 6/6). **Dogfooded live on tenant #0**: generate → judge-block → operator edits (5 eval rows captured + exported) → re-judge → queued → **human-approved**. The judge caught a genuine embellishment live (sonnet final failed an added ungrounded rationale the haiku screen passed — ratified decision 2 proven).
-- **claude-cli dev transport (PR #10, founder-requested)**: `claude-cli/<alias>` model tiers run on the founder's Claude subscription via headless Claude Code — build/test only, embeddings stay on gateway. Founder's `.env.local`: draft/final=claude-cli/sonnet, screen=claude-cli/haiku (restores ratified two-tier strength without gateway credits).
-- Ratchets landed with their lessons (see the board message): judge/fanout `lastError` surfacing (operational vs editorial fails), PGlite single-writer CLI guard, export data-dir fix, Turbopack `new URL(rel, import.meta.url)` ban in db client.
+- **Sprint-1 exit review signed off by the founder** (operational-mirror criterion confirmed). Founder directive: stop flagging optional [you] items (gateway top-up, Langfuse) until a bucket blocks on one.
+- **Amendment A5 approved + landed** (`d38a056`): Sprint 2 expands to B2.1–B2.6 (timed ingest + single contract window · waterfall clip plans · exemplar library · demo-plan slice · queue UI), B3.7 visual-ingest sidecar added, trend radar folded into B3.5, transcript capability built in-house (self-hosted Whisper strategic; hosted APIs optional adapters), ToS-evading scrapers rejected. Design rationale in the ADR.
+- **B2.1 merged (PR #11, rebase-merge)**: prep commit made tenant-as-data possible (dogfood JSON input file + `DEMO_TENANT_SLUG` env + shipped-tenant validation ratchet); proof commit added fictional tenant #2 (`proprietary/profiles/tenants/fernwood.v1.json`) with **zero code changes** — exit criterion met literally. Live slice: x queued, linkedin blocked on a genuine g3 tier disagreement (I3 on a second tenant); replay idempotent.
 
 ## Next action
 
-**Session start: present the Sprint-1 exit review to the founder** — walk the charter exit criteria (all code-side criteria verified this session; the operational-mirror item is founder-side), then propose **B2.1** (fictional tenant #2 as pure runtime config; exit criterion: zero code changes). One queued and one blocked draft sit in the approve queue as real triage items (`npm run dev` → /approve).
+**Session start: B2.2 — timed ingest + the sprint's single contract window** (lead, solo; scope pinned in `CHARTER.md` B2.2 row + ADR 0002 §1). After B2.2 merges and the contract re-freezes, cut wave-1 lanes (waterfall + exemplar) per the Sprint-2 board — **lane launch needs fresh founder go**. Real triage items sit in two queues: tenant #0 (`npm run dev` → /approve) and tenant #2 (`DEMO_TENANT_SLUG=fernwood npm run dev` → /approve).
 
-## [you] — founder-supplied, outstanding
+## [you] — founder-supplied, needed as buckets start (not before)
 
-- Optional: AI Gateway credit top-up (dashboard → AI Gateway → top-up) — restores the ratified `anthropic/claude-sonnet-4.5` final-judge default via config; required before any production traffic (Sprint 3+). Build/test currently runs on the claude-cli seam instead.
-- Optional until dogfood needs tracing: Langfuse keys/host (`eval/README.md`).
+- B2.3 dogfood: your first pillar video (own long-form video + its caption/SRT file, or URL).
+- B2.5 dogfood: your website URL + which flows to demo.
