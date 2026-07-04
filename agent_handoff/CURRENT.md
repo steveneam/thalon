@@ -4,7 +4,7 @@
 
 ## Stamp
 
-2026-07-05 (session 7) · **B3.8 (profile spine) + B3.9 (pillar origination) BOTH code-complete on main; next: B3.10 Remotion render seam.** Amendments A6/A7/A8 chartered; pulled buckets B3.12–B3.15 recorded. Pillar-#1 tenant = founder's first company — **its name IS grep-guard token A: never in tracked files or commit messages; profile JSON lives ONLY at gitignored `.context/tenants/<company>.v1.json` (drafted this session, ready)**. Gateway budget ~$4.90 free until top-up.
+2026-07-05 (session 7) · **B3.8 + B3.9 code-complete. Build strategy pivoted to BREADTH-FIRST / two-pass (A9): materialize all 3 output families in pass 1 with fake drivers, defer all live dogfood/verify/real-tenant to pass 2. Next: pass-1 breadth — B3.10 (thin render seam) → B3.15 (web family) → B3.12 (intel skeleton).** Amendments A6/A7/A8/A9 chartered; pulled B3.12–B3.15 recorded. Pillar-#1 tenant name IS grep-guard token A — never in tracked files; profile drafted+PARKED at gitignored `.context/tenants/<company>.v1.json` for pass 2. Pass 1 = zero gateway spend.
 
 ## Pointer
 
@@ -30,18 +30,28 @@ Read in order: `CLAUDE.md` → `CHARTER.md` (new Sprint-3 table + amendment A6) 
 
 `packages/engine/src/origination/` — `runOrigination`: operator prompt source + active-profile identity (B3.8) + optional grounding sources → ONE judged `pillar_script` draft (pinned `pillarScriptDraftMetaSchema`: title/hook/beats/cta/groundingSourceIds); reuses B2.5 storyboard's idempotency/backfill (N=1). `ingest-github.ts` — public README via official API behind the fetcher seam → doc source. Structural: multi-source grounding assembly moved INTO the judge pipeline (`@thalon/judge` `collectGroundingChunks`, run by default when no explicit chunks passed) — apps/web judge-runner + eval dogfood simplified to not pass chunks; a caller can no longer under-ground a multi-source draft. New draft format `pillar_script`. Suite 321 passed / 2 skipped; typecheck + guard green (`fd1d2e2`).
 
-## Pulled buckets added this session (each chartered at its own checkpoint)
+## Pulled buckets added this session
 
 B3.12 trend-intel intake (A7) · B3.13 transcription engine (A8, Whisper + hosted-vendor drivers) · B3.14 per-tenant model-provider choice (gateway/BYOK/local-CLI) · **B3.15 web/landing-page generation** — the third output family (social · video · web), same spine, Vercel deploy seam. All in CHARTER.md "Pulled" table + `product-feature-framing` memory.
 
-## Next action
+## BUILD STRATEGY — breadth-first, two-pass (A9, founder direction 2026-07-05)
 
-**B3.10 — Remotion render seam** (approved `pillar_script` → MP4 + deterministic SRT; growth-gate licence): hold it brutally small — one template, one ratio, local render, text+music first cut (TTS behind a seam after). BLOCKING: gateway credit (~$4.90 free left — enough for a first frugal B3.9 live run, top-up needed before real volume). Pillar #1 tenant profile is DRAFTED and ready at gitignored `.context/tenants/<company>.v1.json` (identity from the live public site + vault; only the `prompt` field is a placeholder — founder supplies the topic/angle at session start). **B2.5 dogfood opener** still runnable any time (chromium installed; needs founder's docs-search flow confirmation).
+Materialize all three output families end-to-end in **pass 1** using fake/keyless drivers (**zero gateway spend** — the ~$4.90 credit is NOT blocking pass 1). Keep cheap inline unit tests (green-suite ratchet); **defer ALL live dogfood / real-tenant (the founder's #1 company) / chromium drives / exit reviews / eval refinement / UI polish / TTS / full Remotion / full trend pollers to pass 2.** Render/deploy seams may be thin stubs in pass 1. The pillar-#1 tenant profile draft at gitignored `.context/tenants/<company>.v1.json` is PARKED for pass 2, not used now. Don't stop for a live-verify gate between buckets. Full rationale: CHARTER.md amendment A9 + `build-strategy-breadth-first` memory.
 
-## [you] — founder-supplied, needed as work starts (not before)
+## Next action (pass 1, breadth)
 
-- Profile content for your two real companies (runtime data as dogfood JSON, never committed — fernwood.v1.json is the template, now with an `identity` block).
-- Pillar #1: which company + rough topic direction (shapes B3.9's first real run).
-- B2.5 dogfood: confirm the exact docs-search flow when we run the opener.
-- File LinkedIn + X OAuth developer apps (B3.1's long pole — paperwork only, start anytime).
-- Gateway credit top-up — **blocking B3.9 start** (origination leans on the sonnet final judge gate).
+Continue materializing the three families. Recommended order:
+1. **B3.10 render seam (THIN):** approved `pillar_script` → deterministic SRT (from the authored beats) + a preview/manifest artifact behind a `RenderTarget` seam. Real Remotion MP4 render = pass 2. Fake driver, keyless test.
+2. **B3.15 web/landing-page generation:** new `web_page` draft format; brand profile + prompt → self-contained landing page → same judge spine → approve queue → thin Vercel `DeployTarget` seam (stub in pass 1). This stands up the missing third family.
+3. **B3.12 trend-intel skeleton:** `TrendSource` seam + watchlist config + deterministic outlier math over `source_metrics` → auto-exemplar ingest, all against a fake source. Live pollers = pass 2.
+
+No live gateway runs, no chromium, no real-tenant setup this pass.
+
+## [you] — founder-supplied, needed for PASS 2 (not pass 1)
+
+Pass 1 is self-contained (fake drivers). Everything below is a pass-2 input:
+- Pillar #1 topic/angle + confirm the pillar-#1 tenant profile draft (`.context/tenants/<company>.v1.json`).
+- Gateway credit top-up (pass-2 live dogfood + judge tier).
+- LinkedIn + X OAuth developer apps (B3.1 long pole — paperwork, start anytime).
+- B2.5 dogfood docs-search flow confirmation.
+- Decision: scrub the guard token from historical commit `0b11d48`? Needs a one-time branch-protection relax (private repo; HEAD is already clean).
