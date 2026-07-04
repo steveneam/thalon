@@ -26,6 +26,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      # B2.2 ratchet: lint gates the PR, not the lead's merge pass (B1.4
+      # lesson — lane lint findings surfaced only at merge). Root eslint
+      # covers packages/proprietary/eval; the chained web lint covers apps/web.
+      - run: npm run lint
       - run: npm test
 
   # The Sprint-1 ship gate (charter B1.5, ratified decision 5): the KEYLESS
