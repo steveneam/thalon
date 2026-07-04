@@ -1,16 +1,19 @@
 import { tenantCtx, type TenantCtx } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
+import { readEnv } from "@thalon/platform";
 
 /**
- * Sprint-1 dogfood tenant (charter ratified decision 3: tenant #0 = self/demo,
- * matching the `slug: "self"` convention seeded by the B0.4 test fixtures).
- * Real operator -> tenant resolution (Clerk org mapping) is a later bucket;
- * this hardcode is scoped to apps/web only and easy to replace with one.
+ * The web app operates as one tenant per process, selected by
+ * `DEMO_TENANT_SLUG` (default `"self"` — tenant #0, charter ratified decision
+ * 3). B2.1: which tenant is operated on is runtime config, never code. Real
+ * operator → tenant resolution (Clerk org mapping) is a later bucket.
  */
-const DEMO_TENANT_SLUG = "self";
+export function demoTenantSlug(): string {
+  return readEnv().DEMO_TENANT_SLUG;
+}
 
-/** Returns null when the demo tenant has not been seeded yet (fresh dev db) — callers render an empty state, not an error. */
+/** Returns null when the configured tenant has not been seeded yet (fresh dev db) — callers render an empty state, not an error. */
 export async function resolveTenantCtx(repos: Repos): Promise<TenantCtx | null> {
-  const tenant = await repos.tenants.getBySlug(DEMO_TENANT_SLUG);
+  const tenant = await repos.tenants.getBySlug(demoTenantSlug());
   return tenant ? tenantCtx(tenant.id) : null;
 }

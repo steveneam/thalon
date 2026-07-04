@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { tenantCtx, type PlatformProfile } from "@thalon/contracts";
+import { z } from "zod";
+import { brandProfileConfigSchema, tenantCtx, type PlatformProfile } from "@thalon/contracts";
 import { openDb, type Draft, type Repos } from "@thalon/db";
 import {
   ingestSource,
@@ -126,6 +128,24 @@ export async function runDogfoodSlice(
 }
 
 /**
+ * B2.1: a dogfood run is DATA — any tenant lands as a JSON file validated
+ * against this schema (brand config reuses the contracts schema verbatim),
+ * never as code. `tenantSlug` doubles as the web app's `DEMO_TENANT_SLUG`
+ * value for triaging that tenant's queue.
+ */
+export const dogfoodInputSchema = z.object({
+  tenantSlug: z.string().min(1),
+  tenantName: z.string().min(1),
+  brandConfig: brandProfileConfigSchema,
+  prompt: z.string().min(1),
+  platforms: z.array(z.string().min(1)).min(1),
+});
+
+export function loadDogfoodInput(path: string): DogfoodInput {
+  return dogfoodInputSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+}
+
+/**
  * Tenant #0 (ratified decision 3): the engine dogfoods itself. All of this
  * is runtime DATA for the generic self tenant — the slug matches the web
  * app's demo-tenant lookup so the approve queue shows this run's drafts.
@@ -156,9 +176,13 @@ async function main(): Promise<void> {
   loadEnvLocal();
   useWebAppDataDir();
   await assertSoleDbWriter();
+  // Optional argv: path to a tenant-run JSON (B2.1). No arg = tenant #0.
+  const inputPath = process.argv[2];
+  const input = inputPath ? loadDogfoodInput(inputPath) : TENANT_ZERO;
+  console.error(`dogfood: tenant "${input.tenantSlug}"${inputPath ? ` (from ${inputPath})` : " (built-in tenant #0)"}`);
   const handle = await openDb();
   try {
-    const result = await runDogfoodSlice(handle.repos, TENANT_ZERO, {
+    const result = await runDogfoodSlice(handle.repos, input, {
       screenDriver: gatewayJudgeDriver(),
       finalDriver: gatewayJudgeDriver(),
     });
