@@ -172,4 +172,51 @@ describe("draft state machine against the database (SPINE §1.1)", () => {
       repos.drafts.transition(otherCtx, fx.draft.id, "judging"),
     ).rejects.toThrow(NotFoundError);
   });
+
+  it("reJudge (B2.6): a blocked draft re-enters judging directly, through the one transition fn", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await repos.drafts.transition(fx.ctx, fx.draft.id, "judging");
+    await repos.drafts.transition(fx.ctx, fx.draft.id, "blocked", { reason: "g1 denylist fail" });
+
+    const reJudging = await repos.drafts.reJudge(fx.ctx, fx.draft.id, { actor: "operator" });
+    expect(reJudging.status).toBe("judging");
+    expect(reJudging.body).toBe(fx.draft.body);
+
+    const rows = await repos.events.list(fx.ctx, { entityType: "draft", entityId: fx.draft.id });
+    expect(rows.map((r) => r.event)).toEqual(["draft.created", "draft.transition", "draft.transition", "draft.transition"]);
+    expect(rows.at(-1)?.payload).toMatchObject({ from: "blocked", to: "judging" });
+  });
+
+  it("reJudge (B2.6): releases a draft an operational halt (e.g. BudgetExceededError) stranded in judging, via judging -> blocked -> judging — never landing on queued itself", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    // g1 ran and passed; a gateway call then threw (a hard stop, not a
+    // verdict) before any further transition — the draft is stuck in
+    // "judging" with no g3 verdict at all.
+    await repos.drafts.transition(fx.ctx, fx.draft.id, "judging");
+    await repos.judgeResults.append(fx.ctx, { draftId: fx.draft.id, gate: "g1", verdict: "pass" });
+
+    const reJudging = await repos.drafts.reJudge(fx.ctx, fx.draft.id, { actor: "operator" });
+    expect(reJudging.status).toBe("judging");
+
+    const rows = await repos.events.list(fx.ctx, { entityType: "draft", entityId: fx.draft.id });
+    expect(rows.map((r) => r.event)).toEqual([
+      "draft.created",
+      "draft.transition",
+      "draft.transition",
+      "draft.transition",
+    ]);
+    expect(rows.at(-2)?.payload).toMatchObject({ from: "judging", to: "blocked" });
+    expect(rows.at(-1)?.payload).toMatchObject({ from: "blocked", to: "judging" });
+
+    // I1 still holds: no fresh passing verdict for the current hash yet.
+    await expect(repos.drafts.transition(fx.ctx, fx.draft.id, "queued")).rejects.toThrow(/I1/);
+  });
+
+  it("reJudge (B2.6): rejects a draft that isn't blocked or stuck-judging (e.g. generated, queued, approved)", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await expect(repos.drafts.reJudge(fx.ctx, fx.draft.id)).rejects.toThrow(/blocked.*judging|judging.*blocked/i);
+  });
 });

@@ -11,7 +11,7 @@ export const FIXTURE_DRAFT_A_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"; // run
 export const FIXTURE_DRAFT_B_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"; // run 2, x, tier disagreement
 export const FIXTURE_DRAFT_C_ID = "cccccccc-cccc-cccc-cccc-cccccccccccc"; // run 1, linkedin, approved
 
-function run(id: string, createdAt: string): FeedRun {
+export function run(id: string, createdAt: string, draftsComplete = true): FeedRun {
   return {
     id,
     tenantId: "tenant-fixture",
@@ -25,20 +25,29 @@ function run(id: string, createdAt: string): FeedRun {
     generationKey: `gen-${id}`,
     status: "complete",
     createdAt,
+    draftsComplete,
   };
 }
 
-function draft(id: string, runId: string, platform: string, body: string, status: string, bodyHash: string): GridDraft {
+export function draft(
+  id: string,
+  runId: string,
+  platform: string,
+  body: string,
+  status: string,
+  bodyHash: string,
+  extra: { format?: string | null; meta?: Record<string, unknown> } = {},
+): GridDraft {
   return {
     id,
     tenantId: "tenant-fixture",
     fanoutRunId: runId,
     sourceId: `source-${runId}`,
     platform,
-    format: null,
+    format: extra.format ?? null,
     body,
     bodyHash,
-    meta: {},
+    meta: extra.meta ?? {},
     status,
     generationKey: `gen-${id}`,
     createdAt: "2026-07-04T09:00:00.000Z",
@@ -46,7 +55,7 @@ function draft(id: string, runId: string, platform: string, body: string, status
   };
 }
 
-function verdict(gate: string, v: "pass" | "fail", bodyHash: string): PanelJudgeResult {
+export function verdict(gate: string, v: "pass" | "fail", bodyHash: string): PanelJudgeResult {
   return {
     id: `${gate}-${bodyHash}`,
     tenantId: "tenant-fixture",
@@ -67,9 +76,9 @@ export const fixtureRuns: FeedRun[] = [
   run(FIXTURE_RUN_1_ID, "2026-07-03T09:00:00.000Z"),
 ];
 
-const draftA = draft(FIXTURE_DRAFT_A_ID, FIXTURE_RUN_2_ID, "linkedin", "Run2 LinkedIn draft", "queued", "hash-a");
-const draftB = draft(FIXTURE_DRAFT_B_ID, FIXTURE_RUN_2_ID, "x", "Run2 X draft", "blocked", "hash-b");
-const draftC = draft(FIXTURE_DRAFT_C_ID, FIXTURE_RUN_1_ID, "linkedin", "Run1 LinkedIn draft", "approved", "hash-c");
+export const draftA = draft(FIXTURE_DRAFT_A_ID, FIXTURE_RUN_2_ID, "linkedin", "Run2 LinkedIn draft", "queued", "hash-a");
+export const draftB = draft(FIXTURE_DRAFT_B_ID, FIXTURE_RUN_2_ID, "x", "Run2 X draft", "blocked", "hash-b");
+export const draftC = draft(FIXTURE_DRAFT_C_ID, FIXTURE_RUN_1_ID, "linkedin", "Run1 LinkedIn draft", "approved", "hash-c");
 
 export const fixtureDraftsByRun: Record<string, GridDraft[]> = {
   [FIXTURE_RUN_2_ID]: [draftA, draftB],

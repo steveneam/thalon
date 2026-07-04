@@ -1,7 +1,15 @@
-import type { ActionResult, DraftDetail, FeedRun, GridDraft } from "./types";
+import type { ActionResult, DraftDetail, FeedRun, GridDraft, ReJudgeResult } from "./types";
 
+/** On failure, surfaces the route's own `{ error }` message (toErrorResponse) rather than a bare status code — judge/transition failures must fail LOUDLY and legibly for the operator. */
 async function asJson<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(`request failed: ${res.status}`);
+  if (!res.ok) {
+    const body: unknown = await res.json().catch(() => null);
+    const message =
+      body && typeof body === "object" && typeof (body as { error?: unknown }).error === "string"
+        ? (body as { error: string }).error
+        : `request failed: ${res.status}`;
+    throw new Error(message);
+  }
   return (await res.json()) as T;
 }
 
@@ -40,4 +48,9 @@ export async function editDraft(draftId: string, editedBody: string): Promise<Ac
     body: JSON.stringify({ editedBody }),
   });
   return asJson<ActionResult>(res);
+}
+
+export async function reJudgeDraft(draftId: string): Promise<ReJudgeResult> {
+  const res = await fetch(`/api/drafts/${draftId}/rejudge`, { method: "POST" });
+  return asJson<ReJudgeResult>(res);
 }

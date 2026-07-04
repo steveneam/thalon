@@ -19,7 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@thalon/contracts": ["../../packages/contracts/src/index.ts"],
+      "@thalon/db": ["../../packages/db/src/index.ts"],
+      "@thalon/platform": ["../../packages/platform/src/index.ts"],
+      "@thalon/judge": ["../../proprietary/judge/src/index.ts"]
     }
   },
   "include": [

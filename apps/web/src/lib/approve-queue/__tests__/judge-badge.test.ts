@@ -57,4 +57,33 @@ describe("computeJudgeBadge", () => {
     expect(badge.gates.g1).toBe("pass");
     expect(badge.overall).toBe("pass");
   });
+
+  it("blocked_overlap: a failing exemplar_overlap verdict is distinct from, and takes priority over, a plain g3 fail", () => {
+    const badge = computeJudgeBadge(
+      [result("g1", "pass"), result("g3_screen", "pass"), result("g3_final", "pass"), result("exemplar_overlap", "fail")],
+      HASH,
+    );
+    expect(badge.overall).toBe("blocked_overlap");
+    expect(badge.gates.exemplar_overlap).toBe("fail");
+  });
+
+  it("exemplar_overlap is absent from `gates` on a plain (non-exemplar-aware) run", () => {
+    const badge = computeJudgeBadge([result("g1", "pass"), result("g3_screen", "pass"), result("g3_final", "pass")], HASH);
+    expect(badge.gates.exemplar_overlap).toBeUndefined();
+    expect(badge.overall).toBe("pass");
+  });
+
+  it("ignores an exemplar_overlap verdict bound to a stale body hash (I1)", () => {
+    const badge = computeJudgeBadge(
+      [
+        result("g1", "pass"),
+        result("g3_screen", "pass"),
+        result("g3_final", "pass"),
+        result("exemplar_overlap", "fail", OTHER_HASH),
+      ],
+      HASH,
+    );
+    expect(badge.overall).toBe("pass");
+    expect(badge.gates.exemplar_overlap).toBeUndefined();
+  });
 });

@@ -5,6 +5,7 @@ const LABEL: Record<JudgeOverallStatus, string> = {
   pass: "Pass",
   fail: "Fail",
   blocked_disagreement: "Blocked — disagreement",
+  blocked_overlap: "Blocked — exemplar overlap",
   pending: "Pending",
 };
 
@@ -12,6 +13,7 @@ const VARIANT: Record<JudgeOverallStatus, "default" | "destructive" | "outline">
   pass: "default",
   fail: "destructive",
   blocked_disagreement: "destructive",
+  blocked_overlap: "destructive",
   pending: "outline",
 };
 
@@ -20,7 +22,7 @@ interface JudgeBadgeProps {
   bodyHash: string;
 }
 
-/** Surfaces gate evidence (g1 / g3_screen / g3_final) and clearly distinguishes pass / fail / blocked-disagreement / pending. */
+/** Surfaces gate evidence (g1 / g3_screen / g3_final, plus the B2.4 exemplar_overlap gate when present) and clearly distinguishes pass / fail / blocked-disagreement / blocked-overlap / pending. */
 export function JudgeBadge({ results, bodyHash }: JudgeBadgeProps) {
   const { overall, gates } = computeJudgeBadge(results, bodyHash);
   return (
