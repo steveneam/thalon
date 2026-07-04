@@ -188,6 +188,70 @@ describe("runWaterfall (B2.3 end-to-end, keyless + networkless)", () => {
     expect(result.drafts.every((d) => d.status === "generated")).toBe(true);
   });
 
+  it("recovers a duplicate-windowIndex candidate via bounded repair retries before persisting", async () => {
+    const { ctx, repos, sourceId } = await setup();
+    const fake = createFakeHighlightSelectDriver();
+    let attempts = 0;
+    const repairingDriver: HighlightSelectDriver = async (req) => {
+      attempts += 1;
+      // First attempt: the same window selected twice — schema-shaped and
+      // in-range, but a duplicate would collide on the draft generation key
+      // (content-addressed on the window's time range) mid-persist.
+      if (attempts === 1) {
+        return {
+          candidate: {
+            clips: [
+              { windowIndex: 0, hook: "hook a", captions: "captions a", platformCopy: "copy a" },
+              { windowIndex: 0, hook: "hook b", captions: "captions b", platformCopy: "copy b" },
+            ],
+          },
+          tokensIn: 1,
+          tokensOut: 1,
+        };
+      }
+      return fake(req);
+    };
+
+    const result = await runWaterfall(
+      ctx,
+      repos,
+      { sourceId, platforms: ["linkedin"], windowConfig: WINDOW_CONFIG },
+      { driver: repairingDriver, capTokens: 1_000_000 },
+    );
+
+    expect(attempts).toBe(2); // one rejected duplicate attempt, then a successful repair
+    expect(result.drafts.length).toBeGreaterThan(0);
+    expect(result.drafts.every((d) => d.status === "generated")).toBe(true);
+  });
+
+  it("persists nothing for a platform whose shell only ever duplicates a window, keeping the platform backfillable", async () => {
+    const { ctx, repos, sourceId } = await setup();
+    const duplicatingDriver: HighlightSelectDriver = async () => ({
+      candidate: {
+        clips: [
+          { windowIndex: 0, hook: "hook a", captions: "captions a", platformCopy: "copy a" },
+          { windowIndex: 0, hook: "hook b", captions: "captions b", platformCopy: "copy b" },
+        ],
+      },
+      tokensIn: 1,
+      tokensOut: 1,
+    });
+
+    await expect(
+      runWaterfall(
+        ctx,
+        repos,
+        { sourceId, platforms: ["linkedin"], windowConfig: WINDOW_CONFIG },
+        { driver: duplicatingDriver, capTokens: 1_000_000 },
+      ),
+    ).rejects.toThrow(/selected more than once/);
+
+    // Nothing persisted for the platform — a later replay backfills it whole
+    // instead of skipping a half-persisted platform forever.
+    const draftEvents = await repos.events.list(ctx, { entityType: "draft" });
+    expect(draftEvents).toHaveLength(0);
+  });
+
   it("backfills only the platforms missing after a prior irrecoverable failure, reusing the same run and the untouched drafts", async () => {
     const { ctx, repos, sourceId } = await setup();
     const fake = createFakeHighlightSelectDriver();

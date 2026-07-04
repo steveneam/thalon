@@ -22,12 +22,16 @@ const DEFAULT_MAX_ATTEMPTS = 3;
 /**
  * The shell->core boundary guard (SPINE §1 doctrine): every shell output
  * crosses into the core through this Zod-validated, bounded repair-retry
- * loop — mirrors ../fanout/validate-shell-output.ts exactly, plus one
- * domain-specific check Zod alone can't express: every clip's `windowIndex`
+ * loop — mirrors ../fanout/validate-shell-output.ts exactly, plus two
+ * domain-specific checks Zod alone can't express: every clip's `windowIndex`
  * must reference one of the candidate windows `req.candidateWindows` this
  * call was actually given (the shell selects among core-derived windows, it
- * never invents new timing) — an out-of-range index is treated identically
- * to a schema-invalid candidate and consumes one of the bounded attempts.
+ * never invents new timing), and no window may be selected more than once —
+ * the draft generation key is content-addressed on the window's time range,
+ * so a duplicate selection could never be persisted (unique key) and would
+ * strand the platform mid-persist behind the platform-granularity backfill.
+ * Either violation is treated identically to a schema-invalid candidate and
+ * consumes one of the bounded attempts.
  * `driver` is expected to already be wrapped in `withGatewayGuard` by the
  * caller, so every attempt (including repair retries) is metered through the
  * one gateway choke point.
@@ -64,6 +68,17 @@ export async function generateValidatedHighlightSelect(
     );
     if (outOfRange) {
       lastError = `schema-invalid candidate: windowIndex ${outOfRange.windowIndex} out of range (only ${req.candidateWindows.length} candidate window(s) provided)`;
+      if (attempt === maxAttempts) break;
+      continue;
+    }
+    const seen = new Set<number>();
+    const duplicate = parsed.data.clips.find((clip) => {
+      if (seen.has(clip.windowIndex)) return true;
+      seen.add(clip.windowIndex);
+      return false;
+    });
+    if (duplicate) {
+      lastError = `schema-invalid candidate: windowIndex ${duplicate.windowIndex} selected more than once (at most one clip per candidate window)`;
       if (attempt === maxAttempts) break;
       continue;
     }
