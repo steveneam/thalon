@@ -4,23 +4,24 @@
 
 ## Stamp
 
-2026-07-04 (session 3) · **Sprint 1: B1.1–B1.4 merged, B1.2 landed this session (PR #8) — only B1.5 exit gate remains**
+2026-07-04 (session 3) · **SPRINT 1 COMPLETE — B1.2 (PR #8) + B1.5 (PR #9) merged, dogfooded live end to end; claude-cli dev transport added (PR #10)**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + 2026-07-04 messages — the B1.2 wrap message carries the ratchet follow-up).
+Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + the 2026-07-04 B1.5 wrap message — live-run ratchets and follow-ups live there).
 
 ## Delta (this session)
 
-- **B1.2 fan-out merged (PR #8)** on founder go: one source → N drafts, LinkedIn+X profiles as versioned data files, versioned generation prompt, all generation through `withGatewayGuard`, idempotent + **self-healing replay** (lead review caught a silent-partial-replay bug pre-merge; lane fixed with backfill-missing-platforms + regression test). 109/109 tests green on `main`.
-- `AI_GATEWAY_API_KEY` supplied by founder → `apps/web/.env.local` (gitignored; value trimmed/verified without entering chat). The last `[you]` blocker is closed — B1.5 dogfood is fully unblocked.
-- Founder directive recorded (agent memory, `lead-drives-lanes`): **>2 concurrent subagents ⇒ Mode B** (founder-opened terminals, one lead-authored kickoff prompt per window, lead orchestrates). ≤2 stay in-session worktree subagents.
-- Follow-up logged on the board: Agent-tool worktrees don't get the `worktree.symlinkDirectories` node_modules link — lane lint silently unrunnable; lead re-runs lint at merge until fixed.
+- **B1.2 fan-out merged (PR #8)**: one source → N drafts, profiles/prompts as versioned data, idempotent + self-healing replay (lead review caught the silent-partial-replay bug pre-merge).
+- **B1.5 exit gate merged (PR #9)**: dogfood slice runner (`npm run -w @thalon/eval dogfood`), keyless chain test, CI `eval-gate` job armed (deterministic suite = ship gate), golden-G3 live runner (first run 6/6). **Dogfooded live on tenant #0**: generate → judge-block → operator edits (5 eval rows captured + exported) → re-judge → queued → **human-approved**. The judge caught a genuine embellishment live (sonnet final failed an added ungrounded rationale the haiku screen passed — ratified decision 2 proven).
+- **claude-cli dev transport (PR #10, founder-requested)**: `claude-cli/<alias>` model tiers run on the founder's Claude subscription via headless Claude Code — build/test only, embeddings stay on gateway. Founder's `.env.local`: draft/final=claude-cli/sonnet, screen=claude-cli/haiku (restores ratified two-tier strength without gateway credits).
+- Ratchets landed with their lessons (see the board message): judge/fanout `lastError` surfacing (operational vs editorial fails), PGlite single-writer CLI guard, export data-dir fix, Turbopack `new URL(rel, import.meta.url)` ban in db client.
 
 ## Next action
 
-**Session start: ask the founder whether to start B1.5 (Sprint-1 exit gate)** — fresh approval every time. Per the board this is the **eval lane, lead-terminal owned (no subagent)**: dogfood the full slice on tenant #0 (real generation via the now-present gateway key), arm the green eval suite as the ship gate, verify the charter's Sprint-0/1 exit criteria, then Sprint-1 exit review.
+**Session start: present the Sprint-1 exit review to the founder** — walk the charter exit criteria (all code-side criteria verified this session; the operational-mirror item is founder-side), then propose **B2.1** (fictional tenant #2 as pure runtime config; exit criterion: zero code changes). One queued and one blocked draft sit in the approve queue as real triage items (`npm run dev` → /approve).
 
 ## [you] — founder-supplied, outstanding
 
-None blocking. Optional until dogfood needs tracing: Langfuse keys/host (`eval/README.md`).
+- Optional: AI Gateway credit top-up (dashboard → AI Gateway → top-up) — restores the ratified `anthropic/claude-sonnet-4.5` final-judge default via config; required before any production traffic (Sprint 3+). Build/test currently runs on the claude-cli seam instead.
+- Optional until dogfood needs tracing: Langfuse keys/host (`eval/README.md`).

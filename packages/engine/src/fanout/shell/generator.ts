@@ -1,6 +1,12 @@
 import { generateObject } from "ai";
 import type { PlatformProfile } from "@thalon/contracts";
-import { getGateway, modelTiers } from "@thalon/platform";
+import {
+  getGateway,
+  isClaudeCliModel,
+  modelTiers,
+  parseCandidateJson,
+  runClaudeCliJson,
+} from "@thalon/platform";
 import { fanoutShellOutputSchema } from "../schemas";
 import { readPromptFile } from "./prompt-file";
 
@@ -43,18 +49,38 @@ export type DraftGeneratorDriver = (req: GenerateDraftRequest) => Promise<Genera
  */
 export function gatewayDraftGenerator(): DraftGeneratorDriver {
   return async (req) => {
-    const model = getGateway().languageModel(modelTiers().draft);
+    const modelId = modelTiers().draft;
     const system = readPromptFile(PROMPT_FILE);
+    const prompt = [
+      `PLATFORM: ${req.platform}`,
+      `VOICE: ${JSON.stringify(req.voice)}`,
+      `PLATFORM PROFILE: ${JSON.stringify(req.platformProfile)}`,
+      `SOURCE CONTENT:\n${req.sourceText}`,
+    ].join("\n\n");
+
+    // Dev-only transport (see @thalon/platform claude-cli.ts): a
+    // `claude-cli/<alias>` tier routes through the local Claude Code CLI on
+    // the operator's subscription instead of the gateway — build/test phase
+    // only, selected purely by runtime config. Same prompt file, same Zod
+    // boundary downstream.
+    if (isClaudeCliModel(modelId)) {
+      const out = await runClaudeCliJson({
+        model: modelId,
+        system,
+        prompt: `${prompt}\n\nReturn JSON: {"body": string (the complete draft), "format"?: string}`,
+      });
+      return {
+        candidate: parseCandidateJson(out.text),
+        tokensIn: out.tokensIn,
+        tokensOut: out.tokensOut,
+      };
+    }
+
     const { object, usage } = await generateObject({
-      model,
+      model: getGateway().languageModel(modelId),
       schema: fanoutShellOutputSchema,
       system,
-      prompt: [
-        `PLATFORM: ${req.platform}`,
-        `VOICE: ${JSON.stringify(req.voice)}`,
-        `PLATFORM PROFILE: ${JSON.stringify(req.platformProfile)}`,
-        `SOURCE CONTENT:\n${req.sourceText}`,
-      ].join("\n\n"),
+      prompt,
     });
     return {
       candidate: object,

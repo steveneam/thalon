@@ -1,5 +1,11 @@
 import { generateObject } from "ai";
-import { getGateway, modelTiers } from "@thalon/platform";
+import {
+  getGateway,
+  isClaudeCliModel,
+  modelTiers,
+  parseCandidateJson,
+  runClaudeCliJson,
+} from "@thalon/platform";
 import { readPromptFile } from "./prompt-file";
 import { shellJudgeOutputSchema } from "./schema";
 
@@ -54,14 +60,33 @@ export function gatewayJudgeDriver(): JudgeModelDriver {
   return async (req) => {
     const tiers = modelTiers();
     const modelId = req.tier === "screen" ? tiers.judgeScreen : tiers.judgeFinal;
-    const model = getGateway().languageModel(modelId);
     const system = readPromptFile(PROMPT_FILE_FOR_TIER[req.tier]);
     const sources = req.chunks.map((c) => `[${c.ref}] ${c.text}`).join("\n\n");
+    const prompt = `DRAFT:\n${req.body}\n\nPROVIDED SOURCES:\n${sources || "(none provided)"}`;
+
+    // Dev-only transport (see @thalon/platform claude-cli.ts): a
+    // `claude-cli/<alias>` tier routes through the local Claude Code CLI on
+    // the operator's subscription instead of the gateway — build/test phase
+    // only, selected purely by runtime config. Same versioned prompt file,
+    // same Zod boundary in ../validate-shell-output.ts.
+    if (isClaudeCliModel(modelId)) {
+      const out = await runClaudeCliJson({
+        model: modelId,
+        system,
+        prompt: `${prompt}\n\nReturn JSON: {"verdict": "pass" | "fail", "claims": [{"claim": string, "supported": boolean, "chunkRef"?: string}], "notes"?: string}`,
+      });
+      return {
+        candidate: parseCandidateJson(out.text),
+        tokensIn: out.tokensIn,
+        tokensOut: out.tokensOut,
+      };
+    }
+
     const { object, usage } = await generateObject({
-      model,
+      model: getGateway().languageModel(modelId),
       schema: shellJudgeOutputSchema,
       system,
-      prompt: `DRAFT:\n${req.body}\n\nPROVIDED SOURCES:\n${sources || "(none provided)"}`,
+      prompt,
     });
     return {
       candidate: object,
