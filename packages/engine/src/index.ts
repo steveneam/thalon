@@ -13,6 +13,9 @@
  * pillar_script draft. Multi-source grounding assembly lives in
  * @thalon/judge (collectGroundingChunks, run INSIDE the pipeline by
  * default) so no judge caller can under-ground a draft.
+ * B3.10 landed (thin, pass 1 per A9): src/render/ — approved pillar_script
+ * -> deterministic SRT from the authored beats + content-addressed render
+ * manifest behind the RenderTarget seam (real Remotion target = pass 2).
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -25,3 +28,4 @@ export * from "./waterfall";
 export * from "./exemplar";
 export * from "./demo";
 export * from "./origination";
+export * from "./render";

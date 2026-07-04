@@ -29,10 +29,16 @@ export type PillarScriptShellOutput = z.infer<typeof pillarScriptShellOutputSche
 /**
  * The PINNED `pillar_script` draft-meta contract (mirrors B2.5's
  * demoPlanDraftMetaSchema role): the approve-queue UI renders from this and
- * the B3.10 render seam consumes it — change it only at a contract window.
- * `groundingSourceIds` lists EVERY source this script may draw claims from
- * (the operator's prompt source plus any site-crawl/repo sources); the judge
- * callers ground against all of them via `collectGroundingChunks`.
+ * the B3.10 render seam consumes it — extend additively only; never
+ * rename/remove a field outside a contract window. `groundingSourceIds`
+ * lists EVERY source this script may draw claims from (the operator's
+ * prompt source plus any site-crawl/repo sources); the judge callers ground
+ * against all of them via `collectGroundingChunks`.
+ *
+ * `renderStatus`/`renderRef` (B3.10, additive — mirrors demo_plan's
+ * captureStatus/captureRef): "scripted" until a render succeeds; the
+ * defaults keep drafts persisted before B3.10 parsing unchanged. Only
+ * ../render/render.ts moves these fields.
  */
 export const pillarScriptDraftMetaSchema = z.object({
   title: z.string().min(1),
@@ -45,6 +51,9 @@ export const pillarScriptDraftMetaSchema = z.object({
   promptVersion: z.string().min(1),
   brandProfileVersion: z.number().int(),
   platformProfileVersion: z.string().min(1),
+  renderStatus: z.enum(["scripted", "rendered", "failed"]).default("scripted"),
+  /** null until a render succeeds; then the content-addressed object-store key of the render manifest */
+  renderRef: z.string().nullable().default(null),
 });
 
 export type PillarScriptDraftMeta = z.infer<typeof pillarScriptDraftMetaSchema>;
