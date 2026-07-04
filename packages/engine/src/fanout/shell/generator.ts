@@ -11,10 +11,16 @@ import { fanoutShellOutputSchema } from "../schemas";
 import { readPromptFile } from "./prompt-file";
 
 const PROMPT_FILE = "fanout-generate.v1.md";
+const EXEMPLAR_PROMPT_FILE = "fanout-exemplar-context.v1.md";
 
 /** `prompt_version` recorded on `fanout_runs` and every draft's `meta` (SPINE §3.2; charter B1.2-blocking provenance). */
 export function fanoutPromptVersion(): string {
   return PROMPT_FILE.replace(/\.md$/, "");
+}
+
+/** B2.4: recorded in the generation key + draft meta whenever a fan-out runs exemplar-aware (never for a plain run) — this is what keeps an exemplar-aware run from fast-path-colliding with a plain run sharing every other input. */
+export function exemplarPromptVersion(): string {
+  return EXEMPLAR_PROMPT_FILE.replace(/\.md$/, "");
 }
 
 export interface GenerateDraftRequest {
@@ -22,6 +28,8 @@ export interface GenerateDraftRequest {
   sourceText: string;
   voice: Record<string, unknown>;
   platformProfile: PlatformProfile;
+  /** B2.4: retrieved exemplar/voice-sample context, threaded into the prompt when a fan-out runs exemplar-aware. Absent for a plain run — every plain-run prompt stays byte-identical to pre-B2.4. */
+  exemplarContext?: string;
 }
 
 /** One driver invocation = one gateway call: the raw candidate plus its token spend. */
@@ -50,11 +58,16 @@ export type DraftGeneratorDriver = (req: GenerateDraftRequest) => Promise<Genera
 export function gatewayDraftGenerator(): DraftGeneratorDriver {
   return async (req) => {
     const modelId = modelTiers().draft;
-    const system = readPromptFile(PROMPT_FILE);
+    const system = req.exemplarContext
+      ? `${readPromptFile(PROMPT_FILE)}\n\n${readPromptFile(EXEMPLAR_PROMPT_FILE)}`
+      : readPromptFile(PROMPT_FILE);
     const prompt = [
       `PLATFORM: ${req.platform}`,
       `VOICE: ${JSON.stringify(req.voice)}`,
       `PLATFORM PROFILE: ${JSON.stringify(req.platformProfile)}`,
+      ...(req.exemplarContext
+        ? [`EXEMPLAR CONTEXT (grounding only — never reproduce verbatim):\n${req.exemplarContext}`]
+        : []),
       `SOURCE CONTENT:\n${req.sourceText}`,
     ].join("\n\n");
 

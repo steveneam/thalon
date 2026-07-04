@@ -4,6 +4,7 @@ export { fanoutShellOutputSchema, type FanoutShellOutput } from "./schemas";
 export { generateValidatedDraft, type GenerateCallResult } from "./validate-shell-output";
 export {
   createFakeDraftGeneratorDriver,
+  exemplarPromptVersion,
   fanoutPromptVersion,
   gatewayDraftGenerator,
   type DraftGeneratorDriver,

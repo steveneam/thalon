@@ -1,8 +1,11 @@
 import { platformProfileSchema, type PlatformProfile, type TenantCtx } from "@thalon/contracts";
 import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
-import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
+import { modelTiers, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
+import { retrieveExemplarContext, runExemplarOverlapGate, type ExemplarContext } from "../exemplar";
+import type { EmbeddingDriver } from "../ingest";
 import { loadPlatformProfile } from "./profiles";
 import {
+  exemplarPromptVersion,
   fanoutPromptVersion,
   gatewayDraftGenerator,
   type DraftGeneratorDriver,
@@ -12,12 +15,23 @@ import { generateValidatedDraft } from "./validate-shell-output";
 export interface FanoutRequest {
   sourceId: string;
   platforms: string[];
+  /**
+   * B2.4: opt-in exemplar/voice-sample-aware generation. Absent (the
+   * default) means this fan-out is byte-identical to a pre-B2.4 run — no
+   * retrieval, no prompt addition, no overlap gate. `k` overrides the
+   * default top-k retrieved into context.
+   */
+  exemplar?: { k?: number };
 }
 
 export interface FanoutDeps {
   driver?: DraftGeneratorDriver;
   /** Overrides the tenant daily token budget cap for this call (tests only; production reads TENANT_DAILY_TOKEN_BUDGET). */
   capTokens?: number;
+  /** B2.4: overrides the embedding driver used to embed the exemplar retrieval query (tests only — keeps exemplar-aware fan-out tests keyless/networkless too). */
+  exemplarEmbedder?: EmbeddingDriver;
+  /** B2.4: overrides the object store backing the exemplar query-embedding cache (tests only). */
+  exemplarObjectStore?: ObjectStore;
 }
 
 export interface FanoutResult {
@@ -75,6 +89,26 @@ export async function runFanout(
   const model = modelTiers().draft;
   const promptVersion = fanoutPromptVersion();
   const platforms = [...new Set(request.platforms)].sort();
+  const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+
+  // B2.4: exemplar retrieval runs BEFORE the generation key is computed —
+  // exemplar ids fold into the key below so an exemplar-aware run can never
+  // fast-path-collide with a plain run sharing every other input. Absent
+  // request.exemplar this block never runs: zero extra reads, zero extra
+  // gateway calls — byte-identical to the pre-B2.4 fan-out.
+  let precomputedSourceText: string | undefined;
+  let exemplarContext: ExemplarContext | undefined;
+  if (request.exemplar) {
+    const queryChunks = await repos.sourceChunks.listBySource(ctx, source.id);
+    precomputedSourceText = queryChunks.map((chunk) => chunk.text).join("\n\n");
+    exemplarContext = await retrieveExemplarContext(
+      ctx,
+      repos,
+      { queryText: precomputedSourceText, k: request.exemplar.k, capTokens },
+      { embedder: deps.exemplarEmbedder, objectStore: deps.exemplarObjectStore },
+    );
+  }
+
   const generationKey = sha256Hex(
     stableStringify({
       tenantId: ctx.tenantId,
@@ -84,6 +118,12 @@ export async function runFanout(
       platforms,
       promptVersion,
       model,
+      exemplar: exemplarContext
+        ? {
+            promptVersion: exemplarPromptVersion(),
+            ids: [...exemplarContext.exemplarIds].map((e) => `${e.sourceId}:${e.chunkId}`).sort(),
+          }
+        : undefined,
     }),
   );
 
@@ -119,6 +159,7 @@ export async function runFanout(
       promptVersion,
       model,
       generationKey,
+      params: exemplarContext ? { exemplarIds: exemplarContext.exemplarIds } : undefined,
     });
     runId = run.id;
     runGenerationKey = run.generationKey;
@@ -126,11 +167,10 @@ export async function runFanout(
   }
 
   const chunks = await repos.sourceChunks.listBySource(ctx, source.id);
-  const sourceText = chunks.map((chunk) => chunk.text).join("\n\n");
+  const sourceText = precomputedSourceText ?? chunks.map((chunk) => chunk.text).join("\n\n");
   const voice = (profile.voice as Record<string, unknown> | null) ?? {};
   const tenantPlatformProfiles =
     (profile.platformProfiles as Record<string, unknown> | null) ?? {};
-  const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
   const rawDriver = deps.driver ?? gatewayDraftGenerator();
 
   const generated: Draft[] = [];
@@ -147,6 +187,7 @@ export async function runFanout(
         brandProfileVersion: profile.version,
         promptVersion,
         platform,
+        exemplarContext,
       },
     );
     generated.push(draft);
@@ -173,6 +214,8 @@ interface DraftSpec {
   brandProfileVersion: number;
   promptVersion: string;
   platform: string;
+  /** B2.4: present only for an exemplar-aware run — threaded into the prompt, recorded as draft provenance, and checked by the overlap gate immediately after generation. */
+  exemplarContext?: ExemplarContext;
 }
 
 /** One platform's generation + validation + persistence — shared by the fresh-run loop and the backfill-replay loop above. */
@@ -207,6 +250,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     sourceText: spec.sourceText,
     voice: spec.voice,
     platformProfile,
+    exemplarContext: spec.exemplarContext?.contextBlock,
   });
   if (!result.output) {
     throw new Error(
@@ -214,7 +258,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     );
   }
 
-  return guard.repos.drafts.create(guard.ctx, {
+  const draft = await guard.repos.drafts.create(guard.ctx, {
     fanoutRunId: spec.runId,
     sourceId: spec.sourceId,
     platform: spec.platform,
@@ -225,8 +269,24 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
       promptVersion: spec.promptVersion,
       brandProfileVersion: spec.brandProfileVersion,
       platformProfileVersion: profileVersion,
+      ...(spec.exemplarContext ? { exemplarIds: spec.exemplarContext.exemplarIds } : {}),
     },
   });
+
+  // B2.4 invariant (ADR 0002 decision 4): exemplars are grounding-only,
+  // never republished. Runs immediately post-generation, only for
+  // exemplar-aware drafts; a breach drives the draft to `blocked` through
+  // the ONE transition function before it can ever reach the judge harness
+  // or the queue.
+  if (spec.exemplarContext) {
+    await runExemplarOverlapGate(guard.repos, {
+      ctx: guard.ctx,
+      draftId: draft.id,
+      exemplarChunks: spec.exemplarContext.chunks,
+    });
+  }
+
+  return draft;
 }
 
 /**
