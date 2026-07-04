@@ -31,7 +31,9 @@ describe("tenancy ratchet", () => {
         "source_metrics",
         "sources",
         "tenants",
+        "trend_snapshots",
         "usage_ledger",
+        "watchlists",
       ].sort(),
     );
   });
