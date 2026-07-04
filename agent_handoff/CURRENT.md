@@ -4,24 +4,26 @@
 
 ## Stamp
 
-2026-07-04 (session 5) · **Wave 1 merged — B2.3 (PR #13) + B2.4 (PR #14) on main; wave 2 (demo B2.5 + ui B2.6) cuttable on founder go**
+2026-07-05 (session 6) · **Wave 2 merged — B2.5 (PR #15) + B2.6 (PR #16) on main; SPRINT 2 CODE-COMPLETE (B2.1–B2.6); next: Sprint-2 exit review (dogfood B2.3 + B2.5), then Sprint-3 re-charter**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table) → `COORDINATION.md` (Sprint-2 lane board + the 2026-07-04 wave-1 messages — lane cut, merge-train wrap).
+Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table + Sprint-3 pulled list) → `COORDINATION.md` (Sprint-2 lane board + the 2026-07-05 wave-2 merge-train message — review findings, lint rounds, follow-ups).
 
 ## Delta (this session)
 
-- **B2.3 merged (PR #13)**: `packages/engine/src/waterfall/` — deterministic candidate windows (pure core) → highlight-select shell (`highlight-select.v1.md`) → `clip_plan` drafts, `fanout_runs`-anchored with fan-out's exact idempotency/backfill semantics; clip-plan body/meta shape documented for B2.6 in `waterfall/schemas.ts`. Lead review fix pre-merge: duplicate `windowIndex` rejection at the shell boundary (would have stranded a half-persisted platform behind backfill).
-- **B2.4 merged (PR #14)**: `packages/engine/src/exemplar/` — PII-strip-before-hash ingest (invariant), generic `source_metrics`, retrieval scoped to exemplar/voice_sample kinds, opt-in exemplar-aware fan-out (exemplar ids fold into the generation key; provenance on run params + draft meta; plain runs byte-identical), deterministic 8-word n-gram overlap gate → `judge_results.gate = "exemplar_overlap"` + blocked via the one transition fn (invariant).
-- Founder Q&A (pipecat/livekit): **not integrating** — they're real-time conversational voice-agent orchestrators, not ASR; transcription quality = model choice behind the existing `TranscriptProvider` seam. Parakeet-TDT-via-ONNX (sherpa-onnx) recorded as a second driver candidate for a bake-off vs whisper.cpp/faster-whisper at Whisper-driver bucket time (agent memory: future-tooling-candidates).
-- Root suite now 187 tests; the orchestrator-worktree caveats (skip lint in lanes, `@thalon/*` vitest aliasing) held — engine's config covered both lanes since they lived inside `packages/engine`.
+- **B2.5 merged (PR #15)**: `packages/engine/src/demo/` — crawl (robots.txt merged-across-groups + rate limit on EVERY request, incl. robots fetch, as tested core invariants) → flow map → storyboard shell behind a Zod+structural validation boundary → one `demo_plan` draft per run with waterfall's idempotency/backfill → post-approval Playwright drive (`DemoDriver` seam; browser-gated integration test) → content-addressed capture bundle; `drafts.updateMeta` with optimistic concurrency (`ConcurrentUpdateError`). Pinned `demo_plan` meta contract for the UI: `packages/engine/src/demo/schemas.ts`.
+- **B2.6 merged (PR #16)**: approve-queue renders clip plans (canonical shape), exemplar provenance + `blocked_overlap` badge, demo plans (pinned contract, `captureStatus` chip); three Sprint-1 follow-ups closed — panel refresh race (ref-guarded), aborted-run rows (feed rewired onto new additive `fanoutRuns.list()`), operator re-judge. **Structural change: apps/web now depends on `@thalon/judge` and runs the judge pipeline in-request** on both save-edit and re-judge (wired like `eval/src/dogfood.ts`; metering stays inside the pipeline's `withGatewayGuard`) — a judged outcome (`queued`/`blocked`) comes back in the response; failures surface loudly with the draft honestly at `judging`; re-judge doubles as the retry path.
+- Root suite 300 passed / 2 skipped (browser-gated); lint 0 errors; both lane worktrees + branches GC'd.
+- **Founder process directive (in agent memory, `lead-drives-lanes`): an approval covers exactly the named agent runs — reviewer agents and lane fix-round resumes each count as launches; any agent run beyond the approved count = pause, founder approves or defers.** This session used 6 runs against a 2-lane approval before the directive landed.
+- Founder decision: B2.5 dogfood target = a known brand's **public docs-search flow** (Anthropic docs first) as runtime input, never committed; auth-walled chat products are out (A5 no-ToS-evasion).
 
 ## Next action
 
-**Cut wave-2 lanes on founder go**: demo (B2.5) + ui (B2.6) per the Sprint-2 board (`COORDINATION.md`) — kickoffs carry the same caveats ("skip lint, lead verifies at merge"); B2.6's kickoff should include the clip-plan draft shape (`packages/engine/src/waterfall/schemas.ts`) and the Sprint-1 queued UI follow-ups (approve-panel refresh after save-edit, aborted-run rows, operator re-judge action). B2.5 adds Playwright (Apache-2.0) as the drive/capture dep. **Lane launch always needs fresh founder approval.**
+**Sprint-2 exit review** (lead terminal, no agents needed): dogfood the two new slices end-to-end on real inputs — B2.3 clip plans from the founder's pillar caption/SRT, B2.5 demo plan against the pinned docs-search flow (crawl → storyboard → judge → approve in the queue UI → Playwright drive → capture; needs `npx playwright install chromium` locally + `AI_GATEWAY_API_KEY` already in `apps/web/.env.local`) — capture any overrides as eval rows, then present Sprint-3 re-charter options (B3.x are pulled, not pushed). Small follow-ups queued on the board: `fanout.ts` double read, `_dataDir` lint warning, failed-drive partial-trace persistence.
 
-## [you] — founder-supplied, needed as buckets start (not before)
+## [you] — founder-supplied, needed as work starts (not before)
 
-- B2.3 dogfood (unblocked now): your first pillar video's caption/SRT file (caption-file driver is live; raw media works once the Whisper driver lands).
-- B2.5 dogfood: your website URL + which flows to demo.
+- B2.3 dogfood (blocking that half of the exit review): your first pillar video's caption/SRT file.
+- B2.5 dogfood: confirm the exact docs-search flow to storyboard when we run it (target stays runtime input).
+- Gateway credit top-up (optional until Sprint 3): restores the ratified sonnet final judge tier.
