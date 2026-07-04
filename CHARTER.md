@@ -83,6 +83,7 @@ Standing dogfood flywheel: origination runs across all three tenants → eval ro
 | B3.5 | Analytics MVP (generation-metadata ↔ performance join) **+ trend radar / outlier detection — official platform APIs only (A5)**. |
 | B3.6 | Studio shell. |
 | B3.7 | **Visual-ingest tier (A5):** Apache-2.0 visual-RAG sidecar behind the ingest seam (screenshot-tile rendering + visual retrieval for exemplars/site design); schema seam (`modality`/`visual_ref`) lands at B2.2; pulled once B2.4 proves exemplar value. |
+| B3.14 | **Per-tenant model-provider choice (founder idea 2026-07-05):** each tenant picks how generation/judge calls are backed — Thalon's gateway (default, metered), **BYOK** (tenant-supplied provider API keys for GPT/Claude/Gemini/Grok, encrypted per-tenant runtime config — the dependable cross-provider mechanism), or **local-CLI** (self-hosted operators: shell to the provider's own CLI on the operator's machine — the pattern the `claude-cli/*` dev transport already proves). Provider-OAuth adapters slot behind the same seam where providers actually offer them (rare today). Invariant: the two-tier judge's final-gate quality floor is per-tenant config but never silently downgraded — disagreement still blocks. |
 
 ## Exit criteria (Sprint 0–1 = the MVP gate)
 
