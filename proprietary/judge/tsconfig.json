@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@thalon/contracts": ["../../packages/contracts/src/index.ts"],
       "@thalon/db": ["../../packages/db/src/index.ts"],
