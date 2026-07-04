@@ -4,7 +4,7 @@
 
 ## Stamp
 
-2026-07-05 (session 7) · **B3.8 (profile spine) + B3.9 (pillar origination) BOTH code-complete on main; next: B3.10 Remotion render seam.** Amendments A6/A7/A8 chartered; pulled buckets B3.12–B3.15 recorded. Pillar-#1 tenant = founder's first company — **its name is a guarded token: never in tracked files or commit messages; profile JSON lives ONLY at gitignored `.context/tenants/eamos.v1.json` (drafted this session, ready)**. Gateway budget ~$4.90 free until top-up.
+2026-07-05 (session 7) · **B3.8 (profile spine) + B3.9 (pillar origination) BOTH code-complete on main; next: B3.10 Remotion render seam.** Amendments A6/A7/A8 chartered; pulled buckets B3.12–B3.15 recorded. Pillar-#1 tenant = founder's first company — **its name IS grep-guard token A: never in tracked files or commit messages; profile JSON lives ONLY at gitignored `.context/tenants/<company>.v1.json` (drafted this session, ready)**. Gateway budget ~$4.90 free until top-up.
 
 ## Pointer
 
@@ -36,7 +36,7 @@ B3.12 trend-intel intake (A7) · B3.13 transcription engine (A8, Whisper + hoste
 
 ## Next action
 
-**B3.10 — Remotion render seam** (approved `pillar_script` → MP4 + deterministic SRT; growth-gate licence): hold it brutally small — one template, one ratio, local render, text+music first cut (TTS behind a seam after). BLOCKING: gateway credit (~$4.90 free left — enough for a first frugal B3.9 live run, top-up needed before real volume). Pillar #1 tenant profile is DRAFTED and ready at gitignored `.context/tenants/eamos.v1.json` (identity from the live public site + vault; only the `prompt` field is a placeholder — founder supplies the topic/angle at session start). **B2.5 dogfood opener** still runnable any time (chromium installed; needs founder's docs-search flow confirmation).
+**B3.10 — Remotion render seam** (approved `pillar_script` → MP4 + deterministic SRT; growth-gate licence): hold it brutally small — one template, one ratio, local render, text+music first cut (TTS behind a seam after). BLOCKING: gateway credit (~$4.90 free left — enough for a first frugal B3.9 live run, top-up needed before real volume). Pillar #1 tenant profile is DRAFTED and ready at gitignored `.context/tenants/<company>.v1.json` (identity from the live public site + vault; only the `prompt` field is a placeholder — founder supplies the topic/angle at session start). **B2.5 dogfood opener** still runnable any time (chromium installed; needs founder's docs-search flow confirmation).
 
 ## [you] — founder-supplied, needed as work starts (not before)
 
