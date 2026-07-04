@@ -1,4 +1,5 @@
 export * from "./auth";
+export * from "./claude-cli";
 export * from "./db-client";
 export * from "./env";
 export * from "./gateway";
