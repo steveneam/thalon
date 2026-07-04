@@ -1,0 +1,8 @@
+{
+  "platform": "linkedin",
+  "tone": "professional, concise, first-person, no hype",
+  "charLimit": 3000,
+  "hashtagPolicy": "0-3 relevant hashtags at the end, no hashtag stuffing",
+  "ctaPolicy": "at most one soft call-to-action (comment, share, or link) at the end",
+  "disclosure": "AI-assisted draft — review before publishing"
+}

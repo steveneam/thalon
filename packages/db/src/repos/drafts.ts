@@ -191,6 +191,14 @@ export function draftsRepo(db: Db) {
       return getDraftScoped(db, ctx, id);
     },
 
+    /** Groups the N drafts of one fan-out run — the Approve batch unit (SPINE §2.5). Landed with B1.2, which needs it for idempotent-replay reads. */
+    async listByRun(ctx: TenantCtx, fanoutRunId: string): Promise<Draft[]> {
+      return db
+        .select()
+        .from(drafts)
+        .where(and(eq(drafts.tenantId, ctx.tenantId), eq(drafts.fanoutRunId, fanoutRunId)));
+    },
+
     async transition(
       ctx: TenantCtx,
       draftId: string,

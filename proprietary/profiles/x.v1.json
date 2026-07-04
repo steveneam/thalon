@@ -1,0 +1,8 @@
+{
+  "platform": "x",
+  "tone": "punchy, conversational, plain language",
+  "charLimit": 280,
+  "hashtagPolicy": "0-2 hashtags max, only if highly relevant",
+  "ctaPolicy": "no hard sell; at most one soft call-to-action",
+  "disclosure": "AI-assisted draft — review before publishing"
+}

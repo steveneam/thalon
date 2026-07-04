@@ -1,6 +1,6 @@
 /**
  * B1.1 landed: src/ingest/ — source -> chunks -> embeddings -> grounding
- * index. src/fanout/ is B1.2.
+ * index. B1.2 landed: src/fanout/ — one source -> N platform-native drafts.
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -8,3 +8,4 @@
  * by tests/boundary.test.ts at the repo root).
  */
 export * from "./ingest";
+export * from "./fanout";
