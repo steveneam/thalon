@@ -65,21 +65,32 @@ export function parseRobotsTxt(text: string): RobotsRules {
   return { groups };
 }
 
-function selectGroup(rules: RobotsRules, userAgent: string): RobotsRuleGroup | null {
+/**
+ * Every rule from every group matching `userAgent` — a robots.txt is free to
+ * split one agent's rules across multiple non-adjacent groups (e.g.
+ * interleaved with other agents' groups), and ALL of them apply, not just
+ * the first one found. Specific-agent groups take priority over the `*`
+ * fallback as a set: if ANY group names this agent specifically, the `*`
+ * groups are ignored entirely (never merged in) — only when NO group names
+ * this agent do the `*` groups' rules apply, merged the same way.
+ */
+function selectRules(rules: RobotsRules, userAgent: string): RobotsRule[] {
   const lowerUA = userAgent.toLowerCase();
-  const specific = rules.groups.find((g) =>
+  const specificGroups = rules.groups.filter((g) =>
     g.userAgents.some((ua) => ua !== "*" && lowerUA.includes(ua.toLowerCase())),
   );
-  if (specific) return specific;
-  return rules.groups.find((g) => g.userAgents.includes("*")) ?? null;
+  const matchingGroups =
+    specificGroups.length > 0
+      ? specificGroups
+      : rules.groups.filter((g) => g.userAgents.includes("*"));
+  return matchingGroups.flatMap((g) => g.rules);
 }
 
-/** Pure permission check: the longest matching Disallow/Allow path prefix wins; no match at all ⇒ allowed (robots.txt convention). */
+/** Pure permission check: the longest matching Disallow/Allow path prefix wins, across ALL of the user-agent's matching rules; no match at all ⇒ allowed (robots.txt convention). */
 export function isPathAllowed(rules: RobotsRules, userAgent: string, path: string): boolean {
-  const group = selectGroup(rules, userAgent);
-  if (!group) return true;
+  const matchingRules = selectRules(rules, userAgent);
   let best: RobotsRule | null = null;
-  for (const rule of group.rules) {
+  for (const rule of matchingRules) {
     if (!path.startsWith(rule.path)) continue;
     if (
       !best ||

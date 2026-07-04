@@ -74,6 +74,49 @@ describe("parseRobotsTxt + isPathAllowed (B2.5 stage 1, pure core)", () => {
     const text = ["User-agent: *", "Disallow: /a", "Allow: /a/b"].join("\n");
     expect(parseRobotsTxt(text)).toEqual(parseRobotsTxt(text));
   });
+
+  it("merges rules from ALL groups matching one specific user-agent, even non-adjacent ones", () => {
+    // ThalonDemoBot's rules are split across two groups with an unrelated
+    // agent's group in between — both Disallows must still apply.
+    const rules = parseRobotsTxt(
+      [
+        "User-agent: ThalonDemoBot",
+        "Disallow: /admin",
+        "",
+        "User-agent: SomeOtherBot",
+        "Disallow: /other",
+        "",
+        "User-agent: ThalonDemoBot",
+        "Disallow: /blog",
+      ].join("\n"),
+    );
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/admin/settings")).toBe(false);
+    // Before the fix, only the FIRST matching group's rules were honored —
+    // this second group's Disallow was silently ignored (fail-open).
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/blog/post-1")).toBe(false);
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/docs")).toBe(true);
+    // SomeOtherBot's own rule never leaks onto ThalonDemoBot.
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/other")).toBe(true);
+    expect(isPathAllowed(rules, "SomeOtherBot", "/other")).toBe(false);
+  });
+
+  it("merges rules from ALL wildcard groups when no specific-agent group exists", () => {
+    const rules = parseRobotsTxt(
+      [
+        "User-agent: *",
+        "Disallow: /admin",
+        "",
+        "User-agent: SomeOtherBot",
+        "Disallow: /other",
+        "",
+        "User-agent: *",
+        "Disallow: /blog",
+      ].join("\n"),
+    );
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/admin/settings")).toBe(false);
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/blog/post-1")).toBe(false);
+    expect(isPathAllowed(rules, "ThalonDemoBot", "/docs")).toBe(true);
+  });
 });
 
 describe("assertPathAllowed (CHARTER B2.5 safety invariant: refuse loudly, never silently skip)", () => {

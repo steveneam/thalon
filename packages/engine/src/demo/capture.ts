@@ -1,7 +1,7 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
 import { getObjectStore, type ObjectStore } from "@thalon/platform";
-import type { DemoDriver, DemoStepOutcome } from "./driver";
+import type { DemoCaptureArtifacts, DemoDriver, DemoStepOutcome } from "./driver";
 import { demoPlanDraftMetaSchema, type DemoPlanDraftMeta } from "./schemas";
 
 export interface DemoCaptureCursorPoint {
@@ -45,7 +45,10 @@ async function defaultReadVideo(videoPath: string): Promise<Buffer> {
  * render spend. Only a clean run of every step writes the content-addressed
  * capture bundle (video + synthetic cursor track + event trace) to the
  * object store (the existing local->s3 seam) and back onto the draft's meta
- * via `repos.drafts.updateMeta`.
+ * via `repos.drafts.updateMeta` (optimistic-concurrency-guarded on the
+ * `updatedAt` this function read at the very start — a concurrent drive of
+ * the same draft loses as a loud `ConcurrentUpdateError`, never a silent
+ * clobber of the other drive's result).
  */
 export async function driveDemoCapture(
   ctx: TenantCtx,
@@ -61,6 +64,7 @@ export async function driveDemoCapture(
     );
   }
   const meta = demoPlanDraftMetaSchema.parse(draft.meta);
+  const expectedUpdatedAt = draft.updatedAt;
   const objectStore = deps.objectStore ?? getObjectStore();
   const readVideo = deps.readVideo ?? defaultReadVideo;
 
@@ -78,19 +82,50 @@ export async function driveDemoCapture(
     eventTrace.push(outcome);
     cursorTrack.push({ stepIndex: step.stepIndex, timestamp: outcome.timestamp, cursor: outcome.cursor });
     if (outcome.outcome === "error") {
-      await driver.finish();
+      // `finish()` carries no no-throw contract (unlike `runStep`), and a
+      // teardown failure here is CORRELATED with the step failure that
+      // triggered this branch — e.g. the real Playwright driver's
+      // page/context/browser `.close()` calls can throw. The "failed" meta
+      // write must land regardless, or a prior successful capture's
+      // captureStatus/captureRef would durably survive as a lie about this
+      // drive. Surface (never swallow) a teardown error by folding it into
+      // the reported error message.
+      let teardownError: string | undefined;
+      try {
+        await driver.finish();
+      } catch (err) {
+        teardownError = err instanceof Error ? err.message : String(err);
+      }
       const failedMeta: DemoPlanDraftMeta = { ...meta, captureStatus: "failed", captureRef: null };
-      const updated = await repos.drafts.updateMeta(ctx, draftId, failedMeta);
+      const updated = await repos.drafts.updateMeta(ctx, draftId, expectedUpdatedAt, failedMeta);
+      const stepError = outcome.error ?? `step ${step.stepIndex} (${step.action} "${step.target}") failed`;
       return {
         status: "failed",
         draft: updated,
-        error: outcome.error ?? `step ${step.stepIndex} (${step.action} "${step.target}") failed`,
+        error: teardownError
+          ? `${stepError}; additionally, driver teardown failed: ${teardownError}`
+          : stepError,
         failedStepIndex: step.stepIndex,
       };
     }
   }
 
-  const artifacts = await driver.finish();
+  // Symmetric check: on the success path, nothing is written to `meta`
+  // until AFTER `finish()` resolves and the bundle is built and stored — so
+  // a `finish()` throw here cannot durably lie about this drive's outcome
+  // (the draft's prior true state, whatever it was, simply stands). Still
+  // wrapped for a clear, attributable error message rather than a bare
+  // driver exception.
+  let artifacts: DemoCaptureArtifacts;
+  try {
+    artifacts = await driver.finish();
+  } catch (err) {
+    throw new Error(
+      `demo capture driver teardown failed after all ${steps.length} step(s) succeeded (no capture bundle was persisted): ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
   const bundle: DemoCaptureBundle = {
     eventTrace,
     cursorTrack,
@@ -101,6 +136,6 @@ export async function driveDemoCapture(
   await objectStore.put(captureRef, bundleJson);
 
   const capturedMeta: DemoPlanDraftMeta = { ...meta, captureStatus: "captured", captureRef };
-  const updated = await repos.drafts.updateMeta(ctx, draftId, capturedMeta);
+  const updated = await repos.drafts.updateMeta(ctx, draftId, expectedUpdatedAt, capturedMeta);
   return { status: "captured", draft: updated, captureRef };
 }

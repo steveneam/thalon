@@ -16,6 +16,21 @@ export class InvariantViolationError extends Error {
   }
 }
 
+/**
+ * Optimistic-concurrency guard (B2.5's `drafts.updateMeta`): the row changed
+ * between the caller's read and its write. Losing a race must be a loud
+ * error, never a silent last-write-wins overwrite of a concurrent update.
+ */
+export class ConcurrentUpdateError extends Error {
+  constructor(
+    public readonly entity: string,
+    public readonly id: string,
+  ) {
+    super(`${entity} "${id}" was modified concurrently — retry with a fresh read`);
+    this.name = "ConcurrentUpdateError";
+  }
+}
+
 /** Per-tenant daily cap reached: hard stop, fail loud, never silently degrade (amendment A2). */
 export class BudgetExceededError extends Error {
   constructor(

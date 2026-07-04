@@ -2,12 +2,24 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { tenantCtx, FINAL_JUDGE_GATE, type TenantCtx } from "@thalon/contracts";
-import { openTestDb, type DbHandle, type Draft, type Repos } from "@thalon/db";
+import { ConcurrentUpdateError, openTestDb, type DbHandle, type Draft, type Repos } from "@thalon/db";
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { driveDemoCapture } from "../capture";
+import type { DemoDriver } from "../driver";
 import { demoPlanDraftMetaSchema, type DemoPlanDraftMeta } from "../schemas";
 import { createFakeDemoDriver } from "../fake-driver";
+
+/** A fake driver whose `finish()` throws — simulates the real Playwright driver's unguarded page/context/browser `.close()` calls rejecting during teardown. */
+function createThrowingFinishDriver(failTargets: readonly string[] = []): DemoDriver {
+  const base = createFakeDemoDriver({ failTargets });
+  return {
+    ...base,
+    finish: async () => {
+      throw new Error("simulated teardown failure (e.g. browser.close() rejected)");
+    },
+  };
+}
 
 let handle: DbHandle | undefined;
 let storeRoot: string | undefined;
@@ -164,5 +176,82 @@ describe("driveDemoCapture (B2.5 stage 4, keyless + browser-free)", () => {
     // Nothing was ever written to the object store for this failed capture.
     const keys = await objectStore.list("demo-captures/");
     expect(keys).toEqual([]);
+  });
+
+  it("persists the failed meta even when the driver's teardown throws after the step failure", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const draft = await approvedDraft(ctx, repos);
+    const driver = createThrowingFinishDriver(["https://example.test/"]);
+
+    const result = await driveDemoCapture(ctx, repos, draft.id, driver, { objectStore });
+
+    expect(result.status).toBe("failed");
+    if (result.status !== "failed") throw new Error("unreachable");
+    // Both failures are surfaced — the teardown error is never swallowed.
+    expect(result.error).toMatch(/configured to fail/);
+    expect(result.error).toMatch(/driver teardown failed/);
+    expect(result.error).toMatch(/simulated teardown failure/);
+
+    // The critical assertion: a throwing finish() must NOT prevent the
+    // "failed" meta write, or a prior successful capture's captureStatus/
+    // captureRef would durably survive as a lie about this drive.
+    const updated = await repos.drafts.get(ctx, draft.id);
+    const meta = updated.meta as DemoPlanDraftMeta;
+    expect(meta.captureStatus).toBe("failed");
+    expect(meta.captureRef).toBeNull();
+  });
+
+  it("throws (rather than silently overwriting) when finish() fails after a PRIOR capture already succeeded", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const draft = await approvedDraft(ctx, repos);
+
+    // Drive #1 succeeds: captureStatus "captured" + a real captureRef persists.
+    const first = await driveDemoCapture(ctx, repos, draft.id, createFakeDemoDriver(), { objectStore });
+    expect(first.status).toBe("captured");
+    if (first.status !== "captured") throw new Error("unreachable");
+
+    // Drive #2 (operator re-drive) fails a step AND its teardown throws.
+    const second = await driveDemoCapture(
+      ctx,
+      repos,
+      draft.id,
+      createThrowingFinishDriver(["https://example.test/"]),
+      { objectStore },
+    );
+    expect(second.status).toBe("failed");
+
+    // The draft must now truthfully reflect drive #2's outcome, not durably
+    // keep drive #1's stale "captured"/refA.
+    const updated = await repos.drafts.get(ctx, draft.id);
+    const meta = updated.meta as DemoPlanDraftMeta;
+    expect(meta.captureStatus).toBe("failed");
+    expect(meta.captureRef).toBeNull();
+  });
+
+  it("detects a concurrent write and throws instead of clobbering an already-persisted capture", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const draft = await approvedDraft(ctx, repos);
+    // The snapshot a concurrent caller would have read BEFORE any drive's
+    // write landed (double-click / client retry — nothing serializes drives).
+    const staleUpdatedAt = draft.updatedAt;
+
+    const result = await driveDemoCapture(ctx, repos, draft.id, createFakeDemoDriver(), { objectStore });
+    expect(result.status).toBe("captured");
+    if (result.status !== "captured") throw new Error("unreachable");
+
+    // A second write built from that same stale snapshot must be rejected,
+    // never silently clobber the first drive's already-persisted result.
+    await expect(
+      repos.drafts.updateMeta(ctx, draft.id, staleUpdatedAt, {
+        ...META,
+        captureStatus: "failed",
+        captureRef: null,
+      }),
+    ).rejects.toThrow(ConcurrentUpdateError);
+
+    const updated = await repos.drafts.get(ctx, draft.id);
+    const meta = updated.meta as DemoPlanDraftMeta;
+    expect(meta.captureStatus).toBe("captured");
+    expect(meta.captureRef).toBe(result.captureRef);
   });
 });

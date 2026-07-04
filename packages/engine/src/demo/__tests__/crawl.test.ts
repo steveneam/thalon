@@ -26,6 +26,30 @@ function noWaitDeps() {
   };
 }
 
+/** A fetcher that stamps every call with the shared simulated clock's current reading, so a test can assert the rate limiter actually gated a given pair of calls. */
+class TimestampedFetcher implements CrawlFetcher {
+  public readonly calls: { url: string; at: number }[] = [];
+  constructor(
+    private readonly responses: Record<string, CrawlFetchResult>,
+    private readonly clock: { now(): number },
+  ) {}
+  async fetch(url: string): Promise<CrawlFetchResult> {
+    this.calls.push({ url, at: this.clock.now() });
+    return this.responses[url] ?? { status: 404, html: "" };
+  }
+}
+
+/** A simulated clock where `sleep(ms)` deterministically advances `now()` by `ms` — timing assertions without ever really waiting. */
+function simulatedClock() {
+  let clock = 0;
+  return {
+    now: () => clock,
+    sleep: async (ms: number) => {
+      clock += ms;
+    },
+  };
+}
+
 const CONFIG: CrawlConfig = { maxPages: 50, maxDepth: 3, minDelayMs: 250, userAgent: "ThalonDemoBot" };
 
 describe("crawlSite (B2.5 stage 1, keyless + networkless)", () => {
@@ -134,5 +158,26 @@ describe("crawlSite (B2.5 stage 1, keyless + networkless)", () => {
     const result = await crawlSite(`${ORIGIN}/`, DEFAULT_CRAWL_CONFIG, { fetcher, ...noWaitDeps() });
     expect(result.config).toEqual(DEFAULT_CRAWL_CONFIG);
     expect(result.pages).toHaveLength(1);
+  });
+
+  it("rate-limits the robots.txt fetch itself, not just page fetches", async () => {
+    const clock = simulatedClock();
+    const fetcher = new TimestampedFetcher(
+      {
+        [`${ORIGIN}/robots.txt`]: { status: 404, html: "" },
+        [`${ORIGIN}/`]: { status: 200, html: `no links` },
+      },
+      clock,
+    );
+    await crawlSite(`${ORIGIN}/`, CONFIG, { fetcher, rateLimiter: clock });
+
+    expect(fetcher.calls.map((c) => c.url)).toEqual([`${ORIGIN}/robots.txt`, `${ORIGIN}/`]);
+    // Before the fix, robots.txt fetched at t=0 and the seed page ALSO at
+    // t=0 (the limiter was constructed only after the robots.txt fetch, so
+    // its first-ever call saw no prior request and never waited). The
+    // limiter must gate the robots.txt fetch too, so the seed page fetch is
+    // still `minDelayMs` behind it.
+    expect(fetcher.calls[0].at).toBe(0);
+    expect(fetcher.calls[1].at).toBe(CONFIG.minDelayMs);
   });
 });

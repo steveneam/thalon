@@ -60,7 +60,9 @@ function robotsPath(url: string): string {
  * propagates out of the whole crawl rather than quietly omitting the page
  * from the flow map. HTTP fetching goes through the ./fetcher.ts seam so
  * this function never touches the network directly — tests inject fixture
- * responses.
+ * responses. The rate limit covers EVERY request this function makes,
+ * including the robots.txt fetch itself — the limiter is constructed before
+ * that first fetch, not just before the page-crawling loop.
  */
 export async function crawlSite(
   seedUrl: string,
@@ -69,13 +71,15 @@ export async function crawlSite(
 ): Promise<CrawlResult> {
   const fetcher = deps.fetcher ?? getCrawlFetcher();
   const origin = new URL(seedUrl).origin;
+  const rateLimiter = createRateLimiter(config.minDelayMs, deps.rateLimiter);
+
+  await rateLimiter.beforeRequest();
   const robotsRes = await fetcher.fetch(`${origin}/robots.txt`);
   const robots: RobotsRules =
     robotsRes.status >= 200 && robotsRes.status < 300
       ? parseRobotsTxt(robotsRes.html)
       : { groups: [] };
 
-  const rateLimiter = createRateLimiter(config.minDelayMs, deps.rateLimiter);
   const visited = new Set<string>();
   const queued = new Set<string>();
   const normalizedSeed = normalizeUrl(seedUrl);
