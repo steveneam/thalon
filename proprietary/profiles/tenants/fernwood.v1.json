@@ -1,0 +1,23 @@
+{
+  "tenantSlug": "fernwood",
+  "tenantName": "Fernwood Outfitters (fictional demo tenant #2)",
+  "brandConfig": {
+    "voice": {
+      "register": "warm, practical, unhurried",
+      "persona": "a fictional family-run hiking and camping gear shop that repairs more gear than it sells",
+      "pointOfView": "we",
+      "avoid": "hype, urgency, exclamation marks"
+    },
+    "denylist": ["world's best", "guaranteed", "miracle", "once-in-a-lifetime", "act now"],
+    "platformProfiles": {
+      "linkedin": {
+        "tone": "community-first and matter-of-fact; lead with the practical detail, not the pitch",
+        "charLimit": 2200,
+        "hashtagPolicy": "at most two, and only if they name the activity (e.g. #hiking); never invented brand tags",
+        "ctaPolicy": "soft invitation only - no urgency language"
+      }
+    }
+  },
+  "prompt": "Fernwood Outfitters is a fictional, family-run hiking and camping gear shop used as demo data. This month it is announcing a free gear-repair clinic: every first Saturday, 9am to noon, at the shop, customers can bring any brand of pack, tent, or rain jacket for zipper, seam, and buckle repairs at no charge. The clinic is staffed by the shop's two full-time repair technicians. Spots are limited to twenty walk-ins per session, first come first served. The aim is to keep usable gear out of landfill; last year's pilot repaired 140 items.",
+  "platforms": ["linkedin", "x"]
+}
