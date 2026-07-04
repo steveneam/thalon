@@ -28,6 +28,8 @@ const envSchema = z.object({
   MODEL_JUDGE_FINAL: z.string().default("anthropic/claude-sonnet-4.5"),
   MODEL_EMBEDDING: z.string().default("openai/text-embedding-3-small"),
   TENANT_DAILY_TOKEN_BUDGET: z.coerce.number().int().positive().default(2_000_000),
+  /** Which tenant the dev web app operates as (slug). Real operator→tenant resolution (Clerk org mapping) is a later bucket; until then the operated-on tenant is runtime config, never code. */
+  DEMO_TENANT_SLUG: z.string().default("self"),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;
