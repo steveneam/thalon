@@ -13,7 +13,7 @@
     "dev": "npm run dev -w @thalon/web",
     "build": "npm run build -w @thalon/web",
     "start": "npm run start -w @thalon/web",
-    "lint": "npm run lint -w @thalon/web",
+    "lint": "eslint . && npm run lint -w @thalon/web",
     "test": "vitest run",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "db:generate": "npm run generate -w @thalon/db",
@@ -21,8 +21,11 @@
     "guard:pwsh": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^20",
+    "eslint": "^10.6.0",
     "typescript": "^5",
+    "typescript-eslint": "^8.62.1",
     "vitest": "^4.1.9"
   }
 }
