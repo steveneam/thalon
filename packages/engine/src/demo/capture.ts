@@ -124,6 +124,7 @@ export async function driveDemoCapture(
       `demo capture driver teardown failed after all ${steps.length} step(s) succeeded (no capture bundle was persisted): ${
         err instanceof Error ? err.message : String(err)
       }`,
+      { cause: err },
     );
   }
   const bundle: DemoCaptureBundle = {
