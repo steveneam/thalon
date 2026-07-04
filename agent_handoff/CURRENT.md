@@ -4,23 +4,25 @@
 
 ## Stamp
 
-2026-07-04 (session 4) · **Sprint-1 exit signed off · amendment A5 landed · B2.1 merged (PR #11) — Sprint 2 underway**
+2026-07-04 (session 4) · **B2.1 merged (PR #11) + B2.2 merged (PR #12) — Sprint-2 contract re-frozen; wave-1 lanes cuttable on founder go**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table + amendment A5) → `docs/adr/0002-sprint2-expansion.md` → `COORDINATION.md` (Sprint-2 planned lanes + the two 2026-07-04 messages).
+Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table + amendment A5) → `docs/adr/0002-sprint2-expansion.md` → `COORDINATION.md` (Sprint-2 lane board + the three 2026-07-04 session-4 messages — B2.1 proof, B2.2 window, A5 landing).
 
 ## Delta (this session)
 
-- **Sprint-1 exit review signed off by the founder** (operational-mirror criterion confirmed). Founder directive: stop flagging optional [you] items (gateway top-up, Langfuse) until a bucket blocks on one.
-- **Amendment A5 approved + landed** (`d38a056`): Sprint 2 expands to B2.1–B2.6 (timed ingest + single contract window · waterfall clip plans · exemplar library · demo-plan slice · queue UI), B3.7 visual-ingest sidecar added, trend radar folded into B3.5, transcript capability built in-house (self-hosted Whisper strategic; hosted APIs optional adapters), ToS-evading scrapers rejected. Design rationale in the ADR.
-- **B2.1 merged (PR #11, rebase-merge)**: prep commit made tenant-as-data possible (dogfood JSON input file + `DEMO_TENANT_SLUG` env + shipped-tenant validation ratchet); proof commit added fictional tenant #2 (`proprietary/profiles/tenants/fernwood.v1.json`) with **zero code changes** — exit criterion met literally. Live slice: x queued, linkedin blocked on a genuine g3 tier disagreement (I3 on a second tenant); replay idempotent.
+- Sprint-1 exit signed off; **amendment A5 landed** (`docs/adr/0002-sprint2-expansion.md`).
+- **B2.1 merged (PR #11)**: tenant #2 as one JSON data file — zero code (criterion met literally); live slice on it queued one draft and blocked one on a real g3 tier disagreement (I3 on a second tenant).
+- **B2.2 merged (PR #12)**: the sprint's single contract window (time-coded chunks · new source kinds · `modality`/`visual_ref` seam · `source_metrics` · sources unique index) + timed ingest (fail-loud SRT/VTT/plain parser, segment-atomic timed chunking, `TranscriptProvider` seam, caption-file driver). **Contract re-frozen.**
+- Ratchet (founder-prompted): root eslint over packages/proprietary/eval + **lint as a CI step** — CI had never run eslint; lint now gates the PR.
+- Direction pinned (board message + agent memory): Whisper driver = in-house, Windows-native (whisper.cpp/faster-whisper, MIT); B3.7 = port-the-pattern (Apache-2.0, no clean room; pgvector + object store + ONNX/DirectML; WSL2 interim; verify weights licence at bucket time).
 
 ## Next action
 
-**Session start: B2.2 — timed ingest + the sprint's single contract window** (lead, solo; scope pinned in `CHARTER.md` B2.2 row + ADR 0002 §1). After B2.2 merges and the contract re-freezes, cut wave-1 lanes (waterfall + exemplar) per the Sprint-2 board — **lane launch needs fresh founder go**. Real triage items sit in two queues: tenant #0 (`npm run dev` → /approve) and tenant #2 (`DEMO_TENANT_SLUG=fernwood npm run dev` → /approve).
+**Cut wave-1 lanes on founder go**: waterfall (B2.3) + exemplar (B2.4) as in-session worktree subagents per the Sprint-2 board (`COORDINATION.md`) — kickoffs say "skip lint, lead verifies at merge" (worktree symlink caveat), merge-order waterfall → exemplar. Wave 2 (demo B2.5 + ui B2.6) follows. **Lane launch always needs fresh founder approval.**
 
 ## [you] — founder-supplied, needed as buckets start (not before)
 
-- B2.3 dogfood: your first pillar video (own long-form video + its caption/SRT file, or URL).
+- B2.3 dogfood: your first pillar video — its caption/SRT file (own media; the caption-file driver is live) or the raw file once the Whisper driver lands.
 - B2.5 dogfood: your website URL + which flows to demo.
