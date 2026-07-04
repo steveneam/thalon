@@ -7,6 +7,7 @@ import {
 import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
 import { runG1Denylist } from "./g1-denylist";
+import { collectGroundingChunks } from "./grounding";
 import {
   promptVersionFor,
   type JudgeModelDriver,
@@ -23,8 +24,15 @@ const GATE_FOR_TIER: Record<JudgeTier, string> = {
 export interface RunJudgePipelineInput {
   ctx: TenantCtx;
   draftId: string;
-  /** Grounding evidence: the provided source chunks both tiers judge claims against. */
-  chunks: SourceChunkInput[];
+  /**
+   * Grounding-evidence OVERRIDE (tests / callers with pre-assembled
+   * evidence). Omitted — the production default — the pipeline assembles it
+   * itself via `collectGroundingChunks`: every source in the draft's
+   * `meta.groundingSourceIds` (B3.9 multi-source drafts), else the draft's
+   * own source. Assembling inside the pipeline means no caller can
+   * under-ground a multi-source draft.
+   */
+  chunks?: SourceChunkInput[];
   screenDriver: JudgeModelDriver;
   finalDriver: JudgeModelDriver;
   /** Overrides the tenant daily token budget cap for this run (tests only; production reads TENANT_DAILY_TOKEN_BUDGET). */
@@ -68,18 +76,20 @@ export async function runJudgePipeline(
   // Deliberately the CURRENT active identity, not the version the draft was
   // generated under: a claim the tenant no longer asserts must fail grounding
   // on re-judge, not pass on stale facts. Empty identity appends nothing.
+  const baseChunks =
+    input.chunks ?? (await collectGroundingChunks(input.ctx, repos, judging));
   const identityText = profile
     ? renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {}))
     : "";
   const chunks: SourceChunkInput[] = identityText
     ? [
-        ...input.chunks,
+        ...baseChunks,
         {
           ref: `profile:v${profile!.version}:identity`,
           text: `TENANT IDENTITY (operator-asserted):\n${identityText}`,
         },
       ]
-    : input.chunks;
+    : baseChunks;
   const g1 = runG1Denylist({ body: judging.body, denylist });
   await repos.judgeResults.append(input.ctx, {
     draftId: judging.id,

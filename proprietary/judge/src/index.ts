@@ -6,6 +6,7 @@
  * bypass it (see `pipeline.ts`).
  */
 export { runG1Denylist, type G1Result, type RunG1Input } from "./g1-denylist";
+export { collectGroundingChunks, type GroundingChunk } from "./grounding";
 export { runJudgePipeline, type PipelineOutcome, type RunJudgePipelineInput } from "./pipeline";
 export { callTierJudge, type TierCallResult } from "./validate-shell-output";
 export {

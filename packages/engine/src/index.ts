@@ -8,6 +8,11 @@
  * B2.5 landed: src/demo/ — site crawl -> flow map -> storyboard (judged) ->
  * approved demo_plan -> deterministic Playwright drive -> raw capture
  * (video + synthetic cursor track + event trace, content-addressed).
+ * B3.9 landed: src/origination/ — operator prompt + active-profile identity
+ * + optional grounding sources (site crawl / repo readme) -> one judged
+ * pillar_script draft. Multi-source grounding assembly lives in
+ * @thalon/judge (collectGroundingChunks, run INSIDE the pipeline by
+ * default) so no judge caller can under-ground a draft.
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -19,3 +24,4 @@ export * from "./fanout";
 export * from "./waterfall";
 export * from "./exemplar";
 export * from "./demo";
+export * from "./origination";

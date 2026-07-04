@@ -13,12 +13,14 @@ export interface JudgeRunnerDeps {
 
 /**
  * Runs the SAME judge pipeline eval/src/dogfood.ts uses (`runJudgePipeline`),
- * wired identically: grounding chunks from the draft's own source, the
- * tenant's daily token budget, and — by default — the real gateway driver
- * for both G3 tiers. Every gateway attempt is metered through
- * `withGatewayGuard` INSIDE `runJudgePipeline` itself (the B1.3 merge
- * lesson); this helper only supplies drivers, it never calls them directly,
- * so it cannot bypass that choke point.
+ * wired identically: grounding assembled INSIDE the pipeline (B3.9 —
+ * `collectGroundingChunks` reads the draft's `meta.groundingSourceIds`, else
+ * its own source, so multi-source pillar drafts re-judge correctly here with
+ * zero caller logic), the tenant's daily token budget, and — by default —
+ * the real gateway driver for both G3 tiers. Every gateway attempt is
+ * metered through `withGatewayGuard` INSIDE `runJudgePipeline` itself (the
+ * B1.3 merge lesson); this helper only supplies drivers, it never calls
+ * them directly, so it cannot bypass that choke point.
  *
  * apps/web's edit and re-judge actions call this AFTER transitioning a draft
  * to `judging`, so their response reflects the fully-judged outcome (queued
@@ -34,14 +36,9 @@ export async function runJudgeOnDraft(
   draft: Draft,
   deps: JudgeRunnerDeps = {},
 ): Promise<PipelineOutcome> {
-  const chunks = (await repos.sourceChunks.listBySource(ctx, draft.sourceId)).map((chunk) => ({
-    ref: chunk.id,
-    text: chunk.text,
-  }));
   return runJudgePipeline(repos, {
     ctx,
     draftId: draft.id,
-    chunks,
     screenDriver: deps.screenDriver ?? gatewayJudgeDriver(),
     finalDriver: deps.finalDriver ?? gatewayJudgeDriver(),
     capTokens: deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET,

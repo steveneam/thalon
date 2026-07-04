@@ -3,8 +3,10 @@
  * open-ended text — generator shells may emit platform-native format names —
  * but engine code that BRANCHES on a format must use one of these:
  * `clip_plan` (B2.3 waterfall: start/end + hook + captions from a timed
- * source) and `demo_plan` (B2.5: judged storyboard steps for a site demo).
+ * source), `demo_plan` (B2.5: judged storyboard steps for a site demo), and
+ * `pillar_script` (B3.9 origination: the judged script a pillar video is
+ * rendered from — beats with narration/on-screen text/timing hints).
  * `post` is the default social draft every Sprint-1 fan-out produces.
  */
-export const DRAFT_FORMATS = ["post", "clip_plan", "demo_plan"] as const;
+export const DRAFT_FORMATS = ["post", "clip_plan", "demo_plan", "pillar_script"] as const;
 export type DraftFormat = (typeof DRAFT_FORMATS)[number];

@@ -87,11 +87,6 @@ export async function runDogfoodSlice(
     { driver: deps.draftDriver, capTokens: deps.capTokens },
   );
 
-  const chunks = (await repos.sourceChunks.listBySource(ctx, ingest.sourceId)).map((chunk) => ({
-    ref: chunk.id,
-    text: chunk.text,
-  }));
-
   const outcomes: DogfoodOutcome[] = [];
   for (const draft of fanout.drafts) {
     // Judge fresh drafts AND drafts an operator edit sent back to "judging"
@@ -108,10 +103,12 @@ export async function runDogfoodSlice(
       });
       continue;
     }
+    // Grounding assembles INSIDE the pipeline (B3.9): the draft's
+    // meta.groundingSourceIds when present, else its own source — plus the
+    // B3.8 identity chunk the pipeline appends itself.
     const outcome = await runJudgePipeline(repos, {
       ctx,
       draftId: draft.id,
-      chunks,
       screenDriver: deps.screenDriver,
       finalDriver: deps.finalDriver,
       capTokens: deps.capTokens,
