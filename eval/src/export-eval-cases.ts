@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { tenantCtx, type TenantCtx } from "@thalon/contracts";
 import { openDb, type Repos } from "@thalon/db";
 import { toJsonl, type EvalRecord } from "./dataset";
+import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local";
 
 /**
  * The read side of the "every override becomes an eval row" mechanism:
@@ -30,6 +31,11 @@ export async function exportEvalCases(
 
 async function main(): Promise<void> {
   const slug = process.argv[2] ?? "self";
+  // Same dev DB as the web app + dogfood CLI (a bare cwd-relative .data
+  // would silently export from a different, empty database).
+  loadEnvLocal();
+  useWebAppDataDir();
+  await assertSoleDbWriter();
   const handle = await openDb();
   try {
     const tenant = await handle.repos.tenants.getBySlug(slug);

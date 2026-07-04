@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   createDbClient,
@@ -10,10 +12,37 @@ import { migrate } from "drizzle-orm/pglite/migrator";
 import { createRepos, type Repos } from "./repos";
 import * as schema from "./schema";
 
-// Resolved relative to this source file; revisit if a bundler ever consumes
-// openDb directly (apps/web reaches the db only through engine/judge services,
-// which run in Node).
-const migrationsFolder = fileURLToPath(new URL("../drizzle", import.meta.url));
+/**
+ * Never use `new URL("<rel>", import.meta.url)` for this: Turbopack
+ * statically analyzes that exact pattern (through const indirection too) and
+ * fails the build trying to bundle the directory as an asset — found the
+ * first time apps/web booted against the real DB path (B1.5 dogfood).
+ * Plain Node (tsx CLIs, vitest) resolves relative to this source file; a
+ * bundled route (apps/web) has a rewritten import.meta.url, so fall back to
+ * walking up from cwd to the workspace's packages/db/drizzle.
+ */
+function resolveMigrationsFolder(): string {
+  try {
+    const fromSource = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "drizzle");
+    if (existsSync(fromSource)) return fromSource;
+  } catch {
+    // import.meta.url is not a usable file URL in this context — fall through.
+  }
+  let dir = process.cwd();
+  for (;;) {
+    const candidate = path.join(dir, "packages", "db", "drizzle");
+    if (existsSync(candidate)) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      throw new Error(
+        "could not locate the packages/db/drizzle migrations folder from this process (source-relative and cwd-upward lookups both failed)",
+      );
+    }
+    dir = parent;
+  }
+}
+
+const migrationsFolder = resolveMigrationsFolder();
 
 export interface DbHandle {
   /** Tenant-scoped repositories — the ONLY database API this package exports (SPINE §2.6). */
