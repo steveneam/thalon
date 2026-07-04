@@ -4,21 +4,23 @@
 
 ## Stamp
 
-2026-07-04 (session 2) · **Sprint 1: B1.1 + B1.3 + B1.4 merged — B1.2 launch presented and deferred by founder; awaiting go**
+2026-07-04 (session 3) · **Sprint 1: B1.1–B1.4 merged, B1.2 landed this session (PR #8) — only B1.5 exit gate remains**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + 2026-07-04 wrap message — ratchets and follow-ups live there).
+Read in order: `CLAUDE.md` → `CHARTER.md` → `docs/SPINE.md` (§5) → `COORDINATION.md` (Sprint-1 board + 2026-07-04 messages — the B1.2 wrap message carries the ratchet follow-up).
 
 ## Delta (this session)
 
-- B1.2 fan-out launch plan presented to the founder per the standing fresh-approval rule; founder chose **defer**. No lane launched; board unchanged (`b12 pending founder go`). No code changes this session.
-- Founder-shared repos evaluated and parked per pulled-not-pushed (recorded in agent memory, `future-tooling-candidates`): **Remotion** → natural fit for B3.3/B3.4 when chartered, special license = recorded launch gate with swap path; **PixelRAG** (Apache-2.0 visual RAG) → candidate visual-ingest tier behind the existing ingest seam, no current bucket needs it.
+- **B1.2 fan-out merged (PR #8)** on founder go: one source → N drafts, LinkedIn+X profiles as versioned data files, versioned generation prompt, all generation through `withGatewayGuard`, idempotent + **self-healing replay** (lead review caught a silent-partial-replay bug pre-merge; lane fixed with backfill-missing-platforms + regression test). 109/109 tests green on `main`.
+- `AI_GATEWAY_API_KEY` supplied by founder → `apps/web/.env.local` (gitignored; value trimmed/verified without entering chat). The last `[you]` blocker is closed — B1.5 dogfood is fully unblocked.
+- Founder directive recorded (agent memory, `lead-drives-lanes`): **>2 concurrent subagents ⇒ Mode B** (founder-opened terminals, one lead-authored kickoff prompt per window, lead orchestrates). ≤2 stay in-session worktree subagents.
+- Follow-up logged on the board: Agent-tool worktrees don't get the `worktree.symlinkDirectories` node_modules link — lane lint silently unrunnable; lead re-runs lint at merge until fixed.
 
 ## Next action
 
-**Session start: ask the founder whether to launch B1.2 fan-out** (launching lanes needs fresh approval every time — a prior defer does not carry over). Plan unchanged: engine lane, one worktree subagent, branch `agent/engine/b12-fanout` — one source → N drafts in `packages/engine/src/fanout/`; LinkedIn+X niche profiles as pure data in `proprietary/profiles/`; versioned fan-out prompts (B1.2-blocking per SPINE §6.6); generation through `withGatewayGuard`; run-twice idempotency on `fanout_runs`; drafts land `generated` only (negative test: can't reach queue without judge); lane aliases `@thalon/*` to its own worktree src (engine's configs are the reference). On merge: **B1.5** — dogfood on tenant #0, green eval suite arms as the ship gate.
+**Session start: ask the founder whether to start B1.5 (Sprint-1 exit gate)** — fresh approval every time. Per the board this is the **eval lane, lead-terminal owned (no subagent)**: dogfood the full slice on tenant #0 (real generation via the now-present gateway key), arm the green eval suite as the ship gate, verify the charter's Sprint-0/1 exit criteria, then Sprint-1 exit review.
 
 ## [you] — founder-supplied, outstanding
 
-`AI_GATEWAY_API_KEY` — Vercel dashboard → AI Gateway → API Keys → create → paste into `apps/web/.env.local` (copy `.env.example`). Doesn't block B1.2 (tests keyless); needed by B1.5 dogfood at the latest. Langfuse keys/host still optional until dogfooding.
+None blocking. Optional until dogfood needs tracing: Langfuse keys/host (`eval/README.md`).
