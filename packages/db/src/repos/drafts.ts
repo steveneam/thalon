@@ -207,6 +207,36 @@ export function draftsRepo(db: Db) {
     ): Promise<Draft> {
       return db.transaction((tx) => transitionInTx(tx, ctx, draftId, to, opts));
     },
+
+    /**
+     * Merges a patch into `drafts.meta` — never touches `status` or `body`
+     * (the ONE writer of `drafts.status` stays `transition` above). B2.5's
+     * demo-capture write-back is the first caller: it needs to record
+     * `captureStatus`/`captureRef` onto an already-`approved` draft's meta
+     * without any lifecycle transition.
+     */
+    async updateMeta(
+      ctx: TenantCtx,
+      draftId: string,
+      metaPatch: Record<string, unknown>,
+    ): Promise<Draft> {
+      return db.transaction(async (tx) => {
+        const draft = await getDraftScoped(tx, ctx, draftId);
+        const nextMeta = { ...(draft.meta as Record<string, unknown>), ...metaPatch };
+        const [updated] = await tx
+          .update(drafts)
+          .set({ meta: nextMeta, updatedAt: new Date() })
+          .where(and(eq(drafts.id, draftId), eq(drafts.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "draft",
+          entityId: draftId,
+          event: "draft.meta_updated",
+          payload: { keys: Object.keys(metaPatch) },
+        });
+        return updated;
+      });
+    },
   };
 }
 

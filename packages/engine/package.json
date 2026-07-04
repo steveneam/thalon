@@ -17,6 +17,7 @@
     "@thalon/db": "*",
     "@thalon/platform": "*",
     "ai": "^5.0.209",
+    "playwright": "^1.55.0",
     "zod": "^4.1.0"
   }
 }
