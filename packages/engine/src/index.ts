@@ -16,6 +16,11 @@
  * B3.10 landed (thin, pass 1 per A9): src/render/ — approved pillar_script
  * -> deterministic SRT from the authored beats + content-addressed render
  * manifest behind the RenderTarget seam (real Remotion target = pass 2).
+ * B3.15 landed (thin deploy per A9): src/webpage/ — operator prompt +
+ * active-profile identity + optional grounding -> one judged web_page
+ * draft (body = the artifact's extracted visible text; self-containment
+ * enforced structurally) -> approved draft ships via the DeployTarget seam
+ * (real Vercel adapter = pass 2).
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -29,3 +34,4 @@ export * from "./exemplar";
 export * from "./demo";
 export * from "./origination";
 export * from "./render";
+export * from "./webpage";
