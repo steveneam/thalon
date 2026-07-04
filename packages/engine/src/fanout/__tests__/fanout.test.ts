@@ -135,6 +135,68 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
     expect(drafts).toHaveLength(2);
   });
 
+  it("backfills only the platforms missing after a prior irrecoverable failure, reusing the same run and the untouched draft", async () => {
+    const { ctx, repos, sourceId } = await setup();
+    const fake = createFakeDraftGeneratorDriver();
+    const firstCallCounts: Record<string, number> = {};
+    // "x" is always schema-invalid (empty body fails fanoutShellOutputSchema's
+    // min(1)) — irrecoverable after the bounded 3 repair attempts. "linkedin"
+    // is healthy and succeeds on its first attempt, before "x" is reached
+    // (platforms are processed in sorted order: linkedin, then x).
+    const flakyDriver: DraftGeneratorDriver = async (req) => {
+      firstCallCounts[req.platform] = (firstCallCounts[req.platform] ?? 0) + 1;
+      if (req.platform === "x") return { candidate: { body: "" }, tokensIn: 1, tokensOut: 1 };
+      return fake(req);
+    };
+
+    await expect(
+      runFanout(
+        ctx,
+        repos,
+        { sourceId, platforms: ["linkedin", "x"] },
+        { driver: flakyDriver, capTokens: 1_000_000 },
+      ),
+    ).rejects.toThrow(/irrecoverable/);
+
+    expect(firstCallCounts.linkedin).toBe(1);
+    expect(firstCallCounts.x).toBe(3); // DEFAULT_MAX_ATTEMPTS bounded repair-retries, all exhausted
+
+    // The run and the one successful draft persisted despite the throw —
+    // recovered here via the events audit spine (I4), since runFanout itself
+    // has nothing left to hand back after throwing.
+    const runEventsBefore = await repos.events.list(ctx, { entityType: "fanout_run" });
+    expect(runEventsBefore).toHaveLength(1);
+    const runIdBefore = runEventsBefore[0].entityId;
+    const draftEventsBefore = await repos.events.list(ctx, { entityType: "draft" });
+    expect(draftEventsBefore).toHaveLength(1);
+    const linkedinDraftIdBefore = draftEventsBefore[0].entityId;
+
+    const secondCallCounts: Record<string, number> = {};
+    const healthyDriver: DraftGeneratorDriver = (req) => {
+      secondCallCounts[req.platform] = (secondCallCounts[req.platform] ?? 0) + 1;
+      return fake(req);
+    };
+    const second = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["linkedin", "x"] },
+      { driver: healthyDriver, capTokens: 1_000_000 },
+    );
+
+    expect(second.runId).toBe(runIdBefore);
+    expect(second.created).toBe(false);
+    expect(second.drafts).toHaveLength(2);
+    // Only the missing platform was (re)generated.
+    expect(secondCallCounts.linkedin).toBeUndefined();
+    expect(secondCallCounts.x).toBe(1);
+    // The original linkedin draft was reused untouched, not regenerated.
+    const linkedinDraft = second.drafts.find((d) => d.platform === "linkedin");
+    expect(linkedinDraft?.id).toBe(linkedinDraftIdBefore);
+
+    const drafts = await repos.drafts.listByRun(ctx, runIdBefore);
+    expect(drafts).toHaveLength(2);
+  });
+
   it("a fanned-out draft cannot reach queued or approved without passing through the judge", async () => {
     const { ctx, repos, sourceId } = await setup();
     const result = await runFanout(
