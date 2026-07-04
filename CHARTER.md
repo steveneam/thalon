@@ -46,11 +46,16 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
 | **B1.4 — Approve queue** | 3-zone layout (feed → per-platform fan-out grid → approve panel with per-variant judge badge); `edit_diff` captured on every touch → eval rows; batch-approve **schema** now, UX later. | B1.3 |
 | **B1.5 — Sprint-1 exit gate** | Dogfood on Thalon-markets-Thalon; green eval suite **arms as the ship gate**; exit criteria below verified. | B1.4 |
 
-### Sprint 2 — seam proof
+### Sprint 2 — seam proof + content intelligence (amendment A5)
 
 | Bucket | Deliverable | Depends on |
 |---|---|---|
 | **B2.1 — Fictional tenant #2** | Added purely as runtime config/data. Exit criterion: **zero code changes**. | B1.5 |
+| **B2.2 — Timed ingest + contract window** | `source_chunks.start_ms/end_ms`; `sources.kind` += `video_transcript\|exemplar\|voice_sample\|site_crawl`; `sources.modality` + `visual_ref` (visual-tier seam); generic per-source metrics; `drafts.format` += `clip_plan\|demo_plan`; unique `sources (tenant_id, content_hash)`. Caption-file ingest (SRT/VTT/plain) as deterministic core; transcript fetch behind one `TranscriptProvider` seam (**in-house**: self-hosted Whisper is the strategic driver; hosted APIs = optional adapters). **The sprint's only contract window** — contract re-freezes at merge. | B2.1 |
+| **B2.3 — Waterfall clip plans** | Pillar transcript → deterministic candidate windows (core) → highlight-select (shell) → `clip_plan` drafts (start/end + hook + captions + platform copy), G3-grounded to the transcript, same Approve queue. No rendering (stays B3.3/B3.4). | B2.2 |
+| **B2.4 — Exemplar library** | `exemplar`/`voice_sample` sources + generic metrics → grounding index → top-k retrieval into fan-out context; exemplar ids recorded per run (provenance). **Invariants:** exemplars are grounding-only — deterministic overlap gate blocks verbatim reuse; PII stripped at ingest. | B2.2 |
+| **B2.5 — Demo-plan slice** | Front half of B3.4: site crawl (robots.txt + rate limits in core) → flow map → storyboard draft judged against the crawl → approved plan → deterministic Playwright drive → raw capture (video + synthetic cursor + event trace, content-addressed). Fails loudly at capture before any render spend. No composition/render. | B2.2 |
+| **B2.6 — Queue UI for new formats** | Approve-queue rendering for clip plans / exemplars / demo plans (vs contract mocks); closes queued UI follow-ups (panel refresh after save-edit, aborted-run rows, operator re-judge action). | B2.2 |
 
 ### Sprint 3+ — pulled, not pushed (each re-chartered at its own checkpoint)
 
@@ -60,8 +65,9 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
 | B3.2 | **G5 AI-disclosure gate — hard precondition for any public post** (EU AI Act Art. 50, in force 2026-08-02). |
 | B3.3 | Multi-platform preview/edit (canonical item → per-platform variants; render N ratios from one composition). |
 | B3.4 | Demo-video pipeline (drives any operator-pointed web app; Fargate render rig + content-addressed render cache). |
-| B3.5 | Analytics MVP (generation-metadata ↔ performance join). |
+| B3.5 | Analytics MVP (generation-metadata ↔ performance join) **+ trend radar / outlier detection — official platform APIs only (A5)**. |
 | B3.6 | Studio shell. |
+| B3.7 | **Visual-ingest tier (A5):** Apache-2.0 visual-RAG sidecar behind the ingest seam (screenshot-tile rendering + visual retrieval for exemplars/site design); schema seam (`modality`/`visual_ref`) lands at B2.2; pulled once B2.4 proves exemplar value. |
 
 ## Exit criteria (Sprint 0–1 = the MVP gate)
 
@@ -79,3 +85,4 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
   - **A2** — B0.3 adds `fanout_runs` (idempotency + fan-out batch anchor) · `events` (append-only audit spine) · `usage_ledger` + per-tenant daily budget caps enforced in the gateway wrapper.
   - **A3** — package extraction at B0.3 (`packages/{contracts,db,platform,engine}`, `proprietary/{judge,prompts,profiles}` skeleton) + three enforcement ratchets: import-boundary lint, tenant-id schema test, draft-state-machine property test.
   - **A4** — parallel-ready plumbing: `COORDINATION.md` lane board, `.worktreeinclude`, tracked worktree settings, and `agent_handoff/CURRENT.md` (single-file session handoff, overwritten each wrap).
+- **2026-07-04 — A5 Sprint-2 expansion (founder-approved).** Decision record: `docs/adr/0002-sprint2-expansion.md`. Adds B2.2–B2.6 (timed ingest + single contract window · waterfall clip plans · exemplar library · demo-plan slice · queue UI) and B3.7 (visual-ingest sidecar, pulled); folds trend radar into B3.5 (official APIs only); transcript capability built in-house (self-hosted Whisper as strategic driver; hosted APIs = optional adapters behind the seam); fine-tuning parked indefinitely (the eval corpus keeps the option open); rejected: ToS-evading scraper architectures. Rendering stays B3.3/B3.4 (Remotion licence = launch gate).
