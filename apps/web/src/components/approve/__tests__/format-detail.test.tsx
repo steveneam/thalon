@@ -36,6 +36,33 @@ describe("FormatDetail", () => {
     expect(screen.getByText("copy")).toBeInTheDocument();
     expect(screen.getByText(/window 2/)).toBeInTheDocument();
     expect(screen.getByText(/chunks 4, 5/)).toBeInTheDocument();
+    // body matches hook+captions+platformCopy exactly -> not stale.
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("flags a clip_plan draft as stale when an edit changed body without touching meta, but keeps timing/window provenance visible", () => {
+    const edited = draft("d2b", "run-1", "linkedin", "an operator's edited body", "judging", "hash-clip-edited", {
+      format: "clip_plan",
+      meta: {
+        startMs: 12_000,
+        endMs: 45_000,
+        durationMs: 33_000,
+        windowIndex: 2,
+        chunkSeqs: [4, 5],
+        hook: "hook",
+        captions: "captions",
+        platformCopy: "copy",
+        promptVersion: "highlight-select.v1",
+        brandProfileVersion: 1,
+        platformProfileVersion: "brand-profile.v1",
+      },
+    });
+    render(<FormatDetail draft={edited} />);
+    expect(screen.getByRole("status")).toHaveTextContent(/edited since generation/i);
+    // Timing/window/chunk provenance stays true regardless of a copy edit.
+    expect(screen.getByText(/0:12–0:45/)).toBeInTheDocument();
+    expect(screen.getByText(/window 2/)).toBeInTheDocument();
+    expect(screen.getByText(/chunks 4, 5/)).toBeInTheDocument();
   });
 
   it("renders demo_plan step table, pageUrls, and a captureStatus chip", () => {
@@ -61,6 +88,33 @@ describe("FormatDetail", () => {
     expect(screen.getByText("object-store-key-1")).toBeInTheDocument();
     expect(screen.getByText("goto")).toBeInTheDocument();
     expect(screen.getByText("narration one")).toBeInTheDocument();
+    expect(screen.getByText(/pages: https:\/\/example\.com/)).toBeInTheDocument();
+    // body matches the narrations joined "\n\n" exactly -> not stale.
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("flags a demo_plan draft as stale when an edit changed body without touching meta, but keeps captureStatus/pageUrls visible", () => {
+    const edited = draft("d3b", "run-1", "linkedin", "an operator's edited body", "judging", "hash-demo-edited", {
+      format: "demo_plan",
+      meta: {
+        steps: [
+          { stepIndex: 0, action: "goto", target: "https://example.com", value: "", narration: "narration one" },
+          { stepIndex: 1, action: "click", target: "#cta", value: "", narration: "narration two" },
+        ],
+        crawlSourceId: "source-1",
+        pageUrls: ["https://example.com"],
+        captureStatus: "captured",
+        captureRef: "object-store-key-1",
+        promptVersion: "storyboard.v1",
+        brandProfileVersion: 1,
+        platformProfileVersion: "brand-profile.v1",
+      },
+    });
+    render(<FormatDetail draft={edited} />);
+    expect(screen.getByRole("status")).toHaveTextContent(/edited since generation/i);
+    // captureStatus/captureRef/pageUrls aren't narration-derived — stay true regardless of the copy edit.
+    expect(screen.getByText("capture: captured")).toBeInTheDocument();
+    expect(screen.getByText("object-store-key-1")).toBeInTheDocument();
     expect(screen.getByText(/pages: https:\/\/example\.com/)).toBeInTheDocument();
   });
 

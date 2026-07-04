@@ -17,6 +17,8 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
       http.post(`/api/drafts/${FIXTURE_DRAFT_B_ID}/edit`, async ({ request }) => {
         const { editedBody: sentBody } = (await request.json()) as { editedBody: string };
         edited = true;
+        // The server now runs the judge lane in the SAME request (judge-runner.ts) — a
+        // successful response reflects the fully-judged outcome (queued), never "judging".
         return HttpResponse.json({
           approval: {
             id: "appr-1",
@@ -27,15 +29,18 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
             editedBody: sentBody,
             createdAt: "2026-07-04T11:00:00.000Z",
           },
-          draft: { ...draftB, body: sentBody, bodyHash: "hash-b-edited", status: "judging" },
+          draft: { ...draftB, body: sentBody, bodyHash: "hash-b-edited", status: "queued" },
         });
       }),
       http.get(`/api/drafts/${FIXTURE_DRAFT_B_ID}`, () => {
         if (!edited) return HttpResponse.json(fixtureDraftDetails[FIXTURE_DRAFT_B_ID]);
-        // Post-edit: re-judge is in flight — no verdicts for the new hash yet.
         return HttpResponse.json({
-          draft: { ...draftB, body: editedBody, bodyHash: "hash-b-edited", status: "judging" },
-          judgeResults: [],
+          draft: { ...draftB, body: editedBody, bodyHash: "hash-b-edited", status: "queued" },
+          judgeResults: [
+            { id: "g1", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g1", verdict: "pass", bodyHash: "hash-b-edited", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
+            { id: "g3s", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g3_screen", verdict: "pass", bodyHash: "hash-b-edited", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
+            { id: "g3f", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g3_final", verdict: "pass", bodyHash: "hash-b-edited", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
+          ],
         });
       }),
     );
@@ -58,21 +63,28 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
     await within(panel).findByText(editedBody);
     expect(edited).toBe(true);
     expect(within(panel).queryByText("Blocked — disagreement")).not.toBeInTheDocument();
-    expect(within(panel).getByText("Pending")).toBeInTheDocument();
+    expect(within(panel).getByText("Pass")).toBeInTheDocument();
   });
 
-  it("re-judge retries a blocked draft unmodified through the dedicated action, never through edit", async () => {
+  it("re-judge retries a blocked draft unmodified through the dedicated action and reaches the fully-judged outcome (queued)", async () => {
     const user = userEvent.setup();
     let reJudged = false;
 
     server.use(
       http.post(`/api/drafts/${FIXTURE_DRAFT_B_ID}/rejudge`, () => {
         reJudged = true;
-        return HttpResponse.json({ draft: { ...draftB, status: "judging" } });
+        return HttpResponse.json({ draft: { ...draftB, status: "queued" } });
       }),
       http.get(`/api/drafts/${FIXTURE_DRAFT_B_ID}`, () => {
         if (!reJudged) return HttpResponse.json(fixtureDraftDetails[FIXTURE_DRAFT_B_ID]);
-        return HttpResponse.json({ draft: { ...draftB, status: "judging" }, judgeResults: [] });
+        return HttpResponse.json({
+          draft: { ...draftB, status: "queued" },
+          judgeResults: [
+            { id: "g1", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g1", verdict: "pass", bodyHash: "hash-b", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
+            { id: "g3s", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g3_screen", verdict: "pass", bodyHash: "hash-b", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
+            { id: "g3f", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g3_final", verdict: "pass", bodyHash: "hash-b", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
+          ],
+        });
       }),
     );
 
@@ -89,7 +101,33 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
     expect(reJudgeButton).toBeEnabled();
     await user.click(reJudgeButton);
 
-    await within(panel).findByText("Pending");
+    await within(panel).findByText("Pass");
     expect(reJudged).toBe(true);
+  });
+
+  it("a judge failure (e.g. a budget halt) surfaces loudly in the panel instead of vanishing silently", async () => {
+    const user = userEvent.setup();
+
+    server.use(
+      http.post(`/api/drafts/${FIXTURE_DRAFT_B_ID}/rejudge`, () =>
+        HttpResponse.json({ error: "tenant tenant-fixture is over its daily token budget" }, { status: 400 }),
+      ),
+    );
+
+    render(<ApproveQueue />);
+    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
+    const panel = screen.getByRole("region", { name: "Approve panel" });
+
+    await within(grid).findByText("Run2 X draft");
+    await user.click(within(grid).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
+    await within(panel).findByText("Run2 X draft");
+
+    await user.click(within(panel).getByRole("button", { name: "Re-judge" }));
+
+    expect(await within(panel).findByRole("alert")).toHaveTextContent(/over its daily token budget/);
+    // No unhandled GET override was registered for this test — the refresh
+    // that follows a failed action re-fetches the draft's real current
+    // state rather than papering over the failure with stale "success" data.
+    expect(within(panel).getByText("Blocked — disagreement")).toBeInTheDocument();
   });
 });

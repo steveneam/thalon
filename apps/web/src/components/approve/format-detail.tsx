@@ -1,11 +1,18 @@
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
+  expectedClipPlanBody,
   formatMsAsClock,
   parseClipPlanMeta,
   type ClipPlanDraftMeta,
 } from "@/lib/approve-queue/formats/clip-plan";
-import { parseDemoPlanMeta, type DemoPlanDraftMeta } from "@/lib/approve-queue/formats/demo-plan";
+import {
+  expectedDemoPlanBody,
+  parseDemoPlanMeta,
+  type DemoPlanDraftMeta,
+} from "@/lib/approve-queue/formats/demo-plan";
 import { parseExemplarIds, type ExemplarId } from "@/lib/approve-queue/formats/exemplar";
+import { cn } from "@/lib/utils";
 import type { GridDraft } from "@/lib/approve-queue/types";
 
 interface FormatDetailProps {
@@ -34,22 +41,35 @@ export function FormatDetail({ draft }: FormatDetailProps) {
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-2 text-sm">
-      {clipPlan && <ClipPlanDetail meta={clipPlan} />}
-      {demoPlan && <DemoPlanDetail meta={demoPlan} />}
+      {clipPlan && <ClipPlanDetail meta={clipPlan} stale={expectedClipPlanBody(clipPlan) !== draft.body} />}
+      {demoPlan && <DemoPlanDetail meta={demoPlan} stale={expectedDemoPlanBody(demoPlan) !== draft.body} />}
       {exemplarIds && <ExemplarProvenance ids={exemplarIds} />}
     </div>
   );
 }
 
-function ClipPlanDetail({ meta }: { meta: ClipPlanDraftMeta }) {
+/** Shown when an operator edit changed `draft.body` without touching the generation `meta` — the structured fields below no longer match the judged text. */
+function StaleNotice({ children }: { children: ReactNode }) {
+  return (
+    <p className="text-[11px] text-muted-foreground italic" role="status">
+      {children}
+    </p>
+  );
+}
+
+function ClipPlanDetail({ meta, stale }: { meta: ClipPlanDraftMeta; stale: boolean }) {
   return (
     <div className="flex flex-col gap-2" aria-label="Clip plan detail">
       <div className="flex flex-wrap items-center gap-1.5">
+        {/* Timing/window/chunk provenance stays true regardless of copy edits — never de-emphasized. */}
         <Badge variant="outline">
           {formatMsAsClock(meta.startMs)}–{formatMsAsClock(meta.endMs)} ({formatMsAsClock(meta.durationMs)})
         </Badge>
       </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+      {stale && (
+        <StaleNotice>Edited since generation — hook/captions/copy below reflect the original text, not the current body.</StaleNotice>
+      )}
+      <dl className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs", stale && "opacity-50")}>
         <dt className="font-medium text-muted-foreground">Hook</dt>
         <dd className="whitespace-pre-wrap text-foreground">{meta.hook}</dd>
         <dt className="font-medium text-muted-foreground">Captions</dt>
@@ -64,14 +84,18 @@ function ClipPlanDetail({ meta }: { meta: ClipPlanDraftMeta }) {
   );
 }
 
-function DemoPlanDetail({ meta }: { meta: DemoPlanDraftMeta }) {
+function DemoPlanDetail({ meta, stale }: { meta: DemoPlanDraftMeta; stale: boolean }) {
   return (
     <div className="flex flex-col gap-2" aria-label="Demo plan detail">
       <div className="flex flex-wrap items-center gap-1.5">
+        {/* captureStatus/captureRef aren't narration-derived — stay true regardless of copy edits, never de-emphasized. */}
         <Badge variant={CAPTURE_STATUS_VARIANT[meta.captureStatus]}>capture: {meta.captureStatus}</Badge>
         {meta.captureRef && <span className="font-mono text-[11px] text-muted-foreground">{meta.captureRef}</span>}
       </div>
-      <table className="w-full text-left text-xs">
+      {stale && (
+        <StaleNotice>Edited since generation — the step narrations below reflect the original text, not the current body.</StaleNotice>
+      )}
+      <table className={cn("w-full text-left text-xs", stale && "opacity-50")}>
         <thead>
           <tr className="text-muted-foreground">
             <th className="pr-2 font-medium">#</th>
@@ -93,6 +117,7 @@ function DemoPlanDetail({ meta }: { meta: DemoPlanDraftMeta }) {
           ))}
         </tbody>
       </table>
+      {/* pageUrls are the crawl's own provenance, not narration-derived — stay true regardless of copy edits. */}
       <p className="text-[11px] text-muted-foreground">pages: {meta.pageUrls.join(", ")}</p>
     </div>
   );

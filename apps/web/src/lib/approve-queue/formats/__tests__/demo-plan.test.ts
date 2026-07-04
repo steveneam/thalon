@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { parseDemoPlanMeta } from "../demo-plan";
+import { expectedDemoPlanBody, parseDemoPlanMeta, type DemoPlanDraftMeta } from "../demo-plan";
 
-const VALID_META = {
+const VALID_META: DemoPlanDraftMeta = {
   steps: [
     { stepIndex: 0, action: "goto", target: "https://example.com", value: "", narration: "Open the docs search page." },
     { stepIndex: 1, action: "fill", target: "#search", value: "hello", narration: "Type a query." },
@@ -35,5 +35,11 @@ describe("parseDemoPlanMeta", () => {
   it("accepts a captured run with a non-null captureRef", () => {
     const captured = { ...VALID_META, captureStatus: "captured" as const, captureRef: "object-store-key-1" };
     expect(parseDemoPlanMeta(captured)).toEqual(captured);
+  });
+});
+
+describe("expectedDemoPlanBody", () => {
+  it("joins every step's narration with \\n\\n — the pinned contract's body convention", () => {
+    expect(expectedDemoPlanBody(VALID_META)).toBe("Open the docs search page.\n\nType a query.");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatMsAsClock, parseClipPlanMeta } from "../clip-plan";
+import { expectedClipPlanBody, formatMsAsClock, parseClipPlanMeta } from "../clip-plan";
 
 const VALID_META = {
   startMs: 12_000,
@@ -43,5 +43,13 @@ describe("formatMsAsClock", () => {
   it("clamps negative/non-finite input to 0:00", () => {
     expect(formatMsAsClock(-1)).toBe("0:00");
     expect(formatMsAsClock(NaN)).toBe("0:00");
+  });
+});
+
+describe("expectedClipPlanBody", () => {
+  it("joins hook, captions, and platformCopy with \\n\\n — the same convention that binds body_hash (I1)", () => {
+    expect(expectedClipPlanBody(VALID_META)).toBe(
+      "You won't believe this\n\nLine one\nLine two\n\nCheck out this clip",
+    );
   });
 });

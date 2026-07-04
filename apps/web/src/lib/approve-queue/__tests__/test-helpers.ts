@@ -1,5 +1,6 @@
 import { tenantCtx, type TenantCtx } from "@thalon/contracts";
 import { openTestDb, sha256Hex, type DbHandle, type Draft, type FanoutRun } from "@thalon/db";
+import type { JudgeModelDriver } from "@thalon/judge";
 
 export interface Seeded {
   handle: DbHandle;
@@ -54,4 +55,19 @@ export async function seedAdditionalRun(
     generationKey: sha256Hex(`${ctx.tenantId}:draft:${n}`),
   });
   return { run, draft };
+}
+
+/** Canned G3 tier candidates matching `shellJudgeOutputSchema` (proprietary/judge/src/shell/schema.ts). */
+export const JUDGE_PASS = { verdict: "pass" as const, claims: [{ claim: "shipped", supported: true, chunkRef: "c1" }] };
+export const JUDGE_FAIL = { verdict: "fail" as const, claims: [{ claim: "shipped", supported: false }] };
+
+/**
+ * A driver that always returns the same canned candidate — reimplemented
+ * locally (rather than importing proprietary/judge's own test-only
+ * fake-drivers.ts) so apps/web's tests stay independent of another
+ * package's test internals. Keeps runJudgeOnDraft/editDraft/reJudgeDraft
+ * tests keyless (no AI_GATEWAY_API_KEY, no real gateway call).
+ */
+export function fixedJudgeDriver(candidate: unknown): JudgeModelDriver {
+  return async () => ({ candidate, tokensIn: 7, tokensOut: 3 });
 }

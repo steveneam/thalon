@@ -37,3 +37,13 @@ export function parseDemoPlanMeta(meta: unknown): DemoPlanDraftMeta | null {
   const result = demoPlanDraftMetaSchema.safeParse(meta);
   return result.success ? result.data : null;
 }
+
+/**
+ * The body a demo_plan draft's steps would produce — narrations joined
+ * "\n\n" (the pinned contract's body convention). An operator edit changes
+ * `draft.body` but never this meta, so comparing the two is how
+ * `FormatDetail` detects the step table has gone stale.
+ */
+export function expectedDemoPlanBody(meta: DemoPlanDraftMeta): string {
+  return meta.steps.map((step) => step.narration).join("\n\n");
+}

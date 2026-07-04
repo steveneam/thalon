@@ -13,6 +13,8 @@ interface ApprovePanelProps {
   draft: GridDraft | null;
   judgeResults: PanelJudgeResult[];
   busy?: boolean;
+  /** Message from the last approve/reject/edit/re-judge attempt, if it failed — e.g. a judge run that threw (no gateway key, a budget halt). Null/undefined once an attempt succeeds. */
+  actionError?: string | null;
   onApprove: () => void;
   onReject: () => void;
   onEditSave: (editedBody: string) => void;
@@ -20,7 +22,7 @@ interface ApprovePanelProps {
 }
 
 /** Zone 3: full body, per-variant judge badge, and the approve / reject / edit / re-judge actions. */
-export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onReject, onEditSave, onReJudge }: ApprovePanelProps) {
+export function ApprovePanel({ status, draft, judgeResults, busy, actionError, onApprove, onReject, onEditSave, onReJudge }: ApprovePanelProps) {
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
 
@@ -98,10 +100,16 @@ export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onR
           </>
         )}
       </div>
+      {actionError && (
+        <p className="text-xs text-destructive" role="alert">
+          {actionError}
+        </p>
+      )}
       {draft.status === "judging" && (
         <p className="text-xs text-muted-foreground">
-          Judging — verdicts will refresh here once the judge lane runs. Stuck here with no verdicts appearing? An
-          operational halt (e.g. a budget cap) may have stranded this draft — use Re-judge to retry it unmodified.
+          No passing verdict yet for this draft&rsquo;s current body — edit-save and Re-judge both run the judge
+          pipeline synchronously, so a draft only sits here when that run is genuinely stuck (see any error above).
+          Re-judge retries it unmodified.
         </p>
       )}
     </section>

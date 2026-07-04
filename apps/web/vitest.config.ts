@@ -15,6 +15,7 @@ export default defineConfig({
       "@thalon/contracts": path.resolve(dirname, "../../packages/contracts/src/index.ts"),
       "@thalon/db": path.resolve(dirname, "../../packages/db/src/index.ts"),
       "@thalon/platform": path.resolve(dirname, "../../packages/platform/src/index.ts"),
+      "@thalon/judge": path.resolve(dirname, "../../proprietary/judge/src/index.ts"),
     },
   },
   test: {
