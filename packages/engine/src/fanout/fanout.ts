@@ -210,7 +210,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
   });
   if (!result.output) {
     throw new Error(
-      `fan-out generation for platform "${spec.platform}" was irrecoverable after ${result.attempts} attempt(s): malformed shell output`,
+      `fan-out generation for platform "${spec.platform}" was irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
     );
   }
 

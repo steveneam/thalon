@@ -12,11 +12,16 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "export": "tsx src/export-eval-cases.ts",
-    "promptfoo": "npx promptfoo@latest eval -c promptfoo/promptfooconfig.yaml"
+    "promptfoo": "npx promptfoo@latest eval -c promptfoo/promptfooconfig.yaml",
+    "dogfood": "tsx src/dogfood.ts",
+    "golden:g3": "tsx src/run-golden-g3.ts"
   },
   "dependencies": {
     "@thalon/contracts": "*",
     "@thalon/db": "*",
+    "@thalon/engine": "*",
+    "@thalon/judge": "*",
+    "@thalon/platform": "*",
     "zod": "^4.1.0"
   },
   "devDependencies": {

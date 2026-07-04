@@ -131,7 +131,7 @@ async function runTier(
         }
       : {
           claims: [],
-          notes: `irrecoverable after ${result.attempts} attempt(s): malformed shell output`,
+          notes: `irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
         },
     model,
     promptVersion,

@@ -7,6 +7,15 @@ export interface GenerateCallResult {
   attempts: number;
   /** True when every repair attempt was exhausted without a schema-valid candidate. */
   irrecoverable: boolean;
+  /**
+   * The LAST attempt's failure, verbatim (driver error message or Zod issue
+   * summary). Operational failures (429s, provider format rejections) look
+   * identical to bad model output from the loop's perspective — this is the
+   * only way an operator can tell them apart, so never discard it (lesson:
+   * a gateway 400 and a free-tier 429 both surfaced as "malformed shell
+   * output" during the first live B1.5 dogfood).
+   */
+  lastError?: string;
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -27,6 +36,7 @@ export async function generateValidatedDraft(
   opts: { maxAttempts?: number } = {},
 ): Promise<GenerateCallResult> {
   const maxAttempts = opts.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
+  let lastError: string | undefined;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     let candidate: unknown;
     try {
@@ -35,6 +45,7 @@ export async function generateValidatedDraft(
       // A blown tenant budget is an operational hard stop (amendment A2),
       // not a repairable shell hiccup — surface it, never swallow it.
       if (err instanceof BudgetExceededError) throw err;
+      lastError = err instanceof Error ? err.message : String(err);
       if (attempt === maxAttempts) break;
       continue;
     }
@@ -42,7 +53,10 @@ export async function generateValidatedDraft(
     if (parsed.success) {
       return { output: parsed.data, attempts: attempt, irrecoverable: false };
     }
+    lastError = `schema-invalid candidate: ${parsed.error.issues
+      .map((i) => `${i.path.join(".")}: ${i.message}`)
+      .join("; ")}`;
     if (attempt === maxAttempts) break;
   }
-  return { output: null, attempts: maxAttempts, irrecoverable: true };
+  return { output: null, attempts: maxAttempts, irrecoverable: true, lastError };
 }
