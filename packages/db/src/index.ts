@@ -15,6 +15,7 @@ export type {
   JudgeResult,
   Source,
   SourceChunk,
+  SourceMetric,
   Tenant,
   UsageLedgerRow,
 } from "./types";

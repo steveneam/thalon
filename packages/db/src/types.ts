@@ -10,6 +10,7 @@ export type Tenant = typeof schema.tenants.$inferSelect;
 export type BrandProfile = typeof schema.brandProfiles.$inferSelect;
 export type Source = typeof schema.sources.$inferSelect;
 export type SourceChunk = typeof schema.sourceChunks.$inferSelect;
+export type SourceMetric = typeof schema.sourceMetrics.$inferSelect;
 export type FanoutRun = typeof schema.fanoutRuns.$inferSelect;
 export type Draft = typeof schema.drafts.$inferSelect;
 export type JudgeResult = typeof schema.judgeResults.$inferSelect;

@@ -10,6 +10,9 @@ export interface IngestChunkInput {
   tokenCount: number;
   contentHash: string;
   embedding?: number[];
+  /** B2.2 time-coded sources: milliseconds into the media; omit for untimed text. */
+  startMs?: number;
+  endMs?: number;
 }
 
 export interface IngestSourceInput {
@@ -17,6 +20,9 @@ export interface IngestSourceInput {
   contentHash: string;
   uri?: string;
   rawRef?: string;
+  /** B2.2: defaults to "text"; the B3.7 visual tier supplies "visual" + visualRef. */
+  modality?: string;
+  visualRef?: string;
   meta?: Record<string, unknown>;
   chunks: IngestChunkInput[];
 }
@@ -98,6 +104,8 @@ export function sourceChunksRepo(db: Db) {
             kind: input.kind,
             uri: input.uri,
             rawRef: input.rawRef,
+            modality: input.modality ?? "text",
+            visualRef: input.visualRef,
             contentHash: input.contentHash,
             meta: input.meta ?? {},
           })
@@ -112,6 +120,8 @@ export function sourceChunksRepo(db: Db) {
                   sourceId: source.id,
                   seq: chunk.seq,
                   text: chunk.text,
+                  startMs: chunk.startMs,
+                  endMs: chunk.endMs,
                   tokenCount: chunk.tokenCount,
                   contentHash: chunk.contentHash,
                   embedding: chunk.embedding,
