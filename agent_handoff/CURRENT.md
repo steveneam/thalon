@@ -6,6 +6,24 @@
 
 2026-07-05 (session 7) · **B3.8 + B3.9 code-complete. Build strategy pivoted to BREADTH-FIRST / two-pass (A9): materialize all 3 output families in pass 1 with fake drivers, defer all live dogfood/verify/real-tenant to pass 2. Next: pass-1 breadth — B3.10 (thin render seam) → B3.15 (web family) → B3.12 (intel skeleton).** Amendments A6/A7/A8/A9 chartered; pulled B3.12–B3.15 recorded. Pillar-#1 tenant name IS grep-guard token A — never in tracked files; profile drafted+PARKED at gitignored `.context/tenants/<company>.v1.json` for pass 2. Pass 1 = zero gateway spend.
 
+## Resume prompt (paste verbatim to resume next session)
+
+> Stamped 2026-07-05 02:41 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
+
+**Resume · Thalon** — stamped **2026-07-05 02:41 (UTC+10:00)** · Sprint 3 in progress, now **BREADTH-FIRST (two-pass, amendment A9).** B3.8 (profile spine) + B3.9 (pillar origination) code-complete. E:\thalon, main @ `cb151e4`.
+
+▎ ▸ Read `CLAUDE.md` → `CHARTER.md` (Sprint-3 table + amendments **A6–A9**; pulled B3.12–B3.15) → `agent_handoff/CURRENT.md`. Skim `docs/adr/0003-sprint3-origination.md` for the origination rationale.
+
+▎ ▸ **STRATEGY (A9, locked):** materialize all **three output families** — social (done), video (B3.9 done), **web (B3.15, not started)** — plus supporting skeletons (trend-intel B3.12, profiles B3.8 done) end-to-end in **pass 1** using **fake/keyless drivers → zero gateway spend**. Render/deploy seams may be **thin stubs**. Keep cheap inline unit tests (green-suite ratchet); **defer ALL live dogfood, real-tenant setup, chromium drives, exit reviews, eval refinement, UI polish, TTS, full Remotion, and full trend pollers to pass 2.** Don't stop for a live-verify gate between buckets.
+
+▎ ▸ **FIRST ACTION (pass-1 breadth, recommended order):** (1) **B3.10 thin render seam** — approved `pillar_script` → deterministic SRT from the authored beats + a preview/manifest artifact behind a `RenderTarget` seam (real Remotion MP4 = pass 2); (2) **B3.15 web/landing-page** — new `web_page` draft format, profile+prompt → self-contained landing page → same judge spine → approve queue → thin `DeployTarget`/Vercel seam; (3) **B3.12 trend-intel skeleton** — `TrendSource` seam + watchlist config + deterministic outlier math over `source_metrics` → auto-exemplar ingest, against a fake source. Guard-gate every commit (`if ($LASTEXITCODE -eq 0)` — never `;`).
+
+▎ ▸ **[you] — pass-2 inputs only (not needed for pass 1):** pillar-#1 topic/angle + confirm the parked tenant profile draft at gitignored `.context/tenants/<company>.v1.json`; gateway credit top-up; LinkedIn/X OAuth apps; whether to scrub the guard token from historical commit `0b11d48` (needs a one-time branch-protection relax; HEAD already clean).
+
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote (`cb151e4`), grep guard passing, no mid-edit state.
+
+---
+
 ## Pointer
 
 Read in order: `CLAUDE.md` → `CHARTER.md` (new Sprint-3 table + amendment A6) → `docs/adr/0003-sprint3-origination.md` (why origination, dogfood flywheel, Remotion growth-gate downgrade) → `COORDINATION.md` (Sprint-2 board; Sprint-3 lanes not yet cut).
