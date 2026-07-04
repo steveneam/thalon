@@ -21,6 +21,10 @@
  * draft (body = the artifact's extracted visible text; self-containment
  * enforced structurally) -> approved draft ships via the DeployTarget seam
  * (real Vercel adapter = pass 2).
+ * B3.12 landed (skeleton per A9): src/trend/ — watchlist (runtime config)
+ * -> TrendSource seam poll (official-API drivers = pass 2) -> deterministic
+ * outlier ratios in core -> outliers auto-ingest as exemplars via the B2.4
+ * path (PII-stripped, G1 denylist-screened), snapshots into source_metrics.
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -35,3 +39,4 @@ export * from "./demo";
 export * from "./origination";
 export * from "./render";
 export * from "./webpage";
+export * from "./trend";

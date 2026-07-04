@@ -15,6 +15,7 @@
   "dependencies": {
     "@thalon/contracts": "*",
     "@thalon/db": "*",
+    "@thalon/judge": "*",
     "@thalon/platform": "*",
     "ai": "^5.0.209",
     "playwright": "^1.55.0",
