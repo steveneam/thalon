@@ -4,7 +4,7 @@
 
 ## Stamp
 
-2026-07-05 (session 7) · **B3.8 approved at checkpoint · A7 chartered (B3.12 trend-intel promoted to bucket — founder direction: automated acquisition IS feature 2, operator never curates manually; B3.13 Whisper driver pulled) · B3.9 pillar origination IN PROGRESS.** Pillar-#1 tenant = the founder's first company — **its name is a guarded token: never in tracked files or commit messages; its profile JSON goes in gitignored `.context/tenants/`** (template: fernwood.v1.json). Gateway budget: ~$4.90 free credit until top-up — keep dogfood runs frugal. B2.5 dogfood opener still pending founder's flow confirmation (chromium installed).
+2026-07-05 (session 7) · **B3.8 (profile spine) + B3.9 (pillar origination) BOTH code-complete on main; next: B3.10 Remotion render seam.** Amendments A6/A7/A8 chartered; pulled buckets B3.12–B3.15 recorded. Pillar-#1 tenant = founder's first company — **its name is a guarded token: never in tracked files or commit messages; profile JSON lives ONLY at gitignored `.context/tenants/eamos.v1.json` (drafted this session, ready)**. Gateway budget ~$4.90 free until top-up.
 
 ## Pointer
 
@@ -26,9 +26,17 @@ Read in order: `CLAUDE.md` → `CHARTER.md` (new Sprint-3 table + amendment A6) 
 - Seeds: `TENANT_ZERO` (eval/src/dogfood.ts) + `proprietary/profiles/tenants/fernwood.v1.json` both carry identity.
 - Suite 310 passed / 2 skipped; lint 0 errors (1 pre-existing `_dataDir` warning); typecheck green.
 
+## B3.9 delta (code-complete)
+
+`packages/engine/src/origination/` — `runOrigination`: operator prompt source + active-profile identity (B3.8) + optional grounding sources → ONE judged `pillar_script` draft (pinned `pillarScriptDraftMetaSchema`: title/hook/beats/cta/groundingSourceIds); reuses B2.5 storyboard's idempotency/backfill (N=1). `ingest-github.ts` — public README via official API behind the fetcher seam → doc source. Structural: multi-source grounding assembly moved INTO the judge pipeline (`@thalon/judge` `collectGroundingChunks`, run by default when no explicit chunks passed) — apps/web judge-runner + eval dogfood simplified to not pass chunks; a caller can no longer under-ground a multi-source draft. New draft format `pillar_script`. Suite 321 passed / 2 skipped; typecheck + guard green (`fd1d2e2`).
+
+## Pulled buckets added this session (each chartered at its own checkpoint)
+
+B3.12 trend-intel intake (A7) · B3.13 transcription engine (A8, Whisper + hosted-vendor drivers) · B3.14 per-tenant model-provider choice (gateway/BYOK/local-CLI) · **B3.15 web/landing-page generation** — the third output family (social · video · web), same spine, Vercel deploy seam. All in CHARTER.md "Pulled" table + `product-feature-framing` memory.
+
 ## Next action
 
-**Founder checkpoint on B3.8**, then **B3.9 — pillar origination** (prompt + active profile + optional site/GitHub crawl → `pillar_script` draft → judge → queue). **B2.5 dogfood opener** can run any time: chromium is installed; needs the founder to confirm the exact docs-search flow (pinned: a known brand's public docs-search, Anthropic docs first).
+**B3.10 — Remotion render seam** (approved `pillar_script` → MP4 + deterministic SRT; growth-gate licence): hold it brutally small — one template, one ratio, local render, text+music first cut (TTS behind a seam after). BLOCKING: gateway credit (~$4.90 free left — enough for a first frugal B3.9 live run, top-up needed before real volume). Pillar #1 tenant profile is DRAFTED and ready at gitignored `.context/tenants/eamos.v1.json` (identity from the live public site + vault; only the `prompt` field is a placeholder — founder supplies the topic/angle at session start). **B2.5 dogfood opener** still runnable any time (chromium installed; needs founder's docs-search flow confirmation).
 
 ## [you] — founder-supplied, needed as work starts (not before)
 
