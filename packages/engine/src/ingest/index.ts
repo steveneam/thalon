@@ -1,4 +1,24 @@
-export { chunkText, DEFAULT_CHUNK_CONFIG, type ChunkConfig, type TextChunk } from "./chunk";
+export {
+  detectCaptionFormat,
+  parseCaptions,
+  parseCaptionTimestamp,
+  type CaptionFormat,
+  type TimedSegment,
+} from "./captions";
+export {
+  chunkText,
+  chunkTimedSegments,
+  DEFAULT_CHUNK_CONFIG,
+  type ChunkConfig,
+  type TextChunk,
+  type TimedTextChunk,
+} from "./chunk";
+export {
+  captionFileProvider,
+  getTranscriptProvider,
+  type TranscriptProvider,
+  type TranscriptRequest,
+} from "./transcript";
 export { extractDoc, extractHtml, extractPrompt, type ExtractedContent } from "./extract";
 export { getFetcher, HttpFetcher, type FetchedPage, type Fetcher } from "./fetcher";
 export {

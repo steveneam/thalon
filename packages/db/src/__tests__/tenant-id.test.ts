@@ -28,6 +28,7 @@ describe("tenancy ratchet", () => {
         "publish_queue",
         "retrieval_cache",
         "source_chunks",
+        "source_metrics",
         "sources",
         "tenants",
         "usage_ledger",

@@ -2,6 +2,7 @@ import { DRAFT_STATUSES, SOURCE_KINDS } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -28,6 +29,10 @@ export const sources = pgTable(
     uri: text("uri"),
     /** Object-store key of the raw payload (doc upload, fetched page). */
     rawRef: text("raw_ref"),
+    /** B2.2: open-ended by design (like judge_results.gate) — known values in contracts SOURCE_MODALITIES; future tiers need zero migrations. */
+    modality: text("modality").notNull().default("text"),
+    /** B2.2: object-store key of the rendered visual artifact — the B3.7 visual-ingest seam; null until that tier lands. */
+    visualRef: text("visual_ref"),
     contentHash: text("content_hash").notNull(),
     meta: jsonb("meta").notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -36,6 +41,8 @@ export const sources = pgTable(
   },
   (t) => [
     index("sources_tenant_created_idx").on(t.tenantId, t.createdAt),
+    // B2.2: the engine's get-or-create idempotency, made structural.
+    uniqueIndex("sources_tenant_content_hash_idx").on(t.tenantId, t.contentHash),
     check("sources_kind_check", sql.raw(`kind in (${inList(SOURCE_KINDS)})`)),
   ],
 );
@@ -53,6 +60,9 @@ export const sourceChunks = pgTable(
       .references(() => sources.id),
     seq: integer("seq").notNull(),
     text: text("text").notNull(),
+    /** B2.2 time-coded sources: milliseconds into the media; null for untimed text. */
+    startMs: integer("start_ms"),
+    endMs: integer("end_ms"),
     embedding: vector("embedding", { dimensions: 1536 }),
     tokenCount: integer("token_count"),
     contentHash: text("content_hash").notNull(),
@@ -67,6 +77,31 @@ export const sourceChunks = pgTable(
       t.embedding.op("vector_cosine_ops"),
     ),
   ],
+);
+
+/**
+ * B2.2 (A5): generic per-source engagement metrics — `metric_name` /
+ * `metric_value` only; platform metric names arrive as tenant data, never
+ * hard-coded (the SPINE §4.1 deferred-analytics rule). Append-only, never
+ * UPDATE; exemplar retrieval (B2.4) and the analytics join (B3.5) read it.
+ */
+export const sourceMetrics = pgTable(
+  "source_metrics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    sourceId: uuid("source_id")
+      .notNull()
+      .references(() => sources.id),
+    metricName: text("metric_name").notNull(),
+    metricValue: doublePrecision("metric_value").notNull(),
+    capturedAt: timestamp("captured_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("source_metrics_tenant_source_idx").on(t.tenantId, t.sourceId)],
 );
 
 /** One row per fan-out invocation: the idempotency + provenance anchor; groups the N drafts of one run (the Approve batch unit). */
