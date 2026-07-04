@@ -4,25 +4,24 @@
 
 ## Stamp
 
-2026-07-04 (session 4) · **B2.1 merged (PR #11) + B2.2 merged (PR #12) — Sprint-2 contract re-frozen; wave-1 lanes cuttable on founder go**
+2026-07-04 (session 5) · **Wave 1 merged — B2.3 (PR #13) + B2.4 (PR #14) on main; wave 2 (demo B2.5 + ui B2.6) cuttable on founder go**
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table + amendment A5) → `docs/adr/0002-sprint2-expansion.md` → `COORDINATION.md` (Sprint-2 lane board + the three 2026-07-04 session-4 messages — B2.1 proof, B2.2 window, A5 landing).
+Read in order: `CLAUDE.md` → `CHARTER.md` (Sprint-2 table) → `COORDINATION.md` (Sprint-2 lane board + the 2026-07-04 wave-1 messages — lane cut, merge-train wrap).
 
 ## Delta (this session)
 
-- Sprint-1 exit signed off; **amendment A5 landed** (`docs/adr/0002-sprint2-expansion.md`).
-- **B2.1 merged (PR #11)**: tenant #2 as one JSON data file — zero code (criterion met literally); live slice on it queued one draft and blocked one on a real g3 tier disagreement (I3 on a second tenant).
-- **B2.2 merged (PR #12)**: the sprint's single contract window (time-coded chunks · new source kinds · `modality`/`visual_ref` seam · `source_metrics` · sources unique index) + timed ingest (fail-loud SRT/VTT/plain parser, segment-atomic timed chunking, `TranscriptProvider` seam, caption-file driver). **Contract re-frozen.**
-- Ratchet (founder-prompted): root eslint over packages/proprietary/eval + **lint as a CI step** — CI had never run eslint; lint now gates the PR.
-- Direction pinned (board message + agent memory): Whisper driver = in-house, Windows-native (whisper.cpp/faster-whisper, MIT); B3.7 = port-the-pattern (Apache-2.0, no clean room; pgvector + object store + ONNX/DirectML; WSL2 interim; verify weights licence at bucket time).
+- **B2.3 merged (PR #13)**: `packages/engine/src/waterfall/` — deterministic candidate windows (pure core) → highlight-select shell (`highlight-select.v1.md`) → `clip_plan` drafts, `fanout_runs`-anchored with fan-out's exact idempotency/backfill semantics; clip-plan body/meta shape documented for B2.6 in `waterfall/schemas.ts`. Lead review fix pre-merge: duplicate `windowIndex` rejection at the shell boundary (would have stranded a half-persisted platform behind backfill).
+- **B2.4 merged (PR #14)**: `packages/engine/src/exemplar/` — PII-strip-before-hash ingest (invariant), generic `source_metrics`, retrieval scoped to exemplar/voice_sample kinds, opt-in exemplar-aware fan-out (exemplar ids fold into the generation key; provenance on run params + draft meta; plain runs byte-identical), deterministic 8-word n-gram overlap gate → `judge_results.gate = "exemplar_overlap"` + blocked via the one transition fn (invariant).
+- Founder Q&A (pipecat/livekit): **not integrating** — they're real-time conversational voice-agent orchestrators, not ASR; transcription quality = model choice behind the existing `TranscriptProvider` seam. Parakeet-TDT-via-ONNX (sherpa-onnx) recorded as a second driver candidate for a bake-off vs whisper.cpp/faster-whisper at Whisper-driver bucket time (agent memory: future-tooling-candidates).
+- Root suite now 187 tests; the orchestrator-worktree caveats (skip lint in lanes, `@thalon/*` vitest aliasing) held — engine's config covered both lanes since they lived inside `packages/engine`.
 
 ## Next action
 
-**Cut wave-1 lanes on founder go**: waterfall (B2.3) + exemplar (B2.4) as in-session worktree subagents per the Sprint-2 board (`COORDINATION.md`) — kickoffs say "skip lint, lead verifies at merge" (worktree symlink caveat), merge-order waterfall → exemplar. Wave 2 (demo B2.5 + ui B2.6) follows. **Lane launch always needs fresh founder approval.**
+**Cut wave-2 lanes on founder go**: demo (B2.5) + ui (B2.6) per the Sprint-2 board (`COORDINATION.md`) — kickoffs carry the same caveats ("skip lint, lead verifies at merge"); B2.6's kickoff should include the clip-plan draft shape (`packages/engine/src/waterfall/schemas.ts`) and the Sprint-1 queued UI follow-ups (approve-panel refresh after save-edit, aborted-run rows, operator re-judge action). B2.5 adds Playwright (Apache-2.0) as the drive/capture dep. **Lane launch always needs fresh founder approval.**
 
 ## [you] — founder-supplied, needed as buckets start (not before)
 
-- B2.3 dogfood: your first pillar video — its caption/SRT file (own media; the caption-file driver is live) or the raw file once the Whisper driver lands.
+- B2.3 dogfood (unblocked now): your first pillar video's caption/SRT file (caption-file driver is live; raw media works once the Whisper driver lands).
 - B2.5 dogfood: your website URL + which flows to demo.
