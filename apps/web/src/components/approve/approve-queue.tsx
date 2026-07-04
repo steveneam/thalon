@@ -100,25 +100,30 @@ export function ApproveQueue() {
   // resolves; guarded by selectedDraftIdRef rather than a closure-scoped
   // cancellation flag so ANY caller of this function — the effect below or a
   // direct refresh call — is protected from a stale-selection clobber.
-  const loadDraftDetail = useCallback(async (draftId: string) => {
-    try {
-      const data = await fetchDraftDetail(draftId);
-      if (selectedDraftIdRef.current !== draftId) return;
-      if (!data) {
-        setPanelStatus("error");
-        return;
-      }
-      setPanelDraft(data.draft);
-      setJudgeResults(data.judgeResults);
-      setPanelStatus("success");
-    } catch {
-      if (selectedDraftIdRef.current === draftId) setPanelStatus("error");
-    }
+  // Promise-chain form (not async/await): every setState sits syntactically
+  // inside a .then/.catch callback, matching the run-selection effect above —
+  // the set-state-in-effect lint rule can't see through an async fn boundary
+  // and would flag the effect below as a synchronous setState (B1.4 lesson).
+  const loadDraftDetail = useCallback((draftId: string) => {
+    return fetchDraftDetail(draftId)
+      .then((data) => {
+        if (selectedDraftIdRef.current !== draftId) return;
+        if (!data) {
+          setPanelStatus("error");
+          return;
+        }
+        setPanelDraft(data.draft);
+        setJudgeResults(data.judgeResults);
+        setPanelStatus("success");
+      })
+      .catch(() => {
+        if (selectedDraftIdRef.current === draftId) setPanelStatus("error");
+      });
   }, []);
 
   useEffect(() => {
     if (!selectedDraftId) return;
-    loadDraftDetail(selectedDraftId);
+    void loadDraftDetail(selectedDraftId);
   }, [selectedDraftId, loadDraftDetail]);
 
   // The refresh every operator action (approve/reject/edit/re-judge) needs:
