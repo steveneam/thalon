@@ -12,6 +12,7 @@ import { readPromptFile } from "./prompt-file";
 
 const PROMPT_FILE = "fanout-generate.v1.md";
 const EXEMPLAR_PROMPT_FILE = "fanout-exemplar-context.v1.md";
+const IDENTITY_PROMPT_FILE = "fanout-identity-context.v1.md";
 
 /** `prompt_version` recorded on `fanout_runs` and every draft's `meta` (SPINE §3.2; charter B1.2-blocking provenance). */
 export function fanoutPromptVersion(): string {
@@ -23,6 +24,11 @@ export function exemplarPromptVersion(): string {
   return EXEMPLAR_PROMPT_FILE.replace(/\.md$/, "");
 }
 
+/** B3.8: recorded in draft meta whenever a fan-out ran identity-aware. Unlike the exemplar version this never enters the generation key — identity lives inside the brand profile, so `brandProfileVersion` (already in the key) fully determines it. */
+export function identityPromptVersion(): string {
+  return IDENTITY_PROMPT_FILE.replace(/\.md$/, "");
+}
+
 export interface GenerateDraftRequest {
   platform: string;
   sourceText: string;
@@ -30,6 +36,8 @@ export interface GenerateDraftRequest {
   platformProfile: PlatformProfile;
   /** B2.4: retrieved exemplar/voice-sample context, threaded into the prompt when a fan-out runs exemplar-aware. Absent for a plain run — every plain-run prompt stays byte-identical to pre-B2.4. */
   exemplarContext?: string;
+  /** B3.8: the profile's rendered brand-identity block (contracts `renderBrandIdentity` — the same text the judge grounds against). Absent when the active profile carries no identity content — identity-less prompts stay byte-identical to pre-B3.8. */
+  identityBlock?: string;
 }
 
 /** One driver invocation = one gateway call: the raw candidate plus its token spend. */
@@ -58,13 +66,17 @@ export type DraftGeneratorDriver = (req: GenerateDraftRequest) => Promise<Genera
 export function gatewayDraftGenerator(): DraftGeneratorDriver {
   return async (req) => {
     const modelId = modelTiers().draft;
-    const system = req.exemplarContext
-      ? `${readPromptFile(PROMPT_FILE)}\n\n${readPromptFile(EXEMPLAR_PROMPT_FILE)}`
-      : readPromptFile(PROMPT_FILE);
+    const systemParts = [readPromptFile(PROMPT_FILE)];
+    if (req.identityBlock) systemParts.push(readPromptFile(IDENTITY_PROMPT_FILE));
+    if (req.exemplarContext) systemParts.push(readPromptFile(EXEMPLAR_PROMPT_FILE));
+    const system = systemParts.join("\n\n");
     const prompt = [
       `PLATFORM: ${req.platform}`,
       `VOICE: ${JSON.stringify(req.voice)}`,
       `PLATFORM PROFILE: ${JSON.stringify(req.platformProfile)}`,
+      ...(req.identityBlock
+        ? [`BRAND IDENTITY (operator-asserted, judge-grounded):\n${req.identityBlock}`]
+        : []),
       ...(req.exemplarContext
         ? [`EXEMPLAR CONTEXT (grounding only — never reproduce verbatim):\n${req.exemplarContext}`]
         : []),

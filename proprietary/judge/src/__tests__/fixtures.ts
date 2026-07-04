@@ -12,6 +12,8 @@ export interface JudgeFixtureOpts {
   denylist?: string[];
   body?: string;
   tenantSlug?: string;
+  /** B3.8: identity on the tenant's active profile — the pipeline appends it as a grounding chunk. */
+  identity?: Record<string, unknown>;
 }
 
 /** Fresh in-memory db, one tenant with a configurable denylist profile, one `generated` draft. */
@@ -26,6 +28,7 @@ export async function judgeFixture(opts: JudgeFixtureOpts = {}): Promise<JudgeFi
       voice: { register: "plain" },
       denylist: opts.denylist ?? [],
       platformProfiles: { alpha: { charLimit: 280 } },
+      ...(opts.identity ? { identity: opts.identity } : {}),
     },
     activate: true,
   });

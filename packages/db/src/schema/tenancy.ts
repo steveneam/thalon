@@ -42,6 +42,8 @@ export const brandProfiles = pgTable(
     voice: jsonb("voice").notNull().default({}),
     denylist: jsonb("denylist").notNull().default([]),
     platformProfiles: jsonb("platform_profiles").notNull().default({}),
+    /** B3.8: durable company identity (facts, philosophy, audience, offers, links) — doubles as judge grounding, see contracts brandIdentitySchema. */
+    identity: jsonb("identity").notNull().default({}),
     version: integer("version").notNull(),
     active: boolean("active").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })

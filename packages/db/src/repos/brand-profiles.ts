@@ -1,6 +1,6 @@
 import {
   brandProfileConfigSchema,
-  type BrandProfileConfig,
+  type BrandProfileConfigInput,
   type TenantCtx,
 } from "@thalon/contracts";
 import { and, desc, eq } from "drizzle-orm";
@@ -17,7 +17,7 @@ export function brandProfilesRepo(db: Db) {
      */
     async create(
       ctx: TenantCtx,
-      input: { config: BrandProfileConfig; activate?: boolean },
+      input: { config: BrandProfileConfigInput; activate?: boolean },
     ): Promise<BrandProfile> {
       const config = brandProfileConfigSchema.parse(input.config);
       return db.transaction(async (tx) => {
@@ -41,6 +41,7 @@ export function brandProfilesRepo(db: Db) {
             voice: config.voice,
             denylist: config.denylist,
             platformProfiles: config.platformProfiles,
+            identity: config.identity,
             version,
             active: input.activate ?? false,
           })

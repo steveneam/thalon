@@ -45,7 +45,7 @@ describe("dogfood input as data (B2.1)", () => {
   it("loads and validates a tenant-run JSON file", () => {
     const input = loadDogfoodInput(writeTmpJson(validInput));
     expect(input.tenantSlug).toBe("tenant-two");
-    expect(input.brandConfig.platformProfiles.linkedin?.charLimit).toBe(2800);
+    expect(input.brandConfig.platformProfiles?.linkedin?.charLimit).toBe(2800);
     expect(input.platforms).toEqual(["linkedin", "x"]);
   });
 

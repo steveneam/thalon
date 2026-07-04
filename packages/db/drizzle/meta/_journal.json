@@ -15,6 +15,13 @@
       "when": 1783162546305,
       "tag": "0001_icy_thunderbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783179577431,
+      "tag": "0002_open_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

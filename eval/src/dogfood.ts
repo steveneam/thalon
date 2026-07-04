@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { z } from "zod";
-import { brandProfileConfigSchema, tenantCtx, type PlatformProfile } from "@thalon/contracts";
+import {
+  brandProfileConfigSchema,
+  tenantCtx,
+  type BrandProfileConfigInput,
+} from "@thalon/contracts";
 import { openDb, type Draft, type Repos } from "@thalon/db";
 import {
   ingestSource,
@@ -16,11 +20,7 @@ export interface DogfoodInput {
   tenantSlug: string;
   tenantName: string;
   /** Used only when the tenant has no active brand profile yet — dogfood never clobbers existing runtime config. */
-  brandConfig: {
-    voice: Record<string, unknown>;
-    denylist: string[];
-    platformProfiles: Record<string, PlatformProfile>;
-  };
+  brandConfig: BrandProfileConfigInput;
   prompt: string;
   platforms: string[];
 }
@@ -160,6 +160,27 @@ export const TENANT_ZERO: DogfoodInput = {
     },
     denylist: ["guaranteed", "can't lose", "risk-free"],
     platformProfiles: {},
+    // B3.8: identity is saved once here and rides along with every
+    // generation automatically — the operator never re-types company
+    // context. Fact-bearing lines double as judge grounding, so each is a
+    // short, individually-checkable statement about the engine itself.
+    identity: {
+      company: "Thalon",
+      oneLiner:
+        "A generic, multi-tenant content and social-automation engine that turns one source or prompt into judged, platform-native drafts.",
+      philosophy:
+        "Safety-gated automation: no draft reaches the operator unjudged, and nothing publishes without human approval.",
+      audience: "Solo founders and small teams who want a steady content pipeline without hiring for it.",
+      offers: [
+        "Fan-out from one source into platform-native drafts",
+        "Grounding-judged drafts with a human approve queue",
+      ],
+      facts: [
+        "Every draft passes a denylist gate and a two-tier grounding judge before it can reach the approve queue.",
+        "No publish path is wired; every draft stops at human approval.",
+      ],
+      topics: ["content automation", "building in public"],
+    },
   },
   prompt: [
     "Sprint 1 of the engine is code-complete. What shipped:",

@@ -1,4 +1,10 @@
-import { platformProfileSchema, type PlatformProfile, type TenantCtx } from "@thalon/contracts";
+import {
+  brandIdentitySchema,
+  platformProfileSchema,
+  renderBrandIdentity,
+  type PlatformProfile,
+  type TenantCtx,
+} from "@thalon/contracts";
 import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
 import { retrieveExemplarContext, runExemplarOverlapGate, type ExemplarContext } from "../exemplar";
@@ -8,6 +14,7 @@ import {
   exemplarPromptVersion,
   fanoutPromptVersion,
   gatewayDraftGenerator,
+  identityPromptVersion,
   type DraftGeneratorDriver,
 } from "./shell/generator";
 import { generateValidatedDraft } from "./validate-shell-output";
@@ -171,6 +178,14 @@ export async function runFanout(
   const voice = (profile.voice as Record<string, unknown> | null) ?? {};
   const tenantPlatformProfiles =
     (profile.platformProfiles as Record<string, unknown> | null) ?? {};
+  // B3.8: the profile's identity rides along automatically — the operator
+  // never re-supplies company context per run. Rendered once here with the
+  // SAME contracts function the judge grounds against; empty identity ⇒
+  // undefined ⇒ the prompt stays byte-identical to pre-B3.8. No generation-key
+  // input: identity lives inside the profile, so brandProfileVersion (already
+  // in the key) fully determines it.
+  const identityBlock =
+    renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {})) || undefined;
   const rawDriver = deps.driver ?? gatewayDraftGenerator();
 
   const generated: Draft[] = [];
@@ -184,6 +199,7 @@ export async function runFanout(
         sourceText,
         voice,
         tenantPlatformProfiles,
+        identityBlock,
         brandProfileVersion: profile.version,
         promptVersion,
         platform,
@@ -211,6 +227,8 @@ interface DraftSpec {
   sourceText: string;
   voice: Record<string, unknown>;
   tenantPlatformProfiles: Record<string, unknown>;
+  /** B3.8: rendered identity block from the active profile — absent when the profile has no identity content. */
+  identityBlock?: string;
   brandProfileVersion: number;
   promptVersion: string;
   platform: string;
@@ -251,6 +269,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     voice: spec.voice,
     platformProfile,
     exemplarContext: spec.exemplarContext?.contextBlock,
+    identityBlock: spec.identityBlock,
   });
   if (!result.output) {
     throw new Error(
@@ -269,6 +288,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
       promptVersion: spec.promptVersion,
       brandProfileVersion: spec.brandProfileVersion,
       platformProfileVersion: profileVersion,
+      ...(spec.identityBlock ? { identityPromptVersion: identityPromptVersion() } : {}),
       ...(spec.exemplarContext ? { exemplarIds: spec.exemplarContext.exemplarIds } : {}),
     },
   });

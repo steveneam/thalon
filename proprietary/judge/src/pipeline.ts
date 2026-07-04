@@ -1,4 +1,9 @@
-import { FINAL_JUDGE_GATE, type TenantCtx } from "@thalon/contracts";
+import {
+  FINAL_JUDGE_GATE,
+  brandIdentitySchema,
+  renderBrandIdentity,
+  type TenantCtx,
+} from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
 import { runG1Denylist } from "./g1-denylist";
@@ -55,6 +60,26 @@ export async function runJudgePipeline(
   const profile = await repos.brandProfiles.getActive(input.ctx);
   // Per-tenant denylist is DATA from brand_profiles — never hard-coded here.
   const denylist = (profile?.denylist as string[] | undefined) ?? [];
+
+  // B3.8: the ACTIVE profile's identity is appended as grounding evidence for
+  // every judged draft, inside the pipeline so no caller can forget it —
+  // generation was allowed to draw claims from the same rendered block
+  // (contracts renderBrandIdentity, one canonical rendering for both sides).
+  // Deliberately the CURRENT active identity, not the version the draft was
+  // generated under: a claim the tenant no longer asserts must fail grounding
+  // on re-judge, not pass on stale facts. Empty identity appends nothing.
+  const identityText = profile
+    ? renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {}))
+    : "";
+  const chunks: SourceChunkInput[] = identityText
+    ? [
+        ...input.chunks,
+        {
+          ref: `profile:v${profile!.version}:identity`,
+          text: `TENANT IDENTITY (operator-asserted):\n${identityText}`,
+        },
+      ]
+    : input.chunks;
   const g1 = runG1Denylist({ body: judging.body, denylist });
   await repos.judgeResults.append(input.ctx, {
     draftId: judging.id,
@@ -69,8 +94,8 @@ export async function runJudgePipeline(
     return { status: "blocked", draft: blocked, reason: "g1 denylist fail" };
   }
 
-  const screen = await runTier(repos, input, judging, "screen", input.screenDriver);
-  const final = await runTier(repos, input, judging, "final", input.finalDriver);
+  const screen = await runTier(repos, input, chunks, judging, "screen", input.screenDriver);
+  const final = await runTier(repos, input, chunks, judging, "final", input.finalDriver);
 
   if (screen.verdict === "pass" && final.verdict === "pass") {
     const queued = await repos.drafts.transition(input.ctx, judging.id, "queued");
@@ -87,6 +112,7 @@ export async function runJudgePipeline(
 async function runTier(
   repos: Repos,
   input: RunJudgePipelineInput,
+  chunks: SourceChunkInput[],
   draft: Draft,
   tier: JudgeTier,
   driver: JudgeModelDriver,
@@ -114,7 +140,7 @@ async function runTier(
       },
     });
   const startedAt = Date.now();
-  const result = await callTierJudge(guarded, { tier, body: draft.body, chunks: input.chunks });
+  const result = await callTierJudge(guarded, { tier, body: draft.body, chunks });
   const latencyMs = Date.now() - startedAt;
   await repos.judgeResults.append(input.ctx, {
     draftId: draft.id,

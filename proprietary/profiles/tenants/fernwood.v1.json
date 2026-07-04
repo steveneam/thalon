@@ -16,6 +16,21 @@
         "hashtagPolicy": "at most two, and only if they name the activity (e.g. #hiking); never invented brand tags",
         "ctaPolicy": "soft invitation only - no urgency language"
       }
+    },
+    "identity": {
+      "company": "Fernwood Outfitters",
+      "oneLiner": "A fictional, family-run hiking and camping gear shop that repairs more gear than it sells.",
+      "philosophy": "Keep usable gear out of landfill; sell only what genuinely needs replacing.",
+      "audience": "Local hikers and campers who would rather repair good gear than rebuy it.",
+      "offers": [
+        "Gear repair for packs, tents, and rain jackets of any brand",
+        "Hiking and camping gear, sold with repair-first advice"
+      ],
+      "facts": [
+        "Family-run shop with two full-time repair technicians.",
+        "Repairs more gear than it sells."
+      ],
+      "topics": ["gear repair", "hiking", "camping", "sustainability"]
     }
   },
   "prompt": "Fernwood Outfitters is a fictional, family-run hiking and camping gear shop used as demo data. This month it is announcing a free gear-repair clinic: every first Saturday, 9am to noon, at the shop, customers can bring any brand of pack, tent, or rain jacket for zipper, seam, and buckle repairs at no charge. The clinic is staffed by the shop's two full-time repair technicians. Spots are limited to twenty walk-ins per session, first come first served. The aim is to keep usable gear out of landfill; last year's pilot repaired 140 items.",
