@@ -7,7 +7,7 @@ import {
   type TenantCtx,
 } from "@thalon/contracts";
 import { and, eq } from "drizzle-orm";
-import { InvariantViolationError, NotFoundError } from "../errors";
+import { ConcurrentUpdateError, InvariantViolationError, NotFoundError } from "../errors";
 import { sha256Hex } from "../hash";
 import { approvals, drafts, judgeResults } from "../schema";
 import type { Db, Draft, Executor, Tx } from "../types";
@@ -206,6 +206,56 @@ export function draftsRepo(db: Db) {
       opts: TransitionOpts = {},
     ): Promise<Draft> {
       return db.transaction((tx) => transitionInTx(tx, ctx, draftId, to, opts));
+    },
+
+    /**
+     * Merges a patch into `drafts.meta` — never touches `status` or `body`
+     * (the ONE writer of `drafts.status` stays `transition` above). B2.5's
+     * demo-capture write-back is the first caller: it needs to record
+     * `captureStatus`/`captureRef` onto an already-`approved` draft's meta
+     * without any lifecycle transition.
+     *
+     * Optimistic concurrency: `expectedUpdatedAt` must match the row's
+     * CURRENT `updated_at` or the write is rejected with
+     * `ConcurrentUpdateError` — never a silent last-write-wins overwrite.
+     * The UPDATE's own WHERE clause carries the check (not just the
+     * read-time comparison), so it is race-safe even if another write lands
+     * between this call's read and its write. Callers pass the
+     * `updatedAt` from whatever read produced the meta they're patching
+     * (e.g. B2.5's `driveDemoCapture` reads the draft once at drive start and
+     * reuses that same timestamp for its eventual write).
+     */
+    async updateMeta(
+      ctx: TenantCtx,
+      draftId: string,
+      expectedUpdatedAt: Date,
+      metaPatch: Record<string, unknown>,
+    ): Promise<Draft> {
+      return db.transaction(async (tx) => {
+        const draft = await getDraftScoped(tx, ctx, draftId);
+        const nextMeta = { ...(draft.meta as Record<string, unknown>), ...metaPatch };
+        const [updated] = await tx
+          .update(drafts)
+          .set({ meta: nextMeta, updatedAt: new Date() })
+          .where(
+            and(
+              eq(drafts.id, draftId),
+              eq(drafts.tenantId, ctx.tenantId),
+              eq(drafts.updatedAt, expectedUpdatedAt),
+            ),
+          )
+          .returning();
+        if (!updated) {
+          throw new ConcurrentUpdateError("draft", draftId);
+        }
+        await appendEvent(tx, ctx, {
+          entityType: "draft",
+          entityId: draftId,
+          event: "draft.meta_updated",
+          payload: { keys: Object.keys(metaPatch) },
+        });
+        return updated;
+      });
     },
   };
 }
