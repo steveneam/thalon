@@ -257,6 +257,44 @@ export function draftsRepo(db: Db) {
         return updated;
       });
     },
+
+    /**
+     * B2.6: the operator re-judge escape hatch — re-runs judging on the
+     * UNMODIFIED draft, for either of two cases edit alone can't reach:
+     * (a) a verdict-`blocked` draft the operator wants retried as-is, or
+     * (b) a draft an operational halt (e.g. BudgetExceededError — a hard
+     * stop, not a verdict) stranded in `judging` with no automatic way back.
+     * Composes ONLY `transitionInTx`, the one writer of drafts.status —
+     * never a new side door. Case (b) walks judging -> blocked -> judging:
+     * both edges already exist in the state machine, and NEITHER can ever
+     * land on `queued` itself — only a fresh judge pass's own `-> queued`
+     * transition re-verifies I1 — so this action can never queue a draft
+     * without a fresh judge pass.
+     */
+    async reJudge(
+      ctx: TenantCtx,
+      draftId: string,
+      opts: TransitionOpts = {},
+    ): Promise<Draft> {
+      return db.transaction(async (tx) => {
+        const draft = await getDraftScoped(tx, ctx, draftId);
+        if (draft.status !== "judging" && draft.status !== "blocked") {
+          throw new Error(
+            `re-judge requires a "blocked" draft or a "judging" draft stuck by an operational halt, got "${draft.status}"`,
+          );
+        }
+        if (draft.status === "judging") {
+          await transitionInTx(tx, ctx, draftId, "blocked", {
+            ...opts,
+            reason: opts.reason ?? "operator re-judge: releasing an operational halt",
+          });
+        }
+        return transitionInTx(tx, ctx, draftId, "judging", {
+          ...opts,
+          reason: opts.reason ?? "operator re-judge",
+        });
+      });
+    },
   };
 }
 

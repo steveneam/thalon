@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { FormatDetail } from "@/components/approve/format-detail";
 import { JudgeBadge } from "@/components/approve/judge-badge";
 import type { GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
@@ -15,10 +16,11 @@ interface ApprovePanelProps {
   onApprove: () => void;
   onReject: () => void;
   onEditSave: (editedBody: string) => void;
+  onReJudge: () => void;
 }
 
-/** Zone 3: full body, per-variant judge badge, and the approve / reject / edit actions. */
-export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onReject, onEditSave }: ApprovePanelProps) {
+/** Zone 3: full body, per-variant judge badge, and the approve / reject / edit / re-judge actions. */
+export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onReject, onEditSave, onReJudge }: ApprovePanelProps) {
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
 
@@ -35,6 +37,11 @@ export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onR
   // approve/reject only leave `queued` (SPINE §1.1 state machine); an edit is legal from queued or blocked.
   const canApproveReject = draft.status === "queued";
   const canEdit = draft.status === "queued" || draft.status === "blocked";
+  // Re-judge (unmodified retry) is legal from `blocked` (a real verdict the
+  // operator wants retried as-is) and from `judging` (a draft an operational
+  // halt — e.g. a budget cap, not a verdict — may have stranded there with no
+  // other way back; see repos.drafts.reJudge).
+  const canReJudge = draft.status === "blocked" || draft.status === "judging";
 
   function startEdit() {
     setEditedBody(draft!.body);
@@ -53,6 +60,7 @@ export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onR
         <span className="text-xs text-muted-foreground">{draft.status}</span>
       </div>
       <JudgeBadge results={judgeResults} bodyHash={draft.bodyHash} />
+      <FormatDetail draft={draft} />
       {editing ? (
         <textarea
           aria-label="Edit draft body"
@@ -84,11 +92,17 @@ export function ApprovePanel({ status, draft, judgeResults, busy, onApprove, onR
             <Button size="sm" variant="outline" onClick={startEdit} disabled={busy || !canEdit}>
               Edit
             </Button>
+            <Button size="sm" variant="outline" onClick={onReJudge} disabled={busy || !canReJudge}>
+              Re-judge
+            </Button>
           </>
         )}
       </div>
       {draft.status === "judging" && (
-        <p className="text-xs text-muted-foreground">Re-judging after your edit — verdicts will refresh here once the judge lane runs.</p>
+        <p className="text-xs text-muted-foreground">
+          Judging — verdicts will refresh here once the judge lane runs. Stuck here with no verdicts appearing? An
+          operational halt (e.g. a budget cap) may have stranded this draft — use Re-judge to retry it unmodified.
+        </p>
       )}
     </section>
   );

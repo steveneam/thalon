@@ -2,34 +2,47 @@ import type { TenantCtx } from "@thalon/contracts";
 import { NotFoundError, type Draft, type FanoutRun, type JudgeResult, type Repos } from "@thalon/db";
 
 /**
- * @thalon/db exposes fanoutRuns.get / drafts.get by id only — there is no
- * bulk "list runs" or "list drafts for a run" repo query yet (a repo-surface
- * gap; see the B1.4 handoff notes). This hydrates both lists from the
- * append-only events spine (invariant I4: every create appends exactly one
- * event), which keeps apps/web entirely inside the repos surface with no
- * direct DB access. Fine at Sprint-1 scale; a real list query would replace
- * this outright.
+ * B2.6: reads the bulk `fanoutRuns.list` / `drafts.listByRun` repo queries
+ * directly — closes the Sprint-1 follow-up noted in the B1.5 handoff (this
+ * used to hydrate both lists from the events spine as a workaround for
+ * neither existing yet).
  */
-const FEED_EVENTS_LIMIT = 200;
-const DRAFT_EVENTS_LIMIT = 500;
+const FEED_LIMIT = 50;
 
-export async function listRunsFeed(repos: Repos, ctx: TenantCtx, limit = 50): Promise<FanoutRun[]> {
-  const created = await repos.events.list(ctx, { entityType: "fanout_run", limit: FEED_EVENTS_LIMIT });
-  const runIds = created.filter((e) => e.event === "fanout_run.created").map((e) => e.entityId);
-  const runs = await Promise.all(runIds.map((id) => repos.fanoutRuns.get(ctx, id)));
-  return runs
-    .filter((r): r is FanoutRun => r !== null)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, limit);
+export interface RunFeedItem extends FanoutRun {
+  /**
+   * false when this run has fewer distinct draft platforms than it requested
+   * — either a total abort (zero drafts persisted before an irrecoverable
+   * failure) or a partial one (some platforms generated, a later one threw
+   * and nobody has replayed the fan-out to backfill the rest yet). Lets the
+   * feed surface these distinctly instead of as an indistinguishable empty
+   * row (Sprint-1 follow-up).
+   */
+  draftsComplete: boolean;
+}
+
+function isRunComplete(run: FanoutRun, drafts: Draft[]): boolean {
+  const expected = Array.isArray(run.platforms) ? (run.platforms as unknown[]).filter((p): p is string => typeof p === "string") : [];
+  if (expected.length === 0) return true;
+  const withDrafts = new Set(drafts.map((d) => d.platform));
+  return expected.every((platform) => withDrafts.has(platform));
+}
+
+export async function listRunsFeed(repos: Repos, ctx: TenantCtx, limit = FEED_LIMIT): Promise<RunFeedItem[]> {
+  const runs = await repos.fanoutRuns.list(ctx, { limit });
+  return Promise.all(
+    runs.map(async (run) => ({
+      ...run,
+      draftsComplete: isRunComplete(run, await repos.drafts.listByRun(ctx, run.id)),
+    })),
+  );
 }
 
 export async function listRunDrafts(repos: Repos, ctx: TenantCtx, runId: string): Promise<Draft[]> {
-  const created = await repos.events.list(ctx, { entityType: "draft", limit: DRAFT_EVENTS_LIMIT });
-  const draftIds = created.filter((e) => e.event === "draft.created").map((e) => e.entityId);
-  const drafts = await Promise.all(draftIds.map((id) => getDraftOrNull(repos, ctx, id)));
-  return drafts
-    .filter((d): d is Draft => d !== null && d.fanoutRunId === runId)
-    .sort((a, b) => a.platform.localeCompare(b.platform) || a.createdAt.getTime() - b.createdAt.getTime());
+  const drafts = await repos.drafts.listByRun(ctx, runId);
+  return [...drafts].sort(
+    (a, b) => a.platform.localeCompare(b.platform) || a.createdAt.getTime() - b.createdAt.getTime(),
+  );
 }
 
 export async function getDraftDetail(

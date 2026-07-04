@@ -1,5 +1,5 @@
 import type { TenantCtx } from "@thalon/contracts";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { fanoutRuns } from "../schema";
 import type { Db, FanoutRun } from "../types";
 import { appendEvent } from "./events";
@@ -89,6 +89,20 @@ export function fanoutRunsRepo(db: Db) {
         )
         .limit(1);
       return row ?? null;
+    },
+
+    /**
+     * Bulk, newest-first list for one tenant (B2.6: closes the Sprint-1
+     * follow-up noted in the B1.5 handoff — apps/web previously hydrated its
+     * feed via the events spine as a workaround for this not existing yet).
+     */
+    async list(ctx: TenantCtx, opts: { limit?: number } = {}): Promise<FanoutRun[]> {
+      return db
+        .select()
+        .from(fanoutRuns)
+        .where(eq(fanoutRuns.tenantId, ctx.tenantId))
+        .orderBy(desc(fanoutRuns.createdAt))
+        .limit(opts.limit ?? 50);
     },
   };
 }

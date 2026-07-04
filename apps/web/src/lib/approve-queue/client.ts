@@ -1,4 +1,4 @@
-import type { ActionResult, DraftDetail, FeedRun, GridDraft } from "./types";
+import type { ActionResult, DraftDetail, FeedRun, GridDraft, ReJudgeResult } from "./types";
 
 async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`request failed: ${res.status}`);
@@ -40,4 +40,9 @@ export async function editDraft(draftId: string, editedBody: string): Promise<Ac
     body: JSON.stringify({ editedBody }),
   });
   return asJson<ActionResult>(res);
+}
+
+export async function reJudgeDraft(draftId: string): Promise<ReJudgeResult> {
+  const res = await fetch(`/api/drafts/${draftId}/rejudge`, { method: "POST" });
+  return asJson<ReJudgeResult>(res);
 }

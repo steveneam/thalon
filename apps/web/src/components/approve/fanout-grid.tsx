@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatMsAsClock, parseClipPlanMeta } from "@/lib/approve-queue/formats/clip-plan";
 import { cn } from "@/lib/utils";
 import type { GridDraft } from "@/lib/approve-queue/types";
 
@@ -52,22 +53,37 @@ export function FanoutGrid({ status, drafts, selectedDraftId, onSelect }: Fanout
               <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{platform}</h3>
               {drafts
                 .filter((d) => d.platform === platform)
-                .map((draft) => (
-                  <button
-                    key={draft.id}
-                    type="button"
-                    aria-label={`Select ${draft.platform} draft ${draft.id}`}
-                    aria-pressed={draft.id === selectedDraftId}
-                    onClick={() => onSelect(draft.id)}
-                    className={cn(
-                      "flex flex-col gap-1 rounded-lg border border-border p-2 text-left text-sm transition-colors hover:bg-muted focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                      draft.id === selectedDraftId && "bg-muted",
-                    )}
-                  >
-                    <span className="line-clamp-3 text-foreground">{draft.body}</span>
-                    <Badge variant="outline">{draft.status}</Badge>
-                  </button>
-                ))}
+                .map((draft) => {
+                  const clipPlan = draft.format === "clip_plan" ? parseClipPlanMeta(draft.meta) : null;
+                  return (
+                    <button
+                      key={draft.id}
+                      type="button"
+                      aria-label={`Select ${draft.platform} draft ${draft.id}`}
+                      aria-pressed={draft.id === selectedDraftId}
+                      onClick={() => onSelect(draft.id)}
+                      className={cn(
+                        "flex flex-col gap-1 rounded-lg border border-border p-2 text-left text-sm transition-colors hover:bg-muted focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                        draft.id === selectedDraftId && "bg-muted",
+                      )}
+                    >
+                      <span className="line-clamp-3 text-foreground">{draft.body}</span>
+                      <span className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline">{draft.status}</Badge>
+                        {draft.format && draft.format !== "post" && (
+                          <Badge variant="secondary" className="font-mono text-[10px]">
+                            {draft.format}
+                          </Badge>
+                        )}
+                        {clipPlan && (
+                          <Badge variant="outline" className="font-mono text-[10px]">
+                            {formatMsAsClock(clipPlan.startMs)}–{formatMsAsClock(clipPlan.endMs)}
+                          </Badge>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           ))}
         </div>

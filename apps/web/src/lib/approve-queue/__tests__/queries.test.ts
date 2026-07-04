@@ -1,3 +1,4 @@
+import { sha256Hex } from "@thalon/db";
 import { afterEach, describe, expect, it } from "vitest";
 import { getDraftDetail, listRunDrafts, listRunsFeed } from "../queries";
 import { seedAdditionalRun, seedDraft, type Seeded } from "./test-helpers";
@@ -16,6 +17,66 @@ describe("approve-queue queries (events-hydrated lists — see B1.4 handoff note
 
     const runs = await listRunsFeed(handle.repos, ctx);
     expect(runs.map((r) => r.id)).toEqual([second.id, run.id]);
+  });
+
+  it("flags draftsComplete=true when every requested platform has a draft (the normal case)", async () => {
+    seeded = await seedDraft({ platform: "linkedin" });
+    const { handle, ctx, run } = seeded;
+
+    const runs = await listRunsFeed(handle.repos, ctx);
+    expect(runs.find((r) => r.id === run.id)?.draftsComplete).toBe(true);
+  });
+
+  it("flags draftsComplete=false for a run with fewer distinct draft platforms than requested (a partial fan-out)", async () => {
+    seeded = await seedDraft({ platform: "linkedin" });
+    const { handle, ctx } = seeded;
+    const profile = await handle.repos.brandProfiles.getActive(ctx);
+    const source = await handle.repos.sources.create(ctx, {
+      kind: "prompt",
+      contentHash: sha256Hex("partial-run-source"),
+    });
+    const partialRun = await handle.repos.fanoutRuns.create(ctx, {
+      sourceId: source.id,
+      brandProfileId: profile!.id,
+      brandProfileVersion: profile!.version,
+      platforms: ["linkedin", "x"],
+      promptVersion: "fanout.v1",
+      model: "test/model",
+      generationKey: sha256Hex(`${ctx.tenantId}:partial-run`),
+    });
+    // Only "linkedin" ever got persisted — "x" is what a mid-run irrecoverable failure left missing.
+    await handle.repos.drafts.create(ctx, {
+      fanoutRunId: partialRun.id,
+      sourceId: source.id,
+      platform: "linkedin",
+      body: "partial",
+      generationKey: sha256Hex(`${ctx.tenantId}:partial-draft`),
+    });
+
+    const runs = await listRunsFeed(handle.repos, ctx);
+    expect(runs.find((r) => r.id === partialRun.id)?.draftsComplete).toBe(false);
+  });
+
+  it("flags draftsComplete=false for a run with zero drafts (total abort before the first platform persisted)", async () => {
+    seeded = await seedDraft({ platform: "linkedin" });
+    const { handle, ctx } = seeded;
+    const profile = await handle.repos.brandProfiles.getActive(ctx);
+    const source = await handle.repos.sources.create(ctx, {
+      kind: "prompt",
+      contentHash: sha256Hex("aborted-run-source"),
+    });
+    const abortedRun = await handle.repos.fanoutRuns.create(ctx, {
+      sourceId: source.id,
+      brandProfileId: profile!.id,
+      brandProfileVersion: profile!.version,
+      platforms: ["linkedin", "x"],
+      promptVersion: "fanout.v1",
+      model: "test/model",
+      generationKey: sha256Hex(`${ctx.tenantId}:aborted-run`),
+    });
+
+    const runs = await listRunsFeed(handle.repos, ctx);
+    expect(runs.find((r) => r.id === abortedRun.id)?.draftsComplete).toBe(false);
   });
 
   it("scopes drafts to one run only", async () => {

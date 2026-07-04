@@ -44,6 +44,11 @@ export function FeedPanel({ status, runs, selectedRunId, onSelect }: FeedPanelPr
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   {new Date(run.createdAt).toLocaleString()}
                   <Badge variant="outline">{run.status}</Badge>
+                  {!run.draftsComplete && (
+                    <Badge variant="destructive" title="This run has fewer drafts than the platforms it requested — an aborted or partial fan-out.">
+                      Incomplete
+                    </Badge>
+                  )}
                 </span>
               </button>
             </li>

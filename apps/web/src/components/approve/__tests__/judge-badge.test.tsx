@@ -38,4 +38,15 @@ describe("JudgeBadge", () => {
     expect(screen.getByText("g3_screen: pass")).toBeInTheDocument();
     expect(screen.getByText("g3_final: pass")).toBeInTheDocument();
   });
+
+  it("renders blocked-by-overlap distinctly, with the exemplar_overlap gate legible via the existing per-gate badge", () => {
+    render(
+      <JudgeBadge
+        results={[r("g1", "pass"), r("g3_screen", "pass"), r("g3_final", "pass"), r("exemplar_overlap", "fail")]}
+        bodyHash={HASH}
+      />,
+    );
+    expect(screen.getByText("Blocked — exemplar overlap")).toBeInTheDocument();
+    expect(screen.getByText("exemplar_overlap: fail")).toBeInTheDocument();
+  });
 });
