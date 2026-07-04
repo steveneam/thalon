@@ -3,6 +3,8 @@
  * index. B1.2 landed: src/fanout/ — one source -> N platform-native drafts.
  * B2.3 landed: src/waterfall/ — a timed source -> candidate clip windows ->
  * highlight-select -> N clip_plan drafts.
+ * B2.4 landed: src/exemplar/ — exemplar/voice_sample ingest + retrieval into
+ * fan-out context, with its PII-strip and overlap-gate ratchets.
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -12,3 +14,4 @@
 export * from "./ingest";
 export * from "./fanout";
 export * from "./waterfall";
+export * from "./exemplar";
