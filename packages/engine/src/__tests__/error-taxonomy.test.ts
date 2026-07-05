@@ -15,6 +15,7 @@ import {
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { runOrigination } from "../origination/origination";
+import { createFakePillarScriptDriver } from "../origination/shell/generator";
 import { createFakeRenderTarget } from "../render/fake-target";
 import { renderPillar } from "../render/render";
 import { deployWebPage } from "../webpage/deploy";
@@ -156,5 +157,39 @@ describe("error taxonomy (B4.5 ratchet)", () => {
     expect((rejection as IrrecoverableGenerationError).attempts).toBe(3);
     expect((rejection as IrrecoverableGenerationError).lastError).toBe("shell exploded");
     expect((rejection as Error).message).toMatch(/irrecoverable after 3 attempt\(s\): shell exploded/);
+
+    // B4.5 residue: the run row keeps the thrown message verbatim for
+    // operator triage (the throw alone dies with the process).
+    const [run] = await repos.fanoutRuns.list(ctx);
+    expect(run.lastError).toBe((rejection as Error).message);
+  });
+
+  it("a successful backfill on the same run clears last_error", async () => {
+    const { ctx, repos } = await db();
+    const { source } = await repos.sourceChunks.ingest(ctx, {
+      kind: "prompt",
+      contentHash: sha256Hex("tax brief 2"),
+      chunks: [{ seq: 0, text: "Brief.", tokenCount: 1, contentHash: sha256Hex("tax2-0") }],
+    });
+    const request = { promptSourceId: source.id };
+    const alwaysThrows = async () => {
+      throw new Error("shell exploded");
+    };
+    await runOrigination(ctx, repos, request, {
+      driver: alwaysThrows,
+      capTokens: 1_000_000,
+    }).catch(() => undefined);
+    const [failedRun] = await repos.fanoutRuns.list(ctx);
+    expect(failedRun.lastError).toMatch(/shell exploded/);
+
+    // Same key material -> the backfill path reuses the failed run.
+    const result = await runOrigination(ctx, repos, request, {
+      driver: createFakePillarScriptDriver(),
+      capTokens: 1_000_000,
+    });
+    expect(result.runId).toBe(failedRun.id);
+    expect(result.created).toBe(false);
+    expect(result.draft.status).toBe("generated");
+    expect((await repos.fanoutRuns.get(ctx, failedRun.id))?.lastError).toBeNull();
   });
 });

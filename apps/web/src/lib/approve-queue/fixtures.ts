@@ -24,6 +24,7 @@ export function run(id: string, createdAt: string, draftsComplete = true): FeedR
     params: {},
     generationKey: `gen-${id}`,
     status: "complete",
+    lastError: null,
     createdAt,
     draftsComplete,
   };

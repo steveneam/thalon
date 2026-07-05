@@ -165,7 +165,10 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
     // recovered here via the events audit spine (I4), since runFanout itself
     // has nothing left to hand back after throwing.
     const runEventsBefore = await repos.events.list(ctx, { entityType: "fanout_run" });
-    expect(runEventsBefore).toHaveLength(1);
+    expect(runEventsBefore.map((e) => e.event)).toEqual([
+      "fanout_run.created",
+      "fanout_run.last_error_recorded", // B4.5: x's failure is on the run row for triage
+    ]);
     const runIdBefore = runEventsBefore[0].entityId;
     const draftEventsBefore = await repos.events.list(ctx, { entityType: "draft" });
     expect(draftEventsBefore).toHaveLength(1);
@@ -195,6 +198,9 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
 
     const drafts = await repos.drafts.listByRun(ctx, runIdBefore);
     expect(drafts).toHaveLength(2);
+
+    // B4.5: the completed backfill cleared the run's triage record.
+    expect((await repos.fanoutRuns.get(ctx, runIdBefore))?.lastError).toBeNull();
   });
 
   it("a fanned-out draft cannot reach queued or approved without passing through the judge", async () => {

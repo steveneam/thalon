@@ -125,6 +125,8 @@ export const fanoutRuns = pgTable(
     params: jsonb("params").notNull().default({}),
     generationKey: text("generation_key").notNull().unique(),
     status: text("status").notNull().default("pending"),
+    /** B4.5 operator triage: the LAST irrecoverable failure on this run, verbatim; null once a later pass on the same run succeeds. Written only via fanoutRuns.recordLastError (events-audited). */
+    lastError: text("last_error"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

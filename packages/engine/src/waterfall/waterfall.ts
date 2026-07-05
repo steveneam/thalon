@@ -1,5 +1,11 @@
 import { platformProfileSchema, type PlatformProfile, type TenantCtx } from "@thalon/contracts";
-import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
+import {
+  IrrecoverableGenerationError,
+  sha256Hex,
+  stableStringify,
+  type Draft,
+  type Repos,
+} from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
 import { loadPlatformProfile } from "../fanout/profiles";
 import { clipPlanDraftMetaSchema } from "./schemas";
@@ -175,6 +181,12 @@ export async function runWaterfall(
     generated.push(...platformDrafts);
   }
 
+  // B4.5: a completed backfill clears the stale failure record (only the
+  // backfill path can carry one — a freshly created run never had it).
+  if (existingRun?.lastError) {
+    await repos.fanoutRuns.recordLastError(ctx, runId, null);
+  }
+
   return { runId, created, drafts: [...existingDrafts, ...generated] };
 }
 
@@ -237,9 +249,15 @@ async function generatePlatformClipPlans(
     candidateWindows: spec.candidateWindows,
   });
   if (!result.output) {
-    throw new Error(
+    const error = new IrrecoverableGenerationError(
       `highlight-select for platform "${spec.platform}" was irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
+      result.attempts,
+      result.lastError,
     );
+    // B4.5: the run row keeps the failure for operator triage — recorded
+    // BEFORE the throw so a caller that crashes still leaves the trail.
+    await guard.repos.fanoutRuns.recordLastError(guard.ctx, spec.runId, error.message);
+    throw error;
   }
 
   const drafts: Draft[] = [];
