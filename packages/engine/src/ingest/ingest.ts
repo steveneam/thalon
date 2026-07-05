@@ -4,6 +4,7 @@ import {
   getObjectStore,
   getTracer,
   modelTiers,
+  objectPrefix,
   readEnv,
   type ObjectStore,
   type Tracer,
@@ -173,7 +174,8 @@ function extractForKind(request: UntimedIngestRequest, rawText: string): { text:
 }
 
 async function storeRaw(store: ObjectStore, contentHash: string, buffer: Buffer): Promise<string> {
-  const key = `sources/${contentHash}`;
+  // B4.6 key scheme (byte-identical to the pre-helper literal).
+  const key = objectPrefix("sources", contentHash);
   await store.put(key, buffer);
   return key;
 }

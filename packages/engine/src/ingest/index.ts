@@ -16,9 +16,26 @@ export {
 export {
   captionFileProvider,
   getTranscriptProvider,
+  registeredTranscriptProviders,
   type TranscriptProvider,
   type TranscriptRequest,
 } from "./transcript";
+export {
+  parseWhisperSegments,
+  whisperLocalProvider,
+  type WhisperRunner,
+} from "./whisper-provider";
+export {
+  hostedVendorProvider,
+  type HostedVendorConfig,
+  type HostedVendorDeps,
+} from "./hosted-transcript-provider";
+export {
+  ingestVideoUrl,
+  type VideoUrlIngestDeps,
+  type VideoUrlIngestRequest,
+  type VideoUrlIngestResult,
+} from "./ingest-video-url";
 export { extractDoc, extractHtml, extractPrompt, type ExtractedContent } from "./extract";
 export { getFetcher, HttpFetcher, type FetchedPage, type Fetcher } from "./fetcher";
 export {
