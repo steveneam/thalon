@@ -48,6 +48,11 @@ export function sourcesRepo(db: Db) {
       return row ?? null;
     },
 
+    /** B4.6: tenant-scoped enumeration for the object-store orphan sweep (collects every `raw_ref` still referenced by a source row). */
+    async list(ctx: TenantCtx): Promise<Source[]> {
+      return db.select().from(sources).where(eq(sources.tenantId, ctx.tenantId));
+    },
+
     /** B2.4: scopes exemplar retrieval to ONLY the tenant's sources of these kinds (e.g. exemplar/voice_sample) — never a fan-out's own pillar source. */
     async listByKind(ctx: TenantCtx, kinds: SourceKind[]): Promise<Source[]> {
       if (kinds.length === 0) return [];

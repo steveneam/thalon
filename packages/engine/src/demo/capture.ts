@@ -1,6 +1,6 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
-import { getObjectStore, type ObjectStore } from "@thalon/platform";
+import { getObjectStore, objectKey, type ObjectStore } from "@thalon/platform";
 import { runArtifactStage } from "../pipeline/artifact-stage";
 import type { DemoCaptureArtifacts, DemoDriver, DemoStepOutcome } from "./driver";
 import { demoPlanDraftMetaSchema, type DemoPlanDraftMeta } from "./schemas";
@@ -130,7 +130,7 @@ export async function driveDemoCapture(
         video: artifacts.videoPath ? (await readVideo(artifacts.videoPath)).toString("base64") : null,
       };
       const bundleJson = stableStringify(bundle);
-      const captureRef = `demo-captures/${sha256Hex(bundleJson)}.json`;
+      const captureRef = objectKey("demo-captures", sha256Hex(bundleJson), "json");
       await objectStore.put(captureRef, bundleJson);
 
       const capturedMeta: DemoPlanDraftMeta = { ...meta, captureStatus: "captured", captureRef };

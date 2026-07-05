@@ -4,6 +4,7 @@ import {
   getObjectStore,
   getTracer,
   modelTiers,
+  objectKey,
   readEnv,
   type ObjectStore,
   type Tracer,
@@ -118,7 +119,7 @@ export async function runSiteCrawl(
   }
 
   const objectStore = deps.objectStore ?? getObjectStore();
-  const rawRef = `crawl-pages/${contentHash}.json`;
+  const rawRef = objectKey("crawl-pages", contentHash, "json");
   await objectStore.put(
     rawRef,
     JSON.stringify(crawl.pages.map((p) => ({ url: p.url, html: p.html }))),

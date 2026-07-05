@@ -4,7 +4,7 @@ import {
   type TenantCtx,
 } from "@thalon/contracts";
 import { sha256Hex, type Draft, type Repos } from "@thalon/db";
-import { getObjectStore, modelTiers, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
+import { getObjectStore, modelTiers, objectKey, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
 import { runSingleDraftPipeline } from "../pipeline/single-draft";
 import { extractVisibleText } from "./html";
 import { webPageDraftMetaSchema } from "./schemas";
@@ -163,7 +163,7 @@ export async function runWebPageGeneration(
       // The artifact lands first, content-addressed — idempotent on retry, and
       // a draft can never reference bytes that aren't durably in the store.
       const html = output.html;
-      const htmlRef = `web-pages/${sha256Hex(html)}.html`;
+      const htmlRef = objectKey("web-pages", sha256Hex(html), "html");
       await objectStore.put(htmlRef, html);
 
       const meta = webPageDraftMetaSchema.parse({

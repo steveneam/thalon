@@ -1,6 +1,6 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { llmCacheKey, type Repos } from "@thalon/db";
-import { getObjectStore, withGatewayGuard, type ObjectStore, type Tracer } from "@thalon/platform";
+import { getObjectStore, objectKey, withGatewayGuard, type ObjectStore, type Tracer } from "@thalon/platform";
 import type { TextChunk } from "./chunk";
 import type { EmbeddingDriver } from "./shell/embedder";
 
@@ -84,9 +84,9 @@ export async function embedChunks(
 
     for (const [i, miss] of misses.entries()) {
       const embedding = vectors[i];
-      const objectKey = `embeddings/${miss.key}.json`;
-      await store.put(objectKey, JSON.stringify(embedding));
-      await repos.caches.llm.put(ctx, { key: miss.key, valueRef: objectKey });
+      const embeddingKey = objectKey("embeddings", miss.key, "json");
+      await store.put(embeddingKey, JSON.stringify(embedding));
+      await repos.caches.llm.put(ctx, { key: miss.key, valueRef: embeddingKey });
       results[miss.index] = {
         contentHash: input.chunks[miss.index].contentHash,
         embedding,

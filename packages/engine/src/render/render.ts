@@ -1,6 +1,6 @@
 import { brandIdentitySchema, type TenantCtx } from "@thalon/contracts";
 import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
-import { getObjectStore, type ObjectStore } from "@thalon/platform";
+import { getContentAddressed, getObjectStore, objectPrefix, type ObjectStore } from "@thalon/platform";
 import { pillarScriptDraftMetaSchema, type PillarScriptDraftMeta } from "../origination/schemas";
 import { runArtifactStage } from "../pipeline/artifact-stage";
 import { derivePillarTimeline, renderSrt } from "./srt";
@@ -96,13 +96,15 @@ export async function renderPillar(
         },
       };
       const manifestJson = stableStringify(manifest);
-      const prefix = `renders/pillar/${sha256Hex(manifestJson)}`;
+      const prefix = objectPrefix("renders/pillar", sha256Hex(manifestJson));
       const manifestKey = `${prefix}/manifest.json`;
 
       // Cache hit: an identical manifest was fully rendered before — reuse its
       // artifacts, never invoke the target. The meta patch still lands so a
       // re-render after e.g. a prior failure truthfully records this success.
-      const cachedManifest = await objectStore.get(manifestKey);
+      // Content-address-verified read (B4.6): a corrupted cache entry throws
+      // loudly instead of being served as a fake "rendered" success.
+      const cachedManifest = await getContentAddressed(objectStore, manifestKey);
       if (cachedManifest) {
         return {
           patch: { renderStatus: "rendered", renderRef: manifestKey },

@@ -1,6 +1,6 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { ArtifactMissingError, type Draft, type Repos } from "@thalon/db";
-import { getObjectStore, type ObjectStore } from "@thalon/platform";
+import { getContentAddressed, getObjectStore, type ObjectStore } from "@thalon/platform";
 import { runArtifactStage } from "../pipeline/artifact-stage";
 import type { DeployTarget } from "./deploy-target";
 import { webPageDraftMetaSchema, type WebPageDraftMeta } from "./schemas";
@@ -47,7 +47,9 @@ export async function deployWebPage(
       `draft "${draftId}" is status "${draft.status}" — web deploy runs ONLY on an "approved" draft`,
     parseMeta: (meta) => webPageDraftMetaSchema.parse(meta),
     execute: async (_draft, meta) => {
-      const htmlBytes = await objectStore.get(meta.htmlRef);
+      // Content-address-verified read (B4.6): what ships must still hash to
+      // the ref the judged body was derived from — corruption throws loudly.
+      const htmlBytes = await getContentAddressed(objectStore, meta.htmlRef);
       if (!htmlBytes) {
         throw new ArtifactMissingError(
           meta.htmlRef,

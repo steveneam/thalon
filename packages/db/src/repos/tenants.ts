@@ -26,6 +26,11 @@ export function tenantsRepo(db: Db) {
       return existing;
     },
 
+    /** B4.6: system-level enumeration for the object-store orphan sweep (refs must be collected across EVERY tenant before anything is called an orphan). */
+    async list(): Promise<Tenant[]> {
+      return db.select().from(tenants);
+    },
+
     async getBySlug(slug: string): Promise<Tenant | null> {
       const [row] = await db
         .select()
