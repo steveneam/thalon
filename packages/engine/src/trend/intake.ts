@@ -28,6 +28,8 @@ export interface TrendIntakeDeps {
 
 export interface TrendIntakeResult {
   polled: number;
+  /** B4.3: history rows appended to `trend_snapshots` this sweep (0 on an exact same-instant replay — the append is idempotent on tenant+source+item+capturedAt). */
+  snapshotsAppended: number;
   /** Every polled item with its scores + fired rules — full operator transparency, outlier or not. */
   scored: ScoredItem[];
   /** Outliers that auto-ingested as exemplars (PII-stripped inside ingestExemplar). `created: false` = a re-sweep of known content; its fresh metric snapshots were still appended. */
@@ -55,8 +57,13 @@ export interface TrendIntakeResult {
  * Re-sweeps are idempotent on content (same stripped text → same source,
  * `created: false`) while every sweep appends FRESH metric snapshots —
  * source_metrics is append-only, so engagement history accrues per item.
- * Cross-sweep longitudinal baselines (velocity against an account's stored
- * history rather than its sweep peers) land with the live pollers in pass 2.
+ *
+ * B4.3 (A10 decision 2): EVERY polled item — outlier or not — additionally
+ * appends one `trend_snapshots` history row at the sweep's `nowMs`
+ * (idempotent on tenant+source+item+capturedAt; watching accrues history,
+ * only outliers become sources). The longitudinal Δ-velocity math over that
+ * stored history is ./longitudinal.ts — pure and tested now, wired into
+ * live polling sweeps in pass 3.
  */
 export async function runTrendIntake(
   ctx: TenantCtx,
@@ -77,6 +84,23 @@ export async function runTrendIntake(
 
   const items = await deps.source.poll(watchlist);
   const scored = detectOutliers(items, config, request.nowMs);
+
+  // B4.3: all watched items accrue timestamped engagement history in the
+  // dedicated trend_snapshots table — BEFORE any outlier gate (watching is
+  // history; storing a source stays outlier-only).
+  const capturedAt = new Date(request.nowMs);
+  let snapshotsAppended = 0;
+  for (const item of items) {
+    const { created } = await repos.trendSnapshots.append(ctx, {
+      source: deps.source.name,
+      externalId: item.externalId,
+      account: item.account,
+      publishedAt: new Date(item.publishedAt),
+      metrics: item.metrics,
+      capturedAt,
+    });
+    if (created) snapshotsAppended++;
+  }
 
   const ingested: TrendIntakeResult["ingested"] = [];
   const screened: TrendIntakeResult["screened"] = [];
@@ -124,5 +148,5 @@ export async function runTrendIntake(
     });
   }
 
-  return { polled: items.length, scored, ingested, screened };
+  return { polled: items.length, snapshotsAppended, scored, ingested, screened };
 }

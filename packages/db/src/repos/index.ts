@@ -11,7 +11,9 @@ import { sourceChunksRepo, type SourceChunksRepo } from "./source-chunks";
 import { sourceMetricsRepo, type SourceMetricsRepo } from "./source-metrics";
 import { sourcesRepo, type SourcesRepo } from "./sources";
 import { tenantsRepo, type TenantsRepo } from "./tenants";
+import { trendSnapshotsRepo, type TrendSnapshotsRepo } from "./trend-snapshots";
 import { usageLedgerRepo, type UsageLedgerRepo } from "./usage-ledger";
+import { watchlistsRepo, type WatchlistsRepo } from "./watchlists";
 
 export interface Repos {
   tenants: TenantsRepo;
@@ -27,6 +29,8 @@ export interface Repos {
   usageLedger: UsageLedgerRepo;
   caches: CachesRepo;
   events: EventsRepo;
+  watchlists: WatchlistsRepo;
+  trendSnapshots: TrendSnapshotsRepo;
   // publish_queue deliberately has no repository: no publish path is wired
   // anywhere in Sprints 0–2 (charter standing discipline).
 }
@@ -46,5 +50,7 @@ export function createRepos(db: Db): Repos {
     usageLedger: usageLedgerRepo(db),
     caches: cachesRepo(db),
     events: eventsRepo(db),
+    watchlists: watchlistsRepo(db),
+    trendSnapshots: trendSnapshotsRepo(db),
   };
 }
