@@ -99,11 +99,15 @@ export async function runSingleDraftPipeline<TOut>(
 
   const result = await plan.generate();
   if (!result.output) {
-    throw new IrrecoverableGenerationError(
+    const error = new IrrecoverableGenerationError(
       `${plan.irrecoverableLabel} was irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
       result.attempts,
       result.lastError,
     );
+    // B4.5: the run row keeps the failure for operator triage — recorded
+    // BEFORE the throw so a caller that crashes still leaves the trail.
+    await repos.fanoutRuns.recordLastError(ctx, runId, error.message);
+    throw error;
   }
 
   const { platform, body, meta } = await plan.toDraft(result.output);
@@ -116,6 +120,12 @@ export async function runSingleDraftPipeline<TOut>(
     generationKey: sha256Hex(`${runGenerationKey}:${plan.format}`),
     meta,
   });
+
+  // B4.5: a successful backfill clears the stale failure record (only the
+  // backfill path can carry one — a freshly created run never had it).
+  if (existingRun?.lastError) {
+    await repos.fanoutRuns.recordLastError(ctx, runId, null);
+  }
 
   return { runId, created, draft };
 }

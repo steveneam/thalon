@@ -279,7 +279,10 @@ describe("runWaterfall (B2.3 end-to-end, keyless + networkless)", () => {
     expect(firstCallCounts.x).toBe(3); // DEFAULT_MAX_ATTEMPTS bounded repair-retries, all exhausted
 
     const runEventsBefore = await repos.events.list(ctx, { entityType: "fanout_run" });
-    expect(runEventsBefore).toHaveLength(1);
+    expect(runEventsBefore.map((e) => e.event)).toEqual([
+      "fanout_run.created",
+      "fanout_run.last_error_recorded", // B4.5: x's failure is on the run row for triage
+    ]);
     const runIdBefore = runEventsBefore[0].entityId;
     // linkedin selected both candidate windows -> 2 persisted drafts -> 2 events.
     const draftEventsBefore = await repos.events.list(ctx, { entityType: "draft" });
@@ -313,6 +316,9 @@ describe("runWaterfall (B2.3 end-to-end, keyless + networkless)", () => {
 
     const drafts = await repos.drafts.listByRun(ctx, runIdBefore);
     expect(drafts).toHaveLength(4);
+
+    // B4.5: the completed backfill cleared the run's triage record.
+    expect((await repos.fanoutRuns.get(ctx, runIdBefore))?.lastError).toBeNull();
   });
 
   it("a clip_plan draft cannot reach queued or approved without passing through the judge", async () => {

@@ -89,6 +89,23 @@ describe("events coverage (B4.4 ratchet)", () => {
     expect(after.slice(-2).every((r) => r.event === "draft.transition")).toBe(true);
   });
 
+  it("fanoutRuns.recordLastError emits fanout_run.last_error_recorded, clearing emits _cleared", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    const [run] = await repos.fanoutRuns.list(fx.ctx);
+    await repos.fanoutRuns.recordLastError(fx.ctx, run.id, "boom");
+    await repos.fanoutRuns.recordLastError(fx.ctx, run.id, null);
+    const rows = await repos.events.list(fx.ctx, {
+      entityType: "fanout_run",
+      entityId: run.id,
+    });
+    const names = rows.map((r) => r.event);
+    expect(names).toContain("fanout_run.last_error_recorded");
+    expect(names).toContain("fanout_run.last_error_cleared");
+    const recorded = rows.find((r) => r.event === "fanout_run.last_error_recorded");
+    expect((recorded?.payload as { message: string }).message).toBe("boom");
+  });
+
   it("usage-ledger budget breach emits budget.exceeded", async () => {
     fx = await fixture();
     const { repos } = fx.handle;

@@ -1,5 +1,6 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { and, desc, eq } from "drizzle-orm";
+import { NotFoundError } from "../errors";
 import { fanoutRuns } from "../schema";
 import type { Db, FanoutRun } from "../types";
 import { appendEvent } from "./events";
@@ -64,6 +65,36 @@ export function fanoutRunsRepo(db: Db) {
           );
         }
         return existing;
+      });
+    },
+
+    /**
+     * B4.5 operator triage: record the LAST irrecoverable failure on this
+     * run (or clear it with `null` once a later pass succeeds). The single
+     * writer of `last_error` — audited in the same transaction (I4).
+     */
+    async recordLastError(
+      ctx: TenantCtx,
+      runId: string,
+      message: string | null,
+    ): Promise<FanoutRun> {
+      return db.transaction(async (tx) => {
+        const [updated] = await tx
+          .update(fanoutRuns)
+          .set({ lastError: message })
+          .where(and(eq(fanoutRuns.id, runId), eq(fanoutRuns.tenantId, ctx.tenantId)))
+          .returning();
+        if (!updated) throw new NotFoundError("fanout_run", runId);
+        await appendEvent(tx, ctx, {
+          entityType: "fanout_run",
+          entityId: runId,
+          event:
+            message === null
+              ? "fanout_run.last_error_cleared"
+              : "fanout_run.last_error_recorded",
+          payload: message === null ? {} : { message },
+        });
+        return updated;
       });
     },
 

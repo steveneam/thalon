@@ -1,0 +1,1 @@
+ALTER TABLE "fanout_runs" ADD COLUMN "last_error" text;

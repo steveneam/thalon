@@ -144,11 +144,15 @@ describe("generateDemoPlan (B2.5 stage 3 end-to-end, keyless + networkless)", ()
       ),
     ).rejects.toThrow(/irrecoverable/);
 
-    // Nothing persisted for an always-invalid shell (waterfall's lesson).
+    // Nothing persisted for an always-invalid shell (waterfall's lesson) —
+    // except the run row's lastError triage record (B4.5), audited.
     const draftEventsBefore = await repos.events.list(ctx, { entityType: "draft" });
     expect(draftEventsBefore).toHaveLength(0);
     const runEvents = await repos.events.list(ctx, { entityType: "fanout_run" });
-    expect(runEvents).toHaveLength(1);
+    expect(runEvents.map((e) => e.event)).toEqual([
+      "fanout_run.created",
+      "fanout_run.last_error_recorded",
+    ]);
 
     const second = await generateDemoPlan(
       ctx,
