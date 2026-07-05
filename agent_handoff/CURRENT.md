@@ -4,45 +4,43 @@
 
 ## Stamp
 
-2026-07-05 (session 9) · **SPRINT 4 (pass-2 hardening, A10) MERGED — B4.1–B4.9 all on `main` @ `d616793`, one residue: `fanout_runs.lastError` (migration 0004).** Lanes launched on the founder's go; after the tooling subagent died on a session limit the founder directed "do everything yourself" — lead salvaged its worktree and finished all three lanes inline. Merge train core (PR #17) → intel (PR #18) → tooling (PR #19), each gated by the NEW required checks (`test` + `eval-gate`, B4.9). Suite 362 → 424 passed / 2 skipped; `npm run doctor` all-green (render/transcript/deploy live-ready, trend fake-only by design); guard green; worktrees GC'd.
+2026-07-05 (session 10) · **Sprint 4 FULLY complete (B4.5 residue closed via PR #20) · pass 2.5 chartered as A11 / Sprint 5 (B5.1–B5.4, deterministic video creation) · lane board cut · work starts next session on founder go.** Main @ `ea3f41c` + this wrap commit.
 
 ## Resume prompt (paste verbatim to resume next session)
 
-> Stamped 2026-07-05 14:15 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
+> Stamped 2026-07-05 14:58 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
 
-**Resume · Thalon** — stamped **2026-07-05 14:15 (UTC+10:00)** · Sprint-4 hardening MERGED (one residue) → founder checkpoint → pass 3. E:\thalon, main @ `d616793`.
+**Resume · Thalon** — stamped **2026-07-05 14:58 (UTC+10:00)** · Sprint 5 (pass 2.5, A11) chartered and lane-boarded → build starts this session. E:\thalon, main @ wrap commit.
 
-▎ ▸ Read `CLAUDE.md` → `agent_handoff/CURRENT.md` → `COORDINATION.md` (Sprint-4 lanes all `merged`; the 2026-07-05 wrap message is the sprint record) → `CHARTER.md` (pass-3 list under "Pass 3 — live verification + meat").
+▎ ▸ Read `CLAUDE.md` → `agent_handoff/CURRENT.md` → `CHARTER.md` ("Sprint 5 — deterministic video creation", amendment A11) → `COORDINATION.md` (Sprint-5 proposed lanes + the 2026-07-05 B4.5/A11 wrap message).
 
-▎ ▸ **First act (lead terminal, no agents needed): close the B4.5 residue** — `fanout_runs.last_error` column (additive, migration **0004** via `npx drizzle-kit generate` in `packages/db`) + `fanoutRuns.recordLastError(ctx, runId, message)` (events-audited) + the single-draft spine (`packages/engine/src/pipeline/single-draft.ts`) records it before throwing `IrrecoverableGenerationError` (clear it on later success) + tests. Small, one commit, straight onto a short branch → PR (required checks gate it).
+▎ ▸ **First act (lead terminal, no agents needed): B5.2 pipeline lane — the Sprint-5 contract window.** Stage registry in contracts (per-format ordered stage list, count is config, default 3: structure → scenes/effects → polish; export = deterministic core); pinned `storyboard` + `direction_doc` schemas; deterministic direction.md renderer/parser (front-matter + per-scene sections) with the byte-identical round-trip ratchet; deterministic-first prefill; one-prompt mode = same stages auto-advanced. `pillar_script` keys stay byte-stable (pin before code moves). Contract freezes at its merge.
 
-▎ ▸ **Then: Sprint-4 exit = founder checkpoint.** Present the sprint record (COORDINATION wrap message) and get the pass-3 go. Pass-3 shape per CHARTER A10: gateway dogfood across all three families · pillar-#1 tenant onboarding · B3.11 (B2.5 pinned docs-search chromium drive as opener, B2.3 waterfall on the first generated pillar's SRT, profile editor/switcher UI) · real drivers behind the hardened seams (Remotion composition → MP4 · Vercel deploy adapter · YouTube/AT-Protocol pollers · live Whisper · TTS) · approve-queue panels for `pillar_script`/`web_page` · eval refinement · green suite as exit gate. Propose lanes at the checkpoint per SPINE §5 (any subagent launch needs a fresh founder go).
+▎ ▸ **Then: propose the wave-of-2** (render B5.1 hyperframes-driver worktree subagent + ui B5.4 staged-flow worktree subagent) — **fresh founder go required before any subagent launches** (standing rule); ratchet B5.3 (shell-inventory pin) closes the sprint on the lead terminal. Merge train: pipeline → render → ui → ratchet.
 
-▎ ▸ **[you] — pass-3 inputs (now load-bearing):** pillar-#1 topic/angle + confirm the tenant profile at gitignored `.context/tenants/<company>.v1.json`; gateway credit top-up (judge tier + live dogfood); LinkedIn/X OAuth apps (B3.1 long pole); `0b11d48` scrub decision.
+▎ ▸ **[you] — unchanged, needed at pass 3 (none block Sprint 5):** pillar-#1 topic/angle + tenant profile at gitignored `.context/tenants/<company>.v1.json`; gateway credit top-up; LinkedIn/X OAuth apps (B3.1 long pole); `0b11d48` scrub decision.
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote (`d616793`), suite 424/2 green, lint 0 errors, grep guard passing, doctor all-green, no mid-edit state, no open PRs, no live worktrees. ok go
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote, suite 428/2 green, lint 0 errors, guard passing, doctor all-green, no mid-edit state, no open PRs, no live worktrees.
 
 ---
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → `COORDINATION.md` (Sprint-4 lane board, all merged + the session-9 wrap message) → `CHARTER.md` (A10 + the pass-3 paragraph). New shared modules worth knowing before pass-3 work: `packages/engine/src/pipeline/{repair-loop,single-draft,artifact-stage}.ts` · `packages/contracts/src/format-registry.ts` · `packages/platform/src/object-keys.ts` · `packages/engine/src/ingest/{transcript,whisper-provider,hosted-transcript-provider,ingest-video-url}.ts` · `packages/db/src/schema/intel.ts`.
+Read in order: `CLAUDE.md` → this file → `CHARTER.md` (Sprint 5 / A11) → `COORDINATION.md` (Sprint-5 lanes). Seams Sprint 5 builds against: `packages/engine/src/render/{render,target}.ts` (the `RenderTarget` seam B5.1 implements) · `packages/contracts/src/format-registry.ts` (where B5.2's stage registry + schemas land) · `packages/engine/src/pipeline/single-draft.ts` (the spine the staged pipeline composes) · `packages/platform` env choke point (driver selection).
 
-## Delta (this session — session 9)
+## Delta (this session — session 10)
 
-- **B4.9**: CI `test` + `eval-gate` promoted to required branch-protection checks (gh api; they gated every merge below). Documented-command pass executed verbatim on main.
-- **Core (PR #17)**: B4.1 key-stability pins FIRST (hash vectors · three generation-key field sets · artifact key schemes · judged-body derivations), then ONE repair loop + ONE single-draft spine + ONE artifact stage (behavior-preserving, pins prove bytes). B4.2 format registry in contracts (apps/web mirrors deleted; every-draft-parses ratchet). B4.4 events-coverage + getGateway-boundary ratchets. B4.5 taxonomy (InvalidState/ArtifactMissing/IrrecoverableGeneration). B4.6 one key helper + verified reads + `npm run -w @thalon/eval sweep`.
-- **Intel (PR #18)**: subagent landed schema + migration 0003 at its pause boundary; lead finished repos (events-audited) + pure longitudinal Δ-velocity math + intake history wiring (every polled item accrues a `trend_snapshots` row; content hash byte-pinned first).
-- **Tooling (PR #19)**: dead lane's worktree salvaged (doctor scripts + Remotion deps + installs were already done); B4.7 doctor finished; B4.8 transcription-thin (env-selected TranscriptProvider registry · whisper-local refuses remote URLs per A5/A8 · hosted-vendor keyed adapter · video-URL ingest surface hashing the fetched transcript). Two red CI rounds fixed at choke points (scripts lint globals; env boundary ratchet).
-- **Residue**: `fanout_runs.lastError` → migration 0004, next session's first act (kept out to keep the drizzle journal linear behind intel's 0003).
+- **B4.5 residue closed (PR #20, `ea3f41c`)**: `fanout_runs.last_error` (migration 0004) + `fanoutRuns.recordLastError` (single writer, tenant-scoped, events-audited) wired into all three generation paths (spine + fanout + waterfall; their plain irrecoverable `Error`s upgraded to `IrrecoverableGenerationError`); record-before-throw, clear-on-successful-backfill; `FeedRun` carries it to the queue UI for free. Suite 424 → 428.
+- **Sprint-4 exit checkpoint held in-chat → founder directed pass 2.5.** Ratified: (1) **Hyperframes default render driver** (verified real: HeyGen's Apache-2.0 HTML→video framework, active, chromium+ffmpeg already toolchain) with Remotion demoted to swap path — A6 growth gate retired; (2) **direction.md = strict-schema markdown** (round-trip ratcheted), never freeform; (3) **staged-flow UI ships in-pass** on fake drivers. Staged model: ~3 stages default (structure → scenes/effects → polish), count is registry config; one-prompt mode = same stages auto-advanced; every stage judged; stage interactions → edit_diffs → eval rows.
+- **A11 written into CHARTER.md** (Sprint 5, B5.1–B5.4) + Sprint-5 lane board cut in `COORDINATION.md` (pending founder go). Memory updated (build-strategy, product-feature-framing, future-tooling).
 
 ## Next action
 
-Paste the resume prompt above — first act is the 0004 lastError residue, then the Sprint-4 exit checkpoint and the pass-3 go.
+Paste the resume prompt above — first act is B5.2 (contract window, lead terminal, no approval needed); the render+ui subagent wave needs the founder's fresh go when proposed.
 
-## [you] — founder-supplied (pass 3, now load-bearing)
+## [you] — founder-supplied (pass 3; nothing blocks Sprint 5)
 
-- Pillar #1 topic/angle + confirm the pillar-#1 tenant profile draft (`.context/tenants/<company>.v1.json`).
+- Pillar #1 topic/angle + confirm the tenant profile draft (`.context/tenants/<company>.v1.json`).
 - Gateway credit top-up (judge tier + live dogfood).
 - LinkedIn + X OAuth developer apps (B3.1 long pole — paperwork, start anytime).
 - Decision: scrub the guard token from historical commit `0b11d48`? (one-time branch-protection relax; HEAD clean).
