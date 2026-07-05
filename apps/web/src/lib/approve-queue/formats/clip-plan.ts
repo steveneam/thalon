@@ -1,27 +1,15 @@
-import { z } from "zod";
+import {
+  clipPlanDraftMetaSchema,
+  DRAFT_FORMAT_REGISTRY,
+  type ClipPlanDraftMeta,
+} from "@thalon/contracts";
 
 /**
- * `clip_plan` draft meta (B2.3 waterfall). Local zod mirror of the canonical
- * schema in `packages/engine/src/waterfall/schemas.ts` (`clipPlanDraftMetaSchema`)
- * — apps/web stays dependency-light (no `@thalon/engine`, which would also
- * pull in the gateway/AI SDK code that package transitively depends on) by
- * mirroring the shape here instead. Keep in sync with the canonical file.
+ * B4.2: the canonical `clip_plan` meta schema now lives in the format
+ * contract registry (@thalon/contracts — dependency-light by design, so
+ * this app no longer keeps a hand-synced mirror of the engine's schema).
  */
-export const clipPlanDraftMetaSchema = z.object({
-  startMs: z.number().int().min(0),
-  endMs: z.number().int().min(0),
-  durationMs: z.number().int().min(0),
-  windowIndex: z.number().int().min(0),
-  chunkSeqs: z.array(z.number().int()),
-  hook: z.string(),
-  captions: z.string(),
-  platformCopy: z.string(),
-  promptVersion: z.string(),
-  brandProfileVersion: z.number().int(),
-  platformProfileVersion: z.string(),
-});
-
-export type ClipPlanDraftMeta = z.infer<typeof clipPlanDraftMetaSchema>;
+export { clipPlanDraftMetaSchema, type ClipPlanDraftMeta };
 
 /** Returns null when `meta` isn't a valid clip_plan meta shape (e.g. absent, or a different format's meta). */
 export function parseClipPlanMeta(meta: unknown): ClipPlanDraftMeta | null {
@@ -30,14 +18,14 @@ export function parseClipPlanMeta(meta: unknown): ClipPlanDraftMeta | null {
 }
 
 /**
- * The body a clip_plan draft's structured fields would produce —
- * `hook + "\n\n" + captions + "\n\n" + platformCopy` (the same convention
- * that binds `drafts.body`/`body_hash`, invariant I1). An operator edit
- * changes `draft.body` but never this meta, so comparing the two is how
+ * The body a clip_plan draft's structured fields would produce — the
+ * registry's judged-body derivation (the same convention that binds
+ * `drafts.body`/`body_hash`, invariant I1). An operator edit changes
+ * `draft.body` but never this meta, so comparing the two is how
  * `FormatDetail` detects the structured view has gone stale.
  */
 export function expectedClipPlanBody(meta: ClipPlanDraftMeta): string {
-  return [meta.hook, meta.captions, meta.platformCopy].join("\n\n");
+  return DRAFT_FORMAT_REGISTRY.clip_plan.expectedBody(meta);
 }
 
 /** Formats milliseconds as mm:ss (e.g. 65_000 -> "1:05"). Negative/non-finite input clamps to "0:00". */
