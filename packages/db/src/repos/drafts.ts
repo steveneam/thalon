@@ -7,7 +7,12 @@ import {
   type TenantCtx,
 } from "@thalon/contracts";
 import { and, eq } from "drizzle-orm";
-import { ConcurrentUpdateError, InvariantViolationError, NotFoundError } from "../errors";
+import {
+  ConcurrentUpdateError,
+  InvalidStateError,
+  InvariantViolationError,
+  NotFoundError,
+} from "../errors";
 import { sha256Hex } from "../hash";
 import { approvals, drafts, judgeResults } from "../schema";
 import type { Db, Draft, Executor, Tx } from "../types";
@@ -279,7 +284,7 @@ export function draftsRepo(db: Db) {
       return db.transaction(async (tx) => {
         const draft = await getDraftScoped(tx, ctx, draftId);
         if (draft.status !== "judging" && draft.status !== "blocked") {
-          throw new Error(
+          throw new InvalidStateError(
             `re-judge requires a "blocked" draft or a "judging" draft stuck by an operational halt, got "${draft.status}"`,
           );
         }

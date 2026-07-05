@@ -1,5 +1,11 @@
 import type { TenantCtx } from "@thalon/contracts";
-import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
+import {
+  IrrecoverableGenerationError,
+  sha256Hex,
+  stableStringify,
+  type Draft,
+  type Repos,
+} from "@thalon/db";
 
 /**
  * THE single-draft origination spine (B4.1 — one deterministic core;
@@ -93,8 +99,10 @@ export async function runSingleDraftPipeline<TOut>(
 
   const result = await plan.generate();
   if (!result.output) {
-    throw new Error(
+    throw new IrrecoverableGenerationError(
       `${plan.irrecoverableLabel} was irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
+      result.attempts,
+      result.lastError,
     );
   }
 
