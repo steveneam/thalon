@@ -132,6 +132,53 @@ describe("runTrendIntake (B3.12 skeleton, keyless + networkless)", () => {
     expect(allMetricsP1).toHaveLength(3);
   });
 
+  it("PINS the ingested exemplar's content hash byte-for-byte (A10: content hashes stay stable through B4.3's storage wiring)", async () => {
+    const { ctx, repos, objectStore, embedder } = await setup();
+    const result = await runTrendIntake(
+      ctx,
+      repos,
+      { watchlist: { source: "fake", accounts: ["alpha"] }, nowMs: NOW },
+      { source: createFakeTrendSource(ITEMS), embedder, objectStore, capTokens: 1_000_000 },
+    );
+    const source = await repos.sources.get(ctx, result.ingested[0].sourceId);
+    // sha256 of the PII-stripped "hot" fixture text — a changed byte here
+    // breaks re-sweep idempotency for every existing tenant. Fix the code,
+    // never this pin.
+    expect(source!.contentHash).toBe(
+      "6dc9bab58129801359d46251fba105f6e185656bd4becf1e9b0aa7ba21b90c28",
+    );
+  });
+
+  it("B4.3: EVERY polled item accrues a trend_snapshots history row — idempotent per capture instant, longitudinal history across sweeps", async () => {
+    const { ctx, repos, objectStore, embedder } = await setup();
+    const deps = { source: createFakeTrendSource(ITEMS), embedder, objectStore, capTokens: 1_000_000 };
+    const request = { watchlist: { source: "fake", accounts: ["alpha"] }, nowMs: NOW };
+
+    const first = await runTrendIntake(ctx, repos, request, deps);
+    expect(first.polled).toBe(3);
+    expect(first.snapshotsAppended).toBe(3); // hot + p1 + p2 — non-outliers included
+
+    // A NON-outlier accrued history without ever becoming a source.
+    const p1History = await repos.trendSnapshots.listByItem(ctx, { source: "fake", externalId: "p1" });
+    expect(p1History).toHaveLength(1);
+    expect(p1History[0].metrics).toEqual({ views: 1_000, shares: 2, bookmarks: 1 });
+    expect(p1History[0].capturedAt.getTime()).toBe(NOW);
+
+    // Same-instant replay appends nothing (structural idempotency)...
+    const replay = await runTrendIntake(ctx, repos, request, deps);
+    expect(replay.snapshotsAppended).toBe(0);
+
+    // ...a later sweep appends the next history row per item.
+    const later = await runTrendIntake(ctx, repos, { ...request, nowMs: NOW + 3_600_000 }, deps);
+    expect(later.snapshotsAppended).toBe(3);
+    const accountHistory = await repos.trendSnapshots.listByAccount(ctx, { source: "fake", account: "alpha" });
+    expect(accountHistory).toHaveLength(6); // 3 items × 2 capture instants
+
+    // The capture is audited (B4.4 events spine).
+    const events = await repos.events.list(ctx, { entityType: "trend_snapshot", limit: 500 });
+    expect(events.filter((e) => e.event === "trend_snapshot.captured")).toHaveLength(6);
+  });
+
   it("re-sweeps idempotently on content while appending fresh metric snapshots", async () => {
     const { ctx, repos, objectStore, embedder } = await setup();
     const deps = { source: createFakeTrendSource(ITEMS), embedder, objectStore, capTokens: 1_000_000 };

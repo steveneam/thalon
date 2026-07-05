@@ -4,6 +4,8 @@ export { openDb, openTestDb, resetDbForTests, type DbHandle } from "./client";
 export * from "./errors";
 export { llmCacheKey, retrievalCacheKey, sha256Hex, stableStringify } from "./hash";
 export type { Repos } from "./repos";
+export type { TrendSnapshot } from "./repos/trend-snapshots";
+export type { Watchlist as WatchlistRow } from "./repos/watchlists";
 export type {
   Approval,
   BrandProfile,

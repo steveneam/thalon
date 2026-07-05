@@ -9,6 +9,15 @@ export {
   type ScoredItem,
 } from "./outliers";
 export {
+  detectLongitudinalOutlier,
+  latestDeltaVelocity,
+  longitudinalConfigSchema,
+  type LongitudinalConfig,
+  type LongitudinalConfigInput,
+  type LongitudinalScore,
+  type SnapshotPoint,
+} from "./longitudinal";
+export {
   runTrendIntake,
   type TrendIntakeDeps,
   type TrendIntakeRequest,
