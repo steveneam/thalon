@@ -1,5 +1,5 @@
 import type { TenantCtx } from "@thalon/contracts";
-import type { Draft, Repos } from "@thalon/db";
+import { ArtifactMissingError, type Draft, type Repos } from "@thalon/db";
 import { getObjectStore, type ObjectStore } from "@thalon/platform";
 import { runArtifactStage } from "../pipeline/artifact-stage";
 import type { DeployTarget } from "./deploy-target";
@@ -49,7 +49,8 @@ export async function deployWebPage(
     execute: async (_draft, meta) => {
       const htmlBytes = await objectStore.get(meta.htmlRef);
       if (!htmlBytes) {
-        throw new Error(
+        throw new ArtifactMissingError(
+          meta.htmlRef,
           `web_page artifact "${meta.htmlRef}" is missing from the object store — the generation path always persists it before the draft exists; refusing to deploy`,
         );
       }

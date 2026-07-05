@@ -1,5 +1,5 @@
 import type { TenantCtx } from "@thalon/contracts";
-import type { Draft, Repos } from "@thalon/db";
+import { InvalidStateError, type Draft, type Repos } from "@thalon/db";
 
 /**
  * THE post-approval artifact stage (B4.1 — one helper behind the
@@ -39,10 +39,10 @@ export async function runArtifactStage<TMeta, TResult>(
 ): Promise<TResult> {
   const draft = await repos.drafts.get(ctx, draftId);
   if (spec.format && draft.format !== spec.format.expected) {
-    throw new Error(spec.format.mismatchMessage(draft));
+    throw new InvalidStateError(spec.format.mismatchMessage(draft));
   }
   if (draft.status !== "approved") {
-    throw new Error(spec.notApprovedMessage(draft));
+    throw new InvalidStateError(spec.notApprovedMessage(draft));
   }
   const meta = spec.parseMeta(draft.meta);
   const expectedUpdatedAt = draft.updatedAt;
