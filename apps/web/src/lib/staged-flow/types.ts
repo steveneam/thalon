@@ -1,11 +1,12 @@
-import type {
-  DirectionAspect,
-  DirectionDoc,
-  DirectionMotion,
-  DirectionPacing,
-  StageDef,
-  StagePlan,
-  StoryboardScene,
+import {
+  STAGED_DRAFT_FORMATS,
+  type DirectionAspect,
+  type DirectionDoc,
+  type DirectionMotion,
+  type DirectionPacing,
+  type StageDef,
+  type StagePlan,
+  type StoryboardScene,
 } from "@thalon/contracts";
 import { z } from "zod";
 import type { CapturedEditKind, Rfc6902Op } from "./patch";
@@ -142,4 +143,9 @@ export interface StagedEditRequest {
 export const stagedPickRequestSchema = z.object({ candidateId: z.string().min(1) });
 export interface StagedPickRequest {
   candidateId: string;
+}
+
+/** True when a draft's format is a stage artifact — the approve queue swaps in the staged-flow surface for these. */
+export function isStagedDraftFormat(format: string | null | undefined): boolean {
+  return format != null && (STAGED_DRAFT_FORMATS as readonly string[]).includes(format);
 }
