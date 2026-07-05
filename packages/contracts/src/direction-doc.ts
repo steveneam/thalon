@@ -94,8 +94,3 @@ export const directionDocSchema = z
     });
   });
 export type DirectionDoc = z.infer<typeof directionDocSchema>;
-
-/** Derived, never stored: the document's total duration is the sum of its scene durations. */
-export function directionDocDurationMs(doc: Pick<DirectionDoc, "scenes">): number {
-  return doc.scenes.reduce((sum, scene) => sum + scene.durationMs, 0);
-}

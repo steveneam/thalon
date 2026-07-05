@@ -3,7 +3,6 @@ import {
   ASPECT_DIMENSIONS,
   DIRECTION_ASPECTS,
   DIRECTION_NONE_SENTINEL,
-  directionDocDurationMs,
   directionDocSchema,
 } from "../direction-doc";
 import { validDoc } from "./direction-fixtures";
@@ -68,10 +67,6 @@ describe("directionDocSchema", () => {
 });
 
 describe("derived values (deterministic core — computed, never stored)", () => {
-  it("directionDocDurationMs is the sum of scene durations", () => {
-    expect(directionDocDurationMs(validDoc())).toBe(7000);
-  });
-
   it("every aspect has compile-time dimensions", () => {
     for (const aspect of DIRECTION_ASPECTS) {
       const { width, height } = ASPECT_DIMENSIONS[aspect];
