@@ -42,6 +42,26 @@ export function whisperModelsFrom(entryNames) {
 }
 
 /**
+ * `npx hyperframes doctor` report -> {passed, failed} check names, or null
+ * when the output is not a doctor report at all (CLI missing, npx error).
+ * Lines look like "  ✓ FFmpeg   ffmpeg 8.1.2..." / "  ✗ Docker running   Not
+ * running"; hint continuation lines carry no glyph and are skipped.
+ */
+export function parseHyperframesDoctor(output) {
+  const passed = [];
+  const failed = [];
+  for (const line of (output ?? "").split(/\r?\n/)) {
+    const match = /^\s*([✓✗])\s+(\S(?:.*?\S)?)\s{2,}\S/.exec(line);
+    if (!match) continue;
+    (match[1] === "✓" ? passed : failed).push(match[2]);
+  }
+  return passed.length + failed.length === 0 ? null : { passed, failed };
+}
+
+/** The hyperframes doctor checks a RENDER actually needs (the rest — TTS/BGM/whisper/Docker — are optional capability tiers, reported informationally). */
+export const HYPERFRAMES_ESSENTIAL_CHECKS = ["FFmpeg", "FFprobe", "Chrome"];
+
+/**
  * One seam row for the report. `status` is the honest tri-state the charter
  * asks for: "live-ready" (toolchain present for the pass-3 driver),
  * "fake-only" (by design this pass), "not-live-ready" (a tool is missing —
@@ -95,4 +115,15 @@ export function selfCheck() {
   if (readiness([{ ok: true }, { ok: true }]) !== "live-ready") fail("readiness(ready)");
   if (readiness([{ ok: true }, { ok: false }]) !== "not-live-ready") fail("readiness(missing)");
   if (!renderTable([seamRow("render", "live-ready", "x")]).includes("live-ready")) fail("renderTable");
+  const doctorReport = parseHyperframesDoctor(
+    "  ✓ Version          0.7.33 (latest)\n  ✗ Memory           15.7 GB total · 1.5 GB available\n                     Low memory — renders may fail.\n  ✓ FFmpeg           ffmpeg 8.1.2 at C:\\x\\ffmpeg.exe\n",
+  );
+  if (
+    !doctorReport ||
+    doctorReport.passed.join(",") !== "Version,FFmpeg" ||
+    doctorReport.failed.join(",") !== "Memory"
+  ) fail("parseHyperframesDoctor");
+  if (parseHyperframesDoctor("npm error could not determine executable") !== null) {
+    fail("parseHyperframesDoctor(miss)");
+  }
 }

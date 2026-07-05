@@ -11,13 +11,16 @@
  * process, or unreadable directory can crash the report.
  *
  * Seams covered (the pass-3 toolchain, installed machine-global except
- * Remotion which is an engine devDependency):
- *   render     — Remotion + @remotion/cli resolvable from this repo.
- *                Licence stance (recorded here per CHARTER A6/A10): the
- *                Remotion company licence is FREE for companies of up to 3
- *                people, including for-profit use — a GROWTH gate to revisit
- *                when the team grows, not a launch gate. Swap path lives
- *                behind the RenderTarget seam.
+ * the render/engine packages which are engine deps):
+ *   render     — Hyperframes (B5.1, amendment A11): @hyperframes/producer +
+ *                @hyperframes/lint version-pinned in the engine package +
+ *                `npx hyperframes doctor` as the per-seam probe (its
+ *                FFmpeg/FFprobe/Chrome rows are what a render needs; the
+ *                rest are optional capability tiers). Licence: Apache 2.0,
+ *                free at any scale — NO GATE (decision record
+ *                docs/adr/0004-render-driver-default.md; the A6 Remotion
+ *                growth gate is retired — Remotion is the recorded swap
+ *                path behind the same RenderTarget seam).
  *   transcript — ffmpeg on PATH + faster-whisper importable + a local
  *                Whisper model present in the HuggingFace hub cache.
  *   deploy     — Vercel CLI on PATH.
@@ -31,8 +34,10 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  HYPERFRAMES_ESSENTIAL_CHECKS,
   parseBareVersion,
   parseFfmpegVersion,
+  parseHyperframesDoctor,
   parsePythonVersion,
   parseVercelVersion,
   readiness,
@@ -52,14 +57,15 @@ const PROBE_TIMEOUT_MS = 30_000;
  * .cmd shims (same handling as platform's claude-cli transport); every
  * argument here is a literal, so the joined command line is shell-safe.
  */
-function probe(cmd, args) {
+function probe(cmd, args, envOverrides = {}) {
   return new Promise((resolve) => {
+    const env = { ...process.env, ...envOverrides };
     let child;
     try {
       child =
         process.platform === "win32"
-          ? spawn([cmd, ...args].join(" "), { shell: true, windowsHide: true })
-          : spawn(cmd, args, { windowsHide: true });
+          ? spawn([cmd, ...args].join(" "), { shell: true, windowsHide: true, env })
+          : spawn(cmd, args, { windowsHide: true, env });
     } catch (err) {
       resolve({ ok: false, output: String(err?.message ?? err) });
       return;
@@ -109,25 +115,60 @@ function cachedWhisperModels() {
   }
 }
 
-const REMOTION_LICENCE_NOTE =
-  "licence: free for companies of <=3 people incl. for-profit — GROWTH gate (revisit when the team grows), not a launch gate (CHARTER A6/A10)";
+const RENDER_LICENCE_NOTE =
+  "licence: Apache 2.0, free at any scale — NO gate (ADR-0004; A6 Remotion growth gate retired)";
 
+/**
+ * B5.1: the render seam is Hyperframes — pinned packages resolvable + the
+ * framework's own `hyperframes doctor` probe (`--no-install` so the probe
+ * never mutates anything; the CLI is an engine devDependency). Telemetry is
+ * opted out for the probe itself (HYPERFRAMES_NO_TELEMETRY, ADR-0004).
+ */
 async function renderSeam() {
+  const producer = installedPackageVersion("@hyperframes/producer");
+  const lint = installedPackageVersion("@hyperframes/lint");
   const remotion = installedPackageVersion("remotion");
-  const cli = installedPackageVersion("@remotion/cli");
-  const status = readiness([{ ok: !!remotion }, { ok: !!cli }]);
-  if (status === "live-ready") {
+  const swapNote = `swap path: remotion ${remotion ?? "not installed"} (recorded, unwired — ADR-0004)`;
+
+  if (!producer || !lint) {
     return seamRow(
       "render",
-      "live-ready",
-      `remotion ${remotion} + @remotion/cli ${cli} installed; driver still fake in pass 2 (real composition = pass 3); ${REMOTION_LICENCE_NOTE}`,
+      "not-live-ready",
+      `@hyperframes/producer ${producer ?? "MISSING"}, @hyperframes/lint ${lint ?? "MISSING"}; ${RENDER_LICENCE_NOTE}; ${swapNote}`,
+      "npm install (from the MAIN checkout, never inside a worktree — the pinned deps are in packages/engine/package.json)",
+    );
+  }
+
+  const doctor = await probe("npx", ["--no-install", "hyperframes", "doctor"], {
+    HYPERFRAMES_NO_TELEMETRY: "1",
+  });
+  const report = parseHyperframesDoctor(doctor.output);
+  if (!doctor.ok || !report) {
+    return seamRow(
+      "render",
+      "not-live-ready",
+      `@hyperframes/producer ${producer} + @hyperframes/lint ${lint} installed, but \`npx hyperframes doctor\` produced no report; ${RENDER_LICENCE_NOTE}`,
+      "npm install (from the MAIN checkout) — the hyperframes CLI is a pinned engine devDependency",
+    );
+  }
+
+  const essentialsMissing = HYPERFRAMES_ESSENTIAL_CHECKS.filter((name) => report.failed.includes(name));
+  const informational = report.failed.filter((name) => !HYPERFRAMES_ESSENTIAL_CHECKS.includes(name));
+  const infoNote = informational.length
+    ? `optional checks failing: ${informational.join(", ")} (capability tiers, not render-blocking)`
+    : "all hyperframes doctor checks green";
+  if (essentialsMissing.length > 0) {
+    return seamRow(
+      "render",
+      "not-live-ready",
+      `hyperframes ${producer} installed but essentials failing: ${essentialsMissing.join(", ")}; ${infoNote}; ${RENDER_LICENCE_NOTE}`,
+      "run `npx hyperframes doctor` for each check's exact fix hint",
     );
   }
   return seamRow(
     "render",
-    "not-live-ready",
-    `remotion ${remotion ?? "MISSING"}, @remotion/cli ${cli ?? "MISSING"}; ${REMOTION_LICENCE_NOTE}`,
-    "npm install --save-dev remotion @remotion/cli --workspace @thalon/engine (run from the repo root)",
+    "live-ready",
+    `@hyperframes/producer ${producer} + @hyperframes/lint ${lint}; hyperframes doctor essentials green (${HYPERFRAMES_ESSENTIAL_CHECKS.join("/")}); ${infoNote}; ${RENDER_LICENCE_NOTE}; ${swapNote}`,
   );
 }
 
