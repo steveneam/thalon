@@ -1,3 +1,4 @@
+import { readEnv } from "@thalon/platform";
 import { z } from "zod";
 import type { TranscriptProvider } from "./transcript";
 
@@ -39,9 +40,10 @@ export interface HostedVendorDeps {
 }
 
 export function hostedVendorProvider(deps: HostedVendorDeps = {}): TranscriptProvider {
+  const env = deps.config ? undefined : readEnv();
   const config = deps.config ?? {
-    url: process.env.TRANSCRIPT_VENDOR_URL,
-    apiKey: process.env.TRANSCRIPT_VENDOR_API_KEY,
+    url: env?.TRANSCRIPT_VENDOR_URL,
+    apiKey: env?.TRANSCRIPT_VENDOR_API_KEY,
   };
   const fetchImpl = deps.fetchImpl ?? fetch;
   return {
