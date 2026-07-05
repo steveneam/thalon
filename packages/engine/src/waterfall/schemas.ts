@@ -1,6 +1,20 @@
 import { z } from "zod";
 
 /**
+ * B4.2: the PINNED `clip_plan` draft-meta contract lives in the format
+ * contract registry — @thalon/contracts/format-registry.ts — beside every
+ * other format's meta schema and capabilities. Re-exported here so engine
+ * call sites keep their import paths. `drafts.body` (the groundable text G3
+ * checks against the transcript; `body_hash` binds verdicts to it,
+ * invariant I1) is `hook + "\n\n" + captions + "\n\n" + platformCopy` —
+ * declared as the registry entry's `expectedBody`; `meta` carries the same
+ * three pieces individually (for structured display) plus the clip's
+ * timing/candidate-window provenance and the same generation-key inputs
+ * fan-out records on its drafts.
+ */
+export { clipPlanDraftMetaSchema, type ClipPlanDraftMeta } from "@thalon/contracts";
+
+/**
  * Shell-output validation boundary (SPINE §1: every shell output crosses
  * into the core through a Zod schema) for the B2.3 highlight-select step —
  * mirrors ../fanout/schemas.ts. One call ranks/selects clips for ONE
@@ -26,32 +40,3 @@ export const highlightSelectShellOutputSchema = z.object({
 
 export type HighlightSelectShellOutput = z.infer<typeof highlightSelectShellOutputSchema>;
 export type ClipSelection = HighlightSelectShellOutput["clips"][number];
-
-/**
- * `drafts.meta` shape for every `clip_plan` draft this bucket produces —
- * B2.6's queue UI consumes this. `drafts.body` (the groundable text G3
- * checks against the transcript; `body_hash` binds verdicts to it, invariant
- * I1) is `hook + "\n\n" + captions + "\n\n" + platformCopy`; `meta` carries
- * the same three pieces individually (for structured display) plus the
- * clip's timing/candidate-window provenance and the same generation-key
- * inputs fan-out records on its drafts (promptVersion, brandProfileVersion,
- * platformProfileVersion).
- */
-export const clipPlanDraftMetaSchema = z.object({
-  /** Milliseconds into the source media where this clip starts/ends (CandidateWindow.startMs/endMs). */
-  startMs: z.number().int().min(0),
-  endMs: z.number().int().min(0),
-  durationMs: z.number().int().min(0),
-  /** Index into the run's derived CandidateWindow[] this draft was cut from. */
-  windowIndex: z.number().int().min(0),
-  /** `source_chunks.seq` values composing the window — chunk-level provenance. */
-  chunkSeqs: z.array(z.number().int()),
-  hook: z.string(),
-  captions: z.string(),
-  platformCopy: z.string(),
-  promptVersion: z.string(),
-  brandProfileVersion: z.number().int(),
-  platformProfileVersion: z.string(),
-});
-
-export type ClipPlanDraftMeta = z.infer<typeof clipPlanDraftMetaSchema>;
