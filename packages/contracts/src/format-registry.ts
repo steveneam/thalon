@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { DraftFormat } from "./draft-format";
+import { directionDocSchema } from "./direction-doc";
 
 /**
  * THE format contract registry (B4.2, amendment A10): per-format pinned
@@ -113,6 +114,84 @@ export const pillarScriptDraftMetaSchema = z.object({
 });
 export type PillarScriptDraftMeta = z.infer<typeof pillarScriptDraftMetaSchema>;
 
+/**
+ * One storyboard scene as the structure stage persists it (B5.2). Scene 1
+ * is the hook by convention (prompt-enforced) — there is no separate hook
+ * field, so storyboard scenes map 1:1 onto direction-doc scenes and the
+ * prefill stays purely mechanical.
+ */
+export const storyboardSceneSchema = z.object({
+  /** Must equal the scene's array position (contiguity is schema-enforced below). */
+  sceneIndex: z.number().int().min(0),
+  heading: z.string().min(1),
+  narration: z.string().min(1),
+  onScreenText: z.string().min(1).optional(),
+  visualHint: z.string().min(1).optional(),
+  durationHintMs: z.number().int().positive().optional(),
+});
+export type StoryboardScene = z.infer<typeof storyboardSceneSchema>;
+
+const contiguousScenes = <T extends { sceneIndex: number }>(
+  scenes: T[],
+  ctx: z.RefinementCtx,
+  path: (string | number)[] = ["scenes"],
+) => {
+  scenes.forEach((scene, i) => {
+    if (scene.sceneIndex !== i) {
+      ctx.addIssue({
+        code: "custom",
+        path: [...path, i, "sceneIndex"],
+        message: `sceneIndex ${scene.sceneIndex} at array position ${i} — scenes must be contiguous from 0 in order`,
+      });
+    }
+  });
+};
+
+/**
+ * `storyboard` (B5.2) meta — the structure stage's artifact. `stageKey`/
+ * `stageIndex`/`family` are stage provenance from the stage plan
+ * (./stage-registry.ts) that produced it; the staged pipeline advances a
+ * draft by reading them back (self-describing — no side-channel state).
+ */
+export const storyboardDraftMetaSchema = z
+  .object({
+    title: z.string().min(1),
+    scenes: z.array(storyboardSceneSchema).min(1),
+    cta: z.string().nullable(),
+    family: z.string().min(1),
+    stageKey: z.string().min(1),
+    stageIndex: z.number().int().min(0),
+    groundingSourceIds: z.array(z.string().min(1)).min(1),
+    promptVersion: z.string().min(1),
+    brandProfileVersion: z.number().int(),
+    platformProfileVersion: z.string().min(1),
+  })
+  .superRefine((meta, ctx) => contiguousScenes(meta.scenes, ctx));
+export type StoryboardDraftMeta = z.infer<typeof storyboardDraftMetaSchema>;
+
+/**
+ * `direction_doc` (B5.2) meta — the scenes/effects and polish stages'
+ * artifact: the complete strict-schema direction document (./direction-doc.ts)
+ * plus stage + advance provenance. `renderStatus`/`renderRef` mirror
+ * pillar_script's convention: only the render artifact stage moves them.
+ */
+export const directionDocDraftMetaSchema = z.object({
+  doc: directionDocSchema,
+  family: z.string().min(1),
+  stageKey: z.string().min(1),
+  stageIndex: z.number().int().min(1),
+  /** The stage draft this was advanced FROM (storyboard for stage 2, prior direction_doc after). */
+  priorDraftId: z.string().min(1),
+  groundingSourceIds: z.array(z.string().min(1)).min(1),
+  promptVersion: z.string().min(1),
+  brandProfileVersion: z.number().int(),
+  platformProfileVersion: z.string().min(1),
+  renderStatus: z.enum(["directed", "rendered", "failed"]).default("directed"),
+  /** null until a render succeeds; then the content-addressed object-store key of the render manifest. */
+  renderRef: z.string().nullable().default(null),
+});
+export type DirectionDocDraftMeta = z.infer<typeof directionDocDraftMetaSchema>;
+
 /** `web_page` (B3.15) meta. `deployStatus`/`deployRef` mirror the render/capture convention. */
 export const webPageDraftMetaSchema = z.object({
   title: z.string().min(1),
@@ -206,6 +285,31 @@ export const DRAFT_FORMAT_REGISTRY = {
     capabilities: { ...NO_ARTIFACTS, deployable: true },
     artifactRefFields: ["htmlRef", "deployRef"],
     // body = extractVisibleText(stored html) — artifact-derived, NOT meta-derived.
+  },
+  storyboard: {
+    format: "storyboard",
+    meta: storyboardDraftMetaSchema,
+    // An intermediate stage artifact — the direction_doc it advances into is what renders.
+    capabilities: NO_ARTIFACTS,
+    artifactRefFields: [],
+    expectedBody: (meta: StoryboardDraftMeta) =>
+      [
+        meta.title,
+        ...meta.scenes.map((scene) => scene.narration),
+        ...(meta.cta ? [meta.cta] : []),
+      ].join("\n\n"),
+  },
+  direction_doc: {
+    format: "direction_doc",
+    meta: directionDocDraftMetaSchema,
+    capabilities: { ...NO_ARTIFACTS, renderable: true },
+    artifactRefFields: ["renderRef"],
+    expectedBody: (meta: DirectionDocDraftMeta) =>
+      [
+        meta.doc.title,
+        ...meta.doc.scenes.map((scene) => scene.narration),
+        ...(meta.doc.cta ? [meta.doc.cta] : []),
+      ].join("\n\n"),
   },
 } as const satisfies Record<DraftFormat, ResolvedDraftFormatSpec>;
 
