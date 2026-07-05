@@ -1,7 +1,7 @@
 import type { ActionResult, DraftDetail, FeedRun, GridDraft, ReJudgeResult } from "./types";
 
-/** On failure, surfaces the route's own `{ error }` message (toErrorResponse) rather than a bare status code — judge/transition failures must fail LOUDLY and legibly for the operator. */
-async function asJson<T>(res: Response): Promise<T> {
+/** On failure, surfaces the route's own `{ error }` message (toErrorResponse) rather than a bare status code — judge/transition failures must fail LOUDLY and legibly for the operator. Shared with the staged-flow client (same convention, same seam). */
+export async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body: unknown = await res.json().catch(() => null);
     const message =
