@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApprovePanel, type PanelStatus } from "@/components/approve/approve-panel";
 import { FanoutGrid, type GridStatus } from "@/components/approve/fanout-grid";
 import { FeedPanel, type FeedStatus } from "@/components/approve/feed-panel";
+import { StagedFlow } from "@/components/staged/staged-flow";
 import {
   approveDraft,
   editDraft,
@@ -13,6 +14,7 @@ import {
   reJudgeDraft,
   rejectDraft,
 } from "@/lib/approve-queue/client";
+import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import type { FeedRun, GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
 /** Composes the 3-zone Approve queue: feed selection drives the grid, grid selection drives the panel. */
@@ -121,10 +123,16 @@ export function ApproveQueue() {
       });
   }, []);
 
+  // A stage-artifact draft (storyboard/direction_doc, B5.4) swaps zones 2+3
+  // for the staged-flow surface, which fetches its own flow state — the
+  // panel's detail fetch would be dead weight for it.
+  const selectedDraft = drafts.find((d) => d.id === selectedDraftId) ?? null;
+  const stagedSelected = selectedDraft !== null && isStagedDraftFormat(selectedDraft.format);
+
   useEffect(() => {
-    if (!selectedDraftId) return;
+    if (!selectedDraftId || stagedSelected) return;
     void loadDraftDetail(selectedDraftId);
-  }, [selectedDraftId, loadDraftDetail]);
+  }, [selectedDraftId, stagedSelected, loadDraftDetail]);
 
   // The refresh every operator action (approve/reject/edit/re-judge) needs:
   // waits for the panel's post-action, post-re-judge draft + judge results to
@@ -156,18 +164,25 @@ export function ApproveQueue() {
   return (
     <div className="flex min-h-screen flex-1 flex-col md:flex-row">
       <FeedPanel status={feedStatus} runs={runs} selectedRunId={selectedRunId} onSelect={selectRun} />
-      <FanoutGrid status={gridStatus} drafts={drafts} selectedDraftId={selectedDraftId} onSelect={selectDraft} />
-      <ApprovePanel
-        status={panelStatus}
-        draft={panelDraft}
-        judgeResults={judgeResults}
-        busy={busy}
-        actionError={actionError}
-        onApprove={() => selectedDraftId && withBusy(() => approveDraft(selectedDraftId))}
-        onReject={() => selectedDraftId && withBusy(() => rejectDraft(selectedDraftId))}
-        onEditSave={(body) => selectedDraftId && withBusy(() => editDraft(selectedDraftId, body))}
-        onReJudge={() => selectedDraftId && withBusy(() => reJudgeDraft(selectedDraftId))}
-      />
+      {stagedSelected && selectedDraftId ? (
+        // Keyed remount per anchor draft so the surface never shows a stale flow.
+        <StagedFlow key={selectedDraftId} draftId={selectedDraftId} />
+      ) : (
+        <>
+          <FanoutGrid status={gridStatus} drafts={drafts} selectedDraftId={selectedDraftId} onSelect={selectDraft} />
+          <ApprovePanel
+            status={panelStatus}
+            draft={panelDraft}
+            judgeResults={judgeResults}
+            busy={busy}
+            actionError={actionError}
+            onApprove={() => selectedDraftId && withBusy(() => approveDraft(selectedDraftId))}
+            onReject={() => selectedDraftId && withBusy(() => rejectDraft(selectedDraftId))}
+            onEditSave={(body) => selectedDraftId && withBusy(() => editDraft(selectedDraftId, body))}
+            onReJudge={() => selectedDraftId && withBusy(() => reJudgeDraft(selectedDraftId))}
+          />
+        </>
+      )}
     </div>
   );
 }

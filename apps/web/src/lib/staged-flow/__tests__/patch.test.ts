@@ -2,6 +2,7 @@ import { directionDocSchema, type DirectionDoc } from "@thalon/contracts";
 import { describe, expect, it } from "vitest";
 import {
   applyPatch,
+  buildFieldPatchOps,
   buildFieldReplaceOps,
   buildSceneReorderOps,
   diffDirectionDocs,
@@ -95,6 +96,22 @@ describe("buildFieldReplaceOps", () => {
     expect(buildFieldReplaceOps(pointer("scenes", 1), { narration: "New line", visual: null })).toEqual([
       { op: "replace", path: "/scenes/1/narration", value: "New line" },
       { op: "replace", path: "/scenes/1/visual", value: null },
+    ]);
+  });
+});
+
+describe("buildFieldPatchOps", () => {
+  it("treats undefined as absent (add/remove), null as a value (replace), unchanged as nothing", () => {
+    expect(
+      buildFieldPatchOps(
+        pointer("scenes", 0),
+        { heading: "Hook", onScreenText: undefined, visualHint: "glow", durationHintMs: 4000 },
+        { heading: "Hook", onScreenText: "Never sleeps", visualHint: null, durationHintMs: undefined },
+      ),
+    ).toEqual([
+      { op: "add", path: "/scenes/0/onScreenText", value: "Never sleeps" },
+      { op: "replace", path: "/scenes/0/visualHint", value: null },
+      { op: "remove", path: "/scenes/0/durationHintMs" },
     ]);
   });
 });

@@ -182,6 +182,31 @@ export function buildFieldReplaceOps(
 }
 
 /**
+ * Field ops honoring OPTIONAL fields (storyboard's onScreenText/visualHint/
+ * durationHintMs): `undefined` means absent, so absent→value is an add,
+ * value→absent is a remove, value→value is a replace. `null` is a real
+ * value (direction docs use it for nullable fields) and always replaces.
+ * Unchanged fields emit nothing.
+ */
+export function buildFieldPatchOps(
+  basePath: string,
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+): Rfc6902Op[] {
+  const ops: Rfc6902Op[] = [];
+  for (const field of Object.keys(after)) {
+    const prev = before[field];
+    const next = after[field];
+    if (prev === next) continue;
+    const path = `${basePath}${pointer(field)}`;
+    if (prev === undefined) ops.push({ op: "add", path, value: next });
+    else if (next === undefined) ops.push({ op: "remove", path });
+    else ops.push({ op: "replace", path, value: next });
+  }
+  return ops;
+}
+
+/**
  * A scene reorder as one honest patch: the move op plus the sceneIndex
  * repairs the contract demands (sceneIndex must equal array position —
  * schema-enforced), so applying the patch verbatim yields a schema-valid
