@@ -17,7 +17,18 @@ Thalon's single most important structural rule. Every module below is classified
 | **Hard budgets and timeouts on the shell** | Every gateway call carries a token limit + timeout; a per-tenant daily budget ledger hard-stops generation when exceeded (fail loud, emit event, never silently degrade). |
 | **Deterministic fallbacks** | Formatting, linting, char-limit truncation, denylist matching (G1), scheduling, rendering are pure functions — never delegated to a model. |
 
-**Shell inventory (the only places LLMs are allowed):** ingest extraction, fan-out generation, judge G3 screen + final (and later G2 claims-match, G4 policy classifier), highlight-select (clipping, Sprint 3+). Each lives in a module whose imports are restricted (lint-enforced, §3.4) so the boundary is structural, not conventional.
+**Shell inventory (the only places LLMs are allowed)** — pinned executably by `packages/engine/src/__tests__/shell-inventory.test.ts` (B5.3), which asserts the exact set of `operation:` labels metered through `withGatewayGuard`; a new LLM call site cannot merge without editing that list AND this sentence. The current inventory (one guarded operation each, except the judge site which expands to two gates at runtime):
+
+- `ingest.embed` — source-chunk embeddings (B1.1)
+- `fanout.generate` — one source → N platform drafts (B1.2)
+- `judge.g3_screen` · `judge.g3_final` — G3 two-tier grounding (B1.3; one source site, `judge.${tier}`) — and later G2 claims-match, G4 policy classifier
+- `waterfall.highlight_select` — clip-window highlight select (B2.3)
+- `demo.storyboard` — site-demo storyboard (B2.5)
+- `origination.pillar_script` — one-shot pillar script (B3.9)
+- `webpage.web_page` — landing-page generation (B3.15)
+- `staged_video.structure` · `staged_video.scenes` · `staged_video.polish` — the staged video pipeline's three stages (B5.2)
+
+Each lives in a module whose imports are restricted (lint-enforced, §3.4; `getGateway` reachability pinned by `gateway-boundary.test.ts`) so the boundary is structural, not conventional. **Computable-leakage audit (B5.3):** every shell here is a read-only prompt-builder + model call that returns a candidate; all deterministic derivation the shells' outputs feed — clip-window math, SRT/timeline derivation, direction prefill/export/merge, body derivation, generation-key material — already lives in core (B4.1 extractions + B5.2's deterministic-first staging), so nothing computable is delegated to a model or synthesized inside a shell. The staged-video shells make this sharpest: their boundary schemas admit ONLY the creative slots (aspect/fps/pacing/scene-count are absent by construction), so a stage cannot even attempt to move a computable field.
 
 ### 1.1 The draft lifecycle — an explicit state machine
 
