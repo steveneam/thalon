@@ -25,6 +25,12 @@
  * -> TrendSource seam poll (official-API drivers = pass 2) -> deterministic
  * outlier ratios in core -> outliers auto-ingest as exemplars via the B2.4
  * path (PII-stripped, G1 denylist-screened), snapshots into source_metrics.
+ * B5.2 landed (A11): src/direction/ + src/pipeline/staged-video.ts — the
+ * staged video pipeline: stage plan (contracts registry, count is config)
+ * -> storyboard (structure) -> direction_doc (scenes/effects, polish), each
+ * stage judged before it advances (structural gate on queued/approved);
+ * deterministic-first prefill; deterministic export (timeline/SRT/dims);
+ * one-prompt mode = the same stages auto-advanced. pillar_script untouched.
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -40,3 +46,5 @@ export * from "./origination";
 export * from "./render";
 export * from "./webpage";
 export * from "./trend";
+export * from "./direction";
+export * from "./pipeline/staged-video";
