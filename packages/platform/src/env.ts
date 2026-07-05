@@ -30,6 +30,11 @@ const envSchema = z.object({
   TENANT_DAILY_TOKEN_BUDGET: z.coerce.number().int().positive().default(2_000_000),
   /** Which tenant the dev web app operates as (slug). Real operator→tenant resolution (Clerk org mapping) is a later bucket; until then the operated-on tenant is runtime config, never code. */
   DEMO_TENANT_SLUG: z.string().default("self"),
+  /** B4.8 transcript seam: which TranscriptProvider the registry selects (caption-file | whisper-local | hosted-vendor). Drivers are config, never new ingest code paths. */
+  TRANSCRIPT_PROVIDER: z.string().default("caption-file"),
+  /** B4.8 hosted-vendor adapter (keyed runtime config with a swap path — no vendor named in code; live runs are pass 3). */
+  TRANSCRIPT_VENDOR_URL: z.string().optional(),
+  TRANSCRIPT_VENDOR_API_KEY: z.string().optional(),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;

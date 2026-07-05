@@ -1,3 +1,4 @@
+import { readEnv } from "@thalon/platform";
 import { parseCaptions, type CaptionFormat, type TimedSegment } from "./captions";
 import { hostedVendorProvider } from "./hosted-transcript-provider";
 import { whisperLocalProvider } from "./whisper-provider";
@@ -58,9 +59,9 @@ export function registeredTranscriptProviders(): string[] {
   return Object.keys(PROVIDER_REGISTRY);
 }
 
-/** Seam resolution: explicit name > TRANSCRIPT_PROVIDER env > the zero-dep caption-file default. Unknown names fail loud with the registry listed. */
+/** Seam resolution: explicit name > TRANSCRIPT_PROVIDER env (via the platform env choke point) > the zero-dep caption-file default. Unknown names fail loud with the registry listed. */
 export function getTranscriptProvider(name?: string): TranscriptProvider {
-  const selected = name?.trim() || process.env.TRANSCRIPT_PROVIDER?.trim() || "caption-file";
+  const selected = name?.trim() || readEnv().TRANSCRIPT_PROVIDER;
   const factory = PROVIDER_REGISTRY[selected];
   if (!factory) {
     throw new Error(
