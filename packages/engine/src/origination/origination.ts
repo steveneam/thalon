@@ -3,8 +3,9 @@ import {
   renderBrandIdentity,
   type TenantCtx,
 } from "@thalon/contracts";
-import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
+import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
+import { runSingleDraftPipeline } from "../pipeline/single-draft";
 import { pillarScriptDraftMetaSchema } from "./schemas";
 import {
   gatewayPillarScriptDriver,
@@ -47,13 +48,10 @@ export interface OriginationResult {
  * not have yet originates here; B3.10 renders the approved script into the
  * pillar video + SRT, and B2.3 waterfalls that.
  *
- * Mirrors ../demo/storyboard.ts's idempotency/backfill semantics (N=1): a
- * repeat call with an identical generation key and the draft already
- * persisted is a zero-shell-call fast path; a repeat call after a prior
- * irrecoverable failure (run row exists, draft never persisted) regenerates
- * the single missing draft, reusing the same run. Every draft lands in
- * status "generated" only — the judge harness is the only path onward, and
- * it grounds against EVERY source recorded in meta.groundingSourceIds (the
+ * Idempotency/backfill semantics live in the shared single-draft spine
+ * (../pipeline/single-draft.ts, B4.1). Every draft lands in status
+ * "generated" only — the judge harness is the only path onward, and it
+ * grounds against EVERY source recorded in meta.groundingSourceIds (the
  * prompt source + all extra grounding) via collectGroundingChunks, plus the
  * active profile identity (B3.8, appended inside the pipeline itself).
  */
@@ -87,8 +85,10 @@ export async function runOrigination(
   const platform = request.platform?.trim() || PILLAR_PLATFORM;
   const model = modelTiers().draft;
   const promptVersion = pillarScriptPromptVersion();
-  const generationKey = sha256Hex(
-    stableStringify({
+
+  return runSingleDraftPipeline(ctx, repos, {
+    format: "pillar_script",
+    keyMaterial: {
       tenantId: ctx.tenantId,
       promptSourceId: promptSource.id,
       groundingSourceIds: groundingIds,
@@ -97,28 +97,8 @@ export async function runOrigination(
       platform,
       promptVersion,
       model,
-    }),
-  );
-
-  // Fast-path idempotency check (mirrors storyboard): a repeat call skips
-  // generation entirely, before ever reaching the gateway — UNLESS a prior
-  // call created the run but never persisted its draft (backfill below).
-  const existingRun = await repos.fanoutRuns.getByGenerationKey(ctx, generationKey);
-
-  let runId: string;
-  let runGenerationKey: string;
-  let created: boolean;
-
-  if (existingRun) {
-    const existingDrafts = await repos.drafts.listByRun(ctx, existingRun.id);
-    if (existingDrafts.length > 0) {
-      return { runId: existingRun.id, created: false, draft: existingDrafts[0] };
-    }
-    runId = existingRun.id;
-    runGenerationKey = existingRun.generationKey;
-    created = false;
-  } else {
-    const run = await repos.fanoutRuns.create(ctx, {
+    },
+    run: {
       sourceId: promptSource.id,
       brandProfileId: profile.id,
       brandProfileVersion: profile.version,
@@ -126,90 +106,73 @@ export async function runOrigination(
       promptVersion,
       model,
       params: groundingIds.length > 0 ? { groundingSourceIds: groundingIds } : undefined,
-      generationKey,
-    });
-    runId = run.id;
-    runGenerationKey = run.generationKey;
-    created = true;
-  }
+    },
+    irrecoverableLabel: "pillar-script generation",
+    generate: async () => {
+      const promptChunks = await repos.sourceChunks.listBySource(ctx, promptSource.id);
+      const operatorPrompt = promptChunks.map((chunk) => chunk.text).join("\n\n");
+      const groundingParts: string[] = [];
+      for (const id of groundingIds) {
+        const chunks = await repos.sourceChunks.listBySource(ctx, id);
+        groundingParts.push(chunks.map((chunk) => chunk.text).join("\n\n"));
+      }
+      const groundingText = groundingParts.filter(Boolean).join("\n\n---\n\n");
 
-  const promptChunks = await repos.sourceChunks.listBySource(ctx, promptSource.id);
-  const operatorPrompt = promptChunks.map((chunk) => chunk.text).join("\n\n");
-  const groundingParts: string[] = [];
-  for (const id of groundingIds) {
-    const chunks = await repos.sourceChunks.listBySource(ctx, id);
-    groundingParts.push(chunks.map((chunk) => chunk.text).join("\n\n"));
-  }
-  const groundingText = groundingParts.filter(Boolean).join("\n\n---\n\n");
+      const voice = (profile.voice as Record<string, unknown> | null) ?? {};
+      // B3.8: identity rides along automatically — rendered with the SAME
+      // contracts function the judge grounds against; empty identity ⇒ absent.
+      const identityBlock =
+        renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {})) || undefined;
+      const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+      const rawDriver = deps.driver ?? gatewayPillarScriptDriver();
 
-  const voice = (profile.voice as Record<string, unknown> | null) ?? {};
-  // B3.8: identity rides along automatically — rendered with the SAME
-  // contracts function the judge grounds against; empty identity ⇒ absent.
-  const identityBlock =
-    renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {})) || undefined;
-  const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
-  const rawDriver = deps.driver ?? gatewayPillarScriptDriver();
+      // Core meters the shell: EVERY attempt (including repair retries) routes
+      // through the one gateway choke point — budget asserted before, usage
+      // recorded after, span traced (SPINE §1; amendment A2). The shell driver
+      // itself stays read-only.
+      const guardedDriver: PillarScriptDriver = (req) =>
+        withGatewayGuard({
+          usage: {
+            assertWithinBudget: (o) => repos.usageLedger.assertWithinBudget(ctx, o),
+            recordUsage: (o) => repos.usageLedger.record(ctx, o),
+          },
+          capTokens,
+          model,
+          operation: "origination.pillar_script",
+          call: async () => {
+            const out = await rawDriver(req);
+            return { result: out, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
+          },
+        });
 
-  // Core meters the shell: EVERY attempt (including repair retries) routes
-  // through the one gateway choke point — budget asserted before, usage
-  // recorded after, span traced (SPINE §1; amendment A2). The shell driver
-  // itself stays read-only.
-  const guardedDriver: PillarScriptDriver = (req) =>
-    withGatewayGuard({
-      usage: {
-        assertWithinBudget: (o) => repos.usageLedger.assertWithinBudget(ctx, o),
-        recordUsage: (o) => repos.usageLedger.record(ctx, o),
-      },
-      capTokens,
-      model,
-      operation: "origination.pillar_script",
-      call: async () => {
-        const out = await rawDriver(req);
-        return { result: out, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
-      },
-    });
-
-  const result = await generateValidatedPillarScript(guardedDriver, {
-    operatorPrompt,
-    voice,
-    identityBlock,
-    groundingText,
+      return generateValidatedPillarScript(guardedDriver, {
+        operatorPrompt,
+        voice,
+        identityBlock,
+        groundingText,
+      });
+    },
+    toDraft: async (output) => {
+      const beats = output.beats.map((beat, beatIndex) => ({ ...beat, beatIndex }));
+      const meta = pillarScriptDraftMetaSchema.parse({
+        title: output.title,
+        hook: output.hook,
+        beats,
+        cta: output.cta ?? null,
+        groundingSourceIds: [promptSource.id, ...groundingIds],
+        promptVersion,
+        brandProfileVersion: profile.version,
+        platformProfileVersion: PILLAR_PLATFORM_PROFILE_VERSION,
+      });
+      // The body is the claim surface the judge reads: title + hook + narration
+      // in beat order (+ CTA). The SRT at B3.10 derives from these same lines.
+      const body = [
+        output.title,
+        output.hook,
+        ...beats.map((beat) => beat.narration),
+        ...(output.cta ? [output.cta] : []),
+      ].join("\n\n");
+      return { platform, body, meta };
+    },
   });
-  if (!result.output) {
-    throw new Error(
-      `pillar-script generation was irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
-    );
-  }
-
-  const beats = result.output.beats.map((beat, beatIndex) => ({ ...beat, beatIndex }));
-  const meta = pillarScriptDraftMetaSchema.parse({
-    title: result.output.title,
-    hook: result.output.hook,
-    beats,
-    cta: result.output.cta ?? null,
-    groundingSourceIds: [promptSource.id, ...groundingIds],
-    promptVersion,
-    brandProfileVersion: profile.version,
-    platformProfileVersion: PILLAR_PLATFORM_PROFILE_VERSION,
-  });
-  // The body is the claim surface the judge reads: title + hook + narration
-  // in beat order (+ CTA). The SRT at B3.10 derives from these same lines.
-  const body = [
-    result.output.title,
-    result.output.hook,
-    ...beats.map((beat) => beat.narration),
-    ...(result.output.cta ? [result.output.cta] : []),
-  ].join("\n\n");
-
-  const draft = await repos.drafts.create(ctx, {
-    fanoutRunId: runId,
-    sourceId: promptSource.id,
-    platform,
-    body,
-    format: "pillar_script",
-    generationKey: sha256Hex(`${runGenerationKey}:pillar_script`),
-    meta,
-  });
-
-  return { runId, created, draft };
 }

@@ -3,8 +3,9 @@ import {
   renderBrandIdentity,
   type TenantCtx,
 } from "@thalon/contracts";
-import { sha256Hex, stableStringify, type Draft, type Repos } from "@thalon/db";
+import { sha256Hex, type Draft, type Repos } from "@thalon/db";
 import { getObjectStore, modelTiers, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
+import { runSingleDraftPipeline } from "../pipeline/single-draft";
 import { extractVisibleText } from "./html";
 import { webPageDraftMetaSchema } from "./schemas";
 import {
@@ -46,8 +47,9 @@ export interface WebPageResult {
  * B3.15 entry point: operator prompt (+ active profile identity + optional
  * grounding sources) -> ONE judged-format `web_page` draft (CHARTER B3.15 —
  * the third output family beside social posts and pillar videos, on exactly
- * the same origination→judge→approve→ship spine). Mirrors
- * ../origination/origination.ts's idempotency/backfill semantics (N=1).
+ * the same origination→judge→approve→ship spine). Idempotency/backfill
+ * semantics live in the shared single-draft spine
+ * (../pipeline/single-draft.ts, B4.1).
  *
  * The generated HTML is persisted content-addressed to the object store
  * BEFORE the draft row exists (`web-pages/<sha256(html)>.html` — idempotent
@@ -89,8 +91,11 @@ export async function runWebPageGeneration(
   const platform = request.platform?.trim() || WEB_PLATFORM;
   const model = modelTiers().draft;
   const promptVersion = webPagePromptVersion();
-  const generationKey = sha256Hex(
-    stableStringify({
+  const objectStore = deps.objectStore ?? getObjectStore();
+
+  return runSingleDraftPipeline(ctx, repos, {
+    format: "web_page",
+    keyMaterial: {
       tenantId: ctx.tenantId,
       promptSourceId: promptSource.id,
       groundingSourceIds: groundingIds,
@@ -99,28 +104,8 @@ export async function runWebPageGeneration(
       platform,
       promptVersion,
       model,
-    }),
-  );
-
-  // Fast-path idempotency check (mirrors origination): a repeat call skips
-  // generation entirely, before ever reaching the gateway — UNLESS a prior
-  // call created the run but never persisted its draft (backfill below).
-  const existingRun = await repos.fanoutRuns.getByGenerationKey(ctx, generationKey);
-
-  let runId: string;
-  let runGenerationKey: string;
-  let created: boolean;
-
-  if (existingRun) {
-    const existingDrafts = await repos.drafts.listByRun(ctx, existingRun.id);
-    if (existingDrafts.length > 0) {
-      return { runId: existingRun.id, created: false, draft: existingDrafts[0] };
-    }
-    runId = existingRun.id;
-    runGenerationKey = existingRun.generationKey;
-    created = false;
-  } else {
-    const run = await repos.fanoutRuns.create(ctx, {
+    },
+    run: {
       sourceId: promptSource.id,
       brandProfileId: profile.id,
       brandProfileVersion: profile.version,
@@ -128,91 +113,73 @@ export async function runWebPageGeneration(
       promptVersion,
       model,
       params: groundingIds.length > 0 ? { groundingSourceIds: groundingIds } : undefined,
-      generationKey,
-    });
-    runId = run.id;
-    runGenerationKey = run.generationKey;
-    created = true;
-  }
+    },
+    irrecoverableLabel: "web-page generation",
+    generate: async () => {
+      const promptChunks = await repos.sourceChunks.listBySource(ctx, promptSource.id);
+      const operatorPrompt = promptChunks.map((chunk) => chunk.text).join("\n\n");
+      const groundingParts: string[] = [];
+      for (const id of groundingIds) {
+        const chunks = await repos.sourceChunks.listBySource(ctx, id);
+        groundingParts.push(chunks.map((chunk) => chunk.text).join("\n\n"));
+      }
+      const groundingText = groundingParts.filter(Boolean).join("\n\n---\n\n");
 
-  const promptChunks = await repos.sourceChunks.listBySource(ctx, promptSource.id);
-  const operatorPrompt = promptChunks.map((chunk) => chunk.text).join("\n\n");
-  const groundingParts: string[] = [];
-  for (const id of groundingIds) {
-    const chunks = await repos.sourceChunks.listBySource(ctx, id);
-    groundingParts.push(chunks.map((chunk) => chunk.text).join("\n\n"));
-  }
-  const groundingText = groundingParts.filter(Boolean).join("\n\n---\n\n");
+      const voice = (profile.voice as Record<string, unknown> | null) ?? {};
+      // B3.8: identity rides along automatically — rendered with the SAME
+      // contracts function the judge grounds against; empty identity ⇒ absent.
+      const identityBlock =
+        renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {})) || undefined;
+      const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+      const rawDriver = deps.driver ?? gatewayWebPageDriver();
 
-  const voice = (profile.voice as Record<string, unknown> | null) ?? {};
-  // B3.8: identity rides along automatically — rendered with the SAME
-  // contracts function the judge grounds against; empty identity ⇒ absent.
-  const identityBlock =
-    renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {})) || undefined;
-  const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
-  const objectStore = deps.objectStore ?? getObjectStore();
-  const rawDriver = deps.driver ?? gatewayWebPageDriver();
+      // Core meters the shell: EVERY attempt (including repair retries) routes
+      // through the one gateway choke point — budget asserted before, usage
+      // recorded after, span traced (SPINE §1; amendment A2). The shell driver
+      // itself stays read-only.
+      const guardedDriver: WebPageDriver = (req) =>
+        withGatewayGuard({
+          usage: {
+            assertWithinBudget: (o) => repos.usageLedger.assertWithinBudget(ctx, o),
+            recordUsage: (o) => repos.usageLedger.record(ctx, o),
+          },
+          capTokens,
+          model,
+          operation: "webpage.web_page",
+          call: async () => {
+            const out = await rawDriver(req);
+            return { result: out, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
+          },
+        });
 
-  // Core meters the shell: EVERY attempt (including repair retries) routes
-  // through the one gateway choke point — budget asserted before, usage
-  // recorded after, span traced (SPINE §1; amendment A2). The shell driver
-  // itself stays read-only.
-  const guardedDriver: WebPageDriver = (req) =>
-    withGatewayGuard({
-      usage: {
-        assertWithinBudget: (o) => repos.usageLedger.assertWithinBudget(ctx, o),
-        recordUsage: (o) => repos.usageLedger.record(ctx, o),
-      },
-      capTokens,
-      model,
-      operation: "webpage.web_page",
-      call: async () => {
-        const out = await rawDriver(req);
-        return { result: out, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
-      },
-    });
+      return generateValidatedWebPage(guardedDriver, {
+        operatorPrompt,
+        voice,
+        identityBlock,
+        groundingText,
+      });
+    },
+    toDraft: async (output) => {
+      // The artifact lands first, content-addressed — idempotent on retry, and
+      // a draft can never reference bytes that aren't durably in the store.
+      const html = output.html;
+      const htmlRef = `web-pages/${sha256Hex(html)}.html`;
+      await objectStore.put(htmlRef, html);
 
-  const result = await generateValidatedWebPage(guardedDriver, {
-    operatorPrompt,
-    voice,
-    identityBlock,
-    groundingText,
+      const meta = webPageDraftMetaSchema.parse({
+        title: output.title,
+        description: output.description,
+        htmlRef,
+        groundingSourceIds: [promptSource.id, ...groundingIds],
+        promptVersion,
+        brandProfileVersion: profile.version,
+        platformProfileVersion: WEB_PLATFORM_PROFILE_VERSION,
+      });
+      // The body is the claim surface the judge reads: the page's extracted
+      // visible text (title included via its <title>/<h1>), never a parallel
+      // authored summary — nothing on the page can escape the judge.
+      const body = extractVisibleText(html);
+      return { platform, body, meta };
+    },
   });
-  if (!result.output) {
-    throw new Error(
-      `web-page generation was irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
-    );
-  }
-
-  // The artifact lands first, content-addressed — idempotent on retry, and
-  // a draft can never reference bytes that aren't durably in the store.
-  const html = result.output.html;
-  const htmlRef = `web-pages/${sha256Hex(html)}.html`;
-  await objectStore.put(htmlRef, html);
-
-  const meta = webPageDraftMetaSchema.parse({
-    title: result.output.title,
-    description: result.output.description,
-    htmlRef,
-    groundingSourceIds: [promptSource.id, ...groundingIds],
-    promptVersion,
-    brandProfileVersion: profile.version,
-    platformProfileVersion: WEB_PLATFORM_PROFILE_VERSION,
-  });
-  // The body is the claim surface the judge reads: the page's extracted
-  // visible text (title included via its <title>/<h1>), never a parallel
-  // authored summary — nothing on the page can escape the judge.
-  const body = extractVisibleText(html);
-
-  const draft = await repos.drafts.create(ctx, {
-    fanoutRunId: runId,
-    sourceId: promptSource.id,
-    platform,
-    body,
-    format: "web_page",
-    generationKey: sha256Hex(`${runGenerationKey}:web_page`),
-    meta,
-  });
-
-  return { runId, created, draft };
 }
