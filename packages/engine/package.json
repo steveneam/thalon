@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hyperframes/lint": "0.7.33",
+    "@hyperframes/producer": "0.7.33",
     "@thalon/contracts": "*",
     "@thalon/db": "*",
     "@thalon/judge": "*",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@remotion/cli": "^4.0.484",
+    "hyperframes": "0.7.33",
     "remotion": "^4.0.484"
   }
 }
