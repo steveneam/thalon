@@ -104,7 +104,10 @@ describe("error taxonomy (B4.5 ratchet)", () => {
       model: "test/model",
       generationKey: `${ctx.tenantId}:tax-web-run`,
     });
-    const htmlRef = "web-pages/deadbeef.html";
+    // A well-formed content-addressed key that was simply never written —
+    // B4.6's verified read passes it through as `null` (a malformed ref
+    // would instead fail key parsing, a different loud error).
+    const htmlRef = `web-pages/${sha256Hex("never written")}.html`;
     const draft = await repos.drafts.create(ctx, {
       fanoutRunId: run.id,
       sourceId: source.id,

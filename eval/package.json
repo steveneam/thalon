@@ -14,6 +14,7 @@
     "export": "tsx src/export-eval-cases.ts",
     "promptfoo": "npx promptfoo@latest eval -c promptfoo/promptfooconfig.yaml",
     "dogfood": "tsx src/dogfood.ts",
+    "sweep": "tsx src/sweep-object-store.ts",
     "golden:g3": "tsx src/run-golden-g3.ts"
   },
   "dependencies": {
