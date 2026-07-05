@@ -29,6 +29,11 @@ import {
   createFakePillarScriptDriver,
   pillarScriptPromptVersion,
 } from "../origination/shell/generator";
+import {
+  createFakeDirectionScenesDriver,
+  createFakeStoryboardStageDriver,
+} from "../direction/shell/generator";
+import { advanceVideoStage, startVideoStages } from "../pipeline/staged-video";
 import { createFakeRenderTarget } from "../render/fake-target";
 import { renderPillar } from "../render/render";
 import { extractVisibleText } from "../webpage/html";
@@ -255,6 +260,103 @@ describe("storyboard (demo_plan) key material", () => {
 
     const meta = result.draft.meta as { steps: { narration: string }[] };
     expect(result.draft.body).toBe(meta.steps.map((step) => step.narration).join("\n\n"));
+  });
+});
+
+describe("staged video (storyboard + direction_doc) key material (B5.2)", () => {
+  /** Walks a stage draft to `queued` through the one transition fn (I1 satisfied by a final-gate pass) — the judge-passed state advanceVideoStage gates on. */
+  async function queueStage(ctx: TenantCtx, repos: Repos, draft: Draft): Promise<Draft> {
+    await repos.drafts.transition(ctx, draft.id, "judging");
+    await repos.judgeResults.append(ctx, { draftId: draft.id, gate: FINAL_JUDGE_GATE, verdict: "pass" });
+    return repos.drafts.transition(ctx, draft.id, "queued");
+  }
+
+  it("structure run key = sha256(stableStringify(pinned field set incl. family+stageKey)); draft key = sha256(runKey + ':storyboard'); body = title/narrations/cta joined by blank lines", async () => {
+    const { ctx, repos, profile } = await db();
+    const promptSourceId = await ingestPrompt(ctx, repos);
+    const docA = await ingestDoc(ctx, repos, "a");
+    const docB = await ingestDoc(ctx, repos, "b");
+
+    const result = await startVideoStages(
+      ctx,
+      repos,
+      // Unsorted + duplicated on purpose: dedupe-then-lexicographic-sort is
+      // part of the pinned key contract (mirrors origination).
+      { promptSourceId, groundingSourceIds: [docB, docA, docB] },
+      { structureDriver: createFakeStoryboardStageDriver(), capTokens: 1_000_000 },
+    );
+
+    const expectedRunKey = sha256Hex(
+      stableStringify({
+        tenantId: ctx.tenantId,
+        family: "video",
+        stageKey: "structure",
+        promptSourceId,
+        groundingSourceIds: [docA, docB].sort(),
+        brandProfileId: profile.id,
+        brandProfileVersion: profile.version,
+        platform: "video",
+        promptVersion: "storyboard-stage-structure.v1",
+        model: modelTiers().draft,
+      }),
+    );
+    const run = await repos.fanoutRuns.getByGenerationKey(ctx, expectedRunKey);
+    expect(run?.id).toBe(result.runId);
+    expect(result.draft.generationKey).toBe(sha256Hex(`${expectedRunKey}:storyboard`));
+
+    const meta = result.draft.meta as { title: string; scenes: { narration: string }[]; cta: string | null };
+    expect(result.draft.body).toBe(
+      [meta.title, ...meta.scenes.map((s) => s.narration), ...(meta.cta ? [meta.cta] : [])].join(
+        "\n\n",
+      ),
+    );
+  });
+
+  it("advance run key pins priorDraftId + priorContentHash = sha256(stableStringify({body, meta})); draft key = sha256(runKey + ':direction_doc')", async () => {
+    const { ctx, repos, profile } = await db();
+    const promptSourceId = await ingestPrompt(ctx, repos);
+    const start = await startVideoStages(
+      ctx,
+      repos,
+      { promptSourceId },
+      { structureDriver: createFakeStoryboardStageDriver(), capTokens: 1_000_000 },
+    );
+    await queueStage(ctx, repos, start.draft);
+    const prior = await repos.drafts.get(ctx, start.draft.id);
+
+    const result = await advanceVideoStage(
+      ctx,
+      repos,
+      { draftId: prior.id },
+      { scenesDriver: createFakeDirectionScenesDriver(), capTokens: 1_000_000 },
+    );
+
+    const expectedRunKey = sha256Hex(
+      stableStringify({
+        tenantId: ctx.tenantId,
+        family: "video",
+        stageKey: "scenes_effects",
+        priorDraftId: prior.id,
+        priorContentHash: sha256Hex(stableStringify({ body: prior.body, meta: prior.meta })),
+        brandProfileId: profile.id,
+        brandProfileVersion: profile.version,
+        platform: "video",
+        promptVersion: "direction-stage-scenes.v1",
+        model: modelTiers().draft,
+      }),
+    );
+    const run = await repos.fanoutRuns.getByGenerationKey(ctx, expectedRunKey);
+    expect(run?.id).toBe(result.runId);
+    expect(result.draft.generationKey).toBe(sha256Hex(`${expectedRunKey}:direction_doc`));
+
+    const meta = result.draft.meta as { doc: { title: string; scenes: { narration: string }[]; cta: string | null } };
+    expect(result.draft.body).toBe(
+      [
+        meta.doc.title,
+        ...meta.doc.scenes.map((s) => s.narration),
+        ...(meta.doc.cta ? [meta.doc.cta] : []),
+      ].join("\n\n"),
+    );
   });
 });
 

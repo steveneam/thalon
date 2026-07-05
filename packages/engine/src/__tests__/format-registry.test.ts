@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   DRAFT_FORMAT_REGISTRY,
   DRAFT_FORMATS,
+  FINAL_JUDGE_GATE,
   resolveDraftFormatSpec,
   tenantCtx,
   type TenantCtx,
@@ -20,6 +21,11 @@ import { createFakeDraftGeneratorDriver } from "../fanout/shell/generator";
 import { createFakeEmbeddingDriver } from "../ingest/shell/embedder";
 import { runOrigination } from "../origination/origination";
 import { createFakePillarScriptDriver } from "../origination/shell/generator";
+import {
+  createFakeDirectionScenesDriver,
+  createFakeStoryboardStageDriver,
+} from "../direction/shell/generator";
+import { advanceVideoStage, startVideoStages } from "../pipeline/staged-video";
 import { runWaterfall } from "../waterfall/waterfall";
 import { createFakeHighlightSelectDriver } from "../waterfall/shell/generator";
 import { createFakeWebPageDriver } from "../webpage/shell/generator";
@@ -170,6 +176,35 @@ describe("format contract registry (B4.2 ratchet, keyless + networkless)", () =>
       { driver: createFakePillarScriptDriver(), capTokens: 1_000_000 },
     );
     assertRegistered(result.draft, "pillar_script");
+  });
+
+  it("storyboard + direction_doc: staged-video drafts parse and the registered body derivations reproduce drafts.body", async () => {
+    const { ctx, repos } = await db();
+    const promptSourceId = await ingestPrompt(ctx, repos);
+    const start = await startVideoStages(
+      ctx,
+      repos,
+      { promptSourceId },
+      { structureDriver: createFakeStoryboardStageDriver(), capTokens: 1_000_000 },
+    );
+    assertRegistered(start.draft, "storyboard");
+
+    // Walk the stage gate legitimately (I1: final-gate pass for the current body hash).
+    await repos.drafts.transition(ctx, start.draft.id, "judging");
+    await repos.judgeResults.append(ctx, {
+      draftId: start.draft.id,
+      gate: FINAL_JUDGE_GATE,
+      verdict: "pass",
+    });
+    await repos.drafts.transition(ctx, start.draft.id, "queued");
+
+    const advanced = await advanceVideoStage(
+      ctx,
+      repos,
+      { draftId: start.draft.id },
+      { scenesDriver: createFakeDirectionScenesDriver(), capTokens: 1_000_000 },
+    );
+    assertRegistered(advanced.draft, "direction_doc");
   });
 
   it("web_page: webpage drafts parse; body is artifact-derived so the registry declares no expectedBody", async () => {
