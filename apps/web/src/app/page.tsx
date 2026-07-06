@@ -40,7 +40,9 @@ const TRUST_CHIPS = [
 
 export default function LandingPage() {
   return (
-    <>
+    // The landing stays dark-cinematic (workspace-ux-v2.md §4, ratified):
+    // `.dark` is scoped here now that the document root is light-first.
+    <div className="dark flex min-h-dvh flex-1 flex-col bg-background text-foreground">
       <OrganizationJsonLd />
       <FaqJsonLd />
 
@@ -306,6 +308,6 @@ export default function LandingPage() {
       </footer>
 
       <StickyCta />
-    </>
+    </div>
   );
 }

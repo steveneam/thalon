@@ -36,7 +36,7 @@ export function Topbar() {
           "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors",
           "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           needsYou > 0
-            ? "border-primary/40 bg-primary/15 font-medium text-primary hover:bg-primary/25"
+            ? "border-signal/40 bg-signal/15 font-medium text-signal hover:bg-signal/25"
             : "border-border text-muted-foreground hover:bg-muted",
         )}
       >

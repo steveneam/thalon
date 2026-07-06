@@ -24,7 +24,7 @@ export function HorizonCard({ card, busy, onTarget }: HorizonCardProps) {
         <span className="font-mono text-sm font-medium">&ldquo;{card.query}&rdquo;</span>
         {card.page && <span className="truncate text-xs text-muted-foreground">{card.page}</span>}
         {card.isOpportunity ? (
-          <Badge className="ml-auto">horizon opportunity</Badge>
+          <Badge variant="signal" className="ml-auto">horizon opportunity</Badge>
         ) : (
           <Badge variant="outline" className="ml-auto">
             {card.reasons.length > 0 ? "partial signal" : "no signal"}
@@ -61,7 +61,7 @@ export function HorizonCard({ card, busy, onTarget }: HorizonCardProps) {
         {card.reasons.length > 0 && (
           <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
             {card.reasons.map((reason) => (
-              <li key={reason} className="border-l-2 border-primary/40 pl-2">
+              <li key={reason} className="border-l-2 border-signal/50 pl-2">
                 {reason}
               </li>
             ))}

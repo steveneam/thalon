@@ -31,10 +31,10 @@ export function NeedsYouCard({ counts, needsYou }: NeedsYouCardProps) {
     );
   }
   return (
-    <Card className="border-primary/40 bg-primary/5">
+    <Card className="border-signal/40 bg-signal/5">
       <CardHeader>
         <CardTitle className="text-base">
-          <span className="u-tabular text-primary">{needsYou}</span>{" "}
+          <span className="u-tabular text-signal">{needsYou}</span>{" "}
           {needsYou === 1 ? "draft waits" : "drafts wait"} on you
         </CardTitle>
       </CardHeader>

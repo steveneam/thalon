@@ -4,11 +4,12 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 /**
- * B6.1 token ratchet: "WCAG AA contrast for amber-on-dark text pairings"
- * (docs/FRONTEND.md §1) as executable math, not a design note. Parses the
- * oklch tokens straight out of globals.css and re-derives the WCAG 2.x
- * contrast ratio — recolor a token and this either stays green or names the
- * failing pair.
+ * B6.1 token ratchet, re-pinned at the wave-3 light-first retune
+ * (workspace-ux-v2.md §4): WCAG AA for every named pairing as executable
+ * math, not a design note — including the new amber signal channel in both
+ * themes. Parses the oklch tokens straight out of globals.css and
+ * re-derives the WCAG 2.x contrast ratio — recolor a token and this either
+ * stays green or names the failing pair.
  */
 
 const dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -56,12 +57,14 @@ function tokensOf(selector: string): Map<string, number> {
 /** [foreground token, background token, minimum ratio] */
 const PAIRS: Array<[string, string, number]> = [
   ["foreground", "background", 7], // body text — hold AAA
-  ["primary", "background", 4.5], // the amber pairing the spec names
+  ["primary", "background", 4.5], // interactive: blue on paper / amber on ink
   ["muted-foreground", "background", 4.5],
-  ["primary-foreground", "primary", 4.5], // text on amber CTAs
+  ["primary-foreground", "primary", 4.5], // text on primary CTAs
   ["accent-foreground", "accent", 4.5],
   ["secondary-foreground", "secondary", 4.5],
   ["card-foreground", "card", 7],
+  ["signal", "background", 4.5], // heat scores / needs-you counts as text
+  ["signal-foreground", "signal", 4.5], // text on outlier/opportunity badges
 ];
 
 describe.each([":root", ".dark"])("design tokens %s — WCAG AA (B6.1)", (selector) => {

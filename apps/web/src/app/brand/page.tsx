@@ -43,7 +43,9 @@ const CONCEPTS = [
 
 export default function BrandPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-16">
+    // Brand-review page keeps the dark-cinematic mood (scoped, like `/`).
+    <div className="dark flex min-h-dvh flex-1 flex-col bg-background text-foreground">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-16">
       <p className="u-eyebrow text-primary">Internal · B6.1</p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight">The grip mark</h1>
       <p className="mt-2 max-w-xl text-muted-foreground">
@@ -86,6 +88,7 @@ export default function BrandPage() {
           <BrandLockup />
         </div>
       </section>
-    </main>
+      </main>
+    </div>
   );
 }
