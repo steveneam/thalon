@@ -13,8 +13,9 @@
 # testing
 /coverage
 
-# next.js
+# next.js (.next-dev = the dev-mode distDir; see next.config.ts)
 /.next/
+/.next-dev/
 /out/
 
 # production
