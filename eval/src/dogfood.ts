@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
 import {
   brandProfileConfigSchema,
@@ -143,52 +143,20 @@ export function loadDogfoodInput(path: string): DogfoodInput {
 }
 
 /**
- * Tenant #0 (ratified decision 3): the engine dogfoods itself. All of this
- * is runtime DATA for the generic self tenant — the slug matches the web
- * app's demo-tenant lookup so the approve queue shows this run's drafts.
+ * Tenant #0 (ratified decision 3): the engine dogfoods itself. B6.3: the
+ * real Thalon deep profile — identity/voice/topics, brand style, and the
+ * pillar-#1 prompt (locked to Thalon itself) — is TRACKED DATA in
+ * proprietary/profiles/tenants/self.v1.json, loaded through the same
+ * loader operators use and validated by the same CI ratchet as every other
+ * shipped tenant file, so tenant #0 can never drift back into code. The
+ * identity's fact-bearing lines double as judge grounding: each is a short,
+ * individually-checkable, TRUE statement about the engine (the ADR-0006
+ * honest-claims rule applies to the self tenant's copy too).
  */
-export const TENANT_ZERO: DogfoodInput = {
-  tenantSlug: "self",
-  tenantName: "Self (dogfood)",
-  brandConfig: {
-    voice: {
-      register: "plain, direct, no hype",
-      persona: "a solo founder shipping a content-automation engine in public",
-    },
-    denylist: ["guaranteed", "can't lose", "risk-free"],
-    platformProfiles: {},
-    // B3.8: identity is saved once here and rides along with every
-    // generation automatically — the operator never re-types company
-    // context. Fact-bearing lines double as judge grounding, so each is a
-    // short, individually-checkable statement about the engine itself.
-    identity: {
-      company: "Thalon",
-      oneLiner:
-        "A generic, multi-tenant content and social-automation engine that turns one source or prompt into judged, platform-native drafts.",
-      philosophy:
-        "Safety-gated automation: no draft reaches the operator unjudged, and nothing publishes without human approval.",
-      audience: "Solo founders and small teams who want a steady content pipeline without hiring for it.",
-      offers: [
-        "Fan-out from one source into platform-native drafts",
-        "Grounding-judged drafts with a human approve queue",
-      ],
-      facts: [
-        "Every draft passes a denylist gate and a two-tier grounding judge before it can reach the approve queue.",
-        "No publish path is wired; every draft stops at human approval.",
-      ],
-      topics: ["content automation", "building in public"],
-    },
-  },
-  prompt: [
-    "Sprint 1 of the engine is code-complete. What shipped:",
-    "a source-ingest step that turns a URL, prompt, or document into chunked, embedded grounding sources;",
-    "a fan-out step that turns one source into platform-native drafts for LinkedIn and X, driven entirely by per-tenant runtime config;",
-    "a two-tier grounding judge (a cheap screening model plus a stronger final model) that blocks any draft making claims the provided sources don't support, alongside a per-tenant denylist gate;",
-    "and an operator approve queue where every draft shows its judge verdicts and every human edit is captured as an eval case.",
-    "No publish path exists yet by design - every draft stops at the human approval gate.",
-  ].join(" "),
-  platforms: ["linkedin", "x"],
-};
+export const SELF_TENANT_PATH = fileURLToPath(
+  new URL("../../proprietary/profiles/tenants/self.v1.json", import.meta.url),
+);
+export const TENANT_ZERO: DogfoodInput = loadDogfoodInput(SELF_TENANT_PATH);
 
 async function main(): Promise<void> {
   loadEnvLocal();

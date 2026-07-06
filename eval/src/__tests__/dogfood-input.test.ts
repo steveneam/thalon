@@ -42,6 +42,24 @@ describe("dogfood input as data (B2.1)", () => {
     expect(() => dogfoodInputSchema.parse(TENANT_ZERO)).not.toThrow();
   });
 
+  it("tenant #0 IS the tracked self profile (B6.3): real Thalon identity, pillar-#1 prompt locked to Thalon itself", () => {
+    // The deep profile lives in proprietary/profiles/tenants/self.v1.json —
+    // data, never code. These pins keep the load-bearing parts from drifting:
+    // the slug the web app's demo-tenant lookup expects, the real identity,
+    // the platforms the dogfood slice tests exercise, and the composition
+    // styling seam (deriveBrandStyle reads identity.style at render time).
+    expect(TENANT_ZERO.tenantSlug).toBe("self");
+    expect(TENANT_ZERO.brandConfig.identity?.company).toBe("Thalon");
+    expect(TENANT_ZERO.prompt).toContain("Thalon");
+    expect(TENANT_ZERO.platforms).toEqual(["linkedin", "x"]);
+    expect(TENANT_ZERO.brandConfig.denylist).toContain("guaranteed");
+    const identity = TENANT_ZERO.brandConfig.identity as Record<string, unknown>;
+    expect(identity.style).toMatchObject({
+      background: expect.stringMatching(/^#[0-9a-f]{6}$/),
+      accentColor: expect.stringMatching(/^#[0-9a-f]{6}$/),
+    });
+  });
+
   it("loads and validates a tenant-run JSON file", () => {
     const input = loadDogfoodInput(writeTmpJson(validInput));
     expect(input.tenantSlug).toBe("tenant-two");
