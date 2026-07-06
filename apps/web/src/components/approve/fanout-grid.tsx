@@ -16,10 +16,21 @@ interface FanoutGridProps {
   drafts: GridDraft[];
   selectedDraftId: string | null;
   onSelect: (draftId: string) => void;
+  busy: boolean;
+  queuedCount: number;
+  onBatchApprove: () => void;
 }
 
 /** Zone 2: per-platform fan-out grid for the selected run. */
-export function FanoutGrid({ status, drafts, selectedDraftId, onSelect }: FanoutGridProps) {
+export function FanoutGrid({
+  status,
+  drafts,
+  selectedDraftId,
+  onSelect,
+  busy,
+  queuedCount,
+  onBatchApprove,
+}: FanoutGridProps) {
   const columns = [
     ...PLATFORM_COLUMNS,
     ...Array.from(new Set(drafts.map((d) => d.platform))).filter(
@@ -34,10 +45,15 @@ export function FanoutGrid({ status, drafts, selectedDraftId, onSelect }: Fanout
         <Button
           variant="outline"
           size="sm"
-          disabled
-          title="Batch approve is schema-level only in Sprint 1 — full UX lands later per charter."
+          disabled={busy || queuedCount === 0}
+          title={
+            queuedCount === 0
+              ? "No queued drafts in this run — batch approve acts on judge-passed drafts only."
+              : "Approve every queued draft in this run (each records its own approval)."
+          }
+          onClick={onBatchApprove}
         >
-          Approve all passing
+          Approve all queued ({queuedCount})
         </Button>
       </div>
       {status === "idle" && <p className="text-sm text-muted-foreground">Select a run to see its drafts.</p>}
