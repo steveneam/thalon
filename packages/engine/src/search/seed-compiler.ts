@@ -57,8 +57,8 @@ export interface SeedCompilation {
   truncated: number;
 }
 
-/** Queries are matched case-insensitively by every search surface — normalize so recompiles are byte-stable. */
-function normalizeQuery(text: string): string {
+/** Queries are matched case-insensitively by every search surface — normalize so recompiles are byte-stable (shared with ./expansion.ts). */
+export function normalizeQuery(text: string): string {
   return text.trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").toLowerCase();
 }
 

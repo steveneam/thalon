@@ -44,6 +44,7 @@ const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"staged_video.structure"', note: "B5.2 — staged video, structure stage (storyboard)" },
   { op: '"staged_video.scenes"', note: "B5.2 — staged video, scenes/effects fill" },
   { op: '"staged_video.polish"', note: "B5.2 — staged video, polish refine" },
+  { op: '"search.keyword_expand"', note: "B6.8 — judged AI keyword expansion (search targets; G1 + deterministic grounding gate candidates before persist)" },
   { op: "`judge.${GATE_FOR_TIER[tier]}`", note: "B1.3 — G3 two-tier grounding (→ judge.g3_screen | judge.g3_final)" },
 ];
 
@@ -101,8 +102,8 @@ describe("shell inventory (B5.3 executable pin, SPINE §1)", () => {
 
   it("every withGatewayGuard call site carries a pinned operation (count matches — a new site with a reused label is still caught)", () => {
     const { ops, guardCallSites } = collectOperations();
-    // One guarded operation label per guarded call site: 9 string literals +
-    // the single judge template site = 10.
+    // One guarded operation label per guarded call site: 10 string literals +
+    // the single judge template site = 11.
     expect(guardCallSites).toBe(EXPECTED_SHELL_OPERATIONS.length);
     expect(ops.length).toBe(EXPECTED_SHELL_OPERATIONS.length);
   });
