@@ -11,10 +11,12 @@ import { cn } from "@/lib/utils";
 export type CreateFamily = "post" | "video" | "page";
 
 interface CreateSurfaceProps {
-  /** Prompt seed handed over by Intel ("generate from this" / "target this"). */
+  /** Prompt seed handed over by Intel ("generate from this" / "target this") or the omnibox. */
   initialPrompt: string;
   /** Keyword context from the Search tab — rides into generation as a search target. */
   initialKeyword: string;
+  /** Family pre-pick from the omnibox heuristic — the picker stays changeable. */
+  initialFamily?: CreateFamily;
 }
 
 const FAMILIES = [
@@ -45,9 +47,11 @@ const FAMILIES = [
  * post/page state their seam honestly instead of dead-ending. The prompt
  * box is the omnibox's landing target, pre-seeded by Intel handoffs.
  */
-export function CreateSurface({ initialPrompt, initialKeyword }: CreateSurfaceProps) {
+export function CreateSurface({ initialPrompt, initialKeyword, initialFamily }: CreateSurfaceProps) {
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [family, setFamily] = useState<CreateFamily>(initialPrompt || initialKeyword ? "post" : "video");
+  const [family, setFamily] = useState<CreateFamily>(
+    initialFamily ?? (initialPrompt || initialKeyword ? "post" : "video"),
+  );
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">

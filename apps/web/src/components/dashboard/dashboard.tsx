@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ActivityFeed, type ActivityStatus } from "@/components/dashboard/activity-feed";
 import { FirstRunCard } from "@/components/dashboard/first-run-card";
 import { NeedsYouCard } from "@/components/dashboard/needs-you-card";
+import { Omnibox } from "@/components/dashboard/omnibox";
 import { PulseRow } from "@/components/dashboard/pulse-row";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { SeamStatusCard, type StatusCardStatus } from "@/components/dashboard/seam-status-card";
@@ -56,6 +57,7 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
+      <Omnibox />
       <PulseRow counts={counts} needsYou={needsYou} loading={pulseStatus === "loading"} />
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4 lg:col-span-2">

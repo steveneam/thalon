@@ -5,6 +5,7 @@ import { WorkspaceShell } from "@/components/workspace/workspace-shell";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/app/intel",
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 describe("WorkspaceShell", () => {

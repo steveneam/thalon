@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormatDetail } from "@/components/approve/format-detail";
 import { JudgeBadge } from "@/components/approve/judge-badge";
+import { isTypingTarget } from "@/lib/approve-queue/keyboard";
 import type { GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
 export type PanelStatus = "idle" | "loading" | "error" | "success";
@@ -25,6 +26,27 @@ interface ApprovePanelProps {
 export function ApprovePanel({ status, draft, judgeResults, busy, actionError, onApprove, onReject, onEditSave, onReJudge }: ApprovePanelProps) {
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
+
+  // Keyboard triage (B6.2 [+]): 'e' opens the editor (edit state lives
+  // here); Escape cancels it — allowed even FROM the textarea, so the
+  // typing guard applies only to opening.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape" && editing) {
+        setEditing(false);
+        return;
+      }
+      if (event.key !== "e" || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (busy || editing || isTypingTarget(event.target)) return;
+      const editable = draft && (draft.status === "queued" || draft.status === "blocked");
+      if (!editable || status !== "success") return;
+      event.preventDefault();
+      setEditedBody(draft.body);
+      setEditing(true);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [busy, editing, draft, status]);
 
   if (status !== "success" || !draft) {
     return (

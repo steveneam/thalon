@@ -8,6 +8,7 @@ import { server } from "@/lib/testing/server";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/app",
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 function renderDashboard() {

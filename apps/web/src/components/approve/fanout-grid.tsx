@@ -56,6 +56,9 @@ export function FanoutGrid({
           Approve all queued ({queuedCount})
         </Button>
       </div>
+      <p className="u-eyebrow text-muted-foreground">
+        keys · j/k select · a approve · r reject · e edit
+      </p>
       {status === "idle" && <p className="text-sm text-muted-foreground">Select a run to see its drafts.</p>}
       {status === "loading" && <p className="text-sm text-muted-foreground">Loading drafts…</p>}
       {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load drafts.</p>}

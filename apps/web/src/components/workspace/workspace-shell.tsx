@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { CommandPalette } from "@/components/workspace/command-palette";
 import { PulseProvider } from "@/components/workspace/pulse-context";
 import { Sidebar } from "@/components/workspace/sidebar";
 import { Topbar } from "@/components/workspace/topbar";
@@ -48,6 +49,7 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
           <main className="flex min-w-0 flex-1 flex-col">{children}</main>
         </div>
       </div>
+      <CommandPalette />
     </PulseProvider>
   );
 }
