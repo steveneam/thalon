@@ -27,6 +27,7 @@ Thalon's single most important structural rule. Every module below is classified
 - `origination.pillar_script` — one-shot pillar script (B3.9)
 - `webpage.web_page` — landing-page generation (B3.15)
 - `staged_video.structure` · `staged_video.scenes` · `staged_video.polish` — the staged video pipeline's three stages (B5.2)
+- `search.keyword_expand` — judged AI keyword expansion; every candidate then passes deterministic core gates (G1 denylist + grounding-to-profile) before persisting (B6.8)
 
 Each lives in a module whose imports are restricted (lint-enforced, §3.4; `getGateway` reachability pinned by `gateway-boundary.test.ts`) so the boundary is structural, not conventional. **Computable-leakage audit (B5.3):** every shell here is a read-only prompt-builder + model call that returns a candidate; all deterministic derivation the shells' outputs feed — clip-window math, SRT/timeline derivation, direction prefill/export/merge, body derivation, generation-key material — already lives in core (B4.1 extractions + B5.2's deterministic-first staging), so nothing computable is delegated to a model or synthesized inside a shell. The staged-video shells make this sharpest: their boundary schemas admit ONLY the creative slots (aspect/fps/pacing/scene-count are absent by construction), so a stage cannot even attempt to move a computable field.
 
