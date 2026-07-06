@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { DraftFormat } from "./draft-format";
 import { directionDocSchema } from "./direction-doc";
+import { seoMetaSchema } from "./search-intel";
 
 /**
  * THE format contract registry (B4.2, amendment A10): per-format pinned
@@ -111,6 +112,8 @@ export const pillarScriptDraftMetaSchema = z.object({
   renderStatus: z.enum(["scripted", "rendered", "failed"]).default("scripted"),
   /** null until a render succeeds; then the content-addressed object-store key of the render manifest */
   renderRef: z.string().nullable().default(null),
+  /** B6.8 SEO-meta capability — optional, so every pre-B6.8 draft parses unchanged. */
+  seo: seoMetaSchema.optional(),
 });
 export type PillarScriptDraftMeta = z.infer<typeof pillarScriptDraftMetaSchema>;
 
@@ -189,6 +192,8 @@ export const directionDocDraftMetaSchema = z.object({
   renderStatus: z.enum(["directed", "rendered", "failed"]).default("directed"),
   /** null until a render succeeds; then the content-addressed object-store key of the render manifest. */
   renderRef: z.string().nullable().default(null),
+  /** B6.8 SEO-meta capability — optional, so every pre-B6.8 draft parses unchanged. */
+  seo: seoMetaSchema.optional(),
 });
 export type DirectionDocDraftMeta = z.infer<typeof directionDocDraftMetaSchema>;
 
@@ -204,14 +209,22 @@ export const webPageDraftMetaSchema = z.object({
   deployStatus: z.enum(["drafted", "deployed", "failed"]).default("drafted"),
   /** null until a deploy succeeds; then the target-reported URL/ref of the live preview or site */
   deployRef: z.string().nullable().default(null),
+  /** B6.8 SEO-meta capability — optional, so every pre-B6.8 draft parses unchanged. */
+  seo: seoMetaSchema.optional(),
 });
 export type WebPageDraftMeta = z.infer<typeof webPageDraftMetaSchema>;
 
-/** Post-approval artifact capabilities — exactly the render/deploy/capture trio the artifact stage serves. */
+/**
+ * Post-approval artifact capabilities — the render/deploy/capture trio the
+ * artifact stage serves, plus `seoMeta` (B6.8, amendment A13): whether the
+ * format's meta carries the optional `seo` block (./search-intel.ts) that
+ * the deterministic on-page checks and the judge's SEO/AEO lens read.
+ */
 export interface DraftFormatCapabilities {
   renderable: boolean;
   deployable: boolean;
   capturable: boolean;
+  seoMeta: boolean;
 }
 
 /**
@@ -242,6 +255,7 @@ const NO_ARTIFACTS: DraftFormatCapabilities = {
   renderable: false,
   deployable: false,
   capturable: false,
+  seoMeta: false,
 };
 
 export const DRAFT_FORMAT_REGISTRY = {
@@ -269,7 +283,7 @@ export const DRAFT_FORMAT_REGISTRY = {
   pillar_script: {
     format: "pillar_script",
     meta: pillarScriptDraftMetaSchema,
-    capabilities: { ...NO_ARTIFACTS, renderable: true },
+    capabilities: { ...NO_ARTIFACTS, renderable: true, seoMeta: true },
     artifactRefFields: ["renderRef"],
     expectedBody: (meta: PillarScriptDraftMeta) =>
       [
@@ -282,7 +296,7 @@ export const DRAFT_FORMAT_REGISTRY = {
   web_page: {
     format: "web_page",
     meta: webPageDraftMetaSchema,
-    capabilities: { ...NO_ARTIFACTS, deployable: true },
+    capabilities: { ...NO_ARTIFACTS, deployable: true, seoMeta: true },
     artifactRefFields: ["htmlRef", "deployRef"],
     // body = extractVisibleText(stored html) — artifact-derived, NOT meta-derived.
   },
@@ -302,7 +316,7 @@ export const DRAFT_FORMAT_REGISTRY = {
   direction_doc: {
     format: "direction_doc",
     meta: directionDocDraftMetaSchema,
-    capabilities: { ...NO_ARTIFACTS, renderable: true },
+    capabilities: { ...NO_ARTIFACTS, renderable: true, seoMeta: true },
     artifactRefFields: ["renderRef"],
     expectedBody: (meta: DirectionDocDraftMeta) =>
       [

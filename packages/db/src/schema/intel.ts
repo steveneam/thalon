@@ -1,4 +1,7 @@
+import { MONITORED_AREA_STATUSES } from "@thalon/contracts";
+import { sql } from "drizzle-orm";
 import {
+  check,
   index,
   jsonb,
   pgTable,
@@ -40,6 +43,48 @@ export const watchlists = pgTable(
   (t) => [
     // Hot path: the pass-3 poller loop fans out per tenant × driver.
     index("watchlists_tenant_source_idx").on(t.tenantId, t.source),
+  ],
+);
+
+/**
+ * B6.4 (amendment A12 / ADR 0005): operator-described monitored AREAS — the
+ * "niches" third of the chartered B3.12 watchlist, durable per-tenant
+ * runtime config. The free-text `description` is load-bearing data: it
+ * seeds the deterministic area→query expansion and anchors the ranker's
+ * relevance embedding. `config` holds the zod-validated per-area tuning
+ * (contracts monitoredAreaConfigSchema: ranker weight overrides, per-sweep
+ * query ration). Paused areas stop expanding into queries but keep their
+ * history — area provenance on ingested exemplars rides `sources.meta`,
+ * so no intel table changes are needed for tagging.
+ */
+export const monitoredAreas = pgTable(
+  "monitored_areas",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    name: text("name").notNull(),
+    /** Free text: what the operator watches and why — expansion seed + relevance-embedding anchor. */
+    description: text("description").notNull(),
+    /** contracts monitoredAreaConfigSchema — validated at the repo boundary, stored as data. */
+    config: jsonb("config").notNull().default({}),
+    status: text("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("monitored_areas_tenant_name_idx").on(t.tenantId, t.name),
+    // Hot path: the sweep loop expands every ACTIVE area per tenant.
+    index("monitored_areas_tenant_status_idx").on(t.tenantId, t.status),
+    check(
+      "monitored_areas_status_check",
+      sql.raw(`status in (${MONITORED_AREA_STATUSES.map((s) => `'${s}'`).join(", ")})`),
+    ),
   ],
 );
 

@@ -4,7 +4,11 @@ export { openDb, openTestDb, resetDbForTests, type DbHandle } from "./client";
 export * from "./errors";
 export { llmCacheKey, retrievalCacheKey, sha256Hex, stableStringify } from "./hash";
 export type { Repos } from "./repos";
+export type { MonitoredArea as MonitoredAreaRow } from "./repos/monitored-areas";
+export type { SearchSnapshot } from "./repos/search-snapshots";
+export type { SearchTarget as SearchTargetRow } from "./repos/search-targets";
 export type { TrendSnapshot } from "./repos/trend-snapshots";
+export type { WaitlistEntry } from "./repos/waitlist";
 export type { Watchlist as WatchlistRow } from "./repos/watchlists";
 export type {
   Approval,
