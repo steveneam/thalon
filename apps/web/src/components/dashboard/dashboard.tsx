@@ -10,8 +10,7 @@ import { QuickActions } from "@/components/dashboard/quick-actions";
 import { SeamStatusCard, type StatusCardStatus } from "@/components/dashboard/seam-status-card";
 import { usePulse } from "@/components/workspace/pulse-context";
 import { fetchActivity, fetchStatus } from "@/lib/workspace/client";
-import { EMPTY_COUNTS } from "@/lib/workspace/pulse";
-import type { ActivityItem, WorkspaceStatus } from "@/lib/workspace/types";
+import { EMPTY_COUNTS, type ActivityItem, type WorkspaceStatus } from "@/lib/workspace/types";
 
 /**
  * The dashboard (docs/FRONTEND.md §3): one screen answering what needs me ·

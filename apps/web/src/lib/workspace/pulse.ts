@@ -1,7 +1,7 @@
 import { tenantCtx } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
 import { demoTenantSlug } from "@/lib/tenant";
-import type { PulseCounts, WorkspacePulse } from "./types";
+import { EMPTY_COUNTS, type PulseCounts, type WorkspacePulse } from "./types";
 
 /**
  * The dashboard pulse: counts derived by hydrating the feed-window runs and
@@ -11,15 +11,6 @@ import type { PulseCounts, WorkspacePulse } from "./types";
  * states wait on the operator (approve/reject vs edit/re-judge).
  */
 const PULSE_RUN_WINDOW = 50;
-
-export const EMPTY_COUNTS: PulseCounts = {
-  runs: 0,
-  runsWithErrors: 0,
-  drafts: 0,
-  queued: 0,
-  blocked: 0,
-  approved: 0,
-};
 
 export async function readPulse(repos: Repos): Promise<WorkspacePulse> {
   // Resolves the tenant ROW (not just the ctx) — the shell shows its name.

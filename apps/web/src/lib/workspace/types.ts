@@ -19,6 +19,16 @@ export interface PulseCounts {
   approved: number;
 }
 
+/** Client-safe zero state (this module carries no server imports — the pulse READ lives in ./pulse.ts, server-only). */
+export const EMPTY_COUNTS: PulseCounts = {
+  runs: 0,
+  runsWithErrors: 0,
+  drafts: 0,
+  queued: 0,
+  blocked: 0,
+  approved: 0,
+};
+
 export interface WorkspacePulse {
   /** null = the configured demo tenant is not seeded yet (fresh dev db) — the first-run state. */
   tenant: { slug: string; name: string } | null;
