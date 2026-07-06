@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,11 +23,21 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@thalon/contracts": ["../../packages/contracts/src/index.ts"],
-      "@thalon/db": ["../../packages/db/src/index.ts"],
-      "@thalon/platform": ["../../packages/platform/src/index.ts"],
-      "@thalon/judge": ["../../proprietary/judge/src/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@thalon/contracts": [
+        "../../packages/contracts/src/index.ts"
+      ],
+      "@thalon/db": [
+        "../../packages/db/src/index.ts"
+      ],
+      "@thalon/platform": [
+        "../../packages/platform/src/index.ts"
+      ],
+      "@thalon/judge": [
+        "../../proprietary/judge/src/index.ts"
+      ]
     }
   },
   "include": [
@@ -32,7 +46,11 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    ".next-dev/types/**/*.ts",
+    ".next-dev/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
