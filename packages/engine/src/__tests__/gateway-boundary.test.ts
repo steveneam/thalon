@@ -26,6 +26,7 @@ const ALLOWED = new Set(
     "packages/engine/src/waterfall/shell/generator.ts",
     "packages/engine/src/demo/shell/generator.ts",
     "packages/engine/src/direction/shell/generator.ts",
+    "packages/engine/src/search/shell/expander.ts",
     "packages/engine/src/ingest/shell/embedder.ts",
     "proprietary/judge/src/shell/driver.ts",
     "packages/engine/src/__tests__/gateway-boundary.test.ts",
