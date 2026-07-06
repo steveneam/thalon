@@ -66,3 +66,12 @@ export function usePulse(): PulseContextValue {
   if (!value) throw new Error("usePulse must be used inside the workspace shell (PulseProvider)");
   return value;
 }
+
+/**
+ * Provider-optional variant for components that also render OUTSIDE the
+ * shell (the approve queue's component tests mount it bare): they nudge the
+ * badge when present and work unchanged when not.
+ */
+export function usePulseSafe(): PulseContextValue | null {
+  return useContext(PulseContext);
+}

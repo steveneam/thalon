@@ -5,6 +5,7 @@ import { ApprovePanel, type PanelStatus } from "@/components/approve/approve-pan
 import { FanoutGrid, type GridStatus } from "@/components/approve/fanout-grid";
 import { FeedPanel, type FeedStatus } from "@/components/approve/feed-panel";
 import { StagedFlow } from "@/components/staged/staged-flow";
+import { usePulseSafe } from "@/components/workspace/pulse-context";
 import {
   approveDraft,
   editDraft,
@@ -143,6 +144,11 @@ export function ApproveQueue() {
     if (selectedRunId) setDrafts(await fetchRunDrafts(selectedRunId));
   }
 
+  // Inside the workspace shell the needs-you badge counts queued+blocked —
+  // nudge it after every operator action so it never lies (no-op when the
+  // queue renders outside the shell, e.g. component tests).
+  const pulse = usePulseSafe();
+
   // Always refreshes — even when `action` throws — so the panel/grid reflect
   // the draft's TRUE current state (e.g. still `judging` after a failed
   // judge run) rather than stale pre-action data.
@@ -156,20 +162,44 @@ export function ApproveQueue() {
     }
     try {
       await refreshAfterAction();
+      await pulse?.refresh();
     } finally {
       setBusy(false);
     }
   }
 
+  // Batch approve (B6.2): every QUEUED draft in the selected run, in grid
+  // order, sequentially through the same single-draft endpoint (each approve
+  // still records its own approval row). Stops loudly on the first failure —
+  // the refresh then shows exactly how far it got.
+  const queuedDrafts = drafts.filter((d) => d.status === "queued");
+  function batchApprove() {
+    void withBusy(async () => {
+      for (const draft of queuedDrafts) {
+        await approveDraft(draft.id);
+      }
+    });
+  }
+
   return (
-    <div className="flex min-h-screen flex-1 flex-col md:flex-row">
+    // min-h-0 (not min-h-screen): the queue fills the workspace shell's main
+    // area; the shell owns the viewport height.
+    <div className="flex min-h-0 flex-1 flex-col md:flex-row">
       <FeedPanel status={feedStatus} runs={runs} selectedRunId={selectedRunId} onSelect={selectRun} />
       {stagedSelected && selectedDraftId ? (
         // Keyed remount per anchor draft so the surface never shows a stale flow.
         <StagedFlow key={selectedDraftId} draftId={selectedDraftId} />
       ) : (
         <>
-          <FanoutGrid status={gridStatus} drafts={drafts} selectedDraftId={selectedDraftId} onSelect={selectDraft} />
+          <FanoutGrid
+            status={gridStatus}
+            drafts={drafts}
+            selectedDraftId={selectedDraftId}
+            onSelect={selectDraft}
+            busy={busy}
+            queuedCount={queuedDrafts.length}
+            onBatchApprove={batchApprove}
+          />
           <ApprovePanel
             status={panelStatus}
             draft={panelDraft}

@@ -32,18 +32,17 @@ describe("zone loading / empty / error states", () => {
   });
 
   it("fanout grid: idle, loading, empty, error", () => {
-    const { rerender } = render(
-      <FanoutGrid status="idle" drafts={[]} selectedDraftId={null} onSelect={() => {}} />,
-    );
+    const gridProps = { drafts: [], selectedDraftId: null, onSelect: () => {}, busy: false, queuedCount: 0, onBatchApprove: () => {} };
+    const { rerender } = render(<FanoutGrid status="idle" {...gridProps} />);
     expect(screen.getByText(/Select a run/i)).toBeInTheDocument();
 
-    rerender(<FanoutGrid status="loading" drafts={[]} selectedDraftId={null} onSelect={() => {}} />);
+    rerender(<FanoutGrid status="loading" {...gridProps} />);
     expect(screen.getByText(/Loading drafts/i)).toBeInTheDocument();
 
-    rerender(<FanoutGrid status="success" drafts={[]} selectedDraftId={null} onSelect={() => {}} />);
+    rerender(<FanoutGrid status="success" {...gridProps} />);
     expect(screen.getByText(/no drafts yet/i)).toBeInTheDocument();
 
-    rerender(<FanoutGrid status="error" drafts={[]} selectedDraftId={null} onSelect={() => {}} />);
+    rerender(<FanoutGrid status="error" {...gridProps} />);
     expect(screen.getByText(/Couldn.t load drafts/i)).toBeInTheDocument();
   });
 
