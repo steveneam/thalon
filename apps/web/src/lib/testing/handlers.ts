@@ -9,6 +9,7 @@ import {
   targetSearchQuery,
 } from "@/lib/intel/store";
 import type { AreaRow, TargetRow } from "@/lib/intel/types";
+import type { ProfileHistoryEntry, ProfileWire } from "@/lib/profiles/types";
 import { fixtureActivity, fixturePulse, fixtureStatus } from "@/lib/workspace/fixtures";
 import { parseStagedEditRequest, parseStagedPickRequest, runStaged } from "@/lib/staged-flow/http";
 import {
@@ -34,10 +35,15 @@ let testTargets: TargetRow[] = [];
 let intelSeq = 0;
 const TEST_AT = "2026-07-05T12:00:00.000Z";
 
+let testProfile: ProfileWire | null = null;
+let testProfileHistory: ProfileHistoryEntry[] = [];
+
 export function resetIntelTestState(): void {
   testAreas = [];
   testTargets = [];
   intelSeq = 0;
+  testProfile = null;
+  testProfileHistory = [];
 }
 
 function intelError(err: unknown): Response {
@@ -129,6 +135,38 @@ export const handlers = [
   http.get("/api/intel/search/horizon", () =>
     HttpResponse.json({ cards: fixtureHorizonCards, demo: true }),
   ),
+
+  // Profiles (B6.2): the real route versions through the repo; the emulation
+  // keeps the same save-is-a-new-active-version semantics.
+  http.get("/api/profiles", () =>
+    HttpResponse.json({
+      active: testProfile,
+      history: testProfileHistory,
+      tenant: testProfile ? { slug: "self", name: "Thalon" } : null,
+    }),
+  ),
+  http.post("/api/profiles", async ({ request }) => {
+    const body = (await request.json()) as { config?: Partial<ProfileWire["config"]> };
+    if (!body.config) return HttpResponse.json({ error: "Invalid profile config" }, { status: 400 });
+    const version = (testProfile?.version ?? 0) + 1;
+    testProfile = {
+      id: `test-profile-${version}`,
+      version,
+      active: true,
+      config: {
+        voice: body.config.voice ?? {},
+        denylist: body.config.denylist ?? [],
+        platformProfiles: body.config.platformProfiles ?? {},
+        identity: body.config.identity ?? {},
+      },
+      createdAt: TEST_AT,
+    };
+    testProfileHistory = [
+      { profileId: testProfile.id, version, activatedOnCreate: true, at: TEST_AT },
+      ...testProfileHistory,
+    ];
+    return HttpResponse.json({ profile: testProfile }, { status: 201 });
+  }),
   http.post("/api/intel/search/target-this", async ({ request }) => {
     const body = (await request.json()) as { query: string };
     const { capture, promptSeed } = targetSearchQuery(body.query);

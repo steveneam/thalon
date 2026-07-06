@@ -1,7 +1,12 @@
-export default function CreatePage() {
-  return (
-    <div className="p-6 text-sm text-muted-foreground">
-      Create — the three families land in this lane&rsquo;s next commits.
-    </div>
-  );
+import { CreateSurface } from "@/components/create/create-surface";
+
+/** Reads Intel's handoff params server-side (?prompt= from Trends, ?keyword= from Search). */
+export default async function CreatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+  return <CreateSurface initialPrompt={first(params.prompt)} initialKeyword={first(params.keyword)} />;
 }
