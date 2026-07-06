@@ -43,6 +43,7 @@ Founder spec: picture on top, description at the bottom; click → popout with a
 ### §4 FAQ
 - Accordion, objection-driven: *Will it post junk under my name?* (approve gate) · *Where does it publish?* (platform list + roadmap honesty) · *Whose AI keys?* (gateway default, BYOK planned) · *Is AI content disclosed?* (G5/AI-Act stance) · *What data do you keep?*
 - **[+] Final repeat CTA** under the FAQ (one-field waitlist, same endpoint).
+- **AEO/GEO (A13):** the FAQ doubles as the answer-engine surface — `FAQPage` JSON-LD generated from it, answer-first copy; site ships `Organization` JSON-LD + `llms.txt`. Landing copy is written against the manual B6.8 keyword pass; honest-claims rule applies (optimization is claimable, rankings are not — ADR 0006).
 
 ### Performance & meta budget
 - Static-first (SSG), minimal client JS on `/` (target: interactive vignette + modal player only), optimized OG image for link sharing, semantic HTML. The landing page is also the first Vercel deploy target (B6.7).
@@ -60,7 +61,7 @@ Synthesis of the founder's 23 references (Obsidian AIOS dashboards · BenAI prof
 | Surface | What's on it | Backing (exists today unless noted) |
 |---|---|---|
 | **Dashboard** | Pulse row (drafts/runs/queue counts; platform metrics join later at B3.5) · needs-you card · quick actions · live activity feed · seam-status card | `events` table · drafts/runs repos · doctor internals |
-| **Intel** | Monitored-areas manager · trend cards: outlier %-badge + plain-language reasons + engagement ratios · actions: *generate from this*, dismiss (→ eval row) · area filter tabs | outlier/longitudinal math + `trend_snapshots`; fake TrendSource demos it keyless; live pollers = B6.5 |
+| **Intel** | Two tabs (A13): **Trends** — monitored-areas manager · trend cards: outlier %-badge + plain-language reasons + engagement ratios · actions: *generate from this*, dismiss (→ eval row) · area filters; **Search** — keyword targets (seeded from profile) · horizon-opportunity cards (position × rising impressions, reasons) · *target this* → generation context | Trends: outlier/longitudinal math + `trend_snapshots`; fake TrendSource keyless; live pollers = B6.5. Search: B6.8 (`search_targets`/`search_snapshots`; GSC live after B6.7) |
 | **Create** | Three families; video = existing staged flow (one-prompt & advanced), prompt-left / live-preview-right | staged-flow UI (B5.4) · origination engine |
 | **Approve** | Existing queue restyled into the shell · **[+] keyboard triage** (j/k navigate, a/e/r act) · batch approve · **[+] zero-inbox state** | built (B1.4/B2.6) |
 | **Profiles** | Editor/switcher: identity, voice, platforms, denylist, topics | `brand_profiles` spine (B3.8); UI = the B3.11 item, lands here |
