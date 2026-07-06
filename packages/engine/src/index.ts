@@ -25,6 +25,12 @@
  * -> TrendSource seam poll (official-API drivers = pass 2) -> deterministic
  * outlier ratios in core -> outliers auto-ingest as exemplars via the B2.4
  * path (PII-stripped, G1 denylist-screened), snapshots into source_metrics.
+ * B6.4 landed (A12/ADR 0005): src/trend/ grew intel v2 — monitored areas
+ * expand deterministically into rationed per-sweep queries (candidate
+ * generation) and an EdgeRank-shaped config-weighted ranker scores every
+ * polled item per area (embedding relevance × engagement ratios ×
+ * velocity/freshness, one reason line per armed signal); ingested outlier
+ * exemplars carry area provenance as additive sources.meta.trend keys.
  * B5.2 landed (A11): src/direction/ + src/pipeline/staged-video.ts — the
  * staged video pipeline: stage plan (contracts registry, count is config)
  * -> storyboard (structure) -> direction_doc (scenes/effects, polish), each

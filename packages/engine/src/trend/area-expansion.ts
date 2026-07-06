@@ -32,7 +32,8 @@ export const sweepAreaSchema = z.object({
   name: z.string().min(1),
   /** Free text: the query-expansion seed AND the ranker's relevance-embedding anchor. */
   description: z.string().min(1),
-  status: z.enum(MONITORED_AREA_STATUSES).default("active"),
+  /** String in, enum out: drizzle types the row column as `string` (the DB check owns the constraint), so rows must pass the TYPE door too — the pipe re-validates at runtime. */
+  status: z.string().default("active").pipe(z.enum(MONITORED_AREA_STATUSES)),
   config: monitoredAreaConfigSchema.default({}),
 });
 export type SweepAreaInput = z.input<typeof sweepAreaSchema>;
