@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy, ExternalLink, FileText, Globe, Video, X } from "lucide-react";
+import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -59,9 +60,7 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
         </time>
         <span className="ml-auto flex items-center gap-2">
           {card.isOutlier && <Badge variant="signal">outlier</Badge>}
-          <span className="u-tabular text-xs font-medium text-signal" title="Rank score for this area (0–1)">
-            score {card.score.toFixed(2)}
-          </span>
+          <HeatGrade score={card.score} />
         </span>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

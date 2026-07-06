@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, FileText, Globe, Sparkles, Video, X } from "lucide-react";
+import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,9 +110,7 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
                 <Sparkles aria-hidden className="size-3.5 text-primary" />
                 Intel context — rides into generation; remove anything you don&rsquo;t want.
                 {typeof context?.score === "number" && (
-                  <span className="u-tabular ml-auto font-medium text-signal" title="Rank score for this area (0–1)">
-                    score {context.score.toFixed(2)}
-                  </span>
+                  <HeatGrade score={context.score} className="ml-auto" />
                 )}
               </p>
               <ul className="flex flex-wrap gap-1.5">
