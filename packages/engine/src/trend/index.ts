@@ -18,6 +18,31 @@ export {
   type SnapshotPoint,
 } from "./longitudinal";
 export {
+  areaExpansionConfigSchema,
+  expandArea,
+  expandAreas,
+  mergeQueries,
+  sweepAreaSchema,
+  type AreaExpansionConfig,
+  type AreaExpansionConfigInput,
+  type AreaQueryExpansion,
+  type AreasExpansion,
+  type SweepArea,
+  type SweepAreaInput,
+} from "./area-expansion";
+export {
+  cosineSimilarity,
+  rankCandidates,
+  rankerConfigSchema,
+  resolveRankerWeights,
+  type RankableArea,
+  type RankableCandidate,
+  type RankedCandidate,
+  type RankedComponents,
+  type RankerConfig,
+  type RankerConfigInput,
+} from "./ranker";
+export {
   runTrendIntake,
   type TrendIntakeDeps,
   type TrendIntakeRequest,
