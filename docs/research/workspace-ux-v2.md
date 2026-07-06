@@ -82,11 +82,29 @@ Landing-copy patterns worth lifting from the reference screenshots for §2 of th
 2. **Intel dossier card + structured context handoff** (fixture-backed) — per-family exits + the symmetric capture door (absorbs carried follow-up 3).
 3. **B6.5 live drivers** — titles/angles/provenance go real (needs gateway top-up + transcript key). Design reference installed on the lead machine (founder-approved 2026-07-07): the **last30days** agent skill (MIT, ~10.6k stars) — a personal-research sibling of this very feature. Its keyless source endpoints (Reddit public JSON/RSS + arctic-shift archive, HN Algolia, Bluesky app API, GitHub, Polymarket), engagement-weighted scoring, and per-source doctor/health pattern are directly reviewable prior art for the B6.5 driver + poller design. Product policy unchanged: Thalon drivers stay official-APIs-only per source, reviewed at bucket time; scrape-vendor APIs (the ScrapeCreators class it optionally uses) are a recorded *paid swap path*, never the default.
 4. **B6.6 origination live loop** — consumes the context object end-to-end. Web-ingest driver candidate surveyed same session (founder-supplied ten-tool review): **Crawl4AI** (Apache-2.0; URL → clean LLM-ready markdown) behind a subprocess seam like B4.8's transcript pattern — for operator-site grounding ingestion; verify current license terms at adoption.
-5. **Landing v2 moment**: composition v2 (+ demo-clip re-cut, FeatureLoop swap — `engaging-clips.md`) **+ the landing craft uplift (§8)** land together as one coherent landing revision, then **B6.7 deploy** ships it.
+5. **Landing v2 moment**: composition v2 (+ demo-clip re-cut, FeatureLoop swap — `engaging-clips.md`) **+ the landing craft uplift (§8) + the blog v1 surface (§9)** land together as one coherent site revision, then **B6.7 deploy** ships it.
 
 Items 1–2 are lead-terminal work per the board (integration-heavy, no lanes needed to start). The remaining carried follow-ups (events paged read · brandProfiles.list/activate · `next build` CI job · B6.7 deploy notes) slot into these steps where they touch the same files.
 
 Parked (recorded, not now): surfacing the sweep archive as a browsable trend-history view; intel digests pushed out-of-app (already on FRONTEND.md's parked list).
+
+## 9. The blog surface (founder-proposed 2026-07-07, adopted — the loop-closer)
+
+Founder proposal: a blog/news page linked from the landing site, publishing regular posts on new tech and AI tools (social-media/marketing angle; Thalon-related posts when relevant) to lift SEO/AEO/GEO.
+
+**Adopted, and it's stronger than a marketing add-on — it completes the system's own loop:**
+
+- **The Page family finally gets a destination.** The dossier card's → Page exit (§3), the `web_page` format with its `seoMeta` capability, the B6.8 SEO/AEO judge lens, JSON-LD and llms.txt — all of that machinery currently generates pages with nowhere to live. The blog is where they land.
+- **It's B6.6's natural dogfood target — and the posts are made BY Thalon (founder-confirmed 2026-07-07).** The origination live loop's first end-to-end production run: intel sweep surfaces a rising topic → dossier card → → Page → judge gates it → founder approves → the post publishes **to our own site**. No platform APIs, no OAuth, none of the social-publish risk — the social publish path stays pulled; shipping content to our own Next.js site is just a content deploy behind the same approve gate. Every article is self-referential proof (the demo-clips precedent: "researched, written and gated by Thalon"), and when the social publisher eventually arms (post-Sprint-6), each article fans out as platform posts — one topic, multiple surfaces, productized on ourselves.
+- **It closes the A13 measurement loop.** After B6.7 deploys and GSC arms, published posts generate `search_snapshots` → horizon cards ("position 12, impressions rising") → which are literally *what to write next*. Publish → measure → target → publish: the search-intel feature eating its own output.
+- **SEO/AEO/GEO mechanics ride for free:** per-post `Article`/`BlogPosting` JSON-LD (the on-page pack already checks presence + declared-vs-embedded honesty), llms.txt gains the article index, sitemap auto-extends, plus an RSS feed (cheap, and answer-engine/LLM crawlers consume feeds well).
+
+**Honesty guardrails (recorded so the feature can't drift into spam):**
+1. **Quality-gated cadence, not raw daily volume.** Thin daily AI content is exactly what search quality systems demote; the judge gate + grounding + founder approve is the countermeasure, and the landing copy says "regularly" until a daily cadence is *proven* sustained (honest-claims rule, ADR 0006 — optimization claimable, rankings never).
+2. **Disclosure stance carries over** — the FAQ's AI-content position applies to posts.
+3. Seed content at step 5 is lead/founder-authored (a handful of real, useful articles so the site deploys with substance); the automated loop arrives with B6.6 — the blog v1 surface is deliberately buildable before the engine feeds it.
+
+**Slotting:** blog v1 route + seed posts + feed/JSON-LD ride the step-5 landing-v2 moment (it's a site surface, `/blog`, linked from nav/footer — the landing keeps its 4 sections); the automated intel→page→approve→publish loop is B6.6's dogfood; GSC measurement arms after B6.7. Topic sourcing until B6.5 pollers arm: lead-terminal research (the intel sweeps + the last30days skill).
 
 ## 8. Landing uplift (founder-added scope, same session)
 

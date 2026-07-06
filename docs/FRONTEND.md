@@ -48,6 +48,9 @@ Founder spec: picture on top, description at the bottom; click → popout with a
 ### Landing v2 uplift *(added 2026-07-07, founder-directed — `docs/research/workspace-ux-v2.md` §8)*
 Structure stays (the 4 sections + mechanics are sound); the craft rises: one hero signature moment (animated headline + depth layer) · honest stats/proof band · "old way vs new way" strip · feature-card spotlight/hover pull · ≤3 micro-interactions. Sources: the MIT landing-template set (section patterns) + ReactBits (signature moments; MIT+Commons Clause, per-component dep/license check at adoption). Lands with composition v2's demo re-cut as one landing revision, then B6.7 deploys it.
 
+### The blog surface (`/blog`) *(added 2026-07-07, founder-proposed — `docs/research/workspace-ux-v2.md` §9)*
+A site page (nav/footer link — the landing keeps its 4 sections) publishing regular posts on AI/social-media/marketing tooling + Thalon-related pieces, for SEO/AEO/GEO. It is **where the Page family lands** and **B6.6's dogfood loop**: intel → → Page → judge → approve → publish to our own site (no platform APIs; the social publish path stays pulled). **The posts are made by Thalon's own engine** (founder-confirmed) — self-referential proof per the demo-clips precedent — and each article fans out as social posts when the publisher arms post-Sprint-6. Per-post `BlogPosting` JSON-LD, llms.txt article index, sitemap, RSS. Honesty guardrails: quality-gated cadence ("regularly" until daily is proven), disclosure stance from the FAQ applies, rankings never claimed. Blog v1 (route + lead/founder-authored seed posts) rides the landing-v2 moment; the automated loop is B6.6; GSC measures after B6.7.
+
 ### Performance & meta budget
 - Static-first (SSG), minimal client JS on `/` (target: interactive vignette + modal player + **one hero moment** — amended 2026-07-07), optimized OG image for link sharing, semantic HTML. The landing page is also the first Vercel deploy target (B6.7).
 
