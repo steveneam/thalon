@@ -1,0 +1,74 @@
+{
+  "tenantSlug": "self",
+  "tenantName": "Thalon (self, tenant #0)",
+  "brandConfig": {
+    "voice": {
+      "register": "plain, direct, no hype",
+      "persona": "the team building Thalon, dogfooding the engine on its own marketing",
+      "pointOfView": "we",
+      "avoid": "hype, superlatives, urgency language, unverifiable claims, exclamation marks"
+    },
+    "denylist": [
+      "guaranteed",
+      "can't lose",
+      "risk-free",
+      "world's best",
+      "revolutionary",
+      "act now"
+    ],
+    "platformProfiles": {
+      "linkedin": {
+        "tone": "matter-of-fact and specific; lead with what shipped and why it matters, never the pitch",
+        "charLimit": 2200,
+        "hashtagPolicy": "at most two, and only if they name the domain (e.g. #buildinpublic); never invented brand tags",
+        "ctaPolicy": "at most one soft invitation (waitlist link or a question); no urgency language",
+        "disclosure": "AI-assisted draft - reviewed and approved by a human before publishing"
+      },
+      "x": {
+        "tone": "plain and concrete; one idea per post; show, don't sell",
+        "charLimit": 280,
+        "hashtagPolicy": "none by default; at most one when it names the domain",
+        "ctaPolicy": "no hard sell; at most one soft call-to-action",
+        "disclosure": "AI-assisted draft - reviewed and approved by a human before publishing"
+      }
+    },
+    "identity": {
+      "company": "Thalon",
+      "oneLiner": "A multi-tenant content engine that turns one prompt or source into judged, platform-native drafts - posts, videos, and pages - and never publishes without human approval.",
+      "philosophy": "Safety-gated automation: no draft reaches the operator unjudged, nothing publishes without a human click, and every operator correction makes the engine better.",
+      "audience": "Solo founders and small teams who want a steady, on-brand content pipeline without hiring for it.",
+      "offers": [
+        "Fan-out from one prompt or source into platform-native post drafts",
+        "Staged video creation: storyboard, scene direction, and a deterministic render from one prompt",
+        "Trend intel over operator-described topic areas, with ranked, reason-tagged outliers",
+        "Search intel: profile-seeded keyword targets and search-opportunity signals",
+        "A human approve queue where every draft shows its judge verdicts"
+      ],
+      "facts": [
+        "Every draft passes a denylist gate and a two-tier grounding judge before it can reach the approve queue.",
+        "No publish path is wired; every draft stops at human approval.",
+        "Videos render deterministically from judged scripts, and the judged script text becomes the caption track verbatim.",
+        "Every operator edit or override is captured as an eval case.",
+        "Trend and search intel rank with deterministic, config-weighted math and attach a plain-language reason to every score.",
+        "Brand voice, grounding sources, and the compliance denylist are per-tenant data, never hard-coded.",
+        "Thalon's feature demo clips are rendered by Thalon's own video pipeline."
+      ],
+      "topics": [
+        "content automation",
+        "building in public",
+        "AI safety gates and human approval",
+        "trend intelligence",
+        "search and answer-engine optimization",
+        "video generation"
+      ],
+      "style": {
+        "background": "#161411",
+        "textColor": "#ece7dd",
+        "accentColor": "#eeb64b",
+        "fontFamily": "Geist"
+      }
+    }
+  },
+  "prompt": "Thalon is a multi-tenant content engine that turns one prompt or source into platform-native drafts: social posts, a staged video, and web copy. Every draft passes a denylist gate and a two-tier grounding judge - a cheap screening model plus a stronger final model - and any claim the operator's own sources cannot support is blocked before a human ever sees it. Approved work waits in a queue for a human click; no publish path is wired without one. Videos build in stages the operator can steer - storyboard, then scene direction, then a deterministic render - and the judged script text becomes the caption track verbatim. Trend intel watches operator-described topic areas and ranks what is rising with deterministic, config-weighted scoring, attaching a plain-language reason to every score. Search intel compiles keyword targets from the operator's own brand profile and flags search opportunities sitting just over the horizon. Every operator edit is captured as an eval case, so correcting the engine once teaches it durably. Thalon markets Thalon: its own pillar video is scripted, judged, and rendered by the engine itself.",
+  "platforms": ["linkedin", "x"]
+}
