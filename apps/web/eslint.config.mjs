@@ -9,6 +9,11 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // The dev-mode distDir (next.config.ts forks distDir on NODE_ENV).
+    // eslint flat config does NOT inherit .gitignore, so the fork must be
+    // ignored here too or any prior `next dev` run makes lint scan build
+    // output (caught at the B6.2 merge verification).
+    ".next-dev/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
