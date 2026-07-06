@@ -29,8 +29,8 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
           {timeAgo(card.publishedAt)}
         </time>
         <span className="ml-auto flex items-center gap-2">
-          {card.isOutlier && <Badge>outlier</Badge>}
-          <span className="u-tabular text-xs text-muted-foreground" title="Rank score for this area (0–1)">
+          {card.isOutlier && <Badge variant="signal">outlier</Badge>}
+          <span className="u-tabular text-xs font-medium text-signal" title="Rank score for this area (0–1)">
             score {card.score.toFixed(2)}
           </span>
         </span>
@@ -70,7 +70,7 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
           <p className="u-eyebrow mb-1 text-muted-foreground">why it&rsquo;s rising · {card.areaName}</p>
           <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
             {card.reasons.map((reason) => (
-              <li key={reason} className="border-l-2 border-primary/40 pl-2">
+              <li key={reason} className="border-l-2 border-signal/50 pl-2">
                 {reason}
               </li>
             ))}

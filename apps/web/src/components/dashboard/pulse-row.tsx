@@ -15,7 +15,7 @@ export function PulseRow({ counts, needsYou, loading }: PulseRowProps) {
   const tiles = [
     { label: "runs", value: counts.runs, alert: counts.runsWithErrors > 0 ? `${counts.runsWithErrors} failed` : null },
     { label: "drafts", value: counts.drafts, alert: null },
-    { label: "need you", value: needsYou, alert: null, primary: true },
+    { label: "need you", value: needsYou, alert: null, signal: true },
     { label: "approved", value: counts.approved, alert: null },
   ];
   return (
@@ -26,7 +26,7 @@ export function PulseRow({ counts, needsYou, loading }: PulseRowProps) {
           <p
             className={cn(
               "u-tabular text-3xl font-semibold",
-              tile.primary && needsYou > 0 && "text-primary",
+              tile.signal && needsYou > 0 && "text-signal",
             )}
           >
             {loading ? "–" : tile.value}

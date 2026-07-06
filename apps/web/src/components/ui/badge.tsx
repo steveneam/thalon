@@ -19,6 +19,9 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // The amber signal channel (workspace-ux-v2.md §4): the engine
+        // found heat — outlier/opportunity badges, never interactive chrome.
+        signal: "bg-signal text-signal-foreground [a]:hover:bg-signal/80",
       },
     },
     defaultVariants: {

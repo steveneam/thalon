@@ -30,11 +30,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Dark-first (docs/FRONTEND.md §1): the .dark token set is the default
-    // theme; :root keeps the light-capable set for a later theme switch.
+    // Light-first (docs/FRONTEND.md §1, amended 2026-07-07): the workspace
+    // runs on the :root light set; dark-cinematic surfaces (landing, /brand)
+    // opt in with a scoped `.dark` wrapper on their own page.
     <html
       lang="en"
-      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

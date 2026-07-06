@@ -48,7 +48,7 @@ export function Sidebar() {
               {surface.showsNeedsYou && (pulse?.needsYou ?? 0) > 0 && (
                 <span
                   aria-label={`${pulse!.needsYou} drafts need you`}
-                  className="u-tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                  className="u-tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-signal px-1.5 text-xs font-semibold text-signal-foreground"
                 >
                   {pulse!.needsYou}
                 </span>
