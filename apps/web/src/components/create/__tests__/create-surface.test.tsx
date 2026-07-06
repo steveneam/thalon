@@ -34,7 +34,8 @@ describe("CreateSurface — the context spine (wave-3 §3)", () => {
     for (const value of [CONTEXT.title!, CONTEXT.angle!, CONTEXT.hook!, CONTEXT.areaName!]) {
       expect(within(chips).getByText(value)).toBeInTheDocument();
     }
-    expect(within(chips).getByText("score 0.90")).toBeInTheDocument();
+    // The score reads as a heat grade (bar + word), the number lives in the tooltip.
+    expect(within(chips).getByRole("img", { name: "heat hot — rank score 0.90 of 1" })).toBeInTheDocument();
     expect(within(chips).getByRole("link", { name: /original item/i })).toHaveAttribute(
       "href",
       CONTEXT.sourceUrl,

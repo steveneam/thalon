@@ -43,6 +43,10 @@
   --color-destructive: var(--destructive);
   --color-signal: var(--signal);
   --color-signal-foreground: var(--signal-foreground);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -88,6 +92,14 @@
   --ring: oklch(0.5 0.115 252);
   --signal: oklch(0.55 0.118 70);
   --signal-foreground: oklch(0.985 0.005 84);
+  /* Heat ramp — SEQUENTIAL amber, one hue light→dark (cool→hot), hot
+   * anchored to --signal. Magnitude reads through bar LENGTH + the grade
+   * word first; the ramp is the redundant colour channel (validated:
+   * monotonic lightness, adjacent CVD ΔE in the labeled-relief band). */
+  --heat-1: oklch(0.8 0.09 76);
+  --heat-2: oklch(0.71 0.108 74);
+  --heat-3: oklch(0.63 0.115 72);
+  --heat-4: oklch(0.55 0.118 70);
   --chart-1: oklch(0.5 0.115 252);
   --chart-2: oklch(0.55 0.118 70);
   --chart-3: oklch(0.46 0.025 255);
@@ -129,6 +141,11 @@
   --ring: oklch(0.72 0.12 76);
   --signal: oklch(0.78 0.14 76);
   --signal-foreground: oklch(0.16 0.025 78);
+  /* Heat ramp, dark: sequential runs dim→bright toward the amber anchor. */
+  --heat-1: oklch(0.45 0.07 76);
+  --heat-2: oklch(0.56 0.1 76);
+  --heat-3: oklch(0.67 0.12 76);
+  --heat-4: oklch(0.78 0.14 76);
   --chart-1: oklch(0.78 0.14 76);
   --chart-2: oklch(0.62 0.1 70);
   --chart-3: oklch(0.87 0.06 84);
