@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { fixtureDraftDetails, fixtureDraftsByRun, fixtureRuns } from "@/lib/approve-queue/fixtures";
+import { fixtureActivity, fixturePulse, fixtureStatus } from "@/lib/workspace/fixtures";
 import { parseStagedEditRequest, parseStagedPickRequest, runStaged } from "@/lib/staged-flow/http";
 import {
   advanceStagedFlow,
@@ -14,6 +15,11 @@ import {
 
 /** Fetch-boundary mock seam for component development/tests — zero dependency on the engine/judge lanes (SPINE §5 lane map). The staged handlers wrap the SAME fake-driver store the /api/staged routes serve in dev, so tests and dev see one world. */
 export const handlers = [
+  // Shell/dashboard reads (B6.2).
+  http.get("/api/app/pulse", () => HttpResponse.json(fixturePulse)),
+  http.get("/api/app/activity", () => HttpResponse.json({ items: fixtureActivity })),
+  http.get("/api/app/status", () => HttpResponse.json(fixtureStatus)),
+
   // The staged fixture run rides last (oldest) so the classic fixtures keep auto-selecting first.
   http.get("/api/runs", () => HttpResponse.json({ runs: [...fixtureRuns, getStagedRunForFeed()] })),
 
