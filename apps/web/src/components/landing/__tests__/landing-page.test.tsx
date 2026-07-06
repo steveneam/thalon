@@ -45,10 +45,12 @@ describe("landing page / (docs/FRONTEND.md §2)", () => {
     }
     for (const tier of TIERS) {
       expect(screen.getByRole("heading", { name: tier.name })).toBeInTheDocument();
+      // Real planned prices render from the data (founder-delegated 2026-07-07)…
+      expect(screen.getByText(`$${tier.price}`)).toBeInTheDocument();
     }
     expect(container.querySelectorAll("details")).toHaveLength(FAQ.length);
-    // Honest pricing: early-access framing, no invented anchor prices.
-    expect(container.textContent).not.toMatch(/was \$|\$\d/i);
+    // …but fake was-price anchoring stays forbidden (honest-claims rule).
+    expect(container.textContent).not.toMatch(/was \$|save \d+%/i);
   });
 
   it("embeds Organization + FAQPage JSON-LD generated from the visible FAQ (A13)", () => {
