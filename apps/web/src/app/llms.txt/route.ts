@@ -20,7 +20,7 @@ Thalon is a multi-tenant AI content engine for brands and operators. One prompt 
 
 - Intel: operator-described topic areas are watched through official platform APIs; rising items are flagged with deterministic scoring (relevance, engagement ratios, velocity) and plain-language reasons.
 - Create: one prompt fans out into posts, video scripts with captions, and landing pages, grounded in the operator's sources and voice profile.
-- Everywhere: drafts are platform-shaped and gated behind an approve queue; one-click publishing through official platform APIs is rolling out to early access.
+- Everywhere: drafts are platform-shaped and gated behind an approve queue; one-click publishing through official platform APIs is planned for early access.
 - Built-in search optimization: pages ship with meta titles and descriptions, question-shaped headings with answer-first paragraphs, JSON-LD structured data, and llms.txt. Thalon optimizes what is checkable; it does not promise rankings.
 
 ## FAQ

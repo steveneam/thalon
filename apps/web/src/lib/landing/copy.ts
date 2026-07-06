@@ -22,7 +22,7 @@ export const FAQ: FaqItem[] = [
   {
     question: "Where does Thalon publish?",
     answer:
-      "Thalon drafts platform-shaped content for LinkedIn, X, Instagram, Facebook, TikTok, and YouTube, plus full web pages. Today you approve and post; one-click publishing through official platform APIs is rolling out to early-access members — official APIs only, no gray-area automation.",
+      "Thalon drafts platform-shaped content for LinkedIn, X, Instagram, Facebook, TikTok, and YouTube, plus full web pages. Today you approve and post; one-click publishing through official platform APIs is planned for early-access members — official APIs only, no gray-area automation.",
   },
   {
     question: "How does Thalon find rising trends?",
