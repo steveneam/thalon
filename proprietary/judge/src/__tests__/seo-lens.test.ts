@@ -1,7 +1,7 @@
 import { seoMetaSchema } from "@thalon/contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import { runJudgePipeline } from "../pipeline";
-import { runSeoAeoLens, SEO_LENS_GATE, seoLensConfigSchema } from "../seo-lens";
+import { runSeoAeoLens, SEO_LENS_GATE } from "../seo-lens";
 import { fixedDriver } from "./fake-drivers";
 import { judgeFixture, type JudgeFixture } from "./fixtures";
 
@@ -21,8 +21,6 @@ const GOOD_SEO = seoMetaSchema.parse({
 });
 
 describe("runSeoAeoLens (B6.8 — deterministic advisory lens, zero model calls)", () => {
-  const config = seoLensConfigSchema.parse({});
-
   it("a well-formed page passes every check with a reason each", () => {
     const result = runSeoAeoLens({ seo: GOOD_SEO, body: GOOD_BODY, surface: "page" });
     expect(result.verdict).toBe("pass");

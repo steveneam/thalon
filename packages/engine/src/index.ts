@@ -37,6 +37,14 @@
  * stage judged before it advances (structural gate on queued/approved);
  * deterministic-first prefill; deterministic export (timeline/SRT/dims);
  * one-prompt mode = the same stages auto-advanced. pillar_script untouched.
+ * B6.8 landed (A13): src/search/ — search intel as Intel's second half:
+ * profile-seeded keyword compilation (deterministic core + judged AI
+ * expansion via the pinned search.keyword_expand shell op) -> search_targets;
+ * SearchIntelSource seam (fake default, GSC skeleton deploy-gated, paid
+ * tools a fail-loud swap path) -> append-only search_snapshots -> horizon
+ * opportunity math (position window x rising impressions x below-expected
+ * CTR, reason strings); on-page pack (question H2s/answer-first, JSON-LD
+ * honesty, llms.txt) beside the judge's advisory seo_aeo lens.
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -54,3 +62,4 @@ export * from "./webpage";
 export * from "./trend";
 export * from "./direction";
 export * from "./pipeline/staged-video";
+export * from "./search";

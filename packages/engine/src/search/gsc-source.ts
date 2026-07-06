@@ -102,7 +102,14 @@ export function gscSearchIntelSource(deps: GscSourceDeps = {}): SearchIntelSourc
           `gsc responded ${response.status} for "${config.siteUrl}" (${request.startDate}..${request.endDate})`,
         );
       }
-      const parsed = gscResponseSchema.parse(await response.json());
+      const body = await response.text();
+      let candidate: unknown;
+      try {
+        candidate = JSON.parse(body);
+      } catch {
+        throw new Error(`gsc returned non-JSON for "${config.siteUrl}" (${body.slice(0, 120)}…)`);
+      }
+      const parsed = gscResponseSchema.parse(candidate);
 
       const queryIdx = config.dimensions.indexOf("query");
       const pageIdx = config.dimensions.indexOf("page");
