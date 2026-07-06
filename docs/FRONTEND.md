@@ -16,7 +16,7 @@
 - **Verdict on the existing mockup** (founder, 2026-07-06): too corporate — shield + world-map + gold reads enterprise fintech. Dropped.
 - **Keep**: the strong THALON wordmark; the amber/gold accent (excellent on dark).
 - **New mark**: falcon / wing / talon — the name contains *talon*; the hunting metaphor sells the intel feature ("Thalon watches the horizon and strikes when something's rising"). Deliverable: 2–3 SVG mark concepts, founder picks (B6.1).
-- **Palette**: near-black charcoal base · one amber/gold accent · high-contrast neutrals · generous whitespace. Dark-first (every founder reference is a dark command center) with a light-capable token set; WCAG AA contrast for amber-on-dark text pairings.
+- **Palette** *(amended 2026-07-07, founder-ratified — `docs/research/workspace-ux-v2.md` §4)*: the **workspace is light-first** — white/paper base · navy-ink structure · one restrained blue for interactive elements · **amber narrowed to the signal channel** (heat scores, outlier badges, needs-you counts): *blue = you act, amber = the engine found heat*. Rationale: the operator works beside white-background platforms (YouTube/X/FB/GSC) — embedded content must not float on near-black. The **landing stays dark-cinematic** for now (revisit at B6.7); both themes live in the one token set, WCAG AA pinned executable (`tokens-contrast.test.ts`). ~~Dark-first workspace~~ superseded.
 - **Continuity**: landing page and workspace share the same design tokens — the site looks like the product.
 - **Typography**: a confident geometric sans for display; tabular/mono numerals for metrics (the HUD feel of the references, restrained).
 
@@ -45,12 +45,17 @@ Founder spec: picture on top, description at the bottom; click → popout with a
 - **[+] Final repeat CTA** under the FAQ (one-field waitlist, same endpoint).
 - **AEO/GEO (A13):** the FAQ doubles as the answer-engine surface — `FAQPage` JSON-LD generated from it, answer-first copy; site ships `Organization` JSON-LD + `llms.txt`. Landing copy is written against the manual B6.8 keyword pass; honest-claims rule applies (optimization is claimable, rankings are not — ADR 0006).
 
+### Landing v2 uplift *(added 2026-07-07, founder-directed — `docs/research/workspace-ux-v2.md` §8)*
+Structure stays (the 4 sections + mechanics are sound); the craft rises: one hero signature moment (animated headline + depth layer) · honest stats/proof band · "old way vs new way" strip · feature-card spotlight/hover pull · ≤3 micro-interactions. Sources: the MIT landing-template set (section patterns) + ReactBits (signature moments; MIT+Commons Clause, per-component dep/license check at adoption). Lands with composition v2's demo re-cut as one landing revision, then B6.7 deploys it.
+
 ### Performance & meta budget
-- Static-first (SSG), minimal client JS on `/` (target: interactive vignette + modal player only), optimized OG image for link sharing, semantic HTML. The landing page is also the first Vercel deploy target (B6.7).
+- Static-first (SSG), minimal client JS on `/` (target: interactive vignette + modal player + **one hero moment** — amended 2026-07-07), optimized OG image for link sharing, semantic HTML. The landing page is also the first Vercel deploy target (B6.7).
 
 ## 3. Workspace (`/app/*`) — command-center IA
 
 Synthesis of the founder's 23 references (Obsidian AIOS dashboards · BenAI profile dashboard · V.A.U.L.T. HUD · dark command centers · OmniRoute's prompt-left/preview-right). One Next.js app: `/` landing, `/app` workspace. No Clerk yet — dev-seamed identity as today.
+
+> **Wave-3 revision (2026-07-07, founder-ratified — `docs/research/workspace-ux-v2.md` §3):** every intel card becomes a **dossier + launchpad** — ready titles/angles/hook alongside score/reasons/provenance, per-family exits (→ Video · → Post · → Page), and the intel→create handoff upgrades from `?prompt=<text>` to a **structured context object** (capture id → `{title, angle, hook, sourceUrl, areaName, keyword, score}`) rendered on Create as removable context chips. Intel gains a cadence stamp (last swept · next sweep · sweep now). The principle app-wide: *cards are doorways, not reports; context flows forward, never re-asked.*
 
 ### Shell
 - Left sidebar (surfaces below) + top bar with **tenant/profile switcher** (feature 3 made visible from day one) and a **needs-you badge** (approve-queue count).
