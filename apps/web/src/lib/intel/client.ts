@@ -1,6 +1,14 @@
 import type { MonitoredAreaConfig, MonitoredAreaStatus, SearchTargetStatus } from "@thalon/contracts";
 import { asJson } from "@/lib/approve-queue/client";
-import type { AreaRow, HorizonPayload, IntelCapture, TargetRow, TrendsPayload } from "./types";
+import type {
+  AreaRow,
+  CreateContext,
+  CreateFamily,
+  HorizonPayload,
+  IntelCapture,
+  TargetRow,
+  TrendsPayload,
+} from "./types";
 
 export async function fetchTrends(): Promise<TrendsPayload> {
   return asJson<TrendsPayload>(await fetch("/api/intel/trends"));
@@ -36,9 +44,22 @@ export async function dismissTrend(cardId: string): Promise<IntelCapture> {
   return (await asJson<{ capture: IntelCapture }>(res)).capture;
 }
 
-export async function promoteTrend(cardId: string): Promise<{ capture: IntelCapture; createHref: string }> {
-  const res = await fetch(`/api/intel/trends/${cardId}/promote`, { method: "POST" });
+export async function promoteTrend(
+  cardId: string,
+  pick: { family: CreateFamily; titleIndex?: number; angleIndex?: number },
+): Promise<{ capture: IntelCapture; createHref: string }> {
+  const res = await fetch(`/api/intel/trends/${cardId}/promote`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(pick),
+  });
   return asJson<{ capture: IntelCapture; createHref: string }>(res);
+}
+
+/** Resolve the structured intel→create handoff behind a capture id (wave-3 §3.3). */
+export async function fetchCreateContext(captureId: string): Promise<CreateContext> {
+  const res = await fetch(`/api/intel/context/${encodeURIComponent(captureId)}`);
+  return (await asJson<{ context: CreateContext }>(res)).context;
 }
 
 export async function fetchTargets(): Promise<TargetRow[]> {

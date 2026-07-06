@@ -59,7 +59,7 @@ describe("SearchTab", () => {
     expect(within(ranking).getByText("no signal")).toBeInTheDocument();
   });
 
-  it("target-this routes to Create with the query as generation context", async () => {
+  it("target-this routes to Create with a capture id carrying the keyword context", async () => {
     const user = userEvent.setup();
     render(<SearchTab />);
     await screen.findByText(/peering over the horizon/i);
@@ -67,6 +67,6 @@ describe("SearchTab", () => {
     const opportunity = screen.getByTestId("horizon-what is content automation");
     await user.click(within(opportunity).getByRole("button", { name: /target this/i }));
     await waitFor(() => expect(push).toHaveBeenCalled());
-    expect(String(push.mock.calls.at(-1)![0])).toContain("/app/create?keyword=");
+    expect(String(push.mock.calls.at(-1)![0])).toContain("/app/create?ctx=");
   });
 });
