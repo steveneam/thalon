@@ -200,8 +200,8 @@ export default function LandingPage() {
               What does it cost?
             </h2>
             <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
-              Final pricing lands with the public launch — no invented discounts here. Waitlist
-              members get founding-member rates first, in queue order.
+              Planned launch pricing — it may still move before launch, and there are no invented
+              discounts here. Waitlist members get founding-member rates first, in queue order.
             </p>
 
             <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -220,7 +220,8 @@ export default function LandingPage() {
                   <h3 className="text-lg font-semibold tracking-tight">{tier.name}</h3>
                   <p className="mt-0.5 text-sm text-muted-foreground">{tier.audience}</p>
                   <p className="u-tabular mt-4 font-mono text-3xl font-semibold">
-                    $—<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                    ${tier.price}
+                    <span className="text-sm font-normal text-muted-foreground"> USD/mo</span>
                   </p>
                   <ul className="mt-5 space-y-2.5 text-sm leading-6">
                     {tier.bullets.map((bullet) => (

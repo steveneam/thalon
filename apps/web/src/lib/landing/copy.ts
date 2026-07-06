@@ -100,23 +100,32 @@ export const STEPS = [
 export interface Tier {
   name: string;
   audience: string;
+  /** Planned monthly price, USD. */
+  price: number;
   bullets: string[];
   featured?: boolean;
 }
 
 /**
- * Early-access framing only — tier names + honest placeholders until the
- * founder supplies real prices ([you], non-blocking). No invented anchors.
+ * Planned launch pricing — lead-recommended, founder-delegated 2026-07-07
+ * ("have a think about it and put in your recommended price"). Anchors:
+ * scheduling tools run ~$6–99/seat, AI writing ~$39–59, AI video alone
+ * ~$24–90 — Falcon bundles intel + video + the judge gate under the
+ * mid-market video tools it replaces. Aerie prices per-workspace value
+ * (~$20/brand at ten brands) with BYOK trimming our gateway exposure.
+ * Still no invented anchors: no fake was-prices, ever (test-pinned).
  */
 export const TIERS: Tier[] = [
   {
     name: "Scout",
     audience: "For solo operators",
+    price: 29,
     bullets: ["One brand profile", "Trend intel on your core areas", "Posts + landing pages"],
   },
   {
     name: "Falcon",
     audience: "For serious creators",
+    price: 79,
     bullets: [
       "Everything in Scout",
       "Video generation with captions",
@@ -127,6 +136,7 @@ export const TIERS: Tier[] = [
   {
     name: "Aerie",
     audience: "For teams & agencies",
+    price: 199,
     bullets: ["Multiple workspaces", "Shared approval queues", "Bring your own AI keys"],
   },
 ];
