@@ -7,12 +7,16 @@ import { evalCasesRepo, type EvalCasesRepo } from "./eval-cases";
 import { eventsRepo, type EventsRepo } from "./events";
 import { fanoutRunsRepo, type FanoutRunsRepo } from "./fanout-runs";
 import { judgeResultsRepo, type JudgeResultsRepo } from "./judge-results";
+import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
+import { searchSnapshotsRepo, type SearchSnapshotsRepo } from "./search-snapshots";
+import { searchTargetsRepo, type SearchTargetsRepo } from "./search-targets";
 import { sourceChunksRepo, type SourceChunksRepo } from "./source-chunks";
 import { sourceMetricsRepo, type SourceMetricsRepo } from "./source-metrics";
 import { sourcesRepo, type SourcesRepo } from "./sources";
 import { tenantsRepo, type TenantsRepo } from "./tenants";
 import { trendSnapshotsRepo, type TrendSnapshotsRepo } from "./trend-snapshots";
 import { usageLedgerRepo, type UsageLedgerRepo } from "./usage-ledger";
+import { waitlistRepo, type WaitlistRepo } from "./waitlist";
 import { watchlistsRepo, type WatchlistsRepo } from "./watchlists";
 
 export interface Repos {
@@ -31,6 +35,10 @@ export interface Repos {
   events: EventsRepo;
   watchlists: WatchlistsRepo;
   trendSnapshots: TrendSnapshotsRepo;
+  monitoredAreas: MonitoredAreasRepo;
+  searchTargets: SearchTargetsRepo;
+  searchSnapshots: SearchSnapshotsRepo;
+  waitlist: WaitlistRepo;
   // publish_queue deliberately has no repository: no publish path is wired
   // anywhere in Sprints 0–2 (charter standing discipline).
 }
@@ -52,5 +60,9 @@ export function createRepos(db: Db): Repos {
     events: eventsRepo(db),
     watchlists: watchlistsRepo(db),
     trendSnapshots: trendSnapshotsRepo(db),
+    monitoredAreas: monitoredAreasRepo(db),
+    searchTargets: searchTargetsRepo(db),
+    searchSnapshots: searchSnapshotsRepo(db),
+    waitlist: waitlistRepo(db),
   };
 }
