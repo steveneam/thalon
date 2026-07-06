@@ -1,0 +1,23 @@
+{
+  "feature": "everywhere",
+  "title": "Everywhere - approved by you first",
+  "hook": "Every platform. Never without your click.",
+  "beats": [
+    {
+      "narration": "Each draft waits in one approve queue, showing its judge verdicts.",
+      "onScreenText": "One queue",
+      "durationHintMs": 3200
+    },
+    {
+      "narration": "Edit, approve, or block - every correction is captured as an eval case.",
+      "onScreenText": "Your edits teach it",
+      "durationHintMs": 3400
+    },
+    {
+      "narration": "One-click publishing is planned; today nothing leaves without human approval.",
+      "onScreenText": "Approval is the gate",
+      "durationHintMs": 3400
+    }
+  ],
+  "cta": "This demo was rendered by Thalon."
+}

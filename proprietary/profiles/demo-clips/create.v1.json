@@ -1,0 +1,23 @@
+{
+  "feature": "create",
+  "title": "Create - one prompt, three formats",
+  "hook": "One prompt in. Platform-native drafts out.",
+  "beats": [
+    {
+      "narration": "A prompt or source fans out into drafts shaped for each platform you configure.",
+      "onScreenText": "post - video - page",
+      "durationHintMs": 3400
+    },
+    {
+      "narration": "Videos build in stages you can steer: storyboard, scene direction, deterministic render.",
+      "onScreenText": "Staged video",
+      "durationHintMs": 3600
+    },
+    {
+      "narration": "Nothing reaches you unjudged: a denylist gate and a two-tier grounding judge run first.",
+      "onScreenText": "Judged before you see it",
+      "durationHintMs": 3600
+    }
+  ],
+  "cta": "This demo was rendered by Thalon."
+}
