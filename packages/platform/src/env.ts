@@ -34,6 +34,8 @@ const envSchema = z.object({
   TRANSCRIPT_PROVIDER: z.string().default("caption-file"),
   /** B5.1 render seam: which RenderTarget the registry selects (hyperframes | fake; remotion = the recorded swap path, ADR-0004). Default per amendment A11. */
   RENDER_DRIVER: z.string().default("hyperframes"),
+  /** B6.8 search-intel seam: which SearchIntelSource the registry selects (fake | gsc; paid-vendor = the recorded swap path, ADR 0006). GSC goes live at B6.7 deploy — fake is the honest default until a site exists. */
+  SEARCH_INTEL_SOURCE: z.string().default("fake"),
   /** B4.8 hosted-vendor adapter (keyed runtime config with a swap path — no vendor named in code; live runs are pass 3). */
   TRANSCRIPT_VENDOR_URL: z.string().optional(),
   TRANSCRIPT_VENDOR_API_KEY: z.string().optional(),
