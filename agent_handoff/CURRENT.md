@@ -4,44 +4,47 @@
 
 ## Stamp
 
-2026-07-06 (session 11) · **SPRINT 5 COMPLETE (B5.1–B5.4 all merged) — pass 2.5 (deterministic video creation) done. Pass 3 (live verification + real drivers) is next, at founder direction.** Main @ `4b5d804`.
+2026-07-06 (session 12) · **PASS-3 RE-CHARTER DONE (amendment A12, Sprint 6 = B6.1–B6.7). Planning/research session — no feature code. Next: build B6.1 (brand + landing page) on founder go.**
 
 ## Resume prompt (paste verbatim to resume next session)
 
-> Stamped 2026-07-06 00:58 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
+> Stamped 2026-07-06 18:07 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
 
-**Resume · Thalon** — stamped **2026-07-06 00:58 (UTC+10:00)** · Sprint 5 (pass 2.5, A11) COMPLETE → pass 3 is the next pass. E:\thalon, main @ `4b5d804`.
+**Resume · Thalon** — stamped **2026-07-06 18:07 (UTC+10:00)** · Pass-3 re-charter COMPLETE (A12) → Sprint 6 build starts at B6.1. E:\thalon, main.
 
-▎ ▸ Read `CLAUDE.md` → `agent_handoff/CURRENT.md` → `CHARTER.md` (the **"Pass 3 — live verification + meat"** paragraph under Sprint 5, plus B3.11 and the pulled B3.1–B3.7/B3.14/B3.15 rows) → `COORDINATION.md` (the 2026-07-06 SPRINT 5 COMPLETE wrap message pins the carried follow-ups) → `docs/SPINE.md` §1 (the refreshed shell inventory + the B5.3 executable pin).
+▎ ▸ Read `CLAUDE.md` → `agent_handoff/CURRENT.md` → `CHARTER.md` (Sprint-6 table + amendment A12) → `docs/adr/0005-pass3-recharter.md` (the decisions + API research) → `docs/FRONTEND.md` (the full landing/workspace design — the B6.1/B6.2 build spec).
 
-▎ ▸ **Pass 3 is the founder's to shape (a re-charter checkpoint, like every pass boundary).** Do NOT start pass-3 work without the founder's direction on scope/order. What pass 3 covers (A9/A10/A11): gateway dogfood across all three families · pillar-#1 tenant onboarding (`.context/tenants/<company>.v1.json`, `[you]`) · **B3.11** (B2.5 pinned docs-search chromium drive as opener, B2.3 waterfall on the first generated pillar's SRT, profile editor/switcher UI) · real drivers behind the hardened seams (the Sprint-5 Hyperframes render is live-ready; wire direction_doc→render, real judge lane into `/api/staged/*`, Vercel deploy, YouTube/AT-Protocol pollers, live Whisper, TTS) · approve-queue format panels for `pillar_script`/`direction_doc`/`web_page` · eval-row refinement + exit reviews · green suite as the sprint-exit gate.
+▎ ▸ **Founder decisions this session (all ratified, do not re-litigate):** Thalon-first dogfood (tenant #0 real profile; pillar #1 = a Thalon video; first-company onboarding deferred) · frontend first, hand-built shell + dogfooded content · intel v2 = operator-described monitored areas + deterministic two-stage ranker (frameworks doc adopted as math+embeddings, never neural) · transcript live drivers elevated (learning/dogfood input channel) · no Clerk yet · brand = dark command-center, falcon/talon mark (mockup judged too corporate; wings/feather wanted).
 
-▎ ▸ **Sprint-5 carried follow-ups (all non-blocking, itemized in the COORDINATION wrap):** `@hyperframes/player` dep + real preview in `stage-preview.tsx`; swap `/api/staged/*` internals for `startVideoStages`/`advanceVideoStage` + real judge, and teach `approvals.record` a caller-supplied `{kind, patch}` so staged captures become real `edit_diffs` (currently hardcodes `{before, after}`); wire `compositionSpecFromDirectionExport` into a live render path; `rm` the hyperframes target's throwaway temp jobDir after `render.ts` reads the video.
+▎ ▸ **Next action: B6.1 — brand + landing page** (design tokens · 2–3 falcon/talon SVG mark concepts for founder pick · landing per `docs/FRONTEND.md` §2: hero + waitlist w/ referral, 3-feature side-scroll w/ popout demo placeholders, early-access pricing, FAQ · additive `waitlist` table = schema window #1). Before writing frontend code, read `node_modules/next/dist/docs/` (apps/web pins a breaking-changes Next.js). Founder reference imagery lives OUTSIDE the repo (brand folder path contains guard token A — never echo it into tracked files; workspace refs in the founder's Screenshots folder).
 
-▎ ▸ **[you] — founder-supplied, needed for pass 3:** pillar-#1 topic/angle + the tenant profile at gitignored `.context/tenants/<company>.v1.json`; gateway credit top-up (judge tier + live dogfood); LinkedIn + X OAuth developer apps (B3.1 long pole — start anytime); decision on scrubbing the guard token from historical commit `0b11d48` (HEAD is clean).
+▎ ▸ **[you] — founder-supplied (none block B6.1):** domain registration (blocks landing go-live, B6.7) · pricing-tier content (§3 placeholder until then) · gateway credit top-up (B6.5+) · transcript-vendor API key (B6.5) · LinkedIn + X OAuth apps (parallel paperwork, not Sprint 6) · decision on scrubbing the guard token from historical commit `0b11d48` (HEAD clean; carried).
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote, suite **580 passed / 3 skipped**, typecheck clean, lint 0 errors (1 pre-existing `_dataDir` warning), guard passing, `npm run doctor` all seams as-expected (render LIVE-READY), no mid-edit state, no open PRs, no live worktrees (all removed; main node_modules verified intact).
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: working tree clean, local = remote, docs-only session (no code touched — suite state carries at 580 passed / 3 skipped from session 11), guard passing, no open PRs, no live worktrees, no mid-edit state.
 
 ---
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → `CHARTER.md` (Sprint 5 done; "Pass 3" paragraph is the next scope) → `COORDINATION.md` (2026-07-06 wrap). The seams pass 3 drives against: `packages/engine/src/render/{hyperframes-target,render-driver,composition}.ts` (Hyperframes render, live-ready — direction_doc→render is the unwired gap) · `packages/engine/src/pipeline/staged-video.ts` (`startVideoStages`/`advanceVideoStage`, the real staged flow the UI's `/api/staged/*` must call in pass 3) · `apps/web/src/lib/staged-flow/store.ts` (the fake store to replace) · `packages/platform` env choke point (all driver selection: `RENDER_DRIVER`/`TRANSCRIPT_PROVIDER`/deploy/trend).
+Read in order: `CLAUDE.md` → this file → `CHARTER.md` (Sprint-6 table + A12) → `docs/adr/0005-pass3-recharter.md` → `docs/FRONTEND.md`. The surfaces B6.1/B6.2 build against: `apps/web/src/app/page.tsx` (still the create-next-app placeholder — landing is greenfield) · `apps/web/src/app/approve/` + `apps/web/src/components/staged/` (existing surfaces to restyle into the shell) · `packages/db` (schema window #1: `waitlist`). Intel v2 (B6.4) builds on `packages/engine/src/trend/*` (watchlist "niches" slot un-built; outlier/longitudinal math + reason strings ready) + `packages/db/src/schema/intel.ts`.
 
-## Delta (this session — session 11)
+## Delta (this session — session 12, planning/research)
 
-- **SPRINT 5 fully built + merged in one session (B5.1–B5.4).** B5.2 staged pipeline first (contract window, lead terminal, PR #21 `a5ed7f1`): `storyboard`+`direction_doc` formats, stage registry (count is config), strict direction.md renderer/parser in contracts with the byte-identical round-trip ratchet, deterministic-first prefill + deterministic export, staged pipeline with a STRUCTURAL judge gate and one-code-path/two-modes (one-prompt = the same functions auto-advanced). Then the Mode B wave on founder go: **B5.1** render (PR #22) — Hyperframes 0.7.33 driver behind the B3.10 seam, two-belt lint gate before chromium, ADR-0004, doctor live-ready, real $0 render proven; **B5.4** ui (PR #23) — advanced staged-flow on fake drivers, engine-free, RFC-6902 capture; **B5.3** ratchet (PR #24) — shell-inventory executable pin + SPINE §1 refresh + computable-leakage audit.
-- **Dep install:** `@hyperframes/{producer,lint}` + `hyperframes` 0.7.33 exact-pinned in main (`0aacb0c`) — the render lane's stop-and-report, installed in main, junction propagated (never `npm install` in a lane).
-- **Cleanup:** all Sprint-5 worktrees removed junction-safely (main node_modules verified intact, 597/6) + three orphaned prior-session subagent worktree dirs (real node_modules, dead Sprint-4 lanes) swept from `.claude/worktrees` at founder request.
-- Suite **428 → 580 passed / 3 skipped**. Memory updated (build-strategy → Sprint 5 complete; windows-dev-quirks → commit-message here-string-quote trap + the orphaned-subagent real-node_modules cleanup note).
+- **Pass-3 re-charter (A12).** Founder shaped pass 3 in a planning session: dogfood pivot (Thalon markets Thalon — charter decision 3 made real), frontend-first order, intel monitored-areas requirement, transcript feature elevated. Chartered as Sprint 6 (B6.1–B6.7); `docs/adr/0005-pass3-recharter.md` + `docs/FRONTEND.md` written; CHARTER.md pass-3 paragraph superseded.
+- **Research (verified against official docs):** YouTube June-2026 granular quota — `search.list` ≈100 calls/day own bucket, new `videos.batchGetStats` 1-unit refreshes (poller design is quota-shaped as config); Bluesky AppView keyless/abundant; third-party transcript sites = caption-track retrieval (not ASR) behind an IP-block arms race → re-validates the A8 vendor-adapter design; a candidate vendor's API matches the B4.8 seam shape (POST + token; thin response mapping needed).
+- **Frameworks doc mapped:** founder-supplied FB/YT recommender summary → adopt two-stage candidate-gen→rank + EdgeRank-shaped config-weighted scoring + embedding relevance + batch feedback loop (operator actions → eval rows); explicitly rejected: two-tower/federated/GenAI-feed machinery.
+- **Frontend direction locked from founder references:** 23 workspace screenshots + brand mockups studied → dark command-center IA, 10-second rule, conversion/stickiness mechanics (waitlist referral, first-run on fake drivers, keyboard triage, activity-feed provenance) — all in `docs/FRONTEND.md`.
+- Memory updated (5 files + index): dogfood pivot, pass-3 shape, monitored areas, transcript elevation, frontend direction.
 
 ## Next action
 
-Paste the resume prompt above. First act next session is the **pass-3 re-charter checkpoint** — surface scope/order options to the founder and get direction before building. Nothing in Sprint 5 is left open; pass 3 is a fresh pass, founder-directed.
+Paste the resume prompt above. First act next session: **start B6.1** (founder go implied by the ratified charter, but confirm if anything about the mark/landing scope shifted overnight). B6.1 → B6.2 are sequential lead-terminal work (frontend); no parallel lanes proposed for the opening buckets — B6.4 engine work becomes lane-eligible once the B6.2 shell merges (disjoint file sets; fresh founder approval required per protocol).
 
-## [you] — founder-supplied (pass 3)
+## [you] — founder-supplied (Sprint 6)
 
-- Pillar #1 topic/angle + confirm the tenant profile draft (`.context/tenants/<company>.v1.json`).
-- Gateway credit top-up (judge tier + live dogfood).
-- LinkedIn + X OAuth developer apps (B3.1 long pole — paperwork, start anytime).
-- Decision: scrub the guard token from historical commit `0b11d48`? (one-time branch-protection relax; HEAD clean).
+- Domain registration (blocks go-live only).
+- Pricing-tier names/prices for landing §3 (placeholder until supplied).
+- Gateway credit top-up (B6.5 judge-tier dogfood onward).
+- Transcript-vendor API key (B6.5).
+- LinkedIn + X OAuth developer apps (parallel paperwork; publisher stays pulled).
+- Carried: decision on scrubbing the guard token from historical commit `0b11d48`.
