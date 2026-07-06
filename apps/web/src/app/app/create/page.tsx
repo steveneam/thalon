@@ -1,6 +1,6 @@
-import { CreateSurface } from "@/components/create/create-surface";
+import { CreateSurface, type CreateFamily } from "@/components/create/create-surface";
 
-/** Reads Intel's handoff params server-side (?prompt= from Trends, ?keyword= from Search). */
+/** Reads the handoff params server-side (?prompt= from Trends/omnibox, ?keyword= from Search, ?family= from the omnibox heuristic). */
 export default async function CreatePage({
   searchParams,
 }: {
@@ -8,5 +8,12 @@ export default async function CreatePage({
 }) {
   const params = await searchParams;
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
-  return <CreateSurface initialPrompt={first(params.prompt)} initialKeyword={first(params.keyword)} />;
+  const family = first(params.family);
+  return (
+    <CreateSurface
+      initialPrompt={first(params.prompt)}
+      initialKeyword={first(params.keyword)}
+      initialFamily={family === "post" || family === "video" || family === "page" ? (family as CreateFamily) : undefined}
+    />
+  );
 }

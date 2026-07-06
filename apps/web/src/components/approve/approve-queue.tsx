@@ -15,6 +15,7 @@ import {
   reJudgeDraft,
   rejectDraft,
 } from "@/lib/approve-queue/client";
+import { isTypingTarget } from "@/lib/approve-queue/keyboard";
 import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import type { FeedRun, GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
@@ -181,38 +182,84 @@ export function ApproveQueue() {
     });
   }
 
+  // Keyboard triage (B6.2 [+]): j/k move the grid selection, a/r act on the
+  // selected QUEUED draft ('e' lives in the panel, which owns edit state).
+  // Never fires while typing or while the staged surface owns the screen.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (busy || stagedSelected || isTypingTarget(event.target)) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.key === "j" || event.key === "k") {
+        if (drafts.length === 0) return;
+        event.preventDefault();
+        const current = drafts.findIndex((d) => d.id === selectedDraftId);
+        const next =
+          current === -1
+            ? 0
+            : Math.min(Math.max(current + (event.key === "j" ? 1 : -1), 0), drafts.length - 1);
+        selectDraft(drafts[next].id);
+      } else if (event.key === "a" || event.key === "r") {
+        const selected = drafts.find((d) => d.id === selectedDraftId);
+        if (!selected || selected.status !== "queued") return;
+        event.preventDefault();
+        void withBusy(() =>
+          event.key === "a" ? approveDraft(selected.id) : rejectDraft(selected.id),
+        );
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // withBusy is recreated per render; re-registering the listener is cheap
+    // and keeps every closure fresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy, stagedSelected, drafts, selectedDraftId, selectDraft]);
+
+  // Zero-inbox ([+]): the shell pulse knows whether ANYTHING waits across
+  // all runs — celebrate it instead of showing an ambiguous quiet queue.
+  const zeroInbox = feedStatus === "success" && pulse?.status === "success" && pulse.pulse?.needsYou === 0;
+
   return (
     // min-h-0 (not min-h-screen): the queue fills the workspace shell's main
     // area; the shell owns the viewport height.
-    <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-      <FeedPanel status={feedStatus} runs={runs} selectedRunId={selectedRunId} onSelect={selectRun} />
-      {stagedSelected && selectedDraftId ? (
-        // Keyed remount per anchor draft so the surface never shows a stale flow.
-        <StagedFlow key={selectedDraftId} draftId={selectedDraftId} />
-      ) : (
-        <>
-          <FanoutGrid
-            status={gridStatus}
-            drafts={drafts}
-            selectedDraftId={selectedDraftId}
-            onSelect={selectDraft}
-            busy={busy}
-            queuedCount={queuedDrafts.length}
-            onBatchApprove={batchApprove}
-          />
-          <ApprovePanel
-            status={panelStatus}
-            draft={panelDraft}
-            judgeResults={judgeResults}
-            busy={busy}
-            actionError={actionError}
-            onApprove={() => selectedDraftId && withBusy(() => approveDraft(selectedDraftId))}
-            onReject={() => selectedDraftId && withBusy(() => rejectDraft(selectedDraftId))}
-            onEditSave={(body) => selectedDraftId && withBusy(() => editDraft(selectedDraftId, body))}
-            onReJudge={() => selectedDraftId && withBusy(() => reJudgeDraft(selectedDraftId))}
-          />
-        </>
+    <div className="flex min-h-0 flex-1 flex-col">
+      {zeroInbox && (
+        <p className="border-b border-primary/25 bg-primary/5 px-4 py-2 text-sm">
+          <span className="font-medium text-primary">Inbox zero.</span>{" "}
+          <span className="text-muted-foreground">
+            Nothing waits on you — new drafts land here the moment the judge passes them.
+          </span>
+        </p>
       )}
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <FeedPanel status={feedStatus} runs={runs} selectedRunId={selectedRunId} onSelect={selectRun} />
+        {stagedSelected && selectedDraftId ? (
+          // Keyed remount per anchor draft so the surface never shows a stale flow.
+          <StagedFlow key={selectedDraftId} draftId={selectedDraftId} />
+        ) : (
+          <>
+            <FanoutGrid
+              status={gridStatus}
+              drafts={drafts}
+              selectedDraftId={selectedDraftId}
+              onSelect={selectDraft}
+              busy={busy}
+              queuedCount={queuedDrafts.length}
+              onBatchApprove={batchApprove}
+            />
+            <ApprovePanel
+              status={panelStatus}
+              draft={panelDraft}
+              judgeResults={judgeResults}
+              busy={busy}
+              actionError={actionError}
+              onApprove={() => selectedDraftId && withBusy(() => approveDraft(selectedDraftId))}
+              onReject={() => selectedDraftId && withBusy(() => rejectDraft(selectedDraftId))}
+              onEditSave={(body) => selectedDraftId && withBusy(() => editDraft(selectedDraftId, body))}
+              onReJudge={() => selectedDraftId && withBusy(() => reJudgeDraft(selectedDraftId))}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }
