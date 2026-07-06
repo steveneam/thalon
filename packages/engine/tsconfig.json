@@ -4,7 +4,8 @@
     "paths": {
       "@thalon/contracts": ["../contracts/src/index.ts"],
       "@thalon/db": ["../db/src/index.ts"],
-      "@thalon/platform": ["../platform/src/index.ts"]
+      "@thalon/platform": ["../platform/src/index.ts"],
+      "@thalon/judge": ["../../proprietary/judge/src/index.ts"]
     }
   },
   "include": ["src"]
