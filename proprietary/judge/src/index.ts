@@ -6,6 +6,17 @@
  * bypass it (see `pipeline.ts`).
  */
 export { runG1Denylist, type G1Result, type RunG1Input } from "./g1-denylist";
+export {
+  checkSeoMeta,
+  runSeoAeoLens,
+  SEO_LENS_GATE,
+  seoLensConfigSchema,
+  type SeoFinding,
+  type SeoLensConfig,
+  type SeoLensConfigInput,
+  type SeoLensInput,
+  type SeoLensResult,
+} from "./seo-lens";
 export { collectGroundingChunks, type GroundingChunk } from "./grounding";
 export { runJudgePipeline, type PipelineOutcome, type RunJudgePipelineInput } from "./pipeline";
 export { callTierJudge, type TierCallResult } from "./validate-shell-output";

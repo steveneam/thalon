@@ -14,6 +14,9 @@ export interface JudgeFixtureOpts {
   tenantSlug?: string;
   /** B3.8: identity on the tenant's active profile — the pipeline appends it as a grounding chunk. */
   identity?: Record<string, unknown>;
+  /** B6.8: draft format + meta (the SEO/AEO lens reads `meta.seo` on seoMeta-capable formats). */
+  format?: string;
+  meta?: Record<string, unknown>;
 }
 
 /** Fresh in-memory db, one tenant with a configurable denylist profile, one `generated` draft. */
@@ -51,6 +54,8 @@ export async function judgeFixture(opts: JudgeFixtureOpts = {}): Promise<JudgeFi
     platform: "alpha",
     body: opts.body ?? "We shipped a thing today.",
     generationKey: sha256Hex(`${ctx.tenantId}:draft-1`),
+    ...(opts.format ? { format: opts.format } : {}),
+    ...(opts.meta ? { meta: opts.meta } : {}),
   });
   return { handle, ctx, draft, close: () => handle.close() };
 }

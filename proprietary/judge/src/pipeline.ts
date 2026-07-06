@@ -2,12 +2,15 @@ import {
   FINAL_JUDGE_GATE,
   brandIdentitySchema,
   renderBrandIdentity,
+  resolveDraftFormatSpec,
+  seoMetaSchema,
   type TenantCtx,
 } from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
 import { runG1Denylist } from "./g1-denylist";
 import { collectGroundingChunks } from "./grounding";
+import { runSeoAeoLens, SEO_LENS_GATE } from "./seo-lens";
 import {
   promptVersionFor,
   type JudgeModelDriver,
@@ -102,6 +105,39 @@ export async function runJudgePipeline(
       reason: "g1 denylist fail",
     });
     return { status: "blocked", draft: blocked, reason: "g1 denylist fail" };
+  }
+
+  // B6.8 (ADR 0006 decision 2): the ADVISORY SEO/AEO lens — deterministic,
+  // zero model calls, appended for operator triage only. Opt-in by DATA: it
+  // runs only when a seoMeta-capable format actually carries a `meta.seo`
+  // block, so every pre-B6.8 draft (and every test built before it) judges
+  // byte-identically. The queued/blocked outcome below never reads this row
+  // (I1 stays g3_final-only) — advisory is structural, not a promise.
+  const spec = resolveDraftFormatSpec(judging.format);
+  const seoRaw = (judging.meta as Record<string, unknown> | null)?.seo;
+  if (spec.capabilities.seoMeta && seoRaw !== undefined) {
+    const parsedSeo = seoMetaSchema.safeParse(seoRaw);
+    const lens = parsedSeo.success
+      ? runSeoAeoLens({
+          seo: parsedSeo.data,
+          body: judging.body,
+          surface: spec.capabilities.renderable ? "video" : "page",
+        })
+      : {
+          verdict: "fail" as const,
+          evidence: {
+            claims: [],
+            notes: `advisory SEO/AEO lens: meta.seo does not parse against seoMetaSchema — ${parsedSeo.error.issues
+              .map((i) => `${i.path.join(".")}: ${i.message}`)
+              .join("; ")}`,
+          },
+        };
+    await repos.judgeResults.append(input.ctx, {
+      draftId: judging.id,
+      gate: SEO_LENS_GATE,
+      verdict: lens.verdict,
+      evidence: lens.evidence,
+    });
   }
 
   const screen = await runTier(repos, input, chunks, judging, "screen", input.screenDriver);
