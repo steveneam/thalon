@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The founder-picked GRIP II mark (warm sails, fuller bellies) in brand
+       amber on charcoal. Literal twin of MarkGripSoft in
+       components/brand/marks.tsx — keep in sync. -->
+  <rect width="32" height="32" rx="7" fill="#211d15"/>
+  <g fill="#eeb64b" transform="translate(3.2 3.2) scale(0.8)">
+    <path d="M14.5 3 Q24.5 12 19.5 27 Q18.7 28.4 17.6 27.4 Q11.5 15 14.5 3 Z"/>
+    <path d="M4 11 Q13 15 14.8 25.5 Q14.9 27 13.6 26.3 Q6.5 20.5 4 11 Z"/>
+    <path d="M28.7 8.5 Q27.2 19.5 22.8 28.2 Q21.4 29.3 21 27.6 Q24.4 17.5 26.8 9.8 Q27.6 8 28.7 8.5 Z"/>
+  </g>
+</svg>
