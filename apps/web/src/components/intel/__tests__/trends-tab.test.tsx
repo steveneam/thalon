@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { TrendsTab } from "@/components/intel/trends-tab";
 import { fixtureTrendCards } from "@/lib/intel/fixtures";
+import { listIntelCaptures } from "@/lib/intel/store";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -54,15 +55,54 @@ describe("TrendsTab", () => {
     );
   });
 
-  it("generate-from-this routes to Create with the item text as prompt seed", async () => {
+  it("a per-family exit routes to Create with a capture id — the context spine, not a prompt string", async () => {
     const user = userEvent.setup();
     render(<TrendsTab />);
     await screen.findByText(/demo dataset/i);
 
     const card = screen.getByTestId("trend-card-demo-trend-1");
-    await user.click(within(card).getByRole("button", { name: /generate from this/i }));
+    await user.click(within(card).getByRole("button", { name: /create video from this/i }));
     await waitFor(() => expect(push).toHaveBeenCalled());
-    expect(String(push.mock.calls.at(-1)![0])).toContain("/app/create?prompt=");
+    expect(String(push.mock.calls.at(-1)![0])).toContain("/app/create?ctx=");
+
+    // The capture carries the exit family + the default dossier picks.
+    const capture = listIntelCaptures().at(-1)!;
+    expect(capture.payload).toMatchObject({
+      family: "video",
+      title: fixtureTrendCards[0].dossier.titles[0],
+      hook: fixtureTrendCards[0].dossier.hook,
+    });
+  });
+
+  it("the dossier opens with titles/angles/hook, and a selected title rides the exit", async () => {
+    const user = userEvent.setup();
+    render(<TrendsTab />);
+    await screen.findByText(/demo dataset/i);
+
+    const card = screen.getByTestId("trend-card-demo-trend-1");
+    await user.click(within(card).getByText(/dossier/i));
+    expect(within(card).getByText(fixtureTrendCards[0].dossier.hook, { exact: false })).toBeInTheDocument();
+
+    // Pick the second ready title, then exit through → Post.
+    await user.click(
+      within(card).getByRole("radio", { name: fixtureTrendCards[0].dossier.titles[1] }),
+    );
+    await user.click(within(card).getByRole("button", { name: /create post from this/i }));
+    await waitFor(() => expect(push).toHaveBeenCalled());
+    const capture = listIntelCaptures().at(-1)!;
+    expect(capture.payload).toMatchObject({
+      family: "post",
+      title: fixtureTrendCards[0].dossier.titles[1],
+    });
+  });
+
+  it("stamps the sweep cadence honestly — demo mode names what arms it, sweep-now is disabled", async () => {
+    render(<TrendsTab />);
+    await screen.findByText(/demo dataset/i);
+
+    expect(screen.getByText(/last swept/i)).toBeInTheDocument();
+    expect(screen.getByText(/sweeps every 4h once live polling arms \(B6\.5\)/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /sweep now/i })).toBeDisabled();
   });
 
   it("adds a monitored area through the manager and shows it with a zero-card chip", async () => {

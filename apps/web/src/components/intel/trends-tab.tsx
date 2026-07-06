@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AreasManager } from "@/components/intel/areas-manager";
+import { CadenceStamp } from "@/components/intel/cadence-stamp";
 import { DemoBanner } from "@/components/intel/demo-banner";
 import { TrendCard } from "@/components/intel/trend-card";
 import { cn } from "@/lib/utils";
@@ -71,6 +72,8 @@ export function TrendsTab() {
       {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load trends.</p>}
       {status === "success" && payload && (
         <>
+          <CadenceStamp sweep={payload.sweep} demo={payload.demo} />
+
           <AreasManager
             areas={payload.areas}
             busy={busy}
@@ -120,9 +123,9 @@ export function TrendsTab() {
                   key={card.id}
                   card={card}
                   busy={busy}
-                  onPromote={(cardId) =>
+                  onPromote={(cardId, pick) =>
                     withBusy(async () => {
-                      const { createHref } = await promoteTrend(cardId);
+                      const { createHref } = await promoteTrend(cardId, pick);
                       router.push(createHref);
                     })
                   }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fixtureSweep } from "@/lib/intel/fixtures";
 import { toAreaRow } from "@/lib/intel/serialize";
 import { listTrendCards } from "@/lib/intel/store";
 import { getRepos } from "@/lib/repos";
@@ -23,5 +24,6 @@ export async function GET() {
     areas: areas.map(toAreaRow),
     cards: listTrendCards(),
     demo: true,
+    sweep: fixtureSweep,
   });
 }

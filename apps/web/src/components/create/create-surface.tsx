@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, FileText, Globe, Video } from "lucide-react";
+import { ArrowRight, FileText, Globe, Sparkles, Video, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CreateContext, CreateFamily } from "@/lib/intel/types";
 import { cn } from "@/lib/utils";
 
-export type CreateFamily = "post" | "video" | "page";
+export type { CreateFamily } from "@/lib/intel/types";
 
 interface CreateSurfaceProps {
-  /** Prompt seed handed over by Intel ("generate from this" / "target this") or the omnibox. */
+  /** Prompt seed handed over by the omnibox (?prompt=) — the legacy text door. */
   initialPrompt: string;
-  /** Keyword context from the Search tab — rides into generation as a search target. */
+  /** Keyword context from a ?keyword= deep link (legacy door; ctx carries it now). */
   initialKeyword: string;
   /** Family pre-pick from the omnibox heuristic — the picker stays changeable. */
   initialFamily?: CreateFamily;
+  /** The structured intel context behind a capture id (wave-3 §3) — null when absent/expired. */
+  context?: CreateContext | null;
 }
 
 const FAMILIES = [
@@ -40,18 +43,46 @@ const FAMILIES = [
   },
 ];
 
+/** The chip-renderable slice of the context, in display order. */
+const CHIP_FIELDS = [
+  { key: "title", label: "title" },
+  { key: "angle", label: "angle" },
+  { key: "hook", label: "hook" },
+  { key: "areaName", label: "area" },
+  { key: "keyword", label: "keyword" },
+  { key: "text", label: "source text" },
+] as const;
+
+type ChipKey = (typeof CHIP_FIELDS)[number]["key"];
+
 /**
- * Create (B6.2): prompt-first entry to the three families. The live
- * origination wiring is B6.6 — until it lands, video routes into the staged
- * demo flow (fake drivers, zero spend, reachable in the queue) and
- * post/page state their seam honestly instead of dead-ending. The prompt
- * box is the omnibox's landing target, pre-seeded by Intel handoffs.
+ * Create (B6.2, wave-3 context spine): prompt-first entry to the three
+ * families. An intel handoff arrives as a capture id whose context renders
+ * as REMOVABLE chips — the operator sees exactly what flows into
+ * generation and can prune it; nothing is ever retyped. The live
+ * origination wiring is B6.6 — until it lands, video routes into the
+ * staged demo flow and post/page state their seam honestly.
  */
-export function CreateSurface({ initialPrompt, initialKeyword, initialFamily }: CreateSurfaceProps) {
-  const [prompt, setPrompt] = useState(initialPrompt);
+export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, context }: CreateSurfaceProps) {
+  // Pre-fill, never re-ask: the picked title becomes the working title.
+  const [prompt, setPrompt] = useState(initialPrompt || context?.title || "");
   const [family, setFamily] = useState<CreateFamily>(
-    initialFamily ?? (initialPrompt || initialKeyword ? "post" : "video"),
+    initialFamily ??
+      context?.family ??
+      (initialPrompt || initialKeyword ? "post" : "video"),
   );
+  const [chips, setChips] = useState<Array<{ key: ChipKey; label: string; value: string }>>(() =>
+    context
+      ? CHIP_FIELDS.flatMap(({ key, label }) => {
+          const value = context[key];
+          return typeof value === "string" && value.length > 0 ? [{ key, label, value }] : [];
+        })
+      : [],
+  );
+
+  function removeChip(key: ChipKey) {
+    setChips((current) => current.filter((chip) => chip.key !== key));
+  }
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
@@ -71,7 +102,49 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily }: 
             placeholder="e.g. Announce the staged video flow — why deterministic beats timeline editors"
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           />
-          {initialKeyword && (
+
+          {chips.length > 0 && (
+            <div aria-label="Intel context" className="flex flex-col gap-1.5 rounded-lg border border-border bg-muted/40 p-2.5">
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Sparkles aria-hidden className="size-3.5 text-primary" />
+                Intel context — rides into generation; remove anything you don&rsquo;t want.
+                {typeof context?.score === "number" && (
+                  <span className="u-tabular ml-auto font-medium text-signal" title="Rank score for this area (0–1)">
+                    score {context.score.toFixed(2)}
+                  </span>
+                )}
+              </p>
+              <ul className="flex flex-wrap gap-1.5">
+                {chips.map((chip) => (
+                  <li
+                    key={chip.key}
+                    className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-background py-1 pr-1 pl-2.5 text-xs"
+                  >
+                    <span className="u-eyebrow shrink-0 text-muted-foreground">{chip.label}</span>
+                    <span className="truncate">{chip.value}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${chip.label} from the context`}
+                      onClick={() => removeChip(chip.key)}
+                      className="rounded-full p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      <X aria-hidden className="size-3" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {context?.sourceUrl && (
+                <p className="text-xs text-muted-foreground">
+                  provenance:{" "}
+                  <a href={context.sourceUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                    original item
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
+          {initialKeyword && chips.length === 0 && (
             <p className="flex items-center gap-2 text-xs text-muted-foreground">
               Search context from Intel:
               <Badge variant="outline" className="font-mono">{initialKeyword}</Badge>

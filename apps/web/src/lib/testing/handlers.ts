@@ -1,14 +1,15 @@
 import { http, HttpResponse } from "msw";
 import { fixtureDraftDetails, fixtureDraftsByRun, fixtureRuns } from "@/lib/approve-queue/fixtures";
-import { fixtureHorizonCards } from "@/lib/intel/fixtures";
+import { fixtureHorizonCards, fixtureSweep } from "@/lib/intel/fixtures";
 import {
   dismissTrendCard,
   IntelStoreError,
   listTrendCards,
   promoteTrendCard,
+  resolveCreateContext,
   targetSearchQuery,
 } from "@/lib/intel/store";
-import type { AreaRow, TargetRow } from "@/lib/intel/types";
+import type { AreaRow, CreateFamily, TargetRow } from "@/lib/intel/types";
 import type { ProfileHistoryEntry, ProfileWire } from "@/lib/profiles/types";
 import { fixtureActivity, fixturePulse, fixtureStatus } from "@/lib/workspace/fixtures";
 import { parseStagedEditRequest, parseStagedPickRequest, runStaged } from "@/lib/staged-flow/http";
@@ -86,7 +87,7 @@ export const handlers = [
     return HttpResponse.json({ area });
   }),
   http.get("/api/intel/trends", () =>
-    HttpResponse.json({ areas: testAreas, cards: listTrendCards(), demo: true }),
+    HttpResponse.json({ areas: testAreas, cards: listTrendCards(), demo: true, sweep: fixtureSweep }),
   ),
   http.post("/api/intel/trends/:cardId/dismiss", ({ params }) => {
     try {
@@ -95,12 +96,17 @@ export const handlers = [
       return intelError(err);
     }
   }),
-  http.post("/api/intel/trends/:cardId/promote", ({ params }) => {
+  http.post("/api/intel/trends/:cardId/promote", async ({ params, request }) => {
     try {
-      const { capture, promptSeed } = promoteTrendCard(params.cardId as string);
+      const body = (await request.json()) as {
+        family: CreateFamily;
+        titleIndex?: number;
+        angleIndex?: number;
+      };
+      const { capture } = promoteTrendCard(params.cardId as string, body);
       return HttpResponse.json({
         capture,
-        createHref: `/app/create?prompt=${encodeURIComponent(promptSeed)}`,
+        createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,
       });
     } catch (err) {
       return intelError(err);
@@ -135,6 +141,13 @@ export const handlers = [
   http.get("/api/intel/search/horizon", () =>
     HttpResponse.json({ cards: fixtureHorizonCards, demo: true }),
   ),
+  http.get("/api/intel/context/:captureId", ({ params }) => {
+    try {
+      return HttpResponse.json({ context: resolveCreateContext(params.captureId as string) });
+    } catch (err) {
+      return intelError(err);
+    }
+  }),
 
   // Profiles (B6.2): the real route versions through the repo; the emulation
   // keeps the same save-is-a-new-active-version semantics.
@@ -168,11 +181,11 @@ export const handlers = [
     return HttpResponse.json({ profile: testProfile }, { status: 201 });
   }),
   http.post("/api/intel/search/target-this", async ({ request }) => {
-    const body = (await request.json()) as { query: string };
-    const { capture, promptSeed } = targetSearchQuery(body.query);
+    const body = (await request.json()) as { query: string; family?: CreateFamily };
+    const { capture } = targetSearchQuery(body.query, body.family);
     return HttpResponse.json({
       capture,
-      createHref: `/app/create?keyword=${encodeURIComponent(promptSeed)}`,
+      createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,
     });
   }),
 

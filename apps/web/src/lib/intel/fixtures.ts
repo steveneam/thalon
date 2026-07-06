@@ -1,4 +1,4 @@
-import type { HorizonCard, TrendCard } from "./types";
+import type { HorizonCard, SweepStamp, TrendCard } from "./types";
 
 /**
  * The Intel demo dataset (B6.2): deterministic fixture cards so the surface
@@ -21,6 +21,18 @@ function iso(offsetHours: number): string {
   return new Date(BASE_MS + offsetHours * 3_600_000).toISOString();
 }
 
+/**
+ * The Intel header cadence stamp (wave-3 §3.7). Demo-honest: lastSweptAt is
+ * the fixture dataset's stamp, intervalHours is the cadence live polling
+ * will run at, and nextSweepAt stays null — there IS no next sweep until
+ * B6.5 arms the pollers, and the stamp says so instead of faking one.
+ */
+export const fixtureSweep: SweepStamp = {
+  lastSweptAt: iso(0),
+  intervalHours: 4,
+  nextSweepAt: null,
+};
+
 export const fixtureTrendCards: TrendCard[] = [
   {
     id: "demo-trend-1",
@@ -42,6 +54,20 @@ export const fixtureTrendCards: TrendCard[] = [
     shareToView: 0.025,
     bookmarkToView: 0.042,
     metrics: { views: 27_692, shares: 692, bookmarks: 1_163 },
+    dossier: {
+      titles: [
+        "We put an approval gate on an AI content agent — here's what it caught",
+        "One week of agent-drafted updates: the numbers behind the approval queue",
+        "Why 'let the agent post' fails and 'let the agent draft' works",
+        "The approval queue is the feature: lessons from a week of AI drafts",
+      ],
+      angles: [
+        "Run the same experiment on your own updates and publish the catch-rate",
+        "The gate as the product: what a judge should block before you ever see it",
+        "Cost angle: what a week of drafts costs vs an hour of your review",
+      ],
+      hook: "An agent drafted every update for a week. The interesting number is what didn't ship.",
+    },
   },
   {
     id: "demo-trend-2",
@@ -62,6 +88,18 @@ export const fixtureTrendCards: TrendCard[] = [
     shareToView: 0.018,
     bookmarkToView: 0.028,
     metrics: { views: 9_410, shares: 169, bookmarks: 263 },
+    dossier: {
+      titles: [
+        "Grounded generation, explained: how claims get tied to sources",
+        "AI content that cites its receipts — the mechanics of grounding",
+        "Spam with extra steps? A test for whether your AI content is grounded",
+      ],
+      angles: [
+        "Demonstrate a grounded vs ungrounded draft side by side on the same prompt",
+        "Take the contrarian claim seriously: which AI content features actually matter",
+      ],
+      hook: "If your AI can't say where a claim came from, it isn't writing — it's guessing.",
+    },
   },
   {
     id: "demo-trend-3",
@@ -83,6 +121,20 @@ export const fixtureTrendCards: TrendCard[] = [
     shareToView: 0.031,
     bookmarkToView: 0.05,
     metrics: { views: 24_631, shares: 764, bookmarks: 1_232 },
+    dossier: {
+      titles: [
+        "Video as a build step: rendering launch clips from HTML",
+        "No timeline, no export queue — what deterministic video pipelines change",
+        "We treated our launch video like code. Here's the pipeline",
+        "HTML-to-video is real now: the toolchain behind build-step rendering",
+      ],
+      angles: [
+        "Show your own render pipeline end to end — prompt to playable file",
+        "Editor-vs-pipeline: when a timeline tool wins and when a build step does",
+        "Reproducibility angle: same input, same video, every render",
+      ],
+      hook: "Our launch video has no editor file. It has a build step.",
+    },
   },
   {
     id: "demo-trend-4",
@@ -102,6 +154,18 @@ export const fixtureTrendCards: TrendCard[] = [
     shareToView: 0.012,
     bookmarkToView: 0.024,
     metrics: { views: 5_113, shares: 61, bookmarks: 123 },
+    dossier: {
+      titles: [
+        "Word-level captions: the cheapest retention win in short-form",
+        "Muted-feed math: why animated captions carry engagement",
+        "The caption recipe: word timing from transcript to screen",
+      ],
+      angles: [
+        "Benchmark the claim: the same clip with and without word-level captions",
+        "The accessibility case that also happens to be the growth case",
+      ],
+      hook: "Most of your viewers can't hear your video. Captions are the soundtrack.",
+    },
   },
 ];
 
