@@ -48,6 +48,22 @@ const envSchema = z.object({
   /** B4.8 hosted-vendor adapter (keyed runtime config with a swap path — no vendor named in code; live runs are pass 3). */
   TRANSCRIPT_VENDOR_URL: z.string().optional(),
   TRANSCRIPT_VENDOR_API_KEY: z.string().optional(),
+  /**
+   * B6.7 workspace gate (ADR 0007 decision 4, invariant): `user:password`
+   * for the app-level basic-auth proxy over every non-public route. Unset
+   * in development = the dev auth stub (open workspace); unset in
+   * PRODUCTION = the workspace fails CLOSED (503), never open — the stub
+   * must never face the internet.
+   */
+  WORKSPACE_BASIC_AUTH: z.string().optional(),
+  /**
+   * B6.7 backup hook (ADR 0007 decision 5): bearer token the box's
+   * pre-backup step presents to POST /api/admin/db-dump. Unset = the hook
+   * 503s (fail closed) — it is never open, and the workspace basic-auth
+   * gate deliberately exempts the route because THIS gate is the stronger,
+   * machine-to-machine one.
+   */
+  DB_DUMP_TOKEN: z.string().optional(),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;
