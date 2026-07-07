@@ -93,11 +93,10 @@ export function FeatureShowcase() {
               </button>
             </div>
             <div className="h-64 bg-background/40 sm:h-72">
-              <FeatureLoop feature={open.key} />
+              <FeatureLoop feature={open.key} controls />
             </div>
             <p className="border-t px-5 py-3 text-xs leading-5 text-muted-foreground">
-              Placeholder loop — the finished demo here will be a video of this feature working,
-              rendered by Thalon itself.
+              Rendered with Thalon&apos;s own engine — unmute to hear the narration.
             </p>
           </div>
         )}
