@@ -6,9 +6,11 @@ import { SITE_TAGLINE, SITE_URL } from "@/lib/site";
  * llms.txt (A13 AEO/GEO pack, docs/FRONTEND.md §4): the answer-engine
  * summary of the site, generated from the SAME copy module as the page so
  * the claims can never drift apart — and the SAME content module as /blog
- * for the article index (§9). Prerendered at build (force-static).
+ * for the article index (§9). Rendered per request since B6.7 (ADR 0007):
+ * the article index includes engine-published posts, which are runtime
+ * data a build-baked response would omit forever.
  */
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function GET(): Promise<Response> {
   const faqLines = FAQ.map((f) => `- ${f.question} ${f.answer}`).join("\n");

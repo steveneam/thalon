@@ -10,8 +10,12 @@ import { BLOG_TAGLINE, BLOG_TITLE, listPosts } from "@/lib/blog/posts";
  * posts join the same list through the ARMED posts-bundle read
  * (lib/blog/live.ts). Cards are era-blind by design. Rendered per request
  * (engine posts are runtime data — a publish must show up without a
- * rebuild); the B6.7 deploy upgrades this to revalidate-on-publish at the
- * own-site door, and the landing `/` stays static regardless.
+ * rebuild). B6.7 decision (ADR 0007): per-request STAYS the index's mode —
+ * on the long-lived VPS process it is cheap and always honest, where
+ * static-plus-revalidate would serve seed-only pages after every fresh
+ * image deploy until the next publish. Revalidate-on-publish covers the one
+ * cached surface instead: the on-demand `/blog/[slug]` render (see the
+ * publish route). The landing `/` stays static regardless.
  */
 export const dynamic = "force-dynamic";
 

@@ -118,6 +118,32 @@ describe("FormatDetail", () => {
     expect(screen.getByText(/pages: https:\/\/example\.com/)).toBeInTheDocument();
   });
 
+  it("renders web_page title/description, deploy badge, and the deployRef link once deployed", () => {
+    const webPage = draft("d5", "run-1", "web", "Judged pipelines", "approved", "hash-page", {
+      format: "web_page",
+      meta: {
+        title: "Judged pipelines",
+        description: "Why judged pipelines beat unguarded generation.",
+        htmlRef: "web-pages/abc123.html",
+        groundingSourceIds: ["src-1"],
+        promptVersion: "web-page-generate.v1",
+        brandProfileVersion: 1,
+        platformProfileVersion: "web.v1",
+        deployStatus: "deployed",
+        deployRef: "/blog/judged-pipelines",
+      },
+    });
+    render(<FormatDetail draft={webPage} />);
+    expect(screen.getByLabelText("Web page detail")).toBeInTheDocument();
+    expect(screen.getByText("deploy: deployed")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "/blog/judged-pipelines" })).toHaveAttribute(
+      "href",
+      "/blog/judged-pipelines",
+    );
+    expect(screen.getByText("Judged pipelines")).toBeInTheDocument();
+    expect(screen.getByText("web-pages/abc123.html")).toBeInTheDocument();
+  });
+
   it("renders exemplar provenance for an exemplar-aware plain draft", () => {
     const exemplarAware = draft("d4", "run-1", "linkedin", "A grounded post.", "queued", "hash-exemplar", {
       meta: { exemplarIds: [{ sourceId: "src-1", chunkId: "chunk-1" }] },

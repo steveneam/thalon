@@ -1,5 +1,10 @@
 import type { TenantCtx } from "@thalon/contracts";
 import type { Approval, Draft, Repos } from "@thalon/db";
+import {
+  publishWebPageToSite,
+  type PublishWebPageDeps,
+  type PublishWebPageResult,
+} from "@thalon/engine";
 import { runJudgeOnDraft, type JudgeRunnerDeps } from "./judge-runner";
 
 export interface ActionResult {
@@ -81,4 +86,24 @@ export async function reJudgeDraft(
   const judging = await repos.drafts.reJudge(ctx, draftId, { actor });
   const outcome = await runJudgeOnDraft(repos, ctx, judging, judgeDeps);
   return { draft: outcome.draft };
+}
+
+/**
+ * B6.7: the queue's post-approval publish touch for `web_page` drafts — the
+ * own-site door (engine `publishWebPageToSite`: approved-only gate,
+ * content-address-verified artifact read, posts-bundle upsert). Not an
+ * approval action — the draft stays `approved` (republishable) and the
+ * deploy truth lives in its meta (`deployStatus`/`deployRef`), so this never
+ * rides `approvals.record`. A target failure is recorded on the draft by the
+ * engine and returned as `status:"failed"` — the route surfaces it loudly.
+ */
+export async function publishApprovedPage(
+  repos: Repos,
+  ctx: TenantCtx,
+  draftId: string,
+  nowMs: number,
+  tags?: string[],
+  deps: PublishWebPageDeps = {},
+): Promise<PublishWebPageResult> {
+  return publishWebPageToSite(ctx, repos, { draftId, nowMs, tags }, deps);
 }

@@ -1,4 +1,4 @@
-import type { ActionResult, DraftDetail, FeedRun, GridDraft, ReJudgeResult } from "./types";
+import type { ActionResult, DraftDetail, FeedRun, GridDraft, PublishResult, ReJudgeResult } from "./types";
 
 /** On failure, surfaces the route's own `{ error }` message (toErrorResponse) rather than a bare status code — judge/transition failures must fail LOUDLY and legibly for the operator. Shared with the staged-flow client (same convention, same seam). */
 export async function asJson<T>(res: Response): Promise<T> {
@@ -53,4 +53,9 @@ export async function editDraft(draftId: string, editedBody: string): Promise<Ac
 export async function reJudgeDraft(draftId: string): Promise<ReJudgeResult> {
   const res = await fetch(`/api/drafts/${draftId}/rejudge`, { method: "POST" });
   return asJson<ReJudgeResult>(res);
+}
+
+export async function publishDraft(draftId: string): Promise<PublishResult> {
+  const res = await fetch(`/api/drafts/${draftId}/publish`, { method: "POST" });
+  return asJson<PublishResult>(res);
 }

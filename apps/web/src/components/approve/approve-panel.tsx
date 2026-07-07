@@ -20,10 +20,11 @@ interface ApprovePanelProps {
   onReject: () => void;
   onEditSave: (editedBody: string) => void;
   onReJudge: () => void;
+  onPublish: () => void;
 }
 
 /** Zone 3: full body, per-variant judge badge, and the approve / reject / edit / re-judge actions. */
-export function ApprovePanel({ status, draft, judgeResults, busy, actionError, onApprove, onReject, onEditSave, onReJudge }: ApprovePanelProps) {
+export function ApprovePanel({ status, draft, judgeResults, busy, actionError, onApprove, onReject, onEditSave, onReJudge, onPublish }: ApprovePanelProps) {
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
 
@@ -66,6 +67,10 @@ export function ApprovePanel({ status, draft, judgeResults, busy, actionError, o
   // halt — e.g. a budget cap, not a verdict — may have stranded there with no
   // other way back; see repos.drafts.reJudge).
   const canReJudge = draft.status === "blocked" || draft.status === "judging";
+  // Publish (B6.7) = the own-site door: web_page only, approved only (the
+  // engine re-checks both). The draft STAYS approved after — republish is
+  // legal by design, so the button never disables on deploy state.
+  const canPublish = draft.status === "approved" && draft.format === "web_page";
 
   function startEdit() {
     setEditedBody(draft!.body);
@@ -119,6 +124,11 @@ export function ApprovePanel({ status, draft, judgeResults, busy, actionError, o
             <Button size="sm" variant="outline" onClick={onReJudge} disabled={busy || !canReJudge}>
               Re-judge
             </Button>
+            {canPublish && (
+              <Button size="sm" onClick={onPublish} disabled={busy}>
+                Publish to site
+              </Button>
+            )}
           </>
         )}
       </div>

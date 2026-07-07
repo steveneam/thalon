@@ -23,3 +23,10 @@ export interface ActionResult {
 export interface ReJudgeResult {
   draft: GridDraft;
 }
+
+/** Publish (B6.7, web_page only) doesn't touch the approvals table either — the draft stays `approved`; deploy truth lands in its meta. */
+export interface PublishResult {
+  slug: string;
+  url: string;
+  draft: GridDraft;
+}

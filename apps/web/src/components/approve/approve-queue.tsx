@@ -12,6 +12,7 @@ import {
   fetchDraftDetail,
   fetchRunDrafts,
   fetchRunsFeed,
+  publishDraft,
   reJudgeDraft,
   rejectDraft,
 } from "@/lib/approve-queue/client";
@@ -256,6 +257,7 @@ export function ApproveQueue() {
               onReject={() => selectedDraftId && withBusy(() => rejectDraft(selectedDraftId))}
               onEditSave={(body) => selectedDraftId && withBusy(() => editDraft(selectedDraftId, body))}
               onReJudge={() => selectedDraftId && withBusy(() => reJudgeDraft(selectedDraftId))}
+              onPublish={() => selectedDraftId && withBusy(() => publishDraft(selectedDraftId))}
             />
           </>
         )}

@@ -2,7 +2,13 @@ import type { MetadataRoute } from "next";
 import { listPosts } from "@/lib/blog/posts";
 import { SITE_URL } from "@/lib/site";
 
-/** `/` + the blog surfaces (§9: the sitemap auto-extends from the same content module). */
+/**
+ * `/` + the blog surfaces (§9: the sitemap auto-extends from the same
+ * content module). Per request since B6.7 (ADR 0007): sitemap.ts is cached
+ * at build by default, which would omit engine-published posts forever.
+ */
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await listPosts();
   return [

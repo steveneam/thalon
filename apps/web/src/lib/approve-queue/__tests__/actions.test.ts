@@ -1,12 +1,22 @@
-import { BudgetExceededError } from "@thalon/db";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { FINAL_JUDGE_GATE, webPageDraftMetaSchema } from "@thalon/contracts";
+import { BudgetExceededError, sha256Hex } from "@thalon/db";
+import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
-import { approveDraft, editDraft, reJudgeDraft, rejectDraft } from "../actions";
+import { approveDraft, editDraft, publishApprovedPage, reJudgeDraft, rejectDraft } from "../actions";
 import { fixedJudgeDriver, JUDGE_FAIL, JUDGE_PASS, seedDraft, type Seeded } from "./test-helpers";
 
 let seeded: Seeded | undefined;
+let storeRoot: string | undefined;
 afterEach(async () => {
   await seeded?.close();
   seeded = undefined;
+  if (storeRoot) {
+    rmSync(storeRoot, { recursive: true, force: true });
+    storeRoot = undefined;
+  }
 });
 
 /** Route logic asserted directly against real (PGlite) repos — the B0.4 test pattern — since route.ts files are thin wiring over these functions. */
@@ -199,5 +209,67 @@ describe("approve-queue actions", () => {
     await expect(reJudgeDraft(handle.repos, ctx, draft.id, "operator", deps)).rejects.toThrow(
       /blocked.*judging|judging.*blocked/i,
     );
+  });
+
+  it("publish puts an approved web_page draft through the own-site door: deploy meta flips, posts bundle upserts, draft STAYS approved", async () => {
+    seeded = await seedDraft();
+    const { handle, ctx, run, draft } = seeded;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-web-publish-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+
+    // Rebuild the seeded draft as an approved web_page draft with its
+    // artifact in the store (the engine publish tests' shape, web-side).
+    const html =
+      '<html lang="en"><head><title>Judged pipelines</title></head><body><h1>Judged pipelines</h1></body></html>';
+    const htmlRef = `web-pages/${sha256Hex(html)}.html`;
+    await objectStore.put(htmlRef, html);
+    const page = await handle.repos.drafts.create(ctx, {
+      fanoutRunId: run.id,
+      sourceId: draft.sourceId,
+      platform: "web",
+      body: "Judged pipelines",
+      format: "web_page",
+      generationKey: sha256Hex(`${ctx.tenantId}:publish-page`),
+      meta: webPageDraftMetaSchema.parse({
+        title: "Judged pipelines",
+        description: "Why judged pipelines beat unguarded generation.",
+        htmlRef,
+        groundingSourceIds: [draft.sourceId],
+        promptVersion: "web-page-generate.v1",
+        brandProfileVersion: 1,
+        platformProfileVersion: "web.v1",
+      }),
+    });
+    await handle.repos.drafts.transition(ctx, page.id, "judging");
+    await handle.repos.judgeResults.append(ctx, { draftId: page.id, gate: FINAL_JUDGE_GATE, verdict: "pass" });
+    await handle.repos.drafts.transition(ctx, page.id, "queued");
+    await handle.repos.drafts.transition(ctx, page.id, "approved");
+
+    const result = await publishApprovedPage(handle.repos, ctx, page.id, 1_751_900_000_000, ["thalon"], {
+      objectStore,
+    });
+    expect(result.status).toBe("published");
+    if (result.status !== "published") throw new Error("unreachable");
+    expect(result.slug).toBe("judged-pipelines");
+    expect(result.url).toBe("/blog/judged-pipelines");
+    expect(result.bundle.posts).toHaveLength(1);
+    expect(result.bundle.posts[0]).toMatchObject({ slug: "judged-pipelines", tags: ["thalon"] });
+
+    const after = await handle.repos.drafts.get(ctx, page.id);
+    expect(after.status).toBe("approved"); // republishable by design — deploy truth lives in meta
+    const meta = webPageDraftMetaSchema.parse(after.meta);
+    expect(meta.deployStatus).toBe("deployed");
+    expect(meta.deployRef).toBe("/blog/judged-pipelines");
+  });
+
+  it("publish refuses a non-web_page draft loudly (the engine's format gate surfaces through the action)", async () => {
+    seeded = await seedDraft();
+    const { handle, ctx, draft } = seeded;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-web-publish-"));
+    await expect(
+      publishApprovedPage(handle.repos, ctx, draft.id, 1_751_900_000_000, undefined, {
+        objectStore: new LocalObjectStore(storeRoot),
+      }),
+    ).rejects.toThrow(/web_page/);
   });
 });

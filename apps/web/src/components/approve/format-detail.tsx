@@ -12,6 +12,7 @@ import {
   type DemoPlanDraftMeta,
 } from "@/lib/approve-queue/formats/demo-plan";
 import { parseExemplarIds, type ExemplarId } from "@/lib/approve-queue/formats/exemplar";
+import { parseWebPageMeta, type WebPageDraftMeta } from "@/lib/approve-queue/formats/web-page";
 import { cn } from "@/lib/utils";
 import type { GridDraft } from "@/lib/approve-queue/types";
 
@@ -35,14 +36,16 @@ const CAPTURE_STATUS_VARIANT: Record<DemoPlanDraftMeta["captureStatus"], "outlin
 export function FormatDetail({ draft }: FormatDetailProps) {
   const clipPlan = draft.format === "clip_plan" ? parseClipPlanMeta(draft.meta) : null;
   const demoPlan = draft.format === "demo_plan" ? parseDemoPlanMeta(draft.meta) : null;
+  const webPage = draft.format === "web_page" ? parseWebPageMeta(draft.meta) : null;
   const exemplarIds = parseExemplarIds(draft.meta);
 
-  if (!clipPlan && !demoPlan && !exemplarIds) return null;
+  if (!clipPlan && !demoPlan && !webPage && !exemplarIds) return null;
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-2 text-sm">
       {clipPlan && <ClipPlanDetail meta={clipPlan} stale={expectedClipPlanBody(clipPlan) !== draft.body} />}
       {demoPlan && <DemoPlanDetail meta={demoPlan} stale={expectedDemoPlanBody(demoPlan) !== draft.body} />}
+      {webPage && <WebPageDetail meta={webPage} />}
       {exemplarIds && <ExemplarProvenance ids={exemplarIds} />}
     </div>
   );
@@ -119,6 +122,38 @@ function DemoPlanDetail({ meta, stale }: { meta: DemoPlanDraftMeta; stale: boole
       </table>
       {/* pageUrls are the crawl's own provenance, not narration-derived — stay true regardless of copy edits. */}
       <p className="text-[11px] text-muted-foreground">pages: {meta.pageUrls.join(", ")}</p>
+    </div>
+  );
+}
+
+const DEPLOY_STATUS_VARIANT: Record<WebPageDraftMeta["deployStatus"], "outline" | "default" | "destructive"> = {
+  drafted: "outline",
+  deployed: "default",
+  failed: "destructive",
+};
+
+/** B6.7: the web_page panel context — page identity + the LATEST deploy's truth (deployStatus/deployRef ride the meta, not the draft status). */
+function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
+  return (
+    <div className="flex flex-col gap-2" aria-label="Web page detail">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant={DEPLOY_STATUS_VARIANT[meta.deployStatus]}>deploy: {meta.deployStatus}</Badge>
+        {meta.deployRef && (
+          <a
+            href={meta.deployRef}
+            className="font-mono text-[11px] text-primary underline-offset-2 hover:underline"
+          >
+            {meta.deployRef}
+          </a>
+        )}
+      </div>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+        <dt className="font-medium text-muted-foreground">Title</dt>
+        <dd className="text-foreground">{meta.title}</dd>
+        <dt className="font-medium text-muted-foreground">Description</dt>
+        <dd className="text-foreground">{meta.description}</dd>
+      </dl>
+      <p className="font-mono text-[11px] text-muted-foreground">{meta.htmlRef}</p>
     </div>
   );
 }

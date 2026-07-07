@@ -14,10 +14,10 @@ import { postsBundleSchema } from "./types";
  *
  * ARMED at the wave-3.5 merge train (the engine export is on main): the
  * read degrades to [] on ANY failure — a malformed bundle or a boot error
- * must never take down /blog, which always has its seed posts. Feed routes
- * (rss/llms.txt/sitemap) stay force-static, so they bake seed posts at
- * build; engine posts reach them when the B6.7 deploy lands its
- * revalidation story (revalidate-on-publish at the own-site door).
+ * must never take down /blog, which always has its seed posts. Since B6.7
+ * (ADR 0007) the feed routes (rss/llms.txt/sitemap) render per request from
+ * this same read, so engine posts reach them immediately; the publish route
+ * revalidates the one cached surface, the on-demand `/blog/[slug]` page.
  */
 export async function readEnginePosts(): Promise<BlogPostCard[]> {
   try {

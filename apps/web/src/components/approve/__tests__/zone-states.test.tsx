@@ -49,17 +49,17 @@ describe("zone loading / empty / error states", () => {
   it("approve panel: idle, loading, error", () => {
     const noop = () => {};
     const { rerender } = render(
-      <ApprovePanel status="idle" draft={null} judgeResults={[]} onApprove={noop} onReject={noop} onEditSave={noop} onReJudge={noop} />,
+      <ApprovePanel status="idle" draft={null} judgeResults={[]} onApprove={noop} onReject={noop} onEditSave={noop} onReJudge={noop} onPublish={noop} />,
     );
     expect(screen.getByText(/Select a draft/i)).toBeInTheDocument();
 
     rerender(
-      <ApprovePanel status="loading" draft={null} judgeResults={[]} onApprove={noop} onReject={noop} onEditSave={noop} onReJudge={noop} />,
+      <ApprovePanel status="loading" draft={null} judgeResults={[]} onApprove={noop} onReject={noop} onEditSave={noop} onReJudge={noop} onPublish={noop} />,
     );
     expect(screen.getByText(/Loading draft/i)).toBeInTheDocument();
 
     rerender(
-      <ApprovePanel status="error" draft={null} judgeResults={[]} onApprove={noop} onReject={noop} onEditSave={noop} onReJudge={noop} />,
+      <ApprovePanel status="error" draft={null} judgeResults={[]} onApprove={noop} onReject={noop} onEditSave={noop} onReJudge={noop} onPublish={noop} />,
     );
     expect(screen.getByText(/Couldn.t load this draft/i)).toBeInTheDocument();
   });

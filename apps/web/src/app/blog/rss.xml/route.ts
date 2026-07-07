@@ -4,11 +4,14 @@ import { SITE_URL } from "@/lib/site";
 /**
  * The blog RSS feed (§9): answer engines and LLM crawlers consume feeds
  * well, and it is nearly free — built from the SAME content module as the
- * pages (the llms.txt precedent). Prerendered at build (force-static);
- * lastBuildDate is the newest post's date, deliberately not "now", so the
- * feed bytes only change when the content does.
+ * pages (the llms.txt precedent). Rendered per request since B6.7 (ADR
+ * 0007): engine-published posts are runtime data, and force-static baked
+ * seed-only bytes at build — stale forever on the long-lived VPS process.
+ * Bytes stay content-determined regardless (lastBuildDate is the newest
+ * post's date, deliberately not "now"), so unchanged content still serves
+ * unchanged bytes.
  */
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 function xmlEscape(value: string): string {
   return value
