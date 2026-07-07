@@ -36,6 +36,14 @@ export {
   type VideoUrlIngestRequest,
   type VideoUrlIngestResult,
 } from "./ingest-video-url";
+export { youTubeOEmbedTitleFetcher, type FetchLike, type VideoTitleFetcher } from "./video-title";
+export {
+  centroid,
+  scoreAreaRelevance,
+  type AreaRelevance,
+  type AreaRelevanceDeps,
+  type AreaRelevanceInput,
+} from "./area-relevance";
 export {
   crawl4aiDriver,
   parseCrawl4aiOutput,
