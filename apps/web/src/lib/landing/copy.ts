@@ -97,6 +97,54 @@ export const STEPS = [
   },
 ] as const;
 
+/**
+ * §8.2 honest proof band — a pre-launch product has no logos or
+ * testimonials to show, so the band shows engineering facts instead, each
+ * one checkable in this repository or its CI (honest-claims rule, ADR
+ * 0006): the test-suite floor is CI-verified (818+ on main as of
+ * 2026-07-07 — stated as 800+ so the claim only grows truer), the $0
+ * demo-render cost is the recorded B6.3 result, the six platforms are the
+ * FAQ's drafting list verbatim, and zero-without-a-click is the
+ * architecture itself.
+ */
+export interface Stat {
+  value: string;
+  label: string;
+}
+
+export const STATS: Stat[] = [
+  { value: "800+", label: "automated tests gate every change we ship" },
+  { value: "$0", label: "render cost for the demo videos Thalon made of itself" },
+  { value: "6", label: "platforms drafted for at launch" },
+  { value: "0", label: "posts ever shipped without a human click" },
+];
+
+/**
+ * §5 "old way vs new way" strip — the honest two-column: every left-side
+ * pain is generic reality, every right-side line describes something the
+ * product actually does today (watching = official-API trend sweeps;
+ * context carry = the intel→create capture handoff; the judge gate).
+ */
+export const OLD_WAY = {
+  title: "The old way",
+  items: [
+    "Watch every platform yourself and hope you catch what's rising",
+    "Rewrite the same announcement five times, once per platform",
+    "Copy context between tools that forget it instantly",
+    "Publish and pray nobody checks the claim your AI invented",
+  ],
+};
+
+export const NEW_WAY = {
+  title: "With Thalon",
+  items: [
+    "Describe your topics once — Thalon watches them and explains why something's moving",
+    "One prompt fans out into posts, video scripts, and pages",
+    "Context flows from trend card to draft — you never retype it",
+    "A judge checks every claim against your sources before you ever see the draft",
+  ],
+};
+
 export interface Tier {
   name: string;
   audience: string;

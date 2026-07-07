@@ -1,8 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { JoinResult } from "@/lib/waitlist/join";
 import { SPOTS_PER_REFERRAL } from "@/lib/waitlist/position";
+
+/**
+ * §8.4 micro-interaction (2 of 2): the queue position counts up to its
+ * real value on reveal — the number is the payoff of signing up, so it
+ * gets the one beat of ceremony. Snaps straight to the value under
+ * prefers-reduced-motion (and in environments without matchMedia/rAF).
+ */
+function CountUp({ value }: { value: number }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (
+      typeof window.matchMedia !== "function" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typeof requestAnimationFrame !== "function"
+    ) {
+      setShown(value);
+      return;
+    }
+    const durationMs = 900;
+    const start = performance.now();
+    let raf = requestAnimationFrame(function tick(now: number) {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - (1 - t) ** 3;
+      setShown(Math.round(eased * value));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{shown}</>;
+}
 
 type FormState =
   | { phase: "idle" | "busy" }
@@ -61,8 +91,10 @@ export function WaitlistForm({ id }: { id: string }) {
       >
         <p className="font-semibold">
           {result.created ? "You're in." : "Welcome back."} You&apos;re{" "}
-          <span className="u-tabular text-primary">#{result.effectivePosition}</span> of{" "}
-          <span className="u-tabular">{result.total}</span> in line.
+          <span className="u-tabular text-primary">
+            #<CountUp value={result.effectivePosition} />
+          </span>{" "}
+          of <span className="u-tabular">{result.total}</span> in line.
         </p>
         <p className="mt-1.5 leading-6 text-muted-foreground">
           Skip the line: every signup from your link moves you up {SPOTS_PER_REFERRAL} spots
@@ -108,7 +140,7 @@ export function WaitlistForm({ id }: { id: string }) {
         <button
           type="submit"
           disabled={state.phase === "busy"}
-          className="h-11 shrink-0 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[0_0_28px_-6px] shadow-primary/50 transition-opacity hover:opacity-85 disabled:opacity-50"
+          className="cta-glare h-11 shrink-0 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[0_0_28px_-6px] shadow-primary/50 transition-opacity hover:opacity-85 disabled:opacity-50"
         >
           {state.phase === "busy" ? "Joining…" : "Join the waitlist"}
         </button>

@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
-import { BrandLockup } from "@/components/brand/marks";
 import { FeatureShowcase } from "@/components/landing/feature-showcase";
 import { HeroVignette } from "@/components/landing/hero-vignette";
 import { FaqJsonLd, OrganizationJsonLd } from "@/components/landing/json-ld";
+import { SiteFooter } from "@/components/landing/site-footer";
+import { SiteHeader } from "@/components/landing/site-header";
 import { StickyCta } from "@/components/landing/sticky-cta";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
-import { FAQ, STEPS, TIERS } from "@/lib/landing/copy";
+import { FAQ, NEW_WAY, OLD_WAY, STATS, STEPS, TIERS } from "@/lib/landing/copy";
 
 /**
- * The landing page (B6.1, docs/FRONTEND.md §2): founder's four sections +
- * the [+] conversion mechanics, statically prerendered — no dynamic API is
- * touched anywhere in this tree, so the whole page ships as the SSG shell;
- * client JS is limited to the waitlist forms, the feature modal, and the
- * sticky CTA (the vignette is pure CSS). Copy follows the manual keyword
- * pass (proprietary/prompts/keyword-manual-pass.md) and the honest-claims
- * rule (ADR 0006 §5).
+ * The landing page (B6.1 + the §8 uplift, docs/FRONTEND.md §2): founder's
+ * four sections + the [+] conversion mechanics, statically prerendered —
+ * no dynamic API is touched anywhere in this tree, so the whole page ships
+ * as the SSG shell. The client-JS budget is the consciously amended one
+ * (workspace-ux-v2.md §8.1): forms + modal + sticky + ONE hero moment —
+ * and the hero moment (split headline + drifting depth layer) is pure CSS
+ * on server-rendered spans, so it costs zero client JS anyway. Copy
+ * follows the manual keyword pass (proprietary/prompts/keyword-manual-pass
+ * .md) and the honest-claims rule (ADR 0006 §5).
  */
 export const metadata: Metadata = {
   title: { absolute: "Thalon — AI content engine with built-in approval" },
@@ -38,6 +41,22 @@ const TRUST_CHIPS = [
   "Nothing posts without your click",
 ];
 
+/**
+ * §8.1: the headline's words stagger in — server-rendered spans, inline
+ * delays, `.anim-word` does the rest in CSS. Spaces stay text nodes so the
+ * h1's textContent (and screen readers) read one uninterrupted sentence.
+ */
+function SplitHeadline({ text, baseDelaySec = 0.08 }: { text: string; baseDelaySec?: number }) {
+  return text.split(" ").map((word, i) => (
+    <span key={`${word}-${i}`}>
+      {i > 0 ? " " : null}
+      <span className="anim-word" style={{ animationDelay: `${(baseDelaySec + i * 0.05).toFixed(2)}s` }}>
+        {word}
+      </span>
+    </span>
+  ));
+}
+
 export default function LandingPage() {
   return (
     // The landing stays dark-cinematic (workspace-ux-v2.md §4, ratified):
@@ -46,28 +65,7 @@ export default function LandingPage() {
       <OrganizationJsonLd />
       <FaqJsonLd />
 
-      <header>
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-5">
-          <BrandLockup />
-          <nav aria-label="Primary" className="flex items-center gap-5 sm:gap-7">
-            <a href="#features" className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline">
-              Features
-            </a>
-            <a href="#pricing" className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline">
-              Pricing
-            </a>
-            <a href="#faq" className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline">
-              FAQ
-            </a>
-            <a
-              href="#waitlist"
-              className="rounded-lg border border-primary/40 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
-            >
-              Join the waitlist
-            </a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1">
         {/* §1 — hero + waitlist */}
@@ -81,6 +79,16 @@ export default function LandingPage() {
             aria-hidden="true"
             className="absolute inset-0 bg-[radial-gradient(50%_40%_at_75%_12%,oklch(0.78_0.14_76/7%),transparent_70%)]"
           />
+          {/* §8.1 depth layer: two blooms drifting on long offsets behind the
+              vignette — parallax depth without a scroll listener. */}
+          <div
+            aria-hidden="true"
+            className="anim-drift absolute inset-0 bg-[radial-gradient(42%_36%_at_70%_55%,oklch(0.78_0.14_76/6%),transparent_70%)]"
+          />
+          <div
+            aria-hidden="true"
+            className="anim-drift-late absolute inset-0 bg-[radial-gradient(36%_30%_at_22%_70%,oklch(0.5_0.115_252/8%),transparent_72%)]"
+          />
 
           <div className="relative mx-auto grid w-full max-w-6xl gap-14 px-6 pt-14 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-24 lg:pb-28">
             <div>
@@ -89,10 +97,9 @@ export default function LandingPage() {
               </p>
               <h1
                 id="hero-heading"
-                className="anim-rise mt-4 max-w-xl text-4xl leading-[1.06] font-bold tracking-tight text-balance sm:text-5xl lg:text-[3.4rem]"
-                style={{ animationDelay: "0.08s" }}
+                className="mt-4 max-w-xl text-4xl leading-[1.06] font-bold tracking-tight text-balance sm:text-5xl lg:text-[3.4rem]"
               >
-                Turn one prompt into posts, videos, and pages.
+                <SplitHeadline text="Turn one prompt into posts, videos, and pages." />
               </h1>
               <p
                 className="anim-rise mt-5 max-w-lg text-lg leading-8 text-muted-foreground"
@@ -118,6 +125,24 @@ export default function LandingPage() {
 
           {/* the horizon — Thalon watches it */}
           <div aria-hidden="true" className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        </section>
+
+        {/* §8.2 honest proof band — engineering facts, not logo theater
+            (each value's provenance is documented on STATS in copy.ts) */}
+        <section aria-label="Proof" className="border-b">
+          <dl className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-x-6 gap-y-8 px-6 py-10 md:grid-cols-4">
+            {STATS.map((stat) => (
+              <div key={stat.label}>
+                <dt className="sr-only">{stat.label}</dt>
+                <dd className="u-tabular font-mono text-3xl font-semibold text-primary">
+                  {stat.value}
+                </dd>
+                <dd aria-hidden="true" className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                  {stat.label}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         {/* §2 — the three features + how it works + trust */}
@@ -155,6 +180,46 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ol>
+            </div>
+
+            {/* §8.2 old way vs new way — the two-column contrast strip
+                (workspace-ux-v2.md §5, honest lines only) */}
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              <div className="rounded-xl border border-dashed p-6 sm:p-8">
+                <h3 className="text-xl font-semibold tracking-tight text-muted-foreground">
+                  {OLD_WAY.title}
+                </h3>
+                <ul className="mt-5 space-y-3.5">
+                  {OLD_WAY.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-muted-foreground">
+                      <svg viewBox="0 0 14 14" className="mt-1 size-3.5 shrink-0 opacity-60" aria-hidden="true">
+                        <path d="M3 3 L11 11 M11 3 L3 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl border border-primary/25 bg-primary/5 p-6 sm:p-8">
+                <h3 className="text-xl font-semibold tracking-tight">{NEW_WAY.title}</h3>
+                <ul className="mt-5 space-y-3.5">
+                  {NEW_WAY.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm leading-6">
+                      <svg viewBox="0 0 16 16" className="mt-1 size-3.5 shrink-0 text-primary" aria-hidden="true">
+                        <path
+                          d="M3 8.5 L6.5 12 L13 4.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             {/* [+] trust framing — the differentiator, led with */}
@@ -244,7 +309,7 @@ export default function LandingPage() {
                     href="#waitlist"
                     className={`mt-6 block rounded-lg px-4 py-2 text-center text-sm font-semibold transition-opacity hover:opacity-85 ${
                       tier.featured
-                        ? "bg-primary text-primary-foreground"
+                        ? "cta-glare bg-primary text-primary-foreground"
                         : "border border-primary/40 text-primary"
                     }`}
                   >
@@ -299,14 +364,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-8">
-          <BrandLockup />
-          <p className="text-xs text-muted-foreground">
-            AI content, human-approved. © 2026 Thalon.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
 
       <StickyCta />
     </div>

@@ -226,6 +226,62 @@
     color: var(--primary);
     animation: caret-blink 1.1s steps(1) infinite;
   }
+  /* §8.1 hero signature moment — the split-headline word rise. Server-
+   * rendered spans with staggered inline delays; pure CSS, zero client JS,
+   * so `/` stays a static shell. */
+  .anim-word {
+    display: inline-block;
+    animation: word-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  /* §8.1 depth layer — two blurred blooms drifting slowly behind the hero.
+   * Transform/opacity only (compositor-cheap), decorative, aria-hidden. */
+  .anim-drift {
+    animation: drift 26s ease-in-out infinite alternate;
+  }
+  .anim-drift-late {
+    animation: drift 32s ease-in-out -14s infinite alternate-reverse;
+  }
+  /* §8.4 micro-interaction (1 of 2): a specular glare that sweeps the
+   * primary CTA once on hover/focus. CSS-only. */
+  .cta-glare {
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-glare::after {
+    content: "";
+    position: absolute;
+    inset: -150% auto -150% -60%;
+    width: 40%;
+    transform: translateX(-120%) rotate(20deg);
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 35%), transparent);
+    pointer-events: none;
+  }
+  .cta-glare:hover::after,
+  .cta-glare:focus-visible::after {
+    animation: glare-sweep 0.7s ease-out;
+  }
+}
+
+/* §8.3 feature-card pull — a pointer-tracked spotlight (the ReactBits
+ * spotlight-card pattern, CSS-only equivalent: the card sets --spot-x/y
+ * from onPointerMove; this overlay renders the glow). Hidden until hover so
+ * touch devices simply never see it. */
+.card-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    oklch(0.78 0.14 76 / 10%),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+.card-spotlight:hover::before {
+  opacity: 1;
 }
 
 @keyframes rise {
@@ -254,6 +310,34 @@
 @keyframes caret-blink {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4%, 3%, 0) scale(1.08);
+  }
+}
+
+@keyframes glare-sweep {
+  to {
+    transform: translateX(420%) rotate(20deg);
   }
 }
 
@@ -322,6 +406,10 @@
   .anim-dash,
   .anim-draw,
   .anim-caret::after,
+  .anim-word,
+  .anim-drift,
+  .anim-drift-late,
+  .cta-glare::after,
   [data-vignette] * {
     animation: none !important;
   }
