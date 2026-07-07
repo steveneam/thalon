@@ -10,7 +10,7 @@ export const evalRecordSchema = z.object({
   kind: z.string().min(1),
   input: z.record(z.string(), z.unknown()),
   expected: z.record(z.string(), z.unknown()),
-  origin: z.enum(["edit_diff", "golden", "manual"]),
+  origin: z.enum(["edit_diff", "golden", "manual", "intel_dismiss"]),
   sourceRef: z.string().nullish(),
 });
 

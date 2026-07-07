@@ -17,7 +17,7 @@ import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local"
 export async function exportEvalCases(
   repos: Repos,
   ctx: TenantCtx,
-  filter: { origin?: "edit_diff" | "golden" | "manual"; limit?: number } = {},
+  filter: { origin?: "edit_diff" | "golden" | "manual" | "intel_dismiss"; limit?: number } = {},
 ): Promise<EvalRecord[]> {
   const rows = await repos.evalCases.list(ctx, filter);
   return rows.map((row) => ({

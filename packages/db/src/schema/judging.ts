@@ -116,9 +116,13 @@ export const evalCases = pgTable(
   },
   (t) => [
     index("eval_cases_tenant_created_idx").on(t.tenantId, t.createdAt),
+    // B6.7 (carried from ADR 0005): 'intel_dismiss' = the intel-triage
+    // learning door — mechanism-written from an operator dismissal, its own
+    // origin by design (disguising it as 'manual' would corrupt the
+    // taxonomy separating mechanism-written from human-authored rows).
     check(
       "eval_cases_origin_check",
-      sql.raw(`origin in ('edit_diff', 'golden', 'manual')`),
+      sql.raw(`origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss')`),
     ),
   ],
 );
