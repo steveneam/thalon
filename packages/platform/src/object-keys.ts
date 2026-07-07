@@ -23,6 +23,13 @@ import type { ObjectStore } from "./object-store";
  *                                            protected from the orphan
  *                                            sweep (no db row references it
  *                                            by design)
+ *   posts/<tenantId>.json                    MUTABLE POINTER (B6.6): the
+ *                                            tenant's published-posts
+ *                                            bundle (the blog's read
+ *                                            model), upserted per publish;
+ *                                            derived state, rebuildable
+ *                                            from web_page drafts; orphan-
+ *                                            sweep-protected like sweeps/
  *
  * GC stance (documented here because this is the one file every key passes
  * through): content-addressed artifacts are IMMUTABLE — never overwritten,
