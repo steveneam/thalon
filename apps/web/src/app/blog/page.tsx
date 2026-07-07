@@ -6,11 +6,15 @@ import { BLOG_TAGLINE, BLOG_TITLE, listPosts } from "@/lib/blog/posts";
 
 /**
  * The blog index (§9, workspace-ux-v2.md): a site surface, dark-cinematic
- * like the landing, statically prerendered — posts are content, not
- * fetches. Seed posts ship tracked in this app; engine-published posts join
- * the same list when the lead arms the posts-bundle read (lib/blog/live.ts
- * seam). Cards are era-blind by design.
+ * like the landing. Seed posts ship tracked in this app; engine-published
+ * posts join the same list through the ARMED posts-bundle read
+ * (lib/blog/live.ts). Cards are era-blind by design. Rendered per request
+ * (engine posts are runtime data — a publish must show up without a
+ * rebuild); the B6.7 deploy upgrades this to revalidate-on-publish at the
+ * own-site door, and the landing `/` stays static regardless.
  */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Blog",
   description: BLOG_TAGLINE,

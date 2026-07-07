@@ -1,3 +1,6 @@
+import { readPublishedPosts } from "@thalon/engine";
+import { getRepos } from "@/lib/repos";
+import { resolveTenantCtx } from "@/lib/tenant";
 import type { BlogPostCard, PostsBundle, PostsBundleEntry } from "./types";
 import { postsBundleSchema } from "./types";
 
@@ -9,18 +12,36 @@ import { postsBundleSchema } from "./types";
  * wire shape the seed posts use, so the components never know which era
  * they render.
  *
- * SEAM — DISARMED (wave 3.5): the object-store read below is deliberately
- * not wired; the lead arms it at the merge train once the origination
- * lane's export is on main. Until then /blog degrades honestly to
- * seed-posts-only. Arming = replace the `return []` with the bundle
- * read + parse + map, roughly:
- *
- *   const raw = await readPostsBundle(tenantId);        // engine export
- *   const bundle = parsePostsBundle(raw);
- *   return bundle ? bundle.posts.map(toBlogPostCard) : [];
+ * ARMED at the wave-3.5 merge train (the engine export is on main): the
+ * read degrades to [] on ANY failure — a malformed bundle or a boot error
+ * must never take down /blog, which always has its seed posts. Feed routes
+ * (rss/llms.txt/sitemap) stay force-static, so they bake seed posts at
+ * build; engine posts reach them when the B6.7 deploy lands its
+ * revalidation story (revalidate-on-publish at the own-site door).
  */
 export async function readEnginePosts(): Promise<BlogPostCard[]> {
-  return [];
+  try {
+    const repos = await getRepos();
+    const ctx = await resolveTenantCtx(repos);
+    if (!ctx) return [];
+    const bundle = await readPublishedPosts(ctx.tenantId);
+    return bundle ? bundle.posts.map(toBlogPostCard) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** The body page's entry lookup: the bundle row (incl. `htmlRef`) for one engine slug, or null. */
+export async function findEnginePost(slug: string): Promise<PostsBundleEntry | null> {
+  try {
+    const repos = await getRepos();
+    const ctx = await resolveTenantCtx(repos);
+    if (!ctx) return null;
+    const bundle = await readPublishedPosts(ctx.tenantId);
+    return bundle?.posts.find((post) => post.slug === slug) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /** Bundle text/JSON → validated bundle, or null (malformed bundles degrade, never throw into the page). */

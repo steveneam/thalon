@@ -1,22 +1,46 @@
+import { readPublishedPageHtml } from "@thalon/engine";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogPostingJsonLd } from "@/components/landing/json-ld";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
+import { findEnginePost, toBlogPostCard } from "@/lib/blog/live";
 import { getSeedPost, POST_DISCLOSURE, SEED_POSTS } from "@/lib/blog/posts";
+import type { BlogPostCard } from "@/lib/blog/types";
 
 /**
- * A blog post page (§9): statically prerendered from the tracked content
- * module — `generateStaticParams` covers every seed post, so the whole
- * route ships as SSG. Engine-published post bodies (posts-bundle `htmlRef`)
- * join when the lead arms the lib/blog/live.ts seam at the merge train;
- * until then unknown slugs are honest 404s. BlogPosting JSON-LD and the
+ * A blog post page (§9): seed posts statically prerender from the tracked
+ * content module (`generateStaticParams` covers them, `dynamicParams` stays
+ * on) — engine-PUBLISHED posts resolve at request time through the armed
+ * lib/blog/live.ts seam: bundle entry → verified `htmlRef` artifact read
+ * (engine `readPublishedPageHtml`) → the artifact's own <body> markup.
+ * Rendering that markup is safe BY CONSTRUCTION: `selfContainmentViolations`
+ * gates every web_page draft before judging — no <script>/<iframe>/<object>/
+ * <embed>, no external resource loads — and the read is content-address
+ * verified. Unknown slugs stay honest 404s. BlogPosting JSON-LD and the
  * visible article render from the SAME post object (the A13 no-drift rule).
  */
 
 export function generateStaticParams(): Array<{ slug: string }> {
   return SEED_POSTS.map(({ slug }) => ({ slug }));
+}
+
+async function resolvePost(
+  slug: string,
+): Promise<{ card: BlogPostCard; engineHtml?: string } | null> {
+  const seed = getSeedPost(slug);
+  if (seed) {
+    const { slug: seedSlug, title, description, publishedAt, tags } = seed;
+    return { card: { slug: seedSlug, title, description, publishedAt, tags } };
+  }
+  const entry = await findEnginePost(slug);
+  if (!entry) return null;
+  const html = await readPublishedPageHtml(entry.htmlRef);
+  if (!html) return null;
+  const body = /<body[^>]*>([\s\S]*)<\/body>/i.exec(html)?.[1]?.trim();
+  if (!body) return null;
+  return { card: toBlogPostCard(entry), engineHtml: body };
 }
 
 export async function generateMetadata({
@@ -25,8 +49,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getSeedPost(slug);
-  if (!post) return {};
+  const resolved = await resolvePost(slug);
+  if (!resolved) return {};
+  const post = resolved.card;
   return {
     title: post.title,
     description: post.description,
@@ -56,8 +81,10 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getSeedPost(slug);
-  if (!post) notFound();
+  const seed = getSeedPost(slug);
+  const resolved = await resolvePost(slug);
+  if (!resolved) notFound();
+  const post = resolved.card;
 
   return (
     <div className="dark flex min-h-dvh flex-1 flex-col bg-background text-foreground">
@@ -84,20 +111,28 @@ export default async function BlogPostPage({
           </p>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">{post.description}</p>
 
-          {post.sections.map((section, i) => (
-            <section key={section.heading ?? `intro-${i}`} className="mt-10">
-              {section.heading && (
-                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-                  {section.heading}
-                </h2>
-              )}
-              {section.paragraphs.map((paragraph) => (
-                <p key={paragraph.slice(0, 40)} className="mt-4 leading-8 text-foreground/90">
-                  {paragraph}
-                </p>
-              ))}
-            </section>
-          ))}
+          {seed ? (
+            seed.sections.map((section, i) => (
+              <section key={section.heading ?? `intro-${i}`} className="mt-10">
+                {section.heading && (
+                  <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                    {section.heading}
+                  </h2>
+                )}
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph.slice(0, 40)} className="mt-4 leading-8 text-foreground/90">
+                    {paragraph}
+                  </p>
+                ))}
+              </section>
+            ))
+          ) : (
+            /* Judged, approved, self-contained-by-construction markup (see the module doc). */
+            <div
+              className="post-engine-body mt-10 leading-8 text-foreground/90"
+              dangerouslySetInnerHTML={{ __html: resolved.engineHtml ?? "" }}
+            />
+          )}
 
           {/* §9 guardrail 2: the FAQ's AI-disclosure stance, on every post. */}
           <footer className="mt-14 border-t pt-6">
