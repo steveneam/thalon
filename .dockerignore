@@ -1,0 +1,17 @@
+# Build context hygiene for Dockerfile.web (CI-only builds). Secrets and
+# machine-local state must NEVER reach an image layer.
+**/.env
+**/.env.*
+.git
+.github
+.context
+.claude
+agent_handoff
+**/node_modules
+**/.next
+**/.next-dev
+**/.data
+**/dist
+**/*.tsbuildinfo
+Dockerfile*
+.dockerignore

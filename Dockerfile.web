@@ -1,0 +1,72 @@
+# Thalon web container (B6.7, ADR 0007) — built ONLY in CI (.github/workflows/
+# web-image.yml -> ghcr.io/steveneam/thalon-web); never built on the dev
+# machine (no-Docker rule). The render worker is a separate, future image.
+#
+# Bases are digest-pinned (node:24-alpine, resolved 2026-07-08); bump
+# deliberately, never by tag drift.
+
+FROM node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS builder
+WORKDIR /app
+
+# Full-context copy (.dockerignore keeps node_modules/.next/.data/.context/
+# env files out): npm workspaces need every package.json anyway, and this
+# image builds from a clean CI checkout where layer-cache surgery buys
+# little correctness risk is worth.
+COPY . .
+RUN npm ci
+
+# NEXT_PUBLIC_* is inlined at BUILD time (apps/web/src/lib/site.ts) — the
+# site URL is a build arg, not runtime env.
+ARG NEXT_PUBLIC_SITE_URL=https://thalon.org
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+RUN npm run build -w @thalon/web
+
+# Executable check (ADR 0007 decision 2): PGlite is WASM behind
+# serverExternalPackages — if its assets ever fall out of the standalone
+# trace, the IMAGE BUILD fails here, not the first request on the box.
+RUN test -f apps/web/.next/standalone/apps/web/server.js \
+  && test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/pglite.wasm \
+  && test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/pglite.data \
+  && test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/vector.tar.gz
+
+FROM node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS runner
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0 \
+    THALON_DATA_DIR=/data
+
+# The traced server (monorepo layout: server.js under apps/web, hoisted
+# node_modules at the root) + the static/public dirs standalone deliberately
+# leaves out.
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
+# Runtime DATA the code resolves by cwd-upward walk from apps/web (dynamic
+# fs paths are invisible to the file trace): versioned prompt files, the
+# generic self-tenant profiles, and the drizzle migrations the app runs at
+# boot. SPINE §3.2: prompts are data, so they ride the image like code.
+COPY --from=builder /app/proprietary/prompts ./proprietary/prompts
+COPY --from=builder /app/proprietary/profiles ./proprietary/profiles
+COPY --from=builder /app/packages/db/drizzle ./packages/db/drizzle
+
+# /data = the ONE persistent volume (embedded DB + object store + pointer
+# bundles; the box mounts and backs it up — ADR 0007 decision 3). Next's
+# incremental cache under .next must be writable for the on-demand
+# /blog/[slug] renders.
+RUN mkdir -p /data && chown node:node /data \
+  && chown -R node:node /app/apps/web/.next
+VOLUME /data
+
+USER node
+EXPOSE 3000
+
+# The box's platform watches this (ADR 0007 decision 1). Node 24 has global
+# fetch; alpine ships no curl.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+# server.js chdirs to its own dir (apps/web); the cwd-upward walks then find
+# /app/proprietary/* and /app/packages/db/drizzle.
+CMD ["node", "apps/web/server.js"]

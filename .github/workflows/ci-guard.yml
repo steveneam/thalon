@@ -32,6 +32,29 @@ jobs:
       - run: npm run lint
       - run: npm test
 
+  # B6.7 (ADR 0007): the production build must stay green — Dockerfile.web
+  # runs exactly this build, so a PR that breaks `next build` (or silently
+  # drops the standalone trace / PGlite WASM assets) fails HERE, not at the
+  # image build on main. Keyless by design: NEXT_PUBLIC_SITE_URL falls back
+  # to the RFC-2606 placeholder and no data dir is touched.
+  web-build:
+    name: web-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @thalon/web
+      - name: Standalone trace sanity (the Dockerfile.web executable check, mirrored)
+        run: |
+          test -f apps/web/.next/standalone/apps/web/server.js
+          test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/pglite.wasm
+          test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/pglite.data
+          test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/vector.tar.gz
+
   # The Sprint-1 ship gate (charter B1.5, ratified decision 5): the KEYLESS
   # deterministic eval suite must be green to merge. The eval vitest project
   # already rides `npm test` above; this job arms the remaining keyless
