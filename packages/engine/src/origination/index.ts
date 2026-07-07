@@ -9,6 +9,17 @@ export {
   type OriginationResult,
 } from "./origination";
 export {
+  composePageBrief,
+  pageLoopBriefVersion,
+  pageLoopContextSchema,
+  runPageLoop,
+  type PageLoopContext,
+  type PageLoopContextInput,
+  type PageLoopDeps,
+  type PageLoopRequest,
+  type PageLoopResult,
+} from "./page-loop";
+export {
   pillarBeatSchema,
   pillarScriptDraftMetaSchema,
   pillarScriptShellOutputSchema,
