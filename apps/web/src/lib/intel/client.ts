@@ -14,6 +14,11 @@ export async function fetchTrends(): Promise<TrendsPayload> {
   return asJson<TrendsPayload>(await fetch("/api/intel/trends"));
 }
 
+/** Run one live sweep now (B6.5) — driver refusals surface verbatim as the thrown message. */
+export async function sweepNow(): Promise<{ polled: number; cards: number }> {
+  return asJson<{ polled: number; cards: number }>(await fetch("/api/intel/sweep", { method: "POST" }));
+}
+
 export async function createArea(input: {
   name: string;
   description: string;

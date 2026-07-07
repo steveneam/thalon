@@ -32,9 +32,9 @@ describe("intel fake-driver store", () => {
     expect(capture.kind).toBe("trend_promote");
     expect(capture.payload).toMatchObject({
       family: "video",
-      title: card.dossier.titles[1],
-      angle: card.dossier.angles[0],
-      hook: card.dossier.hook,
+      title: card.dossier!.titles[1],
+      angle: card.dossier!.angles[0],
+      hook: card.dossier!.hook,
     });
     expect(listTrendCards().map((c) => c.id)).toContain(card.id);
   });
@@ -57,9 +57,9 @@ describe("intel fake-driver store", () => {
       captureId: capture.id,
       kind: "trend_promote",
       family: "page",
-      title: card.dossier.titles[2],
-      angle: card.dossier.angles[0],
-      hook: card.dossier.hook,
+      title: card.dossier!.titles[2],
+      angle: card.dossier!.angles[0],
+      hook: card.dossier!.hook,
       areaName: card.areaName,
       score: card.score,
       text: card.text,

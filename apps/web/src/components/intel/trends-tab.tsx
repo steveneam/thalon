@@ -7,7 +7,7 @@ import { CadenceStamp } from "@/components/intel/cadence-stamp";
 import { DemoBanner } from "@/components/intel/demo-banner";
 import { TrendCard } from "@/components/intel/trend-card";
 import { cn } from "@/lib/utils";
-import { createArea, dismissTrend, fetchTrends, promoteTrend, updateArea } from "@/lib/intel/client";
+import { createArea, dismissTrend, fetchTrends, promoteTrend, sweepNow, updateArea } from "@/lib/intel/client";
 import type { TrendsPayload } from "@/lib/intel/types";
 
 type TabStatus = "loading" | "error" | "success";
@@ -72,7 +72,16 @@ export function TrendsTab() {
       {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load trends.</p>}
       {status === "success" && payload && (
         <>
-          <CadenceStamp sweep={payload.sweep} demo={payload.demo} />
+          <CadenceStamp
+            sweep={payload.sweep}
+            busy={busy}
+            onSweepNow={() =>
+              withBusy(async () => {
+                await sweepNow();
+                await reload();
+              })
+            }
+          />
 
           <AreasManager
             areas={payload.areas}

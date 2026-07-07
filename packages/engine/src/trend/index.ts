@@ -63,3 +63,15 @@ export {
   type TrendIntakeRequest,
   type TrendIntakeResult,
 } from "./intake";
+export {
+  readSweepBundle,
+  runTrendSweep,
+  SWEEP_BUNDLE_VERSION,
+  sweepBundleKey,
+  sweepBundleSchema,
+  type SweepBundle,
+  type SweepCard,
+  type TrendSweepDeps,
+  type TrendSweepRequest,
+  type TrendSweepResult,
+} from "./sweep";

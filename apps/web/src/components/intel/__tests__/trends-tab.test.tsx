@@ -69,8 +69,8 @@ describe("TrendsTab", () => {
     const capture = listIntelCaptures().at(-1)!;
     expect(capture.payload).toMatchObject({
       family: "video",
-      title: fixtureTrendCards[0].dossier.titles[0],
-      hook: fixtureTrendCards[0].dossier.hook,
+      title: fixtureTrendCards[0].dossier!.titles[0],
+      hook: fixtureTrendCards[0].dossier!.hook,
     });
   });
 
@@ -81,28 +81,28 @@ describe("TrendsTab", () => {
 
     const card = screen.getByTestId("trend-card-demo-trend-1");
     await user.click(within(card).getByText(/dossier/i));
-    expect(within(card).getByText(fixtureTrendCards[0].dossier.hook, { exact: false })).toBeInTheDocument();
+    expect(within(card).getByText(fixtureTrendCards[0].dossier!.hook, { exact: false })).toBeInTheDocument();
 
     // Pick the second ready title, then exit through → Post.
     await user.click(
-      within(card).getByRole("radio", { name: fixtureTrendCards[0].dossier.titles[1] }),
+      within(card).getByRole("radio", { name: fixtureTrendCards[0].dossier!.titles[1] }),
     );
     await user.click(within(card).getByRole("button", { name: /create post from this/i }));
     await waitFor(() => expect(push).toHaveBeenCalled());
     const capture = listIntelCaptures().at(-1)!;
     expect(capture.payload).toMatchObject({
       family: "post",
-      title: fixtureTrendCards[0].dossier.titles[1],
+      title: fixtureTrendCards[0].dossier!.titles[1],
     });
   });
 
-  it("stamps the sweep cadence honestly — demo mode names what arms it, sweep-now is disabled", async () => {
+  it("stamps the sweep cadence honestly — demo mode invites the FIRST sweep, sweep-now is armed (B6.5)", async () => {
     render(<TrendsTab />);
     await screen.findByText(/demo dataset/i);
 
     expect(screen.getByText(/last swept/i)).toBeInTheDocument();
-    expect(screen.getByText(/sweeps every 4h once live polling arms \(B6\.5\)/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sweep now/i })).toBeDisabled();
+    expect(screen.getByText(/sweeps every 4h — run the first one now/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /sweep now/i })).toBeEnabled();
   });
 
   it("adds a monitored area through the manager and shows it with a zero-card chip", async () => {

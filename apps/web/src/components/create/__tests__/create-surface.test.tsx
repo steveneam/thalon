@@ -86,7 +86,7 @@ describe("CreateContextLoader — the capture-id door", () => {
     render(<CreateContextLoader contextId={capture.id} initialPrompt="" initialKeyword="" />);
 
     expect(await screen.findByLabelText("Intel context")).toBeInTheDocument();
-    expect(screen.getByLabelText("Creation prompt")).toHaveValue(card.dossier.titles[1]);
+    expect(screen.getByLabelText("Creation prompt")).toHaveValue(card.dossier!.titles[1]);
     expect(screen.getByRole("button", { name: /post/i, pressed: true })).toBeInTheDocument();
   });
 
