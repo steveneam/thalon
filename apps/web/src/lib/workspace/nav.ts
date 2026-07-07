@@ -1,6 +1,7 @@
 import {
   CheckCheck,
   LayoutDashboard,
+  Library,
   ListChecks,
   Radar,
   Settings,
@@ -47,6 +48,13 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: Sparkles,
     hint: "Post, video, or page from one prompt",
     keywords: ["generate", "draft", "prompt", "video", "post", "page", "new"],
+  },
+  {
+    label: "Library",
+    href: "/app/library",
+    icon: Library,
+    hint: "Paste a video URL — transcript in, ready to copy, export, and ground on",
+    keywords: ["transcript", "video", "url", "youtube", "ingest", "captions", "srt", "csv", "sources"],
   },
   {
     label: "Approve",

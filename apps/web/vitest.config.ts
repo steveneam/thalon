@@ -14,6 +14,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "@thalon/contracts": path.resolve(dirname, "../../packages/contracts/src/index.ts"),
       "@thalon/db": path.resolve(dirname, "../../packages/db/src/index.ts"),
+      "@thalon/engine": path.resolve(dirname, "../../packages/engine/src/index.ts"),
       "@thalon/platform": path.resolve(dirname, "../../packages/platform/src/index.ts"),
       "@thalon/judge": path.resolve(dirname, "../../proprietary/judge/src/index.ts"),
     },

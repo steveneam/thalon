@@ -32,6 +32,9 @@
       "@thalon/db": [
         "../../packages/db/src/index.ts"
       ],
+      "@thalon/engine": [
+        "../../packages/engine/src/index.ts"
+      ],
       "@thalon/platform": [
         "../../packages/platform/src/index.ts"
       ],
