@@ -1,15 +1,21 @@
+import { listPosts } from "@/lib/blog/posts";
 import { FAQ } from "@/lib/landing/copy";
 import { SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 /**
  * llms.txt (A13 AEO/GEO pack, docs/FRONTEND.md §4): the answer-engine
  * summary of the site, generated from the SAME copy module as the page so
- * the claims can never drift apart. Prerendered at build (force-static).
+ * the claims can never drift apart — and the SAME content module as /blog
+ * for the article index (§9). Prerendered at build (force-static).
  */
 export const dynamic = "force-static";
 
-export function GET(): Response {
+export async function GET(): Promise<Response> {
   const faqLines = FAQ.map((f) => `- ${f.question} ${f.answer}`).join("\n");
+  const posts = await listPosts();
+  const articleLines = posts
+    .map((post) => `- [${post.title}](${SITE_URL}/blog/${post.slug}): ${post.description}`)
+    .join("\n");
   const body = `# Thalon
 
 > ${SITE_TAGLINE}
@@ -27,9 +33,14 @@ Thalon is a multi-tenant AI content engine for brands and operators. One prompt 
 
 ${faqLines}
 
+## Articles
+
+${articleLines}
+
 ## Pages
 
 - [Home](${SITE_URL}/): product overview, features, early-access pricing, FAQ, waitlist.
+- [Blog](${SITE_URL}/blog): posts on AI content tooling, answer engines, and honest automation, published regularly. RSS: ${SITE_URL}/blog/rss.xml
 `;
 
   return new Response(body, {
