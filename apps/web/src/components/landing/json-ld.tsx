@@ -1,3 +1,4 @@
+import type { BlogPostCard } from "@/lib/blog/types";
 import { FAQ } from "@/lib/landing/copy";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
@@ -27,6 +28,26 @@ export function OrganizationJsonLd() {
         url: SITE_URL,
         description: SITE_TAGLINE,
         logo: `${SITE_URL}/icon.svg`,
+      }}
+    />
+  );
+}
+
+/** §9: per-post BlogPosting, generated from the same content module the page renders. */
+export function BlogPostingJsonLd({ post }: { post: BlogPostCard }) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.description,
+        datePublished: post.publishedAt,
+        keywords: post.tags.join(", "),
+        url: `${SITE_URL}/blog/${post.slug}`,
+        mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+        author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+        publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
       }}
     />
   );
