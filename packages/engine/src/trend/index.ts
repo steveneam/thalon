@@ -2,6 +2,21 @@ export { watchlistSchema, type Watchlist, type WatchlistInput } from "./watchlis
 export type { TrendItem, TrendSource } from "./trend-source";
 export { createFakeTrendSource } from "./fake-source";
 export {
+  blueskyConfigSchema,
+  blueskyTrendSource,
+  type BlueskyConfig,
+  type BlueskyConfigInput,
+  type BlueskySourceDeps,
+} from "./bluesky-source";
+export {
+  youtubeConfigSchema,
+  youtubeTrendSource,
+  type YoutubeConfig,
+  type YoutubeConfigInput,
+  type YoutubeSourceDeps,
+} from "./youtube-source";
+export { getTrendSource, registeredTrendSources } from "./source-registry";
+export {
   detectOutliers,
   outlierConfigSchema,
   type OutlierConfig,
