@@ -2,10 +2,11 @@
 # web-image.yml -> ghcr.io/steveneam/thalon-web); never built on the dev
 # machine (no-Docker rule). The render worker is a separate, future image.
 #
-# Bases are digest-pinned (node:24-alpine, resolved 2026-07-08); bump
+# Bases are digest-pinned (node:24-slim — glibc, matching the CI runner and
+# every -gnu native in the lockfile; resolved 2026-07-08); bump
 # deliberately, never by tag drift.
 
-FROM node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS builder
+FROM node:24-slim@sha256:cb4e8f7c443347358b7875e717c29e27bf9befc8f5a26cf18af3c3dec80e58c5 AS builder
 WORKDIR /app
 
 # Full-context copy (.dockerignore keeps node_modules/.next/.data/.context/
@@ -29,7 +30,7 @@ RUN test -f apps/web/.next/standalone/apps/web/server.js \
   && test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/pglite.data \
   && test -f apps/web/.next/standalone/node_modules/@electric-sql/pglite/dist/vector.tar.gz
 
-FROM node:24-alpine@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd AS runner
+FROM node:24-slim@sha256:cb4e8f7c443347358b7875e717c29e27bf9befc8f5a26cf18af3c3dec80e58c5 AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
@@ -63,7 +64,7 @@ USER node
 EXPOSE 3000
 
 # The box's platform watches this (ADR 0007 decision 1). Node 24 has global
-# fetch; alpine ships no curl.
+# fetch; slim ships no curl.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
