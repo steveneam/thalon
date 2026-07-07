@@ -36,6 +36,28 @@ export {
   type VideoUrlIngestRequest,
   type VideoUrlIngestResult,
 } from "./ingest-video-url";
+export {
+  crawl4aiDriver,
+  parseCrawl4aiOutput,
+  type Crawl4aiDriverDeps,
+  type Crawl4aiRunner,
+} from "./crawl4ai-driver";
+export {
+  fetchExtractDriver,
+  getWebIngestDriver,
+  registeredWebIngestDrivers,
+  type WebIngestDriver,
+  type WebIngestPage,
+  type WebIngestRequest,
+} from "./web-ingest";
+export {
+  DEFAULT_WEB_INGEST_CONFIG,
+  ingestWebUrl,
+  type WebIngestConfig,
+  type WebUrlIngestDeps,
+  type WebUrlIngestRequest,
+  type WebUrlIngestResult,
+} from "./ingest-web-url";
 export { extractDoc, extractHtml, extractPrompt, type ExtractedContent } from "./extract";
 export { getFetcher, HttpFetcher, type FetchedPage, type Fetcher } from "./fetcher";
 export {
