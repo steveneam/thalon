@@ -36,6 +36,13 @@ const envSchema = z.object({
   RENDER_DRIVER: z.string().default("hyperframes"),
   /** B6.8 search-intel seam: which SearchIntelSource the registry selects (fake | gsc; paid-vendor = the recorded swap path, ADR 0006). GSC goes live at B6.7 deploy — fake is the honest default until a site exists. */
   SEARCH_INTEL_SOURCE: z.string().default("fake"),
+  /** B6.5 trend seam: which TrendSource the registry selects (fake | bluesky | youtube). bluesky is keyless — the honest first live selection; fake stays the zero-network default. */
+  TREND_SOURCE: z.string().default("fake"),
+  /** B6.5 YouTube Data API v3 key (free tier; per-driver quota budgets stay config in the driver, never here). */
+  YOUTUBE_API_KEY: z.string().optional(),
+  /** B6.5 Bluesky app-password session (free account; searchPosts is 403 unauthenticated — probed 2026-07-07). Account-feed polling stays keyless without these. */
+  BLUESKY_IDENTIFIER: z.string().optional(),
+  BLUESKY_APP_PASSWORD: z.string().optional(),
   /** B4.8 hosted-vendor adapter (keyed runtime config with a swap path — no vendor named in code; live runs are pass 3). */
   TRANSCRIPT_VENDOR_URL: z.string().optional(),
   TRANSCRIPT_VENDOR_API_KEY: z.string().optional(),
