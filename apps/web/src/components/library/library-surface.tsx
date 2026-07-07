@@ -1,34 +1,66 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Download, FileText } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
+import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
 import { EXPORT_BUILDERS, formatTimecode, hasTimings, toPlainText, type ExportFormat } from "@/lib/library/export";
-import type { LibraryPayload, LibrarySourceRow, TranscriptPayload } from "@/lib/library/types";
+import type { AreaRelevance, LibraryPayload, LibrarySourceRow, TranscriptPayload } from "@/lib/library/types";
 import { cn } from "@/lib/utils";
 
 type SurfaceStatus = "loading" | "error" | "success";
 
+/** "ai, hooks , ai" → ["ai", "hooks"] — trimmed, deduped, capped to the ingest schema's 12. */
+export function parseTags(raw: string): string[] {
+  return [...new Set(raw.split(",").map((tag) => tag.trim()).filter(Boolean))].slice(0, 12);
+}
+
 /**
- * Library (B6.5): paste a video URL → a timed transcript you can read, copy,
- * and export (.txt / .csv / .srt). The transcript seam readout is honest
- * about which provider is armed: caption-file wants the captions pasted
- * alongside the URL; hosted-vendor fetches from the URL once its key is
- * configured; whisper-local transcribes local media. Every ingest lands as a
- * `video_transcript` source — the same grounding shelf generation retrieves
- * from, so a transcript here is immediately usable context, not a dead file.
+ * The relevance badge (session-19 rider): the engine's top-scored monitored
+ * area, worn in the SAME thermal grammar as intel cards (heat-grade.tsx
+ * bands/tokens); the reason string rides the tooltip. Renders nothing when
+ * the engine hasn't scored the row — pre-rider rows never invent heat.
+ */
+function RelevanceBadge({ relevance }: { relevance: AreaRelevance[] }) {
+  if (relevance.length === 0) return null;
+  const top = [...relevance].sort((a, b) => b.score - a.score)[0];
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1.5">
+      <span className="text-xs text-muted-foreground">{top.areaName}</span>
+      <HeatGrade score={top.score} detail={top.reason} />
+    </span>
+  );
+}
+
+/**
+ * Library (B6.5 + the session-19 polish rider): paste a video URL → a timed
+ * transcript you can read, copy, and export (.txt / .csv / .srt). The
+ * transcript seam readout is honest about which provider is armed:
+ * caption-file wants the captions pasted alongside the URL; hosted-vendor
+ * fetches from the URL once its key is configured; whisper-local
+ * transcribes local media. Every ingest lands as a `video_transcript`
+ * source — the same grounding shelf generation retrieves from, so a
+ * transcript here is immediately usable context, not a dead file. Shelf
+ * rows lead with the oEmbed title and wear operator tags + the engine's
+ * area-relevance score (META-KEY MINI-CONTRACT keys — absent on pre-rider
+ * rows, where everything degrades to the URL-only look).
  */
 export function LibrarySurface() {
   const [status, setStatus] = useState<SurfaceStatus>("loading");
   const [payload, setPayload] = useState<LibraryPayload | null>(null);
   const [url, setUrl] = useState("");
   const [captions, setCaptions] = useState("");
+  const [tagsRaw, setTagsRaw] = useState("");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptPayload | null>(null);
+  // Collapsed-by-default after ingest (founder feedback, session 19): the
+  // fresh wall of segments buried the shelf. Opening from the shelf IS the
+  // expand-on-demand click, so that path opens expanded.
+  const [segmentsOpen, setSegmentsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -64,20 +96,25 @@ export function LibrarySurface() {
   async function submitIngest(event: React.FormEvent) {
     event.preventDefault();
     await withBusy(async () => {
+      const tags = parseTags(tagsRaw);
       const result = await ingestVideo({
         url,
         captions: captions.trim() ? captions : undefined,
+        tags: tags.length > 0 ? tags : undefined,
       });
       setTranscript(await fetchTranscript(result.sourceId));
+      setSegmentsOpen(false);
       setPayload(await fetchLibrary());
       setUrl("");
       setCaptions("");
+      setTagsRaw("");
     });
   }
 
   async function openSource(row: LibrarySourceRow) {
     await withBusy(async () => {
       setTranscript(await fetchTranscript(row.id));
+      setSegmentsOpen(true);
     });
   }
 
@@ -104,6 +141,9 @@ export function LibrarySurface() {
   const seam = payload?.seam;
   const captionMode = seam?.selected === "caption-file";
   const timed = transcript ? hasTimings(transcript.segments) : false;
+  const openRow = transcript
+    ? (payload?.sources.find((row) => row.id === transcript.sourceId) ?? null)
+    : null;
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
@@ -138,6 +178,13 @@ export function LibrarySurface() {
                     className="rounded-lg border border-input bg-background px-2.5 py-2 font-mono text-xs focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                   />
                 )}
+                <input
+                  aria-label="Tags (comma-separated, optional)"
+                  placeholder="Tags, comma-separated (optional) — e.g. hooks, ai tools"
+                  value={tagsRaw}
+                  onChange={(e) => setTagsRaw(e.target.value)}
+                  className="h-9 rounded-lg border border-input bg-background px-2.5 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                />
                 <div className="flex items-center gap-2">
                   <Button type="submit" size="sm" disabled={busy || !url.trim() || (captionMode && !captions.trim())}>
                     <FileText aria-hidden data-icon="inline-start" /> Get transcript
@@ -175,7 +222,8 @@ export function LibrarySurface() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex flex-wrap items-center gap-2">
-                  Transcript
+                  {/* Title-first here too: the shelf row's oEmbed title beats the word "Transcript". */}
+                  {openRow?.title ?? "Transcript"}
                   {transcript.provider && <Badge variant="outline">{transcript.provider}</Badge>}
                   <span className="text-xs font-normal text-muted-foreground u-tabular">
                     {transcript.segments.length} segments
@@ -211,21 +259,39 @@ export function LibrarySurface() {
                     </Button>
                   ))}
                 </div>
-                <ol className="max-h-96 overflow-y-auto rounded-lg border border-border" aria-label="Transcript segments">
-                  {transcript.segments.map((segment, i) => (
-                    <li
-                      key={i}
-                      className={cn("flex gap-3 px-3 py-1.5 text-sm", i % 2 === 1 && "bg-muted/40")}
-                    >
-                      {segment.startMs !== undefined && (
-                        <span className="shrink-0 pt-px font-mono text-xs text-muted-foreground u-tabular">
-                          {formatTimecode(segment.startMs).slice(0, 8)}
-                        </span>
-                      )}
-                      <span>{segment.text}</span>
-                    </li>
-                  ))}
-                </ol>
+                {/* Collapsed-by-default after ingest (session-19 rider): copy/
+                    export stay one click; the segment wall is opt-in. */}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSegmentsOpen((open) => !open)}
+                  aria-expanded={segmentsOpen}
+                  className="self-start"
+                >
+                  {segmentsOpen ? (
+                    <ChevronDown aria-hidden data-icon="inline-start" />
+                  ) : (
+                    <ChevronRight aria-hidden data-icon="inline-start" />
+                  )}
+                  {segmentsOpen ? "Hide transcript" : `Show transcript (${transcript.segments.length} segments)`}
+                </Button>
+                {segmentsOpen && (
+                  <ol className="max-h-96 overflow-y-auto rounded-lg border border-border" aria-label="Transcript segments">
+                    {transcript.segments.map((segment, i) => (
+                      <li
+                        key={i}
+                        className={cn("flex gap-3 px-3 py-1.5 text-sm", i % 2 === 1 && "bg-muted/40")}
+                      >
+                        {segment.startMs !== undefined && (
+                          <span className="shrink-0 pt-px font-mono text-xs text-muted-foreground u-tabular">
+                            {formatTimecode(segment.startMs).slice(0, 8)}
+                          </span>
+                        )}
+                        <span>{segment.text}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
               </CardContent>
             </Card>
           )}
@@ -247,6 +313,10 @@ export function LibrarySurface() {
                 <ul className="flex flex-col gap-1.5">
                   {payload.sources.map((row) => (
                     <li key={row.id}>
+                      {/* Title-first rows (session-19 rider): the oEmbed title
+                          is the row's identity, the URL demotes to secondary
+                          text. Pre-rider rows have no title — the URL stays
+                          primary, no invented text. */}
                       <button
                         type="button"
                         onClick={() => openSource(row)}
@@ -257,7 +327,26 @@ export function LibrarySurface() {
                           transcript?.sourceId === row.id && "border-primary/40 bg-primary/5",
                         )}
                       >
-                        <span className="min-w-0 flex-1 truncate">{row.uri ?? row.id}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-medium">
+                            {row.title ?? row.uri ?? row.id}
+                          </span>
+                          {row.title && row.uri && (
+                            <span className="block truncate text-xs text-muted-foreground">
+                              {row.uri}
+                            </span>
+                          )}
+                          {row.tags.length > 0 && (
+                            <span className="mt-1 flex flex-wrap gap-1">
+                              {row.tags.map((tag) => (
+                                <Badge key={tag} variant="secondary">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </span>
+                          )}
+                        </span>
+                        <RelevanceBadge relevance={row.areaRelevance} />
                         {row.provider && <Badge variant="outline">{row.provider}</Badge>}
                         {row.segmentCount !== null && (
                           <span className="shrink-0 text-xs text-muted-foreground u-tabular">

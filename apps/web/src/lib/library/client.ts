@@ -8,6 +8,7 @@ export async function fetchLibrary(): Promise<LibraryPayload> {
 export async function ingestVideo(input: {
   url: string;
   captions?: string;
+  tags?: string[];
 }): Promise<IngestResponse> {
   const res = await fetch("/api/library/ingest", {
     method: "POST",
