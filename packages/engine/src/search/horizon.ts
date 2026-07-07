@@ -61,6 +61,14 @@ export const horizonConfigSchema = z.object({
     ),
   /** Below-expected fires when actual CTR < this fraction of the band's expected CTR. */
   ctrShortfallFactor: z.number().positive().default(0.75),
+  /**
+   * Bounded history window (days): the scan reads and baselines only this
+   * far back. Two failures at once without it — an unbounded read over
+   * append-only history is the first thing daily GSC volume degrades, and
+   * a months-stale "earliest snapshot" makes the rising-impressions
+   * baseline meaningless. Per-tenant config refines (B6.7 volume readiness).
+   */
+  windowDays: z.number().positive().default(90),
 });
 
 export type HorizonConfigInput = z.input<typeof horizonConfigSchema>;

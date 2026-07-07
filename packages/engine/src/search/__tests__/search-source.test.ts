@@ -175,13 +175,28 @@ describe("runSearchIntake + runHorizonScan (append-only history → deterministi
     const events = await repos.events.list(ctx, { entityType: "search_snapshot", limit: 100 });
     expect(events.filter((e) => e.event === "search_snapshot.captured")).toHaveLength(4);
 
-    const scan = await runHorizonScan(ctx, repos, { source: "fake" });
+    const scan = await runHorizonScan(ctx, repos, { source: "fake", nowMs: NOW + WEEK });
     expect(scan.series).toBe(2);
     expect(scan.opportunities.map((o) => o.query)).toEqual(["what is content automation"]);
     expect(scan.opportunities[0].reasons).toHaveLength(3);
     // The already-ranking query is scored transparently but not flagged.
     const ranking = scan.scored.find((s) => s.query === "acme motion studio")!;
     expect(ranking.isOpportunity).toBe(false);
+
+    // The windowed read (B6.7 volume readiness): a scan whose window ends
+    // before the stored history sees nothing — the baseline can never be
+    // a years-stale earliest row, and the read stays index-bounded.
+    const outsideWindow = await runHorizonScan(ctx, repos, {
+      source: "fake",
+      nowMs: NOW + WEEK + 91 * 86_400_000,
+    });
+    expect(outsideWindow.series).toBe(0);
+    const tightWindow = await runHorizonScan(ctx, repos, {
+      source: "fake",
+      nowMs: NOW + WEEK,
+      config: { windowDays: 3 }, // week-1 rows fall outside; only week-2 remains -> no rising history
+    });
+    expect(tightWindow.opportunities).toEqual([]);
   });
 
   it("rejects a malformed poll window at the boundary", async () => {

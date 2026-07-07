@@ -73,17 +73,21 @@ export interface HorizonScanResult {
 }
 
 /**
- * The read side: a driver's full stored history → deterministic horizon
- * math (./horizon.ts, pure). Thresholds/windows are per-tenant config with
- * defaults; every opportunity carries its reason strings.
+ * The read side: a driver's stored history — bounded to the config's
+ * `windowDays` behind `nowMs` (the clock is an argument, never read in
+ * core) — → deterministic horizon math (./horizon.ts, pure). Thresholds/
+ * windows are per-tenant config with defaults; every opportunity carries
+ * its reason strings. The bounded read is index-aligned and keeps the scan
+ * flat as append-only history grows (B6.7 volume readiness).
  */
 export async function runHorizonScan(
   ctx: TenantCtx,
   repos: Repos,
-  request: { source: string; config?: HorizonConfigInput },
+  request: { source: string; nowMs: number; config?: HorizonConfigInput },
 ): Promise<HorizonScanResult> {
   const config = horizonConfigSchema.parse(request.config ?? {});
-  const history = await repos.searchSnapshots.listBySource(ctx, request.source);
+  const since = new Date(request.nowMs - config.windowDays * 86_400_000);
+  const history = await repos.searchSnapshots.listBySource(ctx, request.source, { since });
   const points: SearchSnapshotPoint[] = history.map((row) => ({
     query: row.query,
     page: row.page,

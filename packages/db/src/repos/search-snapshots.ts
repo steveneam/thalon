@@ -1,5 +1,5 @@
 import type { TenantCtx } from "@thalon/contracts";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, gte } from "drizzle-orm";
 import { searchSnapshots } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
@@ -100,12 +100,27 @@ export function searchSnapshotsRepo(db: Db) {
         .orderBy(asc(searchSnapshots.capturedAt));
     },
 
-    /** A driver's full stored history in capture order — the cross-query sweep read. */
-    async listBySource(ctx: TenantCtx, source: string): Promise<SearchSnapshot[]> {
+    /**
+     * A driver's stored history in capture order — the cross-query sweep
+     * read. `since` bounds it (index-aligned:
+     * search_snapshots_tenant_source_captured_idx) — an append-only table
+     * read unbounded is the FIRST thing daily GSC volume degrades, so the
+     * horizon scan always passes its window (B6.7 volume readiness).
+     */
+    async listBySource(
+      ctx: TenantCtx,
+      source: string,
+      opts: { since?: Date } = {},
+    ): Promise<SearchSnapshot[]> {
+      const conditions = [
+        eq(searchSnapshots.tenantId, ctx.tenantId),
+        eq(searchSnapshots.source, source),
+      ];
+      if (opts.since) conditions.push(gte(searchSnapshots.capturedAt, opts.since));
       return db
         .select()
         .from(searchSnapshots)
-        .where(and(eq(searchSnapshots.tenantId, ctx.tenantId), eq(searchSnapshots.source, source)))
+        .where(and(...conditions))
         .orderBy(asc(searchSnapshots.capturedAt));
     },
   };
