@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
-import { FAQ, FEATURES, TIERS } from "@/lib/landing/copy";
+import { FAQ, FEATURES, NEW_WAY, OLD_WAY, STATS, TIERS } from "@/lib/landing/copy";
 import LandingPage from "@/app/page";
 
 /**
@@ -51,6 +51,29 @@ describe("landing page / (docs/FRONTEND.md §2)", () => {
     expect(container.querySelectorAll("details")).toHaveLength(FAQ.length);
     // …but fake was-price anchoring stays forbidden (honest-claims rule).
     expect(container.textContent).not.toMatch(/was \$|save \d+%/i);
+  });
+
+  it("renders the §8 uplift: honest proof band and the old-way/new-way strip", () => {
+    render(<LandingPage />);
+    for (const stat of STATS) {
+      expect(screen.getByText(stat.value)).toBeInTheDocument();
+    }
+    expect(screen.getByRole("heading", { name: OLD_WAY.title })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: NEW_WAY.title })).toBeInTheDocument();
+    expect(screen.getByText(NEW_WAY.items[0])).toBeInTheDocument();
+  });
+
+  it("links the blog from the shared header and footer (§9)", () => {
+    render(<LandingPage />);
+    const blogLinks = screen.getAllByRole("link", { name: /^blog$/i });
+    expect(blogLinks.length).toBeGreaterThanOrEqual(2);
+    for (const link of blogLinks) {
+      expect(link).toHaveAttribute("href", "/blog");
+    }
+    expect(screen.getByRole("link", { name: /rss feed/i })).toHaveAttribute(
+      "href",
+      "/blog/rss.xml",
+    );
   });
 
   it("embeds Organization + FAQPage JSON-LD generated from the visible FAQ (A13)", () => {

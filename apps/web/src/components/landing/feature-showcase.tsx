@@ -9,7 +9,16 @@ import { FeatureLoop } from "./feature-loops";
  * bottom, click → popout modal playing the feature loop. Side-scroll with
  * snap under md, 3-up grid above. The modal is a native <dialog> — focus
  * trap, Esc, and backdrop come from the platform, not a dependency.
+ * §8.3 card pull: a pointer-tracked spotlight — the handler only writes
+ * two CSS vars; `.card-spotlight` (globals.css) renders the glow, and
+ * touch devices never see it (hover-gated).
  */
+function trackSpotlight(event: React.PointerEvent<HTMLElement>) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  event.currentTarget.style.setProperty("--spot-x", `${event.clientX - rect.left}px`);
+  event.currentTarget.style.setProperty("--spot-y", `${event.clientY - rect.top}px`);
+}
+
 export function FeatureShowcase() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState<Feature | null>(null);
@@ -35,7 +44,8 @@ export function FeatureShowcase() {
             role="listitem"
             type="button"
             onClick={() => show(feature)}
-            className="group w-[82%] shrink-0 snap-center rounded-xl border bg-card text-left transition-colors hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none md:w-auto"
+            onPointerMove={trackSpotlight}
+            className="card-spotlight group relative w-[82%] shrink-0 snap-center rounded-xl border bg-card text-left transition-colors hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none md:w-auto"
           >
             <div className="relative h-44 overflow-hidden rounded-t-xl border-b bg-background/40">
               <FeatureLoop feature={feature.key} />
