@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import { resolveProprietaryDir } from "../proprietary-dir";
 
-const profilesDir = fileURLToPath(new URL("../../../../proprietary/profiles", import.meta.url));
+const profilesDir = resolveProprietaryDir("profiles");
 
 /**
  * B2.4 exemplar knobs — config, never code (per-tenant/per-platform top-k

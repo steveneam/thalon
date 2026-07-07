@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { platformProfileSchema, type PlatformProfile } from "@thalon/contracts";
+import { resolveProprietaryDir } from "../proprietary-dir";
 
-const profilesDir = fileURLToPath(new URL("../../../../proprietary/profiles", import.meta.url));
+const profilesDir = resolveProprietaryDir("profiles");
 
 export interface LoadedPlatformProfile {
   platform: string;
