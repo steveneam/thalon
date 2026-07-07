@@ -9,11 +9,13 @@ import {
   type ObjectStore,
   type Tracer,
 } from "@thalon/platform";
+import { scoreAreaRelevance } from "./area-relevance";
 import type { CaptionFormat } from "./captions";
 import { chunkTimedSegments, DEFAULT_CHUNK_CONFIG, type ChunkConfig } from "./chunk";
 import { embedChunks, type EmbeddedChunk } from "./embed";
 import { createGatewayEmbeddingDriver, type EmbeddingDriver } from "./shell/embedder";
 import { getTranscriptProvider, type TranscriptProvider } from "./transcript";
+import { youTubeOEmbedTitleFetcher, type VideoTitleFetcher } from "./video-title";
 
 /**
  * B4.8 (B3.13 pass-2 thin cut): the video-URL ingest surface — paste a URL
@@ -31,6 +33,14 @@ import { getTranscriptProvider, type TranscriptProvider } from "./transcript";
  * bundle persists to `transcripts/<hash>.json` as the source's `raw_ref`
  * (B4.6 key scheme; swept as referenced). Live provider runs are pass 3 —
  * everything here is fake-driver-tested, zero spend.
+ *
+ * B6.6 rider (session-19 Library UX mini-contract — additive meta keys the
+ * web Library reads; pre-rider rows simply lack them, degrading honestly):
+ * `meta.title` (YouTube oEmbed, keyless/quota-free; the URL on any
+ * failure), `meta.tags` (operator-set, stored verbatim),
+ * `meta.areaRelevance` (the transcript's chunk-embedding centroid scored
+ * against the tenant's active monitored areas via the B6.4 ranker's
+ * embedding path — ./area-relevance.ts).
  */
 
 export interface VideoUrlIngestRequest {
@@ -39,12 +49,16 @@ export interface VideoUrlIngestRequest {
   /** Operator-supplied captions (caption-file provider); fetching providers ignore this. */
   captions?: string;
   captionFormat?: CaptionFormat;
+  /** Operator-set library tags — stored verbatim as `meta.tags` (session-19 mini-contract). */
+  tags?: string[];
   meta?: Record<string, unknown>;
 }
 
 export interface VideoUrlIngestDeps {
   /** Explicit provider override (tests / callers); defaults to the env-selected registry driver. */
   transcriptProvider?: TranscriptProvider;
+  /** Display-title seam (tests inject; default = keyless YouTube oEmbed). */
+  titleFetcher?: VideoTitleFetcher;
   embedder?: EmbeddingDriver;
   tracer?: Tracer;
   objectStore?: ObjectStore;
@@ -108,6 +122,22 @@ export async function ingestVideoUrl(
   const rawRef = objectKey("transcripts", contentHash, "json");
   await objectStore.put(rawRef, transcriptJson);
 
+  // B6.6 rider metadata — NEVER blocks ingest: the title seam degrades to
+  // the URL (belt-and-braces catch in case an injected fetcher throws), and
+  // areaRelevance is absent when there are no active areas / no embeddings.
+  let fetchedTitle: string | null = null;
+  try {
+    fetchedTitle = await (deps.titleFetcher ?? youTubeOEmbedTitleFetcher()).fetchTitle(request.url);
+  } catch {
+    fetchedTitle = null;
+  }
+  const areaRelevance = await scoreAreaRelevance(
+    ctx,
+    repos,
+    { vectors: embedded.map((e) => e.embedding), capTokens },
+    { embedder: deps.embedder, tracer: deps.tracer, objectStore },
+  );
+
   const { source, chunks: persisted } = await repos.sourceChunks.ingest(ctx, {
     kind: "video_transcript",
     contentHash,
@@ -116,6 +146,9 @@ export async function ingestVideoUrl(
     meta: {
       transcriptProvider: provider.name,
       segmentCount: segments.length,
+      title: fetchedTitle ?? request.url,
+      ...(request.tags?.length ? { tags: request.tags } : {}),
+      ...(areaRelevance ? { areaRelevance } : {}),
       ...request.meta,
     },
     chunks: chunks.map((chunk, i) => ({
