@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -45,8 +46,18 @@ function resolveMigrationsFolder(): string {
 const migrationsFolder = resolveMigrationsFolder();
 
 export interface DbHandle {
-  /** Tenant-scoped repositories — the ONLY database API this package exports (SPINE §2.6). */
+  /** Tenant-scoped repositories — the ONLY database QUERY API this package exports (SPINE §2.6). */
   repos: Repos;
+  /**
+   * B6.7 backup hook (ADR 0007 decision 5): writes a consistent gzip
+   * tarball of the embedded database to `targetPath`. PGlite has no server
+   * socket, so `pg_dump` cannot attach from outside, and a raw file-level
+   * snapshot of a live data dir can be torn mid-write — the export must
+   * come from the ONE process that owns the database. Temp-file + rename
+   * so a concurrently running backup pass never sees a half-written dump.
+   * Export-only by design — never a query side door around repos.
+   */
+  dumpTo(targetPath: string): Promise<{ bytes: number }>;
   close(): Promise<void>;
 }
 
@@ -55,6 +66,15 @@ async function open(client: DbClient): Promise<DbHandle> {
   await migrate(db, { migrationsFolder });
   return {
     repos: createRepos(db),
+    dumpTo: async (targetPath: string) => {
+      const blob = await client.dumpDataDir("gzip");
+      const bytes = Buffer.from(await blob.arrayBuffer());
+      await mkdir(path.dirname(targetPath), { recursive: true });
+      const tmpPath = `${targetPath}.tmp`;
+      await writeFile(tmpPath, bytes);
+      await rename(tmpPath, targetPath);
+      return { bytes: bytes.byteLength };
+    },
     close: () => client.close(),
   };
 }
