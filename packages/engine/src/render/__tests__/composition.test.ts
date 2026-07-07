@@ -1,69 +1,18 @@
-import { directionDocSchema, type DirectionDoc } from "@thalon/contracts";
 import { describe, expect, it } from "vitest";
 import { deriveDirectionExport } from "../../direction/export";
 import {
-  COMPOSITION_GSAP_SRC,
   GENERIC_BRAND_STYLE,
-  MOTION_EASING,
   PILLAR_COMPOSITION,
   compositionSpecFromDirectionExport,
   compositionSpecFromPillarManifest,
+  defaultCueMotion,
   deriveBrandStyle,
   escapeHtml,
-  renderCompositionHtml,
+  hexToRgba,
   secondsLiteral,
-  type CompositionSpec,
+  shiftHex,
 } from "../composition";
-import { assertCompositionSafe } from "../composition-lint";
-import { derivePillarTimeline } from "../srt";
-import type { PillarRenderManifest } from "../target";
-
-function pillarManifest(identity: Record<string, unknown> = { company: "Self" }): PillarRenderManifest {
-  return {
-    manifestVersion: "pillar-render.v1",
-    tenantId: "tenant-1",
-    title: "Docs that demo themselves",
-    timeline: derivePillarTimeline({
-      hook: "What if your docs wrote their own demo?",
-      beats: [
-        { beatIndex: 0, narration: "Thalon reads your site and drafts the script." },
-        { beatIndex: 1, narration: "You approve. It ships.", durationHintMs: 2_000, onScreenText: "Approve → ship" },
-      ],
-      cta: "Try the demo tenant today.",
-    }),
-    brand: { profileId: "profile-1", profileVersion: 1, identity, voice: {} },
-    script: { promptVersion: "pillar-script-generate.v1", brandProfileVersion: 1, platformProfileVersion: "pillar.v1" },
-  };
-}
-
-const DIRECTION_DOC: DirectionDoc = directionDocSchema.parse({
-  docVersion: "direction.v1",
-  title: "Launch teaser",
-  aspect: "9:16",
-  fps: 24,
-  pacing: "fast",
-  scenes: [
-    {
-      sceneIndex: 0,
-      heading: "The problem",
-      narration: "Shipping content by hand does not scale.",
-      onScreenText: "Manual does not scale",
-      visual: "cluttered desk",
-      motion: "bouncy",
-      durationMs: 3_000,
-    },
-    {
-      sceneIndex: 1,
-      heading: "The fix",
-      narration: "One prompt in, judged drafts out.",
-      onScreenText: null,
-      visual: null,
-      motion: "dramatic",
-      durationMs: 2_500,
-    },
-  ],
-  cta: "See it run.",
-});
+import { DIRECTION_DOC, pillarManifest } from "./composition-fixtures";
 
 describe("secondsLiteral", () => {
   it("emits canonical decimal seconds", () => {
@@ -84,6 +33,20 @@ describe("escapeHtml", () => {
     expect(escapeHtml(`<script>alert("x") & 'y'</script>`)).toBe(
       "&lt;script&gt;alert(&quot;x&quot;) &amp; &#39;y&#39;&lt;/script&gt;",
     );
+  });
+});
+
+describe("color helpers", () => {
+  it("hexToRgba emits canonical rgba (3- and 6-digit inputs)", () => {
+    expect(hexToRgba("#161411", 0.4)).toBe("rgba(22, 20, 17, 0.4)");
+    expect(hexToRgba("#fff", 1)).toBe("rgba(255, 255, 255, 1)");
+  });
+
+  it("shiftHex lightens toward white and darkens toward black, deterministically", () => {
+    expect(shiftHex("#000000", 0.1)).toBe("#1a1a1a");
+    expect(shiftHex("#ffffff", -0.5)).toBe("#808080");
+    expect(shiftHex("#161411", 0.1)).toBe("#2d2c29");
+    expect(shiftHex("#161411", 0.1)).toBe(shiftHex("#161411", 0.1));
   });
 });
 
@@ -115,6 +78,15 @@ describe("deriveBrandStyle", () => {
   });
 });
 
+describe("defaultCueMotion", () => {
+  it("varies deterministically: hook punches, cta lands, beats alternate — no more all-smooth", () => {
+    expect(defaultCueMotion(0, 5)).toBe("snappy");
+    expect(defaultCueMotion(4, 5)).toBe("dramatic");
+    expect(defaultCueMotion(1, 5)).toBe("smooth");
+    expect(defaultCueMotion(2, 5)).toBe("snappy");
+  });
+});
+
 describe("compositionSpecFromPillarManifest", () => {
   it("bakes the pillar compile-time constants and maps the timeline 1:1", () => {
     const manifest = pillarManifest();
@@ -128,6 +100,23 @@ describe("compositionSpecFromPillarManifest", () => {
     expect(spec.cues.map((c) => c.text)).toEqual(manifest.timeline.cues.map((c) => c.text));
     expect(spec.cues[2].onScreenText).toBe("Approve → ship");
     expect(spec.brand.watermark).toBe("Self");
+    expect(spec.audio).toBeNull();
+  });
+
+  it("takes motion/transition from DECORATED cues and falls back to the deterministic defaults", () => {
+    const manifest = pillarManifest();
+    const spec = compositionSpecFromPillarManifest(manifest);
+    // Undecorated: varied defaults, deterministic transition cycle.
+    expect(spec.cues.map((c) => c.motion)).toEqual(["snappy", "smooth", "snappy", "dramatic"]);
+    expect(spec.cues[0].transition).toBe("cut");
+    expect(spec.cues[1].transition).toBe("push");
+    expect(spec.cues[2].transition).toBe("dissolve");
+
+    manifest.timeline.cues[1].motion = "bouncy";
+    manifest.timeline.cues[1].transition = "flash";
+    const decorated = compositionSpecFromPillarManifest(manifest);
+    expect(decorated.cues[1].motion).toBe("bouncy");
+    expect(decorated.cues[1].transition).toBe("flash");
   });
 });
 
@@ -142,79 +131,7 @@ describe("compositionSpecFromDirectionExport", () => {
     expect(spec.durationMs).toBe(exported.timeline.totalDurationMs);
     expect(spec.cues[0].motion).toBe("bouncy");
     expect(spec.cues[0].heading).toBe("The problem");
-    // The derived CTA cue carries no motion — the default fills it.
-    expect(spec.cues[2].motion).toBe("smooth");
-  });
-});
-
-describe("renderCompositionHtml", () => {
-  it("is deterministic: same spec, same bytes", () => {
-    const spec = compositionSpecFromPillarManifest(pillarManifest());
-    expect(renderCompositionHtml(spec)).toBe(renderCompositionHtml(spec));
-  });
-
-  it("bakes root width/height/duration as compile-time literals and registers ONE paused, end-padded timeline", () => {
-    const manifest = pillarManifest();
-    const html = renderCompositionHtml(compositionSpecFromPillarManifest(manifest));
-    const durationSec = secondsLiteral(manifest.timeline.totalDurationMs);
-    expect(html).toContain(`data-width="1920"`);
-    expect(html).toContain(`data-height="1080"`);
-    expect(html).toContain(`data-duration="${durationSec}"`);
-    expect(html).toContain(`<script src="${COMPOSITION_GSAP_SRC}"></script>`);
-    expect(html).toContain("gsap.timeline({ paused: true })");
-    expect(html).toContain(`tl.set({}, {}, ${durationSec});`);
-    expect(html).toContain(`window.__timelines["main"] = tl;`);
-    // One clip per cue, each with literal data-start/data-duration.
-    for (const [i, cue] of manifest.timeline.cues.entries()) {
-      expect(html).toContain(
-        `<div id="cue-${i}" class="clip cue" data-start="${secondsLiteral(cue.startMs)}" data-duration="${secondsLiteral(cue.endMs - cue.startMs)}" data-track-index="2">`,
-      );
-    }
-  });
-
-  it("maps motion → pinned GSAP easings and pacing → pinned tween seconds", () => {
-    const exported = deriveDirectionExport(DIRECTION_DOC);
-    const html = renderCompositionHtml(compositionSpecFromDirectionExport(exported, {}));
-    expect(html).toContain(`duration: 0.2, ease: "${MOTION_EASING.bouncy}"`);
-    expect(html).toContain(`duration: 0.2, ease: "${MOTION_EASING.dramatic}"`);
-  });
-
-  it("HTML-escapes all judged content — markup in a narration cannot become markup in the composition", () => {
-    const manifest = pillarManifest();
-    manifest.timeline.cues[0].text = `<script>fetch("https://evil.test")</script>`;
-    const html = renderCompositionHtml(compositionSpecFromPillarManifest(manifest));
-    expect(html).not.toContain(`<script>fetch(`);
-    expect(html).toContain("&lt;script&gt;fetch(&quot;https://evil.test&quot;)&lt;/script&gt;");
-    // The escaped content is inert to the lint gate too (it scans script bodies, not text).
-    expect(() => assertCompositionSafe(html)).not.toThrow();
-  });
-
-  it("passes the core forbidden-pattern gate for both entry mappings (the generator cannot emit the forbidden list, by construction)", () => {
-    const pillarHtml = renderCompositionHtml(compositionSpecFromPillarManifest(pillarManifest()));
-    const directionHtml = renderCompositionHtml(
-      compositionSpecFromDirectionExport(deriveDirectionExport(DIRECTION_DOC), { company: "Fernwood" }),
-    );
-    expect(() => assertCompositionSafe(pillarHtml)).not.toThrow();
-    expect(() => assertCompositionSafe(directionHtml)).not.toThrow();
-  });
-
-  it("omits the watermark clip when the identity has no company", () => {
-    const html = renderCompositionHtml(compositionSpecFromPillarManifest(pillarManifest({})));
-    expect(html).not.toContain(`id="brand-watermark"`);
-  });
-
-  it("refuses an empty timeline and out-of-policy interpolation slots", () => {
-    const spec: CompositionSpec = {
-      ...compositionSpecFromPillarManifest(pillarManifest()),
-      cues: [],
-    };
-    expect(() => renderCompositionHtml(spec)).toThrow(/no cues/);
-
-    const badId = { ...compositionSpecFromPillarManifest(pillarManifest()), compositionId: `x"]; alert(1); //` };
-    expect(() => renderCompositionHtml(badId)).toThrow(/composition id/);
-
-    const badBrand = compositionSpecFromPillarManifest(pillarManifest());
-    badBrand.brand = { ...badBrand.brand, accentColor: "url(https://evil.test)" };
-    expect(() => renderCompositionHtml(badBrand)).toThrow(/character policy/);
+    // The derived CTA cue carries no motion — the varied default fills it (last cue lands dramatic).
+    expect(spec.cues[2].motion).toBe("dramatic");
   });
 });

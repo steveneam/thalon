@@ -1,4 +1,6 @@
+import type { DirectionMotion } from "@thalon/contracts";
 import type { PillarScriptDraftMeta } from "../origination/schemas";
+import type { CompositionTransition } from "./composition-transitions";
 
 /**
  * B3.10 deterministic caption core (SPINE §1: pure — no I/O, no clock; same
@@ -25,6 +27,17 @@ export interface PillarTimelineCue {
   visualHint: string | null;
   startMs: number;
   endMs: number;
+  /**
+   * Composition-v2 direction decorations (./cue-direction.ts) — OPTIONAL and
+   * NEVER set by derivePillarTimeline, so undecorated timelines (and every
+   * pinned manifest hash built from them) stay byte-identical under
+   * stableStringify. Data wins in the composition mapping; absence falls to
+   * the deterministic defaults.
+   */
+  motion?: DirectionMotion;
+  transition?: CompositionTransition;
+  /** Operator SFX-pack accent id (resolved OUTSIDE the repo; packs are operator data). */
+  sfx?: string;
 }
 
 export interface PillarTimeline {

@@ -1,14 +1,20 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
-  assertCompositionSafe,
+  assertCompositionProjectSafe,
   hyperframesLinter,
   runCompositionLintGate,
   type CompositionLinter,
 } from "./composition-lint";
-import { compositionSpecFromPillarManifest, renderCompositionHtml } from "./composition";
-import type { PillarRenderArtifacts, PillarRenderRequest, RenderTarget } from "./target";
+import {
+  compositionSpecFromPillarManifest,
+  type CaptionWord,
+  type CompositionAudio,
+  type CompositionSpec,
+} from "./composition";
+import { renderCompositionProject } from "./composition-project";
+import type { PillarRenderArtifacts, PillarRenderRequest, PillarRenderManifest, RenderTarget } from "./target";
 
 /**
  * B5.1 (amendment A11): the DEFAULT RenderTarget — Hyperframes, HeyGen's
@@ -19,9 +25,12 @@ import type { PillarRenderArtifacts, PillarRenderRequest, RenderTarget } from ".
  *
  * Pipeline, in order — the lint gates run BEFORE any chromium spend:
  *
- *   manifest → composition spec → deterministic HTML (./composition.ts)
- *     → belt 1: assertCompositionSafe (own forbidden-pattern scan, always)
- *     → belt 2: @hyperframes/lint static analysis (injectable seam)
+ *   manifest → composition spec (+ optional audio bundle from the injected
+ *   provider) → deterministic multi-file project (./composition-project.ts,
+ *   scene-per-beat sub-compositions)
+ *     → belt 1: assertCompositionProjectSafe (own forbidden-pattern scan
+ *       per file + cross-file src/id checks, always)
+ *     → belt 2: @hyperframes/lint static analysis per file (injectable seam)
  *     → @hyperframes/producer createRenderJob/executeRenderJob → MP4
  *
  * Read-only driver contract (B3.10): this target persists NOTHING — it
@@ -101,6 +110,28 @@ async function loadProducerModule(): Promise<HyperframesProducerModule> {
   }
 }
 
+/** One cue's audio artifacts as the injected provider returns them — bytes plus timings; the target owns file naming and writing. */
+export interface RenderAudioCue {
+  wav: Buffer;
+  durationMs: number;
+  words: CaptionWord[];
+}
+
+/**
+ * The audio-tier seam (composition v2): injected CONFIG on this target —
+ * the `RenderTarget` interface and every manifest byte stay untouched.
+ * Arrays align by cue index (null = silent cue). `bed` is the honest empty
+ * seam for audio v2.5's operator-licensed music: the plumbing exists,
+ * nothing in-tree ever supplies a file (engaging-clips §6, founder-ratified).
+ */
+export interface RenderAudioBundle {
+  narration: Array<RenderAudioCue | null>;
+  sfx?: Array<Buffer | null>;
+  bed?: { wav: Buffer; volume: number } | null;
+}
+
+export type RenderAudioProvider = (manifest: PillarRenderManifest) => Promise<RenderAudioBundle | null>;
+
 export interface HyperframesTargetDeps {
   /** Encode preset (pinned: draft CRF 28 · standard CRF 18 "visually lossless at 1080p" · high CRF 15). Default "standard". */
   quality?: "draft" | "standard" | "high";
@@ -113,22 +144,83 @@ export interface HyperframesTargetDeps {
   producer?: () => Promise<HyperframesProducerModule>;
   /** Injectable belt-2 linter (default: @hyperframes/lint). */
   linter?: CompositionLinter;
+  /** Optional audio bundle per manifest (narration/sfx/bed) — see RenderAudioBundle. */
+  audio?: RenderAudioProvider;
+}
+
+interface AudioFilePlan {
+  spec: CompositionAudio;
+  files: Array<{ fileName: string; bytes: Buffer }>;
+}
+
+function planAudioFiles(bundle: RenderAudioBundle, spec: CompositionSpec): AudioFilePlan {
+  if (bundle.narration.length !== spec.cues.length) {
+    throw new HyperframesRenderError(
+      `audio bundle carries ${bundle.narration.length} narration entries for ${spec.cues.length} cues — tracks align by cue index`,
+      "engine",
+    );
+  }
+  const sfx = bundle.sfx ?? spec.cues.map(() => null);
+  if (sfx.length !== spec.cues.length) {
+    throw new HyperframesRenderError(
+      `audio bundle carries ${sfx.length} sfx entries for ${spec.cues.length} cues — tracks align by cue index`,
+      "engine",
+    );
+  }
+  const files: Array<{ fileName: string; bytes: Buffer }> = [];
+  const audio: CompositionAudio = {
+    narration: bundle.narration.map((cue, i) => {
+      if (!cue) return null;
+      const fileName = `audio/cue-${i}.wav`;
+      files.push({ fileName, bytes: cue.wav });
+      return { fileName, durationMs: cue.durationMs, words: cue.words };
+    }),
+    sfx: sfx.map((bytes, i) => {
+      if (!bytes) return null;
+      const fileName = `audio/sfx-${i}.wav`;
+      files.push({ fileName, bytes });
+      return { fileName };
+    }),
+    bed: (() => {
+      if (!bundle.bed) return null;
+      const fileName = "audio/bed.wav";
+      files.push({ fileName, bytes: bundle.bed.wav });
+      return { fileName, volume: bundle.bed.volume };
+    })(),
+  };
+  return { spec: audio, files };
 }
 
 export function createHyperframesRenderTarget(deps: HyperframesTargetDeps = {}): RenderTarget {
   return {
     name: "hyperframes",
     async render(request: PillarRenderRequest): Promise<PillarRenderArtifacts> {
-      const spec = compositionSpecFromPillarManifest(request.manifest);
-      const html = renderCompositionHtml(spec);
+      let spec = compositionSpecFromPillarManifest(request.manifest);
+      const bundle = deps.audio ? await deps.audio(request.manifest) : null;
+      const audioPlan = bundle ? planAudioFiles(bundle, spec) : null;
+      if (audioPlan) spec = { ...spec, audio: audioPlan.spec };
+
+      const { files } = renderCompositionProject(spec);
 
       // The gates, in order, BEFORE any chromium/render spend.
-      assertCompositionSafe(html);
-      await runCompositionLintGate(html, deps.linter ?? hyperframesLinter());
+      assertCompositionProjectSafe(files);
+      const linter = deps.linter ?? hyperframesLinter();
+      for (const html of Object.values(files)) {
+        await runCompositionLintGate(html, linter);
+      }
 
       const producer = await (deps.producer ?? loadProducerModule)();
       const jobDir = await mkdtemp(path.join(deps.workDir ?? tmpdir(), "thalon-hyperframes-"));
-      await writeFile(path.join(jobDir, "index.html"), html, "utf8");
+      for (const [name, html] of Object.entries(files)) {
+        const filePath = path.join(jobDir, name);
+        await mkdir(path.dirname(filePath), { recursive: true });
+        await writeFile(filePath, html, "utf8");
+      }
+      for (const { fileName, bytes } of audioPlan?.files ?? []) {
+        const filePath = path.join(jobDir, fileName);
+        await mkdir(path.dirname(filePath), { recursive: true });
+        await writeFile(filePath, bytes);
+      }
       const outputPath = path.join(jobDir, "video.mp4");
 
       const job = producer.createRenderJob({

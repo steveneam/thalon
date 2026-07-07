@@ -1,33 +1,33 @@
 import type { DirectionMotion, DirectionPacing } from "@thalon/contracts";
 import type { DirectionExport } from "../direction/export";
 import type { PillarRenderManifest } from "./target";
+import { defaultTransition, type CompositionTransition } from "./composition-transitions";
 
 /**
- * B5.1 deterministic HTML composition generator (amendment A11; SPINE §1
- * core — no I/O, no clock; same spec in, same bytes out). One template, two
- * deterministic entry mappings: the B3.10 pillar render manifest and the
- * B5.2 direction export. The composition contract is Hyperframes' (pinned
- * by `docs/research/hyperframes-integration.md` and verified against the
- * official `hyperframes init` scaffold at 0.7.33):
+ * The deterministic composition SPEC model (B5.1, raised to composition v2
+ * in Sprint 6 wave 3.5; SPINE §1 core — no I/O, no clock; same spec in,
+ * same bytes out). One spec, two deterministic entry mappings: the B3.10
+ * pillar render manifest and the B5.2 direction export. The HTML emission
+ * itself lives in ./composition-project.ts (scene-per-beat sub-compositions
+ * per the Hyperframes contract pinned by
+ * docs/research/hyperframes-integration.md and re-verified at 0.7.33).
  *
- *   - root `<div id="root" data-composition-id data-start="0"
- *     data-duration data-width data-height>` — width/height/duration are
- *     COMPILE-TIME literals baked from the manifest/direction export, never
- *     script- or variable-settable (fps is baked into the render job the
- *     same way; it is a producer parameter, not markup).
- *   - every visual element is a `class="clip"` div with literal
- *     `data-start`/`data-duration` seconds (framework-managed visibility).
- *   - one GSAP timeline, created `paused: true`, registered under
- *     `window.__timelines[<composition-id>]`, absolute-positioned tweens
- *     only, end-padded so timeline duration == composition duration.
+ * v2 raises the craft floor for EVERY video the engine renders
+ * (docs/research/engaging-clips.md §5 item 1):
+ *   - per-cue MOTION comes from data (direction scenes / decorated pillar
+ *     cues), with a deterministic varied fallback — no more pinning every
+ *     cue to "smooth";
+ *   - per-cue TRANSITION selects from the curated catalog-derived enum
+ *     (./composition-transitions.ts), deterministic cycle when unauthored;
+ *   - optional per-cue narration audio + word timings (the TTS seam,
+ *     ./narration.ts) drive karaoke captions and <audio> clips.
  *
  * The forbidden patterns (Date.now / rAF / Math.random / render-time
  * fetches / media playback control / non-paused or infinite timelines /
- * script-set root duration) are impossible BY CONSTRUCTION: the only
- * script this template emits is the fixed timeline block below, built
- * from enum-mapped easings and numeric offsets; all judged content is
- * HTML-escaped into markup, never into script. ./composition-lint.ts is
- * the belt-and-braces re-check.
+ * script-set root duration) stay impossible BY CONSTRUCTION: the emitters
+ * assemble fixed tween vocabularies from enum-mapped easings and numeric
+ * offsets; all judged content is HTML-escaped into markup, never into
+ * script. ./composition-lint.ts is the belt-and-braces re-check.
  *
  * Brand styling is DATA from the tenant's active profile identity (never
  * code): the optional `identity.style` object may carry `background`,
@@ -63,14 +63,54 @@ export const PACING_SECONDS: Record<DirectionPacing, number> = {
   slow: 0.6,
 };
 
+/**
+ * The v2 fallback when a cue carries NO authored motion: a deterministic
+ * varied assignment (hook punches, CTA lands, beats alternate) instead of
+ * pinning everything to "smooth". Authored motion always wins.
+ */
+export function defaultCueMotion(cueIndex: number, cueCount: number): DirectionMotion {
+  if (cueIndex === 0) return "snappy";
+  if (cueIndex === cueCount - 1) return "dramatic";
+  return cueIndex % 2 === 1 ? "smooth" : "snappy";
+}
+
+/** One word of a cue's caption, cue-relative ms — from real TTS word alignment when the audio seam is armed, else deterministically estimated. */
+export interface CaptionWord {
+  text: string;
+  startMs: number;
+  endMs: number;
+}
+
+/** A cue's narration clip as the composition consumes it: a file NAME under the project's audio/ dir (the render target writes the bytes) + timings. */
+export interface CueNarrationClip {
+  fileName: string;
+  durationMs: number;
+  words: CaptionWord[];
+}
+
+/**
+ * The composition's audio track set — all optional, all data. `bed` is the
+ * honest empty seam for audio v2.5's operator-licensed music (engaging-clips
+ * §6 rung 1): the mount exists, nothing in-tree ever provides a file.
+ */
+export interface CompositionAudio {
+  /** By cue index; null = silent cue. */
+  narration: Array<CueNarrationClip | null>;
+  /** By cue index; accent SFX are operator-pack data resolved outside the composition. */
+  sfx: Array<{ fileName: string } | null>;
+  bed: { fileName: string; volume: number } | null;
+}
+
 export interface CompositionCue {
   /** Small kicker line above the narration (direction scenes only). */
   heading: string | null;
   /** The narrated line — the cue's main on-screen copy. */
   text: string;
-  /** Emphasized overlay copy (accent-colored). */
+  /** Emphasized overlay copy (accent-colored; a leading integer renders as a count-up stat block). */
   onScreenText: string | null;
   motion: DirectionMotion;
+  /** How this cue's scene ENTERS (ignored for cue 0 — nothing precedes it). */
+  transition: CompositionTransition;
   startMs: number;
   endMs: number;
 }
@@ -85,7 +125,7 @@ export interface CompositionBrandStyle {
   watermark: string | null;
 }
 
-/** The complete, self-contained input renderCompositionHtml consumes — everything compile-time, nothing left to the render environment. */
+/** The complete, self-contained input the project emitter consumes — everything compile-time, nothing left to the render environment. */
 export interface CompositionSpec {
   compositionId: string;
   title: string;
@@ -96,6 +136,8 @@ export interface CompositionSpec {
   pacing: DirectionPacing;
   brand: CompositionBrandStyle;
   cues: CompositionCue[];
+  /** null = today's silent composition; set by the render target when its audio seam is armed. */
+  audio: CompositionAudio | null;
 }
 
 export const GENERIC_BRAND_STYLE: Omit<CompositionBrandStyle, "watermark"> = {
@@ -141,14 +183,15 @@ function assertPositiveInt(name: string, value: number): void {
 }
 
 const COMPOSITION_ID_PATTERN = /^[a-z][a-z0-9-]{0,40}$/;
+const AUDIO_FILE_NAME_PATTERN = /^audio\/[a-z0-9][a-z0-9-]*\.wav$/;
 
 /**
  * Every value the template interpolates OUTSIDE an HTML-escaped text slot
- * (attribute ids, CSS tokens, script string literals) is re-validated here —
- * deriveBrandStyle already enforces the patterns, but the renderer must hold
- * its own invariant against hand-built specs.
+ * (attribute ids, CSS tokens, script string literals, audio file names) is
+ * re-validated here — deriveBrandStyle already enforces the patterns, but
+ * the emitter must hold its own invariant against hand-built specs.
  */
-function assertSpecRenderable(spec: CompositionSpec): void {
+export function assertSpecRenderable(spec: CompositionSpec): void {
   assertPositiveInt("width", spec.width);
   assertPositiveInt("height", spec.height);
   assertPositiveInt("fps", spec.fps);
@@ -169,10 +212,23 @@ function assertSpecRenderable(spec: CompositionSpec): void {
       throw new Error(`composition brand ${name} "${value}" fails its character policy — style tokens must come through deriveBrandStyle`);
     }
   }
+  if (spec.audio) {
+    const names = [
+      ...spec.audio.narration.filter((n) => n !== null).map((n) => n.fileName),
+      ...spec.audio.sfx.filter((s) => s !== null).map((s) => s.fileName),
+      ...(spec.audio.bed ? [spec.audio.bed.fileName] : []),
+    ];
+    for (const fileName of names) {
+      if (!AUDIO_FILE_NAME_PATTERN.test(fileName)) {
+        throw new Error(`composition audio file name "${fileName}" must match ${AUDIO_FILE_NAME_PATTERN} — names are template slots, the render target writes the bytes`);
+      }
+    }
+  }
 }
 
-/** The B3.10 seam's mapping: pillar render manifest → composition spec (pillar constants are compile-time; brand styling from the manifest's render-time ACTIVE identity). */
+/** The B3.10 seam's mapping: pillar render manifest → composition spec (pillar constants are compile-time; brand styling from the manifest's render-time ACTIVE identity; motion/transition from decorated cues when present, deterministic defaults otherwise). */
 export function compositionSpecFromPillarManifest(manifest: PillarRenderManifest): CompositionSpec {
+  const count = manifest.timeline.cues.length;
   return {
     compositionId: "main",
     title: manifest.title,
@@ -182,14 +238,16 @@ export function compositionSpecFromPillarManifest(manifest: PillarRenderManifest
     durationMs: manifest.timeline.totalDurationMs,
     pacing: PILLAR_COMPOSITION_PACING,
     brand: deriveBrandStyle(manifest.brand.identity),
-    cues: manifest.timeline.cues.map((cue) => ({
+    cues: manifest.timeline.cues.map((cue, i) => ({
       heading: null,
       text: cue.text,
       onScreenText: cue.onScreenText,
-      motion: DEFAULT_CUE_MOTION,
+      motion: cue.motion ?? defaultCueMotion(i, count),
+      transition: cue.transition ?? defaultTransition(i),
       startMs: cue.startMs,
       endMs: cue.endMs,
     })),
+    audio: null,
   };
 }
 
@@ -198,6 +256,7 @@ export function compositionSpecFromDirectionExport(
   exported: DirectionExport,
   identity: Record<string, unknown>,
 ): CompositionSpec {
+  const count = exported.timeline.cues.length;
   return {
     compositionId: "main",
     title: exported.title,
@@ -207,14 +266,16 @@ export function compositionSpecFromDirectionExport(
     durationMs: exported.timeline.totalDurationMs,
     pacing: exported.pacing,
     brand: deriveBrandStyle(identity),
-    cues: exported.timeline.cues.map((cue) => ({
+    cues: exported.timeline.cues.map((cue, i) => ({
       heading: cue.heading,
       text: cue.text,
       onScreenText: cue.onScreenText,
-      motion: cue.motion ?? DEFAULT_CUE_MOTION,
+      motion: cue.motion ?? defaultCueMotion(i, count),
+      transition: defaultTransition(i),
       startMs: cue.startMs,
       endMs: cue.endMs,
     })),
+    audio: null,
   };
 }
 
@@ -233,124 +294,26 @@ export function secondsLiteral(ms: number): string {
   return (ms / 1000).toFixed(3).replace(/\.?0+$/, "");
 }
 
-/**
- * Composition spec → the complete single-file HTML composition. Pure string
- * assembly from validated inputs; the bytes are what the render cache's
- * determinism rests on (same manifest → same manifest hash → same HTML).
- */
-export function renderCompositionHtml(spec: CompositionSpec): string {
-  assertSpecRenderable(spec);
-  const durationSec = secondsLiteral(spec.durationMs);
-  const pacingSec = PACING_SECONDS[spec.pacing];
+/** Policy-validated hex (#rgb/#rrggbb, alpha channels ignored) → a canonical rgba() literal — the deterministic way brand colors pick up template-owned opacity. */
+export function hexToRgba(hex: string, alpha: number): string {
+  const body = hex.slice(1);
+  const full = body.length === 3 || body.length === 4 ? body.split("").map((c) => c + c).join("") : body;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
-  const clips: string[] = [];
-  if (spec.brand.watermark) {
-    clips.push(
-      `      <div id="brand-watermark" class="clip" data-start="0" data-duration="${durationSec}" data-track-index="1">${escapeHtml(spec.brand.watermark)}</div>`,
-    );
-  }
-  spec.cues.forEach((cue, i) => {
-    const parts: string[] = [];
-    if (cue.heading) parts.push(`<div class="cue-heading">${escapeHtml(cue.heading)}</div>`);
-    if (cue.onScreenText) {
-      parts.push(`<div class="cue-on-screen">${escapeHtml(cue.onScreenText)}</div>`);
-    }
-    parts.push(`<div class="cue-text">${escapeHtml(cue.text)}</div>`);
-    clips.push(
-      `      <div id="cue-${i}" class="clip cue" data-start="${secondsLiteral(cue.startMs)}" data-duration="${secondsLiteral(cue.endMs - cue.startMs)}" data-track-index="2">\n        ${parts.join("\n        ")}\n      </div>`,
-    );
-  });
-
-  const tweens = spec.cues
-    .map(
-      (cue, i) =>
-        `      tl.from("#cue-${i}", { opacity: 0, y: 24, duration: ${pacingSec}, ease: "${MOTION_EASING[cue.motion]}" }, ${secondsLiteral(cue.startMs)});`,
-    )
-    .join("\n");
-
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=${spec.width}, height=${spec.height}" />
-    <title>${escapeHtml(spec.title)}</title>
-    <script src="${COMPOSITION_GSAP_SRC}"></script>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        width: ${spec.width}px;
-        height: ${spec.height}px;
-        overflow: hidden;
-        background: ${spec.brand.background};
-      }
-      body {
-        font-family: "${spec.brand.fontFamily}", sans-serif;
-        color: ${spec.brand.textColor};
-      }
-      .cue {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: ${Math.round(spec.height / 12)}px ${Math.round(spec.width / 10)}px;
-      }
-      .cue-heading {
-        font-size: ${Math.round(spec.height / 36)}px;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        opacity: 0.7;
-        margin-bottom: ${Math.round(spec.height / 45)}px;
-      }
-      .cue-on-screen {
-        font-size: ${Math.round(spec.height / 15)}px;
-        font-weight: 700;
-        color: ${spec.brand.accentColor};
-        margin-bottom: ${Math.round(spec.height / 30)}px;
-      }
-      .cue-text {
-        font-size: ${Math.round(spec.height / 22)}px;
-        line-height: 1.35;
-        max-width: ${Math.round(spec.width * 0.8)}px;
-      }
-      #brand-watermark {
-        position: absolute;
-        left: ${Math.round(spec.width / 48)}px;
-        bottom: ${Math.round(spec.height / 27)}px;
-        font-size: ${Math.round(spec.height / 45)}px;
-        letter-spacing: 0.08em;
-        opacity: 0.6;
-      }
-    </style>
-  </head>
-  <body>
-    <div
-      id="root"
-      data-composition-id="${spec.compositionId}"
-      data-start="0"
-      data-duration="${durationSec}"
-      data-width="${spec.width}"
-      data-height="${spec.height}"
-    >
-${clips.join("\n")}
-    </div>
-
-    <script>
-      window.__timelines = window.__timelines || {};
-      const tl = gsap.timeline({ paused: true });
-${tweens}
-      tl.set({}, {}, ${durationSec});
-      window.__timelines["${spec.compositionId}"] = tl;
-    </script>
-  </body>
-</html>
-`;
+/** Deterministic lighten/darken for the depth gradient: shifts each channel toward white (positive) or black (negative) by `amount` 0–1, output canonical #rrggbb. */
+export function shiftHex(hex: string, amount: number): string {
+  const body = hex.slice(1);
+  const full = body.length === 3 || body.length === 4 ? body.split("").map((c) => c + c).join("") : body;
+  const shift = (channel: number) =>
+    amount >= 0
+      ? Math.round(channel + (255 - channel) * amount)
+      : Math.round(channel * (1 + amount));
+  const out = [full.slice(0, 2), full.slice(2, 4), full.slice(4, 6)]
+    .map((pair) => shift(parseInt(pair, 16)).toString(16).padStart(2, "0"))
+    .join("");
+  return `#${out}`;
 }

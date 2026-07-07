@@ -26,25 +26,80 @@ export {
   PACING_SECONDS,
   PILLAR_COMPOSITION,
   PILLAR_COMPOSITION_PACING,
+  assertSpecRenderable,
   compositionSpecFromDirectionExport,
   compositionSpecFromPillarManifest,
+  defaultCueMotion,
   deriveBrandStyle,
   escapeHtml,
-  renderCompositionHtml,
+  hexToRgba,
   secondsLiteral,
+  shiftHex,
+  type CaptionWord,
+  type CompositionAudio,
   type CompositionBrandStyle,
   type CompositionCue,
   type CompositionSpec,
+  type CueNarrationClip,
 } from "./composition";
+export {
+  GRAIN_STEP_MS,
+  renderCompositionProject,
+  type CompositionProject,
+} from "./composition-project";
+export {
+  COMPOSITION_TRANSITIONS,
+  DEFAULT_TRANSITION_CYCLE,
+  TRANSITION_RECIPES,
+  defaultTransition,
+  type CompositionTransition,
+  type TransitionProvenance,
+  type TransitionRecipe,
+} from "./composition-transitions";
+export {
+  HOOK_MAX_VISUAL_GAP_MS,
+  MAX_VISUAL_GAP_MS,
+  assertPacingDensity,
+  planAccentPulses,
+  type MotionEvent,
+  type MotionEventKind,
+  type MotionSchedule,
+} from "./composition-pacing";
+export {
+  estimateCaptionWords,
+  groupCaptionWords,
+  planStat,
+  type CaptionGroupPlan,
+  type ScenePlan,
+  type StatPlan,
+} from "./composition-scene";
+export { applyCueDirection, type CueDirective, type CueDirectives } from "./cue-direction";
 export {
   CompositionLintError,
   FORBIDDEN_SCRIPT_PATTERNS,
+  assertCompositionProjectSafe,
   assertCompositionSafe,
   hyperframesLinter,
   runCompositionLintGate,
   type CompositionLintFinding,
   type CompositionLinter,
 } from "./composition-lint";
+export {
+  DEFAULT_TTS_VOICE,
+  KOKORO_MODEL,
+  createFakeNarrationDriver,
+  createKokoroNarrationDriver,
+  estimatedAligner,
+  narrationCacheKey,
+  wavDurationMs,
+  withNarrationCache,
+  type KokoroTtsRunner,
+  type NarrationAligner,
+  type NarrationAlignment,
+  type NarrationArtifact,
+  type NarrationDriver,
+  type NarrationRequest,
+} from "./narration";
 export {
   DEFAULT_RENDER_TIMEOUT_MS,
   HYPERFRAMES_PRODUCER_PACKAGE,
@@ -54,6 +109,9 @@ export {
   type HyperframesProducerModule,
   type HyperframesRenderJob,
   type HyperframesTargetDeps,
+  type RenderAudioBundle,
+  type RenderAudioCue,
+  type RenderAudioProvider,
 } from "./hyperframes-target";
 export {
   RENDER_DRIVERS,

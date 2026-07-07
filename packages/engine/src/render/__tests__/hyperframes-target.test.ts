@@ -7,13 +7,16 @@ import { openTestDb, type DbHandle, type Draft, type Repos } from "@thalon/db";
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { pillarScriptDraftMetaSchema, type PillarScriptDraftMeta } from "../../origination/schemas";
-import { compositionSpecFromPillarManifest, renderCompositionHtml } from "../composition";
+import { compositionSpecFromPillarManifest } from "../composition";
+import { renderCompositionProject } from "../composition-project";
 import { CompositionLintError, type CompositionLinter } from "../composition-lint";
+import { createFakeNarrationDriver } from "../narration";
 import {
   HyperframesRenderError,
   createHyperframesRenderTarget,
   type HyperframesProducerModule,
   type HyperframesRenderJob,
+  type RenderAudioBundle,
 } from "../hyperframes-target";
 import { renderPillar } from "../render";
 import { derivePillarTimeline, renderSrt } from "../srt";
@@ -112,8 +115,60 @@ describe("createHyperframesRenderTarget (browser-free: fake producer module behi
     const call = producer.executeCalls[0];
     expect(call.outputPath).toBe(videoPath);
     expect(call.signal).toBeInstanceOf(AbortSignal);
-    const written = await readFile(path.join(call.projectDir, "index.html"), "utf8");
-    expect(written).toBe(renderCompositionHtml(compositionSpecFromPillarManifest(request.manifest)));
+    // The whole deterministic multi-file project lands in the work dir, byte-equal to the emitter's output.
+    const project = renderCompositionProject(compositionSpecFromPillarManifest(request.manifest));
+    for (const [name, html] of Object.entries(project.files)) {
+      expect(await readFile(path.join(call.projectDir, name), "utf8")).toBe(html);
+    }
+  });
+
+  it("writes the audio bundle's files and bakes narration timings into the composition (the RenderTarget seam itself stays untouched)", async () => {
+    const producer = fakeProducer();
+    const request = pillarRequest();
+    const narrationDriver = createFakeNarrationDriver();
+    const bundleForManifest = async (): Promise<RenderAudioBundle> => {
+      const cues = request.manifest.timeline.cues;
+      const narration = [];
+      for (const cue of cues) {
+        const artifact = await narrationDriver.synthesize({ text: cue.text, voice: "af_heart" });
+        narration.push({ wav: artifact.wav, durationMs: artifact.durationMs, words: artifact.words });
+      }
+      return { narration, sfx: cues.map((_, i) => (i === 1 ? Buffer.from("SFX") : null)) };
+    };
+    const target = createHyperframesRenderTarget({
+      producer: async () => producer.mod,
+      linter: passLinter,
+      workDir: tempDir("audio"),
+      audio: bundleForManifest,
+    });
+    await target.render(request);
+
+    const projectDir = producer.executeCalls[0].projectDir;
+    const root = await readFile(path.join(projectDir, "index.html"), "utf8");
+    expect(root).toContain(`<audio id="narration-0" src="audio/cue-0.wav"`);
+    expect(root).toContain(`<audio id="sfx-1" src="audio/sfx-1.wav"`);
+    expect(root).not.toContain("music-bed"); // the bed seam stays honestly empty
+    expect((await readFile(path.join(projectDir, "audio", "sfx-1.wav"))).toString("utf8")).toBe("SFX");
+    const wav0 = await readFile(path.join(projectDir, "audio", "cue-0.wav"));
+    expect(wav0.toString("ascii", 0, 4)).toBe("RIFF");
+    // Real word timings reached the karaoke layer of the scene file.
+    const scene0 = await readFile(path.join(projectDir, "compositions", "scene-0.html"), "utf8");
+    expect(scene0).toContain(`class="cw"`);
+  });
+
+  it("refuses a misaligned audio bundle before any producer spend", async () => {
+    let producerLoaded = false;
+    const target = createHyperframesRenderTarget({
+      producer: async () => {
+        producerLoaded = true;
+        return fakeProducer().mod;
+      },
+      linter: passLinter,
+      workDir: tempDir("misaligned"),
+      audio: async () => ({ narration: [null] }),
+    });
+    await expect(target.render(pillarRequest())).rejects.toThrow(/narration entries for 3 cues/);
+    expect(producerLoaded).toBe(false);
   });
 
   it("threads quality + workers overrides into the render job", async () => {
@@ -267,9 +322,12 @@ describe("renderPillar × hyperframes target (the B3.10 seam end-to-end, keyless
 
     // The composition the engine rendered came from EXACTLY the cached manifest bytes.
     const manifest = JSON.parse((await store.get(result.renderRef))!.toString("utf8")) as PillarRenderManifest;
+    const project = renderCompositionProject(compositionSpecFromPillarManifest(manifest));
     const written = await readFile(path.join(producer.executeCalls[0].projectDir, "index.html"), "utf8");
-    expect(written).toBe(renderCompositionHtml(compositionSpecFromPillarManifest(manifest)));
-    expect(written).toContain("#f2aa4c"); // brand styling from the ACTIVE profile, as data
+    expect(written).toBe(project.files["index.html"]);
+    // Brand styling from the ACTIVE profile, as data — the accent reaches the scene layer.
+    const scene = await readFile(path.join(producer.executeCalls[0].projectDir, "compositions", "scene-0.html"), "utf8");
+    expect(scene).toContain("#f2aa4c");
 
     const meta = pillarScriptDraftMetaSchema.parse((await repos.drafts.get(ctx, draft.id)).meta);
     expect(meta.renderStatus).toBe("rendered");
