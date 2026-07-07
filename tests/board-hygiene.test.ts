@@ -34,7 +34,11 @@ const BINARY_EXT = /\.(png|jpg|jpeg|gif|webp|ico|mp4|webm|mov|woff2?|ttf|otf|pdf
 const CONFLICT_MARKER = new RegExp(`^(${"<".repeat(7)}|${">".repeat(7)})( |$)`, "m");
 
 describe("board hygiene", () => {
-  it("no tracked file contains merge-conflict markers", () => {
+  // Explicit 30s timeout: this walks EVERY tracked file's bytes (~1s alone),
+  // which blows the 5s vitest default under full-suite disk contention on
+  // the dev box (183 files' workers competing) — the same load-flake class
+  // apps/web ratcheted with hookTimeout at wave 3.5. Seen 2026-07-08.
+  it("no tracked file contains merge-conflict markers", { timeout: 30_000 }, () => {
     const files = trackedFiles().filter((f) => !BINARY_EXT.test(f));
     expect(files.length).toBeGreaterThan(0);
     const offenders = files.filter((f) =>
