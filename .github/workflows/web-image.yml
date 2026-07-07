@@ -8,6 +8,13 @@ name: web-image
 on:
   push:
     branches: [main]
+    # Docs-only pushes (session wraps) don't touch the image — skip the
+    # runner entirely. Root-level *.md ONLY: proprietary/prompts/*.md ships
+    # IN the image and must keep triggering builds.
+    paths-ignore:
+      - "docs/**"
+      - "agent_handoff/**"
+      - "*.md"
   workflow_dispatch:
 
 permissions:

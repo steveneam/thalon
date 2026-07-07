@@ -7,6 +7,13 @@
 .context
 .claude
 agent_handoff
+# Docs never ship in the image — excluding them keeps the COPY layer
+# cache-stable across docs-only pushes (session wraps rebuilt an identical
+# app for ~5min before this). Root-level *.md only, DELIBERATELY: the
+# proprietary/prompts/*.md prompt files DO ship and must invalidate the
+# build when they change.
+docs
+*.md
 **/node_modules
 **/.next
 **/.next-dev
