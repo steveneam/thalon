@@ -17,8 +17,8 @@ import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local"
  * swept only by explicit human decision, never by this tool.
  */
 
-/** `sweeps/` (B6.5) is a mutable latest-sweep pointer per tenant — no db row references it by design, so orphan math must never see it. */
-const PROTECTED_PREFIXES = ["embeddings/", "sweeps/"] as const;
+/** `sweeps/` (B6.5) and `posts/` (B6.6) are mutable latest-wins pointers per tenant — no db row references them by design, so orphan math must never see them. */
+const PROTECTED_PREFIXES = ["embeddings/", "sweeps/", "posts/"] as const;
 const SHA256_TAIL = /[0-9a-f]{64}$/;
 
 export async function collectReferencedRefs(repos: Repos): Promise<Set<string>> {
