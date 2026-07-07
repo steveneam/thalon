@@ -117,13 +117,15 @@ function defaultKokoroRunner(): KokoroTtsRunner {
   return {
     run(textFile, voice, outWavPath): Promise<void> {
       return new Promise((resolve, reject) => {
+        // No env option: the child inherits the parent environment (telemetry
+        // opt-out is machine/environment CONFIG per ADR-0004 §5 — persisted by
+        // `hyperframes telemetry disable` and/or HYPERFRAMES_NO_TELEMETRY set by
+        // the environment; the engine reads no environment variables here —
+        // that stays the platform env choke point's job).
         const child = spawn(
           process.execPath,
           [resolvePinnedCli(), "tts", textFile, "-o", outWavPath, "-v", voice, "--json"],
-          {
-            windowsHide: true,
-            env: { ...process.env, HYPERFRAMES_NO_TELEMETRY: "1", HYPERFRAMES_SKIP_SKILLS: "1" },
-          },
+          { windowsHide: true },
         );
         let stdout = "";
         let stderr = "";
@@ -131,7 +133,7 @@ function defaultKokoroRunner(): KokoroTtsRunner {
         child.stderr.on("data", (d) => (stderr += d.toString()));
         child.on("error", (err) => reject(new Error(`kokoro tts failed to spawn the pinned CLI: ${err.message}`)));
         child.on("close", (code) => {
-          let parsed: { ok?: boolean; error?: string } | null = null;
+          let parsed: { ok?: boolean; error?: string } | null;
           try {
             parsed = JSON.parse(stdout) as { ok?: boolean; error?: string };
           } catch {
@@ -254,7 +256,7 @@ export function withNarrationCache(driver: NarrationDriver, dir: string): Narrat
       const wavPath = path.join(entryDir, "speech.wav");
       const metaPath = path.join(entryDir, "narration.json");
 
-      let metaRaw: string | null = null;
+      let metaRaw: string | null;
       try {
         metaRaw = await readFile(metaPath, "utf8");
       } catch {
