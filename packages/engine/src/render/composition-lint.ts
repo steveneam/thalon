@@ -140,6 +140,62 @@ export function assertCompositionSafe(html: string): void {
   if (findings.length > 0) throw new CompositionLintError("core forbidden-pattern", findings);
 }
 
+/**
+ * Project-level belt 1 (composition v2): every file passes the single-file
+ * scan, every `data-composition-src` the root references exists in the
+ * project, and composition ids stay unique — the cross-file mistakes a
+ * per-string scan cannot see. Same hard-stop semantics.
+ */
+export function assertCompositionProjectSafe(files: Record<string, string>): void {
+  const findings: CompositionLintFinding[] = [];
+  for (const [name, html] of Object.entries(files)) {
+    try {
+      assertCompositionSafe(html);
+    } catch (err) {
+      if (err instanceof CompositionLintError) {
+        findings.push(
+          ...err.findings.map((f) => ({ ...f, message: `${name}: ${f.message}` })),
+        );
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  const ids = new Map<string, string>();
+  for (const [name, html] of Object.entries(files)) {
+    const idRe = /data-composition-id="([^"]*)"/gi;
+    for (let m = idRe.exec(html); m !== null; m = idRe.exec(html)) {
+      const prior = ids.get(m[1]);
+      if (prior) {
+        findings.push({
+          code: "duplicate-composition-id",
+          severity: "error",
+          message: `composition id "${m[1]}" appears in both ${prior} and ${name} — timeline registration keys must be unique`,
+        });
+      } else {
+        ids.set(m[1], name);
+      }
+    }
+  }
+
+  const srcRe = /data-composition-src="([^"]*)"/gi;
+  for (const [name, html] of Object.entries(files)) {
+    for (let m = srcRe.exec(html); m !== null; m = srcRe.exec(html)) {
+      if (!(m[1] in files)) {
+        findings.push({
+          code: "missing-sub-composition",
+          severity: "error",
+          message: `${name} mounts "${m[1]}" but the project emits no such file`,
+        });
+      }
+    }
+    srcRe.lastIndex = 0;
+  }
+
+  if (findings.length > 0) throw new CompositionLintError("core project", findings);
+}
+
 /** Belt 2 seam: the framework's own static linter, injectable so tests never need the package installed. */
 export type CompositionLinter = (html: string) => Promise<{
   ok: boolean;

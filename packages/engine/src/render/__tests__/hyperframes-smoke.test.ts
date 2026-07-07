@@ -29,7 +29,8 @@ afterAll(() => {
 describe.skipIf(!RUN_RENDER_SMOKE)("hyperframes real render smoke ($0, local-only, not CI)", () => {
   it(
     "renders the demo-tenant pillar composition to a playable MP4",
-    { timeout: 300_000 },
+    // Software capture (screenshot fallback, no GPU) can run minutes for even a short clip under load.
+    { timeout: 1_800_000 },
     async () => {
       const timeline = derivePillarTimeline({
         hook: "What if your docs wrote their own demo?",
