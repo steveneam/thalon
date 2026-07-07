@@ -6,17 +6,25 @@
     {
       "narration": "Thalon watches the topic areas you describe and sweeps platforms for outliers.",
       "onScreenText": "Monitored areas",
-      "durationHintMs": 3400
+      "durationHintMs": 3400,
+      "motion": "smooth",
+      "transition": "push"
     },
     {
       "narration": "Every rising item carries a plain-language reason: relevance, engagement, velocity, freshness.",
       "onScreenText": "Reasons, not black boxes",
-      "durationHintMs": 3800
+      "durationHintMs": 3800,
+      "motion": "snappy",
+      "transition": "blur",
+      "sfx": "pop"
     },
     {
       "narration": "Generate from a trend in one click, or dismiss it - dismissals teach the engine.",
       "onScreenText": "Generate from this",
-      "durationHintMs": 3400
+      "durationHintMs": 3400,
+      "motion": "snappy",
+      "transition": "push-up",
+      "sfx": "whoosh"
     }
   ],
   "cta": "This demo was rendered by Thalon."

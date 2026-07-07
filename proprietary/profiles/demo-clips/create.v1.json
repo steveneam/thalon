@@ -5,18 +5,25 @@
   "beats": [
     {
       "narration": "A prompt or source fans out into drafts shaped for each platform you configure.",
-      "onScreenText": "post - video - page",
-      "durationHintMs": 3400
+      "onScreenText": "3 formats - post, video, page",
+      "durationHintMs": 3400,
+      "motion": "snappy",
+      "transition": "push",
+      "sfx": "whoosh"
     },
     {
       "narration": "Videos build in stages you can steer: storyboard, scene direction, deterministic render.",
       "onScreenText": "Staged video",
-      "durationHintMs": 3600
+      "durationHintMs": 3600,
+      "motion": "smooth",
+      "transition": "scale"
     },
     {
       "narration": "Nothing reaches you unjudged: a denylist gate and a two-tier grounding judge run first.",
       "onScreenText": "Judged before you see it",
-      "durationHintMs": 3600
+      "durationHintMs": 3600,
+      "motion": "dramatic",
+      "transition": "blur"
     }
   ],
   "cta": "This demo was rendered by Thalon."

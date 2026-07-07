@@ -6,17 +6,24 @@
     {
       "narration": "Each draft waits in one approve queue, showing its judge verdicts.",
       "onScreenText": "One queue",
-      "durationHintMs": 3200
+      "durationHintMs": 3200,
+      "motion": "snappy",
+      "transition": "push"
     },
     {
       "narration": "Edit, approve, or block - every correction is captured as an eval case.",
       "onScreenText": "Your edits teach it",
-      "durationHintMs": 3400
+      "durationHintMs": 3400,
+      "motion": "smooth",
+      "transition": "dissolve"
     },
     {
       "narration": "One-click publishing is planned; today nothing leaves without human approval.",
       "onScreenText": "Approval is the gate",
-      "durationHintMs": 3400
+      "durationHintMs": 3400,
+      "motion": "dramatic",
+      "transition": "flash",
+      "sfx": "pop"
     }
   ],
   "cta": "This demo was rendered by Thalon."
