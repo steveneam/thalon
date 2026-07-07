@@ -161,7 +161,8 @@ export function groupCaptionWords(
   return groups;
 }
 
-const STAT_PATTERN = /^(.*?)(\d{1,3}(?:,\d{3})+|\d+)(.*)$/s;
+// No dotAll flag: onScreenText is single-line by contract, and apps/web's tsc target predates ES2018.
+const STAT_PATTERN = /^(.*?)(\d{1,3}(?:,\d{3})+|\d+)(.*)$/;
 
 /** First integer token (comma groups allowed) in the onScreenText becomes a count-up; no number, no stat block. */
 export function planStat(cue: CompositionCue, cueDurationMs: number): StatPlan | null {
