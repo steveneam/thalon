@@ -38,6 +38,8 @@ const envSchema = z.object({
   SEARCH_INTEL_SOURCE: z.string().default("fake"),
   /** B6.5 trend seam: which TrendSource the registry selects (fake | bluesky | youtube). bluesky is keyless — the honest first live selection; fake stays the zero-network default. */
   TREND_SOURCE: z.string().default("fake"),
+  /** B6.5 dossier half-step: how many top-ranked cards per sweep get a generated dossier (gateway spend — arming is an operator decision; 0 = disarmed, cards honestly carry no dossier). */
+  TREND_DOSSIER_CARDS: z.coerce.number().int().min(0).default(0),
   /** B6.5 YouTube Data API v3 key (free tier; per-driver quota budgets stay config in the driver, never here). */
   YOUTUBE_API_KEY: z.string().optional(),
   /** B6.5 Bluesky app-password session (free account; searchPosts is 403 unauthenticated — probed 2026-07-07). Account-feed polling stays keyless without these. */

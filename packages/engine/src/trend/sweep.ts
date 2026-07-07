@@ -1,12 +1,14 @@
 import type { TenantCtx } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
-import { getObjectStore, objectKey, type ObjectStore } from "@thalon/platform";
+import { getObjectStore, objectKey, readEnv, type ObjectStore } from "@thalon/platform";
 import { z } from "zod";
 import type { EmbeddingDriver } from "../ingest/shell/embedder";
 import type { AreaExpansionConfigInput, SweepAreaInput } from "./area-expansion";
+import { generateTrendDossiers, type DossierCardInput } from "./dossier";
 import { runTrendIntake, type TrendIntakeResult } from "./intake";
 import type { OutlierConfigInput } from "./outliers";
 import type { RankerConfigInput } from "./ranker";
+import type { DossierDriver } from "./shell/dossier";
 import { getTrendSource } from "./source-registry";
 import type { TrendSource } from "./trend-source";
 
@@ -91,6 +93,14 @@ export interface TrendSweepRequest {
   intervalMs?: number;
   /** Bundle card cap, score-descending (default 30) — the CUT COUNT is reported, never silent. */
   maxCards?: number;
+  /**
+   * How many top-ranked cards get a generated dossier this sweep (the B6.5
+   * half-step). Defaults to `TREND_DOSSIER_CARDS` (env, default 0 =
+   * disarmed) — dossiers are gateway spend, so arming is an operator
+   * decision, per-sweep spend a config ration. Cards beyond the ration
+   * honestly carry no dossier (the wire field stays optional).
+   */
+  dossierCards?: number;
 }
 
 export interface TrendSweepDeps {
@@ -98,6 +108,8 @@ export interface TrendSweepDeps {
   source?: TrendSource;
   embedder?: EmbeddingDriver;
   objectStore?: ObjectStore;
+  /** Dossier shell override (tests) — defaults to the real gateway driver when the ration arms. */
+  dossierDriver?: DossierDriver;
   capTokens?: number;
 }
 
@@ -105,6 +117,8 @@ export interface TrendSweepResult {
   bundle: SweepBundle;
   /** Ranked rows the maxCards cap cut from the bundle (no-silent-caps rule). */
   cardsCut: number;
+  /** Per-card dossier failures, verbatim (empty when disarmed) — reported, never silent. */
+  dossiersFailed: Array<{ cardId: string; reason: string }>;
   intake: TrendIntakeResult;
 }
 
@@ -182,6 +196,35 @@ export async function runTrendSweep(
     };
   });
 
+  // Dossier ration (B6.5 half-step): generate for the TOP dossierCards
+  // cards only — gateway spend is an explicit per-sweep config ration,
+  // default disarmed. Failures degrade per card (reported below); a blown
+  // tenant budget still propagates as the operational halt it is.
+  const dossierCards = request.dossierCards ?? readEnv().TREND_DOSSIER_CARDS;
+  let dossiersFailed: TrendSweepResult["dossiersFailed"] = [];
+  if (dossierCards > 0 && cards.length > 0) {
+    const areaById = new Map(areas.map((a) => [a.id, a]));
+    const inputs: DossierCardInput[] = cards.slice(0, dossierCards).map((card) => ({
+      cardId: card.id,
+      itemText: card.text,
+      source: card.source,
+      account: card.account,
+      areaName: card.areaName,
+      areaDescription: areaById.get(card.areaId)?.description ?? card.areaName,
+    }));
+    const generated = await generateTrendDossiers(ctx, repos, inputs, {
+      driver: deps.dossierDriver,
+      capTokens: deps.capTokens,
+    });
+    for (const card of cards) {
+      const dossier = generated.dossiers.get(card.id);
+      if (dossier) {
+        card.dossier = { titles: dossier.titles, angles: dossier.angles, hook: dossier.hook };
+      }
+    }
+    dossiersFailed = generated.failed;
+  }
+
   const bundle: SweepBundle = {
     version: SWEEP_BUNDLE_VERSION,
     source: source.name,
@@ -197,7 +240,7 @@ export async function runTrendSweep(
   };
   await objectStore.put(sweepBundleKey(ctx.tenantId), JSON.stringify(bundle));
 
-  return { bundle, cardsCut: Math.max(0, rankedDesc.length - cards.length), intake };
+  return { bundle, cardsCut: Math.max(0, rankedDesc.length - cards.length), dossiersFailed, intake };
 }
 
 /** The route-side read: the tenant's latest bundle, schema-validated, or null before the first sweep. */

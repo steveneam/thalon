@@ -45,6 +45,7 @@ const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"staged_video.scenes"', note: "B5.2 — staged video, scenes/effects fill" },
   { op: '"staged_video.polish"', note: "B5.2 — staged video, polish refine" },
   { op: '"search.keyword_expand"', note: "B6.8 — judged AI keyword expansion (search targets; G1 + deterministic grounding gate candidates before persist)" },
+  { op: '"intel.dossier"', note: "B6.5 half-step — trend-card dossier (titles/angles/hook; G1 denylist gates before the wire; per-sweep ration TREND_DOSSIER_CARDS, default disarmed)" },
   { op: "`judge.${GATE_FOR_TIER[tier]}`", note: "B1.3 — G3 two-tier grounding (→ judge.g3_screen | judge.g3_final)" },
 ];
 

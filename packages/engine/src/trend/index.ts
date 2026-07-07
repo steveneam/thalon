@@ -75,3 +75,22 @@ export {
   type TrendSweepRequest,
   type TrendSweepResult,
 } from "./sweep";
+export {
+  generateTrendDossiers,
+  type DossierCardInput,
+  type GenerateDossiersDeps,
+  type GenerateDossiersResult,
+  type TrendDossier,
+} from "./dossier";
+export {
+  trendDossierShellOutputSchema,
+  type TrendDossierShellOutput,
+} from "./dossier-schemas";
+export {
+  createFakeDossierDriver,
+  gatewayDossierDriver,
+  trendDossierPromptVersion,
+  type DossierDriver,
+  type DossierShellCall,
+  type DossierShellRequest,
+} from "./shell/dossier";
