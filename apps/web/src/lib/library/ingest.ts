@@ -26,9 +26,21 @@ export const videoIngestInputSchema = z.object({
     }),
   captions: z.string().trim().min(1).optional(),
   captionFormat: z.enum(["srt", "vtt", "text"]).optional(),
+  /** Operator-set tags (session-19 rider): ride the request, stored verbatim on sources.meta.tags. */
+  tags: z.array(z.string().trim().min(1).max(48)).max(12).optional(),
 });
 
 export type VideoIngestInput = z.infer<typeof videoIngestInputSchema>;
+
+/**
+ * Input → the `meta` the engine spreads onto the source row verbatim
+ * (META-KEY MINI-CONTRACT: `tags` is operator-set; `title`/`areaRelevance`
+ * are the ingest-side rider, written engine-side). Undefined when there is
+ * nothing to store, so re-ingests without tags do not stamp empty keys.
+ */
+export function ingestMeta(input: VideoIngestInput): Record<string, unknown> | undefined {
+  return input.tags && input.tags.length > 0 ? { tags: input.tags } : undefined;
+}
 
 export async function runVideoIngest(
   repos: Repos,
@@ -43,6 +55,7 @@ export async function runVideoIngest(
       url: input.url,
       captions: input.captions,
       captionFormat: input.captionFormat,
+      meta: ingestMeta(input),
     },
     deps,
   );

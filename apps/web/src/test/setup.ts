@@ -3,7 +3,7 @@ import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { resetIntelStore } from "@/lib/intel/store";
 import { server } from "@/lib/testing/server";
-import { resetIntelTestState } from "@/lib/testing/handlers";
+import { resetIntelTestState, resetLibraryTestState } from "@/lib/testing/handlers";
 import { resetStagedFlowStore } from "@/lib/staged-flow/store";
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -14,6 +14,7 @@ afterEach(() => {
   resetStagedFlowStore();
   resetIntelStore();
   resetIntelTestState();
+  resetLibraryTestState();
   cleanup();
 });
 afterAll(() => server.close());

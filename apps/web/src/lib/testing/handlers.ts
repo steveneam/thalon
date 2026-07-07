@@ -10,6 +10,7 @@ import {
   targetSearchQuery,
 } from "@/lib/intel/store";
 import type { AreaRow, CreateFamily, TargetRow } from "@/lib/intel/types";
+import type { LibrarySourceRow, WireSegment } from "@/lib/library/types";
 import type { ProfileHistoryEntry, ProfileWire } from "@/lib/profiles/types";
 import { fixtureActivity, fixturePulse, fixtureStatus } from "@/lib/workspace/fixtures";
 import { parseStagedEditRequest, parseStagedPickRequest, runStaged } from "@/lib/staged-flow/http";
@@ -47,6 +48,41 @@ export function resetIntelTestState(): void {
   testProfileHistory = [];
 }
 
+/**
+ * Library (B6.5 + session-19 rider): the real routes are repo-backed, so
+ * component tests get this in-memory emulation (same wire shapes). Seed
+ * rows via seedLibraryRow; the ingest handler stores request tags verbatim
+ * — exactly the engine's meta pass-through contract.
+ */
+let testLibrarySources: LibrarySourceRow[] = [];
+let testLibraryTranscripts: Record<string, WireSegment[]> = {};
+let librarySeq = 0;
+
+export function seedLibraryRow(
+  row: Partial<LibrarySourceRow> & { uri: string },
+  segments: WireSegment[] = [{ text: "seeded segment", startMs: 0, endMs: 1000 }],
+): LibrarySourceRow {
+  const full: LibrarySourceRow = {
+    id: `test-lib-${++librarySeq}`,
+    title: null,
+    tags: [],
+    areaRelevance: [],
+    provider: "hosted-vendor",
+    segmentCount: segments.length,
+    createdAt: TEST_AT,
+    ...row,
+  };
+  testLibrarySources.unshift(full);
+  testLibraryTranscripts[full.id] = segments;
+  return full;
+}
+
+export function resetLibraryTestState(): void {
+  testLibrarySources = [];
+  testLibraryTranscripts = {};
+  librarySeq = 0;
+}
+
 function intelError(err: unknown): Response {
   if (err instanceof IntelStoreError) {
     return HttpResponse.json({ error: err.message }, { status: err.httpStatus });
@@ -56,6 +92,44 @@ function intelError(err: unknown): Response {
 
 /** Fetch-boundary mock seam for component development/tests — zero dependency on the engine/judge lanes (SPINE §5 lane map). The staged handlers wrap the SAME fake-driver store the /api/staged routes serve in dev, so tests and dev see one world. */
 export const handlers = [
+  // Library (B6.5): shelf read, ingest (tags stored verbatim), transcript read.
+  http.get("/api/library", () =>
+    HttpResponse.json({
+      sources: testLibrarySources,
+      seam: {
+        selected: "hosted-vendor",
+        registered: ["caption-file", "hosted-vendor", "whisper-local"],
+        vendorConfigured: true,
+      },
+    }),
+  ),
+  http.post("/api/library/ingest", async ({ request }) => {
+    const body = (await request.json()) as { url?: string; captions?: string; tags?: string[] };
+    if (!body.url?.trim()) {
+      return HttpResponse.json({ error: "Paste a full video URL (https://…)." }, { status: 400 });
+    }
+    const row = seedLibraryRow(
+      { uri: body.url, tags: body.tags ?? [] },
+      [
+        { text: "first ingested segment", startMs: 0, endMs: 1500 },
+        { text: "second ingested segment", startMs: 1500, endMs: 3000 },
+      ],
+    );
+    return HttpResponse.json(
+      { sourceId: row.id, created: true, chunkCount: 2, provider: row.provider },
+      { status: 201 },
+    );
+  }),
+  http.get("/api/library/:sourceId/transcript", ({ params }) => {
+    const sourceId = String(params.sourceId);
+    const segments = testLibraryTranscripts[sourceId];
+    const row = testLibrarySources.find((r) => r.id === sourceId);
+    if (!segments || !row) {
+      return HttpResponse.json({ error: "transcript not found" }, { status: 404 });
+    }
+    return HttpResponse.json({ sourceId, uri: row.uri, provider: row.provider, segments });
+  }),
+
   // Shell/dashboard reads (B6.2).
   http.get("/api/app/pulse", () => HttpResponse.json(fixturePulse)),
   http.get("/api/app/activity", () => HttpResponse.json({ items: fixtureActivity })),

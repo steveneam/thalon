@@ -29,15 +29,29 @@ export function heatBand(score: number): HeatBand {
   return BANDS.find(({ min }) => score >= min)?.band ?? "cool";
 }
 
-/** The glanceable read: thermal pill + magnitude bar; exact score in the tooltip. */
-export function HeatGrade({ score, className }: { score: number; className?: string }) {
+/**
+ * The glanceable read: thermal pill + magnitude bar; exact score in the
+ * tooltip. `detail` lets other surfaces reusing the grammar (e.g. the
+ * Library's relevance badge) carry their reason string into the tooltip
+ * and accessible label alongside the score.
+ */
+export function HeatGrade({
+  score,
+  className,
+  detail,
+}: {
+  score: number;
+  className?: string;
+  detail?: string;
+}) {
   const clamped = Math.min(1, Math.max(0, score));
   const { band, fill, pill } = BANDS.find(({ min }) => clamped >= min) ?? BANDS[BANDS.length - 1];
+  const suffix = detail ? ` — ${detail}` : "";
   return (
     <span
       role="img"
-      aria-label={`heat ${band} — rank score ${clamped.toFixed(2)} of 1`}
-      title={`rank score ${clamped.toFixed(2)} (0–1) for this area`}
+      aria-label={`heat ${band} — rank score ${clamped.toFixed(2)} of 1${suffix}`}
+      title={`rank score ${clamped.toFixed(2)} (0–1) for this area${suffix}`}
       className={cn("inline-flex items-center gap-1.5 align-middle", className)}
     >
       <span

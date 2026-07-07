@@ -12,9 +12,29 @@ export interface WireSegment {
   endMs?: number;
 }
 
+/**
+ * One entry of `sources.meta.areaRelevance` — the META-KEY MINI-CONTRACT
+ * (session 19): written at ingest by the origination lane's rider (scored
+ * against monitored-area descriptions via the B6.4 ranker's embedding
+ * path), read here. Absent on pre-rider rows — surfaces degrade honestly.
+ */
+export interface AreaRelevance {
+  areaId: string;
+  areaName: string;
+  /** 0–1 rank score — rendered in the thermal-heat grammar. */
+  score: number;
+  reason: string;
+}
+
 export interface LibrarySourceRow {
   id: string;
   uri: string | null;
+  /** oEmbed title (sources.meta.title, mini-contract) — null on pre-rider rows: the URL stays the row's identity. */
+  title: string | null;
+  /** Operator-set tags (sources.meta.tags) — empty on pre-rider rows. */
+  tags: string[];
+  /** Relevance to monitored areas (sources.meta.areaRelevance) — empty until the engine scores it. */
+  areaRelevance: AreaRelevance[];
   /** Which TranscriptProvider fetched it (sources.meta.transcriptProvider). */
   provider: string | null;
   segmentCount: number | null;
