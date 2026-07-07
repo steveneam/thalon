@@ -204,6 +204,15 @@ export function draftsRepo(db: Db) {
         .where(and(eq(drafts.tenantId, ctx.tenantId), eq(drafts.fanoutRunId, fanoutRunId)));
     },
 
+    /** Every draft of one format for the tenant (B6.6: the posts-bundle rebuild scans `web_page` drafts). Additive, id-ordered for deterministic replays. */
+    async listByFormat(ctx: TenantCtx, format: string): Promise<Draft[]> {
+      return db
+        .select()
+        .from(drafts)
+        .where(and(eq(drafts.tenantId, ctx.tenantId), eq(drafts.format, format)))
+        .orderBy(drafts.id);
+    },
+
     async transition(
       ctx: TenantCtx,
       draftId: string,
