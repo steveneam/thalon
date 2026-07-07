@@ -1,4 +1,18 @@
 {
   "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // Worktree lanes share one node_modules junctioned to the main checkout,
+    // so bare @thalon/* imports typecheck against MAIN's sources — not this
+    // checkout's edits. Map them to the local sources (the apps/web
+    // tsconfig.json precedent; ./vitest.config.ts carries the same aliases).
+    // Identical relative layout in main, so this is merge-safe.
+    "paths": {
+      "@thalon/contracts": ["../packages/contracts/src/index.ts"],
+      "@thalon/db": ["../packages/db/src/index.ts"],
+      "@thalon/engine": ["../packages/engine/src/index.ts"],
+      "@thalon/judge": ["../proprietary/judge/src/index.ts"],
+      "@thalon/platform": ["../packages/platform/src/index.ts"]
+    }
+  },
   "include": ["src"]
 }
