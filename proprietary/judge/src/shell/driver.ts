@@ -40,7 +40,14 @@ export interface JudgeModelCall {
 export type JudgeModelDriver = (req: JudgeModelRequest) => Promise<JudgeModelCall>;
 
 const PROMPT_FILE_FOR_TIER: Record<JudgeTier, string> = {
-  screen: "judge-g3-screen.v1.md",
+  // v2 (B6.7 eval-row refinement): the screen tier gained the final tier's
+  // claim taxonomy — verifiable specifics gate, rhetorical commonplaces and
+  // the draft's own argumentation do not. v1 failed page-length drafts on
+  // non-factual framing ("fluency and accuracy are not the same property"),
+  // reproducibly disagreeing with the final tier on doctrine rather than
+  // judgment; golden rows g3-004/g3-005 pin the taxonomy. I3 is untouched:
+  // tier disagreement still blocks.
+  screen: "judge-g3-screen.v2.md",
   final: "judge-g3-final.v1.md",
 };
 
