@@ -1,6 +1,6 @@
 import { seoMetaSchema, type TenantCtx } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
-import { getObjectStore, objectKey, type ObjectStore } from "@thalon/platform";
+import { getContentAddressed, getObjectStore, objectKey, type ObjectStore } from "@thalon/platform";
 import { z } from "zod";
 import { webPageDraftMetaSchema } from "./schemas";
 
@@ -62,6 +62,24 @@ export async function readPublishedPosts(
   const raw = await objectStore.get(postsBundleKey(tenantId));
   if (!raw) return null;
   return postsBundleSchema.parse(JSON.parse(raw.toString("utf8")));
+}
+
+/**
+ * The blog's post-body read (SPINE §80 — the web app calls engine services,
+ * never the store directly): a bundle entry's `htmlRef` names the approved
+ * draft's content-addressed `web-pages/<sha256>.html` artifact, so the read
+ * is VERIFIED (B4.6 `getContentAddressed` — corrupted bytes refuse loudly).
+ * The artifact is script-free and network-free BY CONSTRUCTION
+ * (`selfContainmentViolations` gates generation before judging), which is
+ * what makes rendering its markup on /blog safe. Null when the artifact is
+ * missing — the caller 404s honestly rather than inventing a body.
+ */
+export async function readPublishedPageHtml(
+  htmlRef: string,
+  objectStore: ObjectStore = getObjectStore(),
+): Promise<string | null> {
+  const bytes = await getContentAddressed(objectStore, htmlRef);
+  return bytes ? bytes.toString("utf8") : null;
 }
 
 /**

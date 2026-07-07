@@ -7,6 +7,7 @@ import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   postsBundleKey,
+  readPublishedPageHtml,
   readPublishedPosts,
   rebuildPostsBundle,
   resolvePostSlug,
@@ -233,5 +234,20 @@ describe("publishWebPageToSite (B6.6 own-site publish door, keyless)", () => {
 
   it("pins the bundle key scheme", () => {
     expect(postsBundleKey("tenant-1")).toBe("posts/tenant-1.json");
+  });
+});
+
+describe("readPublishedPageHtml (the blog's verified body read)", () => {
+  it("round-trips the content-addressed artifact and refuses corrupted bytes", async () => {
+    const { objectStore } = await setup();
+    const html = "<!doctype html><html><head><title>t</title></head><body><main>hello</main></body></html>";
+    const htmlRef = `web-pages/${sha256Hex(html)}.html`;
+    await objectStore.put(htmlRef, html);
+
+    expect(await readPublishedPageHtml(htmlRef, objectStore)).toBe(html);
+    expect(await readPublishedPageHtml(`web-pages/${sha256Hex("other")}.html`, objectStore)).toBeNull();
+
+    await objectStore.put(htmlRef, "<!doctype html><html><body>tampered</body></html>");
+    await expect(readPublishedPageHtml(htmlRef, objectStore)).rejects.toThrow(/content-address verification/);
   });
 });

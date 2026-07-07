@@ -24,6 +24,7 @@ export {
   postsBundleKey,
   postsBundleSchema,
   publishedPostSchema,
+  readPublishedPageHtml,
   readPublishedPosts,
   rebuildPostsBundle,
   resolvePostSlug,
