@@ -24,5 +24,9 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     // PGlite (WASM) first boot per test file can be slow, same as packages/db.
     testTimeout: 30_000,
+    // The route tests open that same PGlite in beforeEach hooks — under
+    // multi-lane load the boot blows the 10s hook default the same way
+    // (proven live 2026-07-07: "Hook timed out in 10000ms" at openTestDb).
+    hookTimeout: 30_000,
   },
 });
