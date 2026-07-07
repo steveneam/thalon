@@ -15,8 +15,14 @@ jobs:
         shell: pwsh
         run: ./scripts/ci-grep-guard.ps1
 
-  test:
-    name: test
+  # The suite is the CI long pole (~1050 tests, a fresh embedded Postgres
+  # per db test file), so it runs SHARDED (founder direction 2026-07-08:
+  # sharding saves wall-clock and vitest partitions by file, so it is
+  # exactly as strict). Typecheck + lint run once in their own lane; the
+  # aggregate job below keeps the REQUIRED-CHECK NAME `test` stable across
+  # the split (branch protection never has to change).
+  checks:
+    name: checks (typecheck + lint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +36,33 @@ jobs:
       # lesson — lane lint findings surfaced only at merge). Root eslint
       # covers packages/proprietary/eval; the chained web lint covers apps/web.
       - run: npm run lint
-      - run: npm test
+
+  test-shards:
+    name: test (shard ${{ matrix.shard }}/3)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # every shard reports — a red run shows ALL failures, not the first shard's
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --shard=${{ matrix.shard }}/3
+
+  test:
+    name: test
+    needs: [checks, test-shards]
+    if: always() # the gate must REPORT on failure, not skip (a skipped required check blocks nothing)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every shard + the checks lane succeeded
+        run: |
+          test "${{ needs.checks.result }}" = "success"
+          test "${{ needs.test-shards.result }}" = "success"
 
   # B6.7 (ADR 0007): the production build must stay green — Dockerfile.web
   # runs exactly this build, so a PR that breaks `next build` (or silently
