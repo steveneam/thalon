@@ -125,7 +125,7 @@ export async function ingestVideoUrl(
   // B6.6 rider metadata — NEVER blocks ingest: the title seam degrades to
   // the URL (belt-and-braces catch in case an injected fetcher throws), and
   // areaRelevance is absent when there are no active areas / no embeddings.
-  let fetchedTitle: string | null = null;
+  let fetchedTitle: string | null;
   try {
     fetchedTitle = await (deps.titleFetcher ?? youTubeOEmbedTitleFetcher()).fetchTitle(request.url);
   } catch {
