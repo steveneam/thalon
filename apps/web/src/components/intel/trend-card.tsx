@@ -44,6 +44,8 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
   const [titleIndex, setTitleIndex] = useState(0);
   const [angleIndex, setAngleIndex] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
+  // Const binding so the dossier narrowing survives into JSX callbacks.
+  const dossier = card.dossier;
 
   function copy(key: string, text: string) {
     void navigator.clipboard?.writeText(text);
@@ -106,11 +108,21 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
         </div>
 
         {/* The dossier: ready-to-fire creative context. Selection is the
-            smart default at the seam — whatever is selected rides the exit. */}
+            smart default at the seam — whatever is selected rides the exit.
+            Live cards carry no dossier until title/angle generation arms
+            (gateway top-up) — the honest note renders instead, never
+            fabricated titles. */}
+        {!dossier && (
+          <p className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+            Ready titles &amp; angles arm with the gateway top-up — the exits below still carry this
+            item&rsquo;s full context into Create.
+          </p>
+        )}
+        {dossier && (
         <details className="group rounded-lg border border-border">
           <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted [&::-webkit-details-marker]:hidden">
             <span className="u-eyebrow text-muted-foreground">dossier</span>
-            {card.dossier.titles.length} titles · {card.dossier.angles.length} angles · hook
+            {dossier.titles.length} titles · {dossier.angles.length} angles · hook
             <span aria-hidden className="ml-auto text-muted-foreground transition-transform group-open:rotate-90">
               ›
             </span>
@@ -118,7 +130,7 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
           <div className="flex flex-col gap-3 border-t border-border px-3 py-3">
             <div role="radiogroup" aria-label="Ready titles" className="flex flex-col gap-1">
               <p className="u-eyebrow text-muted-foreground">titles — pick one, it rides the exit</p>
-              {card.dossier.titles.map((title, i) => (
+              {dossier.titles.map((title, i) => (
                 <div key={title} className="flex items-start gap-1.5">
                   <button
                     type="button"
@@ -152,7 +164,7 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
             </div>
             <div role="radiogroup" aria-label="Suggested angles" className="flex flex-col gap-1">
               <p className="u-eyebrow text-muted-foreground">angles</p>
-              {card.dossier.angles.map((angle, i) => (
+              {dossier.angles.map((angle, i) => (
                 <button
                   key={angle}
                   type="button"
@@ -174,11 +186,11 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
             <div>
               <p className="u-eyebrow text-muted-foreground">hook</p>
               <p className="mt-1 flex items-start gap-1.5 text-xs italic">
-                <span className="flex-1">&ldquo;{card.dossier.hook}&rdquo;</span>
+                <span className="flex-1">&ldquo;{dossier.hook}&rdquo;</span>
                 <button
                   type="button"
                   aria-label="Copy hook"
-                  onClick={() => copy("hook", card.dossier.hook)}
+                  onClick={() => copy("hook", dossier.hook)}
                   className="rounded-md p-1 not-italic text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   {copied === "hook" ? (
@@ -191,6 +203,7 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
             </div>
           </div>
         </details>
+        )}
       </CardContent>
       <CardFooter className="flex-wrap gap-2">
         {/* Per-family exits — three doors, one capture spine. */}

@@ -53,9 +53,15 @@ export function listTrendCards(): TrendCard[] {
   return fixtureTrendCards.filter((card) => !state.dismissed.has(card.id));
 }
 
-function requireCard(cardId: string): TrendCard {
-  const card = fixtureTrendCards.find((c) => c.id === cardId);
-  if (!card) throw new IntelStoreError(`trend card "${cardId}" is not in the demo dataset`, 404);
+/** B6.5: live cards filter through the SAME session-dismissal set as fixtures (durable eval-row write = the next contract window). */
+export function isTrendCardDismissed(cardId: string): boolean {
+  return state.dismissed.has(cardId);
+}
+
+function requireCard(cardOrId: TrendCard | string): TrendCard {
+  if (typeof cardOrId !== "string") return cardOrId;
+  const card = fixtureTrendCards.find((c) => c.id === cardOrId);
+  if (!card) throw new IntelStoreError(`trend card "${cardOrId}" is not in the demo dataset`, 404);
   return card;
 }
 
@@ -71,9 +77,9 @@ function cardPayload(card: TrendCard): Record<string, unknown> {
   };
 }
 
-/** Dismissal is SIGNAL, not deletion: the capture row is the point (→ eval row in pass 3). */
-export function dismissTrendCard(cardId: string): IntelCapture {
-  const card = requireCard(cardId);
+/** Dismissal is SIGNAL, not deletion: the capture row is the point (→ eval row in pass 3). B6.5: routes resolve LIVE cards themselves and pass the card object; the string form stays the fixture path. */
+export function dismissTrendCard(cardOrId: TrendCard | string): IntelCapture {
+  const card = requireCard(cardOrId);
   state.dismissed.add(card.id);
   const capture: IntelCapture = {
     id: `intel-capture-${state.tick + 1}`,
@@ -103,9 +109,9 @@ function pick(list: string[], index: number | undefined, what: string): string |
   return list[i];
 }
 
-/** A per-family exit — the promote capture carries the full context the Create surface resolves. */
-export function promoteTrendCard(cardId: string, opts: PromotePick): { capture: IntelCapture } {
-  const card = requireCard(cardId);
+/** A per-family exit — the promote capture carries the full context the Create surface resolves. A live card without a dossier (generation not yet armed) promotes with the raw item context only — never invented titles. */
+export function promoteTrendCard(cardOrId: TrendCard | string, opts: PromotePick): { capture: IntelCapture } {
+  const card = requireCard(cardOrId);
   const capture: IntelCapture = {
     id: `intel-capture-${state.tick + 1}`,
     kind: "trend_promote",
@@ -114,9 +120,9 @@ export function promoteTrendCard(cardId: string, opts: PromotePick): { capture: 
     payload: {
       ...cardPayload(card),
       family: opts.family,
-      title: pick(card.dossier.titles, opts.titleIndex, "title"),
-      angle: pick(card.dossier.angles, opts.angleIndex, "angle"),
-      hook: card.dossier.hook,
+      title: pick(card.dossier?.titles ?? [], opts.titleIndex, "title"),
+      angle: pick(card.dossier?.angles ?? [], opts.angleIndex, "angle"),
+      hook: card.dossier?.hook,
     },
   };
   state.captures.push(capture);

@@ -7,11 +7,20 @@ import { timeAgo } from "@/lib/workspace/format";
 
 /**
  * The Intel cadence stamp (wave-3 §3.7): automation is FELT when it's
- * stamped where the operator looks. Honest about fake-driver mode — while
- * the dataset is demo, "next sweep" names what arms it and "Sweep now" is
- * disabled with the reason, never a fake spinner.
+ * stamped where the operator looks. Honest in both eras — while the dataset
+ * is demo, "next sweep" names what arms it and "Sweep now" runs a REAL
+ * sweep through the env-selected TrendSource (B6.5 armed it); a driver
+ * refusal surfaces verbatim in the tab's error line, never a fake spinner.
  */
-export function CadenceStamp({ sweep, demo }: { sweep: SweepStamp; demo: boolean }) {
+export function CadenceStamp({
+  sweep,
+  busy,
+  onSweepNow,
+}: {
+  sweep: SweepStamp;
+  busy?: boolean;
+  onSweepNow?: () => void;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
       <span>
@@ -27,18 +36,19 @@ export function CadenceStamp({ sweep, demo }: { sweep: SweepStamp; demo: boolean
             next sweep{" "}
             <time dateTime={sweep.nextSweepAt} className="font-medium text-foreground">
               {timeAgo(sweep.nextSweepAt)}
-            </time>
+            </time>{" "}
+            (scheduled polling lands at deploy — Sweep now until then)
           </>
         ) : (
-          <>sweeps every {sweep.intervalHours}h once live polling arms (B6.5)</>
+          <>sweeps every {sweep.intervalHours}h — run the first one now</>
         )}
       </span>
       <span aria-hidden>·</span>
       <Button
         size="sm"
         variant="outline"
-        disabled={demo}
-        title={demo ? "Sweeping arms with the B6.5 live pollers — this dataset is the built-in demo." : undefined}
+        disabled={busy || !onSweepNow}
+        onClick={onSweepNow}
         className="h-6 px-2 text-xs"
       >
         <RefreshCw aria-hidden data-icon="inline-start" /> Sweep now

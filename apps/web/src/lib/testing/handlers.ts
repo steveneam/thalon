@@ -89,6 +89,10 @@ export const handlers = [
   http.get("/api/intel/trends", () =>
     HttpResponse.json({ areas: testAreas, cards: listTrendCards(), demo: true, sweep: fixtureSweep }),
   ),
+  // B6.5 Sweep-now: component tests get the summary shape; the real route's engine path is route-tested.
+  http.post("/api/intel/sweep", () =>
+    HttpResponse.json({ source: "fake", polled: 0, cards: 0, cardsCut: 0, areasSwept: testAreas.length, sweptAt: TEST_AT, nextSweepAt: TEST_AT }),
+  ),
   http.post("/api/intel/trends/:cardId/dismiss", ({ params }) => {
     try {
       return HttpResponse.json({ capture: dismissTrendCard(params.cardId as string) });

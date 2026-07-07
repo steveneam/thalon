@@ -58,7 +58,8 @@ export interface TrendCard {
   shareToView: number | null;
   bookmarkToView: number | null;
   metrics: Record<string, number>;
-  dossier: TrendDossier;
+  /** Absent on live cards until title/angle generation arms (gateway top-up) — never fabricated. */
+  dossier?: TrendDossier;
 }
 
 /** Sweep cadence for the Intel header stamp — honest about fake-driver mode. */

@@ -17,6 +17,12 @@ import type { ObjectStore } from "./object-store";
  *                                            JSON's own bytes hash
  *                                            differently; NOT verifiable)
  *   embeddings/<cache key>.json              cache-keyed (NOT verifiable)
+ *   sweeps/<tenantId>.json                   MUTABLE POINTER (B6.5): the
+ *                                            tenant's latest ranked sweep
+ *                                            bundle, overwritten per sweep;
+ *                                            protected from the orphan
+ *                                            sweep (no db row references it
+ *                                            by design)
  *
  * GC stance (documented here because this is the one file every key passes
  * through): content-addressed artifacts are IMMUTABLE — never overwritten,

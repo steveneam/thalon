@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { findLiveTrendCard } from "@/lib/intel/live";
 import { IntelStoreError, promoteTrendCard } from "@/lib/intel/store";
+import { getRepos } from "@/lib/repos";
+import { resolveTenantCtx } from "@/lib/tenant";
 
 const bodySchema = z.object({
   family: z.enum(["post", "video", "page"]),
@@ -24,7 +27,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ car
     );
   }
   try {
-    const { capture } = promoteTrendCard(cardId, parsed.data);
+    // B6.5: live-first card resolution (the persisted sweep bundle), demo fallback — one capture door.
+    const repos = await getRepos();
+    const ctx = await resolveTenantCtx(repos);
+    const liveCard = ctx ? await findLiveTrendCard(ctx.tenantId, cardId) : null;
+    const { capture } = promoteTrendCard(liveCard ?? cardId, parsed.data);
     return NextResponse.json({
       capture,
       createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,

@@ -146,7 +146,7 @@ export function blueskyTrendSource(deps: BlueskySourceDeps = {}): TrendSource {
         `bluesky createSession responded ${response.status} — check BLUESKY_IDENTIFIER / BLUESKY_APP_PASSWORD (an app password, not the account password)`,
       );
     }
-    return sessionResponseSchema.parse(await response.json()).accessJwt;
+    return sessionResponseSchema.parse(JSON.parse(await response.text())).accessJwt;
   }
 
   return {
