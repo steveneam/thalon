@@ -7,7 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
-import { EXPORT_BUILDERS, formatTimecode, hasTimings, toPlainText, type ExportFormat } from "@/lib/library/export";
+import {
+  EXPORT_BUILDERS,
+  formatTimecode,
+  hasTimings,
+  toMarkdownBrief,
+  type BriefInfo,
+  type ExportFormat,
+} from "@/lib/library/export";
 import type { AreaRelevance, LibraryPayload, LibrarySourceRow, TranscriptPayload } from "@/lib/library/types";
 import { cn } from "@/lib/utils";
 
@@ -118,9 +125,19 @@ export function LibrarySurface() {
     });
   }
 
+  /** The .md brief's header facts, from whatever the shelf row knows (Deliverable D). */
+  function currentBriefInfo(): BriefInfo {
+    if (!transcript) return {};
+    const row = payload?.sources.find((r) => r.id === transcript.sourceId);
+    return { title: row?.title, uri: transcript.uri, tags: row?.tags, createdAt: row?.createdAt };
+  }
+
   async function copyText() {
     if (!transcript) return;
-    await navigator.clipboard.writeText(toPlainText(transcript.segments));
+    // Copy-all IS the AI brief (Deliverable D): the destination is an agent
+    // context window, so the clipboard gets the same token-efficient
+    // Markdown as the .md download — not the old single-line squash.
+    await navigator.clipboard.writeText(toMarkdownBrief(transcript.segments, currentBriefInfo()));
     setCopied(true);
     if (copyTimer.current) clearTimeout(copyTimer.current);
     copyTimer.current = setTimeout(() => setCopied(false), 1_500);
@@ -129,7 +146,7 @@ export function LibrarySurface() {
   function download(format: ExportFormat) {
     if (!transcript) return;
     const { build, mime } = EXPORT_BUILDERS[format];
-    const blob = new Blob([build(transcript.segments)], { type: `${mime};charset=utf-8` });
+    const blob = new Blob([build(transcript.segments, currentBriefInfo())], { type: `${mime};charset=utf-8` });
     const href = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = href;
@@ -238,9 +255,15 @@ export function LibrarySurface() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" onClick={copyText} disabled={busy}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={copyText}
+                    disabled={busy}
+                    title="Copies the Markdown AI brief — paste straight into an agent"
+                  >
                     {copied ? <Check aria-hidden data-icon="inline-start" /> : <Copy aria-hidden data-icon="inline-start" />}
-                    {copied ? "Copied" : "Copy text"}
+                    {copied ? "Copied" : "Copy brief"}
                   </Button>
                   {(Object.keys(EXPORT_BUILDERS) as ExportFormat[]).map((format) => (
                     <Button
