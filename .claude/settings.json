@@ -1,15 +1,18 @@
 {
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
-  "worktree": {
-    "symlinkDirectories": [
-      "node_modules",
-      "apps/web/node_modules",
-      "eval/node_modules",
-      "packages/db/node_modules",
-      "packages/engine/node_modules"
-    ]
-  }
+    "attribution":  {
+                        "commit":  "",
+                        "pr":  ""
+                    },
+    "worktree":  {
+                     "symlinkDirectories":  [
+                                                "node_modules",
+                                                "apps/web/node_modules",
+                                                "eval/node_modules",
+                                                "packages/db/node_modules",
+                                                "packages/engine/node_modules"
+                                            ]
+                 },
+    "permissions":  {
+                        "defaultMode":  "bypassPermissions"
+                    }
 }
