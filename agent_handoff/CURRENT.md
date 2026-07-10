@@ -6,6 +6,14 @@
 
 2026-07-08 (session 22) · **B6.7 DEPLOY PREP COMPLETE — ADR-0007/A14 recorded, Dockerfile + CI image + auth gate + dump hook all landed and smoke-proven on the real standalone server, the first ENGINE-AUTHORED post is live on /blog (judge screen-prompt v2 unblocked it the chartered way), and the infra side's wiring brief is answered — wiring expected the next day.** Next act = **deploy `thalon-web` behind the staging hostname when the handoff pack lands**, then the B6.7 exit-gate tail.
 
+## Addendum — 2026-07-10 (session 23)
+
+The sprint queue below is **unchanged** and still the next act. One new precondition: if you
+are resuming in a **new environment** (fresh host/clone), first complete the bring-up and
+fixups in `.context/migration/PLAN.md` (gitignored — travels outside git). If that file or
+your memories are missing, **stop and ask the founder** before doing anything else. All
+network actions remain founder-gated until the founder lifts the hold.
+
 ## Resume prompt (paste verbatim to resume next session)
 
 > Stamped 2026-07-08 (UTC+10:00). Safe to `/clear` after reading — see the clear-safe line at the end.
