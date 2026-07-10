@@ -44,6 +44,9 @@ Thumbs.db
 
 # Personal agent-harness settings (per-machine; never committed)
 .claude/settings.local.json
+# Editor/harness backup droppings of settings files — carry local paths and
+# split token fragments; must never be stageable
+.claude/*.bak
 
 # Claude Code worktrees (parallel lanes — see COORDINATION.md)
 .claude/worktrees/
