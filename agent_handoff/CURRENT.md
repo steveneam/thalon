@@ -27,9 +27,25 @@ Nothing gitignored crossed with the fresh clone. Staged copy-only to the migrati
 
 After restore: `git status --short` in the clone must show none of it. Then the session-23 bring-up audit below still applies verbatim.
 
+## Resume prompt (LAPTOP session 25 — paste verbatim)
+
+> Stamped 2026-07-11, session-24 wrap.
+
+**Resume · Thalon** — session 25, laptop (active home) — **Sprint-6 exit checkpoint + Sprint-7 kickoff.**
+
+▎ ▸ **Read first:** `CLAUDE.md` → this file → `COORDINATION.md` session-24 entry (the exit-review record) → `docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md` → memories `higgsfield-kompozy-assignment` · `machine-migration-2026-07-10`.
+
+▎ ▸ **State:** main = origin @ `6408afc` · suite **1050/3/0 green** · guard clean · B6.7 exit tail DONE (temp-jobDir fix + three-family exit reviews recorded) · Sprint-6 exit criteria MET, ratification pending.
+
+▎ ▸ **Three founder decisions open this session:** (1) ratify Sprint-6 exit; (2) approve/amend the Sprint-7 proposal; (3) Higgsfield tier — **Plus one month recommended** (free tier = watermarked + promo/training license: wiring smoke-test ONLY, never shipped assets).
+
+▎ ▸ **Then:** verify the Higgsfield MCP loaded (founder connected it session 24; if absent, re-check the connector config with the founder). On approval → **Sprint 7 Phase 1**: asset-pinning module + provenance manifest first (the independence ratchet), then landing-page uplift (images before video), ≥3 iteration passes + browser-verify per surface.
+
+▎ ▸ **Standing constraints:** re-check network posture at start (hotspot = relaxed, otherwise websites+GitHub only) · **AWS untouchable** · no Docker on the laptop · git is the bus (wrap = guard+commit+push) · stealth: neutral hosting names, real domain stays unwired.
+
 ## Resume prompt (box-side first session — paste after the secrets folder lands)
 
-> Stamped 2026-07-10, still current. On the LAPTOP, skip the bring-up audit and just work the queue.
+> Stamped 2026-07-10, still current for the box. On the LAPTOP, use the session-25 prompt above instead.
 
 **Resume · Thalon** — Sprint 6, **B6.7 deploy + exit gate**.
 
