@@ -173,6 +173,57 @@ describe("renderPillar (B3.10 thin render seam, keyless)", () => {
     expect(meta.beats).toEqual(META.beats);
   });
 
+  it("releases the target's work dir only AFTER the video bytes are persisted (read before cleanup, in order)", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const draft = await pillarDraft(ctx, repos);
+    const calls: string[] = [];
+    const target = {
+      name: "cleanup-probe",
+      async render() {
+        return {
+          videoPath: "/probe/video.mp4",
+          cleanup: async () => {
+            calls.push("cleanup");
+          },
+        };
+      },
+    };
+
+    const result = await renderPillar(ctx, repos, draft.id, target, {
+      objectStore,
+      readVideo: async (p: string) => {
+        calls.push(`read:${p}`);
+        return Buffer.from("PROBE-MP4");
+      },
+    });
+
+    expect(result.status).toBe("rendered");
+    if (result.status !== "rendered") throw new Error("unreachable");
+    expect(calls).toEqual(["read:/probe/video.mp4", "cleanup"]);
+    const prefix = result.renderRef.replace(/\/manifest\.json$/, "");
+    expect((await objectStore.get(`${prefix}/video.mp4`))!.toString("utf8")).toBe("PROBE-MP4");
+  });
+
+  it("a failing cleanup handle never outranks a successful render", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const draft = await pillarDraft(ctx, repos);
+    const target = {
+      name: "cleanup-throws",
+      async render() {
+        return {
+          videoPath: null,
+          cleanup: async () => {
+            throw new Error("EBUSY: dir still locked");
+          },
+        };
+      },
+    };
+
+    const result = await renderPillar(ctx, repos, draft.id, target, { objectStore });
+
+    expect(result.status).toBe("rendered");
+  });
+
   it("serves an identical re-render from the content-addressed cache without invoking the target", async () => {
     const { ctx, repos, objectStore } = await setup();
     const draft = await pillarDraft(ctx, repos);

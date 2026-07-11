@@ -119,8 +119,9 @@ export async function renderPillar(
       }
 
       let videoPath: string | null;
+      let releaseWorkDir: (() => Promise<void>) | undefined;
       try {
-        ({ videoPath } = await target.render({ manifest, srt }));
+        ({ videoPath, cleanup: releaseWorkDir } = await target.render({ manifest, srt }));
       } catch (err) {
         return {
           patch: { renderStatus: "failed", renderRef: null },
@@ -132,16 +133,24 @@ export async function renderPillar(
         };
       }
 
-      await objectStore.put(`${prefix}/captions.srt`, srt);
-      if (videoPath) await objectStore.put(`${prefix}/video.mp4`, await readVideo(videoPath));
-      await objectStore.put(
-        `${prefix}/artifacts.json`,
-        stableStringify({ captions: "captions.srt", video: videoPath ? "video.mp4" : null, target: target.name }),
-      );
-      // Written last: manifest.json is the cache commit marker, and its bytes
-      // ARE the hashed content (sha256(manifest.json) === the prefix hash — the
-      // content-addressing is independently verifiable).
-      await objectStore.put(manifestKey, manifestJson);
+      try {
+        await objectStore.put(`${prefix}/captions.srt`, srt);
+        if (videoPath) await objectStore.put(`${prefix}/video.mp4`, await readVideo(videoPath));
+        await objectStore.put(
+          `${prefix}/artifacts.json`,
+          stableStringify({ captions: "captions.srt", video: videoPath ? "video.mp4" : null, target: target.name }),
+        );
+        // Written last: manifest.json is the cache commit marker, and its bytes
+        // ARE the hashed content (sha256(manifest.json) === the prefix hash — the
+        // content-addressing is independently verifiable).
+        await objectStore.put(manifestKey, manifestJson);
+      } finally {
+        // videoPath lives inside the target's work dir, so it is released only
+        // now that the bytes are persisted (or persisting failed — either way
+        // the dir is dead weight). Best-effort: a cleanup failure never
+        // outranks the render outcome.
+        await releaseWorkDir?.().catch(() => {});
+      }
 
       return {
         patch: { renderStatus: "rendered", renderRef: manifestKey },

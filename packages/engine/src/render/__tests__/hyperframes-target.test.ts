@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -247,6 +247,40 @@ describe("createHyperframesRenderTarget (browser-free: fake producer module behi
     expect((thrown as HyperframesRenderError).reason).toBe("engine");
     expect((thrown as HyperframesRenderError).message).toMatch(/stage "capture": browser tab crashed/);
   });
+
+  it("the cleanup handle releases the job dir (video included) and is idempotent", async () => {
+    const producer = fakeProducer();
+    const workDir = tempDir("cleanup");
+    const target = createHyperframesRenderTarget({
+      producer: async () => producer.mod,
+      linter: passLinter,
+      workDir,
+    });
+
+    const { videoPath, cleanup } = await target.render(pillarRequest());
+
+    // The mp4 lives inside the job dir — it survives until the caller says so.
+    expect(existsSync(videoPath!)).toBe(true);
+    await cleanup!();
+    expect(existsSync(path.dirname(videoPath!))).toBe(false);
+    await cleanup!(); // second call is a no-op, not an error
+    expect(readdirSync(workDir)).toEqual([]);
+  });
+
+  it("a producer failure releases the job dir before the error surfaces (no temp leak on the path with no handle)", async () => {
+    const producer = fakeProducer(async () => {
+      throw new Error("chromium died");
+    });
+    const workDir = tempDir("leak");
+    const target = createHyperframesRenderTarget({
+      producer: async () => producer.mod,
+      linter: passLinter,
+      workDir,
+    });
+
+    await expect(target.render(pillarRequest())).rejects.toThrow(HyperframesRenderError);
+    expect(readdirSync(workDir)).toEqual([]);
+  });
 });
 
 describe("renderPillar × hyperframes target (the B3.10 seam end-to-end, keyless)", () => {
@@ -303,11 +337,19 @@ describe("renderPillar × hyperframes target (the B3.10 seam end-to-end, keyless
 
   it("stores video.mp4 under the PINNED renders/pillar/<sha256>/ prefix — new artifact, unchanged key scheme", async () => {
     const { ctx, repos, draft, store } = await approvedPillarDraft();
-    const producer = fakeProducer();
+    // Snapshot the project files AT RENDER TIME: renderPillar releases the
+    // job dir after persisting, so the dir no longer exists by assert time.
+    const written: Record<string, string> = {};
+    const producer = fakeProducer(async (_job, projectDir, outputPath) => {
+      written["index.html"] = await readFile(path.join(projectDir, "index.html"), "utf8");
+      written["scene-0"] = await readFile(path.join(projectDir, "compositions", "scene-0.html"), "utf8");
+      await writeFile(outputPath, "FAKE-MP4-BYTES");
+    });
+    const workDir = tempDir("e2e");
     const target = createHyperframesRenderTarget({
       producer: async () => producer.mod,
       linter: passLinter,
-      workDir: tempDir("e2e"),
+      workDir,
     });
 
     const result = await renderPillar(ctx, repos, draft.id, target, { objectStore: store });
@@ -323,11 +365,12 @@ describe("renderPillar × hyperframes target (the B3.10 seam end-to-end, keyless
     // The composition the engine rendered came from EXACTLY the cached manifest bytes.
     const manifest = JSON.parse((await store.get(result.renderRef))!.toString("utf8")) as PillarRenderManifest;
     const project = renderCompositionProject(compositionSpecFromPillarManifest(manifest));
-    const written = await readFile(path.join(producer.executeCalls[0].projectDir, "index.html"), "utf8");
-    expect(written).toBe(project.files["index.html"]);
+    expect(written["index.html"]).toBe(project.files["index.html"]);
     // Brand styling from the ACTIVE profile, as data — the accent reaches the scene layer.
-    const scene = await readFile(path.join(producer.executeCalls[0].projectDir, "compositions", "scene-0.html"), "utf8");
-    expect(scene).toContain("#f2aa4c");
+    expect(written["scene-0"]).toContain("#f2aa4c");
+    // And the work dir is released once the bytes are in the object store —
+    // renders never accumulate temp dirs (B6.7 exit item).
+    expect(readdirSync(workDir)).toEqual([]);
 
     const meta = pillarScriptDraftMetaSchema.parse((await repos.drafts.get(ctx, draft.id)).meta);
     expect(meta.renderStatus).toBe("rendered");

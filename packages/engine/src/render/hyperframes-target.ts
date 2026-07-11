@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
@@ -239,6 +239,10 @@ export function createHyperframesRenderTarget(deps: HyperframesTargetDeps = {}):
           AbortSignal.timeout(deps.timeoutMs ?? DEFAULT_RENDER_TIMEOUT_MS),
         );
       } catch (err) {
+        // Nothing in the job dir is worth keeping on failure — release it
+        // here, since the caller never receives a cleanup handle. Best-effort:
+        // the render error stays primary over any rm failure.
+        await rm(jobDir, { recursive: true, force: true }).catch(() => {});
         if (err instanceof producer.RenderCancelledError) {
           throw new HyperframesRenderError(
             `hyperframes render cancelled (${err.reason}) for composition "${spec.title}": ${err.message}`,
@@ -254,7 +258,13 @@ export function createHyperframesRenderTarget(deps: HyperframesTargetDeps = {}):
         throw new HyperframesRenderError(`hyperframes render failed at ${detail}`, "engine");
       }
 
-      return { videoPath: outputPath };
+      return {
+        videoPath: outputPath,
+        // The mp4 lives inside the job dir, so releasing it is the caller's
+        // call — after persisting, via this handle (rm is already idempotent
+        // under force).
+        cleanup: () => rm(jobDir, { recursive: true, force: true }),
+      };
     },
   };
 }

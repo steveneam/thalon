@@ -39,6 +39,13 @@ export interface PillarRenderRequest {
 export interface PillarRenderArtifacts {
   /** Absolute path to the rendered video file, or null when the target renders no video (the fake target; a preview-only target). */
   videoPath: string | null;
+  /**
+   * Releases the target's throwaway work dir — `videoPath` may live inside
+   * it, so only the core caller (./render.ts) invokes this, after the video
+   * bytes are persisted. Best-effort and idempotent; a target that leaves
+   * nothing on disk omits it.
+   */
+  cleanup?: () => Promise<void>;
 }
 
 /**
