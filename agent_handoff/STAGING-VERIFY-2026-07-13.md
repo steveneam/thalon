@@ -74,10 +74,18 @@ and fail-closed (503 without its token env, 401 on a bad bearer, 200
 `{path,bytes,ms}` contract unchanged). Restic wiring is unblocked; keep the
 "non-200 = do not trust the dump" gate.
 
-## New image pin (appended post-CI)
+## New image pin — REDEPLOY TO THIS (appended post-CI, same day)
 
-_Pending — CI builds on the fix push; the tag+digest lands here in a
-follow-up commit. Deploy by sha tag + digest, never `latest`._
+```
+ghcr.io/steveneam/thalon-web:fa54d78724a9b800cb34a4f639b2975380bce186
+@sha256:7621f5e33290af0e39d79126114e6fa22abc85c198db943862af8566c6f3a638
+```
+
+Built 2026-07-13 with the fix; the new CI smoke gate ran against this exact
+image on an empty volume before push — `/api/health`, `/blog`,
+`/blog/rss.xml`, `/sitemap.xml`, `/llms.txt` all 200 in the gate log.
+Supersedes `6408afc…@sha256:319b3442…`. Deploy by sha tag + digest, never
+`latest`. Runtime env and volume contract unchanged from the ASK-BACKS file.
 
 ---
 _Thalon repo on this box: `~/work/thalon`. Coordination via the founder, as

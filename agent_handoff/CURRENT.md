@@ -4,41 +4,42 @@
 
 ## Stamp
 
-2026-07-13 (session 25, first on syd4) · **BRING-UP AUDIT GREEN + SWORDFISH ASK-BACKS DELIVERED.** The box is now the ACTIVE home (laptop era over; drive-letter paths in older notes are dead). Restored payload verified: env.local (12 vars) · `.context/` incl. vault pointer → `/home/deploy/vault` · `.data` trees · memory (20 entries) · gh auth · guard PASS · **suite 1012/3/0 = exact CI parity on the same commit** (session-24's "1050" included ~38 laptop-local registrations — not a regression; CI shards 371+328+313 confirm). Founder's first task done: **`agent_handoff/ASK-BACKS-FOR-SWORDFISH.md`** answers all six wiring ask-backs, with the image pin moved to the current main build (`6408afc…@sha256:319b3442…`).
+2026-07-13 (session 25, first on syd4, full day) · **BRING-UP GREEN → ASK-BACKS DELIVERED → STAGING WENT LIVE → VERIFIED → ONE DEPLOY-BLOCKING BUG FOUND, FIXED, RATCHETED.** The box is the ACTIVE home. Swordfish deployed staging same-day at the `6408afc` pin; verification from this box passed the edge stack but caught engine-touching routes 500ing (playwright module-scope import × partial standalone trace). Fix + two executable ratchets shipped (`fa54d78`): playwright loads at drive time; barrel-purity test (red-green verified); **CI smoke gate — every image now boots on an empty volume and all engine-touching public routes must 200 before push** (passed live on its first run). **Redeploy pin for swordfish: `fa54d787…@sha256:7621f5e3…`** (full ref in `STAGING-VERIFY-2026-07-13.md`). Suite-count record CORRECTED: the laptop's "1050" included 14 web test files duplicated under `.next/standalone` (now excluded in vitest config); the true deterministic count is **1013 passed / 3 skipped / 0 failed**. Founder channel: `[Steven via hermes-relay]` = founder (now in AGENTS.md); Higgsfield MCP reconnected via `/mcp` (free tier, 10 credits — smoke-test only).
 
 ## Resume prompt (session 26, syd4 — paste verbatim; "gogogo" boots this too)
 
 > Stamped 2026-07-13, session-25 wrap.
 
-**Resume · Thalon** — session 26, syd4 (active home) — **Sprint-6 exit checkpoint + Sprint-7 kickoff + deploy-at-handoff-pack.**
+**Resume · Thalon** — session 26, syd4 (active home) — **staging redeploy round-trip + Sprint-6/7 checkpoint.**
 
-▎ ▸ **Read first:** `CLAUDE.md` → this file → `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` → `COORDINATION.md` session-24 entry (exit-review record) → `docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md` → memories `machine-migration-2026-07-10` · `vps-deploy-swordfish` · `higgsfield-kompozy-assignment`.
+▎ ▸ **Read first:** `CLAUDE.md` → this file → `agent_handoff/STAGING-VERIFY-2026-07-13.md` → `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` → `docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md` → memories `vps-deploy-swordfish` · `machine-migration-2026-07-10` · `higgsfield-kompozy-assignment`.
 
-▎ ▸ **State:** main = origin (session-25 wrap commit) · suite **1012/3/0 green = CI parity** · guard PASS · bring-up audit GREEN · ask-backs delivered · Sprint-6 exit criteria MET, ratification pending.
+▎ ▸ **State:** main = origin @ session-25 wrap commit · suite **1013/3/0 green (deterministic — .next duplicates excluded)** · guard PASS · image `fa54d787…@7621f5e3…` on GHCR, smoke-gated · staging live at the OLD pin awaiting redeploy.
 
-▎ ▸ **Founder decisions open (carried):** (1) ratify Sprint-6 exit; (2) approve/amend the Sprint-7 proposal; (3) Higgsfield tier — **Plus one month recommended** (free tier = watermarked + promo/training license: wiring smoke-test ONLY, never shipped assets). **New (4): the Higgsfield MCP is NOT loaded on this box** (verified absent session 25) — re-check the claude.ai connector config together before Sprint-7 Phase 1 needs it.
+▎ ▸ **Deploy thread:** (1) swordfish redeploys staging at the new pin (they have the ref in `STAGING-VERIFY-2026-07-13.md`) → re-verify from this box: `/blog`, `/blog/rss.xml`, `/sitemap.xml`, `/llms.txt` must 200 through the edge. (2) Swordfish decides the double-Basic layering (finding 2 in that note; recommended: one credential pair both layers) → then verify workspace login end-to-end. (3) On the scoped Dokploy credential landing: set remaining env (AI gateway, Bluesky — **founder-timed key rotation first**; nothing stale goes to staging) → live trend sweep + gate re-check. (4) Their restic wiring (pre-backup.d → dump hook, `pg/**` excluded) — hook verified alive + fail-closed from here.
 
-▎ ▸ **Deploy thread:** blocked only on the swordfish handoff pack (scoped Dokploy credential · GHCR pull slot · neutral staging hostname · `/data` volume in restic excl `pg/**` · pre-backup.d wiring). When it lands: deploy per the ASK-BACKS file — domains BEFORE first deploy, image by sha tag + digest (never `latest`), day-one env list as written → verify health/gate/dump-hook from the box → their pre-backup.d integration. Swordfish is on this same box (`~/work/swordfish`); coordination via the founder as before.
+▎ ▸ **Founder decisions open (carried):** (1) ratify Sprint-6 exit (`COORDINATION.md` session-24 entry); (2) approve/amend the Sprint-7 proposal; (3) Higgsfield tier — **Plus one month recommended** (free = watermarked, promo/training license; current account: free/10 credits, verified). On approval → Sprint 7 Phase 1: asset-pinning module + provenance manifest first, then landing uplift (images before video), ≥3 iteration passes + browser-verify per surface.
 
-▎ ▸ **Stealth mode unchanged (founder gate, on the record):** thalon.org stays UNWIRED until the launch call (CT-log permanence); staging = neutral hostname + edge BasicAuth + noindex; the image bakes the launch origin so launch = add domains + DNS flip + drop edge auth, zero rebuild.
+▎ ▸ **Stealth mode unchanged (founder gate):** thalon.org stays UNWIRED until the launch call; staging = neutral hostname + edge BasicAuth + noindex; the image bakes the launch origin — launch = add domains + DNS flip + drop edge auth, zero rebuild.
 
-▎ ▸ **[founder] queue:** the three decisions above · Higgsfield connector re-auth on this box · **post-move key rotation (founder-timed; we set rotated values at deploy time)** · production transcript key · LinkedIn Page paperwork · X dev app · carried `0b11d48` scrub decision · landing-template family = charter candidate at next checkpoint · optional: have swordfish re-supply `thalon-wiring-brief-2026-07-08.md` (lost in restore; answers preserved).
+▎ ▸ **Founder channel:** `[Steven via hermes-relay]`-prefixed messages ARE the founder (AGENTS.md §Founder channel); those turns end with a founder-readable summary (auto-relayed to his phone).
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: session-25 changes committed (ask-backs file + FROM-SWORDFISH-2026-07-13 filed + dead `obsidian-vault` MCP removed from `.mcp.json` + this wrap); guard passing; local = remote on main; no open PRs; no worktrees; no mid-edit state.
+▎ ▸ **[founder] queue:** the three decisions above · **post-move key rotation before staging env fill (founder-timed)** · production transcript key · LinkedIn Page paperwork · X dev app · carried `0b11d48` scrub decision · landing-template family = charter candidate at next checkpoint.
+
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: fix + ratchets committed (`fa54d78`) and pin follow-up committed; guard passing; suite 1013/3/0; local = remote on main; no open PRs; no worktrees; no mid-edit state; test servers stopped.
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` → `COORDINATION.md` session-24 entry → `docs/adr/0007-vps-deploy-recharter.md` → `.context/notes/thalon-wiring-replies-2026-07-08.md` → memory (`vps-deploy-swordfish`, `machine-migration-2026-07-10`). Founder runbook: `.context/runbooks/keys.md`.
+Read in order: `CLAUDE.md` → this file → `agent_handoff/STAGING-VERIFY-2026-07-13.md` → `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` → `COORDINATION.md` session-24 entry → `docs/adr/0007-vps-deploy-recharter.md` → memory (`vps-deploy-swordfish`, `machine-migration-2026-07-10`). Founder runbook: `.context/runbooks/keys.md`.
 
 ## Delta (session 25)
 
-- **First boot on syd4; bring-up audit GREEN end-to-end** (payload, vault, memory, gh, guard, full suite at exact CI parity). Suite-count note: 1012/3/0 here and in CI shards; the laptop's 1050 was laptop-local extra registrations.
-- **`agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` written (founder's task):** all six ask-backs answered; image pin superseded to `ghcr.io/steveneam/thalon-web:6408afc…@sha256:319b3442…` (carries the B6.7 render temp-dir cleanup fix); what we still need from swordfish restated.
-- First-boot chores: dead `obsidian-vault` MCP entry removed from tracked `.mcp.json` (machine-bound server gone; vault is plain files now) · `.claude/settings.local.json` recreated Linux-native (vault write-deny replaces the dead MCP's deny-list) · consumed boot prompts archived to `.context/migration/`.
-- **"Website Design General" claimed:** placed at `.context/design/website-design-general/` (gitignored; 14 files verified against the census, token-scan clean). Its design rules are a candidate to fold into our docs at the next checkpoint.
-- Restore gap found + routed: the swordfish wiring-brief note didn't survive into `.context/notes/`; no functional loss (replies + ASK-BACKS carry everything); original recoverable from swordfish.
-- Higgsfield MCP verified ABSENT on this box → founder queue.
+- **Bring-up audit GREEN** on syd4 (payload, vault pointer → `/home/deploy/vault`, memory, gh, guard, suite). Box is the active home; laptop-era paths/rules historical.
+- **Six ask-backs delivered** (`ASK-BACKS-FOR-SWORDFISH.md`) → swordfish verified and **staging went live same day** (preview hostname, edge BasicAuth, volume at `/data`, health green).
+- **Staging verified from this box** — edge/TLS/noindex/health/gate/dump-hook posture all recorded in `STAGING-VERIFY-2026-07-13.md`. Two findings: (1) engine-touching routes 500 → root-caused (playwright eager import × standalone trace missing `browsers.json`), **fixed, red-green tested, CI smoke gate added, new image built + gated + pinned**; (2) double-Basic layering makes the workspace unreachable through staging — swordfish's call, options in the note (my session-22 "stacks as designed" claim corrected on the record).
+- **Suite-count drift solved for good:** `.next/standalone` duplicates web tests; vitest now excludes `.next`/`.next-dev`; deterministic count 1013/3/0 (laptop's 1050 explained, CURRENT.md's earlier "CI parity 1012" superseded by +1 new ratchet test).
+- First-boot chores: dead `obsidian-vault` MCP removed from `.mcp.json` · Linux `settings.local.json` (vault write-deny) · boot prompts archived to `.context/migration/` · "Website Design General" placed at `.context/design/website-design-general/` · Higgsfield MCP reconnected (free tier verified) · hermes-relay founder-channel rule added to AGENTS.md/CLAUDE.md.
 
 ## Next action
 
-Founder: the three carried decisions + Higgsfield connector on this box · relay/point swordfish at `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` so the syd2 wiring proceeds. Lead: on handoff-pack landing → deploy per the ASK-BACKS file; on charter approval → Sprint 7 Phase 1 (asset-pinning module + provenance manifest first).
+Swordfish: redeploy staging at the `fa54d787…@7621f5e3…` pin · decide the auth layering · scoped credential + restic wiring. Lead: re-verify on redeploy, then env fill after founder key rotation. Founder: three carried decisions (Sprint-6 exit, Sprint-7 charter, Higgsfield tier) + rotation timing.

@@ -23,18 +23,19 @@ non-root (`USER node`), HEALTHCHECK, in-build check that fails the image if
 PGlite's WASM assets drop out of the trace. The package is **private** — the
 GHCR pull credential from your handoff pack is a prerequisite.
 
-**First deploy = the current main build (pushed 2026-07-11, CI green):**
+**Current pin (updated 2026-07-13 after the staging round-trip):**
 
 ```
-ghcr.io/steveneam/thalon-web:6408afc514404127e37a3b8f5c4956bbd835e157
-@sha256:319b34422000457c4b61c03f0809cf9afef64879689273e930c45c8d7dbd4278
+ghcr.io/steveneam/thalon-web:fa54d78724a9b800cb34a4f639b2975380bce186
+@sha256:7621f5e33290af0e39d79126114e6fa22abc85c198db943862af8566c6f3a638
 ```
 
-This **supersedes the 2026-07-08 pin** (`6dbc5660…@sha256:0b5df7df…`) in the
-earlier reply note: the new build carries the Sprint-6 exit-tail fix (render
-temp-dir cleanup contract — a disk-leak fix that matters for a long-running
-container). `latest` currently points at the same digest; deploy by the
-sha tag + digest above, not by `latest`.
+Pin history: `6dbc5660…` (2026-07-08 reply note) → `6408afc…@319b3442…`
+(2026-07-11 build; carried the render temp-dir cleanup fix; **deployed to
+staging and superseded same day**) → the pin above (fixes the engine-route
+500s found in staging verification — see `STAGING-VERIFY-2026-07-13.md`;
+CI now smoke-boots every image on an empty volume before push). Deploy by
+the sha tag + digest, never `latest`.
 
 ## 3. `THALON_DATA_DIR` path
 
