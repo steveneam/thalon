@@ -42,6 +42,11 @@ export function brandProfilesRepo(db: Db) {
             denylist: config.denylist,
             platformProfiles: config.platformProfiles,
             identity: config.identity,
+            // Sprint-7 window: optional blocks stay null when absent — the
+            // features they arm (lead scoring, cadence gate, routing) disarm.
+            icp: config.icp ?? null,
+            cadence: config.cadence ?? null,
+            routing: config.routing ?? null,
             version,
             active: input.activate ?? false,
           })

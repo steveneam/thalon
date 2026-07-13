@@ -44,6 +44,12 @@ export const brandProfiles = pgTable(
     platformProfiles: jsonb("platform_profiles").notNull().default({}),
     /** B3.8: durable company identity (facts, philosophy, audience, offers, links) — doubles as judge grounding, see contracts brandIdentitySchema. */
     identity: jsonb("identity").notNull().default({}),
+    /** A16/B-crm.2: ideal-customer-profile block (contracts icpSchema); null = lead scoring not armed for this tenant. */
+    icp: jsonb("icp"),
+    /** B7.a: per-platform posting-cadence norms (contracts cadenceConfigSchema); null = no cadence gate armed. */
+    cadence: jsonb("cadence"),
+    /** B7.e: content-bucket → platform routing map (contracts routingTableSchema); null = default routing. */
+    routing: jsonb("routing"),
     version: integer("version").notNull(),
     active: boolean("active").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })

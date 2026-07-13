@@ -16,6 +16,23 @@ describe("brand identity (B3.8)", () => {
     expect(renderBrandIdentity(config.identity)).toBe("");
   });
 
+  it("Sprint-7 additivity: a pre-window config parses byte-identically — icp/cadence/routing stay ABSENT, never defaulted in", () => {
+    const config = brandProfileConfigSchema.parse({ voice: { register: "plain" } });
+    expect("icp" in config).toBe(false);
+    expect("cadence" in config).toBe(false);
+    expect("routing" in config).toBe(false);
+    // Absence disarms: no icp → no lead scoring; supplied blocks validate.
+    const armed = brandProfileConfigSchema.parse({
+      icp: { description: "Owner-operated local service businesses" },
+      cadence: { linkedin: { maxPerDay: 1 } },
+      routing: { "product-updates": ["linkedin"] },
+    });
+    expect(armed.icp?.description).toBe("Owner-operated local service businesses");
+    expect(
+      brandProfileConfigSchema.safeParse({ icp: { description: "" } }).success,
+    ).toBe(false);
+  });
+
   it("renders every populated field in stable order and skips empties", () => {
     const identity = brandIdentitySchema.parse({
       company: "Fernwood Outfitters",
