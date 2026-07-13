@@ -4,74 +4,41 @@
 
 ## Stamp
 
-2026-07-11 (session 24, late) · **SPRINT 6 EXIT CRITERIA MET + SPRINT 7 PROPOSED.** B6.7 exit tail complete this session: temp-jobDir leak fixed (cleanup-handle contract + 4 tests), exit reviews across all three families recorded in `COORDINATION.md` (invariants grep-proven at the root), **full suite 1050 passed / 3 skipped / 0 failed**. Sprint-6 exit awaits founder ratification at this checkpoint, alongside two open decisions: **approve the Sprint-7 charter proposal** (`docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md` — visual uplift via asset-vendor MCP · AssetSource seam · 25-vertical template portfolio · competitor-informed buckets) and **pick the vendor tier** (Plus recommended, one production month). Vendor MCP added by founder, appears next session. Earlier same session: two-homes environment state below (laptop ACTIVE this weekend; box idle on syd4; ops rules in `agent_handoff/FROM-SWORDFISH-2026-07-11.md`).
+2026-07-13 (session 25, first on syd4) · **BRING-UP AUDIT GREEN + SWORDFISH ASK-BACKS DELIVERED.** The box is now the ACTIVE home (laptop era over; drive-letter paths in older notes are dead). Restored payload verified: env.local (12 vars) · `.context/` incl. vault pointer → `/home/deploy/vault` · `.data` trees · memory (20 entries) · gh auth · guard PASS · **suite 1012/3/0 = exact CI parity on the same commit** (session-24's "1050" included ~38 laptop-local registrations — not a regression; CI shards 371+328+313 confirm). Founder's first task done: **`agent_handoff/ASK-BACKS-FOR-SWORDFISH.md`** answers all six wiring ask-backs, with the image pin moved to the current main build (`6408afc…@sha256:319b3442…`).
 
-## Sync rules (binding, from Swordfish ops — see the FROM-SWORDFISH file)
+## Resume prompt (session 26, syd4 — paste verbatim; "gogogo" boots this too)
 
-- **Git is the bus.** Every session ends commit + push; the box-side copy catches up with `git pull`. Never hand-copy repo files over the box's clone.
-- **One active home at a time.** While the laptop is active, the box-side agent does not run.
-- **Laptop network rule:** IT-monitored — general websites + GitHub (git/gh over HTTPS) only; anything else needs founder go-ahead first.
-- Box auth (claude + gh) is already live per-box; no logins needed there.
-- Headless phone-dispatched runs may land on isolated branches — review as PRs/diffs, normal rules.
+> Stamped 2026-07-13, session-25 wrap.
 
-## Gitignored payload — staged 2026-07-11, restore map (for the box-side agent)
+**Resume · Thalon** — session 26, syd4 (active home) — **Sprint-6 exit checkpoint + Sprint-7 kickoff + deploy-at-handoff-pack.**
 
-Nothing gitignored crossed with the fresh clone. Staged copy-only to the migration drive at `thalon-migration/secrets/` (3,360 files / 88.3 MB), mirroring repo-relative paths; the founder scp's that folder to the box. **Authoritative restore commands + full inventory: `secrets/RESTORE.md` inside that folder.** Summary — restore each item to the same repo-relative path under the clone root (`~/work/thalon/`):
+▎ ▸ **Read first:** `CLAUDE.md` → this file → `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` → `COORDINATION.md` session-24 entry (exit-review record) → `docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md` → memories `machine-migration-2026-07-10` · `vps-deploy-swordfish` · `higgsfield-kompozy-assignment`.
 
-| Item | Note |
-|---|---|
-| `apps/web/.env.local` 🔐 | the 12 runtime vars; rotate post-migration per the drive manifests |
-| `.context/` | vault pointer + prompts + notes + tenant profiles + runbooks + tools (renders/ excluded — regenerable). Stays gitignored; fixup: repoint `.context/READ-ME-FIRST.md` at the vault's new location |
-| `.data/` · `apps/web/.data/` · `eval/.data/` | PGlite dev DBs / object store — dogfood state carried to avoid re-seeding |
-| `.claude/settings.local.json` | reference only — Windows paths; recreate on the box |
+▎ ▸ **State:** main = origin (session-25 wrap commit) · suite **1012/3/0 green = CI parity** · guard PASS · bring-up audit GREEN · ask-backs delivered · Sprint-6 exit criteria MET, ratification pending.
 
-After restore: `git status --short` in the clone must show none of it. Then the session-23 bring-up audit below still applies verbatim.
+▎ ▸ **Founder decisions open (carried):** (1) ratify Sprint-6 exit; (2) approve/amend the Sprint-7 proposal; (3) Higgsfield tier — **Plus one month recommended** (free tier = watermarked + promo/training license: wiring smoke-test ONLY, never shipped assets). **New (4): the Higgsfield MCP is NOT loaded on this box** (verified absent session 25) — re-check the claude.ai connector config together before Sprint-7 Phase 1 needs it.
 
-## Resume prompt (LAPTOP session 25 — paste verbatim)
+▎ ▸ **Deploy thread:** blocked only on the swordfish handoff pack (scoped Dokploy credential · GHCR pull slot · neutral staging hostname · `/data` volume in restic excl `pg/**` · pre-backup.d wiring). When it lands: deploy per the ASK-BACKS file — domains BEFORE first deploy, image by sha tag + digest (never `latest`), day-one env list as written → verify health/gate/dump-hook from the box → their pre-backup.d integration. Swordfish is on this same box (`~/work/swordfish`); coordination via the founder as before.
 
-> Stamped 2026-07-11, session-24 wrap.
+▎ ▸ **Stealth mode unchanged (founder gate, on the record):** thalon.org stays UNWIRED until the launch call (CT-log permanence); staging = neutral hostname + edge BasicAuth + noindex; the image bakes the launch origin so launch = add domains + DNS flip + drop edge auth, zero rebuild.
 
-**Resume · Thalon** — session 25, laptop (active home) — **Sprint-6 exit checkpoint + Sprint-7 kickoff.**
+▎ ▸ **[founder] queue:** the three decisions above · Higgsfield connector re-auth on this box · **post-move key rotation (founder-timed; we set rotated values at deploy time)** · production transcript key · LinkedIn Page paperwork · X dev app · carried `0b11d48` scrub decision · landing-template family = charter candidate at next checkpoint · optional: have swordfish re-supply `thalon-wiring-brief-2026-07-08.md` (lost in restore; answers preserved).
 
-▎ ▸ **Read first:** `CLAUDE.md` → this file → `COORDINATION.md` session-24 entry (the exit-review record) → `docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md` → memories `higgsfield-kompozy-assignment` · `machine-migration-2026-07-10`.
-
-▎ ▸ **State:** main = origin @ `6408afc` · suite **1050/3/0 green** · guard clean · B6.7 exit tail DONE (temp-jobDir fix + three-family exit reviews recorded) · Sprint-6 exit criteria MET, ratification pending.
-
-▎ ▸ **Three founder decisions open this session:** (1) ratify Sprint-6 exit; (2) approve/amend the Sprint-7 proposal; (3) Higgsfield tier — **Plus one month recommended** (free tier = watermarked + promo/training license: wiring smoke-test ONLY, never shipped assets).
-
-▎ ▸ **Then:** verify the Higgsfield MCP loaded (founder connected it session 24; if absent, re-check the connector config with the founder). On approval → **Sprint 7 Phase 1**: asset-pinning module + provenance manifest first (the independence ratchet), then landing-page uplift (images before video), ≥3 iteration passes + browser-verify per surface.
-
-▎ ▸ **Standing constraints:** re-check network posture at start (hotspot = relaxed, otherwise websites+GitHub only) · **AWS untouchable** · no Docker on the laptop · git is the bus (wrap = guard+commit+push) · stealth: neutral hosting names, real domain stays unwired.
-
-## Resume prompt (box-side first session — paste after the secrets folder lands)
-
-> Stamped 2026-07-10, still current for the box. On the LAPTOP, use the session-25 prompt above instead.
-
-**Resume · Thalon** — Sprint 6, **B6.7 deploy + exit gate**.
-
-▎ ▸ **Bring-up audit FIRST — no sprint work until green.** Follow `.context/migration/PLAN.md` (gitignored; travels outside git) and the restore manifests it names. Verify in order: repo clone + `git config user.email steveneam@hotmail.com` + `npm ci` · `.context/` present at the clone root and still gitignored (`git status` shows none of it) · `apps/web/.env.local` present · **memories loaded** (the memory index lists ~20 entries — if empty, the project-dir slug rename step was missed) · vault restored and the pointer in `.context/READ-ME-FIRST.md` updated · gh auth live · pwsh installed → `pwsh scripts/ci-grep-guard.ps1` returns PASS · full suite green. Report gaps to the founder and fix together. **If `.context/` or memories are missing entirely — STOP and ask the founder for the migration materials.**
-
-▎ ▸ Then read: `CLAUDE.md` → this file → `agent_handoff/FROM-SWORDFISH-2026-07-11.md` → `COORDINATION.md` session-22 message + its two addenda → `.context/notes/thalon-wiring-brief-2026-07-08.md` + `thalon-wiring-replies-2026-07-08.md` → memories `vps-deploy-swordfish` · `net-positive-speedups` · `machine-migration-2026-07-10`.
-
-▎ ▸ **Queue (session 24):** (1) **Founder checkpoint FIRST:** ratify Sprint-6 exit (exit-review record = `COORDINATION.md` session-24 entry) · approve/amend the Sprint-7 proposal (`docs/proposals/2026-07-11-visual-uplift-and-template-portfolio.md`) · vendor-tier decision (Plus recommended; free tier = watermarked + promo/training license, never ship its assets). (2) On approval, Sprint 7 Phase 1: asset-pinning module + provenance manifest, then landing → blog → workspace uplift via the vendor MCP (founder connected it; verify it loaded at session start), ≥3 iteration passes + browser-verify per surface. (3) Deploy thread unchanged: if the infra handoff pack lands ([founder] relays: scoped deploy credential + GHCR pull slot + staging hostname + volume) — deploy the container behind the staging hostname (domains BEFORE first deploy; runtime env day-one list: WORKSPACE_BASIC_AUTH + DB_DUMP_TOKEN required, gateway key, TREND_SOURCE=bluesky + creds) → verify health/gate/dump-hook → pre-backup.d integration; Swordfish's six ask-backs still outstanding. (4) Carried: GSC verification at domain-live (`docs/DATA-SPINE.md` §4). Docker available on the box only (never the laptop).
-
-▎ ▸ **Stealth mode unchanged (founder call, on the record):** the real domain stays UNWIRED until the launch call (CT-log permanence); staging = neutral hostname + edge BasicAuth + noindex; the image bakes the launch origin so launch = add domains + DNS flip + drop edge auth, zero rebuild.
-
-▎ ▸ **[founder] queue:** scp `thalon-migration/secrets/` from the drive to the box · relay the wiring-replies note + handoff pack back · production transcript key · LinkedIn Page paperwork · X dev app · optional Trends alpha · carried `0b11d48` scrub decision · landing-template family = charter candidate at the next checkpoint · **post-move key rotation, founder-timed (locations listed in `.context/migration/PLAN.md` + drive manifests)**.
-
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: session-24 code change (render cleanup contract: `target.ts` · `hyperframes-target.ts` · `render.ts` + tests) committed with the suite green at 1050/3/0; guard passing; local = remote on main after push; no open PRs; no worktrees; no mid-edit state.
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: session-25 changes committed (ask-backs file + FROM-SWORDFISH-2026-07-13 filed + dead `obsidian-vault` MCP removed from `.mcp.json` + this wrap); guard passing; local = remote on main; no open PRs; no worktrees; no mid-edit state.
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → `agent_handoff/FROM-SWORDFISH-2026-07-11.md` → (box only: `.context/migration/PLAN.md`) → `COORDINATION.md` session-22 message → `docs/adr/0007-vps-deploy-recharter.md` → the two wiring notes in `.context/notes/` → memory (`vps-deploy-swordfish`, `machine-migration-2026-07-10`). Founder runbook: `.context/runbooks/keys.md`.
+Read in order: `CLAUDE.md` → this file → `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` → `COORDINATION.md` session-24 entry → `docs/adr/0007-vps-deploy-recharter.md` → `.context/notes/thalon-wiring-replies-2026-07-08.md` → memory (`vps-deploy-swordfish`, `machine-migration-2026-07-10`). Founder runbook: `.context/runbooks/keys.md`.
 
-## Delta (session 24)
+## Delta (session 25)
 
-- Swordfish ops handoff received and committed (`FROM-SWORDFISH-2026-07-11.md`): two copies of the agent now exist; laptop active this weekend; sync rules recorded above.
-- Repo gitignored payload staged copy-only to the drive (`thalon-migration/secrets/`, 3,360 files / 88.3 MB, counts verified against source) with restore map (`RESTORE.md`) + refresh block; drive MANIFEST updated — its "nothing to stage" claim superseded.
-- New founder assignment researched inline (asset-vendor MCP + competitor teardown) → Sprint-7 proposal committed (`docs/proposals/`); founder connected the vendor MCP (loads next session); tier decision pending.
-- **B6.7 exit tail COMPLETE**: temp-jobDir cleanup (contract-level `cleanup` handle; failure-path release in the target; caller releases after persist; 4 new tests) · three-family exit reviews recorded in `COORDINATION.md` (single-status-writer + body-hash judge invariant, gateway-guard coverage, approved-only web doors, all carried items verified landed) · **suite 1050/3/0 green** · typecheck + guard clean.
+- **First boot on syd4; bring-up audit GREEN end-to-end** (payload, vault, memory, gh, guard, full suite at exact CI parity). Suite-count note: 1012/3/0 here and in CI shards; the laptop's 1050 was laptop-local extra registrations.
+- **`agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` written (founder's task):** all six ask-backs answered; image pin superseded to `ghcr.io/steveneam/thalon-web:6408afc…@sha256:319b3442…` (carries the B6.7 render temp-dir cleanup fix); what we still need from swordfish restated.
+- First-boot chores: dead `obsidian-vault` MCP entry removed from tracked `.mcp.json` (machine-bound server gone; vault is plain files now) · `.claude/settings.local.json` recreated Linux-native (vault write-deny replaces the dead MCP's deny-list) · consumed boot prompts archived to `.context/migration/`.
+- **"Website Design General" claimed:** placed at `.context/design/website-design-general/` (gitignored; 14 files verified against the census, token-scan clean). Its design rules are a candidate to fold into our docs at the next checkpoint.
+- Restore gap found + routed: the swordfish wiring-brief note didn't survive into `.context/notes/`; no functional loss (replies + ASK-BACKS carry everything); original recoverable from swordfish.
+- Higgsfield MCP verified ABSENT on this box → founder queue.
 
 ## Next action
 
-Founder: ratify Sprint-6 exit + approve Sprint-7 proposal + vendor tier (three decisions, next session) · scp the drive's `thalon-migration/secrets/` folder to the box whenever it becomes active. Lead: on approval, Sprint 7 Phase 1 (asset-pinning ratchet → landing uplift first).
+Founder: the three carried decisions + Higgsfield connector on this box · relay/point swordfish at `agent_handoff/ASK-BACKS-FOR-SWORDFISH.md` so the syd2 wiring proceeds. Lead: on handoff-pack landing → deploy per the ASK-BACKS file; on charter approval → Sprint 7 Phase 1 (asset-pinning module + provenance manifest first).
