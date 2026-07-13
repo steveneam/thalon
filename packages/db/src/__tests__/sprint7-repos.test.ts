@@ -122,6 +122,47 @@ describe("leads repo (B-crm.1)", () => {
   });
 });
 
+describe("lead triage (B-crm.2, window-1a)", () => {
+  it("pin rides meta without clobbering it; re-pinning the same value is a silent no-op; foreign writes 404", async () => {
+    const { ctx, other, repos } = await setup();
+    const { lead } = await repos.leads.add(ctx, {
+      source: "csv",
+      email: "pin@x.example",
+      meta: { "Phone Number": "123" },
+    });
+
+    const pinned = await repos.leads.setPinned(ctx, lead.id, true);
+    expect(pinned.meta).toEqual({ "Phone Number": "123", pinned: true });
+    await repos.leads.setPinned(ctx, lead.id, true); // no-op
+    const unpinned = await repos.leads.setPinned(ctx, lead.id, false);
+    expect(unpinned.meta).toEqual({ "Phone Number": "123", pinned: false });
+    await expect(repos.leads.setPinned(other, lead.id, true)).rejects.toBeInstanceOf(NotFoundError);
+
+    const events = await repos.events.list(ctx, { entityType: "lead", entityId: lead.id });
+    // The no-op replay emitted nothing (B4.4 pin: lead.pin_changed twice, not thrice).
+    expect(events.map((e) => e.event)).toEqual([
+      "lead.created",
+      "lead.pin_changed",
+      "lead.pin_changed",
+    ]);
+  });
+
+  it("dismiss/pin land as eval rows through the lead_triage origin — the taxonomy stays honest", async () => {
+    const { ctx, repos } = await setup();
+    const row = await repos.evalCases.recordLeadTriage(ctx, {
+      kind: "lead_rank",
+      input: { score: 0.72, reasons: ["strong vertical match"] },
+      action: "dismissed",
+      sourceRef: "lead:abc",
+    });
+    expect(row.origin).toBe("lead_triage");
+    expect(row.expected).toEqual({ operatorAction: "dismissed" });
+    const events = await repos.events.list(ctx, { entityType: "eval_case", entityId: row.id });
+    expect(events.map((e) => e.event)).toEqual(["eval_case.recorded"]); // B4.4 pin
+    expect(await repos.evalCases.list(ctx, { origin: "lead_triage" })).toHaveLength(1);
+  });
+});
+
 describe("lead scores repo (B-crm.2)", () => {
   it("appends idempotently on (lead, profileHash, scoredAt); profile drift accrues history; latest wins the queue read", async () => {
     const { ctx, other, repos } = await setup();

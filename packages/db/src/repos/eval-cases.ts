@@ -46,6 +46,45 @@ export function evalCasesRepo(db: Db) {
       });
     },
 
+    /**
+     * B-crm.2 (window-1a): the leads-queue learning door — a dismissal or
+     * pin of a ranked lead is operator signal on the SCORING, captured with
+     * its own origin ('lead_triage', check-constraint enforced). `expected`
+     * records only the ground truth (what the operator did) — the future
+     * weight-tuning harness (B-crm.5) interprets it. Same transaction as
+     * the audit event (invariant I4).
+     */
+    async recordLeadTriage(
+      ctx: TenantCtx,
+      input: {
+        kind: string;
+        input: Record<string, unknown>;
+        action: "dismissed" | "pinned" | "unpinned";
+        sourceRef?: string;
+      },
+    ): Promise<EvalCase> {
+      return db.transaction(async (tx) => {
+        const [row] = await tx
+          .insert(evalCases)
+          .values({
+            tenantId: ctx.tenantId,
+            kind: input.kind,
+            input: input.input,
+            expected: { operatorAction: input.action },
+            origin: "lead_triage",
+            sourceRef: input.sourceRef,
+          })
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "eval_case",
+          entityId: row.id,
+          event: "eval_case.recorded",
+          payload: { kind: input.kind, origin: "lead_triage", sourceRef: input.sourceRef ?? null },
+        });
+        return row;
+      });
+    },
+
     async list(
       ctx: TenantCtx,
       filter: { origin?: string; kind?: string; limit?: number } = {},

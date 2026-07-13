@@ -120,9 +120,11 @@ export const evalCases = pgTable(
     // learning door — mechanism-written from an operator dismissal, its own
     // origin by design (disguising it as 'manual' would corrupt the
     // taxonomy separating mechanism-written from human-authored rows).
+    // 'lead_triage' (B-crm.2, window-1a amendment): the leads-queue door —
+    // operator dismiss/pin of a ranked lead, same taxonomy honesty rule.
     check(
       "eval_cases_origin_check",
-      sql.raw(`origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss')`),
+      sql.raw(`origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage')`),
     ),
   ],
 );
