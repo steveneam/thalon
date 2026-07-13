@@ -1,8 +1,9 @@
 # Proposal: Leads engine — gated CRM + lead scoring (charter candidate)
 
-_Status: PROPOSED 2026-07-13 · a candidate for the Sprint-7 checkpoint, competing for
-priority against (or interleaving with) the visual-uplift phases — founder sequencing
-call._
+_Status: **APPROVED 2026-07-13** (session-26 checkpoint, amendment A16 / ADR 0008) —
+B-crm.1+2 interleave late in Sprint 7 so the portfolio outreach dogfoods them;
+B-crm.3–5 queue for the next checkpoint. Detailed B-crm.1+2 build plan appended below
+(§Build plan)._
 _Inputs: founder idea 2026-07-13 ("CRM component: onboarding + ranking/scoring leads
 with contact details against our criteria/profile") · same-day landscape research
 (open-source CRMs, Clay-pattern enrichment, cold-outreach tooling) · the engine's
@@ -101,6 +102,100 @@ rules carry eval rows.
 
 1. Priority: interleave with Sprint 7 (B-crm.1+2 are contract-window-sized) vs. queue
    as Sprint 8 — recommendation: **B-crm.1+2 late in Sprint 7** so the portfolio
-   outreach dogfoods it, rest next sprint.
-2. First enrichment provider(s) to wire (BYO-keys shortlist to approve).
+   outreach dogfoods it, rest next sprint. → **APPROVED 2026-07-13 (A16).**
+2. First enrichment provider(s) to wire (BYO-keys shortlist to approve). → *Deferred
+   with B-crm.3 to the next checkpoint.*
 3. Outreach send path for dogfood (which operator mailbox/provider, volume comfort).
+   → *Deferred with B-crm.4 to the next checkpoint.*
+
+---
+
+## Build plan — B-crm.1+2 (appended at approval, 2026-07-13 / A16)
+
+### Contract-window items (join Sprint 7's ONE window, opened at B7.3)
+
+New schema file `packages/db/src/schema/leads.ts` (additive; tenancy ratchet covers it
+automatically via the tenant-id schema test):
+
+- **`leads`** — `id` · `tenant_id` (FK, not null) · `source` enum
+  `waitlist | csv | api` · contact fields (`name` · `email` · `company` · `role` ·
+  `website` · `notes`, email required) · `email_hash` (normalized, the dedupe key) ·
+  `status` enum **`new | scored | dismissed`** (deliberately minimal — the
+  contacted/replied lifecycle arrives with B-crm.4's state machine, additive) ·
+  `meta` jsonb (source-specific extras: waitlist referral context, CSV row remainder) ·
+  timestamps. Unique `(tenant_id, email_hash)` — import idempotency made structural,
+  the `waitlist` table's pattern. Hot-path indexes `(tenant_id, status)` ·
+  `(tenant_id, created_at)`.
+- **`lead_scores`** — `id` · `tenant_id` · `lead_id` (FK) · `score` · `reasons` jsonb
+  (one readable string per armed signal — the ranker convention) · `signals` jsonb
+  (per-component values, for tuning) · `profile_hash` (hash of the ICP block that
+  produced the score — re-score on profile change is detectable, cache-key style) ·
+  `scored_at`. Append-only like `trend_snapshots`: scoring history accrues, the queue
+  reads the latest per lead. Index `(tenant_id, lead_id, scored_at)`.
+- **ICP block on the profile schema** (contracts + `brand_profiles` config): optional
+  `icp` object — `description` (free text, the embedding target) ·
+  `verticals: string[]` · `regions: string[]` · `roles: string[]` ·
+  `companySize: {min?, max?}` · `dealbreakers: string[]` · per-tenant
+  `leadRankerWeights` (defaults mirror `rankerWeightsSchema`'s shape). Additive and
+  optional: tenants without an `icp` block simply have no lead scoring armed.
+
+### B-crm.1 — Leads spine (small)
+
+- `packages/db/src/repos/leads.ts` + `lead-scores.ts`: insert-or-return-existing on
+  the dedupe key (waitlist repo pattern) · status transitions guarded (only
+  `new→scored`, `*→dismissed` for now) · every state-changing write emits an `events`
+  row (the B4.4 coverage test enforces this the moment the repo exists).
+- **Waitlist bridge** (`packages/engine/src/leads/intake.ts`): pure function from
+  waitlist rows → lead candidates (source `waitlist`, referral context into `meta`),
+  driven by an idempotent sync job — re-running bridges only new signups (dedupe key
+  does the work). Auto-bridge per tenant, on by default for tenant #0 [question 3
+  below].
+- **CSV import**: server-side parse (header-mapped: name/email/company/role/website/
+  notes; unknown columns → `meta`), normalize + hash emails, per-row
+  insert-or-skip with a returned import report (`added/duplicate/invalid` counts +
+  row-level reasons). No file persistence — parse, ingest, discard.
+- Tests: repo CRUD + tenancy + dedupe · bridge idempotency (run twice, second run
+  adds zero) · CSV edge cases (BOM, quoted commas, missing email, dup within file).
+
+### B-crm.2 — Profile scoring + ranked queue (medium)
+
+- `packages/engine/src/leads/scorer.ts` — **pure tested math, the
+  `trend/ranker.ts` shape reused**: components in [0,1], weight-normalized sum over
+  ARMED signals only (a lead with no website disarms relevance rather than dragging
+  the score), reason string per armed signal. Components v1:
+  - `relevance`: embedding similarity (lead's `company + role + notes + website-title`
+    text vs `icp.description`) — embeddings via the existing platform embedding tier;
+  - `fit`: deterministic structured matches (vertical/region/role hits, dealbreaker
+    = hard zero with its own reason);
+  - `completeness`: fraction of contact fields present (a proxy until B-crm.3
+    enrichment arms real firmographics);
+  - `recency`: freshness half-life on `created_at` (saturating form, ranker
+    convention).
+  Scoring inputs are **intake-provided fields only** in this cut — no fetching, no
+  enrichment calls (that is B-crm.3's seam; the component design leaves `fit` ready
+  to consume enriched firmographics without re-shaping).
+- Scoring runs as a deterministic job (score all `new`/re-score on `profile_hash`
+  drift), writes `lead_scores`, flips `new→scored`. **No LLM call anywhere in
+  B-crm.1+2** — zero gateway spend, judge untouched (the judge enters with B-crm.4's
+  outreach drafts).
+- **Workspace surface** (`apps/web`): a Leads queue — ranked cards with the thermal
+  heat pills (hot/warm/stale, the system-wide grading), per-card reasons, actions:
+  **dismiss** (→ eval row: operator override of the ranking) · **mark hot** (pin +
+  eval row) · CSV import + "sync waitlist" affordances. One web writer rule applies
+  if lanes are live.
+- Eval: dismissals/pins land as eval rows in the same change (rule 6); the golden
+  set seeds from the first dogfood pass over the founder's real prospect list.
+- Success gate (unchanged from §Success criteria): CSV + self profile → ranked queue
+  with readable reasons; tenancy grep-proven; suite green.
+
+### Open questions to the founder (answers shape B-crm.1+2; none block B7.1–B7.3)
+
+1. **ICP draft**: lead drafts tenant #0's "good template client" ICP from the
+   Sprint-7 vertical list (AU-local small businesses first?) for founder edit —
+   or founder dictates it. *Recommend: lead drafts, founder edits.*
+2. **CSV reality check**: any existing contact list you plan to import (from
+   outreach so far)? If yes, its column shape drives the importer's header mapping;
+   if no, the standard template ships.
+3. **Waitlist auto-bridge**: every waitlist signup auto-becomes a lead for tenant #0
+   (dismissal is one click), vs a manual "import from waitlist" action.
+   *Recommend: auto.*

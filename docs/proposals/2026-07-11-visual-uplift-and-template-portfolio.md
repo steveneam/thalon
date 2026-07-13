@@ -1,6 +1,10 @@
 # Proposal: Sprint 7 — Visual uplift, asset engine, template portfolio, competitor-informed features
 
-_Status: PROPOSED 2026-07-11 · founder approval at this checkpoint = charter amendment._
+_Status: **APPROVED 2026-07-13** (session-26 checkpoint, amendment A15 / ADR 0008;
+Sprint-7 bucket table in `CHARTER.md`). Decision 2 (vendor tier) deferred to
+2026-07-14 — imagery work gates on it; B7.1 (asset pinning) proceeds immediately.
+Decision 3: Phase-0 order confirmed — the B6.7 exit tail completed session 24, so the
+charter window is formally open._
 _Inputs: founder assignment 2026-07-11 · founder-provided build-method transcript (the
 "one meta-prompt + asset tools + verification passes" recipe) · same-day research
 teardown of Higgsfield (asset vendor) and Kompozy (competitor)._
