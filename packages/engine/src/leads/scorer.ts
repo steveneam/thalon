@@ -55,13 +55,15 @@ export interface ScorableLead {
   role: string | null;
   website: string | null;
   notes: string | null;
+  /** The lead's problem/need (window-1b) — the strongest relevance text there is. */
+  painPoint: string | null;
   /** Capture time (`created_at`), ms epoch — the recency anchor. */
   createdAtMs: number;
 }
 
 /** The embedding target: what the lead says about itself. "" = nothing to embed → relevance disarms. */
 export function leadEmbeddingText(lead: ScorableLead): string {
-  return [lead.company, lead.role, lead.notes, lead.website]
+  return [lead.company, lead.role, lead.painPoint, lead.notes, lead.website]
     .map((v) => v?.trim() ?? "")
     .filter(Boolean)
     .join("\n");
@@ -142,7 +144,7 @@ export function scoreLead(
 ): LeadScoreBreakdown {
   const config = leadScorerConfigSchema.parse(configInput);
   const weights = resolveLeadWeights(config.weights, icp.weights);
-  const searchableText = [lead.name, lead.company, lead.role, lead.website, lead.notes]
+  const searchableText = [lead.name, lead.company, lead.role, lead.website, lead.notes, lead.painPoint]
     .map((v) => v?.trim() ?? "")
     .filter(Boolean)
     .join("\n");

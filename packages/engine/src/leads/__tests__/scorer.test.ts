@@ -22,6 +22,7 @@ function lead(partial: Partial<ScorableLead>): ScorableLead {
     role: null,
     website: null,
     notes: null,
+    painPoint: null,
     createdAtMs: NOW,
     ...partial,
   };
