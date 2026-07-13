@@ -138,6 +138,37 @@ export function leadsRepo(db: Db) {
         return row;
       });
     },
+
+    /**
+     * B-crm.2 (window-1a): "mark hot" — a pin rides `meta.pinned` (open
+     * shape, no schema change) and floats the lead in the queue; the
+     * learning signal is the caller-composed eval row (recordLeadTriage).
+     * Setting the value it already has is a no-op and emits nothing.
+     */
+    async setPinned(ctx: TenantCtx, id: string, pinned: boolean): Promise<Lead> {
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(leads)
+          .where(and(eq(leads.id, id), eq(leads.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("lead", id);
+        const meta = (current.meta ?? {}) as Record<string, unknown>;
+        if ((meta.pinned === true) === pinned) return current;
+        const [row] = await tx
+          .update(leads)
+          .set({ meta: { ...meta, pinned }, updatedAt: new Date() })
+          .where(and(eq(leads.id, id), eq(leads.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "lead",
+          entityId: row.id,
+          event: "lead.pin_changed",
+          payload: { pinned },
+        });
+        return row;
+      });
+    },
   };
 }
 

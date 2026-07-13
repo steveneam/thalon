@@ -1,0 +1,2 @@
+ALTER TABLE "eval_cases" DROP CONSTRAINT "eval_cases_origin_check";--> statement-breakpoint
+ALTER TABLE "eval_cases" ADD CONSTRAINT "eval_cases_origin_check" CHECK (origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage'));
