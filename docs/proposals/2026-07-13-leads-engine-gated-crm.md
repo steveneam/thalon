@@ -238,3 +238,35 @@ per-lead source provenance → the same B-crm.2 scorer. The acquisition invarian
 is unchanged and non-negotiable: official APIs or operator-supplied data, never
 scraping, never purchased lists. Discovery is what makes tenant #0's dogfood the
 product demo: "Thalon found, scored, and drafted — you approved."
+
+---
+
+## Session-27 addendum (2026-07-13, founder direction mid-build — recorded same day)
+
+1. **Feature composition is a requirement, not a nicety.** The CRM feeds the other families
+   the way every Thalon feature feeds the others (the Kompozy-style composition the founder
+   named): lead cards carry per-family exits (→ Post · → Video · → Page) through the SAME
+   capture door + Create-context resolver as intel dossiers — company/contact/role/pain-point
+   arrive as removable chips, context never retyped. Future: lead → vertical-template
+   instantiation joins B7.4; lead → outreach drafts is B-crm.4.
+2. **`pain_point` is first-class** (window-1b): the lead's problem in words — what outreach
+   can ADDRESS. Joins the relevance embedding, the dealbreaker-searchable text, CSV aliases
+   (pain point/problem/need/challenge), the card, and the handoff chips.
+3. **B-crm.4 channels = email AND platform private messages** — both through judge+approve
+   ("no ungated contact, ever" holds); DMs ride the future publisher seam, official APIs only.
+   The founder's auto-approve temptation maps to **B7.b, the autopilot graduation ladder**:
+   autonomy is EARNED per-source at ≥90% untouched-approval rate, per-tenant, founder-armed —
+   never a global switch.
+4. **Warmth over machine metrics** (founder): scores/reasons are for the OPERATOR; what
+   reaches the lead is built from the lead's identity — pain point in their words, company/
+   role/notes, referral context. B-crm.4 design input: a "lead DNA" brief (B7.c persona-brief
+   pattern) feeds the draft; the judge's grounding check is what kills generic spam-cannon
+   copy. Framing recorded: the internal scoring/QC system turns convincing/onboarding into a
+   repeatable, metric-based science — while the output stays human.
+5. **Scoring-algorithm survey commissioned and filed**: `docs/research/lead-scoring-algorithms.md`
+   (founder-approved single research run). Top no-new-data adoptions for the next checkpoint —
+   Beta-posterior learn loop over the existing eval rows + Wilson bounds (THE B-crm.5 shape) ·
+   Pardot-style fit-grade × engagement-score two-axis split · HN-gravity urgency sort + soft
+   dealbreakers. Blocked-on-events (email opens/visits — B-crm.4+ territory): RFM frequency,
+   EdgeRank affinity, velocity surge. PageRank graph authority deferred until relationship
+   edges exist.
