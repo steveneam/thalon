@@ -164,11 +164,14 @@ export async function runTrendIntake(
       const current = areaTagByItem.get(row.item.externalId);
       // Best RELEVANCE wins; ties keep the first row in ranked order (which
       // is already deterministic), so attribution is stable across replays.
-      if (!current || row.components.relevance > current.relevance) {
+      // A disarmed relevance (no item text) compares as -1: any real
+      // relevance outranks it, and a textless item still gets attributed to
+      // its first ranked row rather than dropped.
+      if (!current || (row.components.relevance ?? -1) > current.relevance) {
         areaTagByItem.set(row.item.externalId, {
           areaId: row.areaId,
           areaName: row.areaName,
-          relevance: row.components.relevance,
+          relevance: row.components.relevance ?? -1,
         });
       }
     }
@@ -279,8 +282,19 @@ async function rankSweep(
 
   // One embed call through the EXISTING ingest choke point (budget checked,
   // usage recorded, content-addressed cache — an unchanged area description
-  // or re-swept item text is a cache hit, never fresh spend).
-  const texts = [...activeAreas.map((a) => a.description), ...scored.map((s) => s.item.text)];
+  // or re-swept item text is a cache hit, never fresh spend). Items with no
+  // embeddable text (image-only posts) are EXCLUDED from the batch — an
+  // empty string is a provider-level rejection that kills the whole call
+  // (found live on staging 2026-07-13); those items rank with relevance
+  // disarmed instead.
+  const itemTexts = scored.map((s) => s.item.text);
+  const embeddableItemIdx = itemTexts
+    .map((text, i) => (text.trim().length > 0 ? i : -1))
+    .filter((i) => i >= 0);
+  const texts = [
+    ...activeAreas.map((a) => a.description),
+    ...embeddableItemIdx.map((i) => itemTexts[i]),
+  ];
   const chunks = texts.map((text, seq) => ({
     seq,
     text,
@@ -305,11 +319,15 @@ async function rankSweep(
     weights: area.config.weights,
     vector: embedded[i].embedding,
   }));
+  const vectorByItemIdx = new Map<number, readonly number[]>();
+  embeddableItemIdx.forEach((itemIdx, batchPos) => {
+    vectorByItemIdx.set(itemIdx, embedded[activeAreas.length + batchPos].embedding);
+  });
   const rankableCandidates: RankableCandidate[] = scored.map((s, i) => {
     const accountPoints = historyByAccount.get(s.item.account) ?? [];
     return {
       scored: s,
-      vector: embedded[activeAreas.length + i].embedding,
+      vector: vectorByItemIdx.get(i) ?? null,
       longitudinal: detectLongitudinalOutlier(
         accountPoints.filter((p) => p.externalId === s.item.externalId),
         accountPoints,

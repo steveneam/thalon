@@ -361,4 +361,46 @@ describe("runTrendIntake with monitored areas (B6.4, keyless + networkless)", ()
     expect(replay.ranked).toEqual(first.ranked);
     expect(replay.snapshotsAppended).toBe(0); // structural idempotency intact
   });
+
+  it("an image-only item (empty text) never reaches the embed batch and ranks with relevance disarmed — staging 2026-07-13", async () => {
+    // The real Bluesky poll returned a post with no text; its empty string
+    // in the embeddings batch was a provider-level rejection ("input cannot
+    // be an empty string") that killed the WHOLE sweep. The batch must
+    // exclude it; the item still ranks on its remaining signals.
+    const { ctx, repos, objectStore, embedder } = await setup();
+    const embedded: string[] = [];
+    const spyingEmbedder: EmbeddingDriver = {
+      model: embedder.model,
+      async embed(texts) {
+        embedded.push(...texts);
+        for (const text of texts) {
+          if (text.trim().length === 0) throw new Error("input cannot be an empty string");
+        }
+        return embedder.embed(texts);
+      },
+    };
+    const imageOnly: TrendItem = {
+      externalId: "img-only",
+      text: "",
+      account: "alpha",
+      publishedAt: NOW - DAY,
+      metrics: { views: 90_000, shares: 2_500, bookmarks: 4_000 },
+    };
+    const { source } = spyingSource([...ITEMS, imageOnly]);
+
+    const result = await runTrendIntake(
+      ctx,
+      repos,
+      { watchlist: { source: "fake", queries: ["standing query"] }, areas: [AREA_VIDEO], nowMs: NOW },
+      { source, embedder: spyingEmbedder, objectStore, capTokens: 1_000_000 },
+    );
+
+    expect(embedded.every((t) => t.trim().length > 0)).toBe(true);
+    const imgRow = result.ranked.find((r) => r.item.externalId === "img-only")!;
+    expect(imgRow.components.relevance).toBeNull();
+    expect(imgRow.reasons[0]).toMatch(/relevance disarmed/);
+    expect(imgRow.score).toBeGreaterThan(0); // engagement/velocity/freshness still rank it
+    // Embedded items are unaffected beside it.
+    expect(result.ranked.find((r) => r.item.externalId === "hot")!.components.relevance).toBe(1);
+  });
 });

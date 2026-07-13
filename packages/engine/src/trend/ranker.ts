@@ -90,15 +90,21 @@ export interface RankableArea {
 export interface RankableCandidate {
   /** Single-sweep scores from ./outliers.ts — engagement ratios + sweep velocity ride in unchanged. */
   scored: ScoredItem;
-  /** Embedding vector of the item text. */
-  vector: readonly number[];
+  /**
+   * Embedding vector of the item text; `null` when the item has no
+   * embeddable text (e.g. an image-only post) — relevance disarms for it,
+   * the same "missing metric disarms its rule" convention as the ratios.
+   * (Found live on staging 2026-07-13: an empty string in the embed batch
+   * is a provider-level rejection that killed the whole sweep.)
+   */
+  vector: readonly number[] | null;
   /** Stored-history Δ-velocity from ./longitudinal.ts, when the caller has history to read. */
   longitudinal?: LongitudinalScore;
 }
 
 export interface RankedComponents {
-  /** Embedding cosine vs the area description, mapped to [0,1]. Always armed. */
-  relevance: number;
+  /** Embedding cosine vs the area description, mapped to [0,1]; null when the item had no text to embed. */
+  relevance: number | null;
   /** Mean of the armed engagement-ratio signals; null when no ratio is armed. */
   engagement: number | null;
   /** Mean of the armed velocity signals (single-sweep + stored Δ); null when neither is armed. */
@@ -215,12 +221,14 @@ export function rankCandidates(
     const freshnessDetail = `published ${round2(ageHours)}h ago, half-life ${config.freshnessHalfLifeHours}h`;
 
     for (const area of areas) {
-      const cosine = cosineSimilarity(candidate.vector, area.vector);
-      const relevance = round4((cosine + 1) / 2);
+      const cosine = candidate.vector === null ? null : cosineSimilarity(candidate.vector, area.vector);
+      const relevance = cosine === null ? null : round4((cosine + 1) / 2);
       const weights = resolveRankerWeights(config.weights, area.weights);
 
       const reasons: string[] = [
-        `relevance ${round2(relevance)} to area "${area.name}" (embedding cosine ${round2(cosine)})`,
+        relevance === null || cosine === null
+          ? `relevance disarmed (no item text to embed)`
+          : `relevance ${round2(relevance)} to area "${area.name}" (embedding cosine ${round2(cosine)})`,
       ];
       if (engagement !== null) {
         reasons.push(
@@ -234,7 +242,8 @@ export function rankCandidates(
       }
       reasons.push(`freshness ${round2(freshness)} (${freshnessDetail})`);
 
-      const armed: Array<[weight: number, signal: number]> = [[weights.relevance, relevance]];
+      const armed: Array<[weight: number, signal: number]> = [];
+      if (relevance !== null) armed.push([weights.relevance, relevance]);
       if (engagement !== null) armed.push([weights.engagement, engagement]);
       if (velocity !== null) armed.push([weights.velocity, velocity]);
       armed.push([weights.freshness, freshness]);

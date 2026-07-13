@@ -298,6 +298,37 @@ describe("rankCandidates (B6.4 EdgeRank-shaped deterministic score)", () => {
       ["c", "z"],
     ]);
   });
+
+  it("a null vector (no embeddable text) disarms relevance instead of crashing — staging 2026-07-13", () => {
+    // Image-only post: no text → no embedding. Freshness (published at NOW
+    // → 1) is the only armed signal, so score = 1 under equal weights;
+    // relevance is null in components and its reason says why.
+    const ranked = rankCandidates(
+      [{ scored: scored("img-only"), vector: null }],
+      [area("a", [1, 0])],
+      {},
+      OUTLIER_CONFIG,
+      NOW,
+    );
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0].components.relevance).toBeNull();
+    expect(ranked[0].components.freshness).toBe(1);
+    expect(ranked[0].score).toBe(1);
+    expect(ranked[0].reasons[0]).toMatch(/relevance disarmed \(no item text to embed\)/);
+    // A textless candidate ranks BESIDE embedded ones, never blocks them.
+    const mixed = rankCandidates(
+      [
+        { scored: scored("with-text"), vector: [1, 0] },
+        { scored: scored("img-only"), vector: null },
+      ],
+      [area("a", [1, 0])],
+      {},
+      OUTLIER_CONFIG,
+      NOW,
+    );
+    expect(mixed.map((r) => r.item.externalId)).toEqual(["img-only", "with-text"]);
+    expect(mixed.find((r) => r.item.externalId === "with-text")?.components.relevance).toBe(1);
+  });
 });
 
 function round4(n: number): number {
