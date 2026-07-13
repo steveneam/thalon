@@ -30,6 +30,15 @@ import type { ObjectStore } from "./object-store";
  *                                            derived state, rebuildable
  *                                            from web_page drafts; orphan-
  *                                            sweep-protected like sweeps/
+ *   assets/<sha256(asset)>/…                 content-addressed prefix (B7.1):
+ *                                            asset.<ext> is the hashed
+ *                                            content (VERIFIABLE); sibling
+ *                                            provenance.json is the pin's
+ *                                            commit marker. Sweep-PROTECTED:
+ *                                            pinned vendor assets are the
+ *                                            post-subscription insurance —
+ *                                            deletion is a deliberate human
+ *                                            act, never orphan math
  *
  * GC stance (documented here because this is the one file every key passes
  * through): content-addressed artifacts are IMMUTABLE — never overwritten,

@@ -51,6 +51,7 @@
  * values only — it never imports repositories or writes anywhere (enforced
  * by tests/boundary.test.ts at the repo root).
  */
+export * from "./assets";
 export * from "./ingest";
 export * from "./fanout";
 export * from "./waterfall";

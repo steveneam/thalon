@@ -17,8 +17,8 @@ import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local"
  * swept only by explicit human decision, never by this tool.
  */
 
-/** `sweeps/` (B6.5) and `posts/` (B6.6) are mutable latest-wins pointers per tenant — no db row references them by design, so orphan math must never see them. */
-const PROTECTED_PREFIXES = ["embeddings/", "sweeps/", "posts/"] as const;
+/** `sweeps/` (B6.5) and `posts/` (B6.6) are mutable latest-wins pointers per tenant — no db row references them by design, so orphan math must never see them. `assets/` (B7.1) holds mint-time-pinned vendor assets: the post-subscription insurance — re-minting costs real credits (or is impossible once unsubscribed), so deletion is a deliberate human act, never orphan math. */
+const PROTECTED_PREFIXES = ["embeddings/", "sweeps/", "posts/", "assets/"] as const;
 const SHA256_TAIL = /[0-9a-f]{64}$/;
 
 export async function collectReferencedRefs(repos: Repos): Promise<Set<string>> {
