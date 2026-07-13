@@ -188,14 +188,53 @@ automatically via the tenant-id schema test):
 - Success gate (unchanged from §Success criteria): CSV + self profile → ranked queue
   with readable reasons; tenancy grep-proven; suite green.
 
-### Open questions to the founder (answers shape B-crm.1+2; none block B7.1–B7.3)
+### Founder answers (2026-07-13, same session — all three resolved)
 
-1. **ICP draft**: lead drafts tenant #0's "good template client" ICP from the
-   Sprint-7 vertical list (AU-local small businesses first?) for founder edit —
-   or founder dictates it. *Recommend: lead drafts, founder edits.*
-2. **CSV reality check**: any existing contact list you plan to import (from
-   outreach so far)? If yes, its column shape drives the importer's header mapping;
-   if no, the standard template ships.
-3. **Waitlist auto-bridge**: every waitlist signup auto-becomes a lead for tenant #0
-   (dismissal is one click), vs a manual "import from waitlist" action.
-   *Recommend: auto.*
+1. **ICP draft: lead drafts, founder edits.** Seed draft in §ICP below; it becomes
+   tenant #0's `icp` block verbatim when the contract window opens.
+2. **No existing contact list.** The importer aligns with the de-facto CRM
+   import/export column conventions (HubSpot-style contact headers first — the
+   format every list-export tool speaks — with Salesforce/Pipedrive/Atomic-CRM
+   header aliases mapped); a verification pass against real template files from
+   the web happens at B-crm.1 build time. Our own minimal template ships too.
+3. **Waitlist auto-bridge: approved** — every signup auto-becomes a lead (dismissal
+   is one click). NOTE the founder's wider framing: waitlist is only the first
+   intake — see §Discovery below.
+4. **Bulk actions**: the leads queue ships multi-select + mass dismiss/edit from
+   day one — and this is now a Thalon-wide QoL convention, recorded in
+   `docs/FRONTEND.md` §0 (extend the B1.4 batch-approve pattern, never per-surface
+   reinvention).
+
+### ICP seed draft — tenant #0 "good template client" (founder to edit)
+
+- **description** (the embedding target): "Owner-operated local service business
+  (1–20 people) with weak or no web presence, in a vertical where a polished
+  single-page site plus steady social content visibly wins customers. Decision-maker
+  reachable directly (owner/GM). Values speed and done-for-you; no in-house
+  marketing. Sydney/AU first, then EN-speaking markets."
+- **verticals**: the Sprint-7 portfolio list (trades/plumbing/electrical/HVAC ·
+  food/café/restaurant · grocer · beauty/salon · health/fitness · real estate ·
+  auto · cleaning · landscaping · pet services · photography · education/tutoring —
+  the ~25-vertical set, weighted toward the pilot three).
+- **regions**: AU (Sydney metro first) · NZ · then EN-speaking.
+- **roles**: owner · founder · general manager · marketing manager.
+- **companySize**: 1–20.
+- **dealbreakers** (hard zero + reason): franchise HQ / enterprise chains ·
+  agencies reselling to their own clients · adult/gambling · anyone demanding
+  guaranteed rankings (honest-claims rule) · contacts of unknown/scraped
+  provenance (structural anyway).
+
+### Discovery — the launch-shape framing (founder, 2026-07-13)
+
+The founder's product frame: at full launch the CRM is a **client-facing tool
+Thalon's tenants use to FIND customers**, not just to rank inbound contacts.
+"Based on what" = **the ICP block** — the same criteria that score inbound leads
+generate discovery queries (verticals × regions × roles), exactly how monitored
+areas drive trend sweeps. Candidate **B-crm.6 (next checkpoint): `LeadSource`
+discovery seam** — ICP-derived queries → official-API prospecting sources only
+(Google Places/Business Profile APIs, government business registries — e.g. the
+AU ABN lookup API — professional directories that offer real APIs) → intake with
+per-lead source provenance → the same B-crm.2 scorer. The acquisition invariant
+is unchanged and non-negotiable: official APIs or operator-supplied data, never
+scraping, never purchased lists. Discovery is what makes tenant #0's dogfood the
+product demo: "Thalon found, scored, and drafted — you approved."

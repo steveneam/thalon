@@ -10,6 +10,7 @@
 - **Workspace dashboard**: one screen answers *what needs me · what is the engine doing · what can I do next*.
 - **Every surface**: the primary action is the visually dominant element; the operator always **reacts to visible artifacts** (cards, previews, diffs) — never faces a blank prompt box (the B5.4 doctrine, extended app-wide).
 - **Empty states are tutorials**: every empty list explains itself and offers a one-click seeded example (fake drivers make this free).
+- **Bulk actions are a standing QoL convention** *(founder direction 2026-07-13, session 26)*: any list surface whose items take repeated per-item actions (approve queue, intel cards, the leads queue, library rows) gets multi-select + mass apply (dismiss/delete/edit/approve as the surface allows) — "should be a QoL feature for most of the functions and features in Thalon if it calls for it." The batch-approve schema (B1.4) was the first instance; extend the pattern, don't reinvent it per surface. Destructive bulk ops confirm once with a count, never per item.
 
 ## 1. Brand direction
 
