@@ -20,6 +20,10 @@ export default tseslint.config(
       "eval/deepeval/**",
       "infra/**",
       ".claude/**",
+      // Gitignored vault-pointer/operator-data dir: CI never sees it (lints
+      // tracked files only) — local lint must match CI semantics, not fail
+      // on dropped-in client/tool files.
+      ".context/**",
     ],
   },
   eslint.configs.recommended,
