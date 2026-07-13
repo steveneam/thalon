@@ -1,5 +1,6 @@
 import {
   CheckCheck,
+  Handshake,
   LayoutDashboard,
   Library,
   ListChecks,
@@ -41,6 +42,13 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: Radar,
     hint: "Trends rising on social · demand rising on search",
     keywords: ["trends", "search", "areas", "keywords", "horizon", "seo", "monitor"],
+  },
+  {
+    label: "Leads",
+    href: "/app/leads",
+    icon: Handshake,
+    hint: "Contacts scored against your ICP — with the reasons spelled out",
+    keywords: ["crm", "leads", "contacts", "prospects", "icp", "waitlist", "import", "csv"],
   },
   {
     label: "Create",

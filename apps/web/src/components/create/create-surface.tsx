@@ -51,6 +51,10 @@ const CHIP_FIELDS = [
   { key: "hook", label: "hook" },
   { key: "areaName", label: "area" },
   { key: "keyword", label: "keyword" },
+  { key: "company", label: "company" },
+  { key: "contact", label: "contact" },
+  { key: "role", label: "role" },
+  { key: "painPoint", label: "pain point" },
   { key: "text", label: "source text" },
 ] as const;
 
@@ -105,10 +109,14 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
           />
 
           {chips.length > 0 && (
-            <div aria-label="Intel context" className="flex flex-col gap-1.5 rounded-lg border border-border bg-muted/40 p-2.5">
+            <div
+              aria-label={context?.kind === "lead_promote" ? "Lead context" : "Intel context"}
+              className="flex flex-col gap-1.5 rounded-lg border border-border bg-muted/40 p-2.5"
+            >
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Sparkles aria-hidden className="size-3.5 text-primary" />
-                Intel context — rides into generation; remove anything you don&rsquo;t want.
+                {context?.kind === "lead_promote" ? "Lead" : "Intel"} context — rides into
+                generation; remove anything you don&rsquo;t want.
                 {typeof context?.score === "number" && (
                   <HeatGrade score={context.score} className="ml-auto" />
                 )}
@@ -136,7 +144,7 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
                 <p className="text-xs text-muted-foreground">
                   provenance:{" "}
                   <a href={context.sourceUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                    original item
+                    {context.kind === "lead_promote" ? "the lead's website" : "original item"}
                   </a>
                 </p>
               )}
