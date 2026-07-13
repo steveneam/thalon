@@ -57,6 +57,7 @@ function toScorable(lead: LeadRow): ScorableLead {
     role: lead.role,
     website: lead.website,
     notes: lead.notes,
+    painPoint: lead.painPoint,
     createdAtMs: lead.createdAt.getTime(),
   };
 }

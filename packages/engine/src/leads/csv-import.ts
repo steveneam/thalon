@@ -17,7 +17,16 @@ import { parseCsv } from "./csv";
 /** Lowercase and strip separators: "First Name" / first_name / FirstName → firstname. */
 const normalizeHeader = (header: string) => header.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-type MappedField = "email" | "name" | "firstName" | "lastName" | "company" | "role" | "website" | "notes";
+type MappedField =
+  | "email"
+  | "name"
+  | "firstName"
+  | "lastName"
+  | "company"
+  | "role"
+  | "website"
+  | "notes"
+  | "painPoint";
 
 const HEADER_ALIASES: Record<MappedField, readonly string[]> = {
   email: ["email", "emailaddress", "workemail", "primaryemail"],
@@ -28,6 +37,8 @@ const HEADER_ALIASES: Record<MappedField, readonly string[]> = {
   role: ["jobtitle", "title", "role", "position"],
   website: ["website", "websiteurl", "companywebsite", "companydomainname", "url", "domain"],
   notes: ["notes", "note", "comments", "description"],
+  // Window-1b (founder direction): the lead's problem — outreach's anchor.
+  painPoint: ["painpoint", "painpoints", "pain", "problem", "need", "challenge"],
 };
 
 const ALIAS_LOOKUP: ReadonlyMap<string, MappedField> = new Map(
@@ -127,6 +138,7 @@ function rowToLeadInput(mapping: CsvColumnMapping, row: string[]): LeadInput {
     ...(fields.role ? { role: fields.role } : {}),
     ...(fields.website ? { website: fields.website } : {}),
     ...(fields.notes ? { notes: fields.notes } : {}),
+    ...(fields.painPoint ? { painPoint: fields.painPoint } : {}),
     meta,
   };
 }
