@@ -1,5 +1,5 @@
 import type { TenantCtx } from "@thalon/contracts";
-import { and, count, eq, max } from "drizzle-orm";
+import { and, asc, count, eq, max } from "drizzle-orm";
 import { waitlist } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
@@ -95,6 +95,15 @@ export function waitlistRepo(db: Db) {
         .from(waitlist)
         .where(and(eq(waitlist.tenantId, ctx.tenantId), eq(waitlist.referredBy, id)));
       return value;
+    },
+
+    /** All entries in join order — the B-crm.1 waitlist→leads bridge's read. */
+    async list(ctx: TenantCtx): Promise<WaitlistEntry[]> {
+      return db
+        .select()
+        .from(waitlist)
+        .where(eq(waitlist.tenantId, ctx.tenantId))
+        .orderBy(asc(waitlist.position));
     },
 
     /** Total queue length for the tenant. */
