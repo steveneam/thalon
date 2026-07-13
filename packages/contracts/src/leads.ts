@@ -75,6 +75,13 @@ export const leadInputSchema = z.object({
   role: z.string().trim().optional(),
   website: z.string().trim().optional(),
   notes: z.string().optional(),
+  /**
+   * The lead's problem/need in the operator's (or their own) words — the
+   * thing outreach can ADDRESS (founder direction 2026-07-13, window-1b).
+   * First-class rather than meta because it anchors both the relevance
+   * embedding and B-crm.4's tailored outreach drafts.
+   */
+  painPoint: z.string().optional(),
   /** Source-specific extras (waitlist referral context, unmapped CSV columns) — data, open shape. */
   meta: z.record(z.string(), z.unknown()).default({}),
 });

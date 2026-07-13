@@ -48,6 +48,7 @@ export function leadsRepo(db: Db) {
             role: parsed.role ?? null,
             website: parsed.website ?? null,
             notes: parsed.notes ?? null,
+            painPoint: parsed.painPoint ?? null,
             meta: parsed.meta,
           })
           .onConflictDoNothing({ target: [leads.tenantId, leads.emailHash] })
