@@ -43,6 +43,8 @@ export const leads = pgTable(
     role: text("role"),
     website: text("website"),
     notes: text("notes"),
+    /** The lead's problem/need — what outreach can address (window-1b); joins the relevance embedding. */
+    painPoint: text("pain_point"),
     status: text("status").notNull().default("new"),
     /** Source-specific extras (waitlist referral context, unmapped CSV columns) — data, open shape. */
     meta: jsonb("meta").notNull().default({}),

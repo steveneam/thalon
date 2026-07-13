@@ -36,10 +36,12 @@ describe("leads repo (B-crm.1)", () => {
       name: "Jane Doe",
       company: "Acme Plumbing",
       role: "owner",
+      painPoint: "no online booking; loses after-hours calls",
       meta: { row: 3 },
     });
     expect(first.created).toBe(true);
     expect(first.lead.email).toBe("Jane.Doe@Acme.com"); // stored as supplied (trimmed)
+    expect(first.lead.painPoint).toBe("no online booking; loses after-hours calls"); // window-1b: outreach's anchor
     expect(first.lead.emailHash).toBe(leadEmailHash("jane.doe@acme.com"));
     expect(first.lead.status).toBe("new");
 
