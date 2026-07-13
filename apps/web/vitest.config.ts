@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 const dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -21,6 +21,11 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // Next's standalone output traces src — co-located tests included —
+    // into .next/standalone, so any checkout with a build present re-runs
+    // those copies (the 1050-vs-1012 cross-machine suite-count drift,
+    // diagnosed 2026-07-13). .next-dev is the dev-server distDir twin.
+    exclude: [...configDefaults.exclude, "**/.next/**", "**/.next-dev/**"],
     setupFiles: ["./src/test/setup.ts"],
     // PGlite (WASM) first boot per test file can be slow, same as packages/db.
     testTimeout: 30_000,

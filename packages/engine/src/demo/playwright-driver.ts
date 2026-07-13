@@ -1,4 +1,4 @@
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import type { Browser, BrowserContext, Page } from "playwright";
 import type { CursorPoint, DemoCaptureArtifacts, DemoDriver, DemoStepOutcome } from "./driver";
 
 export interface PlaywrightDriverOptions {
@@ -14,6 +14,12 @@ export interface PlaywrightDriverOptions {
  * (CI has no browsers installed) — the ONE integration test that drives this
  * against a local static fixture is gated behind RUN_BROWSER_TESTS=1 (see
  * __tests__/playwright-driver.browser.test.ts) and skips cleanly otherwise.
+ *
+ * Playwright loads at drive time, never import time: the engine barrel
+ * re-exports this module into consumers that ship no browser stack (the
+ * web standalone image traces playwright-core without its assets), so a
+ * module-scope `import "playwright"` takes down every barrel consumer at
+ * boot (the 2026-07-13 staging /blog 500).
  */
 export function createPlaywrightDriver(options: PlaywrightDriverOptions): DemoDriver {
   let browser: Browser | undefined;
@@ -23,6 +29,7 @@ export function createPlaywrightDriver(options: PlaywrightDriverOptions): DemoDr
 
   return {
     async start(): Promise<void> {
+      const { chromium } = await import("playwright");
       browser = await chromium.launch();
       context = await browser.newContext({
         viewport: options.viewport ?? { width: 1280, height: 800 },

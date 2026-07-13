@@ -34,6 +34,49 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # Build to the local daemon first: the smoke gate below must pass
+      # before anything reaches GHCR.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.web
+          load: true
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=https://thalon.org
+          tags: ghcr.io/steveneam/thalon-web:smoke
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Smoke gate: boot the image on an EMPTY anonymous volume (a fresh
+      # deploy's exact state) and require every engine-touching public route
+      # to render. Pins the standalone-trace class of failure the in-build
+      # PGlite check cannot see: the 2026-07-13 staging incident shipped an
+      # image whose /blog, feeds, sitemap and llms.txt all 500'd at module
+      # load (playwright-core traced without browsers.json) while health
+      # stayed green. See packages/engine/src/__tests__/barrel-purity.test.ts
+      # for the unit-level half of this ratchet.
+      - name: smoke — engine-touching routes render on an empty volume
+        run: |
+          docker run -d --name smoke -p 3000:3000 \
+            -e WORKSPACE_BASIC_AUTH=smoke:smoke \
+            ghcr.io/steveneam/thalon-web:smoke
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:3000/api/health >/dev/null 2>&1 && break
+            sleep 2
+          done
+          fail=0
+          for path in /api/health /blog /blog/rss.xml /sitemap.xml /llms.txt; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:3000$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          if [ "$fail" = "1" ]; then
+            echo '::error::smoke gate failed — container logs follow'
+            docker logs smoke
+            exit 1
+          fi
+          docker rm -f smoke
+      # Push only after the gate: pure cache-hit rebuild, so this is fast
+      # and byte-identical, with provenance attached as before.
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -45,4 +88,3 @@ jobs:
             ghcr.io/steveneam/thalon-web:latest
             ghcr.io/steveneam/thalon-web:${{ github.sha }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
