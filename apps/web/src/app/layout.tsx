@@ -22,6 +22,13 @@ export const metadata: Metadata = {
     template: `%s · ${SITE_NAME}`,
   },
   description: SITE_TAGLINE,
+  // X requires an explicit twitter:card to render link cards (it does not
+  // fall back to OpenGraph the way LinkedIn does); titles/descriptions
+  // inherit from each page's metadata. Upgrade to summary_large_image when
+  // posts gain hero images (Sprint-7 blog bucket).
+  twitter: {
+    card: "summary",
+  },
 };
 
 export default function RootLayout({

@@ -78,6 +78,7 @@ jobs:
       # Push only after the gate: pure cache-hit rebuild, so this is fast
       # and byte-identical, with provenance attached as before.
       - uses: docker/build-push-action@v6
+        id: push
         with:
           context: .
           file: Dockerfile.web
@@ -88,3 +89,55 @@ jobs:
             ghcr.io/steveneam/thalon-web:latest
             ghcr.io/steveneam/thalon-web:${{ github.sha }}
           cache-from: type=gha
+      # Auto-deploy to staging (founder direction 2026-07-13; recipe proven
+      # live by swordfish — agent_handoff/FROM-SWORDFISH-AUTODEPLOY-2026-07-13.md):
+      # pin the exact sha@digest via the per-app scoped credential, deploy,
+      # poll to done|error. update+deploy is deliberate — the deploy-webhook
+      # only re-pulls the configured tag and saveDockerProvider can clobber
+      # the stored GHCR pull credential; never switch to either.
+      - name: deploy — pin sha@digest on staging via the scoped Dokploy key
+        env:
+          API: ${{ vars.DOKPLOY_API_BASE }}
+          KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          APP: ${{ secrets.DOKPLOY_APP_ID }}
+          IMAGE: ghcr.io/steveneam/thalon-web:${{ github.sha }}@${{ steps.push.outputs.digest }}
+        run: |
+          curl -fsS -X POST "$API/application.update" \
+            -H "x-api-key: $KEY" -H 'content-type: application/json' \
+            -d "{\"applicationId\":\"$APP\",\"dockerImage\":\"$IMAGE\"}" > /dev/null
+          curl -fsS -X POST "$API/application.deploy" \
+            -H "x-api-key: $KEY" -H 'content-type: application/json' \
+            -d "{\"applicationId\":\"$APP\",\"title\":\"main ${GITHUB_SHA::7}\"}" > /dev/null
+          for i in $(seq 1 60); do
+            status=$(curl -fsS "$API/application.one?applicationId=$APP" \
+              -H "x-api-key: $KEY" | jq -r .applicationStatus)
+            echo "applicationStatus: $status"
+            case "$status" in
+              done) exit 0 ;;
+              error) echo '::error::staging deploy errored — roll back = rerun with the previous sha@digest'; exit 1 ;;
+            esac
+            sleep 5
+          done
+          echo '::error::staging deploy did not settle in 5 minutes'
+          exit 1
+      # Post-deploy probe THROUGH the edge: same five routes as the
+      # empty-volume gate — the class the pre-2026-07-13 smoke pass missed.
+      # At launch the edge auth drops and STAGING_EDGE_AUTH rotates; probe
+      # 401s right after a launch announcement are expected until this step
+      # is updated.
+      - name: probe — staging serves the five routes through the edge
+        env:
+          HOST: ${{ vars.STAGING_HOST }}
+          EDGE: ${{ secrets.STAGING_EDGE_AUTH }}
+        run: |
+          for i in $(seq 1 12); do
+            curl -fsS -u "$EDGE" "https://$HOST/api/health" > /dev/null 2>&1 && break
+            sleep 5
+          done
+          fail=0
+          for path in /api/health /blog /blog/rss.xml /sitemap.xml /llms.txt; do
+            code=$(curl -s -u "$EDGE" -o /dev/null -w '%{http_code}' "https://$HOST$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          [ "$fail" = "0" ] || { echo '::error::staging probe failed after deploy'; exit 1; }

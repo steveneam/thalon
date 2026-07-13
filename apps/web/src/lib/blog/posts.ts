@@ -8,6 +8,13 @@ import { readEnginePosts } from "./live";
  * here is bound by the honest-claims rule (ADR 0006): no invented numbers,
  * no rankings promises, cadence stays "regularly" until daily is proven.
  * Flagged for founder review at the merge train before deploy.
+ *
+ * LAUNCH-DAY ITEM (founder direction 2026-07-13): refresh every seed
+ * `publishedAt` to the launch date in the launch-call commit. Honest by
+ * construction — staging is private behind edge auth, so launch day IS
+ * each post's first public publication. The founder shares title +
+ * description + link on LinkedIn/X at launch; keep both hook-shaped and
+ * self-contained (honest-claims rule still binds).
  */
 
 export const BLOG_TITLE = "The Thalon blog";
