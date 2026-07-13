@@ -115,8 +115,8 @@ export interface HorizonPayload {
 /** Operator intel actions captured for the feedback loop (dismiss/promote → eval rows in pass 3). */
 export interface IntelCapture {
   id: string;
-  kind: "trend_dismiss" | "trend_promote" | "search_target_this";
-  /** What was acted on: a TrendCard id or a search query. */
+  kind: "trend_dismiss" | "trend_promote" | "search_target_this" | "lead_promote";
+  /** What was acted on: a TrendCard id, a search query, or a lead id. */
   ref: string;
   at: string;
   payload: Record<string, unknown>;
@@ -132,7 +132,7 @@ export type CreateFamily = "post" | "video" | "page";
  */
 export interface CreateContext {
   captureId: string;
-  kind: "trend_promote" | "search_target_this";
+  kind: "trend_promote" | "search_target_this" | "lead_promote";
   /** Which exit door was clicked — Create's family pre-pick (still changeable). */
   family: CreateFamily;
   /** The operator-selected ready title (the brief's working title). */
@@ -145,4 +145,9 @@ export interface CreateContext {
   score?: number;
   /** The original item text — provenance the operator can keep or prune. */
   text?: string;
+  /** Lead handoff (B-crm.2): everything the CRM gathered rides forward — never retyped. */
+  company?: string;
+  contact?: string;
+  role?: string;
+  painPoint?: string;
 }

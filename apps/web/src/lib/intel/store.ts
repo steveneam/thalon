@@ -129,6 +129,37 @@ export function promoteTrendCard(cardOrId: TrendCard | string, opts: PromotePick
   return { capture };
 }
 
+export interface LeadPromoteInput {
+  leadId: string;
+  family: CreateFamily;
+  name: string | null;
+  company: string | null;
+  role: string | null;
+  website: string | null;
+  notes: string | null;
+  painPoint: string | null;
+  score: number | null;
+}
+
+/**
+ * A per-family exit on a LEAD card (B-crm.2): everything the CRM gathered
+ * about the lead rides the SAME capture door and the same Create-context
+ * resolver as intel promotes — one handoff spine app-wide, context never
+ * retyped (the Kompozy-style feature composition the founder asked for:
+ * lead → post/video/page briefed by the lead's own context).
+ */
+export function promoteLead(input: LeadPromoteInput): { capture: IntelCapture } {
+  const capture: IntelCapture = {
+    id: `intel-capture-${state.tick + 1}`,
+    kind: "lead_promote",
+    ref: input.leadId,
+    at: nextAt(),
+    payload: { ...input },
+  };
+  state.captures.push(capture);
+  return { capture };
+}
+
 /** "Target this" on a horizon card — the keyword context handoff, captured through the same door. */
 export function targetSearchQuery(query: string, family: CreateFamily = "page"): { capture: IntelCapture } {
   const capture: IntelCapture = {
@@ -159,6 +190,21 @@ export function resolveCreateContext(captureId: string): CreateContext {
       kind: capture.kind,
       family: (p.family as CreateFamily) ?? "page",
       keyword: str(p.query),
+    };
+  }
+  if (capture.kind === "lead_promote") {
+    return {
+      captureId: capture.id,
+      kind: capture.kind,
+      family: (p.family as CreateFamily) ?? "post",
+      company: str(p.company),
+      contact: str(p.name),
+      role: str(p.role),
+      painPoint: str(p.painPoint),
+      // The lead's website is the natural grounding link; notes are its source text.
+      sourceUrl: str(p.website),
+      text: str(p.notes),
+      score: typeof p.score === "number" ? p.score : undefined,
     };
   }
   return {
