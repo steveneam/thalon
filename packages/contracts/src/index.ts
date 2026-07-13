@@ -7,6 +7,7 @@ export * from "./draft-status";
 export * from "./format-registry";
 export * from "./intel";
 export * from "./judge";
+export * from "./leads";
 export * from "./search-intel";
 export * from "./source";
 export * from "./stage-registry";

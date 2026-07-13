@@ -1,6 +1,7 @@
 export * from "./content";
 export * from "./intel";
 export * from "./judging";
+export * from "./leads";
 export * from "./ops";
 export * from "./search";
 export * from "./tenancy";

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { icpSchema } from "./leads";
 
 /**
  * The tenant-config shape: brand/voice, denylist, and per-platform niche
@@ -48,11 +49,47 @@ export const brandIdentitySchema = z
   })
   .catchall(z.unknown());
 
+/**
+ * B7.a: per-platform posting-frequency norms as tenant config, enforced
+ * beside denylist + grounding in the judge harness (Sprint-7 charter). A
+ * platform without a rule (or a rule with no fields set) has no cadence
+ * constraint — absence disarms, the standing convention.
+ */
+export const cadenceRuleSchema = z.object({
+  maxPerDay: z.number().int().positive().optional(),
+  maxPerWeek: z.number().int().positive().optional(),
+  minGapMinutes: z.number().int().positive().optional(),
+});
+export type CadenceRule = z.infer<typeof cadenceRuleSchema>;
+
+/** Platform name → cadence rule. Platform keys are free-form strings — data, like platformProfiles. */
+export const cadenceConfigSchema = z.record(z.string(), cadenceRuleSchema);
+export type CadenceConfig = z.infer<typeof cadenceConfigSchema>;
+
+/**
+ * B7.e: content bucket → platform routing map as per-tenant config data
+ * (Sprint-7 charter). Bucket names are tenant vocabulary (topics, pillars —
+ * data, never code); values are the platforms drafts in that bucket fan out
+ * to. An unrouted bucket keeps the default behavior (all platforms).
+ */
+export const routingTableSchema = z.record(z.string(), z.array(z.string().min(1)));
+export type RoutingTable = z.infer<typeof routingTableSchema>;
+
+/**
+ * All four Sprint-7 additions are OPTIONAL (never defaulted): a pre-window
+ * config parses to a byte-identical object, and absence disarms the feature
+ * (no icp → no lead scoring; no cadence/routing → no gate/routing) —
+ * additivity is test-pinned in brand-profile.test.ts.
+ */
 export const brandProfileConfigSchema = z.object({
   voice: z.record(z.string(), z.unknown()).default({}),
   denylist: z.array(z.string()).default([]),
   platformProfiles: z.record(z.string(), platformProfileSchema).default({}),
   identity: brandIdentitySchema.default({ offers: [], links: {}, facts: [], topics: [] }),
+  /** B-crm.2: the ideal-customer-profile block lead scoring reads (contracts/leads.ts). */
+  icp: icpSchema.optional(),
+  cadence: cadenceConfigSchema.optional(),
+  routing: routingTableSchema.optional(),
 });
 
 export type PlatformProfile = z.infer<typeof platformProfileSchema>;

@@ -7,6 +7,8 @@ import { evalCasesRepo, type EvalCasesRepo } from "./eval-cases";
 import { eventsRepo, type EventsRepo } from "./events";
 import { fanoutRunsRepo, type FanoutRunsRepo } from "./fanout-runs";
 import { judgeResultsRepo, type JudgeResultsRepo } from "./judge-results";
+import { leadScoresRepo, type LeadScoresRepo } from "./lead-scores";
+import { leadsRepo, type LeadsRepo } from "./leads";
 import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
 import { searchSnapshotsRepo, type SearchSnapshotsRepo } from "./search-snapshots";
 import { searchTargetsRepo, type SearchTargetsRepo } from "./search-targets";
@@ -39,6 +41,8 @@ export interface Repos {
   searchTargets: SearchTargetsRepo;
   searchSnapshots: SearchSnapshotsRepo;
   waitlist: WaitlistRepo;
+  leads: LeadsRepo;
+  leadScores: LeadScoresRepo;
   // publish_queue deliberately has no repository: no publish path is wired
   // anywhere in Sprints 0–2 (charter standing discipline).
 }
@@ -64,5 +68,7 @@ export function createRepos(db: Db): Repos {
     searchTargets: searchTargetsRepo(db),
     searchSnapshots: searchSnapshotsRepo(db),
     waitlist: waitlistRepo(db),
+    leads: leadsRepo(db),
+    leadScores: leadScoresRepo(db),
   };
 }
