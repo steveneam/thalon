@@ -18,6 +18,8 @@ afterEach(async () => {
 
 async function setup(
   platformProfiles: Record<string, PlatformProfile> = {},
+  /** B7.e: bucket → platforms routing table on the tenant's active profile. */
+  routing?: Record<string, string[]>,
 ): Promise<{ ctx: TenantCtx; repos: Repos; sourceId: string }> {
   handle = await openTestDb();
   const { repos } = handle;
@@ -28,6 +30,7 @@ async function setup(
       voice: { register: "plain" },
       denylist: [],
       platformProfiles,
+      ...(routing ? { routing } : {}),
     },
     activate: true,
   });
@@ -234,5 +237,80 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
         { driver: createFakeDraftGeneratorDriver(), capTokens: 0 },
       ),
     ).rejects.toThrow(BudgetExceededError);
+  });
+});
+
+describe("runFanout — B7.e routing table (bucket → platforms as tenant config)", () => {
+  it("a routed bucket REPLACES the caller's platforms and records provenance on the run", async () => {
+    const { ctx, repos, sourceId } = await setup({}, { launch: ["linkedin", "x"] });
+    const calls: string[] = [];
+    const result = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["bluesky"], bucket: "launch" },
+      { driver: countingDriver(calls), capTokens: 1_000_000 },
+    );
+
+    expect(new Set(result.drafts.map((d) => d.platform))).toEqual(new Set(["linkedin", "x"]));
+    expect(calls).not.toContain("bluesky");
+
+    const run = await repos.fanoutRuns.get(ctx, result.runId);
+    expect(run?.params).toEqual({ bucket: "launch", routed: true });
+  });
+
+  it("an unrouted bucket keeps the caller's platforms (default behavior), provenance says routed:false", async () => {
+    const { ctx, repos, sourceId } = await setup({}, { launch: ["linkedin"] });
+    const result = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["x"], bucket: "weekly-recap" },
+      { driver: createFakeDraftGeneratorDriver(), capTokens: 1_000_000 },
+    );
+    expect(result.drafts.map((d) => d.platform)).toEqual(["x"]);
+    const run = await repos.fanoutRuns.get(ctx, result.runId);
+    expect(run?.params).toEqual({ bucket: "weekly-recap", routed: false });
+  });
+
+  it("no routing config on the profile ⇒ bucket is provenance only", async () => {
+    const { ctx, repos, sourceId } = await setup();
+    const result = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["linkedin"], bucket: "launch" },
+      { driver: createFakeDraftGeneratorDriver(), capTokens: 1_000_000 },
+    );
+    expect(result.drafts.map((d) => d.platform)).toEqual(["linkedin"]);
+  });
+
+  it("no bucket ⇒ byte-identical pre-B7.e behavior, params stay unset", async () => {
+    const { ctx, repos, sourceId } = await setup({}, { launch: ["linkedin"] });
+    const result = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["x"] },
+      { driver: createFakeDraftGeneratorDriver(), capTokens: 1_000_000 },
+    );
+    expect(result.drafts.map((d) => d.platform)).toEqual(["x"]);
+    const run = await repos.fanoutRuns.get(ctx, result.runId);
+    // The column default — exactly what a pre-B7.e bucketless run stored.
+    expect(run?.params).toEqual({});
+  });
+
+  it("idempotency operates on EFFECTIVE platforms: a routed run and the equivalent explicit run are the same run", async () => {
+    const { ctx, repos, sourceId } = await setup({}, { launch: ["linkedin"] });
+    const routed = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["x"], bucket: "launch" },
+      { driver: createFakeDraftGeneratorDriver(), capTokens: 1_000_000 },
+    );
+    const explicit = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["linkedin"] },
+      { driver: createFakeDraftGeneratorDriver(), capTokens: 1_000_000 },
+    );
+    expect(explicit.created).toBe(false);
+    expect(explicit.runId).toBe(routed.runId);
   });
 });

@@ -1,5 +1,6 @@
 export { runFanout, type FanoutDeps, type FanoutRequest, type FanoutResult } from "./fanout";
 export { loadPlatformProfile, type LoadedPlatformProfile } from "./profiles";
+export { resolveRoutedPlatforms, type RoutedPlatforms } from "./routing";
 export { fanoutShellOutputSchema, type FanoutShellOutput } from "./schemas";
 export { generateValidatedDraft, type GenerateCallResult } from "./validate-shell-output";
 export {

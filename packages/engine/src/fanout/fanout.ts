@@ -16,6 +16,7 @@ import { modelTiers, readEnv, withGatewayGuard, type ObjectStore } from "@thalon
 import { retrieveExemplarContext, runExemplarOverlapGate, type ExemplarContext } from "../exemplar";
 import type { EmbeddingDriver } from "../ingest";
 import { loadPlatformProfile } from "./profiles";
+import { resolveRoutedPlatforms } from "./routing";
 import {
   exemplarPromptVersion,
   fanoutPromptVersion,
@@ -27,7 +28,23 @@ import { generateValidatedDraft } from "./validate-shell-output";
 
 export interface FanoutRequest {
   sourceId: string;
+  /**
+   * The default platform set — and, when `bucket` is set and the active
+   * profile's routing table routes it, the fallback for an unrouted bucket.
+   */
   platforms: string[];
+  /**
+   * B7.e: the content bucket this fan-out belongs to (tenant vocabulary —
+   * topics, pillars). When the active profile carries a routing entry for
+   * it, that entry REPLACES `platforms`; an unrouted bucket (or no routing
+   * config) keeps `platforms`, and the whole request stays byte-identical
+   * to pre-B7.e. Provenance only beyond platform selection: the bucket is
+   * recorded on the run's params, never folded into the generation key —
+   * the effective platform list already fully captures its effect, so an
+   * explicit-platforms run and a routed run producing the same list are
+   * the SAME run (idempotency by outputs, not by request shape).
+   */
+  bucket?: string;
   /**
    * B2.4: opt-in exemplar/voice-sample-aware generation. Absent (the
    * default) means this fan-out is byte-identical to a pre-B2.4 run — no
@@ -101,7 +118,11 @@ export async function runFanout(
 
   const model = modelTiers().draft;
   const promptVersion = fanoutPromptVersion();
-  const platforms = [...new Set(request.platforms)].sort();
+  // B7.e: the routing table (per-tenant config data) may replace the
+  // caller's platform list for this bucket — resolved before the generation
+  // key so idempotency operates on the EFFECTIVE platforms.
+  const routing = resolveRoutedPlatforms(profile.routing, request.bucket, request.platforms);
+  const platforms = [...new Set(routing.platforms)].sort();
   const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
 
   // B2.4: exemplar retrieval runs BEFORE the generation key is computed —
@@ -164,6 +185,12 @@ export async function runFanout(
     runGenerationKey = existingRun.generationKey;
     created = false;
   } else {
+    const runParams = {
+      ...(exemplarContext ? { exemplarIds: exemplarContext.exemplarIds } : {}),
+      // B7.e provenance: which bucket asked for this run and whether the
+      // routing table actually decided the platform list.
+      ...(request.bucket ? { bucket: request.bucket, routed: routing.routed } : {}),
+    };
     const run = await repos.fanoutRuns.create(ctx, {
       sourceId: source.id,
       brandProfileId: profile.id,
@@ -172,7 +199,7 @@ export async function runFanout(
       promptVersion,
       model,
       generationKey,
-      params: exemplarContext ? { exemplarIds: exemplarContext.exemplarIds } : undefined,
+      params: Object.keys(runParams).length > 0 ? runParams : undefined,
     });
     runId = run.id;
     runGenerationKey = run.generationKey;
