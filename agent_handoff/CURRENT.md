@@ -40,4 +40,4 @@ Read in order: `CLAUDE.md` → this file → `COORDINATION.md` (Sprint-7 board +
 
 ## Next action
 
-Session 29 (founder-directed): meta-prompt archive + vendor-visual review/plan (tier decision after) → →Email draft-only exit → queue-review feedback folding → B7.c/first-generation if room. Founder at open: paste the meta-prompt; at his pace: triage the staged queue · ICP edits.
+Session 29 (founder-directed): meta-prompt archive + vendor-visual review/plan (tier decision after) → →Email draft-only exit → **wire →Post generation live (first judged generation + spend check; card meta/contact riders)** → B7.c if room. Founder at open: paste the meta-prompt; at his pace: triage the staged queue · ICP edits.
