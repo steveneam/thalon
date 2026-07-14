@@ -31,7 +31,7 @@ export function Omnibox() {
         aria-label="What do you want to create?"
         value={prompt}
         onChange={(event) => setPrompt(event.target.value)}
-        placeholder="What do you want to create? (⌘K for everything else)"
+        placeholder="What do you want to create? (Ctrl/⌘ K for everything else)"
         className="h-9 flex-1 bg-transparent text-sm focus:outline-none"
       />
       <Button type="submit" size="sm" disabled={!prompt.trim()}>

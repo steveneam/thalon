@@ -101,7 +101,7 @@ export function LeadCard({
           )}
           <span className="ml-2">added {timeAgo(lead.createdAt)}</span>
           {stale && (
-            <span className="ml-2 text-amber-700 dark:text-amber-500">
+            <span className="ml-2 text-signal">
               scored against an older ICP — Score now refreshes it
             </span>
           )}

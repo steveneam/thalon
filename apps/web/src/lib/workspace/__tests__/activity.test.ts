@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describeActivity } from "@/lib/workspace/activity";
-import { timeAgo } from "@/lib/workspace/format";
+import { timeAgo, timeUntil } from "@/lib/workspace/format";
 import type { ActivityItem } from "@/lib/workspace/types";
 
 function item(event: string, entityType: string, payload: Record<string, unknown> = {}): ActivityItem {
@@ -54,5 +54,18 @@ describe("timeAgo", () => {
   });
   it("never goes negative on clock skew", () => {
     expect(timeAgo(new Date(now + 60_000).toISOString(), now)).toBe("just now");
+  });
+});
+
+describe("timeUntil", () => {
+  const now = Date.UTC(2026, 6, 6, 12, 0, 0);
+  it("formats coarse forward buckets — the critique-P1 fix: a future instant never reads 'just now'", () => {
+    expect(timeUntil(new Date(now + 120_000).toISOString(), now)).toBe("in 2m");
+    expect(timeUntil(new Date(now + 4 * 3_600_000).toISOString(), now)).toBe("in 4h");
+    expect(timeUntil(new Date(now + 2 * 86_400_000).toISOString(), now)).toBe("in 2d");
+  });
+  it("reads 'now' for due or past instants", () => {
+    expect(timeUntil(new Date(now).toISOString(), now)).toBe("now");
+    expect(timeUntil(new Date(now - 60_000).toISOString(), now)).toBe("now");
   });
 });

@@ -41,9 +41,18 @@ describe("Dashboard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Engine drafted for linkedin")).toBeInTheDocument();
 
-    // Seam-status card reads the doctor internals.
-    expect(await screen.findByText("hyperframes")).toBeInTheDocument();
-    expect(screen.getByText("pglite")).toBeInTheDocument();
+    // Seam/driver config lives in Settings now (founder direction 2026-07-14);
+    // the dashboard only surfaces degraded health — the fixture's gateway is
+    // unconfigured, so the one health notice shows and links to Settings.
+    expect(await screen.findByRole("status")).toHaveTextContent(/gateway key isn.t configured/i);
+    expect(screen.getByRole("link", { name: /check settings/i })).toHaveAttribute(
+      "href",
+      "/app/settings",
+    );
+    expect(screen.queryByText("hyperframes")).not.toBeInTheDocument();
+
+    // Pulse tiles are doorways, not just counters.
+    expect(screen.getByRole("link", { name: /runs/i })).toHaveAttribute("href", "/app/runs");
 
     // Quick actions cover the families.
     expect(screen.getByRole("link", { name: /create from a prompt/i })).toHaveAttribute(
@@ -72,5 +81,19 @@ describe("Dashboard", () => {
       "/app/profiles",
     );
     expect(screen.queryByText(/drafts wait/)).not.toBeInTheDocument();
+  });
+
+  it("renders an honest error card — never a real-looking empty state — when the pulse read fails", async () => {
+    server.use(http.get("/api/app/pulse", () => HttpResponse.error()));
+    renderDashboard();
+
+    // The failure is named, with a retry — not "Queue clear".
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/couldn.t reach the engine/i);
+    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    expect(screen.queryByText(/queue clear/i)).not.toBeInTheDocument();
+
+    // Tiles show "–", not zeros.
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
   });
 });

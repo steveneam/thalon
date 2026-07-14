@@ -135,7 +135,7 @@ export function LeadsSurface() {
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-lg font-semibold">Leads</h1>
+        <h2 className="text-lg font-semibold">Leads</h2>
         <Badge variant="outline">{counts.new + counts.scored} in queue</Badge>
         <span className="ml-auto flex flex-wrap gap-1.5">
           <Button size="sm" variant="outline" disabled={busy} onClick={() => setImportOpen((v) => !v)}>

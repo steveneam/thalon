@@ -1,3 +1,18 @@
+/** Compact relative time for a FUTURE instant ("in 3h") — the forward twin of timeAgo; a due/past instant reads "now". */
+export function timeUntil(iso: string, now: number = Date.now()): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return iso;
+  const seconds = Math.floor((then - now) / 1000);
+  if (seconds <= 30) return "now";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `in ${minutes}m`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `in ${hours}h`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `in ${days}d`;
+  return new Date(iso).toLocaleDateString();
+}
+
 /** Compact relative time for feed rows ("2m ago") — coarse on purpose, no live re-render ticker. */
 export function timeAgo(iso: string, now: number = Date.now()): string {
   const then = new Date(iso).getTime();

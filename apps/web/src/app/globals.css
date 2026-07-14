@@ -72,9 +72,13 @@
 
 /* Workspace light set — warm paper base kept, structure re-inked navy,
  * interactive layer moved to one restrained blue, amber pulled back to the
- * dedicated signal channel (bronze-deep so it clears AA on paper). */
+ * dedicated signal channel (bronze-deep so it clears AA on paper).
+ * 2026-07-14 (founder direction): neutrals nudged a step warmer toward the
+ * landing's amber DNA — warmth rides the paper/washes, NEVER the semantic
+ * channels (blue still acts, amber still signals); AA re-verified by
+ * tokens-contrast.test.ts. */
 :root {
-  --background: oklch(0.98 0.004 84);
+  --background: oklch(0.978 0.008 84);
   --foreground: oklch(0.24 0.028 258);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.028 258);
@@ -82,9 +86,9 @@
   --popover-foreground: oklch(0.24 0.028 258);
   --primary: oklch(0.5 0.115 252);
   --primary-foreground: oklch(0.985 0.005 84);
-  --secondary: oklch(0.94 0.006 82);
+  --secondary: oklch(0.94 0.01 82);
   --secondary-foreground: oklch(0.28 0.025 258);
-  --muted: oklch(0.945 0.005 82);
+  --muted: oklch(0.945 0.009 82);
   --muted-foreground: oklch(0.46 0.025 255);
   --accent: oklch(0.93 0.015 250);
   --accent-foreground: oklch(0.3 0.05 255);
@@ -113,7 +117,7 @@
   --chart-4: oklch(0.62 0.008 255);
   --chart-5: oklch(0.3 0.03 258);
   --radius: 0.625rem;
-  --sidebar: oklch(0.965 0.005 84);
+  --sidebar: oklch(0.962 0.009 84);
   --sidebar-foreground: oklch(0.24 0.028 258);
   --sidebar-primary: oklch(0.5 0.115 252);
   --sidebar-primary-foreground: oklch(0.985 0.005 84);

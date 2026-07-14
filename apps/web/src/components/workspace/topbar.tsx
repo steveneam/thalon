@@ -41,8 +41,14 @@ export function Topbar() {
         )}
       >
         <Inbox aria-hidden className="size-4" />
-        <span className="u-tabular">{status === "success" ? needsYou : "–"}</span>
-        <span className="hidden sm:inline">{needsYou === 1 ? "needs you" : "need you"}</span>
+        {status === "success" && needsYou === 0 ? (
+          <span className="hidden sm:inline">queue clear</span>
+        ) : (
+          <>
+            <span className="u-tabular">{status === "success" ? needsYou : "–"}</span>
+            <span className="hidden sm:inline">{needsYou === 1 ? "needs you" : "need you"}</span>
+          </>
+        )}
       </Link>
 
       {/* Tenant/profile switcher — <details> keeps it dependency-free and

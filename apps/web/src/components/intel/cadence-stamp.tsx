@@ -3,7 +3,7 @@
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SweepStamp } from "@/lib/intel/types";
-import { timeAgo } from "@/lib/workspace/format";
+import { timeAgo, timeUntil } from "@/lib/workspace/format";
 
 /**
  * The Intel cadence stamp (wave-3 §3.7): automation is FELT when it's
@@ -35,7 +35,7 @@ export function CadenceStamp({
           <>
             next sweep{" "}
             <time dateTime={sweep.nextSweepAt} className="font-medium text-foreground">
-              {timeAgo(sweep.nextSweepAt)}
+              {timeUntil(sweep.nextSweepAt)}
             </time>{" "}
             (scheduled polling lands at deploy — Sweep now until then)
           </>

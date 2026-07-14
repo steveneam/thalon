@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-14T00:00:00Z",
+  "title": "Design System: Thalon",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "oklch(0.978 0.008 84)", "tonalRamp": ["oklch(0.15 0.008 84)", "oklch(0.27 0.008 84)", "oklch(0.39 0.008 84)", "oklch(0.51 0.008 84)", "oklch(0.63 0.008 84)", "oklch(0.75 0.008 84)", "oklch(0.87 0.008 84)", "oklch(0.978 0.008 84)"] },
+      "ink-navy": { "role": "neutral", "displayName": "Ink Navy", "canonical": "oklch(0.24 0.028 258)", "tonalRamp": ["oklch(0.15 0.028 258)", "oklch(0.24 0.028 258)", "oklch(0.35 0.028 258)", "oklch(0.46 0.028 258)", "oklch(0.57 0.028 258)", "oklch(0.68 0.028 258)", "oklch(0.81 0.028 258)", "oklch(0.95 0.014 258)"] },
+      "action-blue": { "role": "primary", "displayName": "Action Blue", "canonical": "oklch(0.5 0.115 252)", "tonalRamp": ["oklch(0.2 0.115 252)", "oklch(0.3 0.115 252)", "oklch(0.4 0.115 252)", "oklch(0.5 0.115 252)", "oklch(0.6 0.115 252)", "oklch(0.7 0.1 252)", "oklch(0.82 0.07 252)", "oklch(0.93 0.03 252)"] },
+      "bronze-signal": { "role": "secondary", "displayName": "Bronze Signal", "canonical": "oklch(0.55 0.118 70)", "tonalRamp": ["oklch(0.22 0.09 70)", "oklch(0.33 0.11 70)", "oklch(0.44 0.118 70)", "oklch(0.55 0.118 70)", "oklch(0.66 0.13 72)", "oklch(0.78 0.14 76)", "oklch(0.87 0.09 80)", "oklch(0.95 0.04 84)"] },
+      "heat-cool": { "role": "tertiary", "displayName": "Heat Cool", "canonical": "oklch(0.52 0.075 245)", "tonalRamp": ["oklch(0.2 0.075 245)", "oklch(0.31 0.075 245)", "oklch(0.42 0.075 245)", "oklch(0.52 0.075 245)", "oklch(0.63 0.075 245)", "oklch(0.74 0.06 245)", "oklch(0.85 0.04 245)", "oklch(0.95 0.02 245)"] },
+      "heat-warm": { "role": "tertiary", "displayName": "Heat Warm", "canonical": "oklch(0.8 0.14 90)", "tonalRamp": ["oklch(0.25 0.08 90)", "oklch(0.36 0.1 90)", "oklch(0.47 0.12 90)", "oklch(0.58 0.13 90)", "oklch(0.69 0.14 90)", "oklch(0.8 0.14 90)", "oklch(0.88 0.1 90)", "oklch(0.95 0.05 90)"] },
+      "heat-rising": { "role": "tertiary", "displayName": "Heat Rising", "canonical": "oklch(0.68 0.16 55)", "tonalRamp": ["oklch(0.22 0.1 55)", "oklch(0.33 0.13 55)", "oklch(0.45 0.15 55)", "oklch(0.56 0.16 55)", "oklch(0.68 0.16 55)", "oklch(0.78 0.13 55)", "oklch(0.87 0.09 55)", "oklch(0.95 0.04 55)"] },
+      "heat-hot": { "role": "tertiary", "displayName": "Heat Hot", "canonical": "oklch(0.55 0.2 35)", "tonalRamp": ["oklch(0.2 0.13 35)", "oklch(0.31 0.16 35)", "oklch(0.43 0.18 35)", "oklch(0.55 0.2 35)", "oklch(0.66 0.18 35)", "oklch(0.77 0.13 35)", "oklch(0.87 0.08 35)", "oklch(0.95 0.03 35)"] },
+      "night-ink": { "role": "neutral", "displayName": "Night Ink", "canonical": "oklch(0.145 0.01 260)", "tonalRamp": ["oklch(0.145 0.01 260)", "oklch(0.18 0.01 260)", "oklch(0.23 0.01 260)", "oklch(0.32 0.01 260)", "oklch(0.45 0.01 260)", "oklch(0.6 0.01 260)", "oklch(0.78 0.008 260)", "oklch(0.93 0.006 255)"] },
+      "landing-amber": { "role": "secondary", "displayName": "Landing Amber", "canonical": "oklch(0.78 0.14 76)", "tonalRamp": ["oklch(0.25 0.09 76)", "oklch(0.36 0.11 76)", "oklch(0.47 0.12 76)", "oklch(0.58 0.13 76)", "oklch(0.68 0.14 76)", "oklch(0.78 0.14 76)", "oklch(0.87 0.1 78)", "oklch(0.95 0.05 80)"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title", "purpose": "Card titles and dense-surface headings (CardTitle default)." },
+      "body": { "displayName": "Body", "purpose": "Descriptions and prose; ≤65–75ch." },
+      "label": { "displayName": "Label", "purpose": "Badges, secondary metadata, CardDescription." },
+      "eyebrow": { "displayName": "Eyebrow (HUD micro-label)", "purpose": "Scoped mono kicker — landing sections and dense-card column labels only, never generic section scaffolding." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-signature", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Entrance/rise motion on the landing (anim-rise, word-rise)." },
+      { "name": "duration-product", "value": "150ms-250ms", "purpose": "Workspace state transitions; state-conveying only, reduced-motion alternatives mandatory." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action Blue fill — the one interactive channel; hover dims, press nudges 1px.",
+      "html": "<button class=\"ds-btn-primary\">Generate draft</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 2rem; padding: 0 0.625rem; background: var(--primary, oklch(0.5 0.115 252)); color: var(--primary-foreground, oklch(0.985 0.005 84)); border: 1px solid transparent; border-radius: 0.5rem; font: 500 0.875rem/1 Geist, system-ui, sans-serif; transition: background 0.15s, transform 0.15s; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary, oklch(0.5 0.115 252)) 80%, transparent); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; border-color: var(--ring, oklch(0.5 0.115 252)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(0.5 0.115 252)) 50%, transparent); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Hairline-bordered neutral action on paper.",
+      "html": "<button class=\"ds-btn-outline\">Dismiss</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 2rem; padding: 0 0.625rem; background: var(--background, oklch(0.98 0.004 84)); color: var(--foreground, oklch(0.24 0.028 258)); border: 1px solid var(--border, oklch(0.9 0.008 255)); border-radius: 0.5rem; font: 500 0.875rem/1 Geist, system-ui, sans-serif; transition: background 0.15s; } .ds-btn-outline:hover { background: var(--muted, oklch(0.945 0.005 82)); } .ds-btn-outline:focus-visible { outline: none; border-color: var(--ring, oklch(0.5 0.115 252)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(0.5 0.115 252)) 50%, transparent); }"
+    },
+    {
+      "name": "Signal Badge",
+      "kind": "chip",
+      "refersTo": "badge-signal",
+      "description": "The amber channel: the engine found heat — never interactive.",
+      "html": "<span class=\"ds-badge-signal\">3 need you</span>",
+      "css": ".ds-badge-signal { display: inline-flex; align-items: center; height: 1.25rem; padding: 0.125rem 0.5rem; background: var(--signal, oklch(0.55 0.118 70)); color: var(--signal-foreground, oklch(0.985 0.005 84)); border-radius: 9999px; font: 500 0.75rem/1 Geist, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Card White lifts tonally off Paper; hairline border, no shadow.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Needs you</div><div class=\"ds-card-desc\">2 drafts await review in the approve queue.</div></div>",
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem; background: var(--card, oklch(1 0 0)); color: var(--card-foreground, oklch(0.24 0.028 258)); border: 1px solid var(--border, oklch(0.9 0.008 255)); border-radius: 0.875rem; } .ds-card-title { font: 600 0.875rem/1 Geist, system-ui, sans-serif; } .ds-card-desc { font: 400 0.75rem/1.5 Geist, system-ui, sans-serif; color: var(--muted-foreground, oklch(0.46 0.025 255)); }"
+    },
+    {
+      "name": "HeatGrade Pill",
+      "kind": "custom",
+      "refersTo": "badge-signal",
+      "description": "Signature thermal grade: band word in a filled pill + magnitude bar; exact score demotes to tooltip.",
+      "html": "<span class=\"ds-heat\" title=\"rank score 0.86 (0-1) for this area\"><span class=\"ds-heat-pill\">hot</span><span class=\"ds-heat-track\"><span class=\"ds-heat-bar\" style=\"width: 86%\"></span></span></span>",
+      "css": ".ds-heat { display: inline-flex; align-items: center; gap: 0.375rem; } .ds-heat-pill { display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; background: var(--heat-4, oklch(0.55 0.2 35)); color: var(--heat-paper, oklch(0.985 0.005 84)); border: 1px solid rgba(0,0,0,0.1); border-radius: 9999px; font: 400 0.6875rem/1.2 'Geist Mono', ui-monospace, monospace; letter-spacing: 0.18em; text-transform: uppercase; } .ds-heat-track { display: block; width: 2.5rem; height: 0.375rem; background: var(--muted, oklch(0.945 0.005 82)); border-radius: 9999px; overflow: hidden; } .ds-heat-bar { display: block; height: 100%; background: var(--heat-4, oklch(0.55 0.2 35)); border-radius: 9999px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Falconer's Desk",
+    "overview": "A calm, light desk of paper and navy ink where a vigilant engine delivers what it found — and heat rises off the page exactly where something is worth acting on. Color is never decoration; it is a channel: blue means you act, amber-bronze means the engine found heat. The landing page is the same DNA after dark — near-black ink-navy with amber as the marketing accent — because both surfaces share one token set.",
+    "keyCharacteristics": [
+      "Light-first workspace: paper base, navy ink, white cards, hairline borders",
+      "Two-channel color doctrine: action-blue (interactive) vs bronze-amber (signal)",
+      "Thermal heat grading worn as word-in-pill — glanceable, colorblind-proof",
+      "One sans family (Geist) at a tight product scale; mono for data/eyebrow labels",
+      "Flat by default; depth from tonal layering, not shadows",
+      "Dark-cinematic landing sharing the same tokens (.dark scope, never the root)"
+    ],
+    "rules": [
+      { "name": "The Two-Channel Rule", "body": "Blue = you act; amber = the engine found heat. Neither color ever does the other's job, and no third accent exists.", "section": "colors" },
+      { "name": "The Word-In-Pill Rule", "body": "Heat is never color alone: the band word sits inside the pill, the exact score demotes to the tooltip. Any new grading surface reuses this grammar.", "section": "colors" },
+      { "name": "The AA-Executable Rule", "body": "Every named token pairing is pinned by tokens-contrast.test.ts; a failing pairing does not ship.", "section": "colors" },
+      { "name": "The Tabular Rule", "body": "Any number that updates sets tabular-nums so digits never jitter.", "section": "typography" },
+      { "name": "The One-Family Rule", "body": "No second display face, ever. Contrast comes from weight and the mono.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest; depth is tonal (white-on-paper) or a state response — never an ambient drop shadow under every card.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the two channels pure: Action Blue for anything clickable, Bronze Signal for anything the engine flagged.",
+      "Do reuse the HeatGrade grammar (word-in-pill + magnitude bar) for any new score or grade.",
+      "Do keep skeletons on Muted Wash and write empty states as tutorials with a one-click seeded example.",
+      "Do run motion at 150-250ms, ease-out, state-conveying only, with reduced-motion alternatives.",
+      "Do keep the primary action visually dominant on every surface - the 10-second rule."
+    ],
+    "donts": [
+      "Don't dress the workspace as enterprise-fintech corporate - no shields, world maps, or gold-on-navy.",
+      "Don't darken the workspace: near-black command-center HUDs are the landing's register only.",
+      "Don't ship spam-cannon marketing mechanics: fake urgency, synthetic countdowns, guilt buttons, manufactured scarcity, gamification.",
+      "Don't use amber/signal on interactive chrome or blue on signal badges.",
+      "Don't use side-stripe borders, gradient text, glassmorphism-as-default, or an eyebrow kicker above every section.",
+      "Don't convey any state by color alone - words and attributes carry it.",
+      "Don't add ambient drop shadows under cards; tonal white-on-paper is the elevation system."
+    ]
+  }
+}

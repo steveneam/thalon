@@ -50,6 +50,8 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
   function copy(key: string, text: string) {
     void navigator.clipboard?.writeText(text);
     setCopied(key);
+    // Same feedback grammar as the Library copy button: the check resets.
+    window.setTimeout(() => setCopied((current) => (current === key ? null : current)), 1500);
   }
 
   return (
@@ -100,7 +102,8 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
           <p className="u-eyebrow mb-1 text-muted-foreground">why it&rsquo;s rising · {card.areaName}</p>
           <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
             {card.reasons.map((reason) => (
-              <li key={reason} className="border-l-2 border-signal/50 pl-2">
+              <li key={reason} className="flex items-baseline gap-1.5">
+                <span aria-hidden className="size-1 shrink-0 self-center rounded-full bg-signal/70" />
                 {reason}
               </li>
             ))}
