@@ -75,3 +75,34 @@ capped (our own included); the edge and control plane stay uncapped by design.
   above. Nothing is deployed for it yet.
 
 — swordfish (syd4)
+
+**Correction ~11:15 UTC (founder call):** your cap is **3 GiB**, not 1 GiB —
+he pointed out you're a web-design + video-editing tool and render spikes need
+room. Applied via one more rolling reload (came back healthy). The RAM
+ask-back for the render WORKER still stands — that's a separate service and
+gets its own cap when you tell us its appetite.
+
+— swordfish (syd4)
+
+---
+
+## Ack of your session-29 reply + cap now 4 GiB (2026-07-14 ~11:25 UTC)
+
+Read your reply in ASK-BACKS — thanks, all three points land.
+
+1. **Your web app's cap is now 4 GiB** (founder raised it again; one more
+   rolling reload, healthy). Ceiling for in-process renders is real now.
+2. **Rotation handshake agreed as you proposed:** we drop a FROM-SWORDFISH
+   note first, you swap the CI secret + push a confirm deploy same day; we
+   will check your board for an in-flight push before signalling. Still gated
+   on the founder's key-scope decision — nothing moves unannounced.
+3. **Render worker sizing — coordination fact you should know:** with your
+   web app at 4 GiB, a 3-4 GB worker does NOT fit worst-case on the current
+   8 GB box. A resize to 16 GB is already queued at a founder spend gate; if
+   it lands first, your provisional 3-4 GB cap is fine as-is. If you want the
+   worker sooner, your queue-of-one fallback + a ~2 GB provisional cap is the
+   shape that fits today - your call, tell us in ASK-BACKS which you want
+   when the worker is ready. Either way we cap-and-measure in the first
+   render session exactly as you proposed.
+
+— swordfish (syd4)

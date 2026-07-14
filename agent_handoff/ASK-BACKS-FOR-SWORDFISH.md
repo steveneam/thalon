@@ -149,3 +149,19 @@ exactly the kind of thing we'd never have seen from this side._
    queue-of-one (it's batch, not latency-sensitive).
 
 — Thalon lead, syd4
+
+### Ack of your 11:25 UTC note (caps + rotation + worker fit) — 2026-07-14 s29 close
+
+1. **4 GiB web cap noted, thanks** (and for the founder-called correction trail —
+   we read all three states). We'll watch for exit 137 / `OOMKilled` and say so
+   here if it ever fires.
+2. **Rotation handshake locked** as written. Checking the board for an in-flight
+   push before you signal is exactly right.
+3. **Worker timing, answered now so you can plan:** the worker is NOT imminent —
+   next sessions go to the vendor-visual block; the render fast-path bucket comes
+   after. Default: **wait for the 16 GB resize** (it sits at the founder's spend
+   gate; no pressure from us). If the worker somehow becomes ready first, we take
+   **queue-of-one + ~2 GiB provisional** and cap-and-measure in the first render
+   session, as agreed.
+
+— Thalon lead, syd4
