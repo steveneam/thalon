@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northpace — run-coaching studio · est. before sunrise</title>
+<meta name="description" content="Structured run coaching for early mornings — cadence work, honest pacing, and a plan that survives winter. Demonstration site.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0e1a'/%3E%3Cpath d='M16 5l2 9 9 2-9 2-2 9-2-9-9-2 9-2z' fill='%235fe8a8'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/anybody-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/spline-sans-mono-var.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* ============ fonts (vendored, OFL) ============ */
+@font-face{
+  font-family:'Anybody';
+  src:url('fonts/anybody-var.woff2') format('woff2');
+  font-weight:100 900;font-stretch:50% 150%;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Anybody';
+  src:url('fonts/anybody-italic-var.woff2') format('woff2');
+  font-weight:100 900;font-stretch:50% 150%;font-style:italic;font-display:swap;
+}
+@font-face{
+  font-family:'Spline Sans Mono';
+  src:url('fonts/spline-sans-mono-var.woff2') format('woff2');
+  font-weight:300 700;font-style:normal;font-display:swap;
+}
+
+/* ============ tokens ============ */
+:root{
+  --night:#0a0e1a;      /* polar night field */
+  --night-2:#0e1424;
+  --panel:#101729;
+  --ink:#e9eef8;        /* cold near-white */
+  --dim:#9aa7bf;        /* secondary text on night */
+  --faint:#7a89a4;      /* quietest text that still clears AA on the night field */
+  --line:#3a465c;       /* non-text hairlines only */
+  --g:#5fe8a8;          /* aurora green — the act color */
+  --t:#54d8d8;          /* aurora teal */
+  --v:#a184ff;          /* aurora violet */
+  --ink-dark:#141a2b;   /* text on dawn sky */
+  --dawn-mid:#7d8fae;
+  --dawn-sky:#cfd9ea;
+  --dawn-warm:#e9d9c4;
+  --disp:'Anybody','Avenir Next Condensed',sans-serif;
+  --mono:'Spline Sans Mono',ui-monospace,monospace;
+  --beat:333ms;         /* 180 steps per minute */
+  --half-beat:167ms;
+  --measure:62ch;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:var(--night);color:var(--ink);
+  font-family:var(--disp);font-weight:380;font-stretch:104%;
+  font-size:1.0625rem;line-height:1.62;
+  overflow-x:hidden;
+}
+::selection{background:var(--g);color:var(--night)}
+
+a{color:var(--g)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--g);outline-offset:3px;border-radius:2px}
+img{max-width:100%;height:auto;display:block}
+
+.skip{position:absolute;left:-999px;top:0;background:var(--g);color:var(--night);padding:.6rem 1rem;z-index:99;font-family:var(--mono);font-size:.85rem}
+.skip:focus{left:0}
+
+/* ============ type scale ============ */
+.kicker{
+  font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--dim);max-width:none;
+}
+h1,h2,h3{line-height:.96;text-wrap:balance}
+h2{
+  font-size:clamp(2.4rem,6.4vw,4.6rem);font-weight:780;font-stretch:105%;
+  text-transform:uppercase;letter-spacing:.005em;
+}
+h3{font-size:1.1rem;font-weight:640;font-stretch:112%;text-transform:uppercase;letter-spacing:.06em}
+p{max-width:var(--measure)}
+.lede{font-size:clamp(1.1rem,1.6vw,1.3rem);color:var(--dim);font-weight:330}
+
+.chip{
+  display:inline-flex;align-items:center;gap:.5em;
+  font-family:var(--mono);font-size:.78rem;font-weight:500;letter-spacing:.08em;
+  color:var(--dim);border:1px solid rgba(233,238,248,.16);border-radius:999px;
+  padding:.34em .9em;white-space:nowrap;
+}
+.chip b{color:var(--ink);font-weight:600}
+.chip .dot{width:.5em;height:.5em;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g)}
+
+/* ============ sky layers ============ */
+.sky{
+  position:fixed;inset:0;z-index:-2;pointer-events:none;
+  /* static aurora — the no-JS / reduced-motion sky, and the base under the canvas */
+  background:
+    radial-gradient(120% 55% at 78% -8%, rgba(95,232,168,.13), transparent 60%),
+    radial-gradient(90% 45% at 18% 2%,  rgba(161,132,255,.10), transparent 65%),
+    radial-gradient(70% 38% at 55% 12%, rgba(84,216,216,.08), transparent 70%),
+    linear-gradient(180deg, #0b1020 0%, var(--night) 55%);
+}
+#stars,#aurora{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+#aurora{filter:blur(14px) saturate(1.15)}
+
+/* ============ header / hero ============ */
+header{position:absolute;top:0;left:0;right:0;z-index:5}
+.nav{
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:1.2rem clamp(1.2rem,4vw,3rem);
+}
+.nav .mark{font-weight:740;font-stretch:92%;letter-spacing:.14em;font-size:.95rem;color:var(--ink);text-decoration:none}
+.nav ul{display:flex;gap:1.6rem;list-style:none}
+.nav ul a{
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);text-decoration:none;padding:.3em 0;
+}
+.nav ul a:hover{color:var(--g)}
+
+.hero{
+  min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding:7rem clamp(1.2rem,4vw,3rem) 4rem;position:relative;
+}
+.hero .kicker{margin-bottom:2.2rem}
+.wordmark{
+  font-size:clamp(2.7rem,11.4vw,10.4rem);
+  font-weight:560;font-stretch:98%;
+  text-transform:uppercase;letter-spacing:.015em;line-height:.9;
+  display:flex;flex-wrap:nowrap;user-select:none;
+}
+.wordmark span{display:inline-block}
+/* Polaris lives in the O — the one letterform move */
+.o-star{position:relative}
+.o-star svg{
+  position:absolute;left:50%;top:47%;width:.34em;height:.34em;
+  transform:translate(-50%,-50%);color:var(--g);
+  filter:drop-shadow(0 0 .12em rgba(95,232,168,.9));
+}
+.hero-sub{margin-top:2.6rem;display:grid;gap:1.1rem}
+.hero-sub .line{
+  font-size:clamp(1.35rem,2.6vw,2.1rem);font-weight:300;font-stretch:118%;
+  color:var(--ink);letter-spacing:.01em;
+}
+.hero-sub .line em{font-style:italic;font-weight:430;color:var(--g)}
+.hero-chips{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:2.4rem}
+.hero-scroll{
+  position:absolute;bottom:2rem;left:clamp(1.2rem,4vw,3rem);
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.3em;color:var(--faint);
+  text-transform:uppercase;
+}
+
+/* ============ sections ============ */
+section{padding:clamp(5rem,11vh,9rem) clamp(1.2rem,4vw,3rem);position:relative}
+.rail{max-width:1160px;margin:0 auto}
+.sect-head{display:grid;gap:1.2rem;margin-bottom:3.2rem}
+
+/* rise-in choreography — entrances land on the half-beat grid.
+   Hidden ONLY when JS is present to reveal it (progressive enhancement). */
+html.js [data-rise]{opacity:0;transform:translateY(20px)}
+html.js [data-rise].in{opacity:1;transform:none;
+  transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);
+  transition-delay:calc(var(--i,0)*var(--half-beat));
+}
+@media (prefers-reduced-motion:reduce){
+  html.js [data-rise]{opacity:1;transform:none;transition:none}
+}
+
+/* ---- §180 cadence manifesto ---- */
+.one80{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(2rem,6vw,5rem);align-items:center}
+.big180{
+  font-size:clamp(7rem,24vw,21rem);font-weight:820;font-stretch:76%;line-height:.82;
+  letter-spacing:-.01em;user-select:none;
+}
+.big180 .digits{
+  display:block;position:relative;color:transparent;
+  -webkit-text-stroke:1.5px rgba(233,238,248,.5);
+}
+.big180 .fill{
+  position:absolute;inset:0;color:var(--ink);-webkit-text-stroke:0;
+  clip-path:inset(72% 0 0 0);  /* JS breathes this on the beat */
+}
+.big180 .unit{
+  display:block;font-size:.1em;font-weight:500;font-stretch:118%;
+  color:var(--dim);letter-spacing:.26em;margin-top:.6em;white-space:nowrap;
+}
+.metronome{
+  display:flex;gap:6px;margin-top:2rem;height:34px;align-items:flex-end;
+}
+.metronome i{
+  flex:1;background:rgba(233,238,248,.14);height:12px;border-radius:1px;
+}
+.metronome i.on{background:var(--g);height:34px;box-shadow:0 0 12px rgba(95,232,168,.5)}
+@media (prefers-reduced-motion:reduce){
+  .big180 .fill{clip-path:inset(30% 0 0 0)}
+  .metronome i:nth-child(5){background:var(--g);height:34px}
+}
+
+/* ---- session scene ---- */
+.session{position:relative}
+.session .stage{position:relative}
+.session.enhanced{height:420vh}
+.session.enhanced .stage{position:sticky;top:0;min-height:100svh;display:flex;align-items:center}
+.stage-grid{
+  display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+  gap:clamp(2rem,5vw,4.5rem);align-items:center;width:100%;max-width:1160px;margin:0 auto;
+}
+.phase-word{
+  font-size:clamp(3.2rem,9.4vw,8.4rem);font-weight:400;font-stretch:110%;
+  line-height:.92;text-transform:uppercase;min-height:2.1em;
+  transition:font-weight .333s ease,font-stretch .333s ease,color .333s ease;
+}
+.phase-word small{
+  display:block;font-family:var(--mono);font-size:.16em;font-weight:500;
+  letter-spacing:.3em;color:var(--dim);margin-top:1.2em;font-stretch:100%;
+}
+.watchface{
+  display:flex;gap:.7rem;flex-wrap:wrap;margin-top:2rem;
+}
+.session:not(.enhanced) .watchface{display:none}  /* live instruments only exist in the live scene */
+.session-svg{width:100%;height:auto;margin-top:2.6rem;display:block}
+.session-svg .base{stroke:rgba(233,238,248,.22);fill:none;stroke-width:2}
+.session-svg .lit{stroke:var(--g);fill:none;stroke-width:2.5;filter:drop-shadow(0 0 6px rgba(95,232,168,.6))}
+.session-svg .cursor{fill:var(--ink)}
+.plan{list-style:none;display:grid;gap:.45rem;font-family:var(--mono);font-size:.83rem}
+.plan li{
+  display:flex;justify-content:space-between;gap:1rem;
+  padding:.62em .9em;border:1px solid rgba(233,238,248,.12);border-radius:6px;color:var(--dim);
+}
+.plan li.now{border-color:var(--g);color:var(--ink);background:rgba(95,232,168,.06)}
+.plan li .eff{letter-spacing:.18em;color:var(--faint)}
+.plan li.now .eff{color:var(--g)}
+.plan-note{margin-top:1.1rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;color:var(--faint);text-transform:uppercase}
+
+/* ---- the hours (minted stills) ---- */
+.hours .band{position:relative;border-radius:10px;overflow:hidden;margin-bottom:1.4rem}
+.hours .band img{width:100%;height:auto;filter:brightness(1.18) saturate(1.12)}
+.hours-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+.hours figure{position:relative;border-radius:10px;overflow:hidden;background:var(--night-2)}
+.hours figcaption,.hours .band figcaption{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:2.2rem 1.2rem .9rem;display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  background:linear-gradient(180deg,transparent, rgba(6,9,17,.82));
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;color:var(--ink);
+}
+.hours figcaption i,.hours .band figcaption i{font-style:normal;color:var(--dim);letter-spacing:.06em}
+
+/* ---- method ---- */
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;counter-reset:step}
+.method-grid article{
+  border:1px solid rgba(233,238,248,.12);border-radius:10px;padding:1.8rem 1.6rem;
+  background:linear-gradient(180deg,rgba(16,23,41,.65),rgba(16,23,41,.25));
+}
+.method-grid article::before{
+  counter-increment:step;content:"0" counter(step);
+  font-family:var(--mono);font-size:.75rem;letter-spacing:.3em;color:var(--g);
+  display:block;margin-bottom:1.2rem;
+}
+.method-grid h3{margin-bottom:.7rem}
+.method-grid p{font-size:.95rem;color:var(--dim)}
+
+/* ---- programs ---- */
+.programs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+.tier{
+  border:1px solid rgba(233,238,248,.14);border-radius:12px;padding:2rem 1.7rem 1.7rem;
+  display:flex;flex-direction:column;gap:1.1rem;position:relative;overflow:hidden;
+  background:
+    radial-gradient(140% 90% at 50% -30%, rgba(84,216,216,.07), transparent 60%),
+    linear-gradient(180deg,rgba(16,23,41,.75),rgba(13,18,33,.35));
+}
+.tier:nth-child(2){background:
+    radial-gradient(140% 90% at 50% -30%, rgba(95,232,168,.10), transparent 60%),
+    linear-gradient(180deg,rgba(16,23,41,.8),rgba(13,18,33,.4))}
+.tier:nth-child(3){background:
+    radial-gradient(140% 90% at 50% -30%, rgba(161,132,255,.09), transparent 60%),
+    linear-gradient(180deg,rgba(16,23,41,.75),rgba(13,18,33,.35))}
+.tier h3{
+  font-size:clamp(1.9rem,3vw,2.5rem);font-weight:800;font-stretch:78%;letter-spacing:.02em;
+  transition:font-stretch .5s cubic-bezier(.2,.7,.2,1);
+}
+.tier:hover h3{font-stretch:112%}
+@media (prefers-reduced-motion:reduce){.tier h3,.tier:hover h3{transition:none;font-stretch:78%}}
+.tier .for{font-family:var(--mono);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g)}
+.tier:first-child .for{color:var(--t)}
+.tier:last-child .for{color:var(--v)}
+.tier ul{list-style:none;display:grid;gap:.55rem;font-size:.93rem;color:var(--dim)}
+.tier ul li{padding-left:1.1em;position:relative}
+.tier ul li::before{content:"—";position:absolute;left:0;color:var(--line)}
+.tier .price{
+  margin-top:auto;font-family:var(--mono);font-size:.9rem;color:var(--ink);
+  border-top:1px solid rgba(233,238,248,.12);padding-top:1.1rem;
+}
+.tier .price i{font-style:normal;display:block;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;margin-top:.35rem}
+
+/* ---- dawn close ---- */
+.dawn{
+  padding:0;margin-top:4rem;
+  background:linear-gradient(180deg,
+    rgba(10,14,26,0) 0%, var(--night) 5%, #101a33 10%, #1d2c4e 20%, #35486b 30%,
+    var(--dawn-mid) 40%, #a9b8d0 48%, var(--dawn-sky) 58%, var(--dawn-warm) 86%, var(--dawn-sky) 100%);
+}
+.dawn-inner{max-width:1160px;margin:0 auto;padding:clamp(6rem,14vh,11rem) clamp(1.2rem,4vw,3rem) 0}
+.dawn .still-dark{color:var(--ink)}
+.dawn .still-dark .lede{color:#b9c4da}
+.dawn-gap{height:clamp(16rem,42vh,30rem)}
+.dawn .arrived{color:var(--ink-dark)}
+.dawn .arrived .kicker{color:#36425a}
+.seeyou{
+  font-size:clamp(3rem,10.5vw,9.6rem);font-weight:840;font-stretch:82%;
+  text-transform:uppercase;line-height:.9;letter-spacing:.005em;color:var(--ink-dark);
+}
+.dawn-cta{margin-top:2.6rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+.btn{
+  display:inline-block;background:var(--ink-dark);color:var(--dawn-sky);text-decoration:none;
+  font-family:var(--mono);font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:.95em 1.7em;border-radius:999px;font-weight:600;
+}
+.btn:hover{background:#0c1120}
+.btn:focus-visible{outline-color:var(--ink-dark)}
+.dawn-note{font-family:var(--mono);font-size:.78rem;color:#36425a;letter-spacing:.08em}
+.dawn figure{margin-top:clamp(4rem,10vh,8rem);position:relative}
+.dawn figure img{width:100%;height:auto;display:block;
+  -webkit-mask-image:linear-gradient(180deg,transparent,black 22%);
+  mask-image:linear-gradient(180deg,transparent,black 22%);
+}
+.dawn figcaption{
+  position:absolute;right:clamp(1.2rem,4vw,3rem);bottom:1rem;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;color:rgba(233,238,248,.68);
+  text-transform:uppercase;
+}
+
+/* ---- footer ---- */
+footer{
+  background:var(--night);padding:2.6rem clamp(1.2rem,4vw,3rem);
+  display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;align-items:center;
+}
+footer p{font-family:var(--mono);font-size:.75rem;color:var(--faint);letter-spacing:.06em;max-width:none}
+footer a{color:var(--dim)}
+footer a:hover{color:var(--g)}
+
+/* ============ breakpoints ============ */
+@media (max-width:1023px){
+  .one80{grid-template-columns:1fr}
+  .stage-grid{grid-template-columns:1fr;gap:2rem}
+}
+@media (max-width:767px){
+  .hours-grid,.method-grid,.programs-grid{grid-template-columns:1fr}
+  .nav ul{gap:1rem}
+  .wordmark{letter-spacing:.01em}
+  .session.enhanced{height:340vh}
+}
+@media (max-width:639px){
+  .nav ul li:not(:last-child){display:none}   /* the page is one scroll — keep only Guide */
+}
+</style>
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="sky" aria-hidden="true"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<canvas id="aurora" aria-hidden="true"></canvas>
+
+<header>
+  <nav class="nav" aria-label="Site">
+    <a class="mark" href="#top">NORTHPACE</a>
+    <ul>
+      <li><a href="#session">The session</a></li>
+      <li><a href="#hours">The hours</a></li>
+      <li><a href="#programs">Programs</a></li>
+      <li><a href="guide/">Guide</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+
+<!-- ============ hero ============ -->
+<section class="hero" id="top" aria-label="Northpace">
+  <p class="kicker">Run-coaching studio · est. before sunrise</p>
+  <h1 class="wordmark" id="wordmark" aria-label="Northpace">
+    <span>N</span><span class="o-star">O<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 0l2.2 9.8L24 12l-9.8 2.2L12 24l-2.2-9.8L0 12l9.8-2.2z"/></svg></span><span>R</span><span>T</span><span>H</span><span>P</span><span>A</span><span>C</span><span>E</span>
+  </h1>
+  <div class="hero-sub">
+    <p class="line">Run the hours nobody sees. <em>We'll set the pace.</em></p>
+    <p class="lede">Structured coaching for early runners — cadence work, honest pacing,
+    and a plan that survives winter.</p>
+  </div>
+  <div class="hero-chips">
+    <span class="chip"><b id="live-clock">05:12</b> local</span>
+    <span class="chip">−3° · calm</span>
+    <span class="chip"><span class="dot" id="beat-dot"></span><b>180</b> spm</span>
+  </div>
+  <p class="hero-scroll" aria-hidden="true">Scroll — the night is long</p>
+</section>
+
+<!-- ============ cadence manifesto ============ -->
+<section aria-labelledby="h-180">
+  <div class="rail one80">
+    <div data-rise style="--i:0">
+      <p class="big180" aria-hidden="true"><span class="digits">180<span class="fill" id="fill180">180</span></span><span class="unit">steps / minute</span></p>
+      <div class="metronome" id="metronome" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+    <div>
+      <p class="kicker" data-rise style="--i:1">The first thing we coach</p>
+      <h2 id="h-180" data-rise style="--i:2">Everything here runs at&nbsp;180</h2>
+      <p class="lede" data-rise style="--i:3;margin-top:1.4rem">
+        Cadence before mileage, mileage before speed. A quicker, lighter step —
+        around 180 a minute — is the cheapest injury insurance in running,
+        and it's where every Northpace plan starts.
+      </p>
+      <p data-rise style="--i:4;color:var(--dim);margin-top:1.2rem">
+        This page keeps that tempo. Every pulse, every entrance, every drift of the
+        sky above is phase-locked to the same clock your feet will learn.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ the session (scroll-driven scene) ============ -->
+<section class="session" id="session" aria-labelledby="h-session">
+  <div class="stage">
+    <div class="stage-grid">
+      <div>
+        <p class="kicker" data-rise style="--i:0">One workout, drawn to scale</p>
+        <h2 id="h-session" data-rise style="--i:1">The session</h2>
+        <p class="phase-word" id="phase-word" aria-hidden="true">Threshold day<small id="phase-note">warm up · 4 × 6:00 at threshold · cool down</small></p>
+        <div class="watchface" aria-hidden="true">
+          <span class="chip"><b id="w-elapsed">00:00</b> elapsed</span>
+          <span class="chip"><b id="w-rep">—</b> rep</span>
+          <span class="chip"><b id="w-effort">rest</b> effort</span>
+        </div>
+        <svg class="session-svg" id="session-svg" viewBox="0 0 600 120" role="img" aria-label="Effort profile of the session: easy warm-up, four threshold repeats with floats between, easy cool-down">
+          <path class="base" d="M0,100 L75,100 L75,40 L150,40 L150,85 L175,85 L175,40 L250,40 L250,85 L275,85 L275,40 L350,40 L350,85 L375,85 L375,40 L450,40 L450,100 L600,100"/>
+          <path class="lit" id="lit-path" d="M0,100 L75,100 L75,40 L150,40 L150,85 L175,85 L175,40 L250,40 L250,85 L275,85 L275,40 L350,40 L350,85 L375,85 L375,40 L450,40 L450,100 L600,100"/>
+          <circle class="cursor" id="cursor" r="5" cx="0" cy="100"/>
+        </svg>
+      </div>
+      <div>
+        <ol class="plan" id="plan">
+          <li data-seg="0"><span>Warm up · 10:00</span><span class="eff">EASY</span></li>
+          <li data-seg="1"><span>Rep 1 · 6:00</span><span class="eff">THRESHOLD</span></li>
+          <li data-seg="2"><span>Float · 2:00</span><span class="eff">LIGHT</span></li>
+          <li data-seg="3"><span>Rep 2 · 6:00</span><span class="eff">THRESHOLD</span></li>
+          <li data-seg="4"><span>Float · 2:00</span><span class="eff">LIGHT</span></li>
+          <li data-seg="5"><span>Rep 3 · 6:00</span><span class="eff">THRESHOLD</span></li>
+          <li data-seg="6"><span>Float · 2:00</span><span class="eff">LIGHT</span></li>
+          <li data-seg="7"><span>Rep 4 · 6:00</span><span class="eff">THRESHOLD</span></li>
+          <li data-seg="8"><span>Cool down · 10:00</span><span class="eff">EASY</span></li>
+        </ol>
+        <p class="plan-note">A mid-block Tuesday from the Threshold program · 48:00 total</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ the hours (minted stills) ============ -->
+<section class="hours" id="hours" aria-labelledby="h-hours">
+  <div class="rail">
+    <div class="sect-head">
+      <p class="kicker" data-rise style="--i:0">Where the work happens</p>
+      <h2 id="h-hours" data-rise style="--i:1">The hours nobody sees</h2>
+    </div>
+    <figure class="band" data-rise style="--i:2">
+      <img src="assets/aurora-road.webp" width="1920" height="826" alt="An empty two-lane road at night running toward the horizon under a faint green aurora, a tiny runner far away on the centerline" loading="lazy">
+      <figcaption>04:58 · the north loop <i>out-and-back · 16 km</i></figcaption>
+    </figure>
+    <div class="hours-grid">
+      <figure data-rise style="--i:3">
+        <img src="assets/boulevard.webp" width="1400" height="788" alt="A lone runner under a single warm streetlight on a snowy boulevard before dawn, breath visible in the cold" loading="lazy">
+        <figcaption>05:12 · streetlight miles <i>steady · 10 km</i></figcaption>
+      </figure>
+      <figure data-rise style="--i:4">
+        <img src="assets/headlamp.webp" width="1400" height="788" alt="A runner seen from behind on a dark forest trail, a headlamp beam cutting through low fog ahead" loading="lazy">
+        <figcaption>05:47 · trail day <i>hills · 75 min</i></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ method ============ -->
+<section aria-labelledby="h-method">
+  <div class="rail">
+    <div class="sect-head">
+      <p class="kicker" data-rise style="--i:0">How coaching works</p>
+      <h2 id="h-method" data-rise style="--i:1">Assess. Build. Review.</h2>
+    </div>
+    <div class="method-grid">
+      <article data-rise style="--i:2">
+        <h3>Assess</h3>
+        <p>A gait video, your training history, and one easy run together.
+        We find your current cadence, your honest paces, and what your week
+        can actually hold.</p>
+      </article>
+      <article data-rise style="--i:3">
+        <h3>Build</h3>
+        <p>A weekly block in your inbox every Sunday night — sessions, paces,
+        and the why behind each one. Built around your mornings, not the
+        other way round.</p>
+      </article>
+      <article data-rise style="--i:4">
+        <h3>Review</h3>
+        <p>We read your splits together every fortnight. The plan bends to the
+        life you actually had — missed days are data, not guilt.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ programs ============ -->
+<section id="programs" aria-labelledby="h-programs">
+  <div class="rail">
+    <div class="sect-head">
+      <p class="kicker" data-rise style="--i:0">Three ways in</p>
+      <h2 id="h-programs" data-rise style="--i:1">Programs</h2>
+    </div>
+    <div class="programs-grid">
+      <article class="tier" data-rise style="--i:2">
+        <p class="for">Start running mornings</p>
+        <h3>Base</h3>
+        <ul>
+          <li>12-week aerobic build</li>
+          <li>Cadence drills, twice weekly</li>
+          <li>Monthly plan review</li>
+          <li>Group long run, Saturdays</li>
+        </ul>
+        <p class="price">$79 / month<i>sample plan pricing</i></p>
+      </article>
+      <article class="tier" data-rise style="--i:3">
+        <p class="for">Faster at the same effort</p>
+        <h3>Threshold</h3>
+        <ul>
+          <li>Everything in Base</li>
+          <li>Two coached quality sessions a week</li>
+          <li>Fortnightly splits review</li>
+          <li>Race-pace rehearsals</li>
+        </ul>
+        <p class="price">$139 / month<i>sample plan pricing</i></p>
+      </article>
+      <article class="tier" data-rise style="--i:4">
+        <p class="for">Race build</p>
+        <h3>Peak</h3>
+        <ul>
+          <li>Everything in Threshold</li>
+          <li>Weekly 1:1 coach call</li>
+          <li>Course-specific pacing plan</li>
+          <li>Taper &amp; race-day protocol</li>
+        </ul>
+        <p class="price">$219 / month<i>sample plan pricing</i></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ dawn close ============ -->
+<section class="dawn" aria-labelledby="h-dawn">
+  <div class="dawn-inner">
+    <div class="still-dark">
+      <p class="kicker" data-rise style="--i:0">The payoff</p>
+      <h2 data-rise style="--i:1">The sky pays you back</h2>
+      <p class="lede" data-rise style="--i:2;margin-top:1.2rem">
+        Every early alarm buys you this: the streets to yourself, the year's
+        best light, and breakfast tasting like a medal.
+      </p>
+    </div>
+    <div class="dawn-gap" aria-hidden="true"></div>
+    <div class="arrived">
+      <p class="kicker" data-rise style="--i:0">Northpace</p>
+      <p class="seeyou" data-rise style="--i:1" id="h-dawn">See you<br>at 05:00.</p>
+      <div class="dawn-cta" data-rise style="--i:2">
+        <a class="btn" href="mailto:hello@northpace.example">Book an intro run</a>
+        <p class="dawn-note">Intro runs Tuesdays 05:30 · harbor loop · all paces</p>
+      </div>
+    </div>
+  </div>
+  <figure>
+    <img src="assets/track-dawn.webp" width="1920" height="1080" alt="An empty 400-metre running track at first light, frost on the infield, a pale blue-grey dawn sky" loading="lazy">
+    <figcaption>06:04 · job done</figcaption>
+  </figure>
+</section>
+
+</main>
+
+<footer>
+  <p>Northpace is a fictional demonstration business. Imagery is AI-generated —
+  <a href="guide/">how this page was made</a>.</p>
+  <p>No cookies · no trackers · one HTML file</p>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- entrances (run for everyone; CSS ignores them under reduced motion) ---------- */
+  var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.18}) : null;
+  document.querySelectorAll('[data-rise]').forEach(function(el){
+    if(io) io.observe(el); else el.classList.add('in');
+  });
+
+  if(reduced) return;                       /* everything below is motion */
+
+  /* ---------- the cadence clock: 180 steps / minute ---------- */
+  var BEAT = 60000/180;                      /* 333.33ms */
+  var t0 = performance.now();
+  var hidden = false;
+  document.addEventListener('visibilitychange',function(){ hidden = document.hidden; });
+
+  /* ---------- stars (drawn once) ---------- */
+  var starsC = document.getElementById('stars');
+  function drawStars(){
+    var d = starsC.getContext('2d');
+    var w = starsC.width = innerWidth, h = starsC.height = innerHeight;
+    d.clearRect(0,0,w,h);
+    for(var i=0;i<130;i++){
+      var x=Math.random()*w, y=Math.random()*h*.7, r=Math.random()*1.1+.2;
+      d.globalAlpha = .25+Math.random()*.5;
+      d.fillStyle='#cfe0ff';
+      d.beginPath(); d.arc(x,y,r,0,7); d.fill();
+    }
+    d.globalAlpha=1;
+  }
+  drawStars();
+
+  /* ---------- aurora canvas ---------- */
+  var aC = document.getElementById('aurora'), a = aC.getContext('2d');
+  var AW,AH, SCALE=.42;
+  function sizeAurora(){ AW = aC.width = Math.floor(innerWidth*SCALE); AH = aC.height = Math.floor(innerHeight*SCALE); }
+  sizeAurora();
+  var ribbons = [
+    {y:.16, a1:.045, f1:.006, s1:.00006, a2:.02, f2:.013, s2:.00011, h:.16, hue0:150, hue1:185, al:.14},
+    {y:.30, a1:.06,  f1:.004, s1:.00004, a2:.028,f2:.010, s2:.00008, h:.20, hue0:165, hue1:210, al:.11},
+    {y:.08, a1:.035, f1:.008, s1:.00009, a2:.016,f2:.017, s2:.00013, h:.11, hue0:255, hue1:280, al:.08}
+  ];
+  var auroraDim = 1, effortBoost = 1;
+  /* the sky answers the pointer — ribbons lean toward it and glow (eased, so it feels like weather) */
+  var mx=-1, my=-1, mGlow=0, mxS=0, myS=0;
+  addEventListener('pointermove',function(e){ mx=e.clientX*SCALE; my=e.clientY*SCALE; },{passive:true});
+  addEventListener('pointerleave',function(){ mx=-1; },{passive:true});
+  function drawAurora(t){
+    a.clearRect(0,0,AW,AH);
+    a.globalCompositeOperation='lighter';
+    var shimmer = 1 + .07*Math.sin(t/BEAT*Math.PI*2);      /* the sky keeps cadence too */
+    var targetGlow = (mx>=0 && my<AH*.72) ? 1 : 0;
+    mGlow += (targetGlow-mGlow)*.04;
+    mxS += (mx-mxS)*.05; myS += (my-myS)*.05;
+    for(var r=0;r<ribbons.length;r++){
+      var rb=ribbons[r], step=Math.max(8,AW/56);
+      a.beginPath();
+      for(var x=0;x<=AW+step;x+=step){
+        var lean = mGlow*Math.exp(-Math.pow((x-mxS)/(AW*.14),2));
+        var cy = rb.y*AH + Math.sin(x*rb.f1 + t*rb.s1)*rb.a1*AH*3 + Math.sin(x*rb.f2 - t*rb.s2)*rb.a2*AH*3
+               + lean*(myS-rb.y*AH)*.22;
+        if(x===0) a.moveTo(x,cy); else a.lineTo(x,cy);
+      }
+      for(x=AW+step;x>=0;x-=step){
+        var lean2 = mGlow*Math.exp(-Math.pow((x-mxS)/(AW*.14),2));
+        var cy2 = rb.y*AH + Math.sin(x*rb.f1 + t*rb.s1)*rb.a1*AH*3 + Math.sin(x*rb.f2 - t*rb.s2)*rb.a2*AH*3
+                + lean2*(myS-rb.y*AH)*.22 + rb.h*AH*(1+.3*Math.sin(x*.01+t*.0001));
+        a.lineTo(x,cy2);
+      }
+      a.closePath();
+      var g = a.createLinearGradient(0,0,AW,0);
+      var alpha = rb.al*shimmer*auroraDim*effortBoost;
+      g.addColorStop(0,'hsla('+rb.hue0+',75%,62%,'+alpha+')');
+      g.addColorStop(.6,'hsla('+((rb.hue0+rb.hue1)/2)+',72%,58%,'+(alpha*.9)+')');
+      g.addColorStop(1,'hsla('+rb.hue1+',70%,64%,'+(alpha*.75)+')');
+      a.fillStyle=g; a.fill();
+      if(mGlow>.02){                                        /* a soft bloom where the pointer rests */
+        var rad = a.createRadialGradient(mxS,myS,0,mxS,myS,AW*.12);
+        rad.addColorStop(0,'hsla('+((rb.hue0+rb.hue1)/2)+',80%,65%,'+(rb.al*.5*mGlow*auroraDim)+')');
+        rad.addColorStop(1,'hsla('+((rb.hue0+rb.hue1)/2)+',80%,65%,0)');
+        a.fillStyle=rad; a.fillRect(mxS-AW*.12,myS-AW*.12,AW*.24,AW*.24);
+      }
+    }
+    a.globalCompositeOperation='source-over';
+  }
+
+  /* ---------- wordmark breathing (a stride wave through the letters) +
+       pointer proximity — letters swell under the cursor, type as material ---------- */
+  var letters = Array.prototype.slice.call(document.querySelectorAll('#wordmark > span'));
+  var letterX = [], wordmarkY = 0;
+  function measureLetters(){
+    letterX = letters.map(function(el){ var r = el.getBoundingClientRect(); return r.left + r.width/2; });
+    var wr = document.getElementById('wordmark').getBoundingClientRect();
+    wordmarkY = wr.top + wr.height/2 + scrollY;
+  }
+  measureLetters();
+  var px=-1, py=-1;
+  addEventListener('pointermove',function(e){ px=e.clientX; py=e.clientY; },{passive:true});
+
+  /* ---------- 180 instrument ---------- */
+  var fill180 = document.getElementById('fill180');
+  var metro = document.getElementById('metronome') ? Array.prototype.slice.call(document.getElementById('metronome').children) : [];
+  var beatDot = document.getElementById('beat-dot');
+
+  /* ---------- live clock (a fictional pre-dawn that creeps forward) ---------- */
+  var clockEl = document.getElementById('live-clock');
+  function liveClock(t){
+    var mins = 5*60+12 + Math.floor(t/60000);              /* 05:12 + a real minute per minute */
+    var h=Math.floor(mins/60)%24, m=mins%60;
+    clockEl.textContent = (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+  }
+
+  /* ---------- session scene (sticky needs room: the whole readout must fit the viewport) ---------- */
+  var session = document.querySelector('.session');
+  var canEnhance = innerWidth>=1024 ? innerHeight>=700 : innerHeight>=840;
+  if(canEnhance) session.classList.add('enhanced');
+  var segs = [                                             /* [label, minutes, effort 0-1, wght, wdth, note] */
+    ['Warm up',10,.25,380,116,'easy — conversation pace'],
+    ['Threshold',6,.9,850,64,'rep 1 of 4 — half-marathon effort'],
+    ['Float',2,.4,300,132,'don’t stop — drift'],
+    ['Threshold',6,.9,850,64,'rep 2 of 4 — hold form'],
+    ['Float',2,.4,300,132,'shake the arms out'],
+    ['Threshold',6,.9,850,64,'rep 3 of 4 — this is the one'],
+    ['Float',2,.4,300,132,'breathe down'],
+    ['Threshold',6,.9,850,64,'rep 4 of 4 — finish tall'],
+    ['Cool down',10,.2,250,140,'easy — job done']
+  ];
+  var TOTAL = 48;
+  var phaseWord = document.getElementById('phase-word'),
+      phaseNote = document.getElementById('phase-note'),
+      wElapsed = document.getElementById('w-elapsed'),
+      wRep = document.getElementById('w-rep'),
+      wEffort = document.getElementById('w-effort'),
+      litPath = document.getElementById('lit-path'),
+      cursor = document.getElementById('cursor'),
+      planItems = Array.prototype.slice.call(document.querySelectorAll('#plan li'));
+  var litLen = litPath.getTotalLength();
+  litPath.style.strokeDasharray = litLen+' '+litLen;
+  litPath.style.strokeDashoffset = litLen;
+  /* time runs on the x axis but dash reveal runs on path length (verticals count) —
+     sample once so progress can be x-parameterized */
+  var SAMPLES = 240, lenAtX = [];
+  (function(){
+    for(var i=0;i<=SAMPLES;i++){
+      var L = litLen*i/SAMPLES, pt = litPath.getPointAtLength(L);
+      lenAtX.push({len:L, x:pt.x});
+    }
+  })();
+  function lengthForX(x){
+    for(var i=1;i<lenAtX.length;i++){
+      if(lenAtX[i].x>=x){
+        var a0=lenAtX[i-1], a1=lenAtX[i], f=(a1.x===a0.x)?0:(x-a0.x)/(a1.x-a0.x);
+        return a0.len+(a1.len-a0.len)*f;
+      }
+    }
+    return litLen;
+  }
+  var lastSeg = -1;
+  function updateSession(){
+    if(!canEnhance) return;
+    var rect = session.getBoundingClientRect();
+    var span = session.offsetHeight - innerHeight;
+    var p = Math.min(1,Math.max(0, -rect.top/span));
+    var elapsed = TOTAL*p, acc=0, si=0, reps=0, repNow=0;
+    for(var i=0;i<segs.length;i++){
+      if(segs[i][0]==='Threshold') reps++;
+      if(elapsed>=acc && elapsed<=acc+segs[i][1]){ si=i; repNow=reps; break; }
+      acc+=segs[i][1];
+      if(i===segs.length-1){ si=i; repNow=reps; }
+    }
+    var s = segs[si];
+    if(si!==lastSeg){
+      lastSeg = si;
+      phaseWord.childNodes[0].nodeValue = s[0];
+      phaseNote.textContent = s[5];
+      phaseWord.style.fontWeight = s[3];
+      phaseWord.style.fontStretch = s[4]+'%';
+      phaseWord.style.color = s[2]>.7 ? 'var(--g)' : 'var(--ink)';
+      wEffort.textContent = s[2]>.7 ? 'hard' : (s[2]>.3 ? 'light' : 'easy');
+      wRep.textContent = s[0]==='Threshold' ? repNow+'/4' : '—';
+      planItems.forEach(function(li,idx){ li.classList.toggle('now', idx===si); });
+    }
+    var mm=Math.floor(elapsed), ss=Math.floor((elapsed-mm)*60);
+    wElapsed.textContent=(mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss;
+    var L = lengthForX(600*p);
+    litPath.style.strokeDashoffset = litLen - L;
+    var pt = litPath.getPointAtLength(L);
+    cursor.setAttribute('cx',pt.x); cursor.setAttribute('cy',pt.y);
+    effortBoost = 1 + s[2]*.9*(rect.top<innerHeight && rect.bottom>0 ? 1 : 0);
+  }
+
+  /* ---------- the master loop ---------- */
+  var auroraVisible = true;
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(hidden) return;
+    var t = now - t0;
+    var phase = (t % BEAT)/BEAT;                            /* 0..1 within one step */
+    var beat = Math.floor(t/BEAT);
+
+    /* aurora dims as dawn approaches */
+    var y = scrollY;
+    var doc = document.documentElement;
+    var pp = y/(doc.scrollHeight-innerHeight);
+    auroraDim = Math.max(0, 1-Math.max(0,(pp-.62))/.28);
+    if(auroraDim>0.005){ if(auroraVisible) drawAurora(t); }
+    else if(auroraVisible){ a.clearRect(0,0,AW,AH); }
+
+    /* wordmark: a slow tide (calm rules idle motion) + pointer swell on interaction */
+    var nearWordmark = px>=0 && Math.abs((py+y) - wordmarkY) < 220;
+    for(var i=0;i<letters.length;i++){
+      var lw = 560 + 50*Math.sin((t/7000 + i*.09)*Math.PI*2);
+      if(nearWordmark) lw += 240*Math.exp(-Math.pow((letterX[i]-px)/170,2));
+      letters[i].style.fontWeight = Math.round(Math.min(900,lw));
+    }
+
+    /* 180 instrument */
+    var pulse = .5-.5*Math.cos(phase*Math.PI*2);            /* 0..1..0 per step */
+    if(fill180) fill180.style.clipPath = 'inset('+(72-44*pulse)+'% 0 0 0)';
+    if(metro.length){
+      var on = beat % metro.length;
+      for(var m=0;m<metro.length;m++) metro[m].className = m===on?'on':'';
+    }
+    if(beatDot) beatDot.style.opacity = .45+.55*pulse;
+
+    liveClock(t);
+    updateSession();
+  }
+  requestAnimationFrame(frame);
+
+  addEventListener('resize',function(){ drawStars(); sizeAurora(); measureLetters(); },{passive:true});
+})();
+</script>
+</body>
+</html>

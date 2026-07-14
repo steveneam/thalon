@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How the Northpace demonstration page was designed and built.">
+<meta name="robots" content="noindex">
+<title>Method — how the Northpace page was made</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0e1a'/%3E%3Cpath d='M16 5l2 9 9 2-9 2-2 9-2-9-9-2 9-2z' fill='%235fe8a8'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:'Anybody';src:url('../fonts/anybody-var.woff2') format('woff2');
+  font-weight:100 900;font-stretch:50% 150%;font-style:normal;font-display:swap;}
+@font-face{font-family:'Spline Sans Mono';src:url('../fonts/spline-sans-mono-var.woff2') format('woff2');
+  font-weight:300 700;font-style:normal;font-display:swap;}
+:root{
+  --night:#0a0e1a;--panel:#101729;--ink:#e9eef8;--dim:#9aa7bf;--g:#5fe8a8;
+  --disp:'Anybody',sans-serif;--mono:'Spline Sans Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--night);color:var(--ink);font-family:var(--disp);font-weight:380;
+  font-stretch:104%;font-size:.98rem;line-height:1.68}
+::selection{background:var(--g);color:var(--night)}
+:focus-visible{outline:2px solid var(--g);outline-offset:3px}
+.skip{position:absolute;left:-999px;top:0;background:var(--g);color:var(--night);
+  padding:.5rem 1rem;font-weight:600;text-decoration:none}
+.skip:focus{left:8px;top:8px}
+a{color:var(--g)}
+header{border-bottom:1px solid #2a3550}
+header .bar{max-width:46rem;margin-inline:auto;padding:.9rem clamp(1rem,4vw,2rem);
+  display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.wordmark{font-weight:740;font-stretch:92%;letter-spacing:.12em;font-size:1rem;
+  color:var(--ink);text-decoration:none;text-transform:uppercase}
+header nav a{font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim)}
+main{max-width:46rem;margin-inline:auto;padding:clamp(2.5rem,6vw,4rem) clamp(1rem,4vw,2rem) 4rem}
+h1{font-weight:800;font-stretch:88%;font-size:clamp(2rem,5vw,3rem);line-height:1.02;
+  text-transform:uppercase}
+h2{font-weight:700;font-stretch:100%;font-size:1.35rem;margin-top:2.6rem;
+  border-bottom:1px solid #2a3550;padding-bottom:.4rem;text-transform:uppercase;letter-spacing:.03em}
+p{margin-top:.9rem;color:var(--dim)}
+p strong,li strong{color:var(--ink);font-weight:640}
+ul,ol{padding-left:1.2rem;margin-top:.9rem;display:grid;gap:.5rem;color:var(--dim)}
+dl{margin-top:1rem;border:1px solid #2a3550;background:var(--panel);
+  padding:1.1rem 1.2rem;font-size:.9rem;display:grid;grid-template-columns:max-content 1fr;gap:.45rem 1.2rem}
+dt{font-family:var(--mono);font-weight:600;font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim);align-self:baseline}
+dd{margin:0;color:var(--ink)}
+.passlog{list-style:none;padding:0}
+.passlog li{border-top:1px solid #2a3550;padding-top:.7rem;font-size:.92rem;color:var(--dim)}
+.passlog b{font-family:var(--mono);font-weight:600;font-size:.7rem;letter-spacing:.12em;
+  color:var(--night);background:var(--g);padding:.1rem .5rem;border-radius:3px}
+footer{border-top:1px solid #2a3550}
+footer .bar{max-width:46rem;margin-inline:auto;padding:1.2rem clamp(1rem,4vw,2rem);
+  display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.76rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to content</a>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="../">Northpace</a>
+    <nav aria-label="Page"><a href="../">Back to the page</a></nav>
+  </div>
+</header>
+
+<main id="guide">
+  <h1>How this page was made</h1>
+
+  <p><strong>Northpace is a fictional demonstration business.</strong> No real studio, no real
+  coaches, no real harbor loop — the plan prices are sample prices and the intro-run schedule is
+  invented. This site is one entry in a portfolio of design templates, each built for a
+  different kind of business.</p>
+
+  <h2>The design idea</h2>
+  <p>A coached runner's world is the pre-dawn: streetlights, cold air, a plan for the morning.
+  Most running sites shout — dark gyms, neon, motion blur. This one stays calm and cold
+  instead: a polar-night page under a <strong>living aurora</strong> (drawn in code, drifting
+  slowly, leaning gently toward your pointer), that runs the whole scroll and only surrenders
+  at the end, where the page grades into a pale dawn over the final viewport — the payoff every
+  early alarm is buying.</p>
+  <p>The page has one tempo: <strong>180 steps per minute</strong>, the cadence the studio
+  coaches first. It lives in small instruments — a metronome bar, a pulsing beat dot, liquid
+  rising inside the big numerals — rather than in page-wide motion; ambient movement stays
+  slow and tidal so it never fights the sky. The centerpiece is <strong>the session</strong>:
+  scrolling runs a real coached workout to scale, and the display type embodies the effort —
+  threshold reps set heavy and condensed, floats light and wide — while a profile chart draws
+  the work as you do it.</p>
+
+  <h2>Type and materials</h2>
+  <ul>
+    <li><strong>Anybody</strong> (variable, weight 100–900 × width 50–150%): the display voice.
+    The variable axes are load-bearing — the workout phases speak through weight and width, and
+    the wordmark letters swell under the pointer like a wave through the word.</li>
+    <li><strong>Spline Sans Mono</strong> (variable): timecodes, watch-face chips, splits,
+    captions — the sports-watch voice.</li>
+    <li>Both typefaces are open-source under the SIL Open Font License and served from this
+    site; their license texts ship in the site's <code>fonts/</code> directory.</li>
+    <li>No frameworks, no third-party code, no trackers, and no network calls from any script:
+    what happens on this page stays on this page.</li>
+  </ul>
+
+  <h2>Imagery</h2>
+  <p>Every photograph on the page is <strong>AI-generated</strong>, minted for this site on a
+  paid, commercially-licensed plan — four cinematic stills prompted as one cold morning
+  (aurora road, streetlight miles, trail day, first-light track), all first-take keepers.
+  Full provenance for every image (model, prompt, spend, license tier) is recorded in the
+  studio's asset register at mint time. The aurora itself is not an image — it is drawn live
+  on a canvas, so it can drift, keep the cadence, and answer the pointer.</p>
+  <dl>
+    <dt>Frames</dt><dd>The north loop under the aurora · streetlight miles · trail day ·
+    the track at first light</dd>
+    <dt>Vendor</dt><dd>Higgsfield (paid tier)</dd>
+    <dt>Model</dt><dd>soul_cinematic, 2K stills</dd>
+    <dt>Disclosure</dt><dd>AI-generated imagery; no stock or scraped photography anywhere on
+    this site</dd>
+  </dl>
+
+  <h2>Build notes: iteration passes</h2>
+  <p>The page went through repeated full passes, each hunting faults (layout, contrast, motion
+  honesty, accessibility) and pushing one deliberate ambition item.</p>
+  <ol class="passlog">
+    <li><b>PASS 1</b> — Fault lane: the hero kicker inherited the prose measure and wrapped;
+    the 180 numerals' liquid fill was clipped against the wrong box (it included the unit line
+    below, so the fill rendered as a slab under the digits — re-anchored to its own wrapper);
+    the still cards kept their HTML height attribute while their width shrank, distorting the
+    frames (global <code>height:auto</code>); the dawn's pale stops landed inside the closing
+    photograph, leaving "See you at 05:00" dark-on-dark (gradient re-mapped, gap enlarged);
+    the closing caption was invisible over the dark track (lightened); a missing favicon
+    404'd. Ambition lane: <strong>the sky answers the pointer</strong> — aurora ribbons lean
+    toward the cursor and bloom softly where it rests.</li>
+    <li><b>PASS 2</b> — Fault lane: the phone nav overflowed (collapsed to the wordmark +
+    Guide below 640px); the sticky session scene could clip its own readout on short
+    viewports (it now enhances only when the whole readout fits; otherwise the complete
+    static plan is shown); the static fallback text promised "scroll to run it" even where
+    nothing would happen (made honest); live watch chips showed frozen zeros outside the
+    live scene (hidden when static). Ambition lane: <strong>the wordmark is material</strong>
+    — letters swell in weight under the pointer.</li>
+    <li><b>PASS 3</b> — Fault lane: a computed contrast sweep failed the quietest text tier
+    and the dawn schedule note (both re-inked to clear AA on their actual backgrounds; hairline
+    dashes separated from text color); without JavaScript the entrance choreography left the
+    whole page invisible — the hidden initial state is now gated behind a JS-present class, so
+    the no-script page is complete and static; keyboard walk verified (skip link, logical
+    order, visible focus on the night field and on the dawn); reduced-motion verified honest
+    (static sky, full content, no pulse, no sticky scene). Mid-build direction from review:
+    the headers' springy scroll-width effect and the wordmark's per-step shimmer read as
+    jitter against the calm sky — <strong>idle motion re-tuned to a slow tide</strong>, tempo
+    kept only in the contained instruments, big type now moves only on interaction or state
+    change. Ambition lane: ceiling call — the living sky, the cadence instruments, the
+    session scene and the dawn arrival are this page's memorable moments; anything further
+    would be noise against the calm.</li>
+  </ol>
+
+  <h2>Honesty rules this page follows</h2>
+  <ul>
+    <li>No invented testimonials, race results, awards or member counts.</li>
+    <li>No fake urgency or scarcity — the only countdown is a fictional workout clock that
+    says what it is.</li>
+    <li>Plan prices are labeled sample pricing; the booking address uses a reserved
+    demonstration domain.</li>
+    <li>The fictional nature of the business is disclosed (this page and the site footer).</li>
+  </ul>
+</main>
+
+<footer>
+  <div class="bar">
+    <span>NORTHPACE</span>
+    <span>A fictional demonstration business. <a href="../">Back to the page</a>.</span>
+  </div>
+</footer>
+</body>
+</html>

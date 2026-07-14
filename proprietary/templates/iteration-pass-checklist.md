@@ -42,6 +42,10 @@
 **Motion & state**
 - [ ] Every animation has a `prefers-reduced-motion` alternative.
 - [ ] Nothing animates without conveying state or earning its decoration.
+- [ ] **Idle-motion temperament** (s36 lesson): ambient/idle motion must match the
+      scene's mood — a calm backdrop forbids springy or jittery type; big type
+      moves only on interaction or state change, never on scroll velocity or an
+      idle pulse. Tempo effects live in small contained instruments, not page-wide.
 - [ ] Loading, empty, error, and success states all exist and are honest.
 - [ ] Hover/focus/active/disabled all designed; focus visible on keyboard walk.
 
