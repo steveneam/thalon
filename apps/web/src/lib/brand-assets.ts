@@ -20,12 +20,14 @@ export interface BrandAsset {
 }
 
 export const BRAND_ASSETS = {
-  /** L1 — hero backdrop: three amber sails on a dusk horizon. */
-  heroDusk: {
-    src: "/brand/hero-dusk.webp",
+  /** L1v2 — hero backdrop: ambient dusk glow, low right, no subject
+   * (v1's sails read as a flame floating mid-hero — founder call; the
+   * sails original stays pinned at 6b10470d… for subject-led surfaces). */
+  heroAmbient: {
+    src: "/brand/hero-ambient.webp",
     width: 1920,
     height: 1080,
-    pinnedHash: "6b10470d15b98d51136d26772196b50e567c92602467256b0557ef0c67d0c785",
+    pinnedHash: "3caa32ae2c8aca3e63e43587c2a9f8420ea23a8fb345f62e9fa934f7e6cace02",
     quality: 80,
   },
   /** L2 — features-section texture: faint currents, one warm updraft. */

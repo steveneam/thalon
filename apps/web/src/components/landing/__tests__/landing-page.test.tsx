@@ -68,7 +68,7 @@ describe("landing page / (docs/FRONTEND.md §2)", () => {
     const backdrops = container.querySelectorAll("img[data-brand]");
     const slots = Array.from(backdrops).map((img) => img.getAttribute("data-brand"));
     expect(slots).toEqual([
-      "heroDusk",
+      "heroAmbient",
       "currents",
       "unfolding",
       "lantern",

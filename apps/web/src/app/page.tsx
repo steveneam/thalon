@@ -72,15 +72,15 @@ export default function LandingPage() {
         {/* §1 — hero + waitlist */}
         <section aria-labelledby="hero-heading" className="relative overflow-hidden">
           {/* minted hero backdrop (L1, pinned + derived — see lib/brand-assets):
-              three amber sails on the dusk horizon, under the CSS deck layers.
+              ambient dusk glow low-right, under the CSS deck layers.
               A left/bottom scrim keeps the copy column on near-black. */}
           <img
-            src={BRAND_ASSETS.heroDusk.src}
-            width={BRAND_ASSETS.heroDusk.width}
-            height={BRAND_ASSETS.heroDusk.height}
+            src={BRAND_ASSETS.heroAmbient.src}
+            width={BRAND_ASSETS.heroAmbient.width}
+            height={BRAND_ASSETS.heroAmbient.height}
             alt=""
             aria-hidden="true"
-            data-brand="heroDusk"
+            data-brand="heroAmbient"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70"
           />
           <div
