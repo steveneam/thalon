@@ -1,10 +1,12 @@
-import { tenantCtx, type TenantCtx } from "@thalon/contracts";
+import { tenantCtx, type CadenceConfig, type TenantCtx } from "@thalon/contracts";
 import { openTestDb, sha256Hex, type DbHandle, type Draft } from "@thalon/db";
 
 export interface JudgeFixture {
   handle: DbHandle;
   ctx: TenantCtx;
   draft: Draft;
+  /** B7.a: cadence tests judge several drafts in sequence — extra drafts ride the fixture's run. */
+  addDraft(opts?: { platform?: string; body?: string }): Promise<Draft>;
   close(): Promise<void>;
 }
 
@@ -17,6 +19,8 @@ export interface JudgeFixtureOpts {
   /** B6.8: draft format + meta (the SEO/AEO lens reads `meta.seo` on seoMeta-capable formats). */
   format?: string;
   meta?: Record<string, unknown>;
+  /** B7.a: per-platform cadence rules on the tenant's active profile (contracts cadenceConfigSchema). */
+  cadence?: CadenceConfig;
 }
 
 /** Fresh in-memory db, one tenant with a configurable denylist profile, one `generated` draft. */
@@ -32,6 +36,7 @@ export async function judgeFixture(opts: JudgeFixtureOpts = {}): Promise<JudgeFi
       denylist: opts.denylist ?? [],
       platformProfiles: { alpha: { charLimit: 280 } },
       ...(opts.identity ? { identity: opts.identity } : {}),
+      ...(opts.cadence ? { cadence: opts.cadence } : {}),
     },
     activate: true,
   });
@@ -57,5 +62,16 @@ export async function judgeFixture(opts: JudgeFixtureOpts = {}): Promise<JudgeFi
     ...(opts.format ? { format: opts.format } : {}),
     ...(opts.meta ? { meta: opts.meta } : {}),
   });
-  return { handle, ctx, draft, close: () => handle.close() };
+  let extraDrafts = 0;
+  const addDraft = (extra: { platform?: string; body?: string } = {}) => {
+    extraDrafts++;
+    return repos.drafts.create(ctx, {
+      fanoutRunId: run.id,
+      sourceId: source.id,
+      platform: extra.platform ?? "alpha",
+      body: extra.body ?? `Another thing shipped (${extraDrafts}).`,
+      generationKey: sha256Hex(`${ctx.tenantId}:draft-extra-${extraDrafts}`),
+    });
+  };
+  return { handle, ctx, draft, addDraft, close: () => handle.close() };
 }

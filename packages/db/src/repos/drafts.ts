@@ -6,7 +6,7 @@ import {
   type DraftStatus,
   type TenantCtx,
 } from "@thalon/contracts";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import {
   ConcurrentUpdateError,
   InvalidStateError,
@@ -14,7 +14,7 @@ import {
   NotFoundError,
 } from "../errors";
 import { sha256Hex } from "../hash";
-import { approvals, drafts, judgeResults } from "../schema";
+import { approvals, drafts, events, judgeResults } from "../schema";
 import type { Db, Draft, Executor, Tx } from "../types";
 import { appendEvent } from "./events";
 
@@ -23,6 +23,9 @@ export interface TransitionOpts {
   reason?: string;
   approvalId?: string;
 }
+
+/** B7.a: statuses that still consume a cadence slot — past the judge, not dead. */
+const CADENCE_LIVE_STATUSES: DraftStatus[] = ["queued", "approved", "scheduled", "published"];
 
 export async function getDraftScoped(
   ex: Executor,
@@ -211,6 +214,45 @@ export function draftsRepo(db: Db) {
         .from(drafts)
         .where(and(eq(drafts.tenantId, ctx.tenantId), eq(drafts.format, format)))
         .orderBy(drafts.id);
+    },
+
+    /**
+     * B7.a cadence reads: each draft's LATEST `→ queued` admission on one
+     * platform since `since`, for drafts still in the live band (queued /
+     * approved / scheduled / published — a blocked or rejected draft no
+     * longer consumes a cadence slot). Read-only over the I4 events audit
+     * spine (every transition appends exactly one events row
+     * in-transaction), so admission times are exact — no new schema, no new
+     * write path. Newest first.
+     */
+    async listQueueAdmissions(
+      ctx: TenantCtx,
+      opts: { platform: string; since: Date },
+    ): Promise<Array<{ draftId: string; admittedAt: Date }>> {
+      const rows = await db
+        .select({ draftId: events.entityId, admittedAt: events.createdAt })
+        .from(events)
+        .innerJoin(drafts, eq(drafts.id, events.entityId))
+        .where(
+          and(
+            eq(events.tenantId, ctx.tenantId),
+            eq(drafts.tenantId, ctx.tenantId),
+            eq(events.entityType, "draft"),
+            eq(events.event, "draft.transition"),
+            sql`${events.payload}->>'to' = 'queued'`,
+            gte(events.createdAt, opts.since),
+            eq(drafts.platform, opts.platform),
+            inArray(drafts.status, CADENCE_LIVE_STATUSES),
+          ),
+        )
+        .orderBy(desc(events.createdAt));
+      // A re-judged draft can be admitted more than once in-window — its
+      // latest admission is the one that counts, once.
+      const latestPerDraft = new Map<string, Date>();
+      for (const row of rows) {
+        if (!latestPerDraft.has(row.draftId)) latestPerDraft.set(row.draftId, row.admittedAt);
+      }
+      return [...latestPerDraft].map(([draftId, admittedAt]) => ({ draftId, admittedAt }));
     },
 
     async transition(

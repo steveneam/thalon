@@ -1,6 +1,7 @@
 import {
   FINAL_JUDGE_GATE,
   brandIdentitySchema,
+  cadenceConfigSchema,
   renderBrandIdentity,
   resolveDraftFormatSpec,
   seoMetaSchema,
@@ -8,6 +9,7 @@ import {
 } from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
+import { CADENCE_GATE, cadenceFetchHorizonMs, hasCadenceConstraint, runCadenceGate } from "./cadence";
 import { runG1Denylist } from "./g1-denylist";
 import { collectGroundingChunks } from "./grounding";
 import { runSeoAeoLens, SEO_LENS_GATE } from "./seo-lens";
@@ -105,6 +107,38 @@ export async function runJudgePipeline(
       reason: "g1 denylist fail",
     });
     return { status: "blocked", draft: blocked, reason: "g1 denylist fail" };
+  }
+
+  // B7.a: the cadence gate — deterministic, zero model calls, armed by DATA
+  // exactly like g1's denylist (`brand_profiles.cadence`, validated at the
+  // profile write door). A tenant or platform without a rule (or a rule with
+  // no fields set) judges byte-identically to pre-B7.a: no read, no row.
+  // Runs before any model spend — a cadence-blocked draft costs one db read.
+  const cadenceConfig = profile?.cadence ? cadenceConfigSchema.parse(profile.cadence) : undefined;
+  const cadenceRule = cadenceConfig?.[judging.platform];
+  if (cadenceRule && hasCadenceConstraint(cadenceRule)) {
+    const now = new Date();
+    const admissions = await repos.drafts.listQueueAdmissions(input.ctx, {
+      platform: judging.platform,
+      since: new Date(now.getTime() - cadenceFetchHorizonMs(cadenceRule)),
+    });
+    const cadence = runCadenceGate({
+      platform: judging.platform,
+      rule: cadenceRule,
+      admissions,
+      now,
+    });
+    await repos.judgeResults.append(input.ctx, {
+      draftId: judging.id,
+      gate: CADENCE_GATE,
+      verdict: cadence.verdict,
+      evidence: cadence.evidence,
+    });
+    if (cadence.verdict === "fail") {
+      const reason = `cadence limit for "${judging.platform}"`;
+      const blocked = await repos.drafts.transition(input.ctx, judging.id, "blocked", { reason });
+      return { status: "blocked", draft: blocked, reason };
+    }
   }
 
   // B6.8 (ADR 0006 decision 2): the ADVISORY SEO/AEO lens — deterministic,
