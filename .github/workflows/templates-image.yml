@@ -1,0 +1,127 @@
+# Template-portfolio preview gallery (scaffolding contract:
+# proprietary/templates/README.md): builds ghcr.io/steveneam/thalon-previews
+# from Dockerfile.templates whenever a template site changes — the ONLY place
+# this image is ever built (no-Docker rule on the dev machine). Same channel
+# shape as web-image.yml: build → smoke → GHCR → Dokploy update+deploy.
+# The deploy+probe steps stay dormant until the founder creates the
+# neutral-named Dokploy service and flips the TEMPLATES_PREVIEW_ARMED repo
+# var — until then this still builds and pushes, so arming is a variable
+# flip, not a code change.
+name: templates-image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "proprietary/templates/sites/**"
+      - "proprietary/templates/_preview/**"
+      - "Dockerfile.templates"
+      - ".github/workflows/templates-image.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency: templates-image # serialize; a stale queued build is dropped
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Build to the local daemon first: the smoke gate below must pass
+      # before anything reaches GHCR.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.templates
+          load: true
+          tags: ghcr.io/steveneam/thalon-previews:smoke
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Smoke gate: every site's landing AND /guide/ must render, plus the
+      # neutral root. The site list is derived from the repo, so a new
+      # template extends its own gate.
+      - name: smoke — every site serves / and /guide/
+        run: |
+          docker run -d --name smoke -p 8080:80 \
+            ghcr.io/steveneam/thalon-previews:smoke
+          for i in $(seq 1 15); do
+            curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 && break
+            sleep 2
+          done
+          fail=0
+          paths="/ /healthz"
+          for d in proprietary/templates/sites/*/; do
+            slug=$(basename "$d")
+            paths="$paths /$slug/ /$slug/guide/"
+          done
+          for p in $paths; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080$p")
+            echo "$p -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          if [ "$fail" = "1" ]; then
+            echo '::error::smoke gate failed — container logs follow'
+            docker logs smoke
+            exit 1
+          fi
+          docker rm -f smoke
+      # Push only after the gate: pure cache-hit rebuild, byte-identical.
+      - uses: docker/build-push-action@v6
+        id: push
+        with:
+          context: .
+          file: Dockerfile.templates
+          push: true
+          tags: |
+            ghcr.io/steveneam/thalon-previews:latest
+            ghcr.io/steveneam/thalon-previews:${{ github.sha }}
+          cache-from: type=gha
+      # Auto-deploy — DORMANT until the founder-created service exists.
+      # Same update+deploy semantics as web-image.yml (never the webhook,
+      # never saveDockerProvider).
+      - name: deploy — pin sha@digest on the preview service
+        if: vars.TEMPLATES_PREVIEW_ARMED == 'true'
+        env:
+          API: ${{ vars.DOKPLOY_API_BASE }}
+          KEY: ${{ secrets.TEMPLATES_DOKPLOY_API_KEY }}
+          APP: ${{ secrets.TEMPLATES_DOKPLOY_APP_ID }}
+          IMAGE: ghcr.io/steveneam/thalon-previews:${{ github.sha }}@${{ steps.push.outputs.digest }}
+        run: |
+          curl -fsS -X POST "$API/application.update" \
+            -H "x-api-key: $KEY" -H 'content-type: application/json' \
+            -d "{\"applicationId\":\"$APP\",\"dockerImage\":\"$IMAGE\"}" > /dev/null
+          curl -fsS -X POST "$API/application.deploy" \
+            -H "x-api-key: $KEY" -H 'content-type: application/json' \
+            -d "{\"applicationId\":\"$APP\",\"title\":\"main ${GITHUB_SHA::7}\"}" > /dev/null
+          for i in $(seq 1 60); do
+            status=$(curl -fsS "$API/application.one?applicationId=$APP" \
+              -H "x-api-key: $KEY" | jq -r .applicationStatus)
+            echo "applicationStatus: $status"
+            case "$status" in
+              done) exit 0 ;;
+              error) echo '::error::preview deploy errored — roll back = rerun with the previous sha@digest'; exit 1 ;;
+            esac
+            sleep 5
+          done
+          echo '::error::preview deploy did not settle in 5 minutes'
+          exit 1
+      - name: probe — gallery serves through the edge
+        if: vars.TEMPLATES_PREVIEW_ARMED == 'true'
+        env:
+          HOST: ${{ vars.TEMPLATES_PREVIEW_HOST }}
+        run: |
+          for i in $(seq 1 12); do
+            curl -fsS "https://$HOST/healthz" > /dev/null 2>&1 && exit 0
+            sleep 5
+          done
+          echo '::error::gallery edge probe failed'
+          exit 1

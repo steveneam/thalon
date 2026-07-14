@@ -15,6 +15,10 @@ on:
       - "docs/**"
       - "agent_handoff/**"
       - "*.md"
+      # Template-portfolio sites ship in their OWN image (templates-image.yml);
+      # nothing under templates/ reaches the web runtime image (only
+      # proprietary/prompts + profiles are copied — keep THOSE triggering).
+      - "proprietary/templates/**"
   workflow_dispatch:
 
 permissions:

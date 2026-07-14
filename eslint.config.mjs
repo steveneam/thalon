@@ -42,6 +42,32 @@ export default tseslint.config(
     },
   },
   {
+    // Template-portfolio sites (proprietary/templates/README.md) ship
+    // zero-dependency BROWSER scripts — declare the browser runtime globals
+    // the recommended config doesn't assume for plain .js.
+    files: ["proprietary/templates/sites/**/js/**/*.js"],
+    languageOptions: {
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        performance: "readonly",
+        addEventListener: "readonly",
+        scrollY: "readonly",
+        scrollTo: "readonly",
+        innerHeight: "readonly",
+        devicePixelRatio: "readonly",
+        getComputedStyle: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        IntersectionObserver: "readonly",
+      },
+    },
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",

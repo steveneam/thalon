@@ -1,0 +1,11 @@
+# Preview gallery: static template-portfolio sites (scaffolding contract:
+# proprietary/templates/README.md). Built ONLY by templates-image.yml
+# (no-Docker rule on the dev machine). Docroot = sites/<slug>/ plus the
+# neutral root index — nothing else from proprietary/ may be copied here
+# (the leak boundary: factory method docs never reach a prospect-visible
+# host).
+FROM nginx:1.27-alpine
+
+COPY proprietary/templates/_preview/nginx.conf /etc/nginx/conf.d/default.conf
+COPY proprietary/templates/_preview/index.html /usr/share/nginx/html/index.html
+COPY proprietary/templates/sites/ /usr/share/nginx/html/
