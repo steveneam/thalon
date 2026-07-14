@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { CreateContextLoader } from "@/components/create/create-context-loader";
 import { CreateSurface } from "@/components/create/create-surface";
 import { fixtureTrendCards } from "@/lib/intel/fixtures";
 import { promoteTrendCard } from "@/lib/intel/store";
 import type { CreateContext } from "@/lib/intel/types";
+import { server } from "@/lib/testing/server";
 
 const CONTEXT: CreateContext = {
   captureId: "intel-capture-1",
@@ -76,6 +78,86 @@ describe("CreateSurface — the context spine (wave-3 §3)", () => {
     render(<CreateSurface initialPrompt="hello" initialKeyword="" context={null} />);
     expect(screen.getByLabelText("Creation prompt")).toHaveValue("hello");
     expect(screen.queryByLabelText("Intel context")).not.toBeInTheDocument();
+  });
+});
+
+const LEAD_CONTEXT: CreateContext = {
+  captureId: "intel-capture-9",
+  kind: "lead_promote",
+  family: "email",
+  leadId: "lead-1",
+  company: "Riverbend Plumbing",
+  contact: "Sam Reyes",
+  painPoint: "website never brings in local work",
+  text: "met at the trade expo",
+};
+
+describe("CreateSurface — the →Email compose door (B-crm.4 front half)", () => {
+  it("a lead email context pre-picks Email and composes from the SURVIVING chips only", async () => {
+    let sent: unknown;
+    server.use(
+      http.post("/api/create/email", async ({ request }) => {
+        sent = await request.json();
+        return HttpResponse.json({
+          draftId: "d1",
+          runId: "r1",
+          status: "queued",
+          alreadyComposed: false,
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={LEAD_CONTEXT} />);
+
+    expect(screen.getByRole("button", { name: /email/i, pressed: true })).toBeInTheDocument();
+    // Never sent automatically — the surface says so before composing.
+    expect(screen.getByText(/It is never sent/)).toBeInTheDocument();
+
+    // Prune the company chip: it must NOT reach the brief.
+    const chips = screen.getByLabelText("Lead context");
+    await user.click(within(chips).getByRole("button", { name: /remove company/i }));
+
+    await user.click(screen.getByRole("button", { name: /compose email draft/i }));
+    expect(await screen.findByText(/waiting for your approval/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /review it in the approve queue/i })).toHaveAttribute(
+      "href",
+      "/app/approve",
+    );
+    expect(sent).toMatchObject({
+      leadId: "lead-1",
+      context: {
+        contact: "Sam Reyes",
+        painPoint: "website never brings in local work",
+        notes: "met at the trade expo",
+      },
+    });
+    expect((sent as { context: Record<string, unknown> }).context.company).toBeUndefined();
+  });
+
+  it("a blocked verdict surfaces honestly with the gate reason", async () => {
+    server.use(
+      http.post("/api/create/email", () =>
+        HttpResponse.json({
+          draftId: "d1",
+          runId: "r1",
+          status: "blocked",
+          alreadyComposed: false,
+          blockedReason: "g1 denylist fail",
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={LEAD_CONTEXT} />);
+    await user.click(screen.getByRole("button", { name: /compose email draft/i }));
+    expect(await screen.findByText(/blocked this draft \(g1 denylist fail\)/i)).toBeInTheDocument();
+  });
+
+  it("the Email family without a lead context is an honest pointer to the lead-card exit, not a dead button", async () => {
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+    await user.click(screen.getByRole("button", { name: /email/i }));
+    expect(screen.getByText(/use the → Email exit on a lead card/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /compose email draft/i })).not.toBeInTheDocument();
   });
 });
 

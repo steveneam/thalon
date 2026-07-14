@@ -29,6 +29,14 @@ export interface LeadCard {
   scoredAt: string | null;
   /** Hash of the ICP that produced the score — the drift indicator. */
   profileHash: string | null;
+  /**
+   * Everything else the source supplied (unmapped CSV columns, waitlist
+   * referral context) — preserved on `leads.meta` since window 1 but
+   * invisible until the s29 founder rider: a real CRM export's phone
+   * columns must show on the card. Internal keys (pinned) excluded;
+   * key-sorted for a stable wire.
+   */
+  extras: Array<{ key: string; value: string }>;
 }
 
 export interface LeadsPayload {

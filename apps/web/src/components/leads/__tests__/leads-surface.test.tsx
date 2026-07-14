@@ -30,6 +30,7 @@ function card(partial: Partial<LeadCard>): LeadCard {
     reasons: ["fit 1 (role \"Owner\" matches \"owner\")", "completeness 0.8 (4/5 contact fields present)"],
     scoredAt: "2026-07-13T01:00:00.000Z",
     profileHash: "icp-v1",
+    extras: [],
     ...partial,
   };
 }
@@ -64,13 +65,29 @@ describe("leads surface (B-crm.2)", () => {
     // 0.82 lands in the hot band; the first reason rides the accessible label.
     expect(row.getByRole("img", { name: /heat hot/i })).toHaveAccessibleName(/role "Owner" matches/i);
     expect(row.getByText(/no online booking/)).toBeInTheDocument();
-    for (const exit of ["Post", "Video", "Page"]) {
+    for (const exit of ["Post", "Video", "Page", "Email"]) {
       expect(row.getByRole("button", { name: exit })).toBeInTheDocument();
     }
     // An unscored lead is honest about it — no invented grade.
     const bare = within(screen.getByTestId("lead-card-lead-2"));
     expect(bare.getByText("not scored yet")).toBeInTheDocument();
     expect(bare.queryByRole("img", { name: /heat/i })).not.toBeInTheDocument();
+  });
+
+  it("the s29 riders: contact email reads as a mailto link and unmapped import columns surface as extras", async () => {
+    seedLeads({
+      leads: [card({ extras: [{ key: "Phone 1", value: "+61 400 000 000" }] })],
+      counts: { new: 0, scored: 1, dismissed: 0 },
+    });
+    render(<LeadsSurface />);
+
+    const row = within(await screen.findByTestId("lead-card-lead-1"));
+    expect(row.getByRole("link", { name: "jane@acme.example" })).toHaveAttribute(
+      "href",
+      "mailto:jane@acme.example",
+    );
+    expect(row.getByText("everything else from the import (1)")).toBeInTheDocument();
+    expect(row.getByText("+61 400 000 000")).toBeInTheDocument();
   });
 
   it("bulk dismiss: multi-select → ONE confirm with the count → one triage call (FRONTEND §0)", async () => {

@@ -5,9 +5,11 @@ import { promoteLead } from "@/lib/intel/store";
 import { getRepos } from "@/lib/repos";
 import { resolveTenantCtx } from "@/lib/tenant";
 
+// Lead cards are the ONE exit that also offers "email" (B-crm.4 front half):
+// outreach composes from a lead's context, so trend/search promotes stay 3-family.
 const promoteRequestSchema = z.object({
   id: z.string().min(1),
-  family: z.enum(["post", "video", "page"]),
+  family: z.enum(["post", "video", "page", "email"]),
 });
 
 /**
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
   const body: unknown = await request.json().catch(() => null);
   const parsed = promoteRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Send { id, family: post|video|page }." }, { status: 400 });
+    return NextResponse.json({ error: "Send { id, family: post|video|page|email }." }, { status: 400 });
   }
   const repos = await getRepos();
   const ctx = await resolveTenantCtx(repos);

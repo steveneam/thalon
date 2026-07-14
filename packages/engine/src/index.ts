@@ -65,3 +65,4 @@ export * from "./direction";
 export * from "./pipeline/staged-video";
 export * from "./search";
 export * from "./leads";
+export * from "./outreach";

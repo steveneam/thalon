@@ -46,6 +46,7 @@ const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"staged_video.polish"', note: "B5.2 — staged video, polish refine" },
   { op: '"search.keyword_expand"', note: "B6.8 — judged AI keyword expansion (search targets; G1 + deterministic grounding gate candidates before persist)" },
   { op: '"intel.dossier"', note: "B6.5 half-step — trend-card dossier (titles/angles/hook; G1 denylist gates before the wire; per-sweep ration TREND_DOSSIER_CARDS, default disarmed)" },
+  { op: '"outreach.compose_email"', note: "B-crm.4 front half (s29) — draft-only outreach email from a lead brief; full judge gate downstream, NO send path" },
   { op: "`judge.${GATE_FOR_TIER[tier]}`", note: "B1.3 — G3 two-tier grounding (→ judge.g3_screen | judge.g3_final)" },
 ];
 
@@ -103,8 +104,8 @@ describe("shell inventory (B5.3 executable pin, SPINE §1)", () => {
 
   it("every withGatewayGuard call site carries a pinned operation (count matches — a new site with a reused label is still caught)", () => {
     const { ops, guardCallSites } = collectOperations();
-    // One guarded operation label per guarded call site: 10 string literals +
-    // the single judge template site = 11.
+    // One guarded operation label per guarded call site: 12 string literals +
+    // the single judge template site = 13.
     expect(guardCallSites).toBe(EXPECTED_SHELL_OPERATIONS.length);
     expect(ops.length).toBe(EXPECTED_SHELL_OPERATIONS.length);
   });

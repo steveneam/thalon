@@ -197,6 +197,7 @@ export function resolveCreateContext(captureId: string): CreateContext {
       captureId: capture.id,
       kind: capture.kind,
       family: (p.family as CreateFamily) ?? "post",
+      leadId: capture.ref,
       company: str(p.company),
       contact: str(p.name),
       role: str(p.role),

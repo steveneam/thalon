@@ -2,6 +2,17 @@ import type { LeadSource, LeadStatus } from "@thalon/contracts";
 import type { LeadRow, LeadScoreRow } from "@thalon/db";
 import type { LeadCard } from "./types";
 
+/** Meta keys the app writes for itself — never source data, never card extras. */
+const INTERNAL_META_KEYS = new Set(["pinned"]);
+
+/** The s29 meta rider: every non-internal, non-empty meta entry, stringified and key-sorted. */
+function toExtras(meta: Record<string, unknown>): Array<{ key: string; value: string }> {
+  return Object.entries(meta)
+    .filter(([key, value]) => !INTERNAL_META_KEYS.has(key) && value !== null && value !== undefined && value !== "")
+    .map(([key, value]) => ({ key, value: typeof value === "string" ? value : JSON.stringify(value) }))
+    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+}
+
 /** Row → wire. The latest score rides the card; history stays server-side. */
 export function toLeadCard(lead: LeadRow, latest: LeadScoreRow | null): LeadCard {
   const meta = (lead.meta ?? {}) as Record<string, unknown>;
@@ -22,6 +33,7 @@ export function toLeadCard(lead: LeadRow, latest: LeadScoreRow | null): LeadCard
     reasons: (latest?.reasons as string[] | undefined) ?? [],
     scoredAt: latest?.scoredAt.toISOString() ?? null,
     profileHash: latest?.profileHash ?? null,
+    extras: toExtras(meta),
   };
 }
 
