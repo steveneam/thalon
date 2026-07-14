@@ -30,6 +30,12 @@
   under `js/vendor/` with its license header intact — licensing hygiene rules
   apply, AGPL never. Web fonts are vendored OFL woff2 files under `fonts/`
   with their OFL license texts alongside.
+- **Single-file is the sanctioned time-saver (founder direction 2026-07-14):**
+  the default build shape is ONE `index.html` with inline `<style>`/`<script>`
+  — split into `css/`/`js/` files only when a site genuinely earns it. The
+  rest of the contract is unchanged either way: `site.json`, the `/guide`
+  page, and pinned/manifested assets are not optional. A single-file site
+  passes the ratchet test as-is.
 - **Generic code is tracked; client instantiations are data.** A real client
   site = a copy of the vertical's template with client data swapped in, kept
   gitignored under `.context/clients/` (grocer precedent), per the
@@ -71,6 +77,10 @@ mixed into the product app:
   edge-authed and never shows demo pages; the gallery host carries a neutral
   name, no real domain, no brand-linkable naming, and can be opened to
   prospects independently at the founder's call.
+- **Live hosting is optional, not a build gate (founder direction
+  2026-07-14):** sites don't need to be deployed websites to count as done —
+  founder review = open the file locally (or the CI-built image). Arm the
+  gallery service only when outreach needs shareable links.
 
 ## Definition of done per site (restates the meta-prompt gates)
 

@@ -61,12 +61,23 @@ URL.
 
 **Required structure:**
 - A single responsive landing page for {{vertical}}: hero + the sections the
-  vertical's story needs ({{section_hints}}).
+  vertical's story needs ({{section_hints}}). Default build shape is one
+  self-contained `index.html` (inline style/script) per the scaffolding
+  contract (`README.md`) — split files only when the site earns it.
 - A **`/guide` route**: a brief, honest method note — how the page was designed
   and built, which models minted which assets (from the provenance manifests),
   and that imagery is AI-generated. No client data, no internal codenames.
-- Perf sanity: static-first, no heavy client JS for decoration, images sized
-  and lazy-loaded, reduced-motion alternatives for every animation.
+- Perf floors (not a style ceiling): images sized and lazy-loaded, no layout
+  shift, no jank, reduced-motion alternatives for every animation. Purposeful
+  animation JS is welcome — "static-first" bounds decoration cost, never
+  ambition.
+
+**Be exploratory (founder direction, restored from the source prompt
+2026-07-14):** take real aesthetic risks. Scroll-driven scenes and
+transitions, choreographed entrances, cursor-reactive moments, and living
+backgrounds are encouraged wherever they serve the drawn axes — a safe page
+is a failed page in this portfolio. The perf floors and reduced-motion
+alternatives above are the only brakes.
 
 **Before you call the site done:**
 - Run **at least three iteration passes**, each executing BOTH lanes of
