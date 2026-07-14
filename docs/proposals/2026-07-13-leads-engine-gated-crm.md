@@ -270,3 +270,29 @@ product demo: "Thalon found, scored, and drafted — you approved."
    dealbreakers. Blocked-on-events (email opens/visits — B-crm.4+ territory): RFM frequency,
    EdgeRank affinity, velocity surge. PageRank graph authority deferred until relationship
    edges exist.
+
+## Session-28 addendum (2026-07-14, founder directions at session close — recorded same day)
+
+1. **Draft-only →Email exit APPROVED as a pull-forward slice (session 29, ahead of
+   B7.c).** The Leads queue gains an →Email per-family exit beside →Post/→Video/→Page:
+   Thalon composes the outreach email from the lead's own DNA (company · contact ·
+   role · `pain_point` — outreach's anchor, the 1b field) through the SAME capture
+   door/Create-context resolver, the draft runs the FULL judge gate (denylist ·
+   grounding · cadence), and it parks in the approve queue where the operator copies
+   it into their own mail client and sends manually. **No send path is wired** — the
+   "no ungated contact, ever" invariant and the Sprint-7 "no publish path" rule are
+   untouched. Designed explicitly as the front half of B-crm.4: when the send path
+   is chartered, it attaches behind the same approve door; the two tie together by
+   construction (founder: "it should tie in with each other anyway").
+2. **B-crm.4 provider decision (early, founder): Resend.** The founder holds a Resend
+   account. Sending identity = a Thalon-controlled domain identity via Resend domain
+   verification — the founder's business mailbox is never the from-address (at most
+   reply-to; identity details live in gitignored `.context/outreach/identity.md`,
+   which also records why the mailbox itself must never appear in tracked files).
+   Open at the checkpoint: domain-verification timing vs stealth (DNS-only, no
+   cert/CT-log exposure, but outreach from the brand domain reveals the brand to
+   recipients pre-launch — accept, use a neutral domain, or wait for launch).
+3. Sequencing note: session 29 opens with the vendor meta-prompt review/plan (the
+   founder recovered it; archive verbatim in `.context/` on receipt, plan the
+   deferred visual block BEFORE any tier purchase), then the →Email slice; B7.c
+   follows.
