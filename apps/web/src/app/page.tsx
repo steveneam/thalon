@@ -386,18 +386,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* §4 — FAQ + final repeat CTA. L5 under the close: the thin amber
-            horizon, first light gathering — the horizon Thalon watches */}
+        {/* §4 — FAQ + final repeat CTA. L5v2 under the close: many warm
+            beacons answering one across the dark — publishing everywhere */}
         <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-16 border-t">
           <img
-            src={BRAND_ASSETS.horizon.src}
-            width={BRAND_ASSETS.horizon.width}
-            height={BRAND_ASSETS.horizon.height}
+            src={BRAND_ASSETS.beacons.src}
+            width={BRAND_ASSETS.beacons.width}
+            height={BRAND_ASSETS.beacons.height}
             alt=""
             aria-hidden="true"
-            data-brand="horizon"
+            data-brand="beacons"
             loading="lazy"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-72 w-full object-cover opacity-70 [mask-image:linear-gradient(to_top,black,transparent)]"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-96 w-full object-cover object-bottom opacity-90 [mask-image:linear-gradient(to_top,black_55%,transparent)]"
           />
           <div className="relative mx-auto w-full max-w-3xl px-6 py-20 lg:py-24">
             <p className="u-eyebrow text-primary">Objections, answered</p>

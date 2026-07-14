@@ -62,12 +62,14 @@ export const BRAND_ASSETS = {
     pinnedHash: "77845aba74b59f04059eaebd530e83bb431862018e45587fbcd54cfcc8e303e3",
     quality: 70,
   },
-  /** L5 — thin amber horizon, first light gathering (final CTA band). */
-  horizon: {
-    src: "/brand/horizon.webp",
+  /** L5v2 — the closing beacons: many warm lights answering one, under
+   * "Be publishing everywhere…" (v1's thin streak did nothing — founder
+   * call; the first-light original stays pinned at 7c6b6f2e…). */
+  beacons: {
+    src: "/brand/beacons.webp",
     width: 2048,
     height: 881,
-    pinnedHash: "7c6b6f2e05ba3a19a0b7e949c04521415ee38eaa13b8d6367a3a28a4555858f0",
+    pinnedHash: "3ac2b35ffc22d128cb433184829cbed260332dc0f1f5b1aef1ccc824161a32df",
     quality: 78,
   },
 } as const satisfies Record<string, BrandAsset>;

@@ -73,7 +73,7 @@ describe("landing page / (docs/FRONTEND.md §2)", () => {
       "unfolding",
       "lantern",
       "paperGrain",
-      "horizon",
+      "beacons",
     ]);
     for (const img of backdrops) {
       // Decorative contract: hidden from AT, empty alt, CLS-safe dimensions.
