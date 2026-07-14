@@ -29,16 +29,23 @@ type MappedField =
   | "painPoint";
 
 const HEADER_ALIASES: Record<MappedField, readonly string[]> = {
-  email: ["email", "emailaddress", "workemail", "primaryemail"],
+  // "email1": numbered-email convention (multi-email CRM exports; seen in the
+  // wild on sample-CSV vendors' lead exports) — "Email 1" is the primary,
+  // "Email 2"+ deliberately ride meta.
+  email: ["email", "emailaddress", "workemail", "primaryemail", "email1"],
   name: ["name", "fullname", "contactname"],
   firstName: ["firstname"],
   lastName: ["lastname", "surname"],
   company: ["company", "companyname", "organization", "organisation", "org", "accountname"],
   role: ["jobtitle", "title", "role", "position"],
   website: ["website", "websiteurl", "companywebsite", "companydomainname", "url", "domain"],
-  notes: ["notes", "note", "comments", "description"],
+  // "companynotes": enrichment-style exports put the qualifying text here —
+  // unmapped it rides meta where the scorer never sees it.
+  notes: ["notes", "note", "comments", "description", "companynotes"],
   // Window-1b (founder direction): the lead's problem — outreach's anchor.
-  painPoint: ["painpoint", "painpoints", "pain", "problem", "need", "challenge"],
+  // "projectdescription": AWS Partner Central's "customer need" field — the
+  // enterprise lead schema's pain_point analog (2026-07-14 header survey).
+  painPoint: ["painpoint", "painpoints", "pain", "problem", "need", "challenge", "projectdescription"],
 };
 
 const ALIAS_LOOKUP: ReadonlyMap<string, MappedField> = new Map(

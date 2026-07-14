@@ -60,6 +60,22 @@ describe("mapCsvHeaders (B-crm.1)", () => {
     expect(columns[1]).toEqual({ header: "Phone Number", field: null });
     expect(columns[2]).toEqual({ header: "E-mail", field: null }); // first email column won
   });
+
+  it("speaks the 2026-07-14 header-survey dialects: numbered emails, enterprise pain-point, enrichment notes", () => {
+    // Numbered-email exports: "Email 1" is the primary; "Email 2" rides meta.
+    expect(mapCsvHeaders(["Email 1", "Email 2", "First Name"]).columns.map((c) => c.field))
+      .toEqual(["email", null, "firstName"]);
+    // A plain "Email" column still wins over a later "Email 1" (first alias occurrence).
+    expect(mapCsvHeaders(["Email", "Email 1"]).columns.map((c) => c.field))
+      .toEqual(["email", null]);
+    // AWS Partner Central-style lead schema: projectDescription = the customer
+    // need (pain_point analog); Title → role, the rest map as before.
+    expect(mapCsvHeaders(["email", "firstName", "lastName", "title", "projectDescription"]).columns.map((c) => c.field))
+      .toEqual(["email", "firstName", "lastName", "role", "painPoint"]);
+    // Enrichment-style "Company Notes" feeds notes (the scorer reads notes, never meta).
+    expect(mapCsvHeaders(["Email", "Company", "Company Notes"]).columns.map((c) => c.field))
+      .toEqual(["email", "company", "notes"]);
+  });
 });
 
 describe("importLeadsCsv (B-crm.1)", () => {
