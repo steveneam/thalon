@@ -69,4 +69,27 @@ describe("/api/profiles", () => {
     expect(res.status).toBe(400);
     expect((await res.json()).error).toContain("denylist");
   });
+
+  it("window-1 blocks (icp · cadence · routing) round-trip through the wire — a GET-built save can never drop them", async () => {
+    const icp = { description: "Owner-operated local service businesses", verticals: ["plumbing"] };
+    const cadence = { linkedin: { maxPerDay: 2 } };
+    const routing = { launch: ["linkedin", "x"] };
+    const saved = await post({ config: { identity: { company: "Thalon" }, icp, cadence, routing } });
+    expect(saved.status).toBe(201);
+
+    const body = await (await GET()).json();
+    // Parsed shapes (zod defaults fill icp's list fields) — the blocks are
+    // PRESENT on the wire; that presence is what the editor's carry relies on.
+    expect(body.active.config.icp).toMatchObject(icp);
+    expect(body.active.config.cadence).toEqual(cadence);
+    expect(body.active.config.routing).toEqual(routing);
+  });
+
+  it("a profile without window-1 blocks keeps its pre-window wire shape (no icp/cadence/routing keys)", async () => {
+    await post({ config: { identity: { company: "Thalon" } } });
+    const body = await (await GET()).json();
+    expect("icp" in body.active.config).toBe(false);
+    expect("cadence" in body.active.config).toBe(false);
+    expect("routing" in body.active.config).toBe(false);
+  });
 });

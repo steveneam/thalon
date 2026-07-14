@@ -87,3 +87,43 @@ describe("profile form mapping", () => {
     expect(back.config?.identity).toMatchObject({ company: "Thalon", topics: ["ai"] });
   });
 });
+
+describe("formToConfig carry — the window-1 blocks the form doesn't edit (2026-07-14 staging find)", () => {
+  const form: ProfileFormState = {
+    company: "Thalon",
+    oneLiner: "",
+    philosophy: "",
+    audience: "",
+    offers: "",
+    facts: "",
+    topics: "",
+    links: "",
+    denylist: "",
+    voiceJson: "",
+    platformProfilesJson: "",
+  };
+
+  it("carries icp, cadence and routing through the save verbatim", () => {
+    const carry = {
+      icp: { description: "Owner-operated local services", verticals: ["plumbing"] },
+      cadence: { linkedin: { maxPerDay: 2 } },
+      routing: { launch: ["linkedin"] },
+    };
+    const mapped = formToConfig(form, carry);
+    expect(mapped.error).toBeNull();
+    expect(mapped.config?.icp).toEqual(carry.icp);
+    expect(mapped.config?.cadence).toEqual(carry.cadence);
+    expect(mapped.config?.routing).toEqual(carry.routing);
+  });
+
+  it("absent blocks stay absent — no keys invented on a pre-window profile", () => {
+    const mapped = formToConfig(form, {});
+    expect(mapped.error).toBeNull();
+    expect(mapped.config && "icp" in mapped.config).toBe(false);
+    expect(mapped.config && "cadence" in mapped.config).toBe(false);
+    expect(mapped.config && "routing" in mapped.config).toBe(false);
+
+    const noCarry = formToConfig(form);
+    expect(noCarry.config && "icp" in noCarry.config).toBe(false);
+  });
+});
