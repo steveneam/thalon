@@ -296,3 +296,14 @@ product demo: "Thalon found, scored, and drafted — you approved."
    founder recovered it; archive verbatim in `.context/` on receipt, plan the
    deferred visual block BEFORE any tier purchase), then the →Email slice; B7.c
    follows.
+4. **Dogfood UX findings (founder's first live click-through, same evening):**
+   (a) →Post/→Page exits carry context to Create correctly, but read as "does
+   nothing" because post/page generation behind Create is the honest unwired
+   note — the gate that deferred it (gateway credit) dissolved today, so
+   **wiring →Post generation live (first judged generation: fan-out → cadence
+   gate → judge → approve queue + the deferred spend check) joins the
+   session-29 plan** beside the →Email slice; (b) the lead card never renders
+   `meta` — a real CRM export's phone columns etc. are preserved but invisible;
+   **card gains an "everything else from the import" meta section** (s29 rider);
+   (c) contact email on the card is too subtle — prominence tweak rides the
+   same touch.
