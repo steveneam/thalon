@@ -7,6 +7,15 @@
  */
 export { runG1Denylist, type G1Result, type RunG1Input } from "./g1-denylist";
 export {
+  CADENCE_GATE,
+  cadenceFetchHorizonMs,
+  hasCadenceConstraint,
+  runCadenceGate,
+  type CadenceResult,
+  type QueueAdmission,
+  type RunCadenceInput,
+} from "./cadence";
+export {
   checkSeoMeta,
   runSeoAeoLens,
   SEO_LENS_GATE,
