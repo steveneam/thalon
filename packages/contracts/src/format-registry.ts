@@ -215,6 +215,33 @@ export const webPageDraftMetaSchema = z.object({
 export type WebPageDraftMeta = z.infer<typeof webPageDraftMetaSchema>;
 
 /**
+ * `outreach_email` (B-crm.4 front half, Sprint-7 window amendment 1c) meta —
+ * the clip_plan convention: the judged body's pieces live here so
+ * `expectedBody` reproduces `drafts.body` byte-for-byte (I1). The subject is
+ * INSIDE the judged body on purpose: recipients read it, so the judge must
+ * too. `recipient` is provenance the queue renders (To: line + the manual
+ * copy-out affordance) — there is deliberately NO send capability on this
+ * format; the operator copies an APPROVED draft into their own mail client
+ * ("no ungated contact, ever" — the send half attaches behind the same
+ * approve door when B-crm.4 is chartered).
+ */
+export const outreachEmailDraftMetaSchema = z.object({
+  subject: z.string().min(1),
+  emailBody: z.string().min(1),
+  recipient: z.object({
+    /** `leads.id` this draft addresses — resolved by the caller from the leads repo, never invented. */
+    leadId: z.string().min(1),
+    email: z.string().min(1),
+    name: z.string().nullable(),
+  }),
+  groundingSourceIds: z.array(z.string().min(1)).min(1),
+  promptVersion: z.string().min(1),
+  brandProfileVersion: z.number().int(),
+  platformProfileVersion: z.string().min(1),
+});
+export type OutreachEmailDraftMeta = z.infer<typeof outreachEmailDraftMetaSchema>;
+
+/**
  * Post-approval artifact capabilities — the render/deploy/capture trio the
  * artifact stage serves, plus `seoMeta` (B6.8, amendment A13): whether the
  * format's meta carries the optional `seo` block (./search-intel.ts) that
@@ -324,6 +351,15 @@ export const DRAFT_FORMAT_REGISTRY = {
         ...meta.doc.scenes.map((scene) => scene.narration),
         ...(meta.doc.cta ? [meta.doc.cta] : []),
       ].join("\n\n"),
+  },
+  outreach_email: {
+    format: "outreach_email",
+    meta: outreachEmailDraftMetaSchema,
+    // Draft-only by construction: no render/deploy/capture — and no send —
+    // artifact stage exists for outreach email in this sprint.
+    capabilities: NO_ARTIFACTS,
+    artifactRefFields: [],
+    expectedBody: (meta: OutreachEmailDraftMeta) => [meta.subject, meta.emailBody].join("\n\n"),
   },
 } as const satisfies Record<DraftFormat, ResolvedDraftFormatSpec>;
 

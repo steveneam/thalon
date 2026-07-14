@@ -13,7 +13,10 @@
  * ordered scene list — scene 1 is the hook by convention) and
  * `direction_doc` (the scenes/effects and polish stages' complete direction
  * document — the strict-schema direction.md the deterministic export renders
- * from; see ./direction-doc.ts and ./stage-registry.ts).
+ * from; see ./direction-doc.ts and ./stage-registry.ts), and
+ * `outreach_email` (B-crm.4 front half, session-29 slice: a judged
+ * draft-only outreach email composed from a lead's own context — subject +
+ * body both inside the judged text; NO send path exists for it anywhere).
  * `post` is the default social draft every Sprint-1 fan-out produces.
  */
 export const DRAFT_FORMATS = [
@@ -24,5 +27,6 @@ export const DRAFT_FORMATS = [
   "web_page",
   "storyboard",
   "direction_doc",
+  "outreach_email",
 ] as const;
 export type DraftFormat = (typeof DRAFT_FORMATS)[number];

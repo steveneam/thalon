@@ -21,6 +21,8 @@ import { createFakeDraftGeneratorDriver } from "../fanout/shell/generator";
 import { createFakeEmbeddingDriver } from "../ingest/shell/embedder";
 import { runOrigination } from "../origination/origination";
 import { createFakePillarScriptDriver } from "../origination/shell/generator";
+import { runOutreachEmail } from "../outreach/compose";
+import { createFakeOutreachEmailDriver } from "../outreach/shell/generator";
 import {
   createFakeDirectionScenesDriver,
   createFakeStoryboardStageDriver,
@@ -176,6 +178,18 @@ describe("format contract registry (B4.2 ratchet, keyless + networkless)", () =>
       { driver: createFakePillarScriptDriver(), capTokens: 1_000_000 },
     );
     assertRegistered(result.draft, "pillar_script");
+  });
+
+  it("outreach_email: compose drafts parse and the registered body derivation reproduces drafts.body", async () => {
+    const { ctx, repos } = await db();
+    const briefSourceId = await ingestPrompt(ctx, repos);
+    const result = await runOutreachEmail(
+      ctx,
+      repos,
+      { briefSourceId, recipient: { leadId: "lead-1", email: "sam@example.com", name: "Sam" } },
+      { driver: createFakeOutreachEmailDriver(), capTokens: 1_000_000 },
+    );
+    assertRegistered(result.draft, "outreach_email");
   });
 
   it("storyboard + direction_doc: staged-video drafts parse and the registered body derivations reproduce drafts.body", async () => {

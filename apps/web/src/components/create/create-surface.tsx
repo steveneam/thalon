@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, FileText, Globe, Sparkles, Video, X } from "lucide-react";
+import { ArrowRight, FileText, Globe, Mail, Sparkles, Video, X } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CreateContext, CreateFamily } from "@/lib/intel/types";
+import { composeEmail } from "@/lib/outreach/client";
+import type { ComposeEmailResult } from "@/lib/outreach/types";
 import { cn } from "@/lib/utils";
 
 export type { CreateFamily } from "@/lib/intel/types";
@@ -41,6 +43,12 @@ const FAMILIES = [
     label: "Page",
     icon: Globe,
     hint: "A web page written against your keyword targets",
+  },
+  {
+    id: "email" as const,
+    label: "Email",
+    icon: Mail,
+    hint: "An outreach draft from a lead's own context — judged, approved, sent by you",
   },
 ];
 
@@ -84,9 +92,43 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
         })
       : [],
   );
+  const [compose, setCompose] = useState<
+    | { state: "idle" }
+    | { state: "composing" }
+    | { state: "done"; result: ComposeEmailResult }
+    | { state: "error"; message: string }
+  >({ state: "idle" });
 
   function removeChip(key: ChipKey) {
     setChips((current) => current.filter((chip) => chip.key !== key));
+  }
+
+  // The →Email compose payload is built from the SURVIVING chips — a pruned
+  // chip never reaches the brief, so what the operator sees is exactly what
+  // grounds (and bounds) the draft.
+  const chipValue = (key: ChipKey) => chips.find((chip) => chip.key === key)?.value;
+  const emailArmed = context?.kind === "lead_promote" && typeof context.leadId === "string";
+
+  async function composeEmailDraft() {
+    if (!context?.leadId) return;
+    setCompose({ state: "composing" });
+    try {
+      const result = await composeEmail({
+        leadId: context.leadId,
+        prompt: prompt.trim() || undefined,
+        context: {
+          contact: chipValue("contact"),
+          company: chipValue("company"),
+          role: chipValue("role"),
+          painPoint: chipValue("painPoint"),
+          notes: chipValue("text"),
+          sourceUrl: context.sourceUrl,
+        },
+      });
+      setCompose({ state: "done", result });
+    } catch (err) {
+      setCompose({ state: "error", message: err instanceof Error ? err.message : String(err) });
+    }
   }
 
   return (
@@ -158,7 +200,7 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
               — rides into generation as a keyword target.
             </p>
           )}
-          <div role="group" aria-label="Output family" className="grid gap-2 sm:grid-cols-3">
+          <div role="group" aria-label="Output family" className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
             {FAMILIES.map((f) => {
               const Icon = f.icon;
               return (
@@ -196,6 +238,58 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
                 </Link>
               </Button>
             </div>
+          ) : family === "email" ? (
+            !emailArmed ? (
+              <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+                Email drafts compose from a lead&rsquo;s own context — use the → Email exit on a
+                lead card so the recipient and their pain point ride in as chips. Nothing here is
+                ever sent automatically.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2 rounded-lg border border-primary/25 bg-primary/5 p-3">
+                <p className="text-sm">
+                  Thalon writes ONE short outreach email from the context above (pruned chips stay
+                  out), runs the full judge gate, and parks it in the Approve queue.{" "}
+                  <span className="font-medium">It is never sent</span> — you copy an approved
+                  draft into your own mail client.
+                </p>
+                {compose.state === "done" ? (
+                  <div className="flex flex-col gap-1.5" role="status">
+                    <p className="text-sm">
+                      {compose.result.status === "queued"
+                        ? compose.result.alreadyComposed
+                          ? "This exact brief was already composed — the existing draft is in your queue."
+                          : "Draft composed and judged — it's waiting for your approval."
+                        : compose.result.status === "blocked"
+                          ? `The judge blocked this draft (${compose.result.blockedReason ?? "see the queue for the gate trail"}) — it's parked for triage.`
+                          : `Draft is in state "${compose.result.status}" — see the queue.`}
+                    </p>
+                    <Button asChild size="sm" className="self-start">
+                      <Link href="/app/approve">
+                        Review it in the Approve queue <ArrowRight aria-hidden data-icon="inline-end" />
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {compose.state === "error" && (
+                      <p className="text-sm text-destructive" role="alert">
+                        {compose.message}
+                      </p>
+                    )}
+                    <Button
+                      size="sm"
+                      className="self-start"
+                      disabled={compose.state === "composing"}
+                      onClick={() => void composeEmailDraft()}
+                    >
+                      <Mail aria-hidden data-icon="inline-start" />
+                      {compose.state === "composing" ? "Composing + judging…" : "Compose email draft"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )
           ) : (
             <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
               Live {family} generation from this box wires up with the B6.6 origination loop — the

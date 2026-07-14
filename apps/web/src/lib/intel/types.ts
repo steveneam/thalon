@@ -122,8 +122,13 @@ export interface IntelCapture {
   payload: Record<string, unknown>;
 }
 
-/** The three Create output families — shared by the per-family card exits and the Create picker. */
-export type CreateFamily = "post" | "video" | "page";
+/**
+ * The Create output families — shared by the per-family card exits and the
+ * Create picker. `email` (B-crm.4 front half, session 29) is the lead-only
+ * outreach family: it composes FROM a lead's context, so only lead cards
+ * carry its exit and only a lead_promote context can arm its compose.
+ */
+export type CreateFamily = "post" | "video" | "page" | "email";
 
 /**
  * The structured context object behind a capture id (wave-3 §3): what the
@@ -150,4 +155,6 @@ export interface CreateContext {
   contact?: string;
   role?: string;
   painPoint?: string;
+  /** The lead row behind a lead_promote capture — what the →Email compose addresses (B-crm.4 front half). */
+  leadId?: string;
 }

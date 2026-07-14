@@ -5,6 +5,7 @@ import {
   IntelStoreError,
   listIntelCaptures,
   listTrendCards,
+  promoteLead,
   promoteTrendCard,
   resetIntelStore,
   resolveCreateContext,
@@ -74,6 +75,30 @@ describe("intel fake-driver store", () => {
       kind: "search_target_this",
       family: "page", // the keyword target's natural destination, changeable on Create
       keyword: "what is content automation",
+    });
+  });
+
+  it("a lead promote resolves with the lead's id and DNA — the →Email compose needs both (B-crm.4 front half)", () => {
+    const { capture } = promoteLead({
+      leadId: "lead-1",
+      family: "email",
+      name: "Sam Reyes",
+      company: "Riverbend Plumbing",
+      role: "Owner",
+      website: "https://riverbend.example",
+      notes: "met at the trade expo",
+      painPoint: "website never brings in local work",
+      score: 0.9,
+    });
+    expect(resolveCreateContext(capture.id)).toMatchObject({
+      kind: "lead_promote",
+      family: "email",
+      leadId: "lead-1",
+      contact: "Sam Reyes",
+      company: "Riverbend Plumbing",
+      painPoint: "website never brings in local work",
+      sourceUrl: "https://riverbend.example",
+      text: "met at the trade expo",
     });
   });
 

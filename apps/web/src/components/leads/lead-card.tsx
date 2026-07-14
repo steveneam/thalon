@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, FileText, Flame, Globe, Video, X } from "lucide-react";
+import { ExternalLink, FileText, Flame, Globe, Mail, Video, X } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ const EXITS: Array<{ family: CreateFamily; label: string; icon: typeof Video }> 
   { family: "post", label: "Post", icon: FileText },
   { family: "video", label: "Video", icon: Video },
   { family: "page", label: "Page", icon: Globe },
+  // B-crm.4 front half: drafts an outreach email from this lead's context —
+  // judged, parked in the approve queue, sent manually by the operator.
+  { family: "email", label: "Email", icon: Mail },
 ];
 
 interface LeadCardProps {
@@ -77,8 +80,14 @@ export function LeadCard({
         </span>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
+        {/* Contact info is the card's point (founder dogfood rider, s28): the address reads as foreground, copyable text — not card chrome. */}
         <p className="text-xs text-muted-foreground">
-          {lead.email}
+          <a
+            href={`mailto:${lead.email}`}
+            className="select-all text-sm font-medium text-foreground underline-offset-2 hover:text-primary hover:underline"
+          >
+            {lead.email}
+          </a>
           {lead.website && (
             <a
               href={lead.website}
@@ -114,6 +123,22 @@ export function LeadCard({
                 <li key={reason}>· {reason}</li>
               ))}
             </ul>
+          </details>
+        )}
+        {/* s28 dogfood rider: a real export's extra columns (phones, tiers, …) were preserved but invisible — surface them. */}
+        {lead.extras.length > 0 && (
+          <details>
+            <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+              everything else from the import ({lead.extras.length})
+            </summary>
+            <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+              {lead.extras.map(({ key, value }) => (
+                <span key={key} className="contents">
+                  <dt className="font-medium">{key}</dt>
+                  <dd className="break-all">{value}</dd>
+                </span>
+              ))}
+            </dl>
           </details>
         )}
       </CardContent>

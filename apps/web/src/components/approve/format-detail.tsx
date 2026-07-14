@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   expectedClipPlanBody,
   formatMsAsClock,
@@ -12,6 +13,12 @@ import {
   type DemoPlanDraftMeta,
 } from "@/lib/approve-queue/formats/demo-plan";
 import { parseExemplarIds, type ExemplarId } from "@/lib/approve-queue/formats/exemplar";
+import {
+  expectedOutreachEmailBody,
+  parseOutreachEmailMeta,
+  splitOutreachEmailBody,
+  type OutreachEmailDraftMeta,
+} from "@/lib/approve-queue/formats/outreach-email";
 import { parseWebPageMeta, type WebPageDraftMeta } from "@/lib/approve-queue/formats/web-page";
 import { cn } from "@/lib/utils";
 import type { GridDraft } from "@/lib/approve-queue/types";
@@ -37,15 +44,24 @@ export function FormatDetail({ draft }: FormatDetailProps) {
   const clipPlan = draft.format === "clip_plan" ? parseClipPlanMeta(draft.meta) : null;
   const demoPlan = draft.format === "demo_plan" ? parseDemoPlanMeta(draft.meta) : null;
   const webPage = draft.format === "web_page" ? parseWebPageMeta(draft.meta) : null;
+  const outreachEmail = draft.format === "outreach_email" ? parseOutreachEmailMeta(draft.meta) : null;
   const exemplarIds = parseExemplarIds(draft.meta);
 
-  if (!clipPlan && !demoPlan && !webPage && !exemplarIds) return null;
+  if (!clipPlan && !demoPlan && !webPage && !outreachEmail && !exemplarIds) return null;
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-2 text-sm">
       {clipPlan && <ClipPlanDetail meta={clipPlan} stale={expectedClipPlanBody(clipPlan) !== draft.body} />}
       {demoPlan && <DemoPlanDetail meta={demoPlan} stale={expectedDemoPlanBody(demoPlan) !== draft.body} />}
       {webPage && <WebPageDetail meta={webPage} />}
+      {outreachEmail && (
+        <OutreachEmailDetail
+          meta={outreachEmail}
+          body={draft.body}
+          approved={draft.status === "approved"}
+          stale={expectedOutreachEmailBody(outreachEmail) !== draft.body}
+        />
+      )}
       {exemplarIds && <ExemplarProvenance ids={exemplarIds} />}
     </div>
   );
@@ -154,6 +170,81 @@ function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
         <dd className="text-foreground">{meta.description}</dd>
       </dl>
       <p className="font-mono text-[11px] text-muted-foreground">{meta.htmlRef}</p>
+    </div>
+  );
+}
+
+/** One-shot clipboard button with honest feedback — used only by the approved copy-out affordance below. */
+function CopyButton({ label, text }: { label: string; text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => {
+        void navigator.clipboard.writeText(text).then(() => setCopied(true));
+      }}
+    >
+      {copied ? "Copied" : label}
+    </Button>
+  );
+}
+
+/**
+ * B-crm.4 front half: the outreach-email panel context. The recipient is
+ * generation provenance (true regardless of edits); subject/body reflect
+ * generation meta with the standard stale notice. The manual copy-out
+ * affordance appears ONLY on an APPROVED draft and copies the CURRENT
+ * judged/edited body — the operator sends from their own mail client; no
+ * send path exists here or anywhere ("no ungated contact, ever").
+ */
+function OutreachEmailDetail({
+  meta,
+  body,
+  approved,
+  stale,
+}: {
+  meta: OutreachEmailDraftMeta;
+  body: string;
+  approved: boolean;
+  stale: boolean;
+}) {
+  const current = splitOutreachEmailBody(body);
+  const to = meta.recipient.name
+    ? `${meta.recipient.name} <${meta.recipient.email}>`
+    : meta.recipient.email;
+  return (
+    <div className="flex flex-col gap-2" aria-label="Outreach email detail">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="outline">draft-only — never auto-sent</Badge>
+        <span className="text-xs text-muted-foreground">To: {to}</span>
+      </div>
+      {stale && (
+        <StaleNotice>Edited since generation — subject/body below reflect the original text, not the current body.</StaleNotice>
+      )}
+      <dl className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs", stale && "opacity-50")}>
+        <dt className="font-medium text-muted-foreground">Subject</dt>
+        <dd className="whitespace-pre-wrap text-foreground">{meta.subject}</dd>
+        <dt className="font-medium text-muted-foreground">Body</dt>
+        <dd className="whitespace-pre-wrap text-foreground">{meta.emailBody}</dd>
+      </dl>
+      {approved ? (
+        <div className="flex flex-wrap items-center gap-1.5" aria-label="Copy into your mail client">
+          <CopyButton label="Copy subject" text={current.subject} />
+          <CopyButton label="Copy body" text={current.emailBody} />
+          <Button size="sm" variant="outline" asChild>
+            <a
+              href={`mailto:${encodeURIComponent(meta.recipient.email)}?subject=${encodeURIComponent(current.subject)}&body=${encodeURIComponent(current.emailBody)}`}
+            >
+              Open in your mail client
+            </a>
+          </Button>
+        </div>
+      ) : (
+        <p className="text-[11px] text-muted-foreground">
+          Approve to unlock copy-out — you send it yourself, from your own mail client.
+        </p>
+      )}
     </div>
   );
 }

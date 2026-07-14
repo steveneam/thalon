@@ -18,7 +18,7 @@ export default async function CreatePage({
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
   const familyParam = first(params.family);
   const family =
-    familyParam === "post" || familyParam === "video" || familyParam === "page"
+    familyParam === "post" || familyParam === "video" || familyParam === "page" || familyParam === "email"
       ? (familyParam as CreateFamily)
       : undefined;
   const ctxId = first(params.ctx);

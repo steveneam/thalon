@@ -22,6 +22,7 @@ const ALLOWED = new Set(
     "packages/platform/src/gateway.ts",
     "packages/engine/src/fanout/shell/generator.ts",
     "packages/engine/src/origination/shell/generator.ts",
+    "packages/engine/src/outreach/shell/generator.ts",
     "packages/engine/src/webpage/shell/generator.ts",
     "packages/engine/src/waterfall/shell/generator.ts",
     "packages/engine/src/demo/shell/generator.ts",
