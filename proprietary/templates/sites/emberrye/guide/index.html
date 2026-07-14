@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How the Ember & Rye demonstration page was designed and built.">
+<meta name="robots" content="noindex">
+<title>Method — how the Ember &amp; Rye page was made</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0908'/%3E%3Ccircle cx='16' cy='19' r='7' fill='%23e8632c'/%3E%3Ccircle cx='16' cy='19' r='3.4' fill='%23ffb36b'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Fraunces";src:url("../fonts/fraunces-var.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;}
+@font-face{font-family:"Fraunces";src:url("../fonts/fraunces-italic-var.woff2") format("woff2");
+  font-weight:100 900;font-style:italic;font-display:swap;}
+@font-face{font-family:"Space Grotesk";src:url("../fonts/space-grotesk-var.woff2") format("woff2");
+  font-weight:300 700;font-style:normal;font-display:swap;}
+:root{
+  --paper:#f2ead9;--ink:#221c15;--ink-soft:#5c5142;--rule:#b7a98f;--ember:#e8632c;
+  --serif:"Fraunces",Georgia,serif;--grot:"Space Grotesk",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--grot);font-weight:390;
+  font-size:.98rem;line-height:1.68;}
+::selection{background:var(--ember);color:var(--paper);}
+:focus-visible{outline:2px solid var(--ember);outline-offset:3px;}
+.skip{position:absolute;left:-999px;top:0;background:var(--ember);color:var(--paper);
+  padding:.5rem 1rem;font-weight:600;text-decoration:none;}
+.skip:focus{left:8px;top:8px;}
+a{color:inherit;}
+header{border-bottom:3px double var(--ink);}
+header .bar{max-width:46rem;margin-inline:auto;padding:.85rem clamp(1rem,4vw,2rem);
+  display:flex;justify-content:space-between;align-items:baseline;gap:1rem;}
+.wordmark{font-family:var(--serif);font-weight:560;font-size:1.15rem;text-decoration:none;}
+.wordmark em{font-style:italic;color:var(--ember);}
+header nav a{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+main{max-width:46rem;margin-inline:auto;padding:clamp(2.5rem,6vw,4rem) clamp(1rem,4vw,2rem) 4rem;}
+h1{font-family:var(--serif);font-weight:470;font-size:clamp(2rem,5vw,3rem);line-height:1.05;
+  letter-spacing:-.01em;}
+h2{font-family:var(--serif);font-weight:520;font-size:1.45rem;margin-top:2.6rem;
+  border-bottom:1px solid var(--ink);padding-bottom:.35rem;}
+p{margin-top:.9rem;}
+ul,ol{padding-left:1.2rem;margin-top:.9rem;display:grid;gap:.5rem;}
+dl{margin-top:1rem;border:1px solid var(--ink);background:rgba(255,255,255,.35);
+  padding:1.1rem 1.2rem;font-size:.9rem;display:grid;grid-template-columns:max-content 1fr;gap:.45rem 1.2rem;}
+dt{font-weight:600;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  align-self:baseline;}
+dd{margin:0;}
+.passlog{list-style:none;padding:0;}
+.passlog li{border-top:1px solid var(--ink);padding-top:.7rem;font-size:.92rem;}
+.passlog b{font-weight:600;font-size:.72rem;letter-spacing:.12em;color:var(--paper);
+  background:var(--ember);padding:.08rem .45rem;}
+footer{border-top:3px double var(--ink);}
+footer .bar{max-width:46rem;margin-inline:auto;padding:1.2rem clamp(1rem,4vw,2rem);
+  display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to content</a>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="../">Ember <em>&amp;</em> Rye</a>
+    <nav aria-label="Page"><a href="../">Back to the page</a></nav>
+  </div>
+</header>
+
+<main id="guide">
+  <h1>How this page was made</h1>
+
+  <p><strong>Ember &amp; Rye is a fictional demonstration business.</strong> No real restaurant,
+  no real address, no real menu — the prices are sample prices and the board is invented. This
+  site is one entry in a portfolio of design templates, each built for a different kind of
+  business.</p>
+
+  <h2>The design idea</h2>
+  <p>A restaurant built around one wood-fired oven has a natural story: a single evening, lit
+  by a single fire. So the page is shot and cut like a short film — full-bleed stills carry it,
+  the copy recedes into subtitle captions and timecodes, and scrolling plays the night from
+  17:05 (the fire is lit) to 23:58 (the last embers). The page itself color-grades as you go:
+  a fixed dusk tint dissolves into an ember one, and each frame&rsquo;s timecode warms along the
+  same arc, so the scroll bar becomes the clock of the evening — read the little timecode rail
+  on the right.</p>
+  <p>Halfway through, the film is interrupted by print: the menu arrives as a magazine insert —
+  double rules, a drop cap, a grid-breaking photograph, dot-leader dishes — because a
+  neighborhood restaurant&rsquo;s other natural document is the thing pinned to its door. The
+  insert is printed night-side: dark stock and cream ink rather than bright paper, so the page
+  never breaks its low light mid-scroll (a direction from review — the one bright object left
+  is the bread photograph, tipped in on a cream mat). It is the restaurant&rsquo;s own house
+  notes, not a pretend press review; nobody is quoted saying it&rsquo;s wonderful.</p>
+
+  <h2>Type and materials</h2>
+  <ul>
+    <li><strong>Fraunces</strong> (variable, with true italics): the masthead, editorial
+    headlines, long-form text and menu dishes — one optical-size axis covers the whole print
+    voice.</li>
+    <li><strong>Space Grotesk</strong> (variable): timecodes, kickers, captions and the
+    practical band — the film-credit voice.</li>
+    <li>Both typefaces are open-source under the SIL Open Font License and served from this
+    site; their license texts ship in the site&rsquo;s <code>fonts/</code> directory.</li>
+    <li>No frameworks, no third-party code, no trackers, and no network calls from any script:
+    what happens on this page stays on this page.</li>
+  </ul>
+
+  <h2>Imagery</h2>
+  <p>Every photograph on the page is <strong>AI-generated</strong>, minted for this site on a
+  paid, commercially-licensed plan — seven cinematic stills from one model, prompted as a
+  single evening with one consistent grade (the magazine&rsquo;s bread photograph is
+  deliberately print-graded instead). Full provenance for every image (model, prompt, spend,
+  license tier) is recorded in the studio&rsquo;s asset register at mint time. One take was
+  rejected and re-shot for a badly drawn hand; its spend is recorded too.</p>
+  <dl>
+    <dt>Frames</dt><dd>The oven at full flame · feeding the fire · shaping the rye · the pass ·
+    the dining room · the dark rye still life · dying embers</dd>
+    <dt>Vendor</dt><dd>Higgsfield (paid tier)</dd>
+    <dt>Model</dt><dd>soul_cinematic, 2K stills</dd>
+    <dt>Disclosure</dt><dd>AI-generated imagery; no stock or scraped photography anywhere on this site</dd>
+  </dl>
+
+  <h2>Build notes: iteration passes</h2>
+  <p>The page went through repeated full passes, each hunting faults (layout, contrast, motion
+  honesty, accessibility) and pushing one deliberate ambition item.</p>
+  <ol class="passlog" id="passlog">
+    <li><b>PASS 1</b> — Fault lane: the hero&rsquo;s timecode chip collided with the navigation
+    (moved to the bottom of the frame, above the letterbox bar); every chapter caption sat left
+    of center — two centering transforms were stacking (rebuilt on margins); the magazine
+    photograph&rsquo;s grid-break overshot its column gap and touched the text (pulled back);
+    the timecode rail was invisible over the print insert, leaving an orphaned glowing dot.
+    Ambition lane: the letterbox bars now retract as the night begins — the frame opens like a
+    shutter over the first scroll.</li>
+    <li><b>PASS 2</b> — Fault lane: the rail&rsquo;s backdrop pill (pass-1&rsquo;s fix) read as
+    a grey lozenge on the insert and covered the menu prices at tablet width — replaced with the
+    honest move: the film chrome fades out entirely while the print insert is on screen, and the
+    rail stays desktop-only; the stacked magazine photograph ballooned to full column width
+    (constrained to editorial scale). Ambition lane: the timecodes now run — while a frame holds
+    the screen its clock ticks forward a minute at a time, so the film is playing, not paused.</li>
+    <li><b>PASS 3</b> — Fault lane: full breakpoint walk (390/768/1024/1440); at phone width the
+    wordmark wrapped into the navigation and the letterbox credit overflowed its bar (nowrap,
+    trimmed nav, the credit yields before it wraps); a computed contrast sweep found two
+    pairings under AA — the letterbox credit and the fictional-address fine print — both
+    lightened and re-measured; keyboard walk (logical order, visible focus everywhere, skip
+    link lands on chapter one); no-script and reduced-motion states verified honest (full page
+    visible, static grade, no rail, no ticking). Mid-build direction from review: the insert was
+    originally bright cream — re-printed as the midnight edition so the page never breaks its
+    low light. Ambition lane: ceiling call — the running clock, the dusk-to-ember grade and the
+    dark-stock insert are this page&rsquo;s memorable moments; anything further would be
+    noise.</li>
+  </ol>
+
+  <h2>Honesty rules this page follows</h2>
+  <ul>
+    <li>No invented testimonials, review scores, awards or press quotes — the magazine insert
+    is the fictional restaurant&rsquo;s own voice, labeled as house notes.</li>
+    <li>No fake urgency or scarcity; the only clock on the page is the fiction of one evening,
+    and the timecodes say what they are.</li>
+    <li>The menu is labeled a sample; the address is labeled fictional where it appears.</li>
+    <li>The fictional nature of the business is disclosed (this page, the magazine folio, the
+    practical band and the footer).</li>
+  </ul>
+</main>
+
+<footer>
+  <div class="bar">
+    <span>EMBER &amp; RYE</span>
+    <span>A fictional demonstration business. <a href="../">Back to the page</a>.</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -35,6 +35,9 @@
       (Thalon surfaces: the Two-Channel Rule — blue acts, amber signals).
 - [ ] Type scale: no arbitrary sizes outside the named steps; hierarchy reads
       at squint distance.
+- [ ] **Tonal continuity** (s35 lesson): no sensory-shock background jumps —
+      a bright wall after several dark viewports (or the reverse) fails the
+      scroll even if the section is beautiful alone.
 
 **Motion & state**
 - [ ] Every animation has a `prefers-reduced-motion` alternative.
@@ -71,6 +74,10 @@
       credit tags before minting video.)
 - [ ] Is the palette merely correct, or actually *exceptional*? One deliberate
       intensification per page is usually available.
+- [ ] **Material feel** (s35 lesson): would texture upgrade a flat fill —
+      parchment grain, print grammar, a lit-object vignette? Flat backgrounds
+      read cheap on luxury verticals; self-contained textures (inline SVG
+      noise, layered gradients) cost nothing.
 - [ ] Complexify with intent: layered depth, second reading rewards, detail in
       corners — never noise for its own sake.
 - [ ] Squint test versus the rest of the wave: is this page still unmistakably

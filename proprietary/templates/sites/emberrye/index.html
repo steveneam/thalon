@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en" class="nojs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ember & Rye — a wood-fired neighborhood restaurant. One oven, one menu, open tables. A fictional demonstration business.">
+<title>Ember &amp; Rye — a wood-fired neighborhood restaurant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0908'/%3E%3Ccircle cx='16' cy='19' r='7' fill='%23e8632c'/%3E%3Ccircle cx='16' cy='19' r='3.4' fill='%23ffb36b'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/space-grotesk-var.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* ---------- fonts (OFL, vendored — license texts in fonts/) ---------- */
+@font-face{font-family:"Fraunces";src:url("fonts/fraunces-var.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;}
+@font-face{font-family:"Fraunces";src:url("fonts/fraunces-italic-var.woff2") format("woff2");
+  font-weight:100 900;font-style:italic;font-display:swap;}
+@font-face{font-family:"Space Grotesk";src:url("fonts/space-grotesk-var.woff2") format("woff2");
+  font-weight:300 700;font-style:normal;font-display:swap;}
+
+/* ---------- tokens ---------- */
+:root{
+  --night:#0a0908;          /* char black, the film base */
+  --night-2:#12100d;
+  --bone:#efe6d8;           /* light text on the film */
+  --ash:#b9ac9d;            /* quiet text on the film */
+  --ember:#e8632c;
+  --ember-hot:#ff8a4d;
+  --paper:#f2ead9;          /* the magazine insert */
+  --paper-2:#eadfc9;
+  --ink:#221c15;
+  --ink-soft:#5c5142;
+  --rule:#b7a98f;
+  --serif:"Fraunces",Georgia,serif;
+  --grot:"Space Grotesk",Arial,sans-serif;
+  --g:0.5;                  /* night progress 0→1; JS drives, 0.5 is the honest static grade */
+  --hb:0;                   /* hero shutter progress — the letterbox opens as the night starts */
+  --bar:clamp(2.4rem,7vh,4.2rem); /* letterbox bar height (hero, at rest) */
+  --barh:calc(var(--bar)*(1 - var(--hb)*0.45)); /* live bar height */
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{
+  background:var(--night);color:var(--bone);
+  font-family:var(--grot);font-weight:380;font-size:1rem;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;}
+a{color:inherit;}
+::selection{background:var(--ember);color:var(--night);}
+:focus-visible{outline:2px solid var(--ember-hot);outline-offset:3px;}
+
+.skip{position:absolute;left:-999px;top:0;z-index:60;background:var(--ember);color:var(--night);
+  padding:.55rem 1.1rem;font-weight:600;text-decoration:none;}
+.skip:focus{left:10px;top:10px;}
+
+/* ---------- the grade: a fixed dusk→ember tint over the whole film ---------- */
+.grade{position:fixed;inset:0;z-index:3;pointer-events:none;}
+.grade .dusk,.grade .late{position:absolute;inset:0;}
+.grade .dusk{background:linear-gradient(180deg,rgba(62,80,110,.16),rgba(38,48,66,.10));
+  opacity:calc(1 - var(--g));}
+.grade .late{background:linear-gradient(180deg,rgba(20,8,3,.12),rgba(232,99,44,.07) 60%,rgba(10,4,2,.18));
+  opacity:var(--g);}
+/* the paper spread sits above the grade — print doesn't take a color cast */
+
+/* ---------- playhead: the night as a timecode rail (JS only) ---------- */
+.playhead{position:fixed;right:clamp(.6rem,1.6vw,1.4rem);top:50%;translate:0 -50%;z-index:40;
+  display:none;flex-direction:column;align-items:center;gap:.55rem;pointer-events:none;
+  transition:opacity .5s ease;}
+.js .playhead{display:flex;}
+/* the film chrome leaves while the print insert is on screen */
+.print-mode .playhead{opacity:0;}
+@media (prefers-reduced-motion:reduce){.playhead{display:none !important;}}
+.playhead .rail{width:2px;height:min(30vh,220px);background:rgba(233,222,210,.18);position:relative;}
+.playhead .rail i{position:absolute;left:50%;translate:-50% 0;top:calc(var(--g)*100%);
+  width:8px;height:8px;border-radius:50%;
+  background:var(--ember-hot);box-shadow:0 0 10px rgba(255,138,77,.8);}
+.playhead .tc{font-size:.68rem;letter-spacing:.14em;color:var(--ash);writing-mode:vertical-rl;
+  text-shadow:0 1px 6px rgba(10,9,8,.8);}
+.playhead .now{font-size:.74rem;letter-spacing:.1em;color:var(--bone);font-weight:500;
+  font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(10,9,8,.8);}
+@media (max-width:1023px){.playhead{display:none !important;}}
+
+/* ---------- header ---------- */
+header.site{position:absolute;top:var(--barh);left:0;right:0;z-index:30;}
+header.site .bar{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding:1.1rem clamp(1rem,4vw,2.6rem);}
+.wordmark{font-family:var(--serif);font-weight:560;font-size:1.15rem;letter-spacing:.01em;
+  color:var(--bone);text-decoration:none;white-space:nowrap;}
+.wordmark em{font-style:italic;color:var(--ember-hot);}
+nav.top{display:flex;gap:clamp(.9rem,2.4vw,1.8rem);flex-wrap:wrap;}
+nav.top a{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);
+  text-decoration:none;padding:.2rem 0;}
+nav.top a:hover{color:var(--bone);}
+@media (max-width:700px){nav.top a:nth-child(2),nav.top a:nth-child(4){display:none;}}
+/* the letterbox credit is decoration — it yields before it wraps */
+@media (max-width:600px){.hero .bars span{display:none;}}
+
+/* ---------- hero: the title frame ---------- */
+.hero{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--night);}
+.hero .frame{position:absolute;inset:var(--barh) 0;overflow:hidden;}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:63% 50%;}
+.hero .scrim{position:absolute;inset:0;
+  background:linear-gradient(75deg,rgba(10,9,8,.88) 0%,rgba(10,9,8,.55) 34%,rgba(10,9,8,0) 60%),
+             linear-gradient(0deg,rgba(10,9,8,.6) 0%,rgba(10,9,8,0) 30%);}
+.hero .bars{position:absolute;left:0;right:0;height:var(--barh);background:var(--night);z-index:20;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.hero .bars.top{top:0;}
+.hero .bars.bottom{bottom:0;}
+.hero .bars span{font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;color:#8d8377;}
+.hero .title{position:absolute;z-index:10;left:clamp(1rem,5vw,3.4rem);bottom:clamp(4.6rem,16vh,9.5rem);
+  max-width:min(34rem,86vw);}
+.kicker{font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;color:var(--ash);margin-bottom:1.1rem;}
+h1{font-family:var(--serif);font-weight:430;font-size:clamp(3.1rem,9.5vw,6.8rem);
+  line-height:.98;letter-spacing:-.01em;color:var(--bone);text-wrap:balance;}
+h1 .amp{font-style:italic;font-weight:340;color:var(--ember-hot);}
+.hero .sub{margin-top:1.3rem;max-width:30rem;color:var(--ash);font-size:1.02rem;line-height:1.65;}
+.hero .sub b{color:var(--bone);font-weight:500;}
+/* title entrance — pure CSS, once, motion-gated */
+.title>*{opacity:0;transform:translateY(14px);animation:rise .9s cubic-bezier(.2,.6,.2,1) forwards;}
+.title>.kicker{animation-delay:.15s;}
+.title>h1{animation-delay:.32s;}
+.title>.sub{animation-delay:.58s;}
+@keyframes rise{to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){.title>*{animation:none;opacity:1;transform:none;}}
+
+/* timecode chip — every film frame carries the clock */
+.tc-chip{position:absolute;z-index:12;top:1.05rem;right:clamp(3.4rem,7vw,4.8rem);
+  display:inline-flex;align-items:baseline;gap:.5rem;padding:.32rem .7rem;
+  background:rgba(10,9,8,.62);border:1px solid rgba(233,222,210,.16);backdrop-filter:blur(2px);}
+.hero .tc-chip{top:auto;bottom:calc(var(--barh) + 1.05rem);}
+.tc-chip .t{font-variant-numeric:tabular-nums;font-weight:600;font-size:.82rem;letter-spacing:.08em;
+  color:var(--acc,var(--ember-hot));}
+.tc-chip .l{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ash);}
+
+/* ---------- chapters: full-bleed film frames ---------- */
+section.chapter{position:relative;height:132vh;height:132svh;}
+section.chapter .scene{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;}
+section.chapter img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+section.chapter .scrim{position:absolute;inset:0;
+  background:linear-gradient(0deg,rgba(10,9,8,.72) 0%,rgba(10,9,8,.12) 26%,rgba(10,9,8,0) 45%),
+             linear-gradient(180deg,rgba(10,9,8,.35),rgba(10,9,8,0) 22%);}
+.cap{position:absolute;z-index:10;left:0;right:0;margin-inline:auto;bottom:clamp(2rem,7vh,4rem);
+  width:min(44rem,88vw);text-align:center;}
+.cap .rule{display:block;width:3.2rem;height:2px;margin:0 auto .8rem;background:var(--acc,var(--ember));}
+.cap p{font-size:clamp(1.02rem,2vw,1.22rem);line-height:1.6;color:var(--bone);
+  text-shadow:0 1px 14px rgba(10,9,8,.85);text-wrap:balance;}
+.cap .who{margin-top:.55rem;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--ash);}
+/* caption reveal (JS adds .in as the frame enters; no-JS shows everything) */
+.js .cap{opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s ease;}
+.js .cap.in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){.js .cap{opacity:1;transform:none;transition:none;}}
+
+/* the night arc, executable in CSS: each frame carries its own hour color */
+.hero{--acc:#96a7c2;}            /* 17:05 — dusk steel */
+#ch-fire{--acc:#c99a6a;}         /* 17:32 — first warmth */
+#ch-dough{--acc:#d98d55;}        /* 18:04 */
+#ch-pass{--acc:#e87f45;}         /* 19:48 */
+#ch-room{--acc:#f0703a;}         /* 21:17 */
+.closing{--acc:#ff6a35;}         /* 23:58 — last ember */
+
+/* ---------- the magazine insert: a midnight edition on dark stock ----------
+   (founder note: no bright wall after four dark frames — the insert keeps its
+   print grammar but is printed night-side: warm char stock, cream ink) */
+.paper{position:relative;z-index:5;
+  --paper:#191310;--paper-2:#1d1813;--ink:#e9dcc4;--ink-soft:#a89a83;--rule:#4a4033;
+  /* dark parchment: mottled aging under a fiber grain (inline SVG noise — self-contained) */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.93 0 0 0 0 0.86 0 0 0 0 0.72 0 0 0 0.055 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(120% 90% at 12% 8%,rgba(122,96,58,.14),transparent 55%),
+    radial-gradient(110% 80% at 88% 30%,rgba(64,48,30,.20),transparent 60%),
+    radial-gradient(130% 100% at 45% 95%,rgba(110,82,48,.11),transparent 55%),
+    radial-gradient(80% 60% at 70% 70%,rgba(20,12,7,.5),transparent 70%),
+    var(--paper);
+  box-shadow:inset 0 0 clamp(3rem,9vw,7rem) rgba(5,3,2,.75); /* lit object, not a flat fill */
+  color:var(--ink);
+  padding:clamp(3rem,7vw,5.5rem) clamp(1.1rem,5vw,3rem) clamp(3.4rem,7vw,5.5rem);}
+.paper .sheet{max-width:68rem;margin-inline:auto;}
+.masthead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  border-top:3px double var(--ink);border-bottom:1px solid var(--ink);padding:.55rem 0;}
+.masthead .name{font-size:.78rem;letter-spacing:.3em;text-transform:uppercase;font-weight:600;}
+.masthead .issue{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+.paper h2{font-family:var(--serif);font-weight:470;font-size:clamp(2.5rem,6.4vw,4.6rem);
+  line-height:1.02;letter-spacing:-.012em;margin:clamp(1.6rem,4vw,2.8rem) 0 .9rem;max-width:18ch;}
+.standfirst{font-family:var(--serif);font-style:italic;font-weight:380;
+  font-size:clamp(1.1rem,2.4vw,1.42rem);line-height:1.5;color:var(--ink-soft);max-width:44ch;}
+.spread{display:grid;gap:clamp(1.4rem,3.6vw,3rem);margin-top:clamp(2rem,4.5vw,3.2rem);
+  grid-template-columns:1fr;}
+@media (min-width:880px){.spread{grid-template-columns:7fr 5fr;}}
+.longform{font-family:var(--serif);font-weight:400;font-size:1.06rem;line-height:1.72;max-width:66ch;}
+.longform p+p{margin-top:1em;text-indent:1.6em;}
+.longform .dc::first-letter{font-family:var(--serif);font-weight:600;font-size:3.4em;line-height:.86;
+  float:left;padding:.06em .12em 0 0;color:var(--ember-hot);}
+.pull{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);margin:1.6em 0;padding:1em .2em;
+  font-family:var(--serif);font-style:italic;font-weight:430;font-size:1.5rem;line-height:1.35;
+  text-indent:0 !important;color:var(--ink);}
+.pull small{display:block;margin-top:.5em;font-family:var(--grot);font-style:normal;font-size:.68rem;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);}
+.printfig{margin:0;max-width:30rem;margin-inline:auto;} /* stacked: keep editorial scale */
+.printfig .ph{position:relative;padding:10px;background:#e9dcc4;} /* tipped-in plate on a cream mat */
+.printfig img{width:100%;height:auto;}
+.printfig figcaption{display:flex;gap:.7rem;align-items:baseline;margin-top:.6rem;
+  font-size:.8rem;line-height:1.5;color:var(--ink-soft);}
+.printfig figcaption b{font-family:var(--grot);font-weight:600;font-size:.68rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink);white-space:nowrap;}
+@media (min-width:880px){
+  .printfig{max-width:none;margin:0 0 0 -8%;} /* break the column grid, print-style — keeps air to the text */
+}
+
+/* the menu, set like an engraved card on the parchment */
+.menu{margin-top:clamp(2.4rem,5vw,3.6rem);position:relative;
+  border:1px solid rgba(233,220,196,.30);
+  background:rgba(233,220,196,.028);
+  padding:clamp(1.6rem,4.5vw,3rem) clamp(1.2rem,4vw,2.8rem);}
+.menu::before{content:"";position:absolute;inset:7px;border:1px solid rgba(233,220,196,.13);
+  pointer-events:none;}
+.menu .orn{display:flex;align-items:center;gap:.9rem;margin-top:1.1rem;color:var(--rule);}
+.menu .orn::before,.menu .orn::after{content:"";height:1px;flex:1;background:var(--rule);}
+.menu .orn i{width:7px;height:7px;rotate:45deg;border:1px solid var(--ink-soft);display:block;}
+.menu .menuhead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;}
+.menu h3{font-family:var(--serif);font-weight:520;font-size:1.9rem;letter-spacing:-.01em;}
+.menu .note{font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);}
+.courses{display:grid;gap:clamp(1.6rem,4vw,2.6rem);margin-top:1.6rem;grid-template-columns:1fr;}
+@media (min-width:880px){.courses{grid-template-columns:1fr 1fr 1fr;}}
+.course h4{font-size:.74rem;letter-spacing:.26em;text-transform:uppercase;font-weight:600;
+  color:var(--ember-hot);border-bottom:1px solid var(--rule);padding-bottom:.45rem;}
+.course{min-width:0;}
+.course dl{margin-top:.9rem;}
+.course .dish{display:flex;align-items:baseline;gap:.5rem;padding:.5rem 0;}
+.course .dish+.dish{border-top:1px dotted var(--rule);}
+.course dt{font-family:var(--serif);font-weight:460;font-size:1.02rem;line-height:1.4;}
+.course dt small{display:block;font-family:var(--grot);font-weight:380;font-size:.8rem;
+  color:var(--ink-soft);letter-spacing:.01em;}
+.course dd{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:500;color:var(--ink);}
+.menu .wine{margin-top:1.8rem;padding-top:1rem;border-top:1px solid var(--rule);
+  font-family:var(--serif);font-style:italic;color:var(--ink-soft);font-size:1.02rem;}
+.folio{margin-top:clamp(2.2rem,5vw,3.4rem);border-top:1px solid var(--ink);padding-top:.6rem;
+  display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);}
+
+/* ---------- practical band ---------- */
+.practical{position:relative;background:var(--night-2);
+  padding:clamp(3rem,7vw,5rem) clamp(1.1rem,5vw,3rem);}
+.practical .wrap{max-width:68rem;margin-inline:auto;display:grid;gap:clamp(2rem,5vw,4rem);
+  grid-template-columns:1fr;}
+@media (min-width:820px){.practical .wrap{grid-template-columns:1.2fr 1fr;}}
+.practical h2{font-family:var(--serif);font-weight:460;font-size:clamp(1.9rem,4vw,2.7rem);
+  line-height:1.1;letter-spacing:-.01em;max-width:16ch;}
+.practical h2 em{font-style:italic;color:var(--ember-hot);}
+.practical .lede{margin-top:1rem;color:var(--ash);max-width:44ch;}
+.hours{border-top:1px solid rgba(233,222,210,.22);}
+.hours .row{display:flex;justify-content:space-between;gap:1rem;padding:.68rem .1rem;
+  border-bottom:1px solid rgba(233,222,210,.13);font-size:.95rem;}
+.hours .d{letter-spacing:.06em;color:var(--bone);}
+.hours .h{font-variant-numeric:tabular-nums;color:var(--ash);}
+.hours .h b{color:var(--bone);font-weight:500;}
+.addr{margin-top:1.4rem;font-size:.92rem;color:var(--ash);line-height:1.7;}
+.addr b{color:var(--bone);font-weight:500;}
+.addr .fine{font-size:.78rem;color:#928779;}
+
+/* ---------- closing: last embers ---------- */
+.closing{position:relative;height:96vh;height:96svh;overflow:hidden;background:var(--night);}
+.closing img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92;}
+.closing canvas{position:absolute;inset:0;width:100%;height:100%;}
+.closing .scrim{position:absolute;inset:0;background:
+  linear-gradient(0deg,rgba(10,9,8,.82),rgba(10,9,8,.2) 40%,rgba(10,9,8,.35));}
+.closing .end{position:absolute;z-index:10;inset:0;display:grid;place-content:center;text-align:center;
+  padding:1.2rem;}
+.closing .end p.big{font-family:var(--serif);font-weight:430;font-size:clamp(1.7rem,4.4vw,3rem);
+  line-height:1.25;max-width:22ch;text-wrap:balance;}
+.closing .end p.big em{font-style:italic;color:var(--ember-hot);}
+.closing .end .small{margin-top:1.2rem;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ash);}
+.closing .end .links{margin-top:2.2rem;display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;}
+.closing .end .links a{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:var(--bone);
+  text-decoration:none;border-bottom:1px solid var(--ember);padding-bottom:.25rem;}
+.closing .end .links a:hover{color:var(--ember-hot);}
+
+/* ---------- footer ---------- */
+footer.site{background:#070605;border-top:1px solid rgba(233,222,210,.12);}
+footer.site .bar{max-width:68rem;margin-inline:auto;padding:1.5rem clamp(1.1rem,5vw,3rem);
+  display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  font-size:.78rem;color:#8a7f74;line-height:1.7;}
+footer.site a{color:var(--ash);}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.replace("nojs","js");</script>
+<a class="skip" href="#night">Skip to content</a>
+
+<div class="grade" aria-hidden="true"><div class="dusk"></div><div class="late"></div></div>
+
+<div class="playhead" aria-hidden="true">
+  <span class="tc">17:05</span>
+  <span class="rail"><i></i></span>
+  <span class="tc">24:00</span>
+  <span class="now" id="nightclock">17:05</span>
+</div>
+
+<header class="site">
+  <div class="bar">
+    <a class="wordmark" href="#top">Ember <em>&amp;</em> Rye</a>
+    <nav class="top" aria-label="Site">
+      <a href="#night">The night</a>
+      <a href="#menu">The menu</a>
+      <a href="#find">Find us</a>
+      <a href="guide/">How this was made</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ————— title frame ————— -->
+  <section class="hero" id="top" aria-label="Ember & Rye — title">
+    <div class="bars top"><span>a neighborhood restaurant, shot over one evening</span></div>
+    <div class="frame">
+      <img src="assets/hero-oven.webp" alt="The mouth of the wood-fired oven at full flame — the only light in a dark kitchen." width="1920" height="826" fetchpriority="high">
+      <div class="scrim" aria-hidden="true"></div>
+    </div>
+    <div class="tc-chip"><span class="t" data-until="17:31">17:05</span><span class="l">the fire is lit</span></div>
+    <div class="title">
+      <p class="kicker">Wood fire · dark rye · open tables</p>
+      <h1>Ember <span class="amp">&amp;</span> Rye</h1>
+      <p class="sub">One oven, and a menu it decides each morning. <b>No bookings — walk in,</b> the way you'd call on a neighbor. The night runs 17:05 to midnight; scroll and it will pass.</p>
+    </div>
+    <div class="bars bottom"><span>scroll — the whole night is below</span></div>
+  </section>
+
+  <!-- ————— the film ————— -->
+  <section class="chapter" id="ch-fire" aria-label="17:32 — feeding the oven">
+    <div class="scene">
+      <img src="assets/fire-lighting.webp" alt="Two hands feed a split log into the young fire in the oven's dark mouth." width="1600" height="689" loading="lazy">
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="tc-chip"><span class="t" data-until="18:03">17:32</span><span class="l">feeding the oven</span></div>
+      <div class="cap" id="night">
+        <span class="rule" aria-hidden="true"></span>
+        <p>Ironbark in, door shut. The oven takes an hour to say yes, and there is no rushing it.</p>
+        <p class="who">chapter one — fire</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch-dough" aria-label="18:04 — the last shaping">
+    <div class="scene">
+      <img src="assets/dough.webp" alt="Floured hands over a shaped rye loaf on the wooden bench, flour hanging in one warm sidelight." width="1600" height="689" loading="lazy">
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="tc-chip"><span class="t" data-until="19:47">18:04</span><span class="l">the last shaping</span></div>
+      <div class="cap">
+        <span class="rule" aria-hidden="true"></span>
+        <p>The last loaves are shaped while the room still has its chairs on the tables.</p>
+        <p class="who">chapter two — rye</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch-pass" aria-label="19:48 — first plates">
+    <div class="scene">
+      <img src="assets/the-pass.webp" alt="A single plate under the pass lamp, steam rising through the cone of light." width="1600" height="689" loading="lazy">
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="tc-chip"><span class="t" data-until="21:16">19:48</span><span class="l">first plates</span></div>
+      <div class="cap">
+        <span class="rule" aria-hidden="true"></span>
+        <p>First plates over the pass. The lamp is the hottest seat in the house.</p>
+        <p class="who">chapter three — service</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="ch-room" aria-label="21:17 — the room">
+    <div class="scene">
+      <img src="assets/the-room.webp" alt="The candlelit dining room at night — tables of neighbors as soft warm shapes in the dark." width="1600" height="689" loading="lazy">
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="tc-chip"><span class="t" data-until="23:57">21:17</span><span class="l">the room, full</span></div>
+      <div class="cap">
+        <span class="rule" aria-hidden="true"></span>
+        <p>By nine the room hums. Nobody is in a hurry, least of all the oven.</p>
+        <p class="who">chapter four — the neighborhood</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— the magazine insert ————— -->
+  <section class="paper" id="menu" aria-label="House notes and the menu">
+    <div class="sheet">
+      <div class="masthead">
+        <span class="name">The Neighborhood Table</span>
+        <span class="issue">House notes from Ember &amp; Rye — no. 3, winter</span>
+      </div>
+
+      <h2>The oven decides.</h2>
+      <p class="standfirst">Notes from our kitchen on why the menu is short, the bread is dark, and the fire is the only clock we keep.</p>
+
+      <div class="spread">
+        <div class="longform">
+          <p class="dc">We light the oven at five and it tells us what kind of night it will be. Some evenings it runs hot and fast and wants fish whole in fig leaf, blistered and done in minutes; some evenings it settles low and long and the lamb shoulder goes in early and comes out at eight, sighing. We stopped arguing with it years ago. The menu is written each morning from what the market had and what the fire will agree to, which is why it fits on one board and changes more often than the weather.</p>
+          <div class="pull">If the oven won&rsquo;t give it, it isn&rsquo;t on the menu.<small>— house rule, unbroken</small></div>
+          <p>The rye is the other constant. A dark, cross-scored loaf raised on a starter older than our lease, baked in the oven&rsquo;s falling heat after the last service — which is to say tonight&rsquo;s dinner bakes tomorrow&rsquo;s bread. It comes to every table first, with cultured butter, whether you ordered it or not. Neighbors argue about whether the first slice or the heel is the better one. We stay out of it.</p>
+        </div>
+
+        <figure class="printfig">
+          <div class="ph">
+            <img src="assets/rye-loaf.webp" alt="The dark rye: a cross-scored loaf, partly sliced, on crumpled baking paper beside a serrated knife." width="900" height="1350" loading="lazy">
+          </div>
+          <figcaption><b>Fig. 1</b><span>The dark rye, baked in yesterday&rsquo;s falling heat. Photographed for the house notes; AI-generated imagery, as disclosed in the <a href="guide/">method note</a>.</span></figcaption>
+        </figure>
+      </div>
+
+      <div class="menu">
+        <div class="menuhead">
+          <h3>Tonight</h3>
+          <p class="note">A sample menu — the board changes with the market</p>
+        </div>
+        <div class="orn" aria-hidden="true"><i></i></div>
+        <div class="courses">
+          <div class="course">
+            <h4>From the oven</h4>
+            <dl>
+              <div class="dish"><dt>Charred rye, cultured butter<small>comes first, every table</small></dt><dd>9</dd></div>
+              <div class="dish"><dt>Coal-roasted leeks<small>hazelnut, brown butter</small></dt><dd>19</dd></div>
+              <div class="dish"><dt>Whole market fish in fig leaf<small>burnt lemon</small></dt><dd>41</dd></div>
+            </dl>
+          </div>
+          <div class="course">
+            <h4>From the hearth</h4>
+            <dl>
+              <div class="dish"><dt>Half chicken off the coals<small>bread sauce, drippings</small></dt><dd>34</dd></div>
+              <div class="dish"><dt>Slow lamb shoulder for the table<small>flatbread, pickles — for three or more</small></dt><dd>68</dd></div>
+              <div class="dish"><dt>Wood-roasted mushrooms<small>rye porridge, aged cheese</small></dt><dd>24</dd></div>
+            </dl>
+          </div>
+          <div class="course">
+            <h4>To finish</h4>
+            <dl>
+              <div class="dish"><dt>Rye &amp; ember<small>burnt-honey ice cream, toasted crumbs</small></dt><dd>14</dd></div>
+              <div class="dish"><dt>Whole pear, dying oven<small>roasted in the last heat, thick cream</small></dt><dd>15</dd></div>
+            </dl>
+          </div>
+        </div>
+        <p class="wine">The wine list is short and mostly people we can drive to. Ask whoever brings the bread.</p>
+      </div>
+
+      <div class="folio">
+        <span>The Neighborhood Table — printed for the web</span>
+        <span>Ember &amp; Rye is a fictional demonstration business</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— practical ————— -->
+  <section class="practical" id="find" aria-label="Hours and address">
+    <div class="wrap">
+      <div>
+        <h2>Walk in. <em>The oven is already on.</em></h2>
+        <p class="lede">No bookings for parties under seven — the room is small and we hold it for the street. Larger tables can write to the kitchen; the address below is on the door.</p>
+        <p class="addr"><b>12 Coleman Lane</b> — under the brick chimney, two doors from the laundry.<br>
+        <span class="fine">A fictional address for a fictional restaurant — see <a href="guide/">how this page was made</a>.</span></p>
+      </div>
+      <div class="hours" role="table" aria-label="Opening hours">
+        <div class="row" role="row"><span class="d" role="cell">Wednesday — Thursday</span><span class="h" role="cell"><b>17:00</b> — 22:00</span></div>
+        <div class="row" role="row"><span class="d" role="cell">Friday — Saturday</span><span class="h" role="cell"><b>17:00</b> — 23:00</span></div>
+        <div class="row" role="row"><span class="d" role="cell">Sunday</span><span class="h" role="cell"><b>12:00</b> — 20:00</span></div>
+        <div class="row" role="row"><span class="d" role="cell">Monday — Tuesday</span><span class="h" role="cell">the oven rests</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ————— last embers ————— -->
+  <section class="closing" aria-label="Midnight — the fire dies">
+    <img src="assets/embers.webp" alt="Dying embers veined orange through black, close up." width="1600" height="689" loading="lazy">
+    <canvas id="emberfield" aria-hidden="true"></canvas>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="tc-chip"><span class="t" data-until="23:59">23:58</span><span class="l">last embers</span></div>
+    <div class="end">
+      <p class="big">The fire dies at midnight. <em>It is lit again at five.</em></p>
+      <p class="small">Ember &amp; Rye — wood fire · dark rye · open tables</p>
+      <div class="links">
+        <a href="#menu">Read the menu</a>
+        <a href="guide/">How this page was made</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="bar">
+    <span>EMBER &amp; RYE — a <strong>fictional demonstration business</strong>; the address is invented and no real services are offered.</span>
+    <span>All imagery AI-generated — <a href="guide/">method &amp; disclosure</a>.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var docEl = document.documentElement;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* ---- the night: scroll progress drives the grade + the playhead clock ---- */
+  var clock = document.getElementById("nightclock");
+  var NIGHT_START = 17 * 60 + 5, NIGHT_END = 23 * 60 + 58;
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      var max = docEl.scrollHeight - window.innerHeight;
+      var g = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      docEl.style.setProperty("--g", g.toFixed(4));
+      var hb = Math.min(1, window.scrollY / (window.innerHeight * 0.9));
+      docEl.style.setProperty("--hb", hb.toFixed(4));
+      if (clock) {
+        var m = Math.round(NIGHT_START + g * (NIGHT_END - NIGHT_START));
+        var hh = Math.floor(m / 60), mm = m % 60;
+        clock.textContent = (hh < 10 ? "0" + hh : hh) + ":" + (mm < 10 ? "0" + mm : mm);
+      }
+    });
+  }
+  if (!reduced.matches) {
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    onScroll();
+  } /* reduced motion: --g stays at the static 0.5 grade from CSS */
+
+  /* ---- captions fade in as each frame enters ---- */
+  var caps = document.querySelectorAll(".cap");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    caps.forEach(function (c) { io.observe(c); });
+  } else {
+    caps.forEach(function (c) { c.classList.add("in"); });
+  }
+
+  /* ---- the print insert interrupts the film: fade the playhead out ---- */
+  var paper = document.querySelector(".paper");
+  if (paper && "IntersectionObserver" in window) {
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        docEl.classList.toggle("print-mode", e.isIntersecting);
+      });
+    }, { threshold: 0.08 }).observe(paper);
+  }
+
+  /* ---- the timecodes run while their frame holds the screen ---- */
+  if (!reduced.matches && "IntersectionObserver" in window) {
+    var chips = [];
+    document.querySelectorAll(".tc-chip .t[data-until]").forEach(function (t) {
+      var parse = function (s) { var p = s.split(":"); return (+p[0]) * 60 + (+p[1]); };
+      chips.push({
+        el: t, now: parse(t.textContent), until: parse(t.getAttribute("data-until")),
+        visible: false,
+        scene: t.closest("section")
+      });
+    });
+    var tickIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        chips.forEach(function (c) { if (c.scene === e.target) c.visible = e.isIntersecting; });
+      });
+    }, { threshold: 0.45 });
+    chips.forEach(function (c) { if (c.scene) tickIo.observe(c.scene); });
+    setInterval(function () {
+      chips.forEach(function (c) {
+        if (!c.visible || c.now >= c.until) return;
+        c.now += 1;
+        var hh = Math.floor(c.now / 60), mm = c.now % 60;
+        c.el.textContent = (hh < 10 ? "0" + hh : hh) + ":" + (mm < 10 ? "0" + mm : mm);
+      });
+    }, 1400);
+  }
+
+  /* ---- ember field: a few sparks over the closing frame ---- */
+  var canvas = document.getElementById("emberfield");
+  if (canvas && !reduced.matches) {
+    var ctx = canvas.getContext("2d");
+    var sparks = [], running = false, W = 0, H = 0, raf = 0;
+    function size() {
+      var dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function spawn(y) {
+      return {
+        x: Math.random() * W,
+        y: y === undefined ? H * (0.55 + Math.random() * 0.45) : y,
+        r: 0.6 + Math.random() * 1.6,
+        vy: 0.18 + Math.random() * 0.5,
+        vx: (Math.random() - 0.5) * 0.22,
+        life: 0.35 + Math.random() * 0.65,
+        tw: Math.random() * Math.PI * 2
+      };
+    }
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < sparks.length; i++) {
+        var s = sparks[i];
+        s.y -= s.vy; s.x += s.vx + Math.sin(s.y * 0.02 + s.tw) * 0.12;
+        s.life -= 0.0016;
+        if (s.life <= 0 || s.y < -4) sparks[i] = spawn(H + 4);
+        var a = Math.max(0, Math.min(1, s.life)) * (0.5 + 0.5 * Math.sin(s.y * 0.05 + s.tw));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255," + Math.round(120 + 80 * a) + ",60," + (0.25 + 0.55 * a).toFixed(3) + ")";
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    function start() { if (!running) { running = true; size(); if (!sparks.length) for (var i = 0; i < 42; i++) sparks.push(spawn()); tick(); } }
+    function stop() { running = false; cancelAnimationFrame(raf); ctx && ctx.clearRect(0, 0, W, H); }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { e.isIntersecting ? start() : stop(); });
+      }, { threshold: 0.05 }).observe(canvas);
+    } else { start(); }
+    window.addEventListener("resize", function () { if (running) size(); }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

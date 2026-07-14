@@ -1,0 +1,9 @@
+[
+  { "file": "hero-oven.webp",     "pinnedHash": "56101ba3616d09adc78a38f754832365675ec16f8a56a92ca2ff5c9f87141646", "width": 1920, "height": 826,  "quality": 80 },
+  { "file": "fire-lighting.webp", "pinnedHash": "43abaaa5798fe9ee16c0e5df2e4a76bf5e0e7a4daecee156608a80f7aa8a65d4", "width": 1600, "height": 689,  "quality": 78 },
+  { "file": "dough.webp",         "pinnedHash": "e5df44677b13e58420441f75cf7427dda34f4b1b0c8f48d84d9ed1d51a5c7998", "width": 1600, "height": 689,  "quality": 78 },
+  { "file": "the-pass.webp",      "pinnedHash": "77a46f2ff2225b2096a7bfa052778000a707220815008030445b318017226a6f", "width": 1600, "height": 689,  "quality": 78 },
+  { "file": "the-room.webp",      "pinnedHash": "1f031f611c6d093b8dd7fc9ca51ac1786af8582d985113609d42574eaf6d475f", "width": 1600, "height": 689,  "quality": 78 },
+  { "file": "rye-loaf.webp",      "pinnedHash": "53af39d5d241fe271d3543311dc354b780ff21ed0252823ab07000ec33a198af", "width": 900,  "height": 1350, "quality": 82 },
+  { "file": "embers.webp",        "pinnedHash": "2074b9f7b2e4899cf3cb9094c5bd9b8baad26561fabc0ea50feeb3da42550e45", "width": 1600, "height": 689,  "quality": 75 }
+]

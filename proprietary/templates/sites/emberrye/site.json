@@ -1,0 +1,15 @@
+{
+  "slug": "emberrye",
+  "name": "Ember & Rye",
+  "vertical": "food-restaurant",
+  "oneLiner": "A wood-fired neighborhood restaurant — one oven, one menu, open tables.",
+  "axes": {
+    "primary": "cinematic-imagery",
+    "secondary": "editorial-print"
+  },
+  "paletteSeed": "char black + smoke grey + ember orange (oklch(0.68 0.19 45)); the film is dark and the magazine insert is a midnight edition — dark warm stock, cream ink, one tipped-in bright plate (founder note s35: no bright wall mid-scroll) — while the page color-grades from blue-hour dusk to ember night",
+  "typeDirection": "Fraunces variable (editorial display serif, opsz axis from masthead to long-form text, real italics) + Space Grotesk (film-credit kickers, timecodes, subtitle captions) — both OFL, vendored",
+  "motionBudget": "scroll-driven color grade (dusk-to-embers page-wide), letterboxed title entrance, subtitle captions that fade with each chapter, rising ember particles in the closing band, magazine-spread reveal — all reduced-motion honest (static graded page, captions visible)",
+  "wave": 1,
+  "built": "2026-07-14"
+}
