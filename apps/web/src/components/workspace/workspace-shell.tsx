@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CommandPalette } from "@/components/workspace/command-palette";
-import { PulseProvider } from "@/components/workspace/pulse-context";
+import { PulseProvider, usePulse } from "@/components/workspace/pulse-context";
 import { Sidebar } from "@/components/workspace/sidebar";
 import { Topbar } from "@/components/workspace/topbar";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,8 @@ import { activeSurface, NAV_SURFACES } from "@/lib/workspace/nav";
 function MobileNav() {
   const pathname = usePathname();
   const active = activeSurface(pathname);
+  const { pulse } = usePulse();
+  const needsYou = pulse?.needsYou ?? 0;
   return (
     <nav
       aria-label="Workspace navigation"
@@ -24,13 +26,23 @@ function MobileNav() {
           href={surface.href}
           aria-current={active?.href === surface.href ? "page" : undefined}
           className={cn(
-            "shrink-0 rounded-full px-3 py-1 text-xs transition-colors",
+            "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors",
             active?.href === surface.href
               ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
           {surface.label}
+          {/* The desktop sidebar shows the needs-you count; the mobile strip
+              must not hide it (critique, Sam persona). */}
+          {surface.showsNeedsYou && needsYou > 0 && (
+            <span
+              aria-label={`${needsYou} drafts need you`}
+              className="u-tabular inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-signal px-1 text-2xs font-semibold text-signal-foreground"
+            >
+              {needsYou}
+            </span>
+          )}
         </Link>
       ))}
     </nav>

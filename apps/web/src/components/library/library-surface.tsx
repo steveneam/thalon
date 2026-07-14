@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorNotice } from "@/components/workspace/error-notice";
 import { fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
 import {
   EXPORT_BUILDERS,
@@ -71,22 +73,25 @@ export function LibrarySurface() {
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const load = useCallback(
+    () =>
+      fetchLibrary()
+        .then((data) => {
+          setPayload(data);
+          setStatus("success");
+        })
+        .catch(() => {
+          setStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
-    let cancelled = false;
-    fetchLibrary()
-      .then((data) => {
-        if (cancelled) return;
-        setPayload(data);
-        setStatus("success");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
-      });
+    void load();
     return () => {
-      cancelled = true;
       if (copyTimer.current) clearTimeout(copyTimer.current);
     };
-  }, []);
+  }, [load]);
 
   async function withBusy(action: () => Promise<unknown>) {
     setBusy(true);
@@ -164,8 +169,21 @@ export function LibrarySurface() {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
-      {status === "loading" && <p className="text-sm text-muted-foreground">Loading library…</p>}
-      {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load the library.</p>}
+      {status === "loading" && (
+        <div className="flex flex-col gap-3" aria-label="Loading library">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+      )}
+      {status === "error" && (
+        <ErrorNotice
+          message="Couldn’t load the library."
+          onRetry={() => {
+            setStatus("loading");
+            void load();
+          }}
+        />
+      )}
       {status === "success" && payload && (
         <>
           <Card>
@@ -217,14 +235,15 @@ export function LibrarySurface() {
                 <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
                   Fetching straight from a video link isn&rsquo;t armed yet — paste the captions
                   alongside the URL for now. It arms when the hosted transcript vendor is keyed
-                  (TRANSCRIPT_PROVIDER=hosted-vendor{seam && !seam.vendorConfigured ? ", key not configured" : ""});
-                  local Whisper (whisper-local) covers media files on this machine.
+                  {seam && !seam.vendorConfigured ? " (not configured yet — Settings shows the seam)" : ""};
+                  local Whisper covers media files on this machine.
                 </p>
               )}
               {seam?.selected === "hosted-vendor" && !seam.vendorConfigured && (
                 <p className="rounded-lg border border-dashed border-signal/50 bg-signal/10 p-3 text-xs">
-                  hosted-vendor is selected but not keyed — set TRANSCRIPT_VENDOR_URL and
-                  TRANSCRIPT_VENDOR_API_KEY, then URL-only ingest works end to end.
+                  The hosted transcript vendor is selected but not keyed — add its URL and API
+                  key to the environment, then URL-only ingest works end to end. Settings shows
+                  the seam readout.
                 </p>
               )}
               {actionError && (

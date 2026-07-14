@@ -26,8 +26,10 @@ describe("WorkspaceShell", () => {
     const dashLinks = screen.getAllByRole("link", { name: "Dashboard" });
     expect(dashLinks.every((l) => l.getAttribute("aria-current") !== "page")).toBe(true);
 
-    // Needs-you badge from the pulse fixture (3 = 2 queued + 1 blocked).
-    expect(await screen.findByLabelText("3 drafts need you")).toBeInTheDocument();
+    // Needs-you badge from the pulse fixture (3 = 2 queued + 1 blocked) —
+    // once in the desktop sidebar AND once in the mobile strip (the strip
+    // must not hide the count; critique 2026-07-14).
+    expect(await screen.findAllByLabelText("3 drafts need you")).toHaveLength(2);
     expect(
       await screen.findByRole("link", { name: /3 drafts need you — open the approve queue/i }),
     ).toBeInTheDocument();

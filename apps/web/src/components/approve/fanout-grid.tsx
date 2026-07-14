@@ -90,12 +90,12 @@ export function FanoutGrid({
                       <span className="flex flex-wrap items-center gap-1.5">
                         <Badge variant="outline">{draft.status}</Badge>
                         {draft.format && draft.format !== "post" && (
-                          <Badge variant="secondary" className="font-mono text-[10px]">
+                          <Badge variant="secondary" className="font-mono text-2xs">
                             {draft.format}
                           </Badge>
                         )}
                         {clipPlan && (
-                          <Badge variant="outline" className="font-mono text-[10px]">
+                          <Badge variant="outline" className="font-mono text-2xs">
                             {formatMsAsClock(clipPlan.startMs)}–{formatMsAsClock(clipPlan.endMs)}
                           </Badge>
                         )}

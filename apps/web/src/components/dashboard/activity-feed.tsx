@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Activity, CircleAlert, User, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorNotice } from "@/components/workspace/error-notice";
 import { cn } from "@/lib/utils";
 import { describeActivity } from "@/lib/workspace/activity";
 import { timeAgo } from "@/lib/workspace/format";
@@ -13,6 +15,8 @@ export type ActivityStatus = "loading" | "error" | "success";
 interface ActivityFeedProps {
   status: ActivityStatus;
   items: ActivityItem[];
+  /** Reload the feed after a failed read (the shared ErrorNotice contract). */
+  onRetry?: () => void;
 }
 
 const TONE_ICON = { engine: Zap, operator: User, alert: CircleAlert } as const;
@@ -21,7 +25,7 @@ const TONE_ICON = { engine: Zap, operator: User, alert: CircleAlert } as const;
  * The live activity feed: work attributed to the engine, each row linking to
  * the surface where its entity lives (event → run → draft provenance).
  */
-export function ActivityFeed({ status, items }: ActivityFeedProps) {
+export function ActivityFeed({ status, items, onRetry }: ActivityFeedProps) {
   return (
     <Card className="min-h-64">
       <CardHeader className="flex-row items-center gap-2">
@@ -29,8 +33,14 @@ export function ActivityFeed({ status, items }: ActivityFeedProps) {
         <CardTitle>Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        {status === "loading" && <p className="text-sm text-muted-foreground">Loading activity…</p>}
-        {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load activity.</p>}
+        {status === "loading" && (
+          <div className="flex flex-col gap-3" aria-label="Loading activity">
+            <Skeleton className="h-4" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-3/5" />
+          </div>
+        )}
+        {status === "error" && <ErrorNotice message="Couldn’t load activity." onRetry={onRetry} />}
         {status === "success" && items.length === 0 && (
           <p className="text-sm text-muted-foreground">
             Nothing yet — every ingest, judge verdict, and approval will show up here as it

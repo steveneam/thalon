@@ -19,6 +19,12 @@
  */
 
 @theme inline {
+  /* The MICRO type step (documented in DESIGN.md §3): dense mono micro-labels
+   * — judge gate chips, stage rail labels, clip timestamps. The smallest
+   * legal size in the system; anything smaller is a defect, and the old
+   * arbitrary 10px utilities are retired in favour of this named step. */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1.4;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);

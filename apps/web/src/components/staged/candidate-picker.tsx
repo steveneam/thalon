@@ -36,7 +36,7 @@ export function CandidatePicker({ stageTitle, candidates, busy, onPick }: Candid
               <div className="flex items-start justify-between gap-2">
                 <h4 className="text-sm font-semibold text-foreground">{candidate.label}</h4>
                 {doc && (
-                  <Badge variant="secondary" className="font-mono text-[10px]">
+                  <Badge variant="secondary" className="font-mono text-2xs">
                     {doc.scenes[0]?.motion}
                   </Badge>
                 )}

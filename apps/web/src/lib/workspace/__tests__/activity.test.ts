@@ -42,6 +42,11 @@ describe("describeActivity", () => {
     expect(view.summary).toBe("some_future.event");
     expect(view.href).toBeNull();
   });
+
+  it("deep-links draft events to the entity, not just the surface (recognition over recall)", () => {
+    const view = describeActivity(item("draft.transition", "draft", { to: "queued" }));
+    expect(view.href).toBe("/app/approve?draft=e-1");
+  });
 });
 
 describe("timeAgo", () => {

@@ -32,8 +32,20 @@ function payloadStr(payload: Record<string, unknown>, key: string): string | nul
   return typeof value === "string" ? value : null;
 }
 
+/**
+ * Provenance links land on the ENTITY, not just its surface (critique
+ * 2026-07-14, recognition-over-recall): a draft event deep-links into the
+ * approve queue's selection; other entities fall back to their surface.
+ */
+function entityHref(item: ActivityItem): string | null {
+  if (item.entityType === "draft") {
+    return `/app/approve?draft=${encodeURIComponent(item.entityId)}`;
+  }
+  return SURFACE_BY_ENTITY[item.entityType] ?? null;
+}
+
 export function describeActivity(item: ActivityItem): ActivityView {
-  const href = SURFACE_BY_ENTITY[item.entityType] ?? null;
+  const href = entityHref(item);
   const p = item.payload;
   switch (item.event) {
     case "fanout_run.created":

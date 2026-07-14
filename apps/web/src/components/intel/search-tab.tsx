@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, RotateCcw, X } from "lucide-react";
 import { DemoBanner } from "@/components/intel/demo-banner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorNotice } from "@/components/workspace/error-notice";
 import { HorizonCard } from "@/components/intel/horizon-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,22 +37,28 @@ export function SearchTab() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const load = useCallback(
+    () =>
+      Promise.all([fetchTargets(), fetchHorizon()])
+        .then(([targetRows, horizonPayload]) => {
+          setTargets(targetRows);
+          setHorizon(horizonPayload);
+          setStatus("success");
+        })
+        .catch(() => {
+          setStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
-    let cancelled = false;
-    Promise.all([fetchTargets(), fetchHorizon()])
-      .then(([targetRows, horizonPayload]) => {
-        if (cancelled) return;
-        setTargets(targetRows);
-        setHorizon(horizonPayload);
-        setStatus("success");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void load();
+  }, [load]);
+
+  function retry() {
+    setStatus("loading");
+    void load();
+  }
 
   async function withBusy(action: () => Promise<unknown>) {
     setBusy(true);
@@ -75,8 +83,16 @@ export function SearchTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      {status === "loading" && <p className="text-sm text-muted-foreground">Loading search intel…</p>}
-      {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load search intel.</p>}
+      {status === "loading" && (
+        <div className="flex flex-col gap-3" aria-label="Loading search intel">
+          <Skeleton className="h-4 w-72" />
+          <div className="grid gap-3 xl:grid-cols-2">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+          </div>
+        </div>
+      )}
+      {status === "error" && <ErrorNotice message="Couldn’t load search intel." onRetry={retry} />}
       {status === "success" && (
         <>
           <Card>

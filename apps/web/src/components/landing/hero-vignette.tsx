@@ -109,10 +109,10 @@ export function HeroVignette() {
             </span>
             <span className="flex items-center gap-1.5 sm:gap-2" style={beat(5.4)}>
               {PLATFORM_DOTS.map((p, i) => (
-                <span key={p} className="relative flex size-7 items-center justify-center rounded-full border bg-background font-mono text-[10px] text-muted-foreground">
+                <span key={p} className="relative flex size-7 items-center justify-center rounded-full border bg-background font-mono text-2xs text-muted-foreground">
                   {p}
                   <span
-                    className="absolute inset-0 flex items-center justify-center rounded-full border border-primary/60 bg-primary/15 font-mono text-[10px] text-primary"
+                    className="absolute inset-0 flex items-center justify-center rounded-full border border-primary/60 bg-primary/15 font-mono text-2xs text-primary"
                     style={beat(5.9 + i * 0.28, "vignette-glow")}
                   >
                     {p}

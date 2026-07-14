@@ -20,11 +20,25 @@ import { isTypingTarget } from "@/lib/approve-queue/keyboard";
 import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import type { FeedRun, GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
+/** ?run=/?draft= from the mount-time URL — SSR-safe, router-free (see deepLinkRef below). */
+function readDeepLink(): { runId: string | null; draftId: string | null } {
+  const params =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  return { runId: params?.get("run") ?? null, draftId: params?.get("draft") ?? null };
+}
+
 /** Composes the 3-zone Approve queue: feed selection drives the grid, grid selection drives the panel. */
 export function ApproveQueue() {
   const [feedStatus, setFeedStatus] = useState<FeedStatus>("loading");
   const [runs, setRuns] = useState<FeedRun[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+
+  // One-shot deep-link targets (?run= / ?draft= — provenance links land on
+  // the ENTITY, not just the surface): consumed by the first feed/grid load,
+  // after which normal selection owns the state. Read from location rather
+  // than useSearchParams — the value is only ever consumed once at mount, and
+  // this keeps the component mountable outside a Next router (tests).
+  const deepLinkRef = useRef(readDeepLink());
 
   const [gridStatus, setGridStatus] = useState<GridStatus>("idle");
   const [drafts, setDrafts] = useState<GridDraft[]>([]);
@@ -72,7 +86,11 @@ export function ApproveQueue() {
         if (cancelled) return;
         setRuns(data);
         setFeedStatus("success");
-        if (data.length > 0) selectRun(data[0].id);
+        if (data.length > 0) {
+          const wanted = deepLinkRef.current.runId;
+          deepLinkRef.current.runId = null;
+          selectRun(wanted && data.some((r) => r.id === wanted) ? wanted : data[0].id);
+        }
       })
       .catch(() => {
         if (!cancelled) setFeedStatus("error");
@@ -90,7 +108,11 @@ export function ApproveQueue() {
         if (cancelled) return;
         setDrafts(data);
         setGridStatus("success");
-        if (data.length > 0) selectDraft(data[0].id);
+        if (data.length > 0) {
+          const wanted = deepLinkRef.current.draftId;
+          deepLinkRef.current.draftId = null;
+          selectDraft(wanted && data.some((d) => d.id === wanted) ? wanted : data[0].id);
+        }
       })
       .catch(() => {
         if (!cancelled) setGridStatus("error");
@@ -223,6 +245,11 @@ export function ApproveQueue() {
     // min-h-0 (not min-h-screen): the queue fills the workspace shell's main
     // area; the shell owns the viewport height.
     <div className="flex min-h-0 flex-1 flex-col">
+      {/* j/k selection is a silent context change for screen readers without
+          this: announce what the panel now shows (critique, Sam persona). */}
+      <p aria-live="polite" className="sr-only">
+        {selectedDraft ? `Selected ${selectedDraft.platform} draft, status ${selectedDraft.status}` : ""}
+      </p>
       {zeroInbox && (
         <p className="border-b border-primary/25 bg-primary/5 px-4 py-2 text-sm">
           <span className="font-medium text-primary">Inbox zero.</span>{" "}

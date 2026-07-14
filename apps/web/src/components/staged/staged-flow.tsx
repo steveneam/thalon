@@ -131,7 +131,7 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
         <h2 className="text-sm font-semibold text-foreground">
           Staged video — advanced mode
           <span className="ml-2 text-xs font-normal text-muted-foreground">
-            {flow.family} plan · {flow.plan.stages.length} stages · fake drivers (B5.4)
+            {flow.family} plan · {flow.plan.stages.length} stages · demo drivers, no spend
           </span>
         </h2>
         {stageDraft && <JudgeBadge results={stage.judgeResults} bodyHash={stageDraft.bodyHash} />}

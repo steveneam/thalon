@@ -19,7 +19,8 @@
       "title": { "displayName": "Title", "purpose": "Card titles and dense-surface headings (CardTitle default)." },
       "body": { "displayName": "Body", "purpose": "Descriptions and prose; ≤65–75ch." },
       "label": { "displayName": "Label", "purpose": "Badges, secondary metadata, CardDescription." },
-      "eyebrow": { "displayName": "Eyebrow (HUD micro-label)", "purpose": "Scoped mono kicker — landing sections and dense-card column labels only, never generic section scaffolding." }
+      "eyebrow": { "displayName": "Eyebrow (HUD micro-label)", "purpose": "Scoped mono kicker — landing sections and dense-card column labels only, never generic section scaffolding." },
+      "micro": { "displayName": "Micro (text-2xs)", "purpose": "Dense mono micro-labels: judge gate chips, stage-rail labels, clip timestamps. The smallest legal step." }
     },
     "shadows": [],
     "motion": [

@@ -292,9 +292,9 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
             )
           ) : (
             <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
-              Live {family} generation from this box wires up with the B6.6 origination loop — the
-              engine and judge lane already exist; this surface connects to them next. Your prompt
-              and Intel context are ready to ride along.
+              Live {family} generation isn&rsquo;t connected on this surface yet — the engine and
+              judge lane already exist; this surface wires into them next. Your prompt and Intel
+              context are ready to ride along.
             </p>
           )}
         </CardContent>

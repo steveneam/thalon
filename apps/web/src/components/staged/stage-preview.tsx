@@ -65,16 +65,16 @@ export function StagePreview({ aspect, scenes, note }: StagePreviewProps) {
         )}
         style={{ aspectRatio: ASPECT_RATIO[aspect] }}
       >
-        <span className="absolute top-2 left-2 max-w-full truncate text-[10px] text-zinc-500">{selected.heading}</span>
+        <span className="absolute top-2 left-2 max-w-full truncate text-2xs text-zinc-500">{selected.heading}</span>
         {selected.motion && (
-          <Badge variant="outline" className="absolute top-2 right-2 border-zinc-700 text-[10px] text-zinc-400">
+          <Badge variant="outline" className="absolute top-2 right-2 border-zinc-700 text-2xs text-zinc-400">
             {selected.motion}
           </Badge>
         )}
         <p className="text-lg leading-snug font-semibold break-words text-zinc-100">
           {selected.onScreenText ?? "—"}
         </p>
-        <p className="absolute right-3 bottom-2 left-3 truncate text-[10px] text-zinc-500 italic">
+        <p className="absolute right-3 bottom-2 left-3 truncate text-2xs text-zinc-500 italic">
           {selected.visual ?? "visual direction pending — filled at the scenes/effects stage"}
         </p>
       </div>
@@ -88,7 +88,7 @@ export function StagePreview({ aspect, scenes, note }: StagePreviewProps) {
             title={`${scene.heading} (${formatMsAsClock(scene.durationMs)})`}
             onClick={() => setSceneIndex(i)}
             className={cn(
-              "min-w-4 rounded-sm border border-border bg-muted text-[10px] text-muted-foreground transition-colors hover:bg-accent focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              "min-w-4 rounded-sm border border-border bg-muted text-2xs text-muted-foreground transition-colors hover:bg-accent focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
               i === sceneIndex && "border-ring bg-accent font-medium text-foreground",
             )}
             style={{ flexGrow: Math.max(scene.durationMs, 1) }}

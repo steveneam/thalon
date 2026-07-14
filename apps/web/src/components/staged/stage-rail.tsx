@@ -40,12 +40,12 @@ export function StageRail({ stages, viewIndex, onView }: StageRailProps) {
               {stage.status === "done" && <Badge variant="outline">done</Badge>}
               {stage.status === "current" && <Badge>current</Badge>}
               {stage.draft && (
-                <Badge variant="secondary" className="font-mono text-[10px]">
+                <Badge variant="secondary" className="font-mono text-2xs">
                   {stage.draft.status}
                 </Badge>
               )}
               {!stage.draft && stage.candidates && (
-                <Badge variant="secondary" className="font-mono text-[10px]">
+                <Badge variant="secondary" className="font-mono text-2xs">
                   pick 1 of {stage.candidates.length}
                 </Badge>
               )}

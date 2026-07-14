@@ -29,7 +29,7 @@ export function JudgeBadge({ results, bodyHash }: JudgeBadgeProps) {
     <div className="flex flex-wrap items-center gap-1.5" data-overall={overall}>
       <Badge variant={VARIANT[overall]}>{LABEL[overall]}</Badge>
       {Object.entries(gates).map(([gate, verdict]) => (
-        <Badge key={gate} variant="secondary" className="font-mono text-[10px]">
+        <Badge key={gate} variant="secondary" className="font-mono text-2xs">
           {gate}: {verdict}
         </Badge>
       ))}

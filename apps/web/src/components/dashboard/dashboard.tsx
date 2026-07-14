@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
 import { ActivityFeed, type ActivityStatus } from "@/components/dashboard/activity-feed";
@@ -52,17 +52,22 @@ export function Dashboard() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [health, setHealth] = useState<WorkspaceStatus | null>(null);
 
+  const loadActivity = useCallback(
+    () =>
+      fetchActivity()
+        .then((items) => {
+          setActivity(items);
+          setActivityStatus("success");
+        })
+        .catch(() => {
+          setActivityStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
     let cancelled = false;
-    fetchActivity()
-      .then((items) => {
-        if (cancelled) return;
-        setActivity(items);
-        setActivityStatus("success");
-      })
-      .catch(() => {
-        if (!cancelled) setActivityStatus("error");
-      });
+    void loadActivity();
     // Best-effort health read: only a degraded gateway surfaces here — the
     // full seam/driver readout is Settings' job, not the dashboard's.
     fetchStatus()
@@ -75,7 +80,7 @@ export function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadActivity]);
 
   const counts = pulse?.counts ?? EMPTY_COUNTS;
   const needsYou = pulse?.needsYou ?? 0;
@@ -114,7 +119,14 @@ export function Dashboard() {
           )}
           <QuickActions />
         </div>
-        <ActivityFeed status={activityStatus} items={activity} />
+        <ActivityFeed
+          status={activityStatus}
+          items={activity}
+          onRetry={() => {
+            setActivityStatus("loading");
+            void loadActivity();
+          }}
+        />
       </div>
     </div>
   );

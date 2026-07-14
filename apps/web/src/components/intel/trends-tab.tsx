@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AreasManager } from "@/components/intel/areas-manager";
 import { CadenceStamp } from "@/components/intel/cadence-stamp";
 import { DemoBanner } from "@/components/intel/demo-banner";
 import { TrendCard } from "@/components/intel/trend-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorNotice } from "@/components/workspace/error-notice";
 import { cn } from "@/lib/utils";
 import { createArea, dismissTrend, fetchTrends, promoteTrend, sweepNow, updateArea } from "@/lib/intel/client";
 import type { TrendsPayload } from "@/lib/intel/types";
@@ -25,21 +27,27 @@ export function TrendsTab() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const load = useCallback(
+    () =>
+      fetchTrends()
+        .then((data) => {
+          setPayload(data);
+          setStatus("success");
+        })
+        .catch(() => {
+          setStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
-    let cancelled = false;
-    fetchTrends()
-      .then((data) => {
-        if (cancelled) return;
-        setPayload(data);
-        setStatus("success");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void load();
+  }, [load]);
+
+  function retry() {
+    setStatus("loading");
+    void load();
+  }
 
   async function reload() {
     setPayload(await fetchTrends());
@@ -68,8 +76,16 @@ export function TrendsTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      {status === "loading" && <p className="text-sm text-muted-foreground">Loading trends…</p>}
-      {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load trends.</p>}
+      {status === "loading" && (
+        <div className="flex flex-col gap-3" aria-label="Loading trends">
+          <Skeleton className="h-4 w-72" />
+          <div className="grid gap-3 xl:grid-cols-2">
+            <Skeleton className="h-40" />
+            <Skeleton className="h-40" />
+          </div>
+        </div>
+      )}
+      {status === "error" && <ErrorNotice message="Couldn’t load trends." onRetry={retry} />}
       {status === "success" && payload && (
         <>
           <CadenceStamp
@@ -99,7 +115,7 @@ export function TrendsTab() {
           />
 
           {payload.demo && (
-            <DemoBanner arming="Live per-area polling arms at B6.5 — these ranked cards show the exact shape it produces, reasons included." />
+            <DemoBanner arming="Live per-area polling isn’t switched on yet — these ranked cards show the exact shape it produces, reasons included." />
           )}
 
           <div role="group" aria-label="Filter by area" className="flex flex-wrap gap-1.5">
@@ -123,7 +139,7 @@ export function TrendsTab() {
 
           {filtered.length === 0 ? (
             <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-              No cards {filter ? `for “${filter}” yet — its first poll lands with B6.5` : "right now"}.
+              No cards {filter ? `for “${filter}” yet — its first live poll hasn’t landed` : "right now"}.
             </p>
           ) : (
             <div className="grid gap-3 xl:grid-cols-2">

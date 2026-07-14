@@ -253,7 +253,7 @@ function DirectionSceneCard({ scene, index, busy, accepted, onEdit, onAccept }: 
           {scene.heading}
         </h4>
         <span className="flex items-center gap-1.5">
-          <Badge variant="secondary" className="font-mono text-[10px]">{scene.motion}</Badge>
+          <Badge variant="secondary" className="font-mono text-2xs">{scene.motion}</Badge>
           <Badge variant="outline">{formatMsAsClock(scene.durationMs)}</Badge>
         </span>
       </div>

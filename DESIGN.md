@@ -38,6 +38,11 @@ typography:
     fontSize: "0.6875rem"
     fontWeight: 400
     letterSpacing: "0.18em"
+  micro:
+    fontFamily: "Geist Mono, ui-monospace, monospace"
+    fontSize: "0.625rem"
+    fontWeight: 400
+    lineHeight: 1.4
 rounded:
   sm: "0.375rem"
   md: "0.5rem"
@@ -178,6 +183,10 @@ a restrained trace of the command-center references, not a costume.
 - **Label** (500, 0.75rem): badges, secondary metadata, `CardDescription`.
 - **Eyebrow** (mono, 0.6875rem, +0.18em, uppercase): the `u-eyebrow` HUD
   micro-label — section kickers on the landing, column labels in dense cards.
+- **Micro** (mono, 0.625rem — the `text-2xs` theme step): dense mono
+  micro-labels only — judge gate chips, stage-rail labels, clip timestamps.
+  The smallest legal size in the system; anything below it is a defect, and
+  arbitrary pixel sizes never substitute for the named step.
 
 ### Named Rules
 **The Tabular Rule.** Any number that updates (counts, scores, budgets) sets

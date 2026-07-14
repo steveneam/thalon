@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorNotice } from "@/components/workspace/error-notice";
 import { fetchRunsFeed } from "@/lib/approve-queue/client";
 import type { FeedRun } from "@/lib/approve-queue/types";
 import { timeAgo } from "@/lib/workspace/format";
@@ -20,21 +22,22 @@ export function RunsList() {
   const [status, setStatus] = useState<ListStatus>("loading");
   const [runs, setRuns] = useState<FeedRun[]>([]);
 
+  const load = useCallback(
+    () =>
+      fetchRunsFeed()
+        .then((data) => {
+          setRuns(data);
+          setStatus("success");
+        })
+        .catch(() => {
+          setStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
-    let cancelled = false;
-    fetchRunsFeed()
-      .then((data) => {
-        if (cancelled) return;
-        setRuns(data);
-        setStatus("success");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void load();
+  }, [load]);
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
@@ -47,8 +50,21 @@ export function RunsList() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {status === "loading" && <p className="text-sm text-muted-foreground">Loading runs…</p>}
-          {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load runs.</p>}
+          {status === "loading" && (
+            <div className="flex flex-col gap-2" aria-label="Loading runs">
+              <Skeleton className="h-14" />
+              <Skeleton className="h-14" />
+            </div>
+          )}
+          {status === "error" && (
+            <ErrorNotice
+              message="Couldn’t load runs."
+              onRetry={() => {
+                setStatus("loading");
+                void load();
+              }}
+            />
+          )}
           {status === "success" && runs.length === 0 && (
             <p className="text-sm text-muted-foreground">
               No runs yet — your first generation lands here with full provenance.
@@ -59,7 +75,16 @@ export function RunsList() {
               {runs.map((run) => (
                 <li key={run.id} className="rounded-lg border border-border p-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs">{run.id.slice(0, 8)}</span>
+                    {/* Recognition over recall: the run reads as WHAT it did;
+                        the id demotes to a mono aside for correlation. */}
+                    <span className="text-sm font-medium">
+                      {Array.isArray(run.platforms) && run.platforms.length > 0
+                        ? `Fan-out to ${(run.platforms as string[]).join(" · ")}`
+                        : "Fan-out run"}
+                    </span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {run.id.slice(0, 8)}
+                    </span>
                     <Badge variant="outline">{run.status}</Badge>
                     {!run.draftsComplete && (
                       <Badge
@@ -69,14 +94,11 @@ export function RunsList() {
                         incomplete
                       </Badge>
                     )}
-                    <span className="text-xs text-muted-foreground">
-                      {Array.isArray(run.platforms) ? (run.platforms as string[]).join(" · ") : ""}
-                    </span>
                     <time dateTime={run.createdAt} className="ml-auto text-xs text-muted-foreground">
                       {timeAgo(run.createdAt)}
                     </time>
                     <Link
-                      href="/app/approve"
+                      href={`/app/approve?run=${encodeURIComponent(run.id)}`}
                       className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                     >
                       open queue <ArrowRight aria-hidden className="size-3" />

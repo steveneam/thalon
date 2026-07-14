@@ -280,8 +280,8 @@ export function LeadsSurface() {
                 (every signup becomes a lead) · or leads arrive via the API. With an ICP on your
                 profile, each one gets scored against who you actually sell to — with the reasons
                 spelled out, and one-click exits into a post, video, or page briefed by the
-                lead&rsquo;s own context. <Flame aria-hidden className="inline size-3.5" /> Outreach
-                drafts (email/DM, judge-gated, approve-to-send) arrive with B-crm.4.
+                lead&rsquo;s own context. <Flame aria-hidden className="inline size-3.5" /> The
+                →Email exit drafts judge-gated outreach you send yourself; DM drafts come later.
               </CardDescription>
             )}
           </CardHeader>

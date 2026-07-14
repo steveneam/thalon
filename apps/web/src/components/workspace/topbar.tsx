@@ -99,8 +99,8 @@ export function Topbar() {
             </>
           )}
           <p className="mt-3 border-t border-border pt-2 text-xs text-muted-foreground">
-            One operated tenant per process — selected by <code className="font-mono">DEMO_TENANT_SLUG</code>.
-            Operator sign-in and true switching arrive with auth.
+            One workspace tenant at a time for now — operator sign-in and true switching arrive
+            with accounts. Which tenant this box operates shows in Settings.
           </p>
         </div>
       </details>

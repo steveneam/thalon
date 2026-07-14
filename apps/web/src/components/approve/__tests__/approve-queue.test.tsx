@@ -9,6 +9,18 @@ import {
 import { ApproveQueue } from "../approve-queue";
 
 describe("ApproveQueue — 3-zone layout", () => {
+  it("consumes a ?run= deep link: the linked run is selected instead of the newest (provenance lands on the entity)", async () => {
+    window.history.replaceState(null, "", `/app/approve?run=${FIXTURE_RUN_1_ID}`);
+    try {
+      render(<ApproveQueue />);
+      const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
+      await within(grid).findByText("Run1 LinkedIn draft");
+      expect(within(grid).queryByText("Run2 LinkedIn draft")).not.toBeInTheDocument();
+    } finally {
+      window.history.replaceState(null, "", "/app/approve");
+    }
+  });
+
   it("feed selection drives the grid, and grid selection drives the panel", async () => {
     const user = userEvent.setup();
     render(<ApproveQueue />);
