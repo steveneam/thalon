@@ -18,7 +18,7 @@
 
 ▎ ▸ **Session-35 plan:** **③ Ember & Rye via the meta-prompt verbatim** — the model-roster site: cinematic stills are the page (soul/seedance class per slot via `models_explore`; nano banana for any text/menu-precise graphics; video-class stays a deliberate draw — batch-estimate before any [VID] mint). Editorial/print secondary (grid-broken magazine layout, long-form confidence). Single-file default; ≥3 two-lane passes; local browser-verify; mint → pin → manifest → export chain per contract (cutouts only if sprites needed — remember 1.0cr each). **(2) If time: ④ Northpace** (otherworldly animation + novel type). Sequential lead-inline default; **any lane/subagent fan-out needs fresh founder go**. Interleave when blocked: dashboard v3 (`workspace-ux-v2.md` §10) or P0.4/P0.5.
 
-▎ ▸ **[founder] queue:** go/no-go on the impeccable re-critique agents · triage the staged leads queue · dogfood the →Email exit · month-end downgrade decision rides the §6 credit re-assess · preview-gallery service stays parked until outreach wants links.
+▎ ▸ **[founder] queue:** triage the staged leads queue · dogfood the →Email exit · month-end downgrade decision rides the §6 credit re-assess · preview-gallery service stays parked until outreach wants links. **Impeccable re-critique DEFERRED (founder, 2026-07-14 s34): run it when workspace work resumes (dashboard v3 slice) — bundle the approval ask into that session's kickoff, not the standing queue.**
 
 ▎ ▸ **Next checkpoint (B-crm.3–6) additions unchanged:** Postgres migration BEFORE triage/eval rows accumulate (then RLS ratchet) · B-crm.5 shortlist + `matchTerm` word-boundary · B-crm.3 enrichment provider · B-crm.4 Resend timing · approve/reject undo contract change.
 
