@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How the TrueBore Plumbing demonstration page was designed and built.">
+<meta name="robots" content="noindex">
+<title>Method — how the TrueBore page was made</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f2c200'/%3E%3Cpath d='M6 20 H14 V12 H26' fill='none' stroke='%23171511' stroke-width='5'/%3E%3Ccircle cx='26' cy='24' r='3' fill='%231f66d0'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Anton";src:url("../fonts/anton-400.woff2") format("woff2");font-weight:400;font-display:swap;}
+@font-face{font-family:"Plex Mono";src:url("../fonts/plex-mono-400.woff2") format("woff2");font-weight:400;font-display:swap;}
+@font-face{font-family:"Plex Mono";src:url("../fonts/plex-mono-600.woff2") format("woff2");font-weight:600;font-display:swap;}
+:root{
+  --conc:#e8e5df;--paper:#f1efe9;--ink:#171511;--ink-soft:#5b564c;
+  --yellow:#f2c200;--water:#1f66d0;
+  --display:"Anton",Impact,sans-serif;--mono:"Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0;}
+body{background:var(--conc);color:var(--ink);font-family:var(--mono);font-size:.97rem;line-height:1.65;}
+::selection{background:var(--yellow);}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+.skip{position:absolute;left:-999px;top:0;background:var(--yellow);border:2px solid var(--ink);padding:.5rem 1rem;font-weight:600;}
+.skip:focus{left:8px;top:8px;}
+header{border-bottom:3px solid var(--ink);}
+header .bar{max-width:46rem;margin-inline:auto;padding:0.8rem clamp(1rem,4vw,2rem);display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.wordmark{font-family:var(--display);font-size:1.3rem;text-transform:uppercase;text-decoration:none;}
+header nav a{font-size:.8rem;font-weight:600;}
+main{max-width:46rem;margin-inline:auto;padding:clamp(2.5rem,6vw,4rem) clamp(1rem,4vw,2rem) 4rem;}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(1.9rem,4.5vw,2.8rem);line-height:1;text-transform:uppercase;}
+h2{font-family:var(--display);font-weight:400;font-size:1.3rem;text-transform:uppercase;margin-top:2.6rem;border-bottom:3px solid var(--yellow);padding-bottom:.3rem;}
+p{margin-top:.9rem;}
+ul,ol{padding-left:1.2rem;margin-top:.9rem;display:grid;gap:.5rem;}
+dl{margin-top:1rem;border:2px solid var(--ink);background:var(--paper);padding:1.1rem 1.2rem;font-size:.9rem;display:grid;grid-template-columns:max-content 1fr;gap:.45rem 1.2rem;}
+dt{font-weight:600;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);align-self:baseline;}
+dd{margin:0;}
+.passlog{list-style:none;padding:0;}
+.passlog li{border-top:2px solid var(--ink);padding-top:.7rem;font-size:.92rem;}
+.passlog b{font-weight:600;font-size:.75rem;letter-spacing:.1em;color:var(--ink);background:var(--yellow);padding:.05rem .35rem;}
+footer{border-top:3px solid var(--ink);}
+footer .bar{max-width:46rem;margin-inline:auto;padding:1.2rem clamp(1rem,4vw,2rem);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to content</a>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="../">TrueBore™</a>
+    <nav aria-label="Page"><a href="../">Back to the page</a></nav>
+  </div>
+</header>
+
+<main id="guide">
+  <h1>How this page was made</h1>
+
+  <p><strong>TrueBore Plumbing is a fictional demonstration business.</strong> No real services are
+  offered, the phone number is a film-style placeholder, and the rate card is labeled as a sample.
+  This site is one entry in a portfolio of design templates, each built for a different kind of
+  business.</p>
+
+  <h2>The design idea</h2>
+  <p>Plumbing is applied physics — pressure, gravity, and water's total indifference to your
+  weekend. So the page runs on a real physics engine and one strict color rule: the world is
+  board-formed concrete, ink, and safety yellow, and <strong>anything blue is literal water</strong>.
+  Water is the antagonist; the trade is the answer.</p>
+  <p>The hero takes it literally. A joint drips under real gravity while a demo gauge counts the
+  litres, and the gate valve actually turns — two and a half full turns, righty-tighty — until the
+  leak stops and the page stamps your time. The parts bin further down is the same idea played for
+  weight: photographs of six real-looking fittings with honest masses (a 2.6&nbsp;kg wrench shoves a
+  120&nbsp;g coupling, never the reverse) that you can pick up and toss.</p>
+
+  <h2>Type and materials</h2>
+  <ul>
+    <li><strong>Anton</strong>: display type, set like stencilled site signage.</li>
+    <li><strong>IBM Plex Mono</strong> (400/600): body, labels, and the gauges — job-sheet voice.</li>
+    <li>Both typefaces are open-source under the SIL Open Font License and served from this site;
+    their license texts ship in the site's <code>fonts/</code> directory.</li>
+    <li>Physics: <strong>Matter.js 0.20.0</strong> (MIT), vendored locally with its license header
+    intact — the only third-party code on the page.</li>
+    <li>No frameworks, no trackers, and no network calls from any script: what happens on this
+    page stays on this page.</li>
+  </ul>
+
+  <h2>Imagery</h2>
+  <p>The six fitting photographs in the parts bin are <strong>AI-generated</strong>, minted for
+  this page on a paid, commercially-licensed plan, then isolated onto transparent backgrounds so
+  the physics engine can tumble them. Full provenance for every image (model, prompt, spend,
+  license tier) is recorded in the studio's asset register at mint time.</p>
+  <dl>
+    <dt>Assets</dt><dd>Pipe wrench, gate valve, brass elbow, copper tee, compression coupling, copper pipe</dd>
+    <dt>Vendor</dt><dd>Higgsfield (paid tier)</dd>
+    <dt>Models</dt><dd>soul_cinematic (generation) + image_background_remover (cutouts)</dd>
+    <dt>Disclosure</dt><dd>AI-generated imagery; no stock or scraped photography anywhere on this site</dd>
+  </dl>
+
+  <h2>Build notes: iteration passes</h2>
+  <p>The page went through repeated full passes, each hunting faults (layout, contrast, motion
+  honesty, accessibility) and pushing one deliberate ambition item.</p>
+  <ol class="passlog" id="passlog">
+    <li><b>PASS 1</b> — Fault lane: the headline's yellow plate painted at font-box height,
+    bleeding over the line above and the paragraph below (rebuilt as a glyph-hugging block);
+    the leak-stopped stamp landed on top of the burst gauge (moved onto the pipe, next to the
+    failed joint); the rate card's "no surprises" stamp was clipped by its own scroll container;
+    the ™ rendered full-size. Ambition lane: the headline now surrenders — closing the valve
+    strikes through <em>WINS.</em> and stamps <em>(not today.)</em> beside it.</li>
+    <li><b>PASS 2</b> — Fault lane: the rate card clipped its detail column on phones (it now
+    folds into a job-sheet list); the figure chips crowded the header hairline on small screens;
+    confirmed the parts bin boots at human scroll speed on phones. Ambition lane: impact dust —
+    collisions in the bin puff concrete dust scaled by mass times speed, so the wrench lands
+    visibly heavier than the coupling.</li>
+    <li><b>PASS 3</b> — Fault lane: full breakpoint walk (390/768/1024/1440, no overflow
+    anywhere), contrast sweep on every text pairing (all clear AA), no-script and motion-off
+    states verified honest (static leak, full protocol pipe, parts laid out in a grid), full
+    keyboard walk with visible focus on every control — including the valve's dashed focus
+    ring, which was wired to the wrong sibling and never showed until this pass. Ambition
+    lane: ceiling call — the valve, the surrendering headline and the bin are this page's
+    memorable moments; anything further would be noise.</li>
+  </ol>
+
+  <h2>Honesty rules this page follows</h2>
+  <ul>
+    <li>No invented testimonials, review scores, or customer logos.</li>
+    <li>No fake urgency or scarcity — the only countdown on the page is the one you control with
+    the valve, and it is labeled a demo.</li>
+    <li>The rate card is labeled as a sample; the gauge is labeled as a demonstration.</li>
+    <li>The fictional nature of the business is disclosed (this page, the closing band, and the
+    footer).</li>
+  </ul>
+</main>
+
+<footer>
+  <div class="bar">
+    <span>TRUEBORE™ PLUMBING</span>
+    <span>A fictional demonstration business. <a href="../">Back to the page</a>.</span>
+  </div>
+</footer>
+</body>
+</html>

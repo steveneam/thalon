@@ -24,6 +24,10 @@ export default tseslint.config(
       // tracked files only) — local lint must match CI semantics, not fail
       // on dropped-in client/tool files.
       ".context/**",
+      // Vendored third-party site libraries (pinned MIT/Apache files per the
+      // template scaffolding contract) — license headers stay intact, our
+      // style rules don't apply to their minified source.
+      "proprietary/templates/sites/**/js/vendor/**",
     ],
   },
   eslint.configs.recommended,

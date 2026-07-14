@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TrueBore Plumbing — 24/7 emergency plumbing. A fictional demonstration business; a working page about water, gravity, and who wins.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="TrueBore Plumbing — water always wins. Until we show up.">
+<meta property="og:description" content="24/7 emergency plumbing (fictional demonstration page). Close the valve yourself and see.">
+<title>TrueBore Plumbing — 24/7 Emergency (Fictional Demo)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f2c200'/%3E%3Cpath d='M6 20 H14 V12 H26' fill='none' stroke='%23171511' stroke-width='5'/%3E%3Ccircle cx='26' cy='24' r='3' fill='%231f66d0'/%3E%3C/svg%3E">
+<style>
+/* ================================================================
+   TRUEBORE PLUMBING — board-formed concrete, ink, safety yellow.
+   One rule holds everywhere: if it is blue, it is water.
+   ================================================================ */
+@font-face{
+  font-family:"Anton";
+  src:url("fonts/anton-400.woff2") format("woff2");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"Plex Mono";
+  src:url("fonts/plex-mono-400.woff2") format("woff2");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"Plex Mono";
+  src:url("fonts/plex-mono-600.woff2") format("woff2");
+  font-weight:600;font-style:normal;font-display:swap;
+}
+:root{
+  --conc:#e8e5df;        /* concrete paper */
+  --conc-2:#dcd8d0;      /* poured panel */
+  --conc-3:#d0ccc2;      /* pipe metal */
+  --paper:#f1efe9;       /* card face */
+  --ink:#171511;
+  --ink-soft:#5b564c;
+  --yellow:#f2c200;
+  --yellow-deep:#c79e00;
+  --water:#1f66d0;       /* THE ONLY BLUE: water */
+  --water-deep:#0c3f8e;
+  --gutter:clamp(1rem,4vw,2.75rem);
+  --display:"Anton",Impact,"Arial Narrow",sans-serif;
+  --mono:"Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  /* named type steps — the only sizes on the page */
+  --t-huge:clamp(3.2rem,10.5vw,8.5rem);
+  --t-h2:clamp(2.1rem,5.5vw,4.2rem);
+  --t-mid:clamp(1.05rem,1.6vw,1.3rem);
+  --t-body:0.97rem;
+  --t-small:0.8rem;
+  --t-label:0.68rem;
+  --hazard:repeating-linear-gradient(-45deg,var(--yellow) 0 14px,var(--ink) 14px 28px);
+  --chipA-x:25%;   /* valve fig chip, tracks the SVG viewBox */
+  --chipB-x:73.3%; /* leak fig chip */
+}
+@media (max-width:719px){
+  :root{--chipA-x:17.8%;--chipB-x:82%;}
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{
+  background:
+    repeating-linear-gradient(90deg,transparent 0 88px,rgba(23,21,17,.05) 88px 90px),
+    var(--conc);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:var(--t-body);
+  line-height:1.62;
+}
+::selection{background:var(--yellow);color:var(--ink);}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+.dark :focus-visible,.dark :focus-visible{outline-color:var(--yellow);}
+img{max-width:100%;height:auto;display:block;}
+a{color:inherit;}
+.skip{
+  position:absolute;left:-999px;top:0;z-index:99;
+  background:var(--yellow);border:2px solid var(--ink);
+  padding:.5rem 1rem;font-weight:600;text-transform:uppercase;font-size:var(--t-small);
+}
+.skip:focus{left:8px;top:8px;}
+.wrap{max-width:76rem;margin-inline:auto;padding-inline:var(--gutter);}
+.label{
+  font-size:var(--t-label);font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.sec-head{
+  display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  border-top:3px solid var(--ink);
+  padding-top:.8rem;margin-bottom:2.2rem;
+}
+.sec-head h2{
+  font-family:var(--display);font-weight:400;font-size:var(--t-h2);
+  line-height:.95;text-transform:uppercase;letter-spacing:.01em;
+}
+.sec-head .label{white-space:nowrap;}
+section{padding-block:clamp(3rem,7vw,5.5rem);}
+
+/* ---------------- header ---------------- */
+.hazard{height:12px;background:var(--hazard);}
+header .bar{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding-block:.7rem;border-bottom:3px solid var(--ink);
+  background:var(--conc);
+}
+.wordmark{
+  font-family:var(--display);font-size:1.55rem;line-height:1;
+  text-transform:uppercase;text-decoration:none;letter-spacing:.02em;
+}
+.wordmark sup{font-size:.45em;vertical-align:.9em;}
+.wordmark small{
+  display:block;font-family:var(--mono);font-size:var(--t-label);
+  font-weight:600;letter-spacing:.14em;color:var(--ink-soft);
+}
+.call-chip{
+  font-weight:600;font-size:var(--t-small);text-decoration:none;
+  background:var(--yellow);border:2px solid var(--ink);
+  box-shadow:4px 4px 0 var(--ink);
+  padding:.55rem .9rem;white-space:nowrap;
+}
+.call-chip:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
+
+/* ---------------- hero ---------------- */
+#hero{position:relative;overflow:hidden;padding-block:0 0;border-bottom:4px solid var(--ink);}
+#hero .wrap{position:relative;z-index:2;}
+.pipe-stage{position:relative;margin-top:1.2rem;z-index:2;}
+@media (max-width:719px){.pipe-stage{margin-top:2.1rem;}}
+.pipe-stage svg{width:100%;height:auto;display:block;}
+#wheel{transform-box:fill-box;transform-origin:center;}
+#wheelHit{cursor:grab;}
+#wheelHit.grabbing{cursor:grabbing;}
+#wheelHit:focus-visible{outline:none;}
+#wheelHit:focus-visible + #wheelRing{stroke:var(--ink);stroke-dasharray:6 5;}
+.fig-chip{
+  position:absolute;transform:translateX(-50%);
+  background:var(--paper);border:2px solid var(--ink);
+  font-size:var(--t-label);font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:.28rem .55rem;white-space:nowrap;
+}
+.fig-chip.a{left:var(--chipA-x);top:-1.7rem;}
+.fig-chip.b{left:var(--chipB-x);bottom:-0.4rem;}
+@media (max-width:719px){
+  .fig-chip{font-size:.55rem;padding:.2rem .4rem;}
+  .fig-chip.a{top:-1.4rem;}
+}
+.hero-grid{
+  display:grid;grid-template-columns:minmax(0,1.6fr) minmax(15rem,1fr);
+  gap:2rem;align-items:end;padding-block:1.6rem 3.4rem;
+}
+@media (max-width:899px){.hero-grid{grid-template-columns:1fr;align-items:start;}}
+h1{
+  font-family:var(--display);font-weight:400;
+  font-size:var(--t-huge);line-height:.92;text-transform:uppercase;
+  letter-spacing:.005em;
+}
+/* inline-block so the yellow plate hugs the glyphs instead of painting at
+   font-box height over the neighbouring lines */
+h1 .win{
+  display:inline-block;position:relative;line-height:1;
+  background:var(--yellow);padding:.02em .1em .07em;margin-top:.04em;
+}
+h1 .win.struck::after{
+  content:"";position:absolute;left:-3%;right:-3%;top:46%;height:.075em;
+  background:var(--ink);transform:rotate(-4deg);
+}
+.not-today{
+  display:none;font-family:var(--mono);font-size:clamp(.75rem,1.4vw,1rem);
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  border:2px solid var(--ink);background:var(--paper);padding:.3em .55em;
+  transform:rotate(-3deg);vertical-align:middle;margin-left:.3em;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.not-today.show{display:inline-block;}
+.hero-sub{margin-top:1.3rem;max-width:34rem;}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.6rem;}
+.btn{
+  display:inline-block;text-decoration:none;font-weight:600;font-size:var(--t-small);
+  letter-spacing:.06em;text-transform:uppercase;
+  border:2px solid var(--ink);padding:.8rem 1.3rem;
+  background:var(--paper);box-shadow:5px 5px 0 var(--ink);
+}
+.btn.solid{background:var(--yellow);}
+.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink);}
+/* the burst gauge */
+.gauge{
+  border:2px solid var(--ink);background:var(--paper);
+  box-shadow:6px 6px 0 var(--ink);
+  padding:1rem 1.1rem;font-size:var(--t-small);
+  display:grid;gap:.35rem;align-self:start;justify-self:end;min-width:16.5rem;
+}
+@media (max-width:899px){.gauge{justify-self:start;}}
+.gauge .row{display:flex;justify-content:space-between;gap:1rem;}
+.gauge .val{font-weight:600;font-variant-numeric:tabular-nums;}
+.gauge .val.water{color:var(--water-deep);}
+.gauge hr{border:0;border-top:2px solid var(--ink);margin-block:.3rem;}
+#valveStatus{min-height:2.4em;}
+/* leak-stopped stamp */
+.stamp{
+  position:absolute;right:8%;top:2%;z-index:3;
+  border:4px solid var(--ink);background:var(--yellow);
+  padding:.9rem 1.2rem;transform:rotate(-6deg) scale(0);
+  font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:var(--t-small);
+  box-shadow:8px 8px 0 var(--ink);text-align:center;
+}
+.stamp .big{font-family:var(--display);font-size:1.8rem;display:block;letter-spacing:.03em;}
+.stamp.show{transform:rotate(-6deg) scale(1);}
+.motion-on .stamp.show{animation:thunk .28s cubic-bezier(.2,1.6,.4,1);}
+@keyframes thunk{0%{transform:rotate(-14deg) scale(2.2);opacity:0}100%{transform:rotate(-6deg) scale(1);opacity:1}}
+@media (max-width:899px){.stamp{position:static;transform:rotate(-2deg) scale(0);margin-top:1rem;width:fit-content;}
+  .stamp.show{transform:rotate(-2deg) scale(1);}}
+#dripCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:none;}
+.motion-on #dripCanvas{display:block;}
+#staticLeak{display:block;}
+.motion-on #staticLeak{display:none;}
+.motion-note{margin-top:.6rem;}
+.motion-on .motion-note{display:none;}
+
+/* ---------------- marquee strip ---------------- */
+.strip{
+  border-block:3px solid var(--ink);background:var(--yellow);
+  overflow:hidden;padding-block:.55rem;position:relative;
+}
+.strip-track{display:flex;gap:0;white-space:nowrap;width:max-content;}
+.motion-on .strip-track{animation:strip 26s linear infinite;}
+.strip span{
+  font-weight:600;font-size:var(--t-small);letter-spacing:.18em;text-transform:uppercase;
+  padding-inline:.5rem;
+}
+@keyframes strip{to{transform:translateX(-50%);}}
+.sr-only{
+  position:absolute;width:1px;height:1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;
+}
+
+/* ---------------- services ---------------- */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+@media (max-width:899px){.svc-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:599px){.svc-grid{grid-template-columns:1fr;}}
+.svc{
+  border:2px solid var(--ink);background:var(--paper);
+  padding:1.1rem 1.1rem 1.3rem;box-shadow:6px 6px 0 var(--ink);
+  will-change:transform;
+}
+.svc .num{
+  font-family:var(--display);font-size:2.4rem;line-height:1;display:block;
+  color:var(--ink);
+}
+.svc h3{
+  font-family:var(--display);font-weight:400;font-size:1.25rem;line-height:1.05;
+  text-transform:uppercase;margin-top:.5rem;border-bottom:2px solid var(--yellow);
+  padding-bottom:.4rem;
+}
+.svc p{margin-top:.6rem;font-size:var(--t-small);color:var(--ink-soft);}
+
+/* ---------------- parts bin ---------------- */
+#parts .intro{max-width:44rem;margin-bottom:1.8rem;}
+.bin-shell{position:relative;border:3px solid var(--ink);background:var(--conc-2);}
+.bin-canvas{display:none;width:100%;height:clamp(380px,55vh,540px);touch-action:pan-y;}
+.bin-shell.live .bin-canvas{display:block;}
+.bin-static{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;padding:1.4rem;}
+@media (max-width:599px){.bin-static{grid-template-columns:repeat(2,1fr);}}
+.bin-shell.live .bin-static{display:none;}
+.bin-static figure{display:grid;gap:.4rem;justify-items:center;}
+.bin-static img{width:min(100%,150px);}
+.bin-static figcaption{font-size:var(--t-label);font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center;}
+.bin-bar{
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;
+  border-top:3px solid var(--ink);background:var(--paper);padding:.6rem 1rem;
+}
+.bin-bar .label{color:var(--ink);}
+#binReset{
+  font:inherit;font-weight:600;font-size:var(--t-label);letter-spacing:.1em;text-transform:uppercase;
+  background:var(--yellow);border:2px solid var(--ink);padding:.45rem .8rem;cursor:pointer;
+  box-shadow:3px 3px 0 var(--ink);display:none;
+}
+.bin-shell.live ~ .bin-bar #binReset,.bin-bar.live #binReset{display:inline-block;}
+#binReset:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+
+/* ---------------- protocol ---------------- */
+#protocol{background:var(--conc-2);border-block:3px solid var(--ink);}
+.proto-pipe{margin-bottom:-.4rem;}
+.proto-pipe svg{width:100%;height:auto;display:block;}
+@media (max-width:719px){.proto-pipe{display:none;}}
+.proto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
+@media (max-width:719px){.proto-grid{grid-template-columns:1fr;}}
+.step{border:2px solid var(--ink);background:var(--paper);padding:1rem 1rem 1.2rem;}
+.step .num{
+  font-family:var(--display);font-size:1.9rem;display:inline-block;line-height:1;
+  border:2px solid var(--ink);padding:.25rem .5rem .15rem;background:var(--paper);
+  transition:background .25s;
+}
+.step.on .num{background:var(--yellow);}
+.step h3{font-family:var(--display);font-weight:400;font-size:1.15rem;text-transform:uppercase;margin-top:.7rem;}
+.step p{font-size:var(--t-small);color:var(--ink-soft);margin-top:.45rem;}
+
+/* ---------------- rates ---------------- */
+.rate-note{margin-bottom:1.2rem;}
+.rates-frame{position:relative;}
+.rates-wrap{overflow-x:auto;}
+table{border-collapse:collapse;width:100%;border:3px solid var(--ink);background:var(--paper);}
+caption{text-align:left;}
+th,td{border:2px solid var(--ink);padding:.9rem 1rem;text-align:left;vertical-align:top;}
+th{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:1.15rem;white-space:nowrap;}
+td.price{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;}
+td.why{color:var(--ink-soft);font-size:var(--t-small);}
+.rate-stamp{
+  position:absolute;right:1rem;top:-1.2rem;z-index:1;transform:rotate(4deg);
+  border:3px solid var(--ink);background:var(--yellow);padding:.4rem .8rem;
+  font-weight:600;font-size:var(--t-small);letter-spacing:.08em;text-transform:uppercase;
+  box-shadow:5px 5px 0 var(--ink);
+}
+/* narrow screens: the rate card folds to a job-sheet list instead of clipping */
+@media (max-width:639px){
+  table{display:block;}
+  table tbody{display:block;}
+  table tr{display:grid;grid-template-columns:1fr auto;border-bottom:2px solid var(--ink);}
+  table tr:last-child{border-bottom:0;}
+  th,td{border:0;padding:.65rem .8rem;}
+  th{grid-column:1;align-self:center;font-size:1.05rem;white-space:normal;}
+  td.price{grid-column:2;align-self:center;}
+  td.why{grid-column:1 / -1;padding-top:0;}
+}
+
+/* ---------------- closing ---------------- */
+#closing{
+  background:var(--ink);color:var(--conc);position:relative;overflow:hidden;
+  border-top:12px solid transparent;border-image:var(--hazard) 12;
+}
+#closing .wrap{position:relative;z-index:2;}
+#closing h2{
+  font-family:var(--display);font-weight:400;color:var(--yellow);
+  font-size:var(--t-h2);line-height:.95;text-transform:uppercase;max-width:22ch;
+}
+#closing .lead{margin-top:1rem;max-width:36rem;color:var(--conc-2);}
+.number{
+  font-family:var(--display);font-size:clamp(2.6rem,8vw,6rem);line-height:1;
+  margin-top:1.6rem;letter-spacing:.02em;color:var(--conc);
+}
+#copyBtn{
+  font:inherit;font-weight:600;font-size:var(--t-small);letter-spacing:.08em;text-transform:uppercase;
+  background:var(--yellow);color:var(--ink);border:2px solid var(--yellow-deep);
+  padding:.8rem 1.3rem;cursor:pointer;margin-top:1.4rem;box-shadow:5px 5px 0 rgba(242,194,0,.35);
+}
+#copyBtn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(242,194,0,.35);}
+#recall{display:none;margin-top:1.4rem;color:var(--yellow);font-weight:600;}
+#recall.show{display:block;}
+#closingCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:none;}
+.motion-on #closingCanvas{display:block;}
+#closing .fine{margin-top:2.4rem;font-size:var(--t-small);color:var(--ink-soft);color:#9a958a;}
+#closing .fine a{color:var(--conc-2);}
+
+/* ---------------- footer ---------------- */
+footer{border-top:3px solid var(--ink);padding-block:1.6rem 2.2rem;font-size:var(--t-small);}
+footer .wrap{display:grid;gap:.5rem;}
+footer .fm{font-family:var(--display);font-size:1.1rem;text-transform:uppercase;}
+footer .dim{color:var(--ink-soft);}
+
+/* ---------------- motion toggle ---------------- */
+#motionToggle{
+  position:fixed;left:10px;bottom:10px;z-index:60;display:none;
+  font:inherit;font-weight:600;font-size:var(--t-label);letter-spacing:.08em;
+  background:var(--paper);border:2px solid var(--ink);padding:.4rem .7rem;cursor:pointer;
+  box-shadow:3px 3px 0 var(--ink);
+}
+#motionToggle.avail{display:block;}
+
+/* reduced-motion hard stops (independent of JS) */
+@media (prefers-reduced-motion:reduce){
+  #dripCanvas,#closingCanvas,.bin-canvas{display:none !important;}
+  .strip-track{animation:none !important;}
+  .stamp.show{animation:none !important;}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header>
+  <div class="hazard" aria-hidden="true"></div>
+  <div class="bar">
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;">
+      <a class="wordmark" href="#main">TrueBore<sup>™</sup>
+        <small>Emergency plumbing — fictional demo</small>
+      </a>
+      <a class="call-chip" href="#closing">24/7 — (555)&nbsp;0117</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ HERO: the leak you can stop ============ -->
+<section id="hero" aria-label="Water always wins — until you close the valve">
+  <canvas id="dripCanvas" aria-hidden="true"></canvas>
+
+  <div class="wrap">
+    <div class="pipe-stage">
+      <span class="fig-chip a" aria-hidden="true">Fig.1 — gate valve · drag to close</span>
+      <span class="fig-chip b" aria-hidden="true">Fig.2 — active leak</span>
+      <svg id="pipeSvg" viewBox="0 0 1200 250" role="img" aria-labelledby="pipeTitle">
+        <title id="pipeTitle">A water pipe with an open gate valve and a leaking joint. The valve wheel can be turned to stop the leak.</title>
+        <!-- pipe body -->
+        <rect x="-10" y="118" width="1220" height="34" fill="var(--conc-3)"></rect>
+        <path d="M-10 118 H1210 M-10 152 H1210" stroke="var(--ink)" stroke-width="4"></path>
+        <!-- healthy flange -->
+        <g>
+          <rect x="132" y="106" width="16" height="58" fill="var(--conc)" stroke="var(--ink)" stroke-width="3"></rect>
+          <circle cx="140" cy="112" r="3" fill="var(--ink)"></circle>
+          <circle cx="140" cy="158" r="3" fill="var(--ink)"></circle>
+        </g>
+        <!-- valve assembly -->
+        <g>
+          <rect x="512" y="106" width="16" height="58" fill="var(--conc)" stroke="var(--ink)" stroke-width="3"></rect>
+          <circle cx="520" cy="112" r="3" fill="var(--ink)"></circle>
+          <circle cx="520" cy="158" r="3" fill="var(--ink)"></circle>
+        </g>
+        <rect x="290" y="74" width="20" height="46" fill="var(--conc-3)" stroke="var(--ink)" stroke-width="3"></rect>
+        <rect x="276" y="60" width="48" height="18" fill="var(--conc)" stroke="var(--ink)" stroke-width="3"></rect>
+        <g id="wheel">
+          <circle cx="300" cy="40" r="32" fill="var(--yellow)" stroke="var(--ink)" stroke-width="5"></circle>
+          <path d="M300 12 V68 M275.8 26 L324.2 54 M275.8 54 L324.2 26" stroke="var(--ink)" stroke-width="4"></path>
+          <circle cx="300" cy="40" r="7" fill="var(--ink)"></circle>
+        </g>
+        <circle id="wheelHit" cx="300" cy="40" r="58" fill="transparent"
+                tabindex="0" role="slider" aria-label="Gate valve — turn clockwise to close. Arrow keys work too."
+                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Valve open, 0 percent closed"></circle>
+        <circle id="wheelRing" cx="300" cy="40" r="44" fill="none" stroke="none" stroke-width="2" pointer-events="none" aria-hidden="true"></circle>
+        <!-- failed joint -->
+        <g transform="rotate(2.5 880 135)">
+          <rect x="872" y="104" width="16" height="62" fill="var(--conc)" stroke="var(--ink)" stroke-width="3"></rect>
+          <circle cx="880" cy="110" r="3" fill="var(--ink)"></circle>
+          <circle cx="880" cy="160" r="3" fill="var(--ink)"></circle>
+        </g>
+        <path d="M884 153 l7 9 l-5 7" stroke="var(--ink)" stroke-width="3" fill="none"></path>
+        <circle id="leakAnchor" cx="887" cy="166" r="1" fill="transparent"></circle>
+        <!-- static leak (shown when motion is off / no script) -->
+        <g id="staticLeak" aria-hidden="true">
+          <circle cx="887" cy="178" r="5" fill="var(--water)"></circle>
+          <circle cx="885" cy="199" r="4" fill="var(--water)"></circle>
+          <circle cx="888" cy="221" r="6" fill="var(--water)"></circle>
+          <ellipse cx="887" cy="243" rx="64" ry="6" fill="var(--water)"></ellipse>
+        </g>
+        <!-- end cap -->
+        <rect x="1178" y="110" width="20" height="50" fill="var(--conc)" stroke="var(--ink)" stroke-width="3"></rect>
+      </svg>
+    </div>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Water<br>always<br><span class="win" id="winWord">wins.</span><span class="not-today" id="notToday" aria-hidden="true">(not today.)</span></h1>
+        <p class="hero-sub">Against your ceiling, your floorboards, your weekend — water is undefeated.
+        TrueBore exists for the rematch: a licensed plumber answers the phone every hour of every
+        year, and the van that arrives carries the fix.</p>
+        <p class="motion-note label">Motion is off, so the leak demo above is paused — the plumbing metaphor survives.</p>
+        <div class="hero-ctas">
+          <a class="btn solid" href="#closing">The number →</a>
+          <a class="btn" href="#rates">Straight rates</a>
+        </div>
+      </div>
+
+      <aside class="gauge" aria-label="Demonstration burst gauge">
+        <span class="label">Burst gauge — demo @ 12 L/min</span>
+        <hr>
+        <div class="row"><span>Water lost</span><span class="val water" id="gLitres">0.0 L</span></div>
+        <div class="row"><span>Clock</span><span class="val" id="gClock">T+0.0 s</span></div>
+        <hr>
+        <div id="valveStatus" role="status">Valve open — 0% closed. Drag the yellow wheel.</div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="stamp" id="stamp" role="status">
+    <span class="big">Leak stopped</span>
+    <span id="stampTime">T+0.0 s</span> · operator: you
+  </div>
+</section>
+
+<!-- ============ hazard marquee ============ -->
+<div class="strip" role="note" aria-label="What counts as an emergency">
+  <p class="sr-only">Emergencies we answer: burst mains, blocked drains, no hot water, gas smell, flooded laundry, slab leaks — 24 hours.</p>
+  <div class="strip-track" aria-hidden="true">
+    <span>Burst main — Blocked drain — No hot water — Gas smell — Flooded laundry — Slab leak — 24 hrs —&nbsp;</span><span>Burst main — Blocked drain — No hot water — Gas smell — Flooded laundry — Slab leak — 24 hrs —&nbsp;</span>
+  </div>
+</div>
+
+<!-- ============ SEC.01 services ============ -->
+<section id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="label">Sec. 01 — job types</span>
+      <h2>What we fix</h2>
+    </div>
+    <div class="svc-grid">
+      <article class="svc"><span class="num" aria-hidden="true">01</span>
+        <h3>Burst pipes &amp; mains</h3>
+        <p>Mains off, damage stopped, then repaired for good — not patched until the next one.</p>
+      </article>
+      <article class="svc"><span class="num" aria-hidden="true">02</span>
+        <h3>Blocked drains</h3>
+        <p>Jet, machine, camera. The blockage leaves, and you watch the camera proof that it left.</p>
+      </article>
+      <article class="svc"><span class="num" aria-hidden="true">03</span>
+        <h3>Hot-water systems</h3>
+        <p>Repair or same-day swap, gas or electric. Cold showers end the day you call.</p>
+      </article>
+      <article class="svc"><span class="num" aria-hidden="true">04</span>
+        <h3>Gas fitting</h3>
+        <p>Licensed work, pressure-tested, certified in writing. Nothing left to "she'll be right".</p>
+      </article>
+      <article class="svc"><span class="num" aria-hidden="true">05</span>
+        <h3>Leak detection</h3>
+        <p>Acoustic and thermal tracing first — we find the leak before anyone opens a wall.</p>
+      </article>
+      <article class="svc"><span class="num" aria-hidden="true">06</span>
+        <h3>Bathrooms &amp; kitchens</h3>
+        <p>Rough-in to fit-off by the same crew that answers the 2 a.m. phone. No handovers.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SEC.02 the parts bin ============ -->
+<section id="parts">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="label">Sec. 02 — inventory</span>
+      <h2>The van is the warehouse</h2>
+    </div>
+    <p class="intro">A call-out that ends with <em>"we'll be back Tuesday with the part"</em> is a failed
+    call-out. TrueBore vans carry the couple-hundred fittings that close most jobs on the first visit.
+    These are from the bin — real weight, real clunk. Go on, pick up the wrench.</p>
+
+    <div class="bin-shell" id="binShell">
+      <canvas class="bin-canvas" id="binCanvas" aria-hidden="true"></canvas>
+      <div class="bin-static">
+        <figure><img src="assets/wrench.webp" width="512" height="512" alt="Steel pipe wrench with a worn yellow handle"><figcaption>Pipe wrench — 350 mm</figcaption></figure>
+        <figure><img src="assets/valve.webp" width="512" height="512" alt="Brass gate valve with a yellow handwheel"><figcaption>Gate valve — 20 mm</figcaption></figure>
+        <figure><img src="assets/elbow.webp" width="512" height="512" alt="Brass 90 degree elbow fitting"><figcaption>Elbow 90° — 15 mm</figcaption></figure>
+        <figure><img src="assets/tee.webp" width="512" height="512" alt="Copper tee fitting"><figcaption>Tee — 15 mm</figcaption></figure>
+        <figure><img src="assets/coupling.webp" width="512" height="512" alt="Brass compression coupling"><figcaption>Coupling — 15 mm</figcaption></figure>
+        <figure><img src="assets/pipe.webp" width="512" height="512" alt="Short length of copper pipe"><figcaption>Copper pipe — Type B</figcaption></figure>
+      </div>
+    </div>
+    <div class="bin-bar" id="binBar">
+      <span class="label" id="binInventory">In the bin: pipe wrench · gate valve · elbow · tee · coupling · copper pipe.</span>
+      <button id="binReset" type="button">Re-tip the bin</button>
+    </div>
+    <p class="sr-only">The bin above is a physics toy: photographs of the six parts fall, collide and can be dragged around with a pointer. The same parts are listed in the caption.</p>
+  </div>
+</section>
+
+<!-- ============ SEC.03 protocol ============ -->
+<section id="protocol">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="label">Sec. 03 — how a call runs</span>
+      <h2>The 2 a.m. protocol</h2>
+    </div>
+    <div class="proto-pipe" aria-hidden="true">
+      <svg viewBox="0 0 1200 70">
+        <path d="M20 35 H1180" stroke="var(--ink)" stroke-width="16" fill="none"></path>
+        <path d="M20 35 H1180" stroke="var(--conc-3)" stroke-width="10" fill="none"></path>
+        <path id="waterPath" d="M20 35 H1180" stroke="var(--water)" stroke-width="10" fill="none"></path>
+        <g fill="var(--conc)" stroke="var(--ink)" stroke-width="3">
+          <circle cx="150" cy="35" r="12"></circle><circle cx="450" cy="35" r="12"></circle>
+          <circle cx="750" cy="35" r="12"></circle><circle cx="1050" cy="35" r="12"></circle>
+        </g>
+      </svg>
+    </div>
+    <div class="proto-grid">
+      <div class="step" data-step="0"><span class="num" aria-hidden="true">01</span>
+        <h3>Call</h3><p>A plumber answers — not a phone tree, not a pager service. Say the word "water" and we're moving.</p></div>
+      <div class="step" data-step="1"><span class="num" aria-hidden="true">02</span>
+        <h3>Triage</h3><p>Shut-off guidance on the line, free, while the van is already rolling toward you.</p></div>
+      <div class="step" data-step="2"><span class="num" aria-hidden="true">03</span>
+        <h3>Arrive</h3><p>A licensed plumber and a stocked van at your door. The quote comes before the wrench.</p></div>
+      <div class="step" data-step="3"><span class="num" aria-hidden="true">04</span>
+        <h3>Fix &amp; prove</h3><p>Repaired, pressure-tested, compliance certificate in your inbox before the van leaves the kerb.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SEC.04 rates ============ -->
+<section id="rates">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="label">Sec. 04 — money</span>
+      <h2>Straight rates</h2>
+    </div>
+    <p class="rate-note label">Sample rate card — this is a fictional demonstration page.</p>
+    <div class="rates-frame">
+      <span class="rate-stamp" aria-hidden="true">No surprises</span>
+      <div class="rates-wrap">
+      <table>
+        <caption class="sr-only">Sample rate card for the fictional TrueBore Plumbing demonstration business</caption>
+        <tbody>
+          <tr><th scope="row">After-hours call-out</th><td class="price">$180 flat</td>
+              <td class="why">Any hour, any night. Known before you dial, not discovered on the invoice.</td></tr>
+          <tr><th scope="row">Business-hours call-out</th><td class="price">$0 with repair</td>
+              <td class="why">Waived the moment you say yes to the fix.</td></tr>
+          <tr><th scope="row">Labour</th><td class="price">$140 / hr</td>
+              <td class="why">Quoted up front, in writing. The meter never surprises you.</td></tr>
+          <tr><th scope="row">Parts</th><td class="price">At list</td>
+              <td class="why">You see the same price list we buy from.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ closing ============ -->
+<section id="closing" class="dark">
+  <canvas id="closingCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <h2>It's 2 a.m. and the carpet squelches.</h2>
+    <p class="lead">That is the wrong moment to start googling plumbers. Save the number while your
+    socks are dry.</p>
+    <p class="number" aria-label="Demonstration phone number: 555 0117">(555)&nbsp;0117</p>
+    <button id="copyBtn" type="button">Copy the number</button>
+    <p id="recall" role="status"></p>
+    <p class="fine">TrueBore Plumbing is a fictional business — this page is a design demonstration
+    and no real services are offered. <a href="guide/">See how this page was made</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="fm">TrueBore™ Plumbing</span>
+    <span class="dim">Fictional demonstration business. Imagery on this page is AI-generated; the
+    physics are real. <a href="guide/">How this page was made</a>.</span>
+    <span class="dim">Hand-built: no frameworks on the page besides a vendored MIT physics engine,
+    no trackers, and no network calls from any script.</span>
+  </div>
+</footer>
+
+<button id="motionToggle" type="button" aria-pressed="true" title="Pause the moving parts">⏸ Motion</button>
+
+<script src="js/vendor/matter.min.js"></script>
+<script>
+(() => {
+"use strict";
+/* ==============================================================
+   TrueBore page systems. Everything is local: zero network calls.
+   Base content is fully visible with no script and no motion;
+   every system below is an opt-in enhancement on top of it.
+   ============================================================== */
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const reduceMq = matchMedia("(prefers-reduced-motion: reduce)");
+const state = { valve: 0, litres: 0, clock: 0, stoppedAt: null, running: false };
+window.__tb = { state };
+
+let rafId = null, last = 0, motionOn = false;
+const systems = []; // {step(dt,now), draw()}
+
+/* ---------- motion controller ---------- */
+const toggle = $("#motionToggle");
+function userWantsMotion() {
+  return !reduceMq.matches && toggle.getAttribute("aria-pressed") !== "false";
+}
+function applyMotion() {
+  const want = userWantsMotion();
+  if (want === motionOn) return;
+  motionOn = want;
+  document.documentElement.classList.toggle("motion-on", motionOn);
+  if (motionOn) { last = performance.now(); rafId = requestAnimationFrame(frame); }
+  else if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}
+toggle.addEventListener("click", () => {
+  const on = toggle.getAttribute("aria-pressed") !== "false";
+  toggle.setAttribute("aria-pressed", String(!on));
+  toggle.textContent = on ? "▶ Motion" : "⏸ Motion";
+  applyMotion();
+});
+reduceMq.addEventListener("change", applyMotion);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  else if (!document.hidden && motionOn && !rafId) { last = performance.now(); rafId = requestAnimationFrame(frame); }
+});
+
+function frame(now) {
+  rafId = requestAnimationFrame(frame);
+  try {
+    const dt = Math.min((now - last) / 1000, 0.04); last = now;
+    for (const s of systems) { if (s.active()) { s.step(dt, now); s.draw(); } }
+  } catch (e) { window.__tbErr = String((e && e.stack) || e); }
+}
+
+/* ---------- canvas helper ---------- */
+function fitCanvas(canvas, host) {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = host.getBoundingClientRect();
+  if (!r.width || !r.height) return null;
+  if (canvas.width !== Math.round(r.width * dpr)) canvas.width = Math.round(r.width * dpr);
+  if (canvas.height !== Math.round(r.height * dpr)) canvas.height = Math.round(r.height * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: r.width, h: r.height };
+}
+function inView(el, slack = 120) {
+  const r = el.getBoundingClientRect();
+  return r.bottom > -slack && r.top < innerHeight + slack;
+}
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const WATER = css("--water") || "#1f66d0";
+const WATER_DEEP = css("--water-deep") || "#0c3f8e";
+
+/* ==============================================================
+   HERO — the leak, the valve, the gauge
+   ============================================================== */
+const hero = $("#hero"), dripCanvas = $("#dripCanvas");
+const leakAnchor = $("#leakAnchor"), wheel = $("#wheel"), wheelHit = $("#wheelHit");
+const gLitres = $("#gLitres"), gClock = $("#gClock"), valveStatus = $("#valveStatus");
+const stamp = $("#stamp"), stampTime = $("#stampTime");
+const FULL_TURN = 2.5 * 360; // degrees of handwheel to fully close
+let wheelDeg = 0;
+
+const drops = [], splashes = [];
+let puddle = 0, spawnTimer = 0;
+
+function leakPoint() {
+  const hr = hero.getBoundingClientRect(), lr = leakAnchor.getBoundingClientRect();
+  return { x: lr.left + lr.width / 2 - hr.left, y: lr.top + lr.height / 2 - hr.top };
+}
+const heroSystem = {
+  active: () => inView(hero),
+  step(dt) {
+    const open = 1 - state.valve;
+    // clock + litres (12 L/min demo rate, scaled by how open the valve is)
+    if (state.stoppedAt === null) {
+      state.clock += dt;
+      state.litres += (12 / 60) * open * dt;
+    }
+    // spawn
+    if (open > 0.01) {
+      spawnTimer -= dt;
+      if (spawnTimer <= 0) {
+        spawnTimer = 0.16 / Math.max(open, 0.06);
+        const p = leakPoint();
+        drops.push({ x: p.x, y: p.y, vy: 40, r: 3.2 + Math.random() * 1.6 });
+      }
+    }
+    const size = fitCanvas(dripCanvas, hero); if (!size) return;
+    const floorY = size.h - 10;
+    for (let i = drops.length - 1; i >= 0; i--) {
+      const d = drops[i];
+      d.vy += 2400 * dt; d.y += d.vy * dt;
+      if (d.y >= floorY) {
+        drops.splice(i, 1);
+        puddle = Math.min(puddle + 7, 300);
+        for (let k = 0; k < 3; k++) {
+          splashes.push({ x: d.x, y: floorY, vx: (Math.random() - 0.5) * 320, vy: -(120 + Math.random() * 220), r: 1.2 + Math.random() * 1.6, life: 0.55 });
+        }
+      }
+    }
+    for (let i = splashes.length - 1; i >= 0; i--) {
+      const s = splashes[i];
+      s.life -= dt; if (s.life <= 0) { splashes.splice(i, 1); continue; }
+      s.vy += 2400 * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+    }
+    if (state.valve >= 1) puddle = Math.max(0, puddle - 60 * dt);
+    // gauge (cheap DOM writes)
+    gLitres.textContent = state.litres.toFixed(1) + " L";
+    gClock.textContent = "T+" + state.clock.toFixed(1) + " s";
+  },
+  draw() {
+    const size = fitCanvas(dripCanvas, hero); if (!size) return;
+    const { ctx, w, h } = size;
+    ctx.clearRect(0, 0, w, h);
+    const floorY = h - 10;
+    ctx.fillStyle = WATER;
+    for (const d of drops) {
+      const stretch = 1 + Math.min(d.vy / 1400, 0.9);
+      ctx.beginPath(); ctx.ellipse(d.x, d.y, d.r * 0.82, d.r * stretch, 0, 0, 7); ctx.fill();
+    }
+    for (const s of splashes) {
+      ctx.globalAlpha = Math.max(s.life / 0.55, 0) * 0.9;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (puddle > 1) {
+      const p = leakPoint();
+      ctx.fillStyle = WATER_DEEP;
+      ctx.beginPath();
+      ctx.roundRect(p.x - puddle / 2, floorY - 5, puddle, 8, 4);
+      ctx.fill();
+    }
+  },
+};
+systems.push(heroSystem);
+
+/* ---------- valve control (pointer + keyboard) ---------- */
+function setValve(deg) {
+  wheelDeg = clamp(deg, 0, FULL_TURN);
+  const p = wheelDeg / FULL_TURN;
+  state.valve = p;
+  wheel.style.transform = `rotate(${wheelDeg}deg)`;
+  const pct = Math.round(p * 100);
+  wheelHit.setAttribute("aria-valuenow", String(pct));
+  wheelHit.setAttribute("aria-valuetext", p >= 1 ? "Valve fully closed — leak stopped" : `Valve ${pct} percent closed`);
+  if (p >= 1 && state.stoppedAt === null) {
+    state.stoppedAt = state.clock;
+    stampTime.textContent = "T+" + state.clock.toFixed(1) + " s";
+    stamp.classList.add("show");
+    $("#winWord").classList.add("struck");   // the headline surrenders
+    $("#notToday").classList.add("show");
+    valveStatus.textContent = `Valve closed. Leak stopped at T+${state.clock.toFixed(1)} s — that's the feeling we sell.`;
+    const recall = $("#recall");
+    recall.textContent = `You stopped the demo leak in ${state.clock.toFixed(1)} seconds. At 2 a.m. it won't be a demo — save the number.`;
+    recall.classList.add("show");
+  } else if (state.stoppedAt === null) {
+    valveStatus.textContent = pct === 0 ? "Valve open — 0% closed. Drag the yellow wheel." : `Valve ${pct}% closed — keep turning.`;
+  }
+}
+let dragging = false, prevAngle = 0;
+function pointerAngle(ev) {
+  const r = wheelHit.getBoundingClientRect();
+  return Math.atan2(ev.clientY - (r.top + r.height / 2), ev.clientX - (r.left + r.width / 2)) * 180 / Math.PI;
+}
+wheelHit.addEventListener("pointerdown", (ev) => {
+  if (state.stoppedAt !== null && state.valve >= 1) return;
+  dragging = true; prevAngle = pointerAngle(ev);
+  wheelHit.classList.add("grabbing");
+  wheelHit.setPointerCapture(ev.pointerId);
+  ev.preventDefault();
+});
+wheelHit.addEventListener("pointermove", (ev) => {
+  if (!dragging) return;
+  const a = pointerAngle(ev);
+  let delta = a - prevAngle;
+  if (delta > 180) delta -= 360; else if (delta < -180) delta += 360;
+  prevAngle = a;
+  setValve(wheelDeg + delta);
+});
+const endDrag = () => { dragging = false; wheelHit.classList.remove("grabbing"); };
+wheelHit.addEventListener("pointerup", endDrag);
+wheelHit.addEventListener("pointercancel", endDrag);
+wheelHit.addEventListener("keydown", (ev) => {
+  const stepDeg = 22.5;
+  if (ev.key === "ArrowRight" || ev.key === "ArrowUp") { setValve(wheelDeg + stepDeg); ev.preventDefault(); }
+  else if (ev.key === "ArrowLeft" || ev.key === "ArrowDown") { setValve(wheelDeg - stepDeg); ev.preventDefault(); }
+  else if (ev.key === "End") { setValve(FULL_TURN); ev.preventDefault(); }
+  else if (ev.key === "Home") { setValve(0); ev.preventDefault(); }
+});
+
+/* ==============================================================
+   CLOSING BAND — sparse drips in the dark
+   ============================================================== */
+const closing = $("#closing"), closingCanvas = $("#closingCanvas");
+const cDrops = []; let cTimer = 0;
+systems.push({
+  active: () => inView(closing),
+  step(dt) {
+    const size = fitCanvas(closingCanvas, closing); if (!size) return;
+    cTimer -= dt;
+    if (cTimer <= 0) {
+      cTimer = 0.9 + Math.random() * 1.2;
+      cDrops.push({ x: Math.random() * size.w, y: -8, vy: 30, r: 2.6 + Math.random() * 1.4 });
+    }
+    for (let i = cDrops.length - 1; i >= 0; i--) {
+      const d = cDrops[i];
+      d.vy += 1500 * dt; d.y += d.vy * dt;
+      if (d.y > size.h + 12) cDrops.splice(i, 1);
+    }
+  },
+  draw() {
+    const size = fitCanvas(closingCanvas, closing); if (!size) return;
+    const { ctx, w, h } = size;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = WATER;
+    for (const d of cDrops) {
+      ctx.globalAlpha = clamp(1.2 - d.y / h, 0.15, 0.85);
+      const stretch = 1 + Math.min(d.vy / 1400, 0.9);
+      ctx.beginPath(); ctx.ellipse(d.x, d.y, d.r * 0.82, d.r * stretch, 0, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+});
+
+/* ==============================================================
+   SERVICE CARDS — spring-loaded tilt (they have weight)
+   ============================================================== */
+const cards = [...document.querySelectorAll(".svc")].map((el) => ({ el, rx: 0, ry: 0, vx: 0, vy: 0, tx: 0, ty: 0, hot: false }));
+for (const c of cards) {
+  c.el.addEventListener("pointermove", (ev) => {
+    if (!motionOn) return;
+    const r = c.el.getBoundingClientRect();
+    c.tx = ((ev.clientY - r.top) / r.height - 0.5) * -2.4;
+    c.ty = ((ev.clientX - r.left) / r.width - 0.5) * 2.4;
+    c.hot = true;
+  });
+  c.el.addEventListener("pointerleave", () => { c.tx = 0; c.ty = 0; c.hot = true; });
+}
+systems.push({
+  active: () => cards.some((c) => c.hot),
+  step(dt) {
+    for (const c of cards) {
+      if (!c.hot) continue;
+      const k = 170, damp = 13;
+      c.vx += (k * (c.tx - c.rx) - damp * c.vx) * dt;
+      c.vy += (k * (c.ty - c.ry) - damp * c.vy) * dt;
+      c.rx += c.vx * dt; c.ry += c.vy * dt;
+      if (Math.abs(c.rx - c.tx) < 0.01 && Math.abs(c.vx) < 0.01 && Math.abs(c.ry - c.ty) < 0.01 && Math.abs(c.vy) < 0.01) {
+        c.rx = c.tx; c.ry = c.ty; c.hot = c.tx !== 0 || c.ty !== 0;
+      }
+    }
+  },
+  draw() {
+    for (const c of cards) {
+      if (c.hot || c.rx || c.ry) c.el.style.transform = `perspective(700px) rotateX(${c.rx.toFixed(3)}deg) rotateY(${c.ry.toFixed(3)}deg)`;
+    }
+  },
+});
+
+/* ==============================================================
+   PARTS BIN — Matter.js world with the minted fittings
+   (material truth: mass in kg drives who pushes whom; brass
+   thuds, copper pipe rolls; everything settles dead — no twitch)
+   ============================================================== */
+const binShell = $("#binShell"), binCanvas = $("#binCanvas"), binBar = $("#binBar");
+/* content boxes measured from the pinned cutouts (fractions of the 512px square) */
+const PARTS = {
+  wrench:   { src: "assets/wrench.webp",   box: { x: 0.020, y: 0.415, w: 0.960, h: 0.172 }, long: 250, mass: 2.6,  rest: 0.05, fric: 0.55, label: "pipe wrench" },
+  valve:    { src: "assets/valve.webp",    box: { x: 0.222, y: 0.254, w: 0.636, h: 0.475 }, long: 150, mass: 1.15, rest: 0.06, fric: 0.60, label: "gate valve" },
+  elbow:    { src: "assets/elbow.webp",    box: { x: 0.267, y: 0.255, w: 0.478, h: 0.446 }, long: 108, mass: 0.28, rest: 0.08, fric: 0.60, label: "elbow" },
+  tee:      { src: "assets/tee.webp",      box: { x: 0.056, y: 0.282, w: 0.866, h: 0.557 }, long: 150, mass: 0.32, rest: 0.08, fric: 0.60, label: "tee" },
+  coupling: { src: "assets/coupling.webp", box: { x: 0.197, y: 0.412, w: 0.600, h: 0.166 }, long: 105, mass: 0.12, rest: 0.10, fric: 0.50, label: "coupling" },
+  pipe:     { src: "assets/pipe.webp",     box: { x: 0.062, y: 0.472, w: 0.873, h: 0.051 }, long: 260, mass: 0.60, rest: 0.12, fric: 0.30, label: "copper pipe" },
+};
+const TERMINAL = 30;
+let bin = null;
+
+function binCounts() {
+  const small = innerWidth < 720;
+  return small
+    ? { wrench: 1, valve: 1, elbow: 1, tee: 1, coupling: 1, pipe: 1 }
+    : { wrench: 1, valve: 2, elbow: 2, tee: 2, coupling: 2, pipe: 1 };
+}
+function initBin() {
+  if (bin || typeof Matter === "undefined") return;
+  const { Engine, Bodies, Body, Composite, Constraint, Sleeping, Query, Events } = Matter;
+  const engine = Engine.create({ enableSleeping: true });
+  engine.gravity.y = 1.35; // heavy trade metal — thuds, doesn't bounce
+  const imgs = {};
+  for (const k of Object.keys(PARTS)) { imgs[k] = new Image(); imgs[k].src = PARTS[k].src; }
+  const items = [];
+  const dust = []; // concrete puffs on hard impacts — weight made visible
+  let W = 0, H = 0;
+  Events.on(engine, "collisionStart", (ev) => {
+    for (const pair of ev.pairs) {
+      const a = pair.bodyA, b = pair.bodyB;
+      const speed = Math.hypot(a.velocity.x - b.velocity.x, a.velocity.y - b.velocity.y);
+      if (speed < 4) continue;
+      const m = (a.isStatic ? 0 : a.mass) + (b.isStatic ? 0 : b.mass);
+      const n = clamp(Math.round(speed * m * 0.4), 2, 9);
+      const c = (pair.collision.supports && pair.collision.supports[0]) ||
+        { x: (a.position.x + b.position.x) / 2, y: (a.position.y + b.position.y) / 2 };
+      for (let i = 0; i < n; i++) {
+        dust.push({ x: c.x, y: c.y, vx: (Math.random() - 0.5) * 150, vy: -(20 + Math.random() * 100), r: 1 + Math.random() * 2.2, life: 0.45 + Math.random() * 0.25 });
+      }
+    }
+  });
+
+  function walls() {
+    const t = 60;
+    return [
+      Bodies.rectangle(W / 2, H + t / 2 - 3, W + t * 2, t, { isStatic: true }),
+      Bodies.rectangle(-t / 2 + 3, H / 2 - 300, t, H + 900, { isStatic: true }),
+      Bodies.rectangle(W + t / 2 - 3, H / 2 - 300, t, H + 900, { isStatic: true }),
+    ];
+  }
+  function spawn() {
+    for (const it of items) Composite.remove(engine.world, it.body);
+    items.length = 0;
+    const counts = binCounts();
+    const scale = Math.min(1, W / 900);
+    let i = 0, total = 0;
+    for (const [kind, n] of Object.entries(counts)) total += n;
+    for (const [kind, n] of Object.entries(counts)) {
+      const P = PARTS[kind];
+      for (let k = 0; k < n; k++) {
+        const w = P.long * scale;
+        const h = Math.max(w * (P.box.h / P.box.w), 16);
+        const x = W * ((i + 0.5 + Math.random() * 0.3) / total);
+        const y = -80 - (i % 4) * 130 - Math.random() * 60;
+        const body = Bodies.rectangle(x, y, w, h, {
+          restitution: P.rest, friction: P.fric, frictionAir: 0.0012,
+          angle: (Math.random() - 0.5) * 2.4,
+        });
+        Body.setMass(body, P.mass);
+        Composite.add(engine.world, body);
+        items.push({ kind, body, w, h, still: 0 });
+        i++;
+      }
+    }
+    const inv = Object.entries(counts).map(([k, n]) => `${n}× ${PARTS[k].label}`).join(" · ");
+    $("#binInventory").textContent = `In the bin: ${inv} — drag them.`;
+  }
+  function measure() {
+    const r = binCanvas.getBoundingClientRect();
+    if (Math.abs(r.width - W) < 2 && Math.abs(r.height - H) < 2) return;
+    W = r.width; H = r.height;
+    Composite.clear(engine.world, false);
+    Composite.add(engine.world, walls());
+    spawn();
+  }
+  measure();
+  addEventListener("resize", () => { if (bin) measure(); });
+
+  /* pointer drag: hit-test first so empty-space touches still scroll */
+  let grab = null;
+  binCanvas.addEventListener("pointerdown", (ev) => {
+    const r = binCanvas.getBoundingClientRect();
+    const pt = { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    const hit = Query.point(items.map((it) => it.body), pt);
+    if (!hit.length) return;
+    const body = hit[0];
+    Sleeping.set(body, false);
+    grab = Constraint.create({
+      pointA: pt, bodyB: body,
+      pointB: { x: pt.x - body.position.x, y: pt.y - body.position.y },
+      stiffness: 0.12, damping: 0.10, length: 0,
+    });
+    Composite.add(engine.world, grab);
+    binCanvas.setPointerCapture(ev.pointerId);
+    ev.preventDefault();
+  });
+  binCanvas.addEventListener("pointermove", (ev) => {
+    if (!grab) return;
+    const r = binCanvas.getBoundingClientRect();
+    grab.pointA = { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  });
+  const drop = () => { if (grab) { Composite.remove(engine.world, grab); grab = null; } };
+  binCanvas.addEventListener("pointerup", drop);
+  binCanvas.addEventListener("pointercancel", drop);
+
+  $("#binReset").addEventListener("click", spawn);
+  binBar.classList.add("live");
+  binShell.classList.add("live");
+
+  bin = {
+    stats: () => ({ bodies: items.length, sleeping: items.filter((it) => it.body.isSleeping).length }),
+    step(dt) {
+      measure();
+      let acc = dt * 1000;
+      while (acc > 0) {
+        Engine.update(engine, Math.min(acc, 1000 / 60));
+        acc -= 1000 / 60;
+        for (const it of items) {
+          const b = it.body;
+          if (b.isSleeping) continue;
+          const sp = Math.hypot(b.velocity.x, b.velocity.y);
+          if (sp > TERMINAL) Body.setVelocity(b, { x: b.velocity.x * TERMINAL / sp, y: b.velocity.y * TERMINAL / sp });
+        }
+      }
+      // settle dead: near-rest for ~12 frames freezes solid (founder rule: no micro-twitch)
+      for (const it of items) {
+        const b = it.body;
+        if (b.isSleeping || grab && grab.bodyB === b) continue;
+        if (Math.hypot(b.velocity.x, b.velocity.y) < 0.35 && Math.abs(b.angularVelocity) < 0.03) {
+          if (++it.still > 12) { Body.setVelocity(b, { x: 0, y: 0 }); Body.setAngularVelocity(b, 0); Sleeping.set(b, true); it.still = 0; }
+        } else it.still = 0;
+      }
+      for (let i = dust.length - 1; i >= 0; i--) {
+        const p = dust[i];
+        p.life -= dt; if (p.life <= 0) { dust.splice(i, 1); continue; }
+        p.vy += 500 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      }
+    },
+    draw() {
+      // sprite draw: the full 512-square scaled so the measured content box
+      // (the physics body) is centered on the body's center
+      const size = fitCanvas(binCanvas, binCanvas); if (!size) return;
+      const { ctx, w, h } = size;
+      ctx.clearRect(0, 0, w, h);
+      for (const it of items) {
+        const im = imgs[it.kind]; if (!im.complete) continue;
+        const P = PARTS[it.kind], b = it.body;
+        const drawW = it.w / P.box.w;
+        const cx = (P.box.x + P.box.w / 2) * drawW, cy = (P.box.y + P.box.h / 2) * drawW;
+        ctx.save();
+        ctx.translate(b.position.x, b.position.y);
+        ctx.rotate(b.angle);
+        ctx.drawImage(im, -cx, -cy, drawW, drawW);
+        ctx.restore();
+      }
+      for (const p of dust) {
+        ctx.globalAlpha = Math.max(p.life / 0.7, 0) * 0.55;
+        ctx.fillStyle = "#8a8478";
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    },
+  };
+  window.__tb.bin = bin.stats;
+}
+const binIO = new IntersectionObserver((entries) => {
+  if (entries.some((e) => e.isIntersecting) && motionOn) initBin();
+}, { rootMargin: "220px" });
+binIO.observe(binShell);
+systems.push({
+  active: () => bin !== null && inView(binShell),
+  step(dt) { bin.step(dt); },
+  draw() { bin.draw(); },
+});
+
+/* ==============================================================
+   PROTOCOL — water advances down the pipe as you scroll
+   ============================================================== */
+const proto = $("#protocol"), waterPath = $("#waterPath");
+const steps = [...document.querySelectorAll(".step")];
+const pathLen = waterPath.getTotalLength();
+waterPath.style.strokeDasharray = String(pathLen);
+let protoP = 1;
+function setProto(p) {
+  protoP = p;
+  waterPath.style.strokeDashoffset = String(pathLen * (1 - p));
+  const thresholds = [0.14, 0.42, 0.68, 0.92];
+  steps.forEach((el, i) => el.classList.toggle("on", p >= thresholds[i]));
+}
+systems.push({
+  active: () => inView(proto, 0),
+  step() {
+    const r = proto.getBoundingClientRect();
+    const p = clamp((innerHeight * 0.9 - r.top) / (r.height + innerHeight * 0.35), 0, 1);
+    if (Math.abs(p - protoP) > 0.002) setProto(p);
+  },
+  draw() {},
+});
+window.__tb.proto = () => protoP;
+
+/* ==============================================================
+   COPY BUTTON (clipboard is local; nothing leaves the page)
+   ============================================================== */
+$("#copyBtn").addEventListener("click", async () => {
+  const btn = $("#copyBtn");
+  try {
+    await navigator.clipboard.writeText("(555) 0117");
+    btn.textContent = "Copied — save it";
+  } catch {
+    btn.textContent = "(555) 0117 — write it down";
+  }
+  setTimeout(() => { btn.textContent = "Copy the number"; }, 2600);
+});
+
+/* ---------- boot ---------- */
+setValve(0);
+setProto(1); // full pipe for the static page…
+if (userWantsMotion()) {
+  setProto(0); // …empty when the scroll choreography will drive it
+  toggle.classList.add("avail");
+  applyMotion();
+} else if (!reduceMq.matches) {
+  toggle.classList.add("avail");
+}
+window.__tb.valve = () => state.valve;
+window.__tb.drops = () => drops.length;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[
+  { "file": "wrench.webp",   "pinnedHash": "ca87f6555454775b004802bd4dff6c5420d7517846c11b8ae1045c32d85a2bc6", "width": 512, "height": 512, "quality": 86 },
+  { "file": "elbow.webp",    "pinnedHash": "3000dd55bd4f981de04268c86e373778aa2ec44dcae32f086d13f7219e8cb988", "width": 512, "height": 512, "quality": 86 },
+  { "file": "tee.webp",      "pinnedHash": "6cb2e8bbb1098b736ec8467ad509e8565cfeb6d08879b3811e2bcf2814bbb4a3", "width": 512, "height": 512, "quality": 86 },
+  { "file": "valve.webp",    "pinnedHash": "87124ae1f81d82d361c94e02abab618b56f6d2f60c9939ed7b941ad20675fb8f", "width": 512, "height": 512, "quality": 86 },
+  { "file": "coupling.webp", "pinnedHash": "de0be22b8c3a014806c90333de640eabf95d1704960bb0b0dce64f3a60596735", "width": 512, "height": 512, "quality": 86 },
+  { "file": "pipe.webp",     "pinnedHash": "e86b8c85a40f03027e02418f085148e01607f29dce70b19555eda6558b4578d4", "width": 512, "height": 512, "quality": 86 }
+]
