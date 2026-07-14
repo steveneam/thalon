@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Loopwell is usage analytics for product teams. Drop in one snippet and read what people actually do: retention, adoption, funnels.">
+<meta name="robots" content="noindex">
+<title>Loopwell — your product is talking. We write it down.</title>
+<link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/martian-mono-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/main.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M3 20 Q8 20 10 14 T16 12 Q20 12 20 17 T15 21 Q12 19 16 15 T24 10 L29 12' fill='none' stroke='%23c8361f' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="wordmark" href="#" aria-label="Loopwell">
+      L<svg class="loop" viewBox="0 0 76 28" aria-hidden="true"><path d="M4 22 C14 22 12 6 24 6 C34 6 36 22 46 22 C58 22 58 6 44 10 C34 13 44 24 56 22 C66 20 68 10 72 8"/></svg>PWELL
+    </a>
+    <nav aria-label="Page">
+      <a href="#readings">Readings</a>
+      <a href="#install" class="quiet-sm">Install</a>
+      <a href="#pricing">Pricing</a>
+      <a href="guide/" class="quiet-sm">Method</a>
+      <a class="btn primary" href="#install">Start recording</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ hero + the recorder ============ -->
+  <section class="hero">
+    <div class="wrap hero-copy">
+      <h1>Your product is talking.<br><span class="pen">Loopwell writes it down.</span></h1>
+      <p class="sub">Usage analytics for product teams. Drop in one snippet and Loopwell
+      records what people actually do, then turns the trace into answers:
+      what holds them, what they use, where they stall.</p>
+      <div class="actions">
+        <a class="btn primary" href="#install">Start recording</a>
+        <a class="btn" href="#readings">See the readings</a>
+      </div>
+    </div>
+
+    <figure class="recorder" aria-label="Live strip chart of your visit to this page">
+      <div class="recorder-head">
+        <span class="live" id="live-label">LIVE · SESSION TRACE</span>
+        <span class="note" id="live-note">Sample trace shown. With scripts on, the recorder draws your own visit instead; nothing ever leaves this page.</span>
+      </div>
+      <div class="chart" id="chart">
+        <svg class="fallback" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true">
+          <path vector-effect="non-scaling-stroke" d="M0 170 C40 168 60 150 90 140 S150 90 190 96 S260 160 310 166 S390 60 440 58 S520 140 570 150 S650 120 700 90 S780 40 830 52 S910 150 960 160 S1060 110 1110 120 L1200 116"/>
+        </svg>
+        <canvas id="trace" hidden></canvas>
+      </div>
+      <figcaption class="readouts">
+        <span><span class="k">ELAPSED&nbsp;</span><b id="r-elapsed">00:00</b></span>
+        <span><span class="k">SCROLL&nbsp;</span><b id="r-scroll">0%</b></span>
+        <span><span class="k">POINTER&nbsp;</span><b id="r-pointer">0 px</b></span>
+        <span><span class="k">EVENTS&nbsp;</span><b id="r-events">0</b></span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ readings ============ -->
+  <section class="section" id="readings">
+    <div class="wrap">
+      <div class="plate"><span class="label">READINGS</span></div>
+      <h2 class="section-title">Three questions, answered from the trace.</h2>
+      <p class="readings-intro">Raw events are noise. Loopwell aggregates them
+      into three standing instruments that update as your users move.</p>
+
+      <div class="readings-grid">
+        <article class="reading">
+          <h3>Do they come back?</h3>
+          <p class="how">Retention curves by signup cohort.</p>
+          <figure>
+            <svg viewBox="0 0 340 170" role="img" aria-label="Line chart: weekly retention for three cohorts, flattening near forty-one percent at week four" class="drawable">
+              <g class="stroke-faint" stroke-width="1">
+                <line x1="34" y1="20" x2="34" y2="140"/><line x1="34" y1="140" x2="320" y2="140"/>
+                <line x1="34" y1="80" x2="320" y2="80" stroke-dasharray="2 4"/>
+                <line x1="34" y1="20" x2="320" y2="20" stroke-dasharray="2 4"/>
+              </g>
+              <text class="chart-label" x="8" y="24">100%</text>
+              <text class="chart-label" x="14" y="84">50%</text>
+              <text class="chart-label" x="30" y="156">w0</text>
+              <text class="chart-label" x="300" y="156">w8</text>
+              <path class="stroke-ink draw" style="--len:420" stroke-width="1.4" opacity="0.35" d="M34 22 C80 60 110 92 150 100 S250 112 320 114"/>
+              <path class="stroke-ink draw" style="--len:420" stroke-width="1.4" opacity="0.6" d="M34 22 C80 55 110 84 150 92 S250 104 320 106"/>
+              <path class="stroke-signal draw" style="--len:420" stroke-width="2" d="M34 22 C80 48 110 74 150 84 S250 90 320 91"/>
+              <circle class="fill-signal" cx="176" cy="87" r="3.5"/>
+            </svg>
+          </figure>
+          <span class="find">▸ newest cohort holds 41% at week 4: up 6 pts after onboarding rework</span>
+        </article>
+
+        <article class="reading">
+          <h3>What do they use?</h3>
+          <p class="how">Feature adoption, share of weekly sessions.</p>
+          <figure>
+            <svg viewBox="0 0 340 170" role="img" aria-label="Bar chart: feature adoption, export feature leading at sixty-two percent of weekly sessions">
+              <g font-size="9">
+                <text class="chart-label" x="10" y="34">export</text>
+                <text class="chart-label" x="10" y="64">reports</text>
+                <text class="chart-label" x="10" y="94">invites</text>
+                <text class="chart-label" x="10" y="124">api</text>
+              </g>
+              <rect class="fill-signal" x="62" y="24" width="212" height="14"/>
+              <rect class="fill-cobalt" x="62" y="54" width="141" height="14" opacity="0.75"/>
+              <rect class="fill-cobalt" x="62" y="84" width="92" height="14" opacity="0.55"/>
+              <rect class="fill-cobalt" x="62" y="114" width="48" height="14" opacity="0.4"/>
+              <text class="chart-label" x="280" y="35">62%</text>
+              <text class="chart-label" x="209" y="65">41%</text>
+              <text class="chart-label" x="160" y="95">27%</text>
+              <text class="chart-label" x="116" y="125">14%</text>
+              <line class="stroke-faint" x1="62" y1="16" x2="62" y2="136"/>
+            </svg>
+          </figure>
+          <span class="find">▸ “export” anchors 62% of weekly sessions: the habit to build around</span>
+        </article>
+
+        <article class="reading">
+          <h3>Where do they stall?</h3>
+          <p class="how">Activation funnel, first seven days.</p>
+          <figure>
+            <svg viewBox="0 0 340 170" role="img" aria-label="Funnel chart: activation steps with a thirty-eight percent drop at the invite step">
+              <g>
+                <rect class="fill-cobalt" x="30" y="26" width="280" height="18" opacity="0.85"/>
+                <rect class="fill-cobalt" x="58" y="56" width="224" height="18" opacity="0.65"/>
+                <rect class="fill-faint" x="100" y="86" width="140" height="18"/>
+                <rect class="fill-cobalt" x="122" y="116" width="96" height="18" opacity="0.5"/>
+              </g>
+              <text class="chart-label" x="30" y="20">sign up · 100%</text>
+              <text class="chart-label" x="58" y="52">first project · 80%</text>
+              <text class="chart-label" x="100" y="82">invite team · 42%</text>
+              <text class="chart-label" x="122" y="112">weekly habit · 31%</text>
+              <path class="stroke-signal" stroke-width="1.6" d="M282 66 L240 94" marker-end="none"/>
+              <circle class="fill-signal" cx="240" cy="95" r="3.2"/>
+              <text x="250" y="102" font-size="9" style="fill:var(--signal-deep);font-family:var(--mono)">−38% here</text>
+            </svg>
+          </figure>
+          <span class="find">▸ the invite step loses 38%: the single highest-leverage fix this quarter</span>
+        </article>
+      </div>
+      <p class="sample-note">Charts show sample data from a demonstration workspace.</p>
+    </div>
+  </section>
+
+  <!-- ============ install ============ -->
+  <section class="section" id="install">
+    <div class="wrap">
+      <div class="plate"><span class="label">INSTALLATION</span></div>
+      <div class="steps">
+        <div class="step">
+          <h3>Drop in the snippet</h3>
+          <p>One import, one call. No schema to design, no events to name up front.</p>
+          <pre class="code"><code>import { record } from "@loopwell/browser"
+
+record({ key: <span class="s">"lw_demo_2041"</span> })
+<span class="c">// that’s it. the pen is down</span></code></pre>
+        </div>
+        <div class="step">
+          <h3>Events stream in</h3>
+          <p>Loopwell auto-captures sessions, feature use, and funnel steps as they happen.</p>
+          <div class="eventlog" id="eventlog" aria-label="Sample event stream" role="log">
+            <div data-seed><time>14:02:11</time><span class="ev-name">session.start</span> — web</div>
+            <div data-seed><time>14:02:19</time><span class="ev-name">feature.used</span> — export</div>
+            <div data-seed><time>14:02:31</time><span class="ev-name">funnel.step</span> — invite</div>
+          </div>
+        </div>
+        <div class="step">
+          <h3>Read the answers</h3>
+          <p>Raw events aggregate into the standing readings above. No dashboard-building shift required.</p>
+          <div class="mini-answer">
+            <svg viewBox="0 0 340 120" role="img" aria-label="Small line chart rising as events aggregate into a reading">
+              <g class="stroke-faint" stroke-width="1">
+                <line x1="24" y1="12" x2="24" y2="96"/><line x1="24" y1="96" x2="324" y2="96"/>
+              </g>
+              <path class="stroke-ink" stroke-width="1.3" opacity="0.4" d="M24 88 L64 84 L104 86 L144 74 L184 70 L224 60 L264 56 L304 42"/>
+              <path class="stroke-signal" stroke-width="2" d="M24 90 C90 88 140 70 200 62 S290 40 324 34"/>
+              <text class="chart-label" x="234" y="24">weekly habit ↑</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ pricing ============ -->
+  <section class="section" id="pricing">
+    <div class="wrap">
+      <div class="plate"><span class="label">CALIBRATION · PRICING</span></div>
+      <div class="tiers">
+        <article class="tier">
+          <h3>Bench</h3>
+          <p class="price">$0 <small>forever</small></p>
+          <ul>
+            <li>1 project</li>
+            <li>10,000 events / month</li>
+            <li>30-day trace history</li>
+            <li>All three standing readings</li>
+          </ul>
+          <a class="btn" href="#install">Start free</a>
+        </article>
+        <article class="tier reco">
+          <span class="reco-tag">RECOMMENDED</span>
+          <h3>Lab</h3>
+          <p class="price">$49 <small>/ month</small></p>
+          <ul>
+            <li>5 projects</li>
+            <li>1M events / month</li>
+            <li>12-month trace history</li>
+            <li>Cohort exports (CSV)</li>
+            <li>Slack digests</li>
+          </ul>
+          <a class="btn primary" href="#install">Start recording</a>
+        </article>
+        <article class="tier">
+          <h3>Observatory</h3>
+          <p class="price">$199 <small>/ month</small></p>
+          <ul>
+            <li>Unlimited projects</li>
+            <li>20M events / month</li>
+            <li>Full history, never pruned</li>
+            <li>SSO &amp; audit log</li>
+            <li>Priority support</li>
+          </ul>
+          <a class="btn" href="#install">Talk to us</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ closing (minted image) ============ -->
+  <section class="closing" aria-label="Closing">
+    <img src="assets/pen-chart.webp" alt="" width="2048" height="1152" loading="lazy" decoding="async">
+    <div class="wrap">
+      <h2>Put your product on the chart.</h2>
+      <p class="session-line" id="session-line" hidden>
+        This visit alone: <b id="s-elapsed">00:00</b> on the page ·
+        <b id="s-scroll">0%</b> read · <b id="s-pointer">0 px</b> of pointer travel.
+        Imagine knowing this about your product.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="#install">Start recording</a>
+        <a class="btn" href="guide/">How this page was made</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>LOOPWELL</span>
+    <span class="fine">Loopwell is a fictional demonstration business, built as a portfolio
+    template. Imagery is AI-generated. The session trace above is computed in your browser
+    and never transmitted. <a href="guide/">Read the method</a>.</span>
+  </div>
+</footer>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

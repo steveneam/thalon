@@ -1,0 +1,15 @@
+{
+  "slug": "loopwell",
+  "name": "Loopwell",
+  "vertical": "tech-saas",
+  "oneLiner": "Usage analytics for product teams — drop in a snippet, read the answers.",
+  "axes": {
+    "primary": "data-instrument",
+    "secondary": "exceptional-palette"
+  },
+  "paletteSeed": "oklch(0.750 0.080 230) — cobalt, composed as a three-ink chart-paper system (paper white / cobalt ink / signal red)",
+  "typeDirection": "Archivo variable (display wide-black + body) + Martian Mono variable (readouts) — both OFL, vendored",
+  "motionBudget": "one live instrument (hero session recorder, rAF, pauses when hidden), chart draw-ins on intersection, everything with reduced-motion alternatives",
+  "wave": 1,
+  "built": "2026-07-14"
+}

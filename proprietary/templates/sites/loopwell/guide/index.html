@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How the Loopwell demonstration page was designed and built.">
+<meta name="robots" content="noindex">
+<title>Method — how the Loopwell page was made</title>
+<link rel="stylesheet" href="../css/main.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M3 20 Q8 20 10 14 T16 12 Q20 12 20 17 T15 21 Q12 19 16 15 T24 10 L29 12' fill='none' stroke='%23c8361f' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  .guide { max-width: 46rem; margin-inline: auto; padding: clamp(3rem, 7vw, 5rem) var(--gutter) 4rem; }
+  .guide h1 {
+    font-family: var(--display);
+    font-variation-settings: "wdth" 118, "wght" 820;
+    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+    line-height: 1.05;
+  }
+  .guide h2 {
+    font-family: var(--display);
+    font-variation-settings: "wdth" 112, "wght" 750;
+    font-size: 1.25rem;
+    margin-top: 2.6rem;
+  }
+  .guide p, .guide li { color: var(--ink); }
+  .guide p { margin-top: 0.9rem; }
+  .guide ul { padding-left: 1.2rem; margin-top: 0.9rem; display: grid; gap: 0.5rem; }
+  .guide .backlink { display: inline-block; margin-bottom: 2rem; font-size: 0.9rem; }
+  .guide dl {
+    margin-top: 1rem;
+    border: 1px solid var(--grid-major);
+    background: var(--paper-tint);
+    padding: 1.1rem 1.2rem;
+    font-size: 0.92rem;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.45rem 1.2rem;
+  }
+  .guide dt {
+    font-family: var(--mono);
+    font-variation-settings: "wdth" 80, "wght" 550;
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    align-self: baseline;
+  }
+  .guide dd { margin: 0; }
+  .passlog { list-style: none; padding: 0; margin-top: 1rem; display: grid; gap: 0.7rem; }
+  .passlog li {
+    border-left: none;
+    border-top: 1px solid var(--grid-major);
+    padding-top: 0.7rem;
+    font-size: 0.95rem;
+  }
+  .passlog b {
+    font-family: var(--mono);
+    font-variation-settings: "wdth" 85, "wght" 600;
+    font-size: 0.78rem;
+    color: var(--signal-deep);
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="wordmark" href="../">
+      L<svg class="loop" viewBox="0 0 76 28" aria-hidden="true"><path d="M4 22 C14 22 12 6 24 6 C34 6 36 22 46 22 C58 22 58 6 44 10 C34 13 44 24 56 22 C66 20 68 10 72 8"/></svg>PWELL
+    </a>
+    <nav aria-label="Page"><a href="../">Back to the page</a></nav>
+  </div>
+</header>
+
+<main class="guide" id="guide">
+  <h1>How this page was made</h1>
+
+  <p><strong>Loopwell is a fictional demonstration business.</strong> Nothing on the
+  main page is a real product, price, or customer result; the charts show sample
+  data from an invented workspace, labeled as such where they appear. This site is
+  one entry in a portfolio of design templates, each built for a different kind of
+  business.</p>
+
+  <h2>The design idea</h2>
+  <p>A usage-analytics product is an instrument, so the page is built as one: a
+  strip-chart recorder on white millimeter paper. The whole page uses a strict
+  three-ink system, like a printed instrument manual: paper white, cobalt ink for
+  everything structural, and one signal red that is reserved for live or measured
+  marks. If something on the page is red, it is data.</p>
+  <p>The hero takes the idea literally. The recorder at the top of the page measures
+  your own visit (elapsed time, scroll, pointer travel) and draws it as the trace,
+  entirely inside your browser. This page makes no network calls from its scripts,
+  and the trace is never transmitted or stored.</p>
+
+  <h2>Type and materials</h2>
+  <ul>
+    <li><strong>Archivo</strong> (variable): display and body. Set wide and black
+    for headlines, like bezel engraving.</li>
+    <li><strong>Martian Mono</strong> (variable): readouts and labels. Tabular
+    numerals for live figures.</li>
+    <li>Both typefaces are open-source under the SIL Open Font License and are
+    served from this site, not a third-party host. Their license texts ship in the
+    site's <code>fonts/</code> directory.</li>
+    <li>No frameworks, no trackers, no external requests: hand-written HTML, CSS,
+    and one small script for the instrument.</li>
+  </ul>
+
+  <h2>Imagery</h2>
+  <p>The photograph in the closing band is <strong>AI-generated</strong>, minted
+  specifically for this page on a paid, commercially-licensed plan, and served from
+  this site. Its full provenance (model, prompt, spend, license tier) is recorded in
+  the studio's asset register at mint time.</p>
+  <dl>
+    <dt>ASSET</dt><dd>Closing band photograph, chart-recorder pen on grid paper</dd>
+    <dt>VENDOR</dt><dd>Higgsfield (paid tier)</dd>
+    <dt>MODEL</dt><dd id="mint-model">soul_cinematic</dd>
+    <dt>DISCLOSURE</dt><dd>AI-generated imagery; no stock or scraped photography anywhere on this site</dd>
+  </dl>
+
+  <h2>Build notes: iteration passes</h2>
+  <p>The page went through repeated full passes, each hunting faults (layout,
+  contrast, motion honesty, accessibility) and pushing one deliberate ambition item.</p>
+  <ol class="passlog" id="passlog">
+    <li><b>PASS 1</b> — Fault lane: below-fold charts could render undrawn when
+    reveal animation was gated on a scroll observer; charts are now fully visible
+    by default and the draw-in is a pure enhancement (same guarantee for
+    no-script visits). Copy cadence tightened; navigation button wrap fixed on
+    small screens. Ambition lane: the recorder now runs a power-on calibration
+    sweep (a pen check), so the strip has character before you have moved at all.</li>
+    <li><b>PASS 2</b> — Fault lane: the sample event stream mixed fixed seed
+    timestamps with live clock rows (seeds now retire when live rows flow); the
+    closing photograph's crop keeps the pen in frame on narrow screens; the band
+    is knitted to the ink system with a hairline rule. Ambition lane: the
+    instrument closes the loop. The closing band reports your own visit back to
+    you, beside the ask.</li>
+    <li><b>PASS 3</b> — Fault lane: full breakpoint walk (phone, tablet, desktop),
+    contrast sweep on every text-over-color pairing, reduced-motion and no-script
+    states verified honest. Ambition lane: ceiling call. The page's one memorable
+    thing is the live recorder; anything further would be noise, so nothing was
+    added.</li>
+  </ol>
+
+  <h2>Honesty rules this page follows</h2>
+  <ul>
+    <li>No invented testimonials, customer logos, or usage statistics presented as real.</li>
+    <li>No fake urgency or scarcity.</li>
+    <li>Sample data is labeled as sample data.</li>
+    <li>The fictional nature of the business is disclosed (this page, and the footer).</li>
+  </ul>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>LOOPWELL</span>
+    <span class="fine">A fictional demonstration business. <a href="../">Back to the page</a>.</span>
+  </div>
+</footer>
+</body>
+</html>
