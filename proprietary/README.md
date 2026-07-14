@@ -8,6 +8,8 @@ This folder holds the **novel artifacts that make this engine defensible**, kept
 - **prompt chains** — the ideate → script/draft → per-platform fan-out prompt graph, versioned.
 - **fan-out / niche profiles** — the per-tenant, per-platform profile objects (tone, denylist, char limits, disclosure string) that turn one source into many on-brand, never-overclaiming drafts.
 - **tuned heuristics** — clip/highlight scoring rubrics, best-time models, and any other hand-tuned logic that is genuinely ours.
+- **`templates/`** — the template-portfolio factory method: the factory meta-prompt (`templates/meta-prompt.md`) and the two-lane iteration-pass checklist (`templates/iteration-pass-checklist.md`) that every B7.2 surface and B7.4 template runs.
+- **`prompts/`** — versioned prompt packs, starting with the B7.2 shot-list (`prompts/b7.2-shot-list.md`): per-slot minting prompts for Thalon's own surfaces with credit-class tags.
 
 ## What does NOT live here
 
