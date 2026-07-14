@@ -63,6 +63,27 @@ describe("landing page / (docs/FRONTEND.md §2)", () => {
     expect(screen.getByText(NEW_WAY.items[0])).toBeInTheDocument();
   });
 
+  it("renders the minted brand backdrops as decorative layers (B7.2)", () => {
+    const { container } = render(<LandingPage />);
+    const backdrops = container.querySelectorAll("img[data-brand]");
+    const slots = Array.from(backdrops).map((img) => img.getAttribute("data-brand"));
+    expect(slots).toEqual([
+      "heroDusk",
+      "currents",
+      "unfolding",
+      "lantern",
+      "paperGrain",
+      "horizon",
+    ]);
+    for (const img of backdrops) {
+      // Decorative contract: hidden from AT, empty alt, CLS-safe dimensions.
+      expect(img.getAttribute("aria-hidden")).toBe("true");
+      expect(img.getAttribute("alt")).toBe("");
+      expect(Number(img.getAttribute("width"))).toBeGreaterThan(0);
+      expect(Number(img.getAttribute("height"))).toBeGreaterThan(0);
+    }
+  });
+
   it("links the blog from the shared header and footer (§9)", () => {
     render(<LandingPage />);
     const blogLinks = screen.getAllByRole("link", { name: /^blog$/i });

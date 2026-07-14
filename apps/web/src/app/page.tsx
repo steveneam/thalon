@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
 import { StickyCta } from "@/components/landing/sticky-cta";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
+import { BRAND_ASSETS } from "@/lib/brand-assets";
 import { FAQ, NEW_WAY, OLD_WAY, STATS, STEPS, TIERS } from "@/lib/landing/copy";
 
 /**
@@ -70,6 +71,26 @@ export default function LandingPage() {
       <main className="flex-1">
         {/* §1 — hero + waitlist */}
         <section aria-labelledby="hero-heading" className="relative overflow-hidden">
+          {/* minted hero backdrop (L1, pinned + derived — see lib/brand-assets):
+              three amber sails on the dusk horizon, under the CSS deck layers.
+              A left/bottom scrim keeps the copy column on near-black. */}
+          <img
+            src={BRAND_ASSETS.heroDusk.src}
+            width={BRAND_ASSETS.heroDusk.width}
+            height={BRAND_ASSETS.heroDusk.height}
+            alt=""
+            aria-hidden="true"
+            data-brand="heroDusk"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background"
+          />
           {/* command-deck backdrop: faint grid fading out radially + amber bloom */}
           <div
             aria-hidden="true"
@@ -146,8 +167,19 @@ export default function LandingPage() {
         </section>
 
         {/* §2 — the three features + how it works + trust */}
-        <section id="features" aria-labelledby="features-heading" className="scroll-mt-16">
-          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+        <section id="features" aria-labelledby="features-heading" className="relative scroll-mt-16">
+          {/* minted section texture (L2): faint currents, one warm updraft */}
+          <img
+            src={BRAND_ASSETS.currents.src}
+            width={BRAND_ASSETS.currents.width}
+            height={BRAND_ASSETS.currents.height}
+            alt=""
+            aria-hidden="true"
+            data-brand="currents"
+            loading="lazy"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40 [mask-image:linear-gradient(to_bottom,black,transparent_55%)]"
+          />
+          <div className="relative mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
             <p className="u-eyebrow text-primary">The three jobs</p>
             <h2 id="features-heading" className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               What does Thalon do?
@@ -162,10 +194,21 @@ export default function LandingPage() {
               <FeatureShowcase />
             </div>
 
-            {/* [+] the 3-step connective strip */}
-            <div className="mt-16 rounded-xl border bg-card/50 p-6 sm:p-8">
-              <h3 className="text-xl font-semibold tracking-tight">How does it work?</h3>
-              <ol className="mt-6 grid gap-6 md:grid-cols-3">
+            {/* [+] the 3-step connective strip — L3b backdrop: one point of
+                light unfolding into three forms, the steps story itself */}
+            <div className="relative mt-16 overflow-hidden rounded-xl border bg-card/50 p-6 sm:p-8">
+              <img
+                src={BRAND_ASSETS.unfolding.src}
+                width={BRAND_ASSETS.unfolding.width}
+                height={BRAND_ASSETS.unfolding.height}
+                alt=""
+                aria-hidden="true"
+                data-brand="unfolding"
+                loading="lazy"
+                className="pointer-events-none absolute inset-y-0 right-0 h-full w-2/3 object-cover opacity-30 [mask-image:linear-gradient(to_left,black,transparent)]"
+              />
+              <h3 className="relative text-xl font-semibold tracking-tight">How does it work?</h3>
+              <ol className="relative mt-6 grid gap-6 md:grid-cols-3">
                 {STEPS.map((step, i) => (
                   <li key={step.name} className="flex gap-4">
                     <span className="u-tabular font-mono text-2xl font-semibold text-primary/80">
@@ -222,18 +265,29 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* [+] trust framing — the differentiator, led with */}
-            <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
-              <h3 className="text-xl font-semibold tracking-tight">
+            {/* [+] trust framing — the differentiator, led with. L3c backdrop:
+                the calm lantern held above still water — considered judgment */}
+            <div className="relative mt-8 overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
+              <img
+                src={BRAND_ASSETS.lantern.src}
+                width={BRAND_ASSETS.lantern.width}
+                height={BRAND_ASSETS.lantern.height}
+                alt=""
+                aria-hidden="true"
+                data-brand="lantern"
+                loading="lazy"
+                className="pointer-events-none absolute inset-y-0 right-0 h-full w-1/2 object-cover opacity-35 [mask-image:linear-gradient(to_left,black,transparent)]"
+              />
+              <h3 className="relative text-xl font-semibold tracking-tight">
                 Why trust it with your name?
               </h3>
-              <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">
+              <p className="relative mt-3 max-w-2xl leading-7 text-muted-foreground">
                 Because Thalon is gated, not trigger-happy. An automated judge checks every draft&apos;s
                 claims against the sources you provided and screens your denylist — drafts that
                 fail are blocked before you ever see them, and nothing publishes without your
                 explicit approval.
               </p>
-              <ul className="mt-5 flex flex-wrap gap-2.5">
+              <ul className="relative mt-5 flex flex-wrap gap-2.5">
                 {TRUST_CHIPS.map((chip) => (
                   <li
                     key={chip}
@@ -257,9 +311,20 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* §3 — early-access pricing */}
-        <section id="pricing" aria-labelledby="pricing-heading" className="scroll-mt-16 border-t">
-          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+        {/* §3 — early-access pricing. L4 backdrop: near-black paper grain,
+            the faint warm gradient breathing at the section's lower edge */}
+        <section id="pricing" aria-labelledby="pricing-heading" className="relative scroll-mt-16 border-t">
+          <img
+            src={BRAND_ASSETS.paperGrain.src}
+            width={BRAND_ASSETS.paperGrain.width}
+            height={BRAND_ASSETS.paperGrain.height}
+            alt=""
+            aria-hidden="true"
+            data-brand="paperGrain"
+            loading="lazy"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50 [mask-image:linear-gradient(to_top,black,transparent_65%)]"
+          />
+          <div className="relative mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
             <p className="u-eyebrow text-primary">Early access</p>
             <h2 id="pricing-heading" className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               What does it cost?
@@ -321,9 +386,20 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* §4 — FAQ + final repeat CTA */}
-        <section id="faq" aria-labelledby="faq-heading" className="scroll-mt-16 border-t">
-          <div className="mx-auto w-full max-w-3xl px-6 py-20 lg:py-24">
+        {/* §4 — FAQ + final repeat CTA. L5 under the close: the thin amber
+            horizon, first light gathering — the horizon Thalon watches */}
+        <section id="faq" aria-labelledby="faq-heading" className="relative scroll-mt-16 border-t">
+          <img
+            src={BRAND_ASSETS.horizon.src}
+            width={BRAND_ASSETS.horizon.width}
+            height={BRAND_ASSETS.horizon.height}
+            alt=""
+            aria-hidden="true"
+            data-brand="horizon"
+            loading="lazy"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-72 w-full object-cover opacity-70 [mask-image:linear-gradient(to_top,black,transparent)]"
+          />
+          <div className="relative mx-auto w-full max-w-3xl px-6 py-20 lg:py-24">
             <p className="u-eyebrow text-primary">Objections, answered</p>
             <h2 id="faq-heading" className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               Frequently asked questions
