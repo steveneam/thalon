@@ -127,3 +127,50 @@ Uplift items (ratified direction; detail at build time):
 3. **Feature-card pull**: hover/spotlight treatment on the three §2 cards (ReactBits spotlight/tilt class, or CSS-only equivalent), popouts get the real composition-v2 renders (the FeatureLoop swap riding this step).
 4. **Micro-interactions, max 2–3**: count-up on waitlist position, magnetic/glare CTA. Stop there.
 5. **Palette continuity decision folds into step-1 of §7**: landing stays dark, but when the workspace light retune lands, re-tune the landing's dark base toward the same navy-ink + amber-signal DNA so the brand doesn't fork (today's warm charcoal `#161411` is also baked into tenant #0's `identity.style` brand literals — composition v2 is the natural moment to reconcile both).
+
+## 10. Dashboard v3 — founder direction + impeccable critique convergence (2026-07-14, session 30)
+
+The first impeccable run (dual-agent critique, snapshot at
+`.impeccable/critique/2026-07-14T11-50-33Z__apps-web-src-app-app.md`, 25/40)
+landed the same verdict the founder reached independently the same morning:
+the dashboard answers *what needs me* and *what happened* but never *what will
+happen* or *where an asset is in the pipeline*. Ratified direction, three parts:
+
+1. **Config off the dashboard (SHIPPED, `ab6d5b9`)** — the seams/drivers card
+   moved out (Settings already carried the full readout); the dashboard keeps
+   only a degraded-health notice (unconfigured gateway today; the pattern
+   extends to any seam whose failure starves the pipeline). Founder call:
+   "move the seams and drivers to the settings."
+2. **The work calendar (NEXT SLICE)** — a weekly view (month later) of intended
+   work: upcoming sweeps per area (`nextSweepAt`), platform cadence-eligible
+   slots (B7.a config), drafts aging in the approve queue, recent
+   completions. HONEST STATES ONLY: no publish path exists, so nothing may
+   render as a "scheduled upload" — the calendar shows what the engine WILL do
+   (sweep, poll) and what WAITS on the operator (approvals, edits), and grows
+   into the scheduling surface when the publish bucket lands. Needs: one read
+   API aggregating sweep pointers + cadence config + queue ages; a week-grid
+   component on the dashboard (freed real estate from item 1).
+3. **The asset pipeline schematic (NEXT SLICE, pairs with two open critique
+   P1s)** — a per-asset lineage stepper: intel capture → context chips →
+   generation → judge gate (per-check verdicts) → approve queue → (future
+   publish), current stage highlighted, each stage opening its artifact. The
+   events spine already records every transition, so the view is honest by
+   construction. Build it WITH the two critique P1s it depends on: judge
+   verdict *reasons* carried through the wire type, and approve-queue deep
+   links (`?run=`/`?draft=`) + entity-scoped activity hrefs. Founder framing:
+   "show how the current asset is being handled… as a schematic diagram."
+
+Also ratified 2026-07-14: **the amber compromise** — the workspace stays
+light and the two-channel rule stays intact (blue = act, amber = signal);
+warmth rises via the neutrals (background/secondary/muted/sidebar nudged
+toward the landing's amber hue, shipped `ab6d5b9`), the brand mark, charts
+(chart-2 is bronze), and the growing amber-signal surface area of items 2–3.
+Amber never becomes an interactive color in the workspace.
+
+Remaining critique backlog (P1/P2, snapshot has detail): judge reasons on
+blocked drafts · approve-as-informed-consent panel (origin + profile version +
+consequence-stating button; the outreach-email panel is the voice reference) ·
+jargon copy pass (bucket codes/env vars out of operator copy) · skeleton
+loading states · command-palette focus trap + aria-activedescendant ·
+undo/toast after single-key approve · Leads keyboard triage · palette-executable
+actions (Sweep now / Score now / Approve all).
