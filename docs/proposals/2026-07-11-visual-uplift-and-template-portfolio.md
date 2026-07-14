@@ -226,7 +226,28 @@ factory economics read straight off the provenance manifests (they carry credits
 asset, so cost-per-site falls out for free) → remaining ~20 in waves, sequential by
 default.
 
-### Tier recommendation — unchanged, now source-grounded
+### Session-30 addendum — tier PAID + founder's mint-week order (2026-07-14)
+
+The founder subscribed to **Plus** at session-30 close (MCP-verified: plan `plus`,
+1,010 credits). Mint week runs in the founder's revised order, superseding the
+"images → pages → workspace → video-if-credits, then 3-vertical pilot" sequence:
+
+1. **Images** — Thalon's own imagery per the B7.2 shot-list (landing hero/sections,
+   blog auto-hero slots; unlimited-select-model work, credit-cheap).
+2. **Template landing pages, wave 1: FIVE verticals** (up from the 3-vertical pilot)
+   through the factory meta-prompt.
+3. **Workspace** — the paper/navy illustration set (empty states, onboarding,
+   dashboard cards).
+4. **Video** — animation/key-asset mints (the credit pool's main consumer).
+5. **Template landing pages, wave 2: five more.**
+6. **Re-assess remaining credits with the founder** — this checkpoint absorbs the
+   original pilot-wave review (quality bar + factory economics off the provenance
+   manifests) and decides where the rest of the pool goes.
+
+P0.1–P0.3 (meta-prompt v1 · pass checklist · shot-list) still precede step 1 — they
+are hours, not days, and every later step consumes them. P0.4/P0.5 (AssetSource
+window + driver skeleton) ride alongside the early mints. Paid-tier terms
+re-verified live at the first mint; every asset pins through B7.1 with provenance.
 
 **Plus, one month.** The verbatim prompt confirms the workload mix the original
 recommendation assumed: image minting at portfolio scale (absorbed by Plus's unlimited
