@@ -76,7 +76,10 @@ export function ProfileEditor() {
     if (!form) return;
     setError(null);
     setSavedVersion(null);
-    const mapped = formToConfig(form);
+    // Carry the active profile's window-1 blocks (icp · cadence · routing)
+    // through the save — the form doesn't edit them, and dropping them
+    // disarms scoring/cadence/routing (see formToConfig).
+    const mapped = formToConfig(form, payload?.active?.config);
     if (mapped.error !== null) {
       setError(mapped.error);
       return;

@@ -94,8 +94,19 @@ export function profileToForm(profile: ProfileWire | null): ProfileFormState {
   };
 }
 
+/** The window-1 blocks the editor doesn't edit but must never drop on save. */
+export type CarriedConfigBlocks = Pick<ProfileWire["config"], "icp" | "cadence" | "routing">;
+
 export function formToConfig(
   form: ProfileFormState,
+  /**
+   * The ACTIVE profile's non-form-backed blocks (icp · cadence · routing),
+   * carried through verbatim — a save built from the form fields alone
+   * silently dropped them, disarming lead scoring / the cadence gate /
+   * routing (found live on staging, 2026-07-14). Callers pass the fetched
+   * active wire config; absent blocks stay absent.
+   */
+  carry?: CarriedConfigBlocks,
 ): { config: BrandProfileConfigInput; error: null } | { config: null; error: string } {
   const { links, error: linksError } = parseLinks(form.links);
   if (linksError) return { config: null, error: linksError };
@@ -118,6 +129,9 @@ export function formToConfig(
         topics: linesToList(form.topics),
         links,
       },
+      ...(carry?.icp !== undefined ? { icp: carry.icp } : {}),
+      ...(carry?.cadence !== undefined ? { cadence: carry.cadence } : {}),
+      ...(carry?.routing !== undefined ? { routing: carry.routing } : {}),
     },
     error: null,
   };
