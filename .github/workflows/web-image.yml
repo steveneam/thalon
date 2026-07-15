@@ -93,18 +93,18 @@ jobs:
             ghcr.io/steveneam/thalon-web:latest
             ghcr.io/steveneam/thalon-web:${{ github.sha }}
           cache-from: type=gha
-      # Key-scope Option B (ask-backs 2026-07-15): when the repo var
-      # DEPLOY_VIA_RETAG is 'true', CI points the fixed :staging tag at this
-      # build's digest on the GHCR side (no Dokploy grant involved) and the
-      # deploy step skips application.update entirely — the Dokploy app config
-      # pins :staging once and the API key drops to deploy-only, closing the
-      # service:create blast radius. The var stays unset until swordfish
-      # pre-verifies the candidate key and the app config is re-pinned; until
-      # then the legacy update+deploy path below runs unchanged. Rollback under
-      # Option B stays deploy-only: re-tag :staging to the previous digest
-      # (recorded in the step summary every run) and deploy again.
-      - name: retag — point the fixed staging tag at this digest (Option B)
-        if: vars.DEPLOY_VIA_RETAG == 'true'
+      # Deploy-only pipeline (key-scope Option B, cutover completed
+      # 2026-07-15 — the whole exchange is archived in
+      # agent_handoff/SWORDFISH-ARCHIVE.md): the Dokploy app config pins the
+      # fixed :staging tag, so CI's only registry-side move is re-pointing
+      # that tag at this build's digest. The Dokploy key carries NO
+      # create-class grant — application.update is impossible with it by
+      # design (the legacy update+deploy path was removed once the old key
+      # was revoked; resurrect from git history only with a create-capable
+      # key, which STRICT_SCOPE deliberately no longer mints). Rollback is
+      # also deploy-only: re-tag :staging to the previous digest recorded in
+      # the step summary, then deploy.
+      - name: retag — point the fixed staging tag at this digest
         env:
           IMAGE: ghcr.io/steveneam/thalon-web
           DIGEST: ${{ steps.push.outputs.digest }}
@@ -115,27 +115,16 @@ jobs:
           echo "staging tag: \`$prev\` → \`$DIGEST\` (rollback = re-tag to previous + deploy)" \
             >> "$GITHUB_STEP_SUMMARY"
           docker buildx imagetools create --tag "$IMAGE:staging" "$IMAGE@$DIGEST"
-      # Auto-deploy to staging (founder direction 2026-07-13; recipe proven
-      # live by swordfish — agent_handoff/FROM-SWORDFISH.md §2026-07-13):
-      # pin the exact sha@digest via the per-app scoped credential, deploy,
-      # poll to done|error. update+deploy is deliberate — the deploy-webhook
-      # only re-pulls the configured tag and saveDockerProvider can clobber
-      # the stored GHCR pull credential; never switch to either. Under
-      # Option B (var above) the pin already happened at the registry, so
-      # the update call is skipped and only deploy+poll run.
-      - name: deploy — pin sha@digest on staging via the scoped Dokploy key
+      # deploy + poll to done|error. The deploy-webhook stays off-limits
+      # (only re-pulls the configured tag without our gate) and
+      # saveDockerProvider can clobber the stored GHCR pull credential;
+      # never switch to either.
+      - name: deploy — roll staging onto the re-tagged image
         env:
           API: ${{ vars.DOKPLOY_API_BASE }}
           KEY: ${{ secrets.DOKPLOY_API_KEY }}
           APP: ${{ secrets.DOKPLOY_APP_ID }}
-          IMAGE: ghcr.io/steveneam/thalon-web:${{ github.sha }}@${{ steps.push.outputs.digest }}
-          RETAG: ${{ vars.DEPLOY_VIA_RETAG }}
         run: |
-          if [ "$RETAG" != "true" ]; then
-            curl -fsS -X POST "$API/application.update" \
-              -H "x-api-key: $KEY" -H 'content-type: application/json' \
-              -d "{\"applicationId\":\"$APP\",\"dockerImage\":\"$IMAGE\"}" > /dev/null
-          fi
           curl -fsS -X POST "$API/application.deploy" \
             -H "x-api-key: $KEY" -H 'content-type: application/json' \
             -d "{\"applicationId\":\"$APP\",\"title\":\"main ${GITHUB_SHA::7}\"}" > /dev/null
