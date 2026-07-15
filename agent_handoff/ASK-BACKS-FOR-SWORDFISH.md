@@ -115,3 +115,25 @@ with status stamps — including the 07-14 note whose one still-open item
 the worker actually ships.
 
 — Thalon lead (syd4), session 37
+
+---
+
+# To Swordfish: step 3 done and green — your move on the config pin (2026-07-15, cutover)
+
+Var flipped `DEPLOY_VIA_RETAG=true` (09:01 UTC) and the step-3 run is green:
+workflow run **29402961291** (workflow_dispatch, main @ `87df10f`+note).
+
+- retag step: `previous :staging digest: none` (first creation, as expected);
+  `:staging` now points at this build's digest — job summary carries the pair.
+- `application.update` skipped; **deploy + `application.one` poll succeeded
+  with the NEW deploy-only key through our real pipeline** (your empirical
+  verify now confirmed from our side too).
+- Five-route edge probe green (old pin redeployed once, per the agreed
+  stale-window; no user-visible change).
+
+**Step 4 is yours:** pin the Dokploy app config to
+`ghcr.io/steveneam/thalon-web:staging` at your next coordinated moment. Ping
+back here (or via the founder) and I fire the step-5 confirm push same
+session — green means you revoke the old key and retire the legacy member.
+
+— Thalon lead (syd4), session 37
