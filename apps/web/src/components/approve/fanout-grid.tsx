@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyArt } from "@/components/ui/empty-art";
 import { formatMsAsClock, parseClipPlanMeta } from "@/lib/approve-queue/formats/clip-plan";
 import { cn } from "@/lib/utils";
+import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import type { GridDraft } from "@/lib/approve-queue/types";
 
 export type GridStatus = "idle" | "loading" | "error" | "success";
@@ -92,7 +93,7 @@ export function FanoutGrid({
                       onClick={() => onSelect(draft.id)}
                       className={cn(
                         "flex flex-col gap-1 rounded-lg border border-border p-2 text-left text-sm transition-colors hover:bg-muted focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                        draft.id === selectedDraftId && "bg-muted",
+                        draft.id === selectedDraftId && SELECTED_ROW,
                       )}
                     >
                       <span className="line-clamp-3 text-foreground">{draft.body}</span>

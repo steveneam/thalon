@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FormatDetail } from "@/components/approve/format-detail";
 import { JudgeBadge } from "@/components/approve/judge-badge";
 import { JudgeReasons } from "@/components/approve/judge-reasons";
-import { isTypingTarget } from "@/lib/approve-queue/keyboard";
+import { isTypingTarget } from "@/lib/workspace/keyboard";
 import type { GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
 export type PanelStatus = "idle" | "loading" | "error" | "success";

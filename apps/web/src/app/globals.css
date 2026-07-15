@@ -236,6 +236,10 @@
     color: var(--primary);
     animation: caret-blink 1.1s steps(1) infinite;
   }
+  /* Workspace toast entrance (s40): state-conveying, product-register timing. */
+  .anim-toast {
+    animation: toast-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
   /* §8.1 hero signature moment — the split-headline word rise. Server-
    * rendered spans with staggered inline delays; pure CSS, zero client JS,
    * so `/` stays a static shell. */
@@ -320,6 +324,17 @@
 @keyframes caret-blink {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -419,6 +434,7 @@
   .anim-word,
   .anim-drift,
   .anim-drift-late,
+  .anim-toast,
   .cta-glare::after,
   [data-vignette] * {
     animation: none !important;

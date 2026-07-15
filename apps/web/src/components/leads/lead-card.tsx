@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import type { CreateFamily } from "@/lib/intel/types";
 import type { LeadCard as LeadCardData } from "@/lib/leads/types";
+import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/workspace/format";
+import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 
 const EXITS: Array<{ family: CreateFamily; label: string; icon: typeof Video }> = [
   { family: "post", label: "Post", icon: FileText },
@@ -20,7 +22,10 @@ const EXITS: Array<{ family: CreateFamily; label: string; icon: typeof Video }> 
 
 interface LeadCardProps {
   lead: LeadCardData;
+  /** Checkbox multi-select (bulk dismiss). */
   selected: boolean;
+  /** The keyboard cursor (j/k) — the row x/d/h act on; wears the selected-row recipe. */
+  cursor: boolean;
   busy: boolean;
   /** The current ICP hash — a card scored under a different one is honestly stale. */
   currentProfileHash: string | null;
@@ -38,6 +43,7 @@ interface LeadCardProps {
 export function LeadCard({
   lead,
   selected,
+  cursor,
   busy,
   currentProfileHash,
   onSelect,
@@ -51,7 +57,7 @@ export function LeadCard({
     lead.profileHash !== currentProfileHash;
 
   return (
-    <Card data-testid={`lead-card-${lead.id}`} className="gap-3">
+    <Card data-testid={`lead-card-${lead.id}`} className={cn("gap-3", cursor && SELECTED_ROW)}>
       <CardHeader className="flex-row flex-wrap items-center gap-2">
         <input
           type="checkbox"

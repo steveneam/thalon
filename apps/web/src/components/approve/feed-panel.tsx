@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import type { FeedRun } from "@/lib/approve-queue/types";
 
 export type FeedStatus = "loading" | "error" | "success";
@@ -37,7 +38,7 @@ export function FeedPanel({ status, runs, selectedRunId, onSelect }: FeedPanelPr
                 onClick={() => onSelect(run.id)}
                 className={cn(
                   "w-full rounded-lg border border-transparent px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                  run.id === selectedRunId && "border-border bg-muted",
+                  run.id === selectedRunId && SELECTED_ROW,
                 )}
               >
                 <span className="flex items-center gap-1.5">

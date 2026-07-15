@@ -12,6 +12,7 @@ import { fetchRunsFeed } from "@/lib/approve-queue/client";
 import type { FeedRun } from "@/lib/approve-queue/types";
 import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/workspace/format";
+import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 
 type ListStatus = "loading" | "error" | "success";
 
@@ -99,7 +100,7 @@ export function RunsList() {
                   ref={run.id === targetRunId ? targetRef : undefined}
                   className={cn(
                     "rounded-lg border border-border p-3",
-                    run.id === targetRunId && "border-ring/50 bg-muted/40",
+                    run.id === targetRunId && SELECTED_ROW,
                   )}
                 >
                   <div className="flex flex-wrap items-center gap-2">

@@ -5,6 +5,7 @@ import { ApprovePanel, type PanelStatus } from "@/components/approve/approve-pan
 import { FanoutGrid, type GridStatus } from "@/components/approve/fanout-grid";
 import { FeedPanel, type FeedStatus } from "@/components/approve/feed-panel";
 import { StagedFlow } from "@/components/staged/staged-flow";
+import { ActionToast, type ToastState } from "@/components/workspace/action-toast";
 import { usePulseSafe } from "@/components/workspace/pulse-context";
 import {
   approveDraft,
@@ -16,7 +17,7 @@ import {
   reJudgeDraft,
   rejectDraft,
 } from "@/lib/approve-queue/client";
-import { isTypingTarget } from "@/lib/approve-queue/keyboard";
+import { useListKeys } from "@/lib/workspace/keyboard";
 import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import type { FeedRun, GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
@@ -59,6 +60,10 @@ export function ApproveQueue() {
   // budget halt) must fail LOUDLY here rather than vanish, since the draft
   // itself honestly stays `judging` with nothing else to signal it happened.
   const [actionError, setActionError] = useState<string | null>(null);
+  // Terminal-verb confirmation (s40): after approve/reject the only other
+  // feedback is a badge quietly changing — essential under keyboard triage.
+  // True undo rides the queued B-crm approve/reject contract change.
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   // Selection changes are EVENTS: every synchronous status/selection reset
   // lives in these handlers, never in an effect body
@@ -192,13 +197,16 @@ export function ApproveQueue() {
 
   // Always refreshes — even when `action` throws — so the panel/grid reflect
   // the draft's TRUE current state (e.g. still `judging` after a failed
-  // judge run) rather than stale pre-action data.
-  async function withBusy(action: () => Promise<unknown>) {
+  // judge run) rather than stale pre-action data. `confirmToast` fires only
+  // on success — a failed action must never read as a completed one.
+  async function withBusy(action: () => Promise<unknown>, confirmToast?: ToastState) {
     setBusy(true);
     setActionError(null);
+    let succeeded = true;
     try {
       await action();
     } catch (err) {
+      succeeded = false;
       setActionError(err instanceof Error ? err.message : "Action failed");
     }
     try {
@@ -207,6 +215,7 @@ export function ApproveQueue() {
     } finally {
       setBusy(false);
     }
+    if (succeeded && confirmToast) setToast(confirmToast);
   }
 
   // Batch approve (B6.2): every QUEUED draft in the selected run, in grid
@@ -215,44 +224,47 @@ export function ApproveQueue() {
   // the refresh then shows exactly how far it got.
   const queuedDrafts = drafts.filter((d) => d.status === "queued");
   function batchApprove() {
-    void withBusy(async () => {
-      for (const draft of queuedDrafts) {
-        await approveDraft(draft.id);
-      }
-    });
+    const count = queuedDrafts.length;
+    void withBusy(
+      async () => {
+        for (const draft of queuedDrafts) {
+          await approveDraft(draft.id);
+        }
+      },
+      { message: `Approved ${count} queued draft${count === 1 ? "" : "s"}.` },
+    );
   }
 
-  // Keyboard triage (B6.2 [+]): j/k move the grid selection, a/r act on the
-  // selected QUEUED draft ('e' lives in the panel, which owns edit state).
-  // Never fires while typing or while the staged surface owns the screen.
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (busy || stagedSelected || isTypingTarget(event.target)) return;
-      if (event.ctrlKey || event.metaKey || event.altKey) return;
-      if (event.key === "j" || event.key === "k") {
-        if (drafts.length === 0) return;
-        event.preventDefault();
-        const current = drafts.findIndex((d) => d.id === selectedDraftId);
-        const next =
-          current === -1
-            ? 0
-            : Math.min(Math.max(current + (event.key === "j" ? 1 : -1), 0), drafts.length - 1);
-        selectDraft(drafts[next].id);
-      } else if (event.key === "a" || event.key === "r") {
-        const selected = drafts.find((d) => d.id === selectedDraftId);
-        if (!selected || selected.status !== "queued") return;
-        event.preventDefault();
-        void withBusy(() =>
-          event.key === "a" ? approveDraft(selected.id) : rejectDraft(selected.id),
-        );
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // withBusy is recreated per render; re-registering the listener is cheap
-    // and keeps every closure fresh.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busy, stagedSelected, drafts, selectedDraftId, selectDraft]);
+  // Keyboard triage (B6.2 [+], shared grammar since s40): j/k move the grid
+  // selection, a/r act on the selected QUEUED draft ('e' lives in the panel,
+  // which owns edit state). useListKeys guards typing targets and modifiers;
+  // the staged surface owning the screen disables the whole grammar.
+  const moveSelection = (delta: 1 | -1) => (event: KeyboardEvent) => {
+    if (drafts.length === 0) return;
+    event.preventDefault();
+    const current = drafts.findIndex((d) => d.id === selectedDraftId);
+    const next =
+      current === -1 ? 0 : Math.min(Math.max(current + delta, 0), drafts.length - 1);
+    selectDraft(drafts[next].id);
+  };
+  const actOnSelected = (verb: "approve" | "reject") => (event: KeyboardEvent) => {
+    const selected = drafts.find((d) => d.id === selectedDraftId);
+    if (!selected || selected.status !== "queued") return;
+    event.preventDefault();
+    void withBusy(
+      () => (verb === "approve" ? approveDraft(selected.id) : rejectDraft(selected.id)),
+      { message: verb === "approve" ? "Draft approved." : "Draft rejected." },
+    );
+  };
+  useListKeys({
+    enabled: !busy && !stagedSelected,
+    bindings: {
+      j: moveSelection(1),
+      k: moveSelection(-1),
+      a: actOnSelected("approve"),
+      r: actOnSelected("reject"),
+    },
+  });
 
   // Zero-inbox ([+]): the shell pulse knows whether ANYTHING waits across
   // all runs — celebrate it instead of showing an ambiguous quiet queue.
@@ -297,8 +309,14 @@ export function ApproveQueue() {
               judgeResults={judgeResults}
               busy={busy}
               actionError={actionError}
-              onApprove={() => selectedDraftId && withBusy(() => approveDraft(selectedDraftId))}
-              onReject={() => selectedDraftId && withBusy(() => rejectDraft(selectedDraftId))}
+              onApprove={() =>
+                selectedDraftId &&
+                withBusy(() => approveDraft(selectedDraftId), { message: "Draft approved." })
+              }
+              onReject={() =>
+                selectedDraftId &&
+                withBusy(() => rejectDraft(selectedDraftId), { message: "Draft rejected." })
+              }
               onEditSave={(body) => selectedDraftId && withBusy(() => editDraft(selectedDraftId, body))}
               onReJudge={() => selectedDraftId && withBusy(() => reJudgeDraft(selectedDraftId))}
               onPublish={() => selectedDraftId && withBusy(() => publishDraft(selectedDraftId))}
@@ -306,6 +324,7 @@ export function ApproveQueue() {
           </>
         )}
       </div>
+      <ActionToast toast={toast} onClear={() => setToast(null)} />
     </div>
   );
 }

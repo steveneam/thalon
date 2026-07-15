@@ -266,6 +266,39 @@ A new surface that reaches for a removal word picks from this table; a
 audited clean 2026-07-15: intel/leads = Dismiss, library = Delete,
 approve = Reject, Create chips = Remove.
 
+### List-surface grammar *(consistency slice, session 40)*
+
+Four recipes, each defined once — a list surface that reinvents any of them
+is a defect:
+
+**The Selected-Row Recipe.** Exactly one selected/current-row treatment:
+the action-blue tint (`SELECTED_ROW` in `lib/workspace/selected-row.ts`).
+Selection is an interactive state, so it wears the action channel per the
+Two-Channel Rule; muted washes are *hover only* — a selected row that
+matches a hovered row is the defect this retires. Conformance is pinned
+executable by `lib/workspace/__tests__/selected-row.test.ts`.
+
+**The j/k Grammar.** Every triage list shares one keyboard grammar
+(`useListKeys` in `lib/workspace/keyboard.ts`): `j`/`k` move the selected
+row (detail follows selection), `x` picks it for bulk, and single letters
+act on it using the surface's own Four-Verbs word (`a`/`r` on approve, `d`
+= Dismiss on leads, `d` = Delete on library — the named confirm still
+guards destructive keys). Keys never fire while typing or with a modifier
+held; each surface shows a `keys ·` eyebrow legend and announces the
+moved-to row through an sr-only live region.
+
+**The Bulk Bar.** Multi-select bars are one component
+(`components/workspace/bulk-bar.tsx`): count + mass action behind ONE
+named confirm with the count (FRONTEND §0's standing QoL convention) +
+Clear. The action wears its Four-Verbs dress (Delete destructive, Dismiss
+quiet).
+
+**The Terminal Toast.** Terminal verbs (Approve/Reject/Dismiss/Delete)
+confirm through `components/workspace/action-toast.tsx` — message plus a
+link back to where the item now lives when such a place exists (leads →
+Dismissed tab). Never a promised "Undo" that doesn't exist: true
+undo-after-terminal rides the queued B-crm approve/reject contract change.
+
 ### HeatGrade (signature component)
 The thermal pill: `u-eyebrow` band word inside a filled pill (band color
 decides ink-vs-paper text), beside a 2.5rem magnitude bar on Muted Wash whose

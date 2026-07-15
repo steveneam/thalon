@@ -18,7 +18,10 @@ export interface TrendPromotePick {
 
 interface TrendCardProps {
   card: TrendCardData;
+  /** Checkbox multi-select for bulk Dismiss (FRONTEND §0 parity, s40). */
+  selected: boolean;
   busy: boolean;
+  onSelect: (cardId: string, selected: boolean) => void;
   onPromote: (cardId: string, pick: TrendPromotePick) => void;
   onDismiss: (cardId: string) => void;
 }
@@ -40,7 +43,7 @@ function pct(ratio: number | null): string {
  * title/angle ride the promote capture, so Create opens pre-filled and the
  * operator never retypes what intel already knew.
  */
-export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) {
+export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss }: TrendCardProps) {
   const [titleIndex, setTitleIndex] = useState(0);
   const [angleIndex, setAngleIndex] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
@@ -57,6 +60,13 @@ export function TrendCard({ card, busy, onPromote, onDismiss }: TrendCardProps) 
   return (
     <Card data-testid={`trend-card-${card.id}`} className="gap-3">
       <CardHeader className="flex-row flex-wrap items-center gap-2">
+        <input
+          type="checkbox"
+          aria-label={`Select trend from @${card.account}`}
+          checked={selected}
+          onChange={(e) => onSelect(card.id, e.target.checked)}
+          className="size-4 accent-primary"
+        />
         <Badge variant="outline" className="font-mono">{card.source}</Badge>
         <span className="text-xs text-muted-foreground">@{card.account}</span>
         <time dateTime={card.publishedAt} className="text-xs text-muted-foreground">

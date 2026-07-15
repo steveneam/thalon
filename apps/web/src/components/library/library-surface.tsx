@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyArt } from "@/components/ui/empty-art";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ActionToast, type ToastState } from "@/components/workspace/action-toast";
+import { BulkBar } from "@/components/workspace/bulk-bar";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { deleteSource, fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
+import { useListKeys } from "@/lib/workspace/keyboard";
+import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import {
   EXPORT_BUILDERS,
   formatTimecode,
@@ -73,6 +77,12 @@ export function LibrarySurface() {
   const [segmentsOpen, setSegmentsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Multi-select for bulk Delete (FRONTEND §0 parity, s40) + the terminal-
+  // action toast. "Picked" = the checkbox set; "open" = the row whose
+  // transcript shows (the selected-row recipe + what keyboard keys act on).
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const openRowRef = useRef<HTMLLIElement | null>(null);
 
   const load = useCallback(
     () =>
@@ -131,6 +141,15 @@ export function LibrarySurface() {
     });
   }
 
+  function togglePick(id: string, isPicked: boolean) {
+    setPicked((current) => {
+      const next = new Set(current);
+      if (isPicked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
   // Delete (founder direction, session 39). One confirm, named by title (the
   // leads-surface destructive-bulk precedent); the server refuses a source
   // that grounds drafts, and that refusal surfaces verbatim below the form.
@@ -139,7 +158,36 @@ export function LibrarySurface() {
     await withBusy(async () => {
       await deleteSource(row.id);
       if (transcript?.sourceId === row.id) setTranscript(null);
+      togglePick(row.id, false);
       setPayload(await fetchLibrary());
+      setToast({ message: `Deleted "${row.title ?? row.uri ?? row.id}".` });
+    });
+  }
+
+  // Bulk Delete (s40 parity; FRONTEND §0 — BulkBar carries the ONE named
+  // confirm). Sequential through the same endpoint; a refuse-while-referenced
+  // failure never silently vanishes — partial results surface as the error,
+  // and the refresh shows exactly what survived.
+  async function bulkDelete() {
+    const rows = (payload?.sources ?? []).filter((row) => picked.has(row.id));
+    await withBusy(async () => {
+      let done = 0;
+      const failures: string[] = [];
+      for (const row of rows) {
+        try {
+          await deleteSource(row.id);
+          done += 1;
+          if (transcript?.sourceId === row.id) setTranscript(null);
+        } catch (err) {
+          failures.push(err instanceof Error ? err.message : "delete failed");
+        }
+      }
+      setPicked(new Set());
+      setPayload(await fetchLibrary());
+      if (failures.length > 0) {
+        throw new Error(`Deleted ${done}; ${failures.length} refused (${failures[0]})`);
+      }
+      setToast({ message: `Deleted ${done} transcript${done === 1 ? "" : "s"}.` });
     });
   }
 
@@ -180,8 +228,50 @@ export function LibrarySurface() {
     ? (payload?.sources.find((row) => row.id === transcript.sourceId) ?? null)
     : null;
 
+  // Keyboard grammar parity (s40): j/k move the open row exactly like the
+  // approve queue's grid selection (selection drives the detail), x picks it
+  // for bulk, d is the surface's Four-Verbs word — Delete, still behind the
+  // named confirm inside removeSource.
+  const shelfRows = payload?.sources ?? [];
+  const moveOpenRow = (delta: 1 | -1) => (event: KeyboardEvent) => {
+    if (shelfRows.length === 0) return;
+    event.preventDefault();
+    const current = shelfRows.findIndex((row) => row.id === transcript?.sourceId);
+    const next =
+      current === -1 ? 0 : Math.min(Math.max(current + delta, 0), shelfRows.length - 1);
+    void openSource(shelfRows[next]);
+  };
+  useListKeys({
+    enabled: status === "success" && !busy,
+    bindings: {
+      j: moveOpenRow(1),
+      k: moveOpenRow(-1),
+      x: (event) => {
+        if (!openRow) return;
+        event.preventDefault();
+        togglePick(openRow.id, !picked.has(openRow.id));
+      },
+      d: (event) => {
+        if (!openRow) return;
+        event.preventDefault();
+        void removeSource(openRow);
+      },
+    },
+  });
+
+  // Keep the open row in view while j/k cruises the shelf (jsdom-safe call).
+  const openSourceId = transcript?.sourceId;
+  useEffect(() => {
+    openRowRef.current?.scrollIntoView?.({ block: "nearest" });
+  }, [openSourceId]);
+
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
+      {/* j/k moves the open row silently for screen readers without this
+          (the approve queue's live-region precedent). */}
+      <p aria-live="polite" className="sr-only">
+        {openRow ? `Opened ${openRow.title ?? openRow.uri ?? openRow.id}` : ""}
+      </p>
       {status === "loading" && (
         <div className="flex flex-col gap-3" aria-label="Loading library">
           <Skeleton className="h-24" />
@@ -358,8 +448,26 @@ export function LibrarySurface() {
                 Every transcript ingested so far — click one to reopen it. Each is a grounding
                 source generation can already retrieve from.
               </CardDescription>
+              {payload.sources.length > 0 && (
+                <p className="u-eyebrow text-muted-foreground">
+                  keys · j/k open · x pick · d delete
+                </p>
+              )}
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-3">
+              <BulkBar
+                count={picked.size}
+                busy={busy}
+                actionLabel={
+                  <>
+                    <Trash2 aria-hidden className="size-3.5" /> Delete selected
+                  </>
+                }
+                confirmMessage={`Delete ${picked.size} transcript${picked.size === 1 ? "" : "s"} from the library?`}
+                destructive
+                onAction={() => void bulkDelete()}
+                onClear={() => setPicked(new Set())}
+              />
               {payload.sources.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-3">
                   <EmptyArt asset="emptyLibrary" />
@@ -370,7 +478,18 @@ export function LibrarySurface() {
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {payload.sources.map((row) => (
-                    <li key={row.id} className="flex items-stretch gap-1.5">
+                    <li
+                      key={row.id}
+                      ref={transcript?.sourceId === row.id ? openRowRef : undefined}
+                      className="flex items-center gap-1.5"
+                    >
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${row.title ?? row.uri ?? row.id}`}
+                        checked={picked.has(row.id)}
+                        onChange={(e) => togglePick(row.id, e.target.checked)}
+                        className="size-4 shrink-0 accent-primary"
+                      />
                       {/* Title-first rows (session-19 rider): the oEmbed title
                           is the row's identity, the URL demotes to secondary
                           text. Pre-rider rows have no title — the URL stays
@@ -380,9 +499,9 @@ export function LibrarySurface() {
                         onClick={() => openSource(row)}
                         disabled={busy}
                         className={cn(
-                          "flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                          "flex min-w-0 flex-1 items-center gap-2 self-stretch rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
                           "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                          transcript?.sourceId === row.id && "border-primary/40 bg-primary/5",
+                          transcript?.sourceId === row.id && SELECTED_ROW,
                         )}
                       >
                         <span className="min-w-0 flex-1">
@@ -419,7 +538,7 @@ export function LibrarySurface() {
                         disabled={busy}
                         aria-label={`Delete ${row.title ?? row.uri ?? "this transcript"}`}
                         title="Delete this transcript from the library"
-                        className="h-auto"
+                        className="h-auto self-stretch"
                       >
                         <Trash2 aria-hidden />
                       </Button>
@@ -431,6 +550,7 @@ export function LibrarySurface() {
           </Card>
         </>
       )}
+      <ActionToast toast={toast} onClear={() => setToast(null)} />
     </div>
   );
 }

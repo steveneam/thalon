@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyArt } from "@/components/ui/empty-art";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ActionToast, type ToastState } from "@/components/workspace/action-toast";
+import { BulkBar } from "@/components/workspace/bulk-bar";
 import type { CreateFamily } from "@/lib/intel/types";
 import {
   fetchLeads,
@@ -20,6 +22,7 @@ import {
 import { compareLeadCards } from "@/lib/leads/serialize";
 import type { ImportReport, LeadsPayload, TriageAction } from "@/lib/leads/types";
 import { cn } from "@/lib/utils";
+import { useListKeys } from "@/lib/workspace/keyboard";
 
 type QueueTab = "queue" | "dismissed";
 
@@ -35,8 +38,12 @@ export function LeadsSurface() {
   const [payload, setPayload] = useState<LeadsPayload | null>(null);
   const [tab, setTab] = useState<QueueTab>("queue");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // The keyboard cursor (s40 grammar parity): the card j/k moved to — what
+  // x/d/h act on. Distinct from `selected`, the checkbox set bulk acts on.
+  const [cursorId, setCursorId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [lastImport, setLastImport] = useState<ImportReport | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -68,12 +75,14 @@ export function LeadsSurface() {
     return [...filtered].sort(compareLeadCards);
   }, [payload, tab]);
 
-  async function run(work: () => Promise<string>) {
+  // Terminal outcomes (dismiss) confirm via the toast with a way back to the
+  // Dismissed tab; informational results return a string for the notice line.
+  async function run(work: () => Promise<string | null>) {
     setBusy(true);
     setNotice(null);
     try {
       const message = await work();
-      setNotice(message);
+      if (message !== null) setNotice(message);
       await reload();
     } catch (err) {
       // Engine/gateway refusals surface verbatim — an honest error beats a fake spinner.
@@ -83,24 +92,35 @@ export function LeadsSurface() {
     }
   }
 
+  const viewDismissed = { label: "View dismissed", onClick: () => setTab("dismissed") };
+
   function onTriage(action: TriageAction, id: string) {
     void run(async () => {
       const result = await triageLeads(action, [id]);
       if (result.failed.length > 0) return result.failed[0].error;
-      return action === "dismiss" ? "Lead dismissed — that's signal, it tunes the ranking." : "Saved.";
+      if (action !== "dismiss") return "Saved.";
+      setToast({
+        message: "Lead dismissed — that signal tunes the ranking.",
+        action: viewDismissed,
+      });
+      return null;
     });
   }
 
   function onBulkDismiss() {
+    // The ONE named confirm lives in BulkBar (FRONTEND §0), never per item.
     const ids = [...selected];
-    // Destructive bulk op: confirm ONCE with the count (FRONTEND §0), never per item.
-    if (!window.confirm(`Dismiss ${ids.length} selected lead${ids.length === 1 ? "" : "s"}?`)) return;
     void run(async () => {
       const result = await triageLeads("dismiss", ids);
       setSelected(new Set());
-      return result.failed.length === 0
-        ? `Dismissed ${result.done} lead${result.done === 1 ? "" : "s"}.`
-        : `Dismissed ${result.done}; ${result.failed.length} failed (${result.failed[0].error}).`;
+      if (result.failed.length > 0) {
+        return `Dismissed ${result.done}; ${result.failed.length} failed (${result.failed[0].error}).`;
+      }
+      setToast({
+        message: `Dismissed ${result.done} lead${result.done === 1 ? "" : "s"}.`,
+        action: viewDismissed,
+      });
+      return null;
     });
   }
 
@@ -131,10 +151,64 @@ export function LeadsSurface() {
     });
   }
 
+  // Keyboard grammar parity (s40, the approve queue's j/k + act keys): j/k
+  // move the cursor, x picks it for bulk, d is this surface's Four-Verbs
+  // word — Dismiss — and h toggles the hot pick.
+  const cursorIndex = visible.findIndex((lead) => lead.id === cursorId);
+  const cursorLead = cursorIndex === -1 ? null : visible[cursorIndex];
+  const moveCursor = (delta: 1 | -1) => (event: KeyboardEvent) => {
+    if (visible.length === 0) return;
+    event.preventDefault();
+    const next =
+      cursorIndex === -1 ? 0 : Math.min(Math.max(cursorIndex + delta, 0), visible.length - 1);
+    setCursorId(visible[next].id);
+  };
+  useListKeys({
+    enabled: !busy && payload !== null,
+    bindings: {
+      j: moveCursor(1),
+      k: moveCursor(-1),
+      x: (event) => {
+        if (!cursorLead) return;
+        event.preventDefault();
+        onSelect(cursorLead.id, !selected.has(cursorLead.id));
+      },
+      d: (event) => {
+        if (!cursorLead || cursorLead.status === "dismissed") return;
+        event.preventDefault();
+        // Triage keeps flowing: the cursor lands on the neighbour before the
+        // dismissed card leaves the list.
+        const neighbour = visible[cursorIndex + 1] ?? visible[cursorIndex - 1] ?? null;
+        setCursorId(neighbour?.id ?? null);
+        onTriage("dismiss", cursorLead.id);
+      },
+      h: (event) => {
+        if (!cursorLead) return;
+        event.preventDefault();
+        onTriage(cursorLead.pinned ? "unpin" : "pin", cursorLead.id);
+      },
+    },
+  });
+
+  // Keep the cursor card in view while j/k cruises (jsdom-safe call).
+  useEffect(() => {
+    if (!cursorId) return;
+    document
+      .querySelector(`[data-testid="lead-card-${cursorId}"]`)
+      ?.scrollIntoView?.({ block: "nearest" });
+  }, [cursorId]);
+
   const counts = payload?.counts ?? { new: 0, scored: 0, dismissed: 0 };
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
+      {/* j/k is a silent context change for screen readers without this
+          (the approve queue's live-region precedent). */}
+      <p aria-live="polite" className="sr-only">
+        {cursorLead
+          ? `Selected lead ${cursorLead.name || cursorLead.company || cursorLead.email}`
+          : ""}
+      </p>
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="text-lg font-semibold">Leads</h2>
         <Badge variant="outline">{counts.new + counts.scored} in queue</Badge>
@@ -235,6 +309,12 @@ export function LeadsSurface() {
         </p>
       )}
 
+      {visible.length > 0 && (
+        <p className="u-eyebrow text-muted-foreground">
+          keys · j/k select · x pick · d dismiss · h hot
+        </p>
+      )}
+
       <div role="tablist" aria-label="Lead lists" className="flex gap-1.5">
         {(
           [
@@ -257,17 +337,18 @@ export function LeadsSurface() {
         ))}
       </div>
 
-      {selected.size > 0 && (
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
-          <span className="text-xs">{selected.size} selected</span>
-          <Button size="sm" variant="outline" disabled={busy} onClick={onBulkDismiss}>
+      <BulkBar
+        count={selected.size}
+        busy={busy}
+        actionLabel={
+          <>
             <X aria-hidden className="size-3.5" /> Dismiss selected
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
-            Clear
-          </Button>
-        </div>
-      )}
+          </>
+        }
+        confirmMessage={`Dismiss ${selected.size} selected lead${selected.size === 1 ? "" : "s"}?`}
+        onAction={onBulkDismiss}
+        onClear={() => setSelected(new Set())}
+      />
 
       {payload && visible.length === 0 && (
         <Card>
@@ -296,6 +377,7 @@ export function LeadsSurface() {
             key={lead.id}
             lead={lead}
             selected={selected.has(lead.id)}
+            cursor={lead.id === cursorId}
             busy={busy}
             currentProfileHash={payload?.currentProfileHash ?? null}
             onSelect={onSelect}
@@ -304,6 +386,7 @@ export function LeadsSurface() {
           />
         ))}
       </div>
+      <ActionToast toast={toast} onClear={() => setToast(null)} />
     </div>
   );
 }

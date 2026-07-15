@@ -8,6 +8,8 @@ import { DemoBanner } from "@/components/intel/demo-banner";
 import { TrendCard } from "@/components/intel/trend-card";
 import { EmptyArt } from "@/components/ui/empty-art";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ActionToast, type ToastState } from "@/components/workspace/action-toast";
+import { BulkBar } from "@/components/workspace/bulk-bar";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { cn } from "@/lib/utils";
 import { createArea, dismissTrend, fetchTrends, promoteTrend, sweepNow, updateArea } from "@/lib/intel/client";
@@ -25,6 +27,10 @@ export function TrendsTab() {
   const [status, setStatus] = useState<TabStatus>("loading");
   const [payload, setPayload] = useState<TrendsPayload | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
+  // Multi-select for bulk Dismiss (FRONTEND §0 parity, s40) + the terminal-
+  // action toast confirming what left the list.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -69,6 +75,40 @@ export function TrendsTab() {
   const cards = payload?.cards ?? [];
   const cardAreaNames = [...new Set(cards.map((c) => c.areaName))];
   const filtered = filter ? cards.filter((c) => c.areaName === filter) : cards;
+
+  function onSelect(cardId: string, isSelected: boolean) {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (isSelected) next.add(cardId);
+      else next.delete(cardId);
+      return next;
+    });
+  }
+
+  // Bulk Dismiss (s40 parity; BulkBar carries the ONE named confirm).
+  // Sequential through the same single-card endpoint — a failure surfaces
+  // with how far it got; the reload shows the true remainder.
+  function onBulkDismiss() {
+    const ids = [...selected];
+    void withBusy(async () => {
+      let done = 0;
+      const failures: string[] = [];
+      for (const id of ids) {
+        try {
+          await dismissTrend(id);
+          done += 1;
+        } catch (err) {
+          failures.push(err instanceof Error ? err.message : "dismiss failed");
+        }
+      }
+      setSelected(new Set());
+      await reload();
+      if (failures.length > 0) {
+        throw new Error(`Dismissed ${done}; ${failures.length} failed (${failures[0]})`);
+      }
+      setToast({ message: `Dismissed ${done} card${done === 1 ? "" : "s"}.` });
+    });
+  }
   // Chips: every area name present in cards + every REAL area (which may
   // have zero cards until B6.5 polls it — the seam stays visible).
   const chipNames = [
@@ -138,6 +178,15 @@ export function TrendsTab() {
             </p>
           )}
 
+          <BulkBar
+            count={selected.size}
+            busy={busy}
+            actionLabel="Dismiss selected"
+            confirmMessage={`Dismiss ${selected.size} selected card${selected.size === 1 ? "" : "s"}?`}
+            onAction={onBulkDismiss}
+            onClear={() => setSelected(new Set())}
+          />
+
           {filtered.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-4">
               {!filter && <EmptyArt asset="emptyTrends" />}
@@ -151,7 +200,9 @@ export function TrendsTab() {
                 <TrendCard
                   key={card.id}
                   card={card}
+                  selected={selected.has(card.id)}
                   busy={busy}
+                  onSelect={onSelect}
                   onPromote={(cardId, pick) =>
                     withBusy(async () => {
                       const { createHref } = await promoteTrend(cardId, pick);
@@ -161,7 +212,9 @@ export function TrendsTab() {
                   onDismiss={(cardId) =>
                     withBusy(async () => {
                       await dismissTrend(cardId);
+                      onSelect(cardId, false);
                       await reload();
+                      setToast({ message: "Card dismissed." });
                     })
                   }
                 />
@@ -170,6 +223,7 @@ export function TrendsTab() {
           )}
         </>
       )}
+      <ActionToast toast={toast} onClear={() => setToast(null)} />
     </div>
   );
 }
