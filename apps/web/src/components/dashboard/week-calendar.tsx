@@ -59,7 +59,12 @@ export function WeekCalendar({ status, plan, onRetry, now }: WeekCalendarProps) 
       ticksByDay.set(key, [...(ticksByDay.get(key) ?? []), tick]);
     }
   }
-  const waiting = groupByDay(plan ? waitingEntries(plan.assets) : [], days);
+  // Waiting is a present state: drafts that started waiting before Monday
+  // carry into today's cell instead of vanishing (critique P1, s39).
+  const todayKey = days.find((d) => d.isToday)?.key ?? days[0].key;
+  const waiting = groupByDay(plan ? waitingEntries(plan.assets) : [], days, {
+    carryEarlierInto: todayKey,
+  });
   const decided = groupByDay(plan ? decidedEntries(plan.assets) : [], days);
 
   return (
@@ -103,17 +108,22 @@ export function WeekCalendar({ status, plan, onRetry, now }: WeekCalendarProps) 
                         className="flex items-center gap-1 text-2xs text-muted-foreground"
                         title={`Trend sweep the engine will run at ${clock(tick)}`}
                       >
-                        <Radar aria-hidden className="size-3 shrink-0 text-primary/70" />
+                        <Radar aria-hidden className="size-3 shrink-0 text-muted-foreground" />
                         sweep <span className="u-tabular ml-auto">{clock(tick)}</span>
                       </p>
                     ))}
-                    {(waiting.get(day.key) ?? []).map(({ asset }) => (
+                    {(waiting.get(day.key) ?? []).map(({ asset, carried, at }) => (
                       <Link
                         key={asset.draftId}
                         href={assetHref(asset)}
                         className="rounded text-2xs font-medium text-signal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                       >
                         {asset.platform} · {asset.status === "blocked" ? "needs edit" : "your review"}
+                        {carried && (
+                          <span className="block font-normal">
+                            waiting since {timeAgo(at.toISOString(), today.getTime())}
+                          </span>
+                        )}
                       </Link>
                     ))}
                     {(decided.get(day.key) ?? []).map(({ asset }) => (

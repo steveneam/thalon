@@ -89,7 +89,17 @@ export function ApproveQueue() {
         if (data.length > 0) {
           const wanted = deepLinkRef.current.runId;
           deepLinkRef.current.runId = null;
-          selectRun(wanted && data.some((r) => r.id === wanted) ? wanted : data[0].id);
+          // Default selection honors the dashboard's promise (critique P1,
+          // s39): "N drafts wait on you" must land ON waiting work — the
+          // OLDEST run with waiting drafts (FIFO triage; the feed is
+          // newest-first), falling back to the newest run only when nothing
+          // waits. An explicit ?run= deep link still wins.
+          const oldestWaiting = [...data].reverse().find((r) => r.waiting > 0);
+          selectRun(
+            wanted && data.some((r) => r.id === wanted)
+              ? wanted
+              : (oldestWaiting?.id ?? data[0].id),
+          );
         }
       })
       .catch(() => {
@@ -111,7 +121,14 @@ export function ApproveQueue() {
         if (data.length > 0) {
           const wanted = deepLinkRef.current.draftId;
           deepLinkRef.current.draftId = null;
-          selectDraft(wanted && data.some((d) => d.id === wanted) ? wanted : data[0].id);
+          // Same promise inside the run: land on the first draft that waits
+          // on the operator, not merely the first row (critique P1, s39).
+          const firstWaiting = data.find((d) => d.status === "queued" || d.status === "blocked");
+          selectDraft(
+            wanted && data.some((d) => d.id === wanted)
+              ? wanted
+              : (firstWaiting?.id ?? data[0].id),
+          );
         }
       })
       .catch(() => {

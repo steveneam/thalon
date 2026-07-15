@@ -135,4 +135,18 @@ describe("waiting / decided entries", () => {
     const grouped = groupByDay(waitingEntries(assets), weekDays(NOW));
     expect([...grouped.values()].flat()).toHaveLength(0);
   });
+
+  it("carries PRE-WEEK waiting into the named day, flagged — waiting is a present state (critique P1, s39)", () => {
+    const days = weekDays(NOW);
+    const today = days.find((d) => d.isToday)?.key as string;
+    const assets = [
+      asset({ draftId: "old", status: "queued", judgedAt: new Date(2026, 6, 1).toISOString() }),
+      // A FUTURE out-of-window entry must still be dropped, never carried.
+      asset({ draftId: "future", status: "queued", judgedAt: new Date(2026, 6, 25).toISOString() }),
+    ];
+    const grouped = groupByDay(waitingEntries(assets), days, { carryEarlierInto: today });
+    const carried = grouped.get(today) ?? [];
+    expect(carried.map((e) => [e.asset.draftId, e.carried])).toEqual([["old", true]]);
+    expect([...grouped.values()].flat()).toHaveLength(1);
+  });
 });

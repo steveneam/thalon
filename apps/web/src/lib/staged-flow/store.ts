@@ -221,6 +221,10 @@ function seed(): StoreState {
       lastError: null,
       createdAt,
       draftsComplete: true,
+      // Not counted as operator-waiting work: the pulse's needs-you count
+      // can't see this repo-less fixture, and the feed badge must never
+      // disagree with it (the count-agreement invariant).
+      waiting: 0,
     },
     slots,
     captures: [],

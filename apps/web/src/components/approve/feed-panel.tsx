@@ -40,7 +40,11 @@ export function FeedPanel({ status, runs, selectedRunId, onSelect }: FeedPanelPr
                   run.id === selectedRunId && "border-border bg-muted",
                 )}
               >
-                <span className="block truncate font-medium">{run.id.slice(0, 8)}</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="min-w-0 truncate font-medium">{run.id.slice(0, 8)}</span>
+                  {/* WHICH runs hold the waiting work (critique P1, s39) — the signal channel, word carried. */}
+                  {run.waiting > 0 && <Badge variant="signal">{run.waiting} wait</Badge>}
+                </span>
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   {new Date(run.createdAt).toLocaleString()}
                   <Badge variant="outline">{run.status}</Badge>

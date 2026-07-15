@@ -169,7 +169,8 @@ function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
         <dt className="font-medium text-muted-foreground">Description</dt>
         <dd className="text-foreground">{meta.description}</dd>
       </dl>
-      <p className="font-mono text-[11px] text-muted-foreground">{meta.htmlRef}</p>
+      {/* Object-store keys are unbroken tokens — without break-all this row overflows its panel (detector-caught, s39). */}
+      <p className="break-all font-mono text-[11px] text-muted-foreground">{meta.htmlRef}</p>
     </div>
   );
 }

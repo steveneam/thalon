@@ -79,6 +79,8 @@ export interface WeekEntry {
   asset: PipelineAsset;
   /** The instant that places the entry on its day. */
   at: Date;
+  /** True when the entry predates the visible week and was carried into today (waiting lane only). */
+  carried?: boolean;
 }
 
 const WAITING_STATUSES = new Set(["queued", "blocked"]);
@@ -101,15 +103,32 @@ export function decidedEntries(assets: PipelineAsset[]): WeekEntry[] {
     .map((asset) => ({ asset, at: new Date(asset.decidedAt as string) }));
 }
 
-/** Bucket entries by local day key; entries outside the grid are dropped (the window is the view, not the data). */
-export function groupByDay(entries: WeekEntry[], days: WeekDay[]): Map<string, WeekEntry[]> {
+/**
+ * Bucket entries by local day key. Entries outside the grid are dropped
+ * (the window is the view, not the data) — EXCEPT when `carryEarlierInto`
+ * names a day: waiting is a PRESENT state, not a past event, so a draft
+ * that started waiting before Monday must not vanish from a band subtitled
+ * "what waits on you" (critique P1, s39). Carried entries keep their true
+ * instant and are flagged so the view can say "waiting since …" honestly.
+ */
+export function groupByDay(
+  entries: WeekEntry[],
+  days: WeekDay[],
+  opts: { carryEarlierInto?: string } = {},
+): Map<string, WeekEntry[]> {
   const keys = new Set(days.map((d) => d.key));
+  const windowStart = days[0]?.date.getTime() ?? 0;
   const grouped = new Map<string, WeekEntry[]>();
   for (const entry of entries) {
-    const key = dayKey(entry.at);
-    if (!keys.has(key)) continue;
+    let key = dayKey(entry.at);
+    let carried = false;
+    if (!keys.has(key)) {
+      if (!opts.carryEarlierInto || entry.at.getTime() >= windowStart) continue;
+      key = opts.carryEarlierInto;
+      carried = true;
+    }
     const bucket = grouped.get(key) ?? [];
-    bucket.push(entry);
+    bucket.push(carried ? { ...entry, carried } : entry);
     grouped.set(key, bucket);
   }
   for (const bucket of grouped.values()) bucket.sort((a, b) => a.at.getTime() - b.at.getTime());

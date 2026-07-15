@@ -80,7 +80,9 @@ export function assetStages(asset: PipelineAsset): StageView[] {
     },
     {
       key: "decided",
-      label: STAGE_LABELS.decided,
+      // The word must match the state: "Decided" on a stage still waiting
+      // for the decision says done while the color says waiting (critique s39).
+      label: asset.decidedAt ? STAGE_LABELS.decided : "Decide",
       at: asset.decidedAt,
       state: asset.decidedAt ? "done" : queued ? "attention" : "pending",
       href: asset.decidedAt !== null || queued ? approveHref : null,

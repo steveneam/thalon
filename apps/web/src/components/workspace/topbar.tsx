@@ -21,7 +21,7 @@ export function Topbar() {
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-sm font-semibold">{surface?.label ?? "Workspace"}</h1>
+        <h1 className="truncate text-lg font-semibold">{surface?.label ?? "Workspace"}</h1>
         {surface && (
           <p className="hidden truncate text-xs text-muted-foreground sm:block">{surface.hint}</p>
         )}

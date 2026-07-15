@@ -11,7 +11,7 @@ export const FIXTURE_DRAFT_A_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"; // run
 export const FIXTURE_DRAFT_B_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"; // run 2, x, tier disagreement
 export const FIXTURE_DRAFT_C_ID = "cccccccc-cccc-cccc-cccc-cccccccccccc"; // run 1, linkedin, approved
 
-export function run(id: string, createdAt: string, draftsComplete = true): FeedRun {
+export function run(id: string, createdAt: string, draftsComplete = true, waiting = 0): FeedRun {
   return {
     id,
     tenantId: "tenant-fixture",
@@ -27,6 +27,7 @@ export function run(id: string, createdAt: string, draftsComplete = true): FeedR
     lastError: null,
     createdAt,
     draftsComplete,
+    waiting,
   };
 }
 
@@ -78,7 +79,9 @@ export function verdict(
 }
 
 export const fixtureRuns: FeedRun[] = [
-  run(FIXTURE_RUN_2_ID, "2026-07-04T09:00:00.000Z"),
+  // Run 2 holds the waiting work (draftA queued + draftB blocked) — mirrors
+  // the server derivation so selection/badge tests exercise real semantics.
+  run(FIXTURE_RUN_2_ID, "2026-07-04T09:00:00.000Z", true, 2),
   run(FIXTURE_RUN_1_ID, "2026-07-03T09:00:00.000Z"),
 ];
 

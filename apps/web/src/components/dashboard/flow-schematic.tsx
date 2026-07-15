@@ -156,11 +156,20 @@ export function FlowSchematic({ counts, plan, unknown }: FlowSchematicProps) {
                 className="group flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 {/* Fixed-height plate box: the minted plates mix 1:1 and 3:2
-                    aspects — without this the station baselines wobble. */}
+                    aspects — without this the station baselines wobble. The
+                    tighter mask override keeps the plate's paper field from
+                    reading as a beige thumbnail box at this tiny scale. */}
                 <span className="flex h-14 items-center justify-center">
-                  <EmptyArt asset={station.art} size="xs" className="max-h-14 w-auto opacity-90 transition-opacity group-hover:opacity-100" />
+                  <EmptyArt
+                    asset={station.art}
+                    size="xs"
+                    className="max-h-14 w-auto opacity-90 transition-opacity group-hover:opacity-100 [mask-image:radial-gradient(ellipse_62%_62%_at_50%_50%,black_35%,transparent_78%)]"
+                  />
                 </span>
-                <p className="u-eyebrow text-muted-foreground">{station.eyebrow}</p>
+                <p className="u-eyebrow text-muted-foreground">
+                  {station.eyebrow}
+                  <span className="sr-only">:</span>
+                </p>
                 <p
                   className={cn(
                     "u-tabular text-2xl font-semibold leading-none",
@@ -168,9 +177,21 @@ export function FlowSchematic({ counts, plan, unknown }: FlowSchematicProps) {
                     station.alert && "text-destructive",
                   )}
                 >
-                  {station.count === null ? "–" : station.count}
+                  {station.count === null ? (
+                    <>
+                      <span aria-hidden>–</span>
+                      <span className="sr-only">not loaded</span>
+                    </>
+                  ) : (
+                    station.count
+                  )}
+                  {/* Separator so the accessible name never fuses count into unit ("1areas watched"). */}
+                  <span className="sr-only">,</span>
                 </p>
-                <p className="text-xs text-muted-foreground">{station.unit}</p>
+                <p className="text-xs text-muted-foreground">
+                  {station.unit}
+                  <span className="sr-only">.</span>
+                </p>
                 {station.sub && (
                   <p
                     className={cn(

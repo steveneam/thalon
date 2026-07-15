@@ -20,7 +20,8 @@ export function NeedsYouCard({ counts, needsYou }: NeedsYouCardProps) {
     return (
       <Card>
         <CardHeader className="flex-row items-center gap-2">
-          <CircleCheck aria-hidden className="size-5 text-primary" />
+          {/* Muted, not blue: the icon is not clickable and blue means act (Two-Channel). */}
+          <CircleCheck aria-hidden className="size-5 text-muted-foreground" />
           <CardTitle>Queue clear — nothing waits on you</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">

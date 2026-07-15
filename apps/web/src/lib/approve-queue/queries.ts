@@ -19,6 +19,13 @@ export interface RunFeedItem extends FanoutRun {
    * row (Sprint-1 follow-up).
    */
   draftsComplete: boolean;
+  /**
+   * queued + blocked drafts on this run (critique P1, s39): the feed walk
+   * already hydrates every run's drafts for draftsComplete, so the count is
+   * free — it lets the queue's default selection and the run rows answer
+   * WHICH runs actually hold the operator's waiting work.
+   */
+  waiting: number;
 }
 
 function isRunComplete(run: FanoutRun, drafts: Draft[]): boolean {
@@ -31,10 +38,14 @@ function isRunComplete(run: FanoutRun, drafts: Draft[]): boolean {
 export async function listRunsFeed(repos: Repos, ctx: TenantCtx, limit = FEED_LIMIT): Promise<RunFeedItem[]> {
   const runs = await repos.fanoutRuns.list(ctx, { limit });
   return Promise.all(
-    runs.map(async (run) => ({
-      ...run,
-      draftsComplete: isRunComplete(run, await repos.drafts.listByRun(ctx, run.id)),
-    })),
+    runs.map(async (run) => {
+      const drafts = await repos.drafts.listByRun(ctx, run.id);
+      return {
+        ...run,
+        draftsComplete: isRunComplete(run, drafts),
+        waiting: drafts.filter((d) => d.status === "queued" || d.status === "blocked").length,
+      };
+    }),
   );
 }
 

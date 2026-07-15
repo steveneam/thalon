@@ -60,6 +60,7 @@ function StageDot({ stage }: { stage: StageView }) {
       >
         {stage.label}
         {stage.state === "pending" && <span className="sr-only"> — not reached</span>}
+        {stage.state === "attention" && <span className="sr-only"> — waits on you</span>}
       </span>
     </>
   );
@@ -106,7 +107,7 @@ function StepperRow({ asset }: { asset: PipelineAsset }) {
         ))}
       </ol>
       {asset.status === "blocked" && asset.reasons.length > 0 && (
-        <p className="text-xs text-muted-foreground">
+        <p className="line-clamp-2 max-w-[80ch] text-xs text-muted-foreground">
           <span className="font-medium text-foreground">Why: </span>
           {asset.reasons[0]}
         </p>

@@ -39,9 +39,10 @@ describe("PipelineBoard", () => {
   it("steps lens: each asset's journey with stage links and the blocked WHY", () => {
     render(<PipelineBoard status="success" assets={assets} />);
 
-    // The queued asset's decided stage waits on the operator (word, not just color).
+    // The queued asset's decision stage waits on the operator — the word
+    // matches the state ("Decide", not "Decided") and SRs hear the wait.
     const journey = screen.getByRole("list", { name: /linkedin journey/i });
-    expect(journey).toHaveTextContent("Decided");
+    expect(journey).toHaveTextContent("Decide — waits on you");
     // Reached stages open their artifacts.
     expect(screen.getAllByRole("link", { name: /Generated/ })[0]).toHaveAttribute(
       "href",
