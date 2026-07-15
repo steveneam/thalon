@@ -23,3 +23,9 @@ export async function fetchTranscript(sourceId: string): Promise<TranscriptPaylo
     await fetch(`/api/library/${encodeURIComponent(sourceId)}/transcript`),
   );
 }
+
+export async function deleteSource(sourceId: string): Promise<{ deleted: boolean }> {
+  return asJson<{ deleted: boolean }>(
+    await fetch(`/api/library/${encodeURIComponent(sourceId)}`, { method: "DELETE" }),
+  );
+}

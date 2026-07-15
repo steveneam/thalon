@@ -41,6 +41,9 @@ function entityHref(item: ActivityItem): string | null {
   if (item.entityType === "draft") {
     return `/app/approve?draft=${encodeURIComponent(item.entityId)}`;
   }
+  if (item.entityType === "fanout_run") {
+    return `/app/runs?run=${encodeURIComponent(item.entityId)}`;
+  }
   return SURFACE_BY_ENTITY[item.entityType] ?? null;
 }
 
@@ -77,6 +80,8 @@ export function describeActivity(item: ActivityItem): ActivityView {
       return { summary: "Draft metadata updated", href, tone: "engine" };
     case "source.ingested":
       return { summary: "Engine ingested a source", href, tone: "engine" };
+    case "source.deleted":
+      return { summary: "You deleted a transcript from the library", href: "/app/library", tone: "operator" };
     case "trend_snapshot.captured":
       return { summary: "Scout captured a trend snapshot", href, tone: "engine" };
     case "search_snapshot.captured":

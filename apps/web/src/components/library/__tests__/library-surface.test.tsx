@@ -2,7 +2,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { seedLibraryRow } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 import { LibrarySurface, parseTags } from "../library-surface";
@@ -25,7 +25,7 @@ describe("library surface (session-19 rider)", () => {
       ],
     });
     render(<LibrarySurface />);
-    const row = await screen.findByRole("button", { name: /how the judge gate works/i });
+    const row = await screen.findByRole("button", { name: /^how the judge gate works/i });
     // Title is the identity; the URL is present but secondary.
     expect(within(row).getByText("https://youtube.com/watch?v=abc")).toBeInTheDocument();
     expect(within(row).getByText("ai")).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("library surface (session-19 rider)", () => {
   it("degrades pre-rider rows honestly: URL as identity, no chips, no badge", async () => {
     seedLibraryRow({ uri: "https://youtube.com/watch?v=old" });
     render(<LibrarySurface />);
-    const row = await screen.findByRole("button", { name: /watch\?v=old/i });
+    const row = await screen.findByRole("button", { name: /^https:.*watch\?v=old/i });
     expect(within(row).queryByRole("img", { name: /heat/i })).not.toBeInTheDocument();
     expect(within(row).queryAllByText(/./, { selector: "[data-slot=badge]" }).length).toBeLessThanOrEqual(1);
   });
@@ -84,8 +84,42 @@ describe("library surface (session-19 rider)", () => {
     ]);
     const user = userEvent.setup();
     render(<LibrarySurface />);
-    await user.click(await screen.findByRole("button", { name: /shelf opened/i }));
+    await user.click(await screen.findByRole("button", { name: /^shelf opened/i }));
     expect(await screen.findByText("shelf segment text")).toBeInTheDocument();
+  });
+});
+
+describe("library delete (founder direction, s39)", () => {
+  it("deletes a shelf row after one named confirm and clears its open transcript", async () => {
+    const user = userEvent.setup();
+    seedLibraryRow({ uri: "https://youtube.com/watch?v=abc", title: "Delete me" });
+    const confirms: string[] = [];
+    vi.spyOn(window, "confirm").mockImplementation((msg) => {
+      confirms.push(msg ?? "");
+      return true;
+    });
+    render(<LibrarySurface />);
+
+    // Open it first so the delete also has to clear the transcript panel.
+    await user.click(await screen.findByRole("button", { name: /^Delete me/i }));
+    expect(await screen.findByRole("button", { name: /hide transcript|show transcript/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Delete Delete me$/i }));
+    expect(confirms[0]).toContain("Delete me");
+    expect(await screen.findByText(/nothing ingested yet/i)).toBeInTheDocument();
+    // The open transcript panel cleared with the row.
+    expect(screen.queryByRole("button", { name: /hide transcript|show transcript/i })).not.toBeInTheDocument();
+    vi.restoreAllMocks();
+  });
+
+  it("keeps the row when the confirm is declined", async () => {
+    const user = userEvent.setup();
+    seedLibraryRow({ uri: "https://youtube.com/watch?v=abc", title: "Keep me" });
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<LibrarySurface />);
+    await user.click(await screen.findByRole("button", { name: /^Delete Keep me$/i }));
+    expect(screen.getByRole("button", { name: /^keep me/i })).toBeInTheDocument();
+    vi.restoreAllMocks();
   });
 });
 

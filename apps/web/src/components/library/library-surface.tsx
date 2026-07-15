@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronRight, Copy, Download, FileText } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Copy, Download, FileText, Trash2 } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyArt } from "@/components/ui/empty-art";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorNotice } from "@/components/workspace/error-notice";
-import { fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
+import { deleteSource, fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
 import {
   EXPORT_BUILDERS,
   formatTimecode,
@@ -128,6 +128,18 @@ export function LibrarySurface() {
     await withBusy(async () => {
       setTranscript(await fetchTranscript(row.id));
       setSegmentsOpen(true);
+    });
+  }
+
+  // Delete (founder direction, session 39). One confirm, named by title (the
+  // leads-surface destructive-bulk precedent); the server refuses a source
+  // that grounds drafts, and that refusal surfaces verbatim below the form.
+  async function removeSource(row: LibrarySourceRow) {
+    if (!window.confirm(`Delete "${row.title ?? row.uri ?? row.id}" from the library?`)) return;
+    await withBusy(async () => {
+      await deleteSource(row.id);
+      if (transcript?.sourceId === row.id) setTranscript(null);
+      setPayload(await fetchLibrary());
     });
   }
 
@@ -358,7 +370,7 @@ export function LibrarySurface() {
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {payload.sources.map((row) => (
-                    <li key={row.id}>
+                    <li key={row.id} className="flex items-stretch gap-1.5">
                       {/* Title-first rows (session-19 rider): the oEmbed title
                           is the row's identity, the URL demotes to secondary
                           text. Pre-rider rows have no title — the URL stays
@@ -368,7 +380,7 @@ export function LibrarySurface() {
                         onClick={() => openSource(row)}
                         disabled={busy}
                         className={cn(
-                          "flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                          "flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-border px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
                           "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                           transcript?.sourceId === row.id && "border-primary/40 bg-primary/5",
                         )}
@@ -400,6 +412,17 @@ export function LibrarySurface() {
                           </span>
                         )}
                       </button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => void removeSource(row)}
+                        disabled={busy}
+                        aria-label={`Delete ${row.title ?? row.uri ?? "this transcript"}`}
+                        title="Delete this transcript from the library"
+                        className="h-auto"
+                      >
+                        <Trash2 aria-hidden />
+                      </Button>
                     </li>
                   ))}
                 </ul>

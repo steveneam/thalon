@@ -23,9 +23,13 @@ describe("Dashboard", () => {
   it("answers the 10-second questions: what needs me, what the engine did, what to do next", async () => {
     renderDashboard();
 
-    // Pulse row from the fixture counts.
-    expect(await screen.findByText("11")).toBeInTheDocument(); // drafts
-    expect(screen.getByText("1 failed")).toBeInTheDocument(); // runsWithErrors
+    // The schematic spine carries the fixture counts at their stations.
+    expect(await screen.findByText("1 failed — triage")).toBeInTheDocument(); // create station alert
+    expect(screen.getByText("wait on your review")).toBeInTheDocument(); // approve station, 2 queued
+    expect(screen.getByText("need your edit")).toBeInTheDocument(); // judge station, 1 blocked
+    // Plan-backed stations: intel (areas + next sweep) and distribute (honest publish scope).
+    expect(await screen.findByText(/next sweep in \d+h/)).toBeInTheDocument();
+    expect(screen.getByText("own site today · social lands later")).toBeInTheDocument();
 
     // Needs-you card: 3 = 2 queued + 1 blocked, with the queue as the action.
     expect(await screen.findByText(/drafts wait/)).toBeInTheDocument();
@@ -51,8 +55,9 @@ describe("Dashboard", () => {
     );
     expect(screen.queryByText("hyperframes")).not.toBeInTheDocument();
 
-    // Pulse tiles are doorways, not just counters.
-    expect(screen.getByRole("link", { name: /runs/i })).toHaveAttribute("href", "/app/runs");
+    // Schematic stations are doorways, not just counters.
+    expect(screen.getByRole("link", { name: /recent runs/i })).toHaveAttribute("href", "/app/runs");
+    expect(screen.getByRole("link", { name: /01 · Intel/i })).toHaveAttribute("href", "/app/intel");
 
     // Quick actions cover the families.
     expect(screen.getByRole("link", { name: /create from a prompt/i })).toHaveAttribute(

@@ -1,4 +1,4 @@
-import type { ActivityItem, WorkspacePulse, WorkspaceStatus } from "./types";
+import type { ActivityItem, PipelineAsset, PlanPayload, WorkspacePulse, WorkspaceStatus } from "./types";
 
 /** Deterministic MSW fixtures for the shell/dashboard reads (component dev + tests). */
 
@@ -37,6 +37,80 @@ export const fixtureActivity: ActivityItem[] = [
     payload: {},
   },
 ];
+
+/**
+ * Plan fixture (dashboard v3): instants are computed RELATIVE to load time so
+ * the dev calendar always has something in the visible week — component tests
+ * assert presence/copy, never exact dates; the pure week/pipeline math has its
+ * own fixed-clock unit tests.
+ */
+function fixtureAsset(overrides: Partial<PipelineAsset> & { draftId: string }): PipelineAsset {
+  const twoHoursAgo = new Date(Date.now() - 2 * 3_600_000).toISOString();
+  return {
+    runId: "22222222-2222-2222-2222-222222222222",
+    platform: "linkedin",
+    format: null,
+    status: "queued",
+    sourceKind: "url",
+    capturedAt: twoHoursAgo,
+    generatedAt: twoHoursAgo,
+    judgedAt: twoHoursAgo,
+    decidedAt: null,
+    publishedAt: null,
+    gates: [
+      { gate: "g1", verdict: "pass" },
+      { gate: "g3_screen", verdict: "pass" },
+      { gate: "g3_final", verdict: "pass" },
+    ],
+    reasons: [],
+    deployRef: null,
+    ...overrides,
+  };
+}
+
+export const fixturePlan: PlanPayload = {
+  sweep: {
+    lastSweptAt: new Date(Date.now() - 3_600_000).toISOString(),
+    nextSweepAt: new Date(Date.now() + 3 * 3_600_000).toISOString(),
+    intervalMs: 4 * 3_600_000,
+    source: "bluesky",
+  },
+  areas: 2,
+  cadence: [
+    { platform: "linkedin", maxPerDay: 1, maxPerWeek: 5 },
+    { platform: "email", maxPerDay: 2, minGapMinutes: 240 },
+  ],
+  assets: [
+    fixtureAsset({ draftId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", platform: "linkedin" }),
+    fixtureAsset({
+      draftId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      platform: "x",
+      status: "blocked",
+      gates: [
+        { gate: "g1", verdict: "pass" },
+        { gate: "g3_screen", verdict: "pass" },
+        { gate: "g3_final", verdict: "fail" },
+      ],
+      reasons: ["Grounding — final: Ships every platform — no provided source supports this claim."],
+    }),
+    fixtureAsset({
+      draftId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+      runId: "11111111-1111-1111-1111-111111111111",
+      status: "approved",
+      decidedAt: new Date(Date.now() - 26 * 3_600_000).toISOString(),
+    }),
+    fixtureAsset({
+      draftId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+      runId: "11111111-1111-1111-1111-111111111111",
+      platform: "web",
+      format: "web_page",
+      status: "approved",
+      decidedAt: new Date(Date.now() - 20 * 3_600_000).toISOString(),
+      publishedAt: new Date(Date.now() - 19 * 3_600_000).toISOString(),
+      deployRef: "/blog/fixture-post",
+    }),
+  ],
+};
 
 export const fixtureStatus: WorkspaceStatus = {
   seams: {

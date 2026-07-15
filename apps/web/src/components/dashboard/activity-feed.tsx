@@ -48,7 +48,10 @@ export function ActivityFeed({ status, items, onRetry }: ActivityFeedProps) {
           </p>
         )}
         {status === "success" && items.length > 0 && (
-          <ol className="flex flex-col">
+          // Scrolls inside its card: the events tail can be 40 rows deep and
+          // must never dictate the page's height (dashboard v3 — the feed is
+          // one voice among four, not the focal column).
+          <ol className="flex max-h-80 flex-col overflow-y-auto lg:max-h-[26rem]">
             {items.map((item) => {
               const view = describeActivity(item);
               const Icon = TONE_ICON[view.tone];

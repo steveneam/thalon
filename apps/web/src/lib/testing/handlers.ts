@@ -12,7 +12,7 @@ import {
 import type { AreaRow, CreateFamily, TargetRow } from "@/lib/intel/types";
 import type { LibrarySourceRow, WireSegment } from "@/lib/library/types";
 import type { ProfileHistoryEntry, ProfileWire } from "@/lib/profiles/types";
-import { fixtureActivity, fixturePulse, fixtureStatus } from "@/lib/workspace/fixtures";
+import { fixtureActivity, fixturePlan, fixturePulse, fixtureStatus } from "@/lib/workspace/fixtures";
 import { parseStagedEditRequest, parseStagedPickRequest, runStaged } from "@/lib/staged-flow/http";
 import {
   advanceStagedFlow,
@@ -120,6 +120,14 @@ export const handlers = [
       { status: 201 },
     );
   }),
+  http.delete("/api/library/:sourceId", ({ params }) => {
+    const sourceId = String(params.sourceId);
+    const idx = testLibrarySources.findIndex((r) => r.id === sourceId);
+    if (idx === -1) return HttpResponse.json({ error: "transcript not found" }, { status: 404 });
+    testLibrarySources.splice(idx, 1);
+    delete testLibraryTranscripts[sourceId];
+    return HttpResponse.json({ deleted: true });
+  }),
   http.get("/api/library/:sourceId/transcript", ({ params }) => {
     const sourceId = String(params.sourceId);
     const segments = testLibraryTranscripts[sourceId];
@@ -134,6 +142,7 @@ export const handlers = [
   http.get("/api/app/pulse", () => HttpResponse.json(fixturePulse)),
   http.get("/api/app/activity", () => HttpResponse.json({ items: fixtureActivity })),
   http.get("/api/app/status", () => HttpResponse.json(fixtureStatus)),
+  http.get("/api/app/plan", () => HttpResponse.json(fixturePlan)),
 
   // Intel (B6.2): areas/targets emulated in-memory, trends/horizon via the shared fake-driver store.
   http.get("/api/intel/areas", () => HttpResponse.json({ areas: testAreas })),

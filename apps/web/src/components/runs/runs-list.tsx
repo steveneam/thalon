@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { fetchRunsFeed } from "@/lib/approve-queue/client";
 import type { FeedRun } from "@/lib/approve-queue/types";
+import { cn } from "@/lib/utils";
 import { timeAgo } from "@/lib/workspace/format";
 
 type ListStatus = "loading" | "error" | "success";
@@ -22,6 +23,22 @@ type ListStatus = "loading" | "error" | "success";
 export function RunsList() {
   const [status, setStatus] = useState<ListStatus>("loading");
   const [runs, setRuns] = useState<FeedRun[]>([]);
+
+  // ?run= deep link (dashboard v3 provenance: activity rows and pipeline
+  // steps land on the ENTITY): highlight + scroll to the named run. Read
+  // from location once at mount (lazy state init) like the approve queue's
+  // deep link — router-free, test-mountable.
+  const [targetRunId] = useState<string | null>(() =>
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("run")
+      : null,
+  );
+  const targetRef = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    if (status === "success" && targetRef.current) {
+      targetRef.current.scrollIntoView({ block: "center" });
+    }
+  }, [status]);
 
   const load = useCallback(
     () =>
@@ -77,7 +94,14 @@ export function RunsList() {
           {status === "success" && runs.length > 0 && (
             <ul className="flex flex-col gap-2">
               {runs.map((run) => (
-                <li key={run.id} className="rounded-lg border border-border p-3">
+                <li
+                  key={run.id}
+                  ref={run.id === targetRunId ? targetRef : undefined}
+                  className={cn(
+                    "rounded-lg border border-border p-3",
+                    run.id === targetRunId && "border-ring/50 bg-muted/40",
+                  )}
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     {/* Recognition over recall: the run reads as WHAT it did;
                         the id demotes to a mono aside for correlation. */}

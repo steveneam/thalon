@@ -56,7 +56,12 @@ export function draft(
   };
 }
 
-export function verdict(gate: string, v: "pass" | "fail", bodyHash: string): PanelJudgeResult {
+export function verdict(
+  gate: string,
+  v: "pass" | "fail",
+  bodyHash: string,
+  evidence: Record<string, unknown> = { claims: [] },
+): PanelJudgeResult {
   return {
     id: `${gate}-${bodyHash}`,
     tenantId: "tenant-fixture",
@@ -64,7 +69,7 @@ export function verdict(gate: string, v: "pass" | "fail", bodyHash: string): Pan
     gate,
     verdict: v,
     bodyHash,
-    evidence: { claims: [] },
+    evidence,
     model: "test/model",
     promptVersion: "judge.v1",
     latencyMs: 120,
@@ -93,7 +98,21 @@ export const fixtureDraftDetails: Record<string, DraftDetail> = {
   },
   [FIXTURE_DRAFT_B_ID]: {
     draft: draftB,
-    judgeResults: [verdict("g1", "pass", "hash-b"), verdict("g3_screen", "pass", "hash-b"), verdict("g3_final", "fail", "hash-b")],
+    judgeResults: [
+      verdict("g1", "pass", "hash-b"),
+      verdict("g3_screen", "pass", "hash-b"),
+      // The failing tier carries per-claim evidence (contracts judgeEvidenceSchema)
+      // — what the JudgeReasons block renders as the plain-language why.
+      verdict("g3_final", "fail", "hash-b", {
+        claims: [
+          {
+            claim: "Works with every platform",
+            verdict: "fail",
+            evidence: "no provided source supports this claim",
+          },
+        ],
+      }),
+    ],
   },
   [FIXTURE_DRAFT_C_ID]: { draft: draftC, judgeResults: [] },
 };

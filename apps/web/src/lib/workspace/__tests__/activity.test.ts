@@ -25,7 +25,8 @@ describe("describeActivity", () => {
     );
     expect(view.tone).toBe("alert");
     expect(view.summary).toContain("gateway 400");
-    expect(view.href).toBe("/app/runs");
+    // Entity-scoped (dashboard v3): the run row itself, not just the surface.
+    expect(view.href).toBe("/app/runs?run=e-1");
   });
 
   it("credits operator-added vs engine-compiled keyword targets", () => {

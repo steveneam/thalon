@@ -270,6 +270,10 @@ imports it — see The Word-In-Pill Rule.
   every animation a `prefers-reduced-motion` alternative.
 - **Do** keep the primary action visually dominant on every surface — the
   10-second rule is the design invariant.
+- **Do** pass the squint test before shipping a surface: blur your eyes and
+  exactly one focal point per section should survive. If two elements fight
+  for the eye, demote one — hierarchy is weight and placement, not a second
+  accent color (founder-ratified, session 38).
 
 ### Don't:
 - **Don't** dress the workspace as enterprise-fintech corporate — no shields,

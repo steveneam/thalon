@@ -49,6 +49,69 @@ export interface ActivityItem {
   payload: Record<string, unknown>;
 }
 
+/**
+ * Dashboard v3 (§10): the plan read — what the engine WILL do (sweeps), what
+ * it MAY do (cadence allowances), and where every recent asset stands in the
+ * pipeline. One aggregate over sweep pointer + active profile + the
+ * feed-window walk; no engine dependency beyond the sanctioned sweep-bundle
+ * read the Intel surface already uses.
+ */
+export interface PlanSweep {
+  lastSweptAt: string;
+  nextSweepAt: string;
+  /** Exact cadence for tick projection; hours are derived for display. */
+  intervalMs: number;
+  source: string;
+}
+
+/** One per-platform cadence allowance (B7.a config) — absent fields mean no constraint. */
+export interface PlanCadenceRule {
+  platform: string;
+  maxPerDay?: number;
+  maxPerWeek?: number;
+  minGapMinutes?: number;
+}
+
+export interface PipelineGate {
+  gate: string;
+  verdict: string;
+}
+
+/**
+ * One draft as a pipeline lineage row (§10 item 3). Stage instants are ISO
+ * or null = honestly not reached; `decidedAt`/`publishedAt` derive from the
+ * transition-maintained `updatedAt` and the deploy meta the engine records —
+ * the view is honest by construction, never inferred.
+ */
+export interface PipelineAsset {
+  draftId: string;
+  runId: string;
+  platform: string;
+  format: string | null;
+  status: string;
+  sourceKind: string | null;
+  capturedAt: string | null;
+  generatedAt: string;
+  judgedAt: string | null;
+  decidedAt: string | null;
+  publishedAt: string | null;
+  /** Per-gate verdicts for the draft's CURRENT body hash (invariant I1). */
+  gates: PipelineGate[];
+  /** Plain-language failing-claim lines (judge evidence) — why it's blocked. */
+  reasons: string[];
+  /** Live page URL once the own-site deploy recorded it. */
+  deployRef: string | null;
+}
+
+export interface PlanPayload {
+  sweep: PlanSweep | null;
+  /** Active monitored areas — the Intel station's magnitude. */
+  areas: number;
+  cadence: PlanCadenceRule[];
+  /** Feed-window drafts as lineage rows, newest first. */
+  assets: PipelineAsset[];
+}
+
 /** Mirrors @thalon/platform resolveSeams() — names, never key material. */
 export interface SeamReadout {
   db: string;

@@ -5,15 +5,17 @@ import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
 import { ActivityFeed, type ActivityStatus } from "@/components/dashboard/activity-feed";
 import { FirstRunCard } from "@/components/dashboard/first-run-card";
+import { FlowSchematic } from "@/components/dashboard/flow-schematic";
 import { NeedsYouCard } from "@/components/dashboard/needs-you-card";
 import { Omnibox } from "@/components/dashboard/omnibox";
-import { PulseRow } from "@/components/dashboard/pulse-row";
+import { PipelineBoard } from "@/components/dashboard/pipeline-board";
 import { QuickActions } from "@/components/dashboard/quick-actions";
+import { WeekCalendar, type CalendarStatus } from "@/components/dashboard/week-calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePulse } from "@/components/workspace/pulse-context";
-import { fetchActivity, fetchStatus } from "@/lib/workspace/client";
-import { EMPTY_COUNTS, type ActivityItem, type WorkspaceStatus } from "@/lib/workspace/types";
+import { fetchActivity, fetchPlan, fetchStatus } from "@/lib/workspace/client";
+import { EMPTY_COUNTS, type ActivityItem, type PlanPayload, type WorkspaceStatus } from "@/lib/workspace/types";
 
 /**
  * A failed pulse read gets its own honest card: "does anything need me?"
@@ -40,10 +42,11 @@ function EngineUnreachableCard({ onRetry }: { onRetry: () => void }) {
 }
 
 /**
- * The dashboard (docs/FRONTEND.md §3): one screen answering what needs me ·
- * what is the engine doing · what can I do next — the 10-second rule's
- * workspace test. Seam/driver *configuration* lives in Settings (founder
- * direction 2026-07-14); the dashboard only surfaces degraded health.
+ * The dashboard (docs/FRONTEND.md §3), v3 (§10 of workspace-ux-v2.md): the
+ * workflow schematic is the spine — one glance answers what the engine is
+ * doing at every station — then what needs me (needs-you card), what will
+ * happen (week calendar), and where each asset stands (pipeline). Seam/driver
+ * configuration lives in Settings; only degraded health surfaces here.
  */
 export function Dashboard() {
   const { pulse, status: pulseStatus, refresh } = usePulse();
@@ -51,6 +54,9 @@ export function Dashboard() {
   const [activityStatus, setActivityStatus] = useState<ActivityStatus>("loading");
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [health, setHealth] = useState<WorkspaceStatus | null>(null);
+  // One status for both plan-backed views (calendar + pipeline) — they share the read.
+  const [planStatus, setPlanStatus] = useState<CalendarStatus>("loading");
+  const [plan, setPlan] = useState<PlanPayload | null>(null);
 
   const loadActivity = useCallback(
     () =>
@@ -65,9 +71,23 @@ export function Dashboard() {
     [],
   );
 
+  const loadPlan = useCallback(
+    () =>
+      fetchPlan()
+        .then((data) => {
+          setPlan(data);
+          setPlanStatus("success");
+        })
+        .catch(() => {
+          setPlanStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
     let cancelled = false;
     void loadActivity();
+    void loadPlan();
     // Best-effort health read: only a degraded gateway surfaces here — the
     // full seam/driver readout is Settings' job, not the dashboard's.
     fetchStatus()
@@ -80,21 +100,25 @@ export function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [loadActivity]);
+  }, [loadActivity, loadPlan]);
 
   const counts = pulse?.counts ?? EMPTY_COUNTS;
   const needsYou = pulse?.needsYou ?? 0;
   const firstRun = pulseStatus === "success" && pulse?.tenant === null;
   const pulseError = pulseStatus === "error";
 
+  const retryPlan = () => {
+    setPlanStatus("loading");
+    void loadPlan();
+  };
+
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-6">
       <Omnibox />
-      <PulseRow
+      <FlowSchematic
         counts={counts}
-        needsYou={needsYou}
-        loading={pulseStatus === "loading"}
-        error={pulseError}
+        plan={planStatus === "success" ? plan : null}
+        unknown={pulseStatus === "loading" || pulseError}
       />
       {health?.seams.gateway === "unconfigured" && (
         <p
@@ -128,6 +152,8 @@ export function Dashboard() {
           }}
         />
       </div>
+      <WeekCalendar status={planStatus} plan={plan} onRetry={retryPlan} />
+      <PipelineBoard status={planStatus} assets={plan?.assets ?? []} onRetry={retryPlan} />
     </div>
   );
 }

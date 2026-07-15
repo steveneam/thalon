@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormatDetail } from "@/components/approve/format-detail";
 import { JudgeBadge } from "@/components/approve/judge-badge";
+import { JudgeReasons } from "@/components/approve/judge-reasons";
 import { isTypingTarget } from "@/lib/approve-queue/keyboard";
 import type { GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 
@@ -89,6 +90,7 @@ export function ApprovePanel({ status, draft, judgeResults, busy, actionError, o
         <span className="text-xs text-muted-foreground">{draft.status}</span>
       </div>
       <JudgeBadge results={judgeResults} bodyHash={draft.bodyHash} />
+      <JudgeReasons results={judgeResults} bodyHash={draft.bodyHash} />
       <FormatDetail draft={draft} />
       {editing ? (
         <textarea

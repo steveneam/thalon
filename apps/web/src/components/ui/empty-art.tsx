@@ -14,7 +14,7 @@ export function EmptyArt({
   className,
 }: {
   asset: WorkspaceAssetKey;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
   className?: string;
 }) {
   const a = WORKSPACE_ASSETS[asset];
@@ -33,7 +33,7 @@ export function EmptyArt({
         // the mask fades the plate edge so the ink reads drawn-on-the-page.
         "pointer-events-none mx-auto h-auto select-none mix-blend-multiply",
         "[mask-image:radial-gradient(ellipse_72%_72%_at_50%_50%,black_52%,transparent_98%)]",
-        size === "md" ? "w-44" : "w-24",
+        size === "md" ? "w-44" : size === "sm" ? "w-24" : "w-16",
         className,
       )}
     />
