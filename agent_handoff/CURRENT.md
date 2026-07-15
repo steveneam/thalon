@@ -10,7 +10,7 @@
 
 > Stamped 2026-07-15, session-38 wrap.
 
-**Resume · Thalon** — session 39, syd4 — **founder has the video plan + workspace-theme answer + kanban/schematic recommendation in the s38 reply; next slice = founder's pick: (a) dashboard v3 (calendar + pipeline stepper + impeccable re-critique bundled, spec `docs/research/workspace-ux-v2.md` §10) or (b) §V video work (Track B concept film storyboard first) or (c) wave-2 template lane.**
+**Resume · Thalon** — session 39, syd4 — **FOUNDER LOCKED THE ORDER (s38 close, all lead recommendations ratified): (1) dashboard v3 THIS SESSION → (2) Track B concept film → (3) wave-2 templates; landing redesign DEFERRED to portfolio end (distillation step at wave checkpoints = the learning mechanism).** Dashboard v3 scope: weekly calendar + per-asset pipeline stepper (spec `docs/research/workspace-ux-v2.md` §10) + kanban as a lens on stepper data + the intel→create→judge→distribute schematic as the dashboard's visual spine (doubles as the concept-film storyboard) + squint-test checklist line + impeccable re-critique bundled (before/after trend line, s34 timing rule; bundle any agent-launch approval into kickoff). **STANDING founder directive (s38): the workspace needs the "wow, artistic factor" — Thalon is a marketing engine and must practice what it preaches; use Higgsfield for parts/areas as needed (metered ~2-2.5cr/img, get_cost preflight), wow in service of the operator, never against the Two-Channel rule.**
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (swordfish mail; NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → COORDINATION.md session-37/38 messages → ledger `proprietary/prompts/b7.2-shot-list.md` §s38 (the metered-illustration pricing note) → `proprietary/templates/meta-prompt.md` §0 + §Hero-register if template work.
 
@@ -40,4 +40,4 @@ Read in order: `CLAUDE.md` → this file → `COORDINATION.md` (Sprint-7 board +
 
 ## Next action
 
-Session 39: founder's pick — dashboard v3 (calendar + stepper + kanban-lens/schematic decision + impeccable re-critique) · §V video (Track B storyboard first) · or wave-2 templates. Founder at their pace: leads triage · →Email dogfood · month-end credit call after §V.
+Session 39: **dashboard v3** (calendar + stepper + kanban lens + schematic spine + squint-test line + impeccable re-critique; wow-factor directive standing) → then Track B concept film → then wave 2. Founder at their pace: leads triage · →Email dogfood · month-end credit call after §V.
