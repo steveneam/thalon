@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How the Hartline Estates demonstration page was designed and built.">
+<meta name="robots" content="noindex">
+<title>Method — how the Hartline Estates page was made</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3ede2'/%3E%3Cpath d='M9 26V15a7 7 0 0 1 14 0v11h-4v-10a3 3 0 0 0-6 0v10z' fill='%23b0552f'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:'Instrument Serif';src:url('../fonts/instrument-serif.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Instrument Serif';src:url('../fonts/instrument-serif-italic.woff2') format('woff2');
+  font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url('../fonts/instrument-sans-var.woff2') format('woff2');
+  font-weight:400 700;font-style:normal;font-display:swap}
+:root{
+  --paper:#f3ede2;--card:#f7f2e9;--ink:#33291e;--soft:#544738;--faint:#6e5f4b;
+  --clay:#a34c28;--line:#d9cdb6;
+  --serif:'Instrument Serif',Georgia,serif;--sans:'Instrument Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:.98rem;line-height:1.7}
+::selection{background:var(--clay);color:var(--paper)}
+:focus-visible{outline:2px solid var(--clay);outline-offset:3px}
+.skip{position:absolute;left:-999px;top:0;background:var(--clay);color:var(--paper);
+  padding:.5rem 1rem;font-weight:600;text-decoration:none}
+.skip:focus{left:8px;top:8px}
+a{color:var(--clay)}
+header{border-bottom:1px solid var(--line)}
+header .bar{max-width:46rem;margin-inline:auto;padding:.9rem clamp(1rem,4vw,2rem);
+  display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.wordmark{font-family:var(--serif);font-size:1.1rem;color:var(--ink);text-decoration:none;white-space:nowrap}
+header nav a{font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);text-decoration:none}
+main{max-width:46rem;margin-inline:auto;padding:clamp(2.5rem,6vw,4rem) clamp(1rem,4vw,2rem) 4rem}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,5vw,3rem);line-height:1.05}
+h2{font-family:var(--serif);font-weight:400;font-size:1.5rem;margin-top:2.6rem;
+  border-bottom:1px solid var(--line);padding-bottom:.4rem}
+p{margin-top:.9rem;color:var(--soft)}
+p strong,li strong{color:var(--ink);font-weight:640}
+em{font-family:var(--serif);font-style:italic}
+ul,ol{padding-left:1.2rem;margin-top:.9rem;display:grid;gap:.5rem;color:var(--soft)}
+table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:.9rem}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.7rem;font-weight:650;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.passlog{list-style:none;padding:0}
+.passlog li{border-top:1px solid var(--line);padding-top:.7rem;font-size:.92rem}
+.passlog b{font-weight:650;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--paper);background:var(--clay);padding:.12rem .55rem;border-radius:999px}
+footer{border-top:1px solid var(--line)}
+footer .bar{max-width:46rem;margin-inline:auto;padding:1.2rem clamp(1rem,4vw,2rem);
+  display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--faint)}
+</style>
+</head>
+<body>
+<a class="skip" href="#guide">Skip to content</a>
+<header>
+  <div class="bar">
+    <a class="wordmark" href="../">Hartline Estates</a>
+    <nav aria-label="Site"><a href="../">Back to the page</a></nav>
+  </div>
+</header>
+<main id="guide">
+  <h1>How this page was made</h1>
+  <p><strong>Hartline Estates is a fictional demonstration business.</strong> Nothing on the
+     landing page is a real listing, address, or claim about a real company. Every photograph
+     is <strong>AI-generated</strong> — commissioned for this page from image models on a paid
+     license tier, with full provenance (model, prompt, credits, license) recorded for each
+     asset at the moment it was generated. The drawings, the 3D model, and the code are
+     original work, written by hand for this page.</p>
+
+  <h2>The design brief</h2>
+  <p>One single-page landing site for a boutique residential estate agency, built as one of a
+     portfolio of demonstration sites in which every page commits to a different signature
+     technique. This page drew <strong>high-quality 3D</strong> as its primary direction and
+     <strong>soft/organic</strong> as its secondary.</p>
+  <p>Before any design work, published real-estate and architecture sites were studied for
+     what the vertical defaults to — and what to refuse. The luxury default (charcoal, gold
+     serif, an empty glass villa at dusk) photographs money, not home; this page takes the
+     opposite register: warm daylight, limewash and clay, a human-scale house wrapped in
+     greenery. The one honest 3D artifact in real estate is the dollhouse cutaway that
+     explains a home, so the page's 3D is a house that assembles from its own floor plan.
+     The arch — doorway, window, threshold — carries the soft/organic direction.</p>
+
+  <h2>The 3D, honestly</h2>
+  <p>The scroll scene ("Every home we take on gets taken apart first") is built from
+     <strong>no 3D engine at all</strong>: the house is ~40 CSS planes — floor, hinged walls,
+     folding roof panels, gable ends, a chimney box — driven by perspective transforms and a
+     scroll-linked camera. Physics/WebGL engines were considered and rejected: there is
+     nothing to simulate, and architecture is made of planes, which CSS renders crisply at
+     zero dependency weight. The model deliberately reads as an <em>architect's presentation
+     model</em> — a drawing that inks in as it rises — while the photography above and below
+     it carries the real-world register.</p>
+  <p>Motion discipline: nothing on the page moves at idle. The model moves only with scroll,
+     cards tilt only on hover, and the window lamps come on one by one only as the scene
+     completes. With reduced motion (or without JavaScript) the page serves the assembled
+     house and every word of the copy, statically.</p>
+
+  <h2>The imagery</h2>
+  <p>All photographs were generated with <strong>Soul Cinema (Higgsfield)</strong>, on the
+     paid tier, and pinned into a content-addressed store with their prompts and credit costs
+     before the derived web copies were exported. Slots on the page:</p>
+  <table>
+    <thead><tr><th>Slot</th><th>Image</th><th>Format</th></tr></thead>
+    <tbody>
+      <tr><td>Hero — the garden front</td><td>house behind olive, cypress and climbing rose at golden hour</td><td>16:9</td></tr>
+      <tr><td>Hero (small screens)</td><td>the house glimpsed through garden foliage</td><td>2:3</td></tr>
+      <tr><td>7 am — the kitchen</td><td>morning light on plaster and counter</td><td>2:3</td></tr>
+      <tr><td>3 pm — the garden room</td><td>linen curtain beside an arched courtyard door</td><td>2:3</td></tr>
+      <tr><td>8 pm — the stair</td><td>lamp-lit timber landing at dusk</td><td>2:3</td></tr>
+      <tr><td>How we work</td><td>brass keys on linen, still life</td><td>3:2</td></tr>
+      <tr><td>Closing</td><td>the house at dusk over its garden gate, lamps on</td><td>16:9</td></tr>
+    </tbody>
+  </table>
+  <p>Two additional takes were kept in the archive but not used on the page. No stock
+     photography, no scraped imagery, and no third-party assets appear anywhere; the two
+     typefaces (Instrument Serif, Instrument Sans) are vendored under the SIL Open Font
+     License with their license texts alongside.</p>
+
+  <h2>Iteration passes</h2>
+  <ul class="passlog">
+    <li><b>Pass 1</b> — Model geometry rebuilt after first render (gable ends re-parented to
+      their walls, chimney box corrected, roof panels gated out of the plan view); annotation
+      column width fixed; windows and door given paper covers so the drawing "inks in" as the
+      walls rise. Ambition shipped: the unfolded-elevation plan state.</li>
+    <li><b>Pass 2</b> — Art direction: the schematic model was demoted from the hero in favour
+      of commissioned garden photography (a model can't carry a boutique first impression;
+      greenery can), and the closing exterior was re-shot for setting — the house now sits
+      centred in its own gated garden rather than on a street corner. Roof shading separated
+      so the ridge reads; flush roof ends; mobile scene re-anchored. Ambition shipped: the
+      lamps go on one by one, and the model sits on a faint drafting ring.</li>
+    <li><b>Pass 3</b> — Full breakpoint walk (390/768/1440), computed contrast sweep (every
+      text pairing on paper ≥ 4.9:1), keyboard walk with visible focus throughout, no-JS and
+      reduced-motion renders verified honest (assembled house, all copy visible), console
+      clean at every stop.</li>
+  </ul>
+
+  <h2>Honesty notes</h2>
+  <ul>
+    <li>The three "current homes" are illustrative samples and say so on their cards.</li>
+    <li>No urgency, scarcity, or testimonial appears anywhere on the page.</li>
+    <li>The page is self-contained: no external requests, no analytics, no trackers.</li>
+  </ul>
+</main>
+<footer>
+  <div class="bar">
+    <span>Hartline Estates — a fictional demonstration business.</span>
+    <a href="../">Back to the page</a>
+  </div>
+</footer>
+</body>
+</html>

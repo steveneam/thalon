@@ -1,0 +1,15 @@
+{
+  "slug": "hartline",
+  "name": "Hartline Estates",
+  "vertical": "real-estate-boutique-residential",
+  "oneLiner": "A boutique residential estate agency that sells a handful of homes a year — each one walked, known, and matched to its buyer.",
+  "axes": {
+    "primary": "high-quality-3d",
+    "secondary": "soft-organic"
+  },
+  "paletteSeed": "warm daylight — limewash cream and plaster papers, walnut ink, clay/terracotta accent, olive-sage secondary; the wave's only light-first page; closes on golden hour as a gradual warm grade, never a dark wall (tonal continuity, s35 rule)",
+  "typeDirection": "Instrument Serif + italic (display voice and hand-annotations — the human register) with Instrument Sans variable (wayfinding, small-caps data) — both OFL, vendored",
+  "motionBudget": "one scroll-driven CSS-3D scene: a house assembles from floor plan to lit dwelling (walls hinge up, roof folds on, camera orbits from plan view to eye level, windows warm at the end) — transform-only, zero vendored engine (Jolt assessed and rejected: 3D physics simulator, MB-scale WASM, nothing to simulate); pointer-tilt on the hero model is interaction-only; idle motion near zero per the s36 temperament rule; reduced-motion and no-JS serve the assembled house and the full static page",
+  "wave": 1,
+  "built": "2026-07-15"
+}

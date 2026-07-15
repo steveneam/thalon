@@ -1,0 +1,9 @@
+[
+  { "file": "hero-garden.webp",          "pinnedHash": "00b21a3534af3dda8bc7860df557329c326b36aff127e75aa6166d1076805f25", "width": 1920, "height": 1080, "quality": 78 },
+  { "file": "hero-garden-portrait.webp", "pinnedHash": "8635564d44b4e1f347fad78ee5df0033ac046b96e64d1ddb8bd136cc9317ec89", "width": 780,  "height": 1170, "quality": 72 },
+  { "file": "close-dusk.webp",           "pinnedHash": "86de3831936aed18664b57c34ed32e729c91f1e2bd5f07a330eea5c83182fe05", "width": 1920, "height": 1080, "quality": 76 },
+  { "file": "kitchen.webp",              "pinnedHash": "ba551abeee71dbcca7da047643f9c77efae392672d78950ca3918596cff0e475", "width": 980,  "height": 1470, "quality": 76 },
+  { "file": "garden-room.webp",          "pinnedHash": "bd3439c67761515ad54f80ec7192283ebd74ad76c5def0e7389451587b08edf2", "width": 980,  "height": 1470, "quality": 76 },
+  { "file": "stair.webp",                "pinnedHash": "e2965550af95a675ec9806195c8f72c10cc3649f69c09626e98d8b1a71d124a3", "width": 980,  "height": 1470, "quality": 76 },
+  { "file": "keys.webp",                 "pinnedHash": "59e6871aee3a06e8028da8f46f17d91b9d9878c7424bfca3cfbda1ff11e93752", "width": 1400, "height": 933,  "quality": 76 }
+]

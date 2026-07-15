@@ -51,6 +51,12 @@
 
 **Assets & performance**
 - [ ] Images sized to slot, modern format, lazy-loaded below the fold.
+- [ ] **Minted-image setting scrutiny** (s37 lesson): read every property/scene
+      mint for what its *setting* connotes, not just its subject — placement
+      (corner/end-of-street houses fail feng shui and general perception),
+      infrastructure clutter (power lines, bare asphalt), and neighbourhood
+      register (established greenery reads prestigious; bare reads cheap).
+      Re-mint rather than crop around a wrong setting.
 - [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.

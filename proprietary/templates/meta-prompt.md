@@ -88,6 +88,15 @@ backgrounds are encouraged wherever they serve the drawn axes — a safe page
 is a failed page in this portfolio. The perf floors and reduced-motion
 alternatives above are the only brakes.
 
+**Hero register rule (founder direction 2026-07-15 s37):** the first
+impression must be *real*. A code-drawn model, schematic, or illustration
+cannot carry the hero on a premium/boutique vertical — it reads cartoon, not
+bespoke; lead with photography-grade minted imagery and let the crafted/model
+register live in an inner scene where being a drawing or model IS the story.
+Corollary for place-based verticals (real estate, hospitality, food): nature
+is load-bearing — greenery, trees, and setting sell the story; a bare subject
+on a bare background fails the register even when technically clean.
+
 **Before you call the site done:**
 - Run **at least three iteration passes**, each executing BOTH lanes of
   `proprietary/templates/iteration-pass-checklist.md` — the fault-hunt lane and
