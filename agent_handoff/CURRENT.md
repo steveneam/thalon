@@ -39,4 +39,4 @@ Read in order: `CLAUDE.md` → this file → `COORDINATION.md` (Sprint-7 board +
 
 ## Next action
 
-Session 40: **Track B concept film** (§V; stills-first, get_cost preflight, storyboard = the schematic) → then wave 2. Founder at their pace: junk transcript rows · staging transcript vendor decision · leads triage · →Email dogfood · month-end credit call.
+Session 40: **Track B concept film** (§V; plan DRAFTED s39 → `proprietary/prompts/concept-film-plan.md` — shot list, execution order, the three founder picks to bundle at kickoff; stills-first, get_cost preflight) → then wave 2. Founder at their pace: junk transcript rows · staging transcript vendor decision · leads triage · →Email dogfood · month-end credit call.
