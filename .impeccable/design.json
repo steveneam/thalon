@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-15T11:40:14Z",
+  "generatedAt": "2026-07-15T12:27:38Z",
   "title": "Design System: Thalon",
   "extensions": {
     "colorMeta": {
@@ -284,6 +284,11 @@
         "name": "The Flat-By-Default Rule",
         "body": "Surfaces are flat at rest; depth is tonal (white-on-paper) or a state response — never an ambient drop shadow under every card.",
         "section": "elevation"
+      },
+      {
+        "name": "The Four-Verbs Rule",
+        "body": "Removal-shaped actions use exactly one verb per meaning, everywhere: Dismiss = a judgment that teaches the engine (item survives, reversible); Delete = destroy the data (confirm, refused while referenced); Reject = terminal verdict on a draft; Remove = take out of a working set (nothing destroyed, nothing learned). A delete that secretly dismisses, or vice versa, is a defect.",
+        "section": "components"
       }
     ],
     "dos": [

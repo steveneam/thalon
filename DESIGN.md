@@ -249,6 +249,23 @@ every surface.
   Action Blue for the active item; top bar carries tenant switcher + needs-you
   badge (signal channel). Collapses structurally on small screens.
 
+### Action verbs (vocabulary)
+
+**The Four-Verbs Rule** *(founder-prompted, session 39)*: removal-shaped
+actions use exactly one verb per meaning, everywhere — never synonyms:
+
+| Verb | Meaning | Consequence | Dress |
+|---|---|---|---|
+| **Dismiss** | "not for us" — a judgment | Item survives (dismissed tab/badge, reversible); teaches the engine (eval row) | quiet ghost/outline |
+| **Delete** | destroy the data | Gone (cascade); refused while referenced | destructive quiet-red + named confirm |
+| **Reject** | terminal verdict on a draft | Recorded decision; draft closed | destructive, beside Approve |
+| **Remove** | take out of a working set | Nothing destroyed, nothing learned (e.g. context chips) | bare × / ghost |
+
+A new surface that reaches for a removal word picks from this table; a
+"delete" that secretly dismisses (or vice versa) is a defect. Current usage
+audited clean 2026-07-15: intel/leads = Dismiss, library = Delete,
+approve = Reject, Create chips = Remove.
+
 ### HeatGrade (signature component)
 The thermal pill: `u-eyebrow` band word inside a filled pill (band color
 decides ink-vs-paper text), beside a 2.5rem magnitude bar on Muted Wash whose

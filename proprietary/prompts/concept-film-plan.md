@@ -54,12 +54,21 @@ error-red or interactive (Two-Channel scrutiny on minted art, s38 lesson).
    roster; get_cost preflight EACH clip; [VID] pool touched only here).
 5. Cut + captions; walkthrough vs film gate decision rides the result.
 
+## DECIDED (founder, s39): caption-first, no VO in v1
+
+The film must tell its whole story muted (landing autoplay + social feeds).
+Each beat gets ONE short kinetic caption line written at storyboard time —
+composed into the frames, not overlaid after ("intel finds it" · "drafts take
+shape" · "the judge holds one back" · "you release it" · "everywhere").
+SRT ships with the cut (the product's own pillar contract: video + caption/
+SRT). Voiceover = optional v2 layer for a longer pillar cut only.
+
 ## Open founder picks (ask at s40 kickoff, one bundle)
 
 - Aspect: 16:9 landing-first vs 9:16 social-first master (or 16:9 master +
   9:16 re-frames via `reframe`).
-- Music: curated Pixabay pack (operator data, §6 ladder) vs silent-with-
-  captions first cut.
+- Music: curated Pixabay pack (operator data, §6 ladder) vs captions-only
+  first cut.
 - Length target: ~45s signature scene vs ~90s pillar cut (affects clip count).
 
 *v1, 2026-07-15 (s39). Ledger entries land in b7.2-shot-list.md §V as mints happen.*
