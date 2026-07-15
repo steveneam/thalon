@@ -5,6 +5,7 @@ import { Pause, Pencil, Play, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyArt } from "@/components/ui/empty-art";
 import type { AreaRow } from "@/lib/intel/types";
 
 interface AreasManagerProps {
@@ -63,12 +64,15 @@ export function AreasManager({ areas, busy, onCreate, onUpdate }: AreasManagerPr
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {areas.length === 0 && (
-          <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
-            No areas yet. Try something like{" "}
-            <em>&ldquo;AI content automation — agents drafting social posts and videos, approval
-            workflows, grounded generation&rdquo;</em>
-            . The richer the description, the better the ranking.
-          </p>
+          <div className="rounded-lg border border-dashed border-border p-3">
+            <EmptyArt asset="emptyAreas" size="sm" />
+            <p className="text-center text-sm text-muted-foreground">
+              No areas yet. Try something like{" "}
+              <em>&ldquo;AI content automation — agents drafting social posts and videos, approval
+              workflows, grounded generation&rdquo;</em>
+              . The richer the description, the better the ranking.
+            </p>
+          </div>
         )}
         {areas.length > 0 && (
           <ul className="flex flex-col gap-2">

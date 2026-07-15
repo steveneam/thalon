@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Flame, RefreshCw, Upload, Users, X } from "lucide-react";
 import { LeadCard } from "@/components/leads/lead-card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CreateFamily } from "@/lib/intel/types";
@@ -271,6 +272,7 @@ export function LeadsSurface() {
       {payload && visible.length === 0 && (
         <Card>
           <CardHeader>
+            {tab === "queue" && <EmptyArt asset="emptyLeads" />}
             <CardTitle>
               {tab === "queue" ? "No leads yet — three ways in" : "Nothing dismissed"}
             </CardTitle>

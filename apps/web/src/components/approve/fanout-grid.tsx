@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { formatMsAsClock, parseClipPlanMeta } from "@/lib/approve-queue/formats/clip-plan";
 import { cn } from "@/lib/utils";
 import type { GridDraft } from "@/lib/approve-queue/types";
@@ -59,11 +60,19 @@ export function FanoutGrid({
       <p className="u-eyebrow text-muted-foreground">
         keys · j/k select · a approve · r reject · e edit
       </p>
-      {status === "idle" && <p className="text-sm text-muted-foreground">Select a run to see its drafts.</p>}
+      {status === "idle" && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-1 py-6">
+          <EmptyArt asset="emptyApprove" />
+          <p className="text-sm text-muted-foreground">Select a run to see its drafts.</p>
+        </div>
+      )}
       {status === "loading" && <p className="text-sm text-muted-foreground">Loading drafts…</p>}
       {status === "error" && <p className="text-sm text-destructive">Couldn&rsquo;t load drafts.</p>}
       {status === "success" && drafts.length === 0 && (
-        <p className="text-sm text-muted-foreground">This run has no drafts yet.</p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-1 py-6">
+          <EmptyArt asset="emptyApprove" />
+          <p className="text-sm text-muted-foreground">This run has no drafts yet.</p>
+        </div>
       )}
       {status === "success" && drafts.length > 0 && (
         <div className="grid flex-1 auto-cols-fr grid-flow-col gap-3 overflow-x-auto">

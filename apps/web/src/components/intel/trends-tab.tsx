@@ -6,6 +6,7 @@ import { AreasManager } from "@/components/intel/areas-manager";
 import { CadenceStamp } from "@/components/intel/cadence-stamp";
 import { DemoBanner } from "@/components/intel/demo-banner";
 import { TrendCard } from "@/components/intel/trend-card";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { cn } from "@/lib/utils";
@@ -138,9 +139,12 @@ export function TrendsTab() {
           )}
 
           {filtered.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-              No cards {filter ? `for “${filter}” yet — its first live poll hasn’t landed` : "right now"}.
-            </p>
+            <div className="rounded-lg border border-dashed border-border p-4">
+              {!filter && <EmptyArt asset="emptyTrends" />}
+              <p className="text-center text-sm text-muted-foreground">
+                No cards {filter ? `for “${filter}” yet — its first live poll hasn’t landed` : "right now — the watch is on"}.
+              </p>
+            </div>
           ) : (
             <div className="grid gap-3 xl:grid-cols-2">
               {filtered.map((card) => (

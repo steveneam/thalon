@@ -15,7 +15,7 @@ import path from "node:path";
 import sharp from "sharp";
 import { getObjectStore } from "@thalon/platform";
 import { readPinnedAsset } from "@thalon/engine";
-import { BRAND_ASSETS } from "../apps/web/src/lib/brand-assets";
+import { BRAND_ASSETS, WORKSPACE_ASSETS } from "../apps/web/src/lib/brand-assets";
 
 const OUT_DIR = path.resolve(__dirname, "../apps/web/public/brand");
 
@@ -23,13 +23,15 @@ async function main() {
   const store = getObjectStore();
   mkdirSync(OUT_DIR, { recursive: true });
 
-  for (const [name, asset] of Object.entries(BRAND_ASSETS)) {
-    const key = `assets/${asset.pinnedHash}/asset.png`;
+  for (const [name, asset] of Object.entries({ ...BRAND_ASSETS, ...WORKSPACE_ASSETS })) {
+    const ext = asset.ext ?? "png";
+    const key = `assets/${asset.pinnedHash}/asset.${ext}`;
     const original = await readPinnedAsset(store, key);
     if (!original) {
       throw new Error(`pinned original missing or hash-mismatched for "${name}" (${key})`);
     }
-    const out = await sharp(original)
+    // SVG originals rasterize at high density first so the downscale stays crisp.
+    const out = await sharp(original, ext === "svg" ? { density: 300 } : {})
       .resize(asset.width, asset.height, { fit: "cover", position: "centre" })
       .webp({ quality: asset.quality, effort: 6 })
       .toBuffer();

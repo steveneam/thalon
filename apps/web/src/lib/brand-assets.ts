@@ -17,6 +17,8 @@ export interface BrandAsset {
   pinnedHash: string;
   /** Export quality (webp). */
   quality: number;
+  /** Extension of the pinned original in the object store (default "png"). */
+  ext?: "png" | "svg";
 }
 
 export const BRAND_ASSETS = {
@@ -75,3 +77,116 @@ export const BRAND_ASSETS = {
 } as const satisfies Record<string, BrandAsset>;
 
 export type BrandAssetKey = keyof typeof BRAND_ASSETS;
+
+/**
+ * §W — workspace paper/navy set (B7.2 step 3): decorative empty-state and
+ * first-run illustrations. Recraft V4.1 utility_vector originals (SVG) minted
+ * against the DESIGN.md tokens (paper field #faf7f2, ink/muted/hairline/bronze
+ * palette), so the plates share the workspace's exact background. Decorative
+ * only: rendered aria-hidden via <EmptyArt>; the empty-state copy stays the
+ * tutorial (never replace text with art). Amber in these images is an accent
+ * on ink objects, never an interactive cue (Two-Channel Rule).
+ */
+export const WORKSPACE_ASSETS = {
+  /** W1 — approve queue at rest: the falconer's empty glove. */
+  emptyApprove: {
+    src: "/brand/empty-approve.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "a6fea058c90b82fc1fb4e223757b13d1ec07ecf7978226a5076631987b6cac9a",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W2 — runs: blank paper stack beside an inkwell, work about to begin. */
+  emptyRuns: {
+    src: "/brand/empty-runs.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "d520f462be4aa7e83925815b51a380cf6b79ef88c77e368574a97994346a2e78",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W3 — intel · trends: the watchtower, one ember on the horizon. */
+  emptyTrends: {
+    src: "/brand/empty-trends.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "9129eaf28b960489431050ca041532ac9834353c13653f7c277c9fa8702cede1",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W4 — intel · search: hand lens over unmarked contours. */
+  emptySearch: {
+    src: "/brand/empty-search.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "14f526c7115936be42757fc88cb744860818fa11f31f3e95287f036936e2d9fe",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W5 — leads: the open ledger, first line unmarked (navy cover, take 2). */
+  emptyLeads: {
+    src: "/brand/empty-leads.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "0a5b845f3f60c84d969f683d8f0e1c11f96ef6005dc9956fa4e28dcb56d2958d",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W6 — library: three empty shelves, one bookmark ribbon. */
+  emptyLibrary: {
+    src: "/brand/empty-library.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "d3b30772a3fae3698c564ae9b410f7e74209c523a4396780cca2acf3fd59656c",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W7 — areas manager: blank survey chart, one empty pin outline. */
+  emptyAreas: {
+    src: "/brand/empty-areas.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "41679b8451d3f001c02242dca5d95c7bfde925d7799beeb455619366f04374a7",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W8 — profile editor: the blank calling card, unstamped. */
+  emptyProfile: {
+    src: "/brand/empty-profile.webp",
+    width: 720,
+    height: 480,
+    pinnedHash: "2355e20b5204e96afc22cf3430c02e7eb7abc91e279111356587a4505113ac52",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W9a — first-run step 1 (profile): pen filling from the inkwell. */
+  stepProfile: {
+    src: "/brand/step-profile.webp",
+    width: 480,
+    height: 480,
+    pinnedHash: "42cf3fe6b08dc11fbb48cb26e2091acffb814f54317c938e5f85d317bb39ed0f",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W9b — first-run step 2 (prompt): storyboard panels, arc through them. */
+  stepStoryboard: {
+    src: "/brand/step-storyboard.webp",
+    width: 480,
+    height: 480,
+    pinnedHash: "cfe8436416e06ce7b8007d30647ee858400306a27e1f010533731dda650ab462",
+    quality: 82,
+    ext: "svg",
+  },
+  /** W9c — first-run step 3 (approve): the falcon leaving the glove. */
+  stepRelease: {
+    src: "/brand/step-release.webp",
+    width: 480,
+    height: 480,
+    pinnedHash: "4adb04b8ac9e9197e7ba23459f3527f71768307f79eb2a003a3c0d19bbe4cafb",
+    quality: 82,
+    ext: "svg",
+  },
+} as const satisfies Record<string, BrandAsset>;
+
+export type WorkspaceAssetKey = keyof typeof WORKSPACE_ASSETS;

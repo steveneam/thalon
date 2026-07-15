@@ -6,6 +6,7 @@ import { usePulseSafe } from "@/components/workspace/pulse-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { fetchProfiles, saveProfile } from "@/lib/profiles/client";
 import { formToConfig, profileToForm, type ProfileFormState } from "@/lib/profiles/form";
 import type { ProfilesPayload } from "@/lib/profiles/types";
@@ -199,9 +200,12 @@ export function ProfileEditor() {
           </CardHeader>
           <CardContent>
             {(payload?.history.length ?? 0) === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No versions yet — your first save creates v1 and unlocks the workspace.
-              </p>
+              <div className="flex flex-col items-center gap-1 py-2 text-center">
+                <EmptyArt asset="emptyProfile" size="sm" />
+                <p className="text-sm text-muted-foreground">
+                  No versions yet — your first save creates v1 and unlocks the workspace.
+                </p>
+              </div>
             ) : (
               <ol className="flex flex-col gap-1.5">
                 {payload!.history.map((entry) => (

@@ -10,6 +10,7 @@ import { HorizonCard } from "@/components/intel/horizon-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { addTarget, fetchHorizon, fetchTargets, setTargetStatus, targetThis } from "@/lib/intel/client";
 import type { HorizonPayload, TargetRow } from "@/lib/intel/types";
 import { cn } from "@/lib/utils";
@@ -106,10 +107,13 @@ export function SearchTab() {
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {targets.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
-                  No targets yet. Add the searches you want to win — e.g.{" "}
-                  <em>&ldquo;ai content automation for startups&rdquo;</em>.
-                </p>
+                <div className="rounded-lg border border-dashed border-border p-3">
+                  <EmptyArt asset="emptySearch" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    No targets yet. Add the searches you want to win — e.g.{" "}
+                    <em>&ldquo;ai content automation for startups&rdquo;</em>.
+                  </p>
+                </div>
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {targets.map((target) => (

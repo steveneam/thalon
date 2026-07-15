@@ -6,6 +6,7 @@ import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
@@ -348,9 +349,12 @@ export function LibrarySurface() {
             </CardHeader>
             <CardContent>
               {payload.sources.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
-                  Nothing ingested yet — paste a video URL above.
-                </p>
+                <div className="rounded-lg border border-dashed border-border p-3">
+                  <EmptyArt asset="emptyLibrary" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Nothing ingested yet — paste a video URL above.
+                  </p>
+                </div>
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {payload.sources.map((row) => (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyArt } from "@/components/ui/empty-art";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { fetchRunsFeed } from "@/lib/approve-queue/client";
@@ -66,9 +67,12 @@ export function RunsList() {
             />
           )}
           {status === "success" && runs.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              No runs yet — your first generation lands here with full provenance.
-            </p>
+            <div className="flex flex-col items-center gap-1 py-4 text-center">
+              <EmptyArt asset="emptyRuns" />
+              <p className="text-sm text-muted-foreground">
+                No runs yet — your first generation lands here with full provenance.
+              </p>
+            </div>
           )}
           {status === "success" && runs.length > 0 && (
             <ul className="flex flex-col gap-2">
