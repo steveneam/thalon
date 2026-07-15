@@ -14,17 +14,17 @@
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → COORDINATION.md session-38/39 messages → `proprietary/prompts/b7.2-shot-list.md` (ledger; §V section = the film's budget frame) → `proprietary/templates/meta-prompt.md` §0 + taste directives #1-6.
 
-▎ ▸ **State:** main = origin @ session-39 HEAD (`a5c09c8`) · suite **1183/3/0** · guard clean · credits **963.48**/`plus` ([VID] untouched; production month burns since 2026-07-14, ~28 days left) · **dev server + transcript shim LEFT RUNNING deliberately** (founder was testing live: `npm run dev` on :3000, `python3 .context/tools/transcript-shim.py` on :8787 — restart both if the box rebooted; shim must be up for URL-only Library ingest) · pinned assets 58 in `.data/objects/` (don't clean) · wave-1 five sites parked · impeccable hook armed; critique snapshot backlog at `.impeccable/critique/2026-07-15T11-47-44Z__apps-web-src-app-app.md`.
+▎ ▸ **State:** main = origin @ session-39 HEAD · suite **1183/3/0** · guard clean · credits **963.48**/`plus` ([VID] untouched; production month burns since 2026-07-14, ~28 days left) · dev server + transcript shim STOPPED (founder-confirmed close; to test Library URL-ingest again: `npm run dev` on :3000 **and** `python3 .context/tools/transcript-shim.py` on :8787 — the shim must be up or URL-only ingest errors) · pinned assets 58 in `.data/objects/` (don't clean) · wave-1 five sites parked · impeccable hook armed; critique snapshot backlog at `.impeccable/critique/2026-07-15T11-47-44Z__apps-web-src-app-app.md`.
 
 ▎ ▸ **Session-39 outcomes (COORDINATION s39 has detail):** dashboard v3 + fix batch shipped (`927b6f1`, `a5c09c8`) · re-critique 30/40 (trend 25→30) · library: URL-only ingest verified end-to-end (root cause of founder's complaint = caption-file default; syd4 env was already hosted-vendor, the shim just wasn't running) + transcript delete (refuse-while-referenced) · squint-test ratcheted (DESIGN.md §6 + sidecar) · founder's two junk/dupe transcript rows left on the shelf — they can delete them with the new button.
 
-▎ ▸ **[founder] queue:** delete the duplicate transcript rows if unwanted · **staging (VPS) still runs caption-file** — URL-only ingest there needs a real vendor key (or stays caption-paste until launch; flag when staging matters) · leads triage · →Email dogfood · month-end downgrade/cancel decision after §V.
+▎ ▸ **[founder] queue:** delete the duplicate transcript rows if unwanted · leads triage · →Email dogfood · month-end downgrade/cancel decision after §V. (Staging transcript vendor: founder accepted caption-paste-until-launch s39 — the commercial-key swap stays a recorded launch gate, lead offers a vendor survey when it matters.)
 
 ▎ ▸ **Critique backlog (next dashboard slice, NOT s40):** station 03/04 status-filter params into the queue · empty-week collapse + overdue-sweeps doorway · activity day-grouping + scroll fade · inbox-mechanics question (dominant action → next waiting decision?) · HeatGrade-on-dashboard question · `text-[11px]` off-scale class family.
 
 ▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · illustration mints metered ~2-2.5cr (get_cost preflight) · Two-Channel scrutiny applies to minted art · impeccable re-critique rides each workspace slice (s34 timing rule; agent launches need fresh founder approval at kickoff).
 
-▎ ▸ **✅ SAFE TO CLEAR — with two deliberate exceptions.** All session-39 commits pushed; no open PRs; no worktrees; no Monitors; no mid-edit state; suite/lint/guard green at HEAD. Exceptions (founder was live-testing): dev server (:3000) and transcript shim (:8787) left running.
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: all session-39 commits pushed; no open PRs; no worktrees; no Monitors; no mid-edit state; dev server + shim stopped (founder-confirmed); suite/lint/guard green at HEAD.
 
 ## Pointer
 
