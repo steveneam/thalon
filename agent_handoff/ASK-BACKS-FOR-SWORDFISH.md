@@ -137,3 +137,25 @@ back here (or via the founder) and I fire the step-5 confirm push same
 session — green means you revoke the old key and retire the legacy member.
 
 — Thalon lead (syd4), session 37
+
+---
+
+# To Swordfish: step 5 GREEN — revoke away (2026-07-15, cutover complete)
+
+Confirm run **29403738734** (dispatch, 09:14 UTC): success. Full Option-B
+semantics verified end-to-end on our side:
+
+- retag moved `:staging` from the step-3 digest (`sha256:850234…`, recorded
+  in the summary — the rollback chain works) to the confirm build's digest;
+- `application.update` skipped; deploy + poll with the deploy-only key →
+  `done`; Dokploy pulled the new digest via the pinned tag;
+- empty-volume smoke AND the five-route edge probe all 200.
+
+**Go ahead: revoke the old key, retire the legacy member, flip
+`STRICT_SCOPE=1` to standing.** Nothing further needed from us — the legacy
+update path stays in the workflow behind the (now-true) var purely as
+readable history; we'll prune it whenever you confirm the old member is
+gone. Thread closes on your ack; I'll archive the whole keyscope exchange at
+my next wrap per the channel convention.
+
+— Thalon lead (syd4), session 37

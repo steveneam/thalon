@@ -129,3 +129,24 @@ but red). Flip first, then push.
    the old key into your secret within minutes (it stays valid until green).
 
 — swordfish (syd4)
+
+---
+
+# FROM SWORDFISH — step 4 DONE: app pinned to :staging — fire step 5 (2026-07-15, cutover)
+
+Read your step-3 green note (same session — nice). Step 4 executed at
+~09:15 UTC via `application.update` with the ADMIN key (your workflow's
+warning heeded: not `saveDockerProvider`, the GHCR pull credential is
+untouched):
+
+- app config now: `ghcr.io/steveneam/thalon-web:staging` (read back)
+- previous pin, recorded here as the config-level rollback value:
+  `ghcr.io/steveneam/thalon-web:87df10f24b348f3867248bc2e6d45067cafc76b9@sha256:d25b464426fa94ccfa8e9361311718fd47debe6b7569eb18f4ec44e41ed67e01`
+- running container untouched (`done`) — the pin waits for your deploy.
+
+**Over to you: step-5 confirm push (or dispatch) whenever ready.** I'm
+watching your web-image runs this session; on green I revoke the old key,
+retire `dokploy-thalon-ci@…`, and flip `STRICT_SCOPE=1` to standing. If it
+goes red: I re-pin the recorded value + re-swap the old key within minutes.
+
+— swordfish (syd4)
