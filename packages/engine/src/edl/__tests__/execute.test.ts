@@ -2,7 +2,7 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import type { VideoSourceRef } from "@thalon/contracts";
+import type { EdlInput, VideoSourceRef } from "@thalon/contracts";
 import { compileEdl } from "../compile";
 import { EdlExecuteError, executePlan } from "../execute";
 
@@ -44,7 +44,7 @@ function journal(dir: string): string[] {
 }
 
 /** Two beats + one caption line + encoded music — exercises plates, filtergraph, and audio. */
-const EDL = {
+const EDL: EdlInput = {
   name: "test-cut",
   output: { width: 1280, height: 720, fps: 24, duration: 9.5 },
   video: [
@@ -61,7 +61,10 @@ const EDL = {
     style: { pointsize: 44 },
     lines: [{ text: "measured, not vibed", x: 640, y: 600, fadeIn: 1, fadeOut: 4 }],
   },
-} as const;
+};
+
+/** The same lane without the caption pass (no plates → magick never runs). */
+const { captions: _captions, ...EDL_NO_CAPTIONS } = EDL;
 
 const resolve = (ref: VideoSourceRef) => `/media/${ref.ref}`;
 
@@ -113,7 +116,7 @@ describe("executePlan", () => {
 
   it("surfaces an ffmpeg failure as EdlExecuteError with the stderr", async () => {
     const bin = scratchDir();
-    const plan = compileEdl({ ...EDL, captions: undefined });
+    const plan = compileEdl(EDL_NO_CAPTIONS);
     const attempt = executePlan(plan, {
       resolve,
       output: "/tmp/out.mp4",
@@ -127,7 +130,7 @@ describe("executePlan", () => {
 
   it("a plateless plan skips magick entirely", async () => {
     const bin = scratchDir();
-    const plan = compileEdl({ ...EDL, captions: undefined });
+    const plan = compileEdl(EDL_NO_CAPTIONS);
     await executePlan(plan, {
       resolve,
       output: "/tmp/out.mp4",
