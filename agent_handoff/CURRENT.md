@@ -10,7 +10,7 @@
 
 > Stamped 2026-07-16, session-47 wrap.
 
-**Resume · Thalon** — session 48, syd4 — **FIRST: B-ve.3 checkpoint ask** (timeline editor MVP, manual first: reorder / trim / take-swap / caption moves / music offset + waveform lane (wavesurfer + the s44 measured envelope), server render through the engine compiler, versioned cuts — the draft→rendered door already exists; the approve door does NOT land here without the judge gate, that's B-ve.4's line to hold). Confirm scope with the founder, then build lead-inline. Also carry: **wave-2 + credit call held through the B-ve window** (founder verdict s47 — revisit at the B-ve.3 or B-ve.4 checkpoint).
+**Resume · Thalon** — session 48, syd4 — **FIRST: B-ve.3 checkpoint ask — the scope is ALREADY DRAFTED (s47, founder has seen it): present COORDINATION.md §B-video-editor "SESSION 47 (later)" message verbatim** (dedicated `/app/videos/[id]/edit` route · five manual ops incl. take-swap picker w/ reject reasons + wavesurfer music lane · save = create at version+1 · fire-and-poll server render via engine `executePlan` productized from the replay-test recipe, output into `cuts/` under mediaRoot → recordRender · OUT: AI diffs/approve door/aspect handles/mediabunny). Confirm with the founder (recommendations recorded in that message), then build lead-inline. Also carry: **wave-2 + credit call held through the B-ve window** (founder verdict s47 — revisit at the B-ve.3 or B-ve.4 checkpoint) · **founder re-affirmed sequential one-at-a-time s47** (no parallel lanes for now).
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → `docs/adr/0010-video-editor-charter.md` → COORDINATION.md §B-video-editor (B-ve.1+.2 merged).
 
