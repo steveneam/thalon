@@ -7,6 +7,13 @@
  */
 export { runG1Denylist, type G1Result, type RunG1Input } from "./g1-denylist";
 export {
+  CUT_CAPTION_GATE,
+  cutTextLayers,
+  runCutCaptionGate,
+  type CutCaptionFailure,
+  type CutCaptionGateResult,
+} from "./cut-captions";
+export {
   CADENCE_GATE,
   cadenceFetchHorizonMs,
   hasCadenceConstraint,

@@ -275,6 +275,7 @@ describe("cut attribution (B-ve.4: replayable + attributed)", () => {
       videoCutAttributionSchema.safeParse({
         authoredBy: "agent",
         proposal: {
+          baseCutId: "3e0f8b0a-0000-4000-8000-000000000000",
           model: "claude-sonnet-5",
           promptName: "edl-diff-proposer",
           promptHash: "abc123",

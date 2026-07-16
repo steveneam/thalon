@@ -47,6 +47,7 @@ const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"search.keyword_expand"', note: "B6.8 — judged AI keyword expansion (search targets; G1 + deterministic grounding gate candidates before persist)" },
   { op: '"intel.dossier"', note: "B6.5 half-step — trend-card dossier (titles/angles/hook; G1 denylist gates before the wire; per-sweep ration TREND_DOSSIER_CARDS, default disarmed)" },
   { op: '"outreach.compose_email"', note: "B-crm.4 front half (s29) — draft-only outreach email from a lead brief; full judge gate downstream, NO send path" },
+  { op: '"video.propose_edl_diff"', note: "B-ve.4 — agent-proposed EDL diff (measured ops only); core zod-validates + dry-applies, operator approves each op, apply rides the replay-verified save door" },
   { op: "`judge.${GATE_FOR_TIER[tier]}`", note: "B1.3 — G3 two-tier grounding (→ judge.g3_screen | judge.g3_final)" },
 ];
 

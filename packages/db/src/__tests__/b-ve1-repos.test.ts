@@ -280,13 +280,54 @@ describe("video cuts repo (B-ve.1)", () => {
     expect(events.map((e) => e.event)).toEqual(["video_cut.created", "video_cut.rendered"]);
   });
 
-  it("ships NO approve door (ADR 0010): the repo surface is pinned — the approved transition arrives with B-ve.3/4 behind the judge gate", async () => {
+  it("repo surface is pinned — the approve door landed at B-ve.4 behind the judge gate, nothing else has crept in", async () => {
     const { repos } = await setup();
     expect(Object.keys(repos.videoCuts).sort()).toEqual([
+      "approve",
       "create",
       "get",
       "list",
       "recordRender",
     ]);
+  });
+
+  it("approve door (B-ve.4): rendered -> approved only, green receipt in the event, tenancy-walled, approved terminal", async () => {
+    const { repos, ctx, other } = await setup();
+    const { project } = await repos.videoProjects.create(ctx, { name: "film" });
+    const { cut } = await repos.videoCuts.create(ctx, project.id, {
+      name: "master",
+      version: 1,
+      edl: minimalEdl(),
+    });
+    const receipt = { gate: "g1-captions", verdict: "pass" as const, lines: 9 };
+
+    // A draft cannot be approved — render first (the rulebook throws).
+    await expect(repos.videoCuts.approve(ctx, cut.id, receipt)).rejects.toBeInstanceOf(
+      InvalidVideoCutTransitionError,
+    );
+
+    await repos.videoCuts.recordRender(ctx, cut.id, "cuts/master-v1.mp4");
+
+    // Foreign approve 404s before the rulebook is consulted.
+    await expect(repos.videoCuts.approve(other, cut.id, receipt)).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
+
+    const approved = await repos.videoCuts.approve(ctx, cut.id, receipt);
+    expect(approved.status).toBe("approved");
+
+    // Approved is terminal.
+    await expect(repos.videoCuts.approve(ctx, cut.id, receipt)).rejects.toBeInstanceOf(
+      InvalidVideoCutTransitionError,
+    );
+
+    // The receipt rides the event verbatim — every approval says what vouched for it.
+    const events = await repos.events.list(ctx, { entityType: "video_cut", entityId: cut.id });
+    expect(events.map((e) => e.event)).toEqual([
+      "video_cut.created",
+      "video_cut.rendered",
+      "video_cut.approved",
+    ]);
+    expect(events[2].payload).toEqual({ judge: receipt });
   });
 });

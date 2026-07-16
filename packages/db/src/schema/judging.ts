@@ -122,9 +122,14 @@ export const evalCases = pgTable(
     // taxonomy separating mechanism-written from human-authored rows).
     // 'lead_triage' (B-crm.2, window-1a amendment): the leads-queue door —
     // operator dismiss/pin of a ranked lead, same taxonomy honesty rule.
+    // 'cut_diff_review' (B-ve.4 half-window): the editor's proposal door —
+    // an operator REJECTING an agent-proposed EDL diff is a correction, and
+    // corrections become eval rows in the same change (AGENTS.md rule 6).
     check(
       "eval_cases_origin_check",
-      sql.raw(`origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage')`),
+      sql.raw(
+        `origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage', 'cut_diff_review')`,
+      ),
     ),
   ],
 );
