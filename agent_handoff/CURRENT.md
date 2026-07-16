@@ -14,11 +14,11 @@
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → `docs/adr/0010-video-editor-charter.md` → COORDINATION.md §B-video-editor (B-ve.1–.3 merged).
 
-▎ ▸ **State:** main = origin @ post-#47 merge · guard clean · credits **743.52**/`plus` (**downgrade/cancel + wave-2: verdicts due at the B-ve.4 checkpoint**) · suite 1281/5 · film in-app now carries **v7** (`concept-film-16x9` v7 rendered — the editor's first product edit; v6 + 9:16 master untouched) · dev server + shim STOPPED · impeccable hook armed · **claude-design MCP added to user config (founder: run `/design-login` once)**.
+▎ ▸ **State:** main = origin @ post-#47 merge · guard clean · credits **743.52**/`plus` (**downgrade/cancel + wave-2: verdicts due at the B-ve.4 checkpoint**) · suite 1281/5 · film in-app now carries **v7** (`concept-film-16x9` v7 rendered — the editor's first product edit; v6 + 9:16 master untouched) · dev server + shim STOPPED · impeccable hook armed · **claude-design MCP added to user config + AUTHED (rides the box's Claude login — no /design-login needed; tools surface in fresh sessions)**.
 
 ▎ ▸ **s48 ratchets:** engine binaries resolve THROUGH the platform env seam (THALON_FFMPEG/THALON_MAGICK — the boundary ratchet caught the direct read) · save door compile-checks before store (422 verbatim — a cut that can never render refuses at the door) · render single-flight per cut test-pinned (second fire JOINS) · reorder keeps transitions POSITION-bound (lane stays compiler-valid, test-pinned) · outputRef = what the EDL rebuilds (recordRender only after executePlan lands) · typecheck lesson: never `| tail` a root typecheck — a mid-workspace failure scrolls past (CI caught what the tail hid).
 
-▎ ▸ **[founder] queue:** B-ve.4 scope + wave-2 + credit call (all at s49 opener) · `/design-login` for claude-design MCP · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood.
+▎ ▸ **[founder] queue:** B-ve.4 scope + wave-2 + credit call (all at s49 opener) · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood.
 
 ▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per mint (≥40cr = per-clip founder ping) · "IN THE DARK" preset upsell → always `declined_preset_id` · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5 · Seedance = creative-elaboration seat · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17 invariant) · **PGlite is single-process: stop the dev server before `videos:import`**.
 
@@ -33,9 +33,9 @@ Read in order: `CLAUDE.md` → this file → `docs/adr/0010-video-editor-charter
 - **Checkpoint (opener):** B-ve.3 scope confirmed as drafted; wave-2 + credit call re-held to B-ve.4 (founder).
 - **B-ve.3 window (PR #47, merged):** engine `edl/execute.ts` (+env seam entries) · web: 3 API doors + `lib/videos/{editor,save,render,render-jobs}.ts` + editor surface (`cut-editor`/`music-lane`/`num-field`, wavesurfer 7.12.10) + "Open in editor" on cut rows. +32 tests.
 - **Proof run:** browser-driven UI edit on the registered film (caption y 622→614) → saved v7 (server-derived) → rendered live 2m39s/0cr → `cuts/concept-film-16x9-v7.mp4` decodes clean + streams via the guarded route; single-flight join proven with a second POST; mobile overflow scan clean.
-- **Also:** claude-design MCP installed to user config at founder ask (login pending, founder-side).
+- **Also:** claude-design MCP installed to user config at founder ask; authenticates automatically via the box's existing Claude login (verified ✔ Connected — no /design-login needed).
 - **Not done, on purpose:** no AI diffs / approve door / judge gate (B-ve.4); no aspect handles (B-ve.5); `video: copy` contract gap recorded, not forced; vendor untouched.
 
 ## Next action
 
-Session 49: B-ve.4 scope proposal (AI EDL diffs + judge gate + approve door, + the `video: copy` half-window) → wave-2 + credit verdicts due · founder at their pace: `/design-login`, transcript bulk-delete, s40 re-critique approval, leads triage, →Email dogfood.
+Session 49: B-ve.4 scope proposal (AI EDL diffs + judge gate + approve door, + the `video: copy` half-window) → wave-2 + credit verdicts due · founder at their pace: transcript bulk-delete, s40 re-critique approval, leads triage, →Email dogfood.
