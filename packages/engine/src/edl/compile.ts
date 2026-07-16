@@ -1,5 +1,6 @@
 import {
   edlSchema,
+  type AudioCue,
   type CaptionStyle,
   type Edl,
   type EdlClip,
@@ -141,9 +142,71 @@ function plateCommands(
   ];
 }
 
+/**
+ * The music-lane lowering, shared by the encode and copy video paths:
+ * stream-copy the cue's audio track, or offset + STATIC gain + entry/tail
+ * easing (atrim → volume → afade in → afade out — the G-score mux chain,
+ * byte-pinned by the scored-master replay).
+ */
+function lowerAudioCue(
+  cue: AudioCue,
+  inputs: PlanInput[],
+  filters: string[],
+  maps: string[],
+  audioArgs: string[],
+): void {
+  const idx = inputs.length;
+  inputs.push({ source: cue.source });
+  if (cue.mode === "copy") {
+    maps.push(`${idx}:a`);
+    audioArgs.push("-c:a", "copy");
+    return;
+  }
+  const chain: string[] = [];
+  if (cue.offset > 0) chain.push(`atrim=start=${fmt(cue.offset)}`, "asetpts=PTS-STARTPTS");
+  if (cue.gainDb !== 0) chain.push(`volume=${fmt(cue.gainDb)}dB`);
+  if (cue.fadeIn) chain.push(`afade=t=in:st=0:d=${fmt(cue.fadeIn.duration)}`);
+  if (cue.fadeOut) {
+    chain.push(`afade=t=out:st=${fmt(cue.fadeOut.start)}:d=${fmt(cue.fadeOut.duration)}`);
+  }
+  if (chain.length > 0) {
+    filters.push(`[${idx}:a]${chain.join(",")}[aout]`);
+    maps.push("[aout]");
+  } else {
+    maps.push(`${idx}:a`);
+  }
+  audioArgs.push("-c:a", "aac");
+  if (cue.bitrateKbps !== undefined) audioArgs.push("-b:a", `${cue.bitrateKbps}k`);
+}
+
 export function compileEdl(input: EdlInput): EdlPlan {
   const edl: Edl = edlSchema.parse(input);
   const { output } = edl;
+
+  if (edl.audio.length > 1) {
+    throw new Error("edl compiler: at most one audio cue is supported (extend additively)");
+  }
+
+  // Copy output mode (B-ve.4): the picture is stream-copied from the single
+  // clip — no filtergraph touches it, no -r (frame-rate forcing and stream
+  // copy don't mix), zero generation loss. The schema door already refused
+  // anything a stream copy cannot honestly do.
+  if (output.video.mode === "copy") {
+    const inputs: PlanInput[] = [{ source: edl.video[0].source }];
+    const filters: string[] = [];
+    const maps: string[] = ["0:v"];
+    const audioArgs: string[] = [];
+    if (edl.audio.length === 1) lowerAudioCue(edl.audio[0], inputs, filters, maps, audioArgs);
+    return {
+      plates: [],
+      inputs,
+      filter: filters.join(";"),
+      maps,
+      audioArgs,
+      videoArgs: ["-c:v", "copy"],
+      duration: fmt(output.duration),
+    };
+  }
 
   const overlayIndex = edl.video.findIndex((c) => c.transitionIn?.type === "overlay-fade");
   const beats = overlayIndex === -1 ? edl.video : edl.video.slice(0, overlayIndex);
@@ -164,10 +227,6 @@ export function compileEdl(input: EdlInput): EdlPlan {
       );
     }
   });
-  if (edl.audio.length > 1) {
-    throw new Error("edl compiler: at most one audio cue is supported (extend additively)");
-  }
-
   /** Assembled beat-lane duration: sum(durations) − sum(xfade overlaps). */
   const laneDuration = beats.reduce(
     (acc, clip) => acc + clip.duration - (clip.transitionIn?.duration ?? 0),
@@ -269,31 +328,9 @@ export function compileEdl(input: EdlInput): EdlPlan {
 
   const maps: string[] = [prev === "0:v" ? "0:v" : `[${prev}]`];
 
-  // 5) The music lane: stream-copy or offset + static gain + tail easing.
+  // 5) The music lane: stream-copy or offset + static gain + entry/tail easing.
   const audioArgs: string[] = [];
-  if (edl.audio.length === 1) {
-    const cue = edl.audio[0];
-    const idx = inputs.length;
-    inputs.push({ source: cue.source });
-    if (cue.mode === "copy") {
-      maps.push(`${idx}:a`);
-      audioArgs.push("-c:a", "copy");
-    } else {
-      const chain: string[] = [];
-      if (cue.offset > 0) chain.push(`atrim=start=${fmt(cue.offset)}`, "asetpts=PTS-STARTPTS");
-      if (cue.gainDb !== 0) chain.push(`volume=${fmt(cue.gainDb)}dB`);
-      if (cue.fadeOut) {
-        chain.push(`afade=t=out:st=${fmt(cue.fadeOut.start)}:d=${fmt(cue.fadeOut.duration)}`);
-      }
-      if (chain.length > 0) {
-        filters.push(`[${idx}:a]${chain.join(",")}[aout]`);
-        maps.push("[aout]");
-      } else {
-        maps.push(`${idx}:a`);
-      }
-      audioArgs.push("-c:a", "aac");
-    }
-  }
+  if (edl.audio.length === 1) lowerAudioCue(edl.audio[0], inputs, filters, maps, audioArgs);
 
   return {
     plates,

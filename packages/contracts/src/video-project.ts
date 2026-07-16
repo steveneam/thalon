@@ -144,11 +144,13 @@ export type EdlClip = z.infer<typeof edlClipSchema>;
 
 /**
  * The music lane, measured not vibed (s44 method): source + offset +
- * STATIC gain + tail easing only. A fade is for avoiding clicks, not for
- * manufacturing an ending — when the phrase resolves, hold level and ease
- * only the tail (founder, s44 FINAL). `copy` mode stream-copies the
- * source's audio track verbatim (the 9:16 mux from the 16:9 master —
- * identical timeline, zero re-encode).
+ * STATIC gain + entry/tail easing only. A fade is for avoiding clicks, not
+ * for manufacturing an ending — when the phrase resolves, hold level and
+ * ease only the tail (founder, s44 FINAL); a track entering mid-phrase gets
+ * the same anti-click treatment at its head (the G-score mux carries a 1.2s
+ * entry ease, recovered from the master at the B-ve.4 half-window). `copy`
+ * mode stream-copies the source's audio track verbatim (the 9:16 mux from
+ * the 16:9 master — identical timeline, zero re-encode).
  */
 export const audioCueSchema = z.object({
   source: videoSourceRefSchema,
@@ -156,10 +158,14 @@ export const audioCueSchema = z.object({
   offset: seconds.default(0),
   /** Static gain in dB — never dynamic ducking. 0 = level-flat (no filter). */
   gainDb: z.number().finite().default(0),
+  /** Anti-click entry easing: fade-in over the cue's first `duration` seconds (B-ve.4, additive). */
+  fadeIn: z.object({ duration: z.number().positive() }).optional(),
   /** Anti-click tail easing: fade-out start (timeline seconds) + duration. */
   fadeOut: z
     .object({ start: seconds, duration: z.number().positive() })
     .optional(),
+  /** AAC target bitrate in kbps (encode mode only); absent = encoder default (B-ve.4, additive). */
+  bitrateKbps: z.number().int().positive().optional(),
   mode: z.enum(["copy", "encode"]).default("encode"),
 });
 export type AudioCue = z.infer<typeof audioCueSchema>;
@@ -199,6 +205,29 @@ export const captionLineSchema = z.object({
 });
 export type CaptionLine = z.infer<typeof captionLineSchema>;
 
+/**
+ * `copy` output mode (B-ve.4 half-window, additive): the video stream is
+ * stream-copied from a single source — zero re-encode, zero generation
+ * loss. This is the G-score mux made expressible: an existing cut's picture
+ * carried verbatim while the music lane is (re-)muxed. The copy arm sits
+ * FIRST in the union on purpose — zod objects are non-strict, so the encode
+ * arm (all fields defaulted) would otherwise swallow `{ mode: "copy" }`.
+ */
+export const edlVideoCopySchema = z.object({ mode: z.literal("copy") });
+export type EdlVideoCopy = z.infer<typeof edlVideoCopySchema>;
+
+const edlVideoEncodeSchema = z.object({
+  /** Additive discriminator: pre-window EDLs carry no `mode` and default here. */
+  mode: z.literal("encode").default("encode"),
+  codec: z.literal("libx264").default("libx264"),
+  crf: z.number().int().min(0).max(51).default(18),
+  preset: z
+    .enum(["ultrafast", "fast", "medium", "slow", "veryslow"])
+    .default("slow"),
+  pixFmt: z.literal("yuv420p").default("yuv420p"),
+});
+export type EdlVideoEncode = z.infer<typeof edlVideoEncodeSchema>;
+
 export const edlOutputSchema = z.object({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
@@ -206,14 +235,7 @@ export const edlOutputSchema = z.object({
   /** Final duration, seconds (the -t of record). */
   duration: z.number().positive().finite(),
   video: z
-    .object({
-      codec: z.literal("libx264").default("libx264"),
-      crf: z.number().int().min(0).max(51).default(18),
-      preset: z
-        .enum(["ultrafast", "fast", "medium", "slow", "veryslow"])
-        .default("slow"),
-      pixFmt: z.literal("yuv420p").default("yuv420p"),
-    })
+    .union([edlVideoCopySchema, edlVideoEncodeSchema])
     // prefault, not default: the {} must parse THROUGH the schema so the
     // codec defaults fill (zod 4 applies .default() values as-is).
     .prefault({}),
@@ -225,22 +247,60 @@ export type EdlOutput = z.infer<typeof edlOutputSchema>;
  * by construction: same EDL + same takes ⇒ the same film (the golden tests
  * replay both concept-film masters from checked-in EDL fixtures).
  */
-export const edlSchema = z.object({
-  version: z.literal(1).default(1),
-  name: z.string().min(1),
-  output: edlOutputSchema,
-  /** The beat lane, in timeline order. */
-  video: z.array(edlClipSchema).min(1),
-  /** The music lane (empty = silent cut; the 16:9 v6 video pass). */
-  audio: z.array(audioCueSchema).default([]),
-  /** The caption lane. */
-  captions: z
-    .object({
-      style: captionStyleSchema,
-      lines: z.array(captionLineSchema).default([]),
-    })
-    .optional(),
-});
+export const edlSchema = z
+  .object({
+    version: z.literal(1).default(1),
+    name: z.string().min(1),
+    output: edlOutputSchema,
+    /** The beat lane, in timeline order. */
+    video: z.array(edlClipSchema).min(1),
+    /** The music lane (empty = silent cut; the 16:9 v6 video pass). */
+    audio: z.array(audioCueSchema).default([]),
+    /** The caption lane. */
+    captions: z
+      .object({
+        style: captionStyleSchema,
+        lines: z.array(captionLineSchema).default([]),
+      })
+      .optional(),
+  })
+  // `copy` output mode can only carry what a stream copy can honestly do:
+  // one video-bearing source, untouched picture, no caption overlays. What
+  // cannot be stream-copied refuses at the schema door, not in ffmpeg.
+  .superRefine((edl, ctx) => {
+    if (edl.output.video.mode !== "copy") return;
+    if (edl.video.length !== 1) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["video"],
+        message: "copy output mode carries exactly one video clip (the stream to copy)",
+      });
+      return;
+    }
+    const clip = edl.video[0];
+    if (clip.source.kind === "still" || clip.source.kind === "audio") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["video", 0, "source"],
+        message: "copy output mode needs a video-bearing source (take or cut)",
+      });
+    }
+    if (clip.crop || clip.grade || clip.scale || clip.transitionIn || clip.in !== 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["video", 0],
+        message:
+          "copy output mode cannot re-process the picture — no crop/grade/scale/transition/in-point on a stream copy",
+      });
+    }
+    if (edl.captions !== undefined && edl.captions.lines.length > 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["captions"],
+        message: "copy output mode cannot overlay captions — caption work needs an encode pass",
+      });
+    }
+  });
 export type EdlInput = z.input<typeof edlSchema>;
 export type Edl = z.infer<typeof edlSchema>;
 
@@ -335,3 +395,102 @@ export const videoCutInputSchema = z.object({
   meta: z.record(z.string(), z.unknown()).default({}),
 });
 export type VideoCutInput = z.input<typeof videoCutInputSchema>;
+
+/* ------------------------------------------------------------------ */
+/* B-ve.4 (ADR 0010): EDL diffs + attribution — the AI-assist wire.    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The diff vocabulary the agent may propose — the MEASURED ops first
+ * (caption placement + music alignment, ADR 0010 §B-ve.4), grown additively
+ * as later seats earn their way in. A diff op is a targeted knob turn on an
+ * existing EDL, never a whole-EDL replacement: the operator reads each op
+ * (with its `why`), and what they approve rides the SAME save door as a
+ * manual edit — compile-gated, versioned, replayable.
+ */
+export const EDL_DIFF_OP_KINDS = ["caption-move", "caption-text", "music-align"] as const;
+export type EdlDiffOpKind = (typeof EDL_DIFF_OP_KINDS)[number];
+
+export const edlDiffOpSchema = z.discriminatedUnion("op", [
+  z.object({
+    op: z.literal("caption-move"),
+    /** Index into captions.lines. */
+    line: z.number().int().min(0),
+    /** New plate-center coordinates in the output frame. */
+    x: z.number().int(),
+    y: z.number().int(),
+    /** Operator-readable rationale — required; an unexplained op is refused. */
+    why: z.string().min(1),
+  }),
+  z.object({
+    op: z.literal("caption-text"),
+    line: z.number().int().min(0),
+    /** New caption text — CONTENT: the judge gate binds before approve (ADR 0010). */
+    text: z.string().min(1),
+    why: z.string().min(1),
+  }),
+  z
+    .object({
+      op: z.literal("music-align"),
+      /** Index into the audio lane. */
+      cue: z.number().int().min(0),
+      offset: seconds.optional(),
+      gainDb: z.number().finite().optional(),
+      fadeIn: z.object({ duration: z.number().positive() }).optional(),
+      fadeOut: z.object({ start: seconds, duration: z.number().positive() }).optional(),
+      why: z.string().min(1),
+    })
+    .refine(
+      (o) =>
+        o.offset !== undefined ||
+        o.gainDb !== undefined ||
+        o.fadeIn !== undefined ||
+        o.fadeOut !== undefined,
+      { message: "a music-align op must turn at least one knob" },
+    ),
+]);
+export type EdlDiffOp = z.infer<typeof edlDiffOpSchema>;
+
+export const edlDiffSchema = z.object({
+  version: z.literal(1).default(1),
+  /** One-line agent rationale for the whole proposal. */
+  summary: z.string().min(1),
+  ops: z.array(edlDiffOpSchema).min(1),
+});
+export type EdlDiffInput = z.input<typeof edlDiffSchema>;
+export type EdlDiff = z.infer<typeof edlDiffSchema>;
+
+/**
+ * Cut attribution (stored under the cut row's `meta.attribution`, validated
+ * at the save door — no table change): WHO authored this version, and for
+ * agent-proposed edits the full replay record — model + prompt pin + the
+ * exact applied diff. An agent-authored cut without its proposal is refused:
+ * every applied diff stays replayable and attributed (ADR 0010 invariant).
+ */
+export const VIDEO_CUT_AUTHORS = ["operator", "agent"] as const;
+export type VideoCutAuthor = (typeof VIDEO_CUT_AUTHORS)[number];
+
+export const videoCutAttributionSchema = z
+  .object({
+    authoredBy: z.enum(VIDEO_CUT_AUTHORS),
+    proposal: z
+      .object({
+        /** Model id that generated the diff. */
+        model: z.string().min(1),
+        /** proprietary/prompts name of the proposer prompt. */
+        promptName: z.string().min(1),
+        /** Content hash of the prompt file at proposal time. */
+        promptHash: z.string().min(1),
+        /** The operator's natural-language ask, when one drove the proposal. */
+        ask: z.string().optional(),
+        /** The exact applied diff — the replay record. */
+        diff: edlDiffSchema,
+        /** Who accepted it. Always the operator: auto-apply does not exist. */
+        decidedBy: z.literal("operator"),
+      })
+      .optional(),
+  })
+  .refine((a) => a.authoredBy !== "agent" || a.proposal !== undefined, {
+    message: "an agent-authored cut must carry its proposal (replayable + attributed)",
+  });
+export type VideoCutAttribution = z.infer<typeof videoCutAttributionSchema>;

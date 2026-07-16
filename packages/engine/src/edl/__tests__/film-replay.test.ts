@@ -6,6 +6,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import type { VideoSourceRef } from "@thalon/contracts";
 import { compileEdl } from "../compile";
 import { buildFfmpegArgs } from "../plan";
+import { film16x9Scored } from "./fixtures/film-16x9-scored";
 import { film16x9V6 } from "./fixtures/film-16x9-v6";
 import { film9x16Master } from "./fixtures/film-9x16-master";
 
@@ -43,6 +44,10 @@ const armed =
 const CASES = [
   { edl: film16x9V6, target: "cuts/cut-v6-endcard-graded.mp4" },
   { edl: film9x16Master, target: "cuts/thalon-concept-film-9x16-master.mp4" },
+  // B-ve.4: the scored master via copy output mode — replays its own
+  // EDL-built output (the hand mux's 3-frame-short video is a -t artifact
+  // the EDL rightly does not reproduce; the audio bridge is pinned below).
+  { edl: film16x9Scored, target: "cuts/concept-film-16x9-scored-v1.mp4" },
 ] as const;
 
 const scratches: string[] = [];
@@ -51,11 +56,15 @@ afterAll(() => {
   for (const dir of scratches) rmSync(dir, { recursive: true, force: true });
 });
 
-function framemd5(file: string): string {
-  return execFileSync(FFMPEG, ["-v", "error", "-i", file, "-f", "framemd5", "-"], {
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-  });
+function framemd5(file: string, map?: string): string {
+  return execFileSync(
+    FFMPEG,
+    ["-v", "error", "-i", file, ...(map ? ["-map", map] : []), "-f", "framemd5", "-"],
+    {
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    },
+  );
 }
 
 describe.runIf(armed)("film replay (gated: THALON_FILM_REPLAY=1 + film tree on disk)", () => {
@@ -85,6 +94,17 @@ describe.runIf(armed)("film replay (gated: THALON_FILM_REPLAY=1 + film tree on d
       },
     );
   }
+
+  // The provenance bridge (B-ve.4): the EDL-built scored cut carries the
+  // EXACT audio stream of the historical hand mux — same track, same 105.0s
+  // offset, same 1.2s entry ease and 1.275s tail ease, same 192k encode —
+  // proven at the decoded-frame level. (Its video is v6's stream with all
+  // 1219 frames; the hand mux dropped the last 3 to a -t copy artifact.)
+  it("scored cut's audio stream framemd5-equals the historical hand mux", () => {
+    expect(framemd5(join(FILM_DIR, "cuts/concept-film-16x9-scored-v1.mp4"), "0:a")).toBe(
+      framemd5(join(FILM_DIR, "cuts/thalon-concept-film-16x9-master.mp4"), "0:a"),
+    );
+  });
 });
 
 describe.runIf(!armed)("film replay (skipped)", () => {
