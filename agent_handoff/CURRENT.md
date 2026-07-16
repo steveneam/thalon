@@ -4,7 +4,7 @@
 
 ## Stamp
 
-2026-07-16 (session 44, syd4) · **§V CONCEPT FILM DONE — `​.context/design/film-storyboard-s41/cuts/thalon-concept-film-16x9-master.mp4` is the 16:9 master of record (50.78s, founder-picked G score, graceful ending, SRT beside it).** Whole cut phase ran at **0cr**: in-world captions (recipe `cuts/build-captions.sh`) → +5s THALON-sheet appreciation hold (v5) → Pixabay score auditions across three founder rounds (envelope-measured alignments; founder's 2:18 crescendo = the pick, hush on the gate-lift, slam at the wing-snap) → ending fix (level flat through the sheet, 1.275s anti-click easing only). §V closes at **219.96cr** total; balance **743.52** exact. Guard clean · no app code touched (suite 1193/3/0 carries).
+2026-07-16 (session 44, syd4) · **§V CONCEPT FILM DONE — `​.context/design/film-storyboard-s41/cuts/thalon-concept-film-16x9-master.mp4` is the 16:9 master of record (50.78s, founder-picked G score, graceful ending, s44 endcard: title-block tail = the distribution HOOK "carried for you to all your social platforms" — 0cr local type-matched edit, supersedes motto-verbatim for the film; SRT beside it).** Whole cut phase ran at **0cr**: in-world captions (recipe `cuts/build-captions.sh`) → +5s THALON-sheet appreciation hold (v5) → Pixabay score auditions across three founder rounds (envelope-measured alignments; founder's 2:18 crescendo = the pick, hush on the gate-lift, slam at the wing-snap) → ending fix (level flat through the sheet, 1.275s anti-click easing only). §V closes at **219.96cr** total; balance **743.52** exact. Guard clean · no app code touched (suite 1193/3/0 carries).
 
 ## Resume prompt (session 45, syd4 — paste verbatim; "gogogo" boots this too)
 
@@ -30,7 +30,7 @@ Read in order: `CLAUDE.md` → this file → `proprietary/prompts/b7.2-shot-list
 
 ## Delta (session 44)
 
-- **§V DONE.** Founder approved v3 → cut phase at 0cr: captions (10 in-world lines, 5 founder-seed verbatim; deterministic recipe) → SRT → film extended +5s on the sheet (founder-asked appreciation hold) → three score-audition rounds on measured envelopes → founder picked the 2:18-crescendo alignment (G) → ending fix (melody held to a graceful close, easing = anti-click only). Master: `cuts/thalon-concept-film-16x9-master.mp4`.
+- **§V DONE.** Founder approved v3 → cut phase at 0cr: captions (10 in-world lines, 5 founder-seed verbatim; deterministic recipe) → SRT → film extended +5s on the sheet (founder-asked appreciation hold) → three score-audition rounds on measured envelopes → founder picked the 2:18-crescendo alignment (G) → ending fix (melody held to a graceful close, easing = anti-click only) → **endcard swap (founder): title-block tail = the hook ("carried for you to all your social platforms"), 0cr local type-matched edit of the pinned keeper, dissolve rebuilt ghost-free (ffmpeg xfade proved brittle — overlay+alpha-fade is the recipe's transition machinery now)**. Master: `cuts/thalon-concept-film-16x9-master.mp4`.
 - **Founder directives ratcheted:** aspect variants = own-engine recuts (vendor reframe 225cr ruled out); measured-score method; the fade lesson.
 - **B-video-editor logged as a charter candidate** (founder: "basically a video editor" — in-app editor over the video-project contract; creation flow exists (B5.2/B5.4), editing doesn't; this session = the manual prototype).
 - **Caption-lines provenance fixed:** storyboard-v2 lines were lost to a stale git-history pointer on an untracked file — lines of record now live in the index + ledger.
