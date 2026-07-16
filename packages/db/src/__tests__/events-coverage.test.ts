@@ -15,8 +15,9 @@ import { fixture, type Fixture } from "./helpers";
  * here as `draft.meta_updated`. Trend ingest emissions land with B4.3's
  * repos (intel lane) and extend this same pattern; the Sprint-6 window's
  * repos (monitored areas · search targets/snapshots · waitlist) pin their
- * emissions the same way in sprint6-repos.test.ts, and the Sprint-7
- * window's (leads · lead scores) in sprint7-repos.test.ts.
+ * emissions the same way in sprint6-repos.test.ts, the Sprint-7 window's
+ * (leads · lead scores) in sprint7-repos.test.ts, and the B-ve.1 window's
+ * (video projects · takes · cuts) in b-ve1-repos.test.ts.
  */
 
 let fx: Fixture | undefined;

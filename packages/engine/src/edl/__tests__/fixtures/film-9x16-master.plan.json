@@ -1,0 +1,697 @@
+{
+  "plates": [
+    {
+      "file": "c1.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "always watching",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c1.png"
+        ]
+      ]
+    },
+    {
+      "file": "c2.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "intel finds it",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c2.png"
+        ]
+      ]
+    },
+    {
+      "file": "c3.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "carried home",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c3.png"
+        ]
+      ]
+    },
+    {
+      "file": "c4.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "drafts take shape",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c4.png"
+        ]
+      ]
+    },
+    {
+      "file": "c5.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "posts · videos · pages",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c5.png"
+        ]
+      ]
+    },
+    {
+      "file": "c6.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "the judge holds one back",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c6.png"
+        ]
+      ]
+    },
+    {
+      "file": "c7.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "you hold the seal",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c7.png"
+        ]
+      ]
+    },
+    {
+      "file": "c8.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "you release it",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c8.png"
+        ]
+      ]
+    },
+    {
+      "file": "c9.png",
+      "commands": [
+        [
+          "-size",
+          "1080x1920",
+          "xc:none",
+          "-font",
+          "FreeSerif-Italic",
+          "-pointsize",
+          "40",
+          "-kerning",
+          "2",
+          "-fill",
+          "#eaaa40",
+          "-gravity",
+          "center",
+          "-annotate",
+          "+0+0",
+          "everywhere",
+          "_t.png"
+        ],
+        [
+          "_t.png",
+          "(",
+          "+clone",
+          "-channel",
+          "A",
+          "-blur",
+          "0x14",
+          "-evaluate",
+          "multiply",
+          "0.5",
+          "+channel",
+          "-fill",
+          "black",
+          "-colorize",
+          "100",
+          ")",
+          "(",
+          "_t.png",
+          "-channel",
+          "A",
+          "-blur",
+          "0x6",
+          "-evaluate",
+          "multiply",
+          "0.7",
+          "+channel",
+          "-fill",
+          "#e09b30",
+          "-colorize",
+          "100",
+          ")",
+          "_t.png",
+          "-background",
+          "none",
+          "-layers",
+          "flatten",
+          "c9.png"
+        ]
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/composite-01-the-watch-s43.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-02-the-catch.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-03-the-catch-s43.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-04-the-desk-s43-t2.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-05-fan-out-s43.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-06-the-mill-gate-s43.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-07-the-seal-t2.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-08-release.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "take",
+        "ref": "motion/keepers/clip-09-the-bloom-s43-t2.mp4"
+      }
+    },
+    {
+      "plate": "c1.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c2.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c3.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c4.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c5.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c6.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c7.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c8.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "plate": "c9.png",
+      "holdFor": "42.175003"
+    },
+    {
+      "source": {
+        "kind": "still",
+        "ref": "stills/keepers/beat-10-the-sheet-endcard-v2.png"
+      },
+      "holdFor": "50.775"
+    },
+    {
+      "source": {
+        "kind": "cut",
+        "ref": "cuts/thalon-concept-film-16x9-master.mp4"
+      }
+    }
+  ],
+  "filter": "[0:v]crop=405:720:x='690':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p1];[1:v]crop=405:720:x='178':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p2];[2:v]crop=405:720:x='(228+(678-228)*t/5.041667)':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p3];[3:v]crop=405:720:x='358':y='0',scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p4];[4:v]crop=405:720:x='(172+(388-172)*t/5.041667)':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p5];[5:v]crop=405:720:x='495':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p6];[6:v]crop=405:720:x='428':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p7];[7:v]crop=405:720:x='(363+(620-363)*t/5.041667)':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p8];[8:v]crop=405:720:x='min(875*t/4.5,875)':y='0',eq=brightness=0.05:gamma=1.2:saturation=1.05,scale=1080:1920:flags=lanczos,setsar=1,fps=24,format=yuv420p[p9];[p1][p2]xfade=transition=fade:duration=0.4:offset=4.641667[x1];[x1][p3]xfade=transition=fade:duration=0.4:offset=9.283334[x2];[x2][p4]xfade=transition=fade:duration=0.4:offset=13.925001[x3];[x3][p5]xfade=transition=fade:duration=0.4:offset=18.566668[x4];[x4][p6]xfade=transition=fade:duration=0.4:offset=23.208335[x5];[x5][p7]xfade=transition=fade:duration=0.4:offset=27.850002[x6];[x6][p8]xfade=transition=fade:duration=0.4:offset=32.491669[x7];[x7][p9]xfade=transition=fade:duration=0.4:offset=37.133336[x8];[x8]format=rgba[base];[9:v]format=rgba,fade=in:st=0.9:d=0.4:alpha=1,fade=out:st=4:d=0.4:alpha=1[c1];[base][c1]overlay=x=0:y=600[v1];[10:v]format=rgba,fade=in:st=5.341667:d=0.4:alpha=1,fade=out:st=8.641667:d=0.4:alpha=1[c2];[v1][c2]overlay=x=0:y=-440[v2];[11:v]format=rgba,fade=in:st=9.983334:d=0.4:alpha=1,fade=out:st=13.283334:d=0.4:alpha=1[c3];[v2][c3]overlay=x=0:y=600[v3];[12:v]format=rgba,fade=in:st=14.625001:d=0.4:alpha=1,fade=out:st=17.925001:d=0.4:alpha=1[c4];[v3][c4]overlay=x=0:y=-660[v4];[13:v]format=rgba,fade=in:st=19.266668:d=0.4:alpha=1,fade=out:st=22.566668:d=0.4:alpha=1[c5];[v4][c5]overlay=x=0:y=600[v5];[14:v]format=rgba,fade=in:st=23.908335:d=0.4:alpha=1,fade=out:st=27.208335:d=0.4:alpha=1[c6];[v5][c6]overlay=x=0:y=-660[v6];[15:v]format=rgba,fade=in:st=28.550002:d=0.4:alpha=1,fade=out:st=31.850002:d=0.4:alpha=1[c7];[v6][c7]overlay=x=0:y=660[v7];[16:v]format=rgba,fade=in:st=33.191669:d=0.4:alpha=1,fade=out:st=36.491669:d=0.4:alpha=1[c8];[v7][c8]overlay=x=0:y=-660[v8];[17:v]format=rgba,fade=in:st=37.833336:d=0.4:alpha=1,fade=out:st=41.133336:d=0.4:alpha=1[c9];[v8][c9]overlay=x=0:y=600[v9];[v9]trim=0:41.375,setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=9.4[frozen];[18:v]crop=864:1536:x='1503':y='0',scale=1080:1920:flags=lanczos,format=rgba,fade=in:st=41.375:d=0.4:alpha=1[ecf];[frozen][ecf]overlay=x=0:y=0[vout]",
+  "maps": [
+    "[vout]",
+    "19:a"
+  ],
+  "audioArgs": [
+    "-c:a",
+    "copy"
+  ],
+  "videoArgs": [
+    "-c:v",
+    "libx264",
+    "-crf",
+    "18",
+    "-preset",
+    "slow",
+    "-pix_fmt",
+    "yuv420p"
+  ],
+  "fps": "24",
+  "duration": "50.775"
+}

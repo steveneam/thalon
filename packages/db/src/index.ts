@@ -11,6 +11,9 @@ export type { MonitoredArea as MonitoredAreaRow } from "./repos/monitored-areas"
 export type { SearchSnapshot } from "./repos/search-snapshots";
 export type { SearchTarget as SearchTargetRow } from "./repos/search-targets";
 export type { TrendSnapshot } from "./repos/trend-snapshots";
+export type { VideoCutRow } from "./repos/video-cuts";
+export type { VideoProject as VideoProjectRow } from "./repos/video-projects";
+export type { VideoTakeRow } from "./repos/video-takes";
 export type { WaitlistEntry } from "./repos/waitlist";
 export type { Watchlist as WatchlistRow } from "./repos/watchlists";
 export type {

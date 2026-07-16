@@ -18,6 +18,9 @@ import { sourcesRepo, type SourcesRepo } from "./sources";
 import { tenantsRepo, type TenantsRepo } from "./tenants";
 import { trendSnapshotsRepo, type TrendSnapshotsRepo } from "./trend-snapshots";
 import { usageLedgerRepo, type UsageLedgerRepo } from "./usage-ledger";
+import { videoCutsRepo, type VideoCutsRepo } from "./video-cuts";
+import { videoProjectsRepo, type VideoProjectsRepo } from "./video-projects";
+import { videoTakesRepo, type VideoTakesRepo } from "./video-takes";
 import { waitlistRepo, type WaitlistRepo } from "./waitlist";
 import { watchlistsRepo, type WatchlistsRepo } from "./watchlists";
 
@@ -43,6 +46,9 @@ export interface Repos {
   waitlist: WaitlistRepo;
   leads: LeadsRepo;
   leadScores: LeadScoresRepo;
+  videoProjects: VideoProjectsRepo;
+  videoTakes: VideoTakesRepo;
+  videoCuts: VideoCutsRepo;
   // publish_queue deliberately has no repository: no publish path is wired
   // anywhere in Sprints 0–2 (charter standing discipline).
 }
@@ -70,5 +76,8 @@ export function createRepos(db: Db): Repos {
     waitlist: waitlistRepo(db),
     leads: leadsRepo(db),
     leadScores: leadScoresRepo(db),
+    videoProjects: videoProjectsRepo(db),
+    videoTakes: videoTakesRepo(db),
+    videoCuts: videoCutsRepo(db),
   };
 }

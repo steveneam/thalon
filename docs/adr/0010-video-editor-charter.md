@@ -1,0 +1,37 @@
+# ADR 0010 — B-video-editor chartered: EDL-driven editing over the video-project contract
+
+- **Status:** accepted (founder, 2026-07-16, session 46: ratified as proposed at the checkpoint; directed to start at s45 close)
+- **Context home:** `docs/research/video-editor-tools.md` (tooling survey + integration sketch; supersedes it as the decision of record)
+- **Relates to:** ADR 0004 (render-driver seam) · ADR 0008 (Sprint 7 charter this interleaves with) · ADR 0009 (TS core — this build names no Rust modules)
+
+## Context
+
+The founder asked for "basically a video editor" in-app (s44), re-affirmed with the direction that AI may assist the editing *or* the operator does it manually (s45). The shipped product covers staged video *creation* (B5.2/B5.4) but has no *editing* surface over a finished project. Sessions 42–45 hand-built every operation such an editor would automate — take swaps, trims/clone-extensions, caption plates + placement, measured music alignment, per-beat grades, aspect recomposition, churn-audited QA — and the two hand recipes (`build-captions.sh`, `build-9x16.sh`) are edit decision lists in shell form. The concept-film project tree is the founder-directed reference shape for the video-project contract.
+
+## Decision
+
+Charter **B-ve.1–.5** per the survey §4. The productization is **one new schema (EDL), one compiler, one workspace surface**; everything else is reuse (judge gate, render seam, provenance pinning, one-status-writer, per-tenant config).
+
+1. **B-ve.1 — contract window:** video-project + EDL schemas (OTIO-shaped JSON, zod, tenant-scoped) in `packages/contracts`; EDL→ffmpeg-filtergraph compiler in the engine; **golden tests replay both film masters (16:9 + 9:16) byte-stable from checked-in EDL fixtures** — the hand recipes become executable ratchets.
+2. **B-ve.2 — project surface (read-only):** browse takes/cuts/provenance in the workspace; reject reasons visible (the learning material).
+3. **B-ve.3 — timeline editor MVP (manual first):** reorder / trim / take-swap / caption moves / music offset + waveform lane (wavesurfer with the s44 measured-envelope overlay); server render; versioned cuts.
+4. **B-ve.4 — AI-assist:** the agent proposes **EDL diffs** (music alignment + caption placement first — the measured ops) through the same door the UI writes; diff view → operator approve; judge gate on all text layers; every applied diff replayable + attributed; corrections → eval rows.
+5. **B-ve.5 — aspect lens:** per-beat crop/pan handles; vertical/square recuts as derived EDLs.
+
+**Adopted seats:** OTIO schema *shape* (not the WIP JS bindings) · ffmpeg assembler of record + Hyperframes for HTML-native layers (already ours) · wavesurfer.js (BSD-3) · mediabunny (MPL-2.0 — used unmodified, isolated behind a clean interface per licensing hygiene) for client-side preview/scrub · auto-editor (Unlicense) / PySceneDetect (BSD-3) as ingest-side suggesters when client footage arrives. **Watch item:** OpenCut's Rust core (MIT; headless+MCP roadmap) as a possible future *module* swap per ADR 0009. **Ruled out on the hot path:** Remotion (commercial gate, consistent with its B5.1 demotion), anything AGPL, any vendor-metered edit operation.
+
+## Invariants (safety one-way)
+
+- **No vendor-metered call on any edit path.** Edit operations are 0-credit local/deterministic; generative elaboration (e.g. Seedance) stays a *creation* seat, never an edit op.
+- **Aspect variants are own-engine recuts, never vendor reframe** (s44 directive; 0cr vs 225cr proven).
+- **An edited caption/text layer is content like any other draft** — it passes the judge harness (denylist + grounding) before a cut can be marked approved.
+- **AI edits go through the same contract door as manual edits** (EDL diffs → operator approval), replayable and attributed; corrections feed the eval suite (AGENTS.md rule 6).
+
+## Consequences
+
+- B-ve.1 opens as a sprint contract window (contract-window skill) immediately on ratification; the film tree is the reference shape and the two recipes become EDL fixtures.
+- Wave-2 template minting was **held** at the same checkpoint (no slate verdict yet); B-ve.1–.3 burn no credits, so the build is independent of the month-end vendor-tier call.
+- License facts re-verified 2026-07-16 (survey stamp = charter date); re-verify at each later bucket if the gap grows.
+- CHARTER.md amendment A17 records the bucket table; lane sequencing stays on COORDINATION.md.
+
+*Tag: the four invariants above are invariants; the bucket ordering and seat picks are opinions (revisable at checkpoints).*

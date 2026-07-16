@@ -5,4 +5,5 @@ export * from "./leads";
 export * from "./ops";
 export * from "./search";
 export * from "./tenancy";
+export * from "./video";
 export * from "./web";
