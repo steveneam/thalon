@@ -7,7 +7,7 @@ import { usePulse } from "@/components/workspace/pulse-context";
 import { cn } from "@/lib/utils";
 import { activeSurface, NAV_SURFACES } from "@/lib/workspace/nav";
 
-/** Left rail (docs/FRONTEND.md §3 shell): the seven surfaces, always one click away. */
+/** Left rail (docs/FRONTEND.md §3 shell): every registered surface (lib/workspace/nav.ts), always one click away. */
 export function Sidebar() {
   const pathname = usePathname();
   const { pulse } = usePulse();

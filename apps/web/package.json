@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "videos:import": "tsx scripts/import-video-project.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.12",
@@ -43,6 +44,7 @@
     "jsdom": "^25.0.1",
     "msw": "^2.4.9",
     "tailwindcss": "^4",
+    "tsx": "^4.19.0",
     "typescript": "^5",
     "vitest": "^4.1.9"
   },
