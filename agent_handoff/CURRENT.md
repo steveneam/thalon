@@ -4,38 +4,37 @@
 
 ## Stamp
 
-2026-07-16 (session 44, syd4) · **§V CONCEPT FILM DONE — `​.context/design/film-storyboard-s41/cuts/thalon-concept-film-16x9-master.mp4` is the 16:9 master of record (50.78s, founder-picked G score, graceful ending, s44 endcard: title-block tail = the distribution HOOK "carried for you to all your social platforms" — 0cr local type-matched edit, supersedes motto-verbatim for the film; SRT beside it).** Whole cut phase ran at **0cr**: in-world captions (recipe `cuts/build-captions.sh`) → +5s THALON-sheet appreciation hold (v5) → Pixabay score auditions across three founder rounds (envelope-measured alignments; founder's 2:18 crescendo = the pick, hush on the gate-lift, slam at the wing-snap) → ending fix (level flat through the sheet, 1.275s anti-click easing only). §V closes at **219.96cr** total; balance **743.52** exact. Guard clean · no app code touched (suite 1193/3/0 carries).
+2026-07-16 (session 45, syd4) · **9:16 MASTER SHIPPED at 0cr — `​.context/design/film-storyboard-s41/cuts/thalon-concept-film-9x16-master.mp4`** (1080×1920, 50.775s, G score stream-copied, SRT twin; recipe `cuts/build-9x16.sh` — per-beat crop/pan from keepers, re-placed captions, native-2K endcard window, beat-9 full-width sweep timed to the six platform-color blooms; QA: tail churn 0.0002, all six colors verified in-sweep). **B-video-editor tooling survey FILED: `docs/research/video-editor-tools.md`** (verified licenses by seat; OTIO-shaped EDL + compiler integration sketch; 5-bucket charter shape; agent = EDL-diff proposer through the judge gate). **Wave-2 slate PROPOSED, founder approval pending** (⑥ Houselights events/novel-type · ⑦ Vance & Alder legal/editorial · ⑧ Crateline logistics/brutalist · ⑨ Wagtail & Co pets/soft-organic · ⑩ Hue & Cry salon/exceptional-palette; swap bench: café/travel/construction/accounting/photography). Spend **0cr**; balance **743.52**; guard clean; no app code touched (suite 1193/3/0 carries).
 
-## Resume prompt (session 45, syd4 — paste verbatim; "gogogo" boots this too)
+## Resume prompt (session 46, syd4 — paste verbatim; "gogogo" boots this too)
 
-> Stamped 2026-07-16, session-44 wrap.
+> Stamped 2026-07-16, session-45 wrap.
 
-**Resume · Thalon** — session 45, syd4 — **FIRST: wave 2 templates (⑥–⑩ of the 20–25 portfolio)** — meta-prompt §0 LOOK-FIRST per site, taste directives #1–8, get_cost preflight per mint, propose the five verticals to the founder before minting. **Also unblocked: the 9:16 own-engine recut** of the finished film (founder directive: per-beat crop/re-compose from keepers + caption re-place + G score, 0cr, NEVER vendor `reframe`) — fits any session now the film is settled.
+**Resume · Thalon** — session 46, syd4 — **FIRST: read the founder's wave-2 slate verdict** (proposed s45, see stamp; if approved → per-site §0 LOOK-FIRST → build ⑥–⑩ through the factory meta-prompt, get_cost preflight per mint, ≥40cr = per-clip ping). If no verdict yet, ask for it and pick up the founder queue below.
 
-▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → `proprietary/prompts/b7.2-shot-list.md` §s44 (cut-phase ledger, ends at "§V CLOSED") → `.context/design/film-storyboard-s41/index.md` (project map; caption lines + score of record live IN the index).
+▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → `proprietary/prompts/b7.2-shot-list.md` §s45 (recut ledger + slate record) → `.context/design/film-storyboard-s41/index.md` (film map; both masters in the header).
 
-▎ ▸ **State:** main = origin @ this commit · guard clean · credits **743.52**/`plus` (production month burns since 2026-07-14; **month-end downgrade/cancel decision now due — §V has shipped**) · suite 1193/3/0 (no code s41–s44) · pinned assets **98** (s44 was all-local) · film tree final shape: master + SRT + recipe + candidates history + `.context/audio/` Pixabay pack w/ MANIFEST.md (operator data, never tracked) · dev server + shim STOPPED · impeccable hook armed.
+▎ ▸ **State:** main = origin @ this commit · guard clean · credits **743.52**/`plus` (production month burns since 2026-07-14; **month-end downgrade/cancel decision due — note wave 2+ minting needs the paid tier**) · suite 1193/3/0 (no code s41–s45) · pinned assets 98 (s45 all-local) · film DONE both aspects · dev server + shim STOPPED · impeccable hook armed.
 
-▎ ▸ **s44 ratchets (iteration-pass-checklist Assets lane):** score selection is measured (RMS-envelope-to-beat-arc + window scorer; loudnorm flattens builds — static gain; flat RMS ⇒ add highpass(2k) pass; fades avoid clicks, never manufacture endings) · aspect variants = OUR re-edit from keepers, never a vendor job (vendor reframe quoted 225cr vs 0cr local) · caption recipe executable (`build-captions.sh`).
+▎ ▸ **s45 ratchets:** `build-9x16.sh` = executable aspect-recut recipe (the s44 "own-engine recut" directive now runs) · pan targets are measured from gridded source frames, never estimated off contact tiles (b8/b9 lesson, "quantify don't eyeball" family) · video-editor survey verified 2026-07-16 — re-verify licenses at charter time.
 
-▎ ▸ **[founder] queue:** wave-2 vertical slate approval · **month-end credit call (due now §V shipped)** · B-video-editor charter interest (founder ask s44 — staged CREATION shipped B5.2/B5.4, no editing surface exists; s44 ledger = the manual prototype; needs charter before any build) · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood.
+▎ ▸ **[founder] queue:** wave-2 slate verdict (proposed s45) · **month-end credit call (due)** · B-video-editor charter decision (survey filed, 5-bucket shape recommended) · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood.
 
-▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per mint (≥40cr = per-clip founder ping) · "IN THE DARK" preset upsell → always `declined_preset_id` · platform colors = beat-9-only sanctioned exception · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5 · Seedance = creative-elaboration seat (next film: multi-shot per act, cost first).
+▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per mint (≥40cr = per-clip founder ping) · "IN THE DARK" preset upsell → always `declined_preset_id` · platform colors = beat-9-only sanctioned exception · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5 · Seedance = creative-elaboration seat · aspect variants = own-engine recut NEVER vendor reframe.
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: all session-44 work committed and pushed; no open PRs; no worktrees; no Monitors; no in-flight vendor jobs (s44 vendor touch = one free get_cost preflight); guard green at HEAD.
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: all session-45 work committed and pushed; no open PRs; no worktrees; no Monitors; no in-flight vendor jobs (vendor untouched s45); guard green at HEAD.
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → `proprietary/prompts/b7.2-shot-list.md` §s44 → `.context/design/film-storyboard-s41/index.md` → COORDINATION.md (Sprint-7 board) if launching lanes.
+Read in order: `CLAUDE.md` → this file → `proprietary/prompts/b7.2-shot-list.md` §s45 → `docs/research/video-editor-tools.md` (if the charter call is live) → COORDINATION.md (Sprint-7 board) if launching lanes.
 
-## Delta (session 44)
+## Delta (session 45)
 
-- **§V DONE.** Founder approved v3 → cut phase at 0cr: captions (10 in-world lines, 5 founder-seed verbatim; deterministic recipe) → SRT → film extended +5s on the sheet (founder-asked appreciation hold) → three score-audition rounds on measured envelopes → founder picked the 2:18-crescendo alignment (G) → ending fix (melody held to a graceful close, easing = anti-click only) → **endcard swap (founder): title-block tail = the hook ("carried for you to all your social platforms"), 0cr local type-matched edit of the pinned keeper, dissolve rebuilt ghost-free (ffmpeg xfade proved brittle — overlay+alpha-fade is the recipe's transition machinery now)**. Master: `cuts/thalon-concept-film-16x9-master.mp4`.
-- **Founder directives ratcheted:** aspect variants = own-engine recuts (vendor reframe 225cr ruled out); measured-score method; the fade lesson.
-- **B-video-editor logged as a charter candidate** (founder: "basically a video editor" — in-app editor over the video-project contract; creation flow exists (B5.2/B5.4), editing doesn't; this session = the manual prototype).
-- **Caption-lines provenance fixed:** storyboard-v2 lines were lost to a stale git-history pointer on an untracked file — lines of record now live in the index + ledger.
-- **Not done, on purpose:** 9:16 recut (unblocked, founder sequenced it post-settle); wave 2 untouched; s40 re-critique deferred; upscale parked (no preflight exists).
+- **9:16 recut DONE (0cr, 3 build passes):** per-beat vertical recomposition from the keepers — static crops (watch/catch/desk/gate/seal), tracking pans (carry/fan-out/release), and the beat-9 full-width sweep timed so all six platform-color blooms pass (source camera measured static, towers at fixed x, scarlet ignites last); captions re-placed for the vertical frame; endcard = native-2K window (sharpest frame in the film); G score muxed straight from the 16:9 master. Recipe + SRT beside the master.
+- **B-video-editor research filed** (`docs/research/video-editor-tools.md`): editor verb-set extracted from the s42–s45 manual prototype; candidates verified by seat (OTIO schema-shape · ffmpeg/Hyperframes kept · wavesurfer BSD-3 · mediabunny MPL-2.0 isolated · auto-editor/PySceneDetect ingest suggesters · OpenCut MIT rewrite w/ headless+MCP = watch item · Remotion stays ruled out); integration = one new EDL schema + one compiler + one workspace surface, AI-assist = agent-proposed EDL diffs through the judge gate; 5-bucket charter shape recommended.
+- **Wave-2 slate proposed** (verticals+names+axis draws above); founder redirected s45 to recut+research first — slate verdict outstanding.
+- **Not done, on purpose:** no wave-2 minting (checkpoint gate); upscale parked; s40 re-critique deferred.
 
 ## Next action
 
-Session 45: wave 2 templates (five-vertical slate → founder approval → mint) · 9:16 own-engine recut whenever convenient · founder at their pace: month-end credit call (due), B-video-editor charter interest, transcript bulk-delete, re-critique approval, leads triage, →Email dogfood.
+Session 46: wave-2 slate verdict → LOOK-FIRST → build ⑥–⑩ · founder at their pace: month-end credit call (due), B-video-editor charter, transcript bulk-delete, re-critique approval, leads triage, →Email dogfood.
