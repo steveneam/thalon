@@ -359,6 +359,12 @@ function CutRow({
           <time dateTime={cut.createdAt} className="text-xs text-muted-foreground">
             {timeAgo(cut.createdAt)}
           </time>
+          <Link
+            href={`/app/videos/${projectId}/edit?cut=${cut.id}`}
+            className="text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            Open in editor
+          </Link>
           {canPlay && (
             <button
               type="button"

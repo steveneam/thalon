@@ -1,4 +1,4 @@
-import type { VideoCutStatus, VideoTakeDisposition, VideoTakeKind } from "@thalon/contracts";
+import type { Edl, VideoCutStatus, VideoTakeDisposition, VideoTakeKind } from "@thalon/contracts";
 
 /**
  * B-ve.2 wire shapes: the read-only project surface over the frozen B-ve.1
@@ -53,6 +53,29 @@ export interface CutView {
   outputRef: string | null;
   edl: EdlSummary;
   createdAt: string;
+}
+
+/** B-ve.3: the editor's read — one cut WITH its full EDL (the browse surface keeps summaries). */
+export interface CutDetail {
+  id: string;
+  name: string;
+  version: number;
+  status: VideoCutStatus;
+  outputRef: string | null;
+  edl: Edl;
+  createdAt: string;
+}
+
+/** B-ve.3 fire-and-poll render job (in-process; a render is minutes of local x264). */
+export interface RenderJobView {
+  id: string;
+  projectId: string;
+  cutId: string;
+  status: "running" | "done" | "error";
+  outputRef: string | null;
+  error: string | null;
+  startedAt: string;
+  finishedAt: string | null;
 }
 
 export interface ProjectDetail {
