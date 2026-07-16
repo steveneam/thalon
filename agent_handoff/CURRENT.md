@@ -4,40 +4,40 @@
 
 ## Stamp
 
-2026-07-16 (session 41, syd4) · **§V STORYBOARD v2 COMPLETE + FOUNDER-APPROVED ("much better") — checkpoint ran live in-session, story rebuilt on founder direction, 10/10 beats keeper-locked.** Two phases: v1 stills (3.68cr) → live founder checkpoint → v2 rebuild (5.08cr). §V total **8.76cr**, balance **954.72** verified, [VID] untouched. Earlier: crash recovery (first s41 killed 06:43Z by swordfish's code-server restart; incident absorbed, guard-token redaction in the channel file, hygiene ask sent). Guard clean · no code touched (suite 1193/3/0 carries) · commits `ff135bc` + `9563cc6` pushed.
+2026-07-16 (session 42, syd4) · **§V MOTION PASS COMPLETE — 10/10 beats locked, rough cut assembled at 43.76s, graded pair ready for founder review.** 8 minted clips (7× kling3_0 std @7.5cr + 1× seedance_2_0 fast @17.5cr) + 2 built still-holds (0cr). 5 reasoned rejects taught two ratcheted lessons (anchor-stillness; color-semantic beats = Seedance slot). §V total **116.26cr** (vs ~55–65 s39 estimate — overrun = retakes + one Seedance slot, all reasoned in the ledger; the 40cr per-clip founder gate never tripped). Balance **847.22** verified exact. Guard clean · no app code touched (suite 1193/3/0 carries).
 
-## Resume prompt (session 42, syd4 — paste verbatim; "gogogo" boots this too)
+## Resume prompt (session 43, syd4 — paste verbatim; "gogogo" boots this too)
 
-> Stamped 2026-07-16, session-41 wrap (v2).
+> Stamped 2026-07-16, session-42 wrap.
 
-**Resume · Thalon** — session 42, syd4 — **§V MOTION PASS on the approved v2 storyboard.** Story + treatments are DECIDED (plan §Story v2): causal-handoff chain, watermill gate, beat-9 platform-COLOR beacons (colors not logos; FB royal blue · IG magenta→orange · X white · LI steel · TikTok cyan · YT scarlet = the one sanctioned red; exact vector glyphs allowed on the caption layer at cut), THALON+motto title block. Pinned v2 stills = the image→video sources (`.context/design/film-storyboard-s41/index.md` maps beats → hashes → jobs). Motion: 6–8 clips per the beat timing in the plan, Kling 3.0 / Seedance 2.0 per-slot roster (`models_explore` recommend per clip), **get_cost preflight EACH clip, premium-class ≥40cr = per-clip founder ping**, grade note = lift night-water luminance a stop. Then cut + captions (16:9 master, 9:16 `reframe`, captions-only, ~45s) → SRT ships with the cut → then wave 2. Vendor quirk standing: `nano_banana_pro` requests may be silently substituted to `nano_banana_2` (3× now, text perfect each time) — check the job-response model on text-critical mints.
+**Resume · Thalon** — session 43, syd4 — **FIRST: founder verdict on the §V rough cut, THEN the cut phase.** The pair to review sits in `.context/design/film-storyboard-s41/motion/`: `rough-cut-v0.mp4` (ungraded) vs `rough-cut-v0-graded.mp4` (night lifted ~a stop per the s41 grade note) — founder picks the grade direction and flags any beat for re-motion. Then the cut phase: caption lines composed as IN-WORLD objects (etched/glowing, look-first note #3 — the per-beat lines are in the storyboard index), 16:9 master finish, 9:16 via `reframe` (vendor tool, cost-preflight it), SRT ships with the cut; vector platform glyphs may join the caption layer on the social cut only (compliant nominative use). Optional at cut approval: `upscale_video` the 720p master (get_cost first). Then wave 2 templates.
 
-▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → `proprietary/prompts/concept-film-plan.md` §Story v2 (the approved film) → `proprietary/prompts/b7.2-shot-list.md` §s41 ledgers → `.context/design/film-storyboard-s41/index.md`.
+▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → `proprietary/prompts/b7.2-shot-list.md` §s42 (motion ledger + lessons) → `.context/design/film-storyboard-s41/index.md` §Motion pass.
 
-▎ ▸ **State:** main = origin @ `9563cc6` · guard clean · credits **954.72**/`plus` ([VID] untouched; production month burns since 2026-07-14, ~27 days left) · suite 1193/3/0 (no code changed s41) · pinned assets **77** in `.data/objects/` (don't clean) · dev server + shim STOPPED (:3001 on the box is NOT ours) · impeccable hook armed · critique backlog unchanged.
+▎ ▸ **State:** main = origin @ this commit · guard clean · credits **847.22**/`plus` (production month burns since 2026-07-14, ~27 days left; month-end downgrade/cancel decision after §V) · suite 1193/3/0 (no code changed s41–s42) · pinned assets **85** in `.data/objects/` (77 + 8 motion keepers — don't clean) · reject takes kept locally in `motion/` as teaching copies (unpinned, gitignored) · dev server + shim STOPPED (:3001 on the box is NOT ours) · impeccable hook armed · critique backlog unchanged.
 
-▎ ▸ **Terminal (one-time, from swordfish's incident fix):** boot s42 by closing the old terminal and reopening via the project tab — agent-term lands in tmux under `agent-tmux.service` — then `claude --continue`.
+▎ ▸ **Tooling (new, user-scope ~/.local/bin, founder-asked s42):** static `ffmpeg`/`ffprobe` 7.0.2 + ImageMagick 7.1.2 (`magick`, extracted AppImage at `~/.local/magick-appimage`). SVG rasterization for exact platform glyphs = the s32 headless Chrome. Cut pipeline is fully local now.
 
-▎ ▸ **Session-41 outcomes:** v2 storyboard keeper table in the ledger (hashes `4c4274dc·dadaae89·4249ed5d·1c8ff6e6·87233df1·22f56231·01d104bd·c080295b(v1)·f7dca7a2·74cd9469`) · **taste directives #7 causal-handoff + #8 legibility-at-render-scale ratcheted** (founder-taught, iteration-pass-checklist Assets lane) · beat-9 color mapping + logo-at-cut treatment DECIDED · v1 stills archived (`v1-reference/`, all pinned) · crash post-mortem + guard-token catch handled (watch swordfish's next note for token hygiene).
+▎ ▸ **Session-42 outcomes:** motion keeper table + reject reasoning in the ledger (pinned hashes `9fd207df·bc5d8f9a·01b633dc·cb44fe8a·31516832·0eba7625·772f4357·0eaaea75`) · **lessons ratcheted into iteration-pass-checklist Assets lane:** anchor stillness in motion prompts (Kling animates the focal object by default — both first-take "held object" rejects) + per-object color-hold routes the model slot (Kling cycled the platform-flame colors TWICE; Seedance held them — color-semantic beats = Seedance) · vendor quirk: "IN THE DARK" preset upsell intercepts dark-night prompts, always resubmit with `declined_preset_id` · beats 3+10 = ffmpeg still-holds by design (courier pan, sheet settle — the plan's own "idle-still end").
 
-▎ ▸ **[founder] queue:** motion-pass clips will come one at a time for taste checks (cheap Kling/Seedance class first; any ≥40cr premium clip pings you first) · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood · month-end downgrade/cancel decision after §V.
+▎ ▸ **[founder] queue:** §V rough-cut verdict (graded vs ungraded + any beat re-motion) · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood · month-end credit call after §V ships.
 
-▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per batch, per clip on video · Two-Channel scrutiny on minted art (beat-9's platform-color bloom is the ONE sanctioned exception; YT scarlet = destination flame only, never water/UI) · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5.
+▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per clip on video (≥40cr = per-clip founder ping; seedance std 1080p quotes 45cr — that tier needs the ping) · Two-Channel scrutiny on minted art (beat-9 platform colors = the ONE sanctioned exception; the keeper still is the color reference of record) · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5.
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: all session-41 work committed and pushed (`ff135bc`, `9563cc6`); no open PRs; no worktrees; no Monitors; no mid-edit state; guard green at HEAD; peer mail acked; the killed first-s41 transcript (`15c07f2e…`) stays superseded — do NOT `--resume` it.
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: all session-42 work committed and pushed; no open PRs; no worktrees; no Monitors; no in-flight vendor jobs (all 13 resolved keeper/reject); guard green at HEAD; peer mail clean at boot and unchanged.
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → `proprietary/prompts/concept-film-plan.md` §Story v2 → `proprietary/prompts/b7.2-shot-list.md` §s41 → `.context/design/film-storyboard-s41/index.md` → COORDINATION.md (Sprint-7 board) if launching lanes.
+Read in order: `CLAUDE.md` → this file → `proprietary/prompts/b7.2-shot-list.md` §s42 → `proprietary/prompts/concept-film-plan.md` §Status → `.context/design/film-storyboard-s41/index.md` §Motion pass → COORDINATION.md (Sprint-7 board) if launching lanes.
 
-## Delta (session 41)
+## Delta (session 42)
 
-- **Crash recovery:** resumed from working tree + CURRENT.md after the 06:43Z tmux kill; zero rework lost; swordfish incident note absorbed, token redacted from the tracked channel file, hygiene ask sent.
-- **v1 stills phase** (3.68cr): 10 beats first pass, ledgered with 5 reasoned rejects.
-- **Live founder checkpoint → story v2** (5.08cr): causal-handoff chain (founder's spark→card image verbatim), falcon planted early as the film's character, watermill = cottage + judge's gate, wax-seal approve, platform-color bloom, THALON+motto sheet. Founder: "much better."
-- **Ratchets:** taste directives #7 (causal handoff) + #8 (legibility at render scale) into the iteration checklist · beat-9 color/logo treatment + grade note into the plan · v2 ledger with the repeated nano-substitution quirk.
-- **Not done, on purpose:** motion pass not started ([VID] still sealed — next session opens it per the approved plan) · s40 re-critique still deferred.
+- **Motion pass shipped end-to-end:** motion-lock on beat 2 (same beat as the s41 style lock) validated the kling3_0-std class, then wave A (1/4/6), wave B (5/7/8/9), retakes where reasoned. Every clip get_cost-preflighted; every keeper pinned with full provenance within URL-expiry windows.
+- **Beat 9 = the roster's proof case:** two Kling takes broke the founder's platform-color law two different ways (white-river + red halo; then hue-cycling flames). The Seedance 2.0 slot held every tower's color from the approved still. Lesson is now a checklist item, not a memory.
+- **Assembly at 0cr:** rough-cut-v0 (10 beats, 0.4s crossfades) + graded variant; beats 3/10 are deterministic ffmpeg holds from the pinned stills.
+- **Tooling:** ffmpeg/ffprobe + ImageMagick installed user-scope on syd4 mid-session at the founder's ask; cut/caption/SRT pipeline now fully local (Chrome covers SVG glyph rasterization).
+- **Not done, on purpose:** captions/SRT/9:16/upscale = the cut phase, gated on the founder's rough-cut verdict; s40 re-critique still deferred; wave 2 untouched.
 
 ## Next action
 
-Session 42: **§V motion pass** — clip-by-clip off the pinned v2 stills (get_cost each, cheap class first, ≥40cr pings founder), grade lifts the night a stop, then cut + captions + SRT → founder review of the ~45s signature scene → wave 2. Founder at their pace: transcript bulk-delete · re-critique approval · leads triage · →Email dogfood · month-end credit call.
+Session 43: founder reviews `rough-cut-v0.mp4` vs `rough-cut-v0-graded.mp4` (pick grade, flag beats) → cut phase (in-world captions → 16:9 master → 9:16 `reframe` → SRT) → wave 2. Founder at their pace: transcript bulk-delete · re-critique approval · leads triage · →Email dogfood · month-end credit call.

@@ -132,13 +132,18 @@ as the flow arrives — the founder's "light up when it reaches them."
 **Grade note (motion pass):** lift night-water luminance a stop so linework
 survives phones; the v2 prompts already bake "never crushed to black."
 
-## Status (s41 close): STORYBOARD v2 COMPLETE — 10/10 beats keeper-locked, founder-approved story
+## Status (s42 close): MOTION PASS COMPLETE — 10/10 beats locked, rough cut assembled
 
-§V spend-to-date 8.76cr ([VID] untouched). v2 keepers + v1 archive in
-`.context/design/film-storyboard-s41/` (index.md maps beats → hashes → jobs;
-ledgers in b7.2-shot-list.md §s41). Next: motion pass (image→video per beat,
-Kling 3.0 / Seedance 2.0, get_cost preflight EACH clip, [VID] opens here;
-premium ≥40cr per-clip founder ping) → cut + captions (16:9 master, 9:16
-`reframe`, captions-only, ~45s).
+§V spend-to-date **116.26cr** (stills 8.76 + motion 107.5; ledger
+b7.2-shot-list.md §s42). 8 minted motion keepers (7× kling3_0 std 7.5cr, 1×
+seedance_2_0 fast 17.5cr — beat 9 went to the Seedance slot after two Kling
+takes cycled the platform-flame colors) + 2 built still-holds (beat 3 pan,
+beat 10 settle, 0cr). Rough cut assembled locally: `motion/rough-cut-v0.mp4`
+43.76s + `rough-cut-v0-graded.mp4` (night lifted a stop per the grade note) —
+**founder reviews the pair before the cut phase**. Motion-prompt lessons
+ratcheted into the iteration checklist (anchor stillness; color-semantic
+beats = Seedance). Next: founder verdict on rough cut → cut + captions
+(caption lines composed as in-world objects, 16:9 master, 9:16 `reframe`,
+SRT ships with the cut) → wave 2.
 
 *v1, 2026-07-15 (s39). Ledger entries land in b7.2-shot-list.md §V as mints happen.*

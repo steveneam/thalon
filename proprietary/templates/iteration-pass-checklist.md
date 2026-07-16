@@ -68,6 +68,18 @@
       on a bright monitor — subjects must survive small, dark, and moving.
       Night palettes stay rich and readable, never crushed to near-black; a
       frame whose subject can't be named at three inches wide is a reject.
+- [ ] **Anchor stillness in motion prompts** (s42 lesson): image→video models
+      animate the focal object by default — a "held/pinned/still" object will
+      drift, detach, or scribble unless the prompt names what stays still as
+      explicitly as what moves and pushes the motion energy into the
+      environment (water, light, machinery). Both s42 first-take rejects were
+      exactly this failure; the "nothing else moves" retakes both passed.
+- [ ] **Per-object color-hold routes the model slot** (s42 lesson): Kling 3.0
+      cycles per-object colors over time even when the prompt fixes them (two
+      takes, same drift — flames wandered magenta→red→orange); Seedance 2.0's
+      identity strength holds per-object hues from a reference frame. Any beat
+      whose colors carry *meaning* (platform-color beacons) goes to the
+      Seedance slot; decorative color can ride Kling.
 - [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.
