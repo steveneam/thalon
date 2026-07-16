@@ -1,7 +1,7 @@
 import { edlSchema, type TenantCtx, type VideoCutStatus, type VideoTakeDisposition, type VideoTakeKind } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
 import { mediaRootOf } from "./media-root";
-import type { CutView, EdlSummary, ProjectDetail, ProjectSummary, TakeView } from "./types";
+import type { CutDetail, CutView, EdlSummary, ProjectDetail, ProjectSummary, TakeView } from "./types";
 
 /**
  * B-ve.2 read layer: view shapes over the frozen B-ve.1 repos. Zero writes —
@@ -66,6 +66,26 @@ export async function listProjectSummaries(
     }),
   );
   return summaries.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/** B-ve.3 editor read: one cut with its FULL EDL (tenancy-walled, project-checked). */
+export async function getCutDetail(
+  repos: Repos,
+  ctx: TenantCtx,
+  projectId: string,
+  cutId: string,
+): Promise<CutDetail | null> {
+  const cut = await repos.videoCuts.get(ctx, cutId);
+  if (!cut || cut.projectId !== projectId) return null;
+  return {
+    id: cut.id,
+    name: cut.name,
+    version: cut.version,
+    status: cut.status as VideoCutStatus,
+    outputRef: cut.outputRef,
+    edl: edlSchema.parse(cut.edl),
+    createdAt: cut.createdAt.toISOString(),
+  };
 }
 
 export async function getProjectDetail(

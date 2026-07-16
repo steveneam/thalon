@@ -48,6 +48,9 @@ const envSchema = z.object({
   /** B4.8 hosted-vendor adapter (keyed runtime config with a swap path — no vendor named in code; live runs are pass 3). */
   TRANSCRIPT_VENDOR_URL: z.string().optional(),
   TRANSCRIPT_VENDOR_API_KEY: z.string().optional(),
+  /** B-ve.3 render binaries (ADR 0010): where ffmpeg/ImageMagick live on THIS box. Unset = ~/.local/bin, then PATH (engine edl/execute.ts). Box-local config, never code. */
+  THALON_FFMPEG: z.string().optional(),
+  THALON_MAGICK: z.string().optional(),
   /**
    * B6.7 workspace gate (ADR 0007 decision 4, invariant): `user:password`
    * for the app-level basic-auth proxy over every non-public route. Unset
