@@ -132,7 +132,16 @@
       flattened a candidate's entire build (+0.6dB where the storyboard needed
       a crescendo); use static gain for score work and re-measure the envelope
       AFTER the mux.
-- [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
+- [ ] **Aspect variants are OUR re-edit, never a vendor job** (s44 standing
+      directive, founder-taught): holding the 16:9 master + keeper clips +
+      the deterministic assembly recipe means any 9:16/1:1 variant is a local
+      recut — per-beat crop/re-compose toward each beat's focal object,
+      captions re-placed for the new frame, same score — at 0cr (vendor
+      `reframe` quoted 225cr for the same 46s). Do the recut AFTER the master
+      settles (music + grade locked); cutting a vertical from an unsettled
+      film re-does the work. This is also the product's own story: the
+      engine's video-project contract (keepers + recipe + provenance) is what
+      makes aspect variants free.
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.
 
