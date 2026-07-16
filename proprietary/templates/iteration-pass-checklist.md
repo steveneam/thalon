@@ -80,6 +80,15 @@
       identity strength holds per-object hues from a reference frame. Any beat
       whose colors carry *meaning* (platform-color beacons) goes to the
       Seedance slot; decorative color can ride Kling.
+- [ ] **Fix the flaw, keep the energy** (s43 lesson, founder-taught): a take
+      that breaks a law (palette drift, detached anchor) but nails the story
+      *event* is a better retake seed than a law-clean take where nothing
+      happens. Judging on law-compliance alone selects for static clips — both
+      s42 mill-gate/bloom keepers were quieter than their rejects and lost the
+      beat's meaning. On any retake, transcribe the reject's event
+      choreography into the new prompt explicitly (what ignites, what strains,
+      in what order), then add the law as anchors — never re-prompt from the
+      still alone.
 - [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.
