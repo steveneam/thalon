@@ -46,12 +46,19 @@
  * CTR, reason strings); on-page pack (question H2s/answer-first, JSON-LD
  * honesty, llms.txt) beside the judge's advisory seo_aeo lens.
  *
+ * B-ve.1 landed (A17/ADR 0010): src/edl/ — the video editor's EDL →
+ * ffmpeg-filtergraph compiler, deterministic core with zero vendor credits
+ * by construction; golden tests pin the compiled plans and the gated
+ * replay test rebuilds both concept-film masters from the checked-in EDL
+ * fixtures.
+ *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
  * values only — it never imports repositories or writes anywhere (enforced
  * by tests/boundary.test.ts at the repo root).
  */
 export * from "./assets";
+export * from "./edl";
 export * from "./ingest";
 export * from "./fanout";
 export * from "./waterfall";

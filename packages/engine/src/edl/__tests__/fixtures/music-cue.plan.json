@@ -1,0 +1,38 @@
+{
+  "plates": [],
+  "inputs": [
+    {
+      "source": {
+        "kind": "cut",
+        "ref": "cuts/cut-v6-endcard-graded.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "audio",
+        "ref": "audio/score-candidate.m4a"
+      }
+    }
+  ],
+  "filter": "[1:a]atrim=start=105,asetpts=PTS-STARTPTS,afade=t=out:st=49.5:d=1.275[aout]",
+  "maps": [
+    "0:v",
+    "[aout]"
+  ],
+  "audioArgs": [
+    "-c:a",
+    "aac"
+  ],
+  "videoArgs": [
+    "-c:v",
+    "libx264",
+    "-crf",
+    "18",
+    "-preset",
+    "slow",
+    "-pix_fmt",
+    "yuv420p"
+  ],
+  "fps": "24",
+  "duration": "50.775"
+}

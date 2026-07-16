@@ -71,6 +71,13 @@
       "when": 1783951360799,
       "tag": "0009_lead_pain_point",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784207845036,
+      "tag": "0010_b_ve1_window",
+      "breakpoints": true
     }
   ]
 }

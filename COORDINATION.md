@@ -94,6 +94,18 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 | uplift | lead terminal — vendor-visual phase OPEN | `apps/web/**` (B7.2 surfaces), pinned-asset data dirs | `agent/uplift/b72-thalon` | pending (**tier PAID 2026-07-14: Plus live, 1,010 credits, verified via MCP balance** — P0.1–P0.3 zero-spend first, then mint week images→pages→workspace→video-if-credits) | — (trigger fired) | 5 |
 | contract-w2 → factory | lead terminal — vendor-visual phase OPEN | `packages/contracts/**` (AssetSource), `proprietary/templates/**` (new), neutral preview hosting | `agent/contract/s7-asset-window` → `agent/factory/b74-pilot` | pending (P0.4/P0.5 contract+skeleton, zero-spend) | uplift quality bar · w2 frozen | 6 |
 
+## B-video-editor — lanes (cut 2026-07-16 at the A17 charter, session 46; sequential lead work by default — any parallel lane activation needs fresh founder go)
+
+> A17/ADR-0010 rules bind every bucket: no vendor-metered call on any edit path (edit ops = 0cr, local/deterministic) · aspect variants = own-engine recuts, never vendor reframe · edited caption/text = content (judge gate before approve) · AI edits ride the same EDL-diff door as manual edits. **Contract window = B-ve.1** (video-project + EDL schemas + tables + the compiler goldens); freezes at its merge — B-ve.2+ consume it frozen.
+
+| lane | owner | owns (glob) | branch | status | depends-on | merge-order |
+|------|-------|-------------|--------|--------|------------|-------------|
+| contract (B-ve.1) | lead terminal | `packages/contracts/**` (video-project/EDL), `packages/db` `schema/video.ts` + repos + migration (additive), `packages/engine/src/edl/**` (new) | `agent/contract/b-ve1-window` | review | — (session-46 opener; charter docs ride the same PR) | 1 |
+| surface (B-ve.2) | lead terminal | `apps/web/**` (read-only project browser) | — | pending | B-ve.1 frozen | 2 |
+| editor (B-ve.3) | lead terminal | `apps/web/**` (timeline MVP), engine render wiring | — | pending | B-ve.2 | 3 |
+| ai-assist (B-ve.4) | lead terminal | `proprietary/prompts/**` (EDL-diff proposer), judge lens wiring | — | pending | B-ve.3 | 4 |
+| aspect-lens (B-ve.5) | lead terminal | `apps/web/**` (crop/pan handles), derived-EDL flows | — | pending | B-ve.3 | 5 |
+
 ## Messages (append-only)
 
 - 2026-07-03 lead: board created. B0.3→B0.4 vs B0.5 are file-disjoint per the charter; Lane B is inert until the founder opens the second terminal (or we fall back to sequential). Worktree prereqs landed: `.worktreeinclude`, `.claude/settings.json` symlinks `node_modules`, dev DB/store/queue isolate per worktree via the local seams.
