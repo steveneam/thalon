@@ -475,6 +475,8 @@ export const videoCutAttributionSchema = z
     authoredBy: z.enum(VIDEO_CUT_AUTHORS),
     proposal: z
       .object({
+        /** The cut the diff was proposed AGAINST — the replay anchor: base EDL + diff must reproduce this save's EDL, verified at the door. */
+        baseCutId: z.string().min(1),
         /** Model id that generated the diff. */
         model: z.string().min(1),
         /** proprietary/prompts name of the proposer prompt. */

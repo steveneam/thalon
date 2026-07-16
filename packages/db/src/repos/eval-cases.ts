@@ -85,6 +85,54 @@ export function evalCasesRepo(db: Db) {
       });
     },
 
+    /**
+     * B-ve.4 (half-window amendment): the editor's proposal learning door —
+     * an operator REJECTING an agent-proposed EDL diff is a correction on
+     * the proposer, captured with its own origin ('cut_diff_review',
+     * check-constraint enforced) and the reject discipline of the take
+     * tables: the reason is REQUIRED, it is the learning material.
+     * `expected` records only the ground truth (rejected + why) — a future
+     * proposer-tuning harness interprets it. Same transaction as the audit
+     * event (invariant I4).
+     */
+    async recordCutDiffReview(
+      ctx: TenantCtx,
+      input: {
+        kind: string;
+        input: Record<string, unknown>;
+        reason: string;
+        sourceRef?: string;
+      },
+    ): Promise<EvalCase> {
+      if (!input.reason.trim()) {
+        throw new Error("a rejected proposal must carry its reason (the learning material)");
+      }
+      return db.transaction(async (tx) => {
+        const [row] = await tx
+          .insert(evalCases)
+          .values({
+            tenantId: ctx.tenantId,
+            kind: input.kind,
+            input: input.input,
+            expected: { operatorAction: "rejected", reason: input.reason },
+            origin: "cut_diff_review",
+            sourceRef: input.sourceRef,
+          })
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "eval_case",
+          entityId: row.id,
+          event: "eval_case.recorded",
+          payload: {
+            kind: input.kind,
+            origin: "cut_diff_review",
+            sourceRef: input.sourceRef ?? null,
+          },
+        });
+        return row;
+      });
+    },
+
     async list(
       ctx: TenantCtx,
       filter: { origin?: string; kind?: string; limit?: number } = {},

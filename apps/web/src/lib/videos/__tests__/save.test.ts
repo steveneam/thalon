@@ -56,3 +56,62 @@ describe("planCutSave (the version is DERIVED — a re-edit is always a new vers
     });
   });
 });
+
+describe("save attribution (B-ve.4: every save is attributed, agent saves carry their proposal)", () => {
+  const AGENT_ATTRIBUTION = {
+    authoredBy: "agent",
+    proposal: {
+      baseCutId: "3e0f8b0a-0000-4000-8000-000000000000",
+      model: "claude-sonnet-5",
+      promptName: "edl-diff-proposer",
+      promptHash: "abc123",
+      ask: "clear the caption off the falcon",
+      diff: {
+        summary: "move line 1 up",
+        ops: [{ op: "caption-move", line: 1, x: 640, y: 610, why: "clears the wing" }],
+      },
+      decidedBy: "operator",
+    },
+  };
+
+  it("stamps operator attribution by default — every B-ve.4+ cut says who authored it", () => {
+    const planned = planCutSave([], { name: "film", edl: VALID_EDL });
+    expect(planned).toMatchObject({
+      ok: true,
+      input: { meta: { attribution: { authoredBy: "operator" } } },
+    });
+  });
+
+  it("carries a full agent proposal through to meta.attribution (the replay record)", () => {
+    const planned = planCutSave([], {
+      name: "film",
+      edl: VALID_EDL,
+      attribution: AGENT_ATTRIBUTION,
+    });
+    expect(planned).toMatchObject({
+      ok: true,
+      input: { meta: { attribution: AGENT_ATTRIBUTION } },
+    });
+  });
+
+  it("refuses an agent save without its proposal (replayable + attributed is a schema rule)", () => {
+    const planned = planCutSave([], {
+      name: "film",
+      edl: VALID_EDL,
+      attribution: { authoredBy: "agent" },
+    });
+    expect(planned).toMatchObject({ ok: false, status: 400 });
+  });
+
+  it("overwrites a spoofed meta.attribution — only the validated field is trusted", () => {
+    const planned = planCutSave([], {
+      name: "film",
+      edl: VALID_EDL,
+      meta: { attribution: { authoredBy: "agent" }, keep: "me" },
+    });
+    expect(planned).toMatchObject({
+      ok: true,
+      input: { meta: { attribution: { authoredBy: "operator" }, keep: "me" } },
+    });
+  });
+});

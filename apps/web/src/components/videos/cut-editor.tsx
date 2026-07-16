@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Clapperboard } from "lucide-react";
-import type { Edl } from "@thalon/contracts";
+import type { Edl, VideoCutAttribution } from "@thalon/contracts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,12 +12,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorNotice } from "@/components/workspace/error-notice";
 import { cn } from "@/lib/utils";
 import {
+  approveCut,
   fetchCutDetail,
   fetchProjectDetail,
   fetchRenderJob,
   mediaUrl,
   saveCut,
   startRender,
+  type CaptionRefusal,
 } from "@/lib/videos/client";
 import {
   laneDuration,
@@ -35,6 +37,7 @@ import {
 import type { CutDetail, ProjectDetail, RenderJobView } from "@/lib/videos/types";
 import { useListKeys } from "@/lib/workspace/keyboard";
 import { SELECTED_ROW } from "@/lib/workspace/selected-row";
+import { AssistPanel } from "./assist-panel";
 import { MusicLane } from "./music-lane";
 import { NumField } from "./num-field";
 
@@ -64,6 +67,12 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
   const [job, setJob] = useState<RenderJobView | null>(null);
   const [selected, setSelected] = useState(0);
   const selectedRef = useRef<HTMLLIElement | null>(null);
+  // B-ve.4: an applied agent proposal rides the next save as its attribution.
+  // Any MANUAL edit after Apply clears it — the EDL is no longer base + diff,
+  // and the save door would (rightly) refuse the replay check.
+  const [pendingAttribution, setPendingAttribution] = useState<VideoCutAttribution | null>(null);
+  const [approving, setApproving] = useState(false);
+  const [approveFailures, setApproveFailures] = useState<CaptionRefusal[]>([]);
 
   const load = useCallback(
     () =>
@@ -95,10 +104,11 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
     void load();
   }, [load]);
 
-  /** Every edit op funnels through here — one dirty bit, one working copy. */
+  /** Every MANUAL edit op funnels through here — one dirty bit, one working copy; a manual edit ends any pending agent attribution. */
   const apply = (fn: (edl: Edl) => Edl) => {
     setEdl((current) => (current ? fn(current) : current));
     setDirty(true);
+    setPendingAttribution(null);
   };
 
   const clips = edl?.video ?? [];
@@ -136,11 +146,17 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
     setSaving(true);
     setNotice(null);
     try {
-      const { cut: saved } = await saveCut(projectId, { name: cut.name, edl });
+      const { cut: saved } = await saveCut(projectId, {
+        name: cut.name,
+        edl,
+        ...(pendingAttribution ? { attribution: pendingAttribution } : {}),
+      });
       setCut(saved);
       setEdl(saved.edl);
       setDirty(false);
       setJob(null);
+      setPendingAttribution(null);
+      setApproveFailures([]);
       router.replace(`/app/videos/${projectId}/edit?cut=${saved.id}`, { scroll: false });
       // The version rail (save → vN) reads from the project's cut list — refresh it.
       void fetchProjectDetail(projectId).then((p) => p && setDetail(p));
@@ -159,6 +175,27 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
       setJob(fired);
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "render failed to start");
+    }
+  };
+
+  const onApprove = async () => {
+    if (!cut) return;
+    setApproving(true);
+    setNotice(null);
+    setApproveFailures([]);
+    try {
+      const outcome = await approveCut(projectId, cut.id);
+      if (outcome.ok) {
+        setCut(outcome.cut);
+        void fetchProjectDetail(projectId).then((p) => p && setDetail(p));
+      } else {
+        setNotice(outcome.error);
+        setApproveFailures(outcome.failures);
+      }
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "approve failed");
+    } finally {
+      setApproving(false);
     }
   };
 
@@ -230,6 +267,9 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
             </Badge>
             <Badge variant={cut.status === "draft" ? "outline" : "secondary"}>{cut.status}</Badge>
             {dirty && <Badge variant="signal">unsaved edits</Badge>}
+            {pendingAttribution?.authoredBy === "agent" && (
+              <Badge variant="signal">agent proposal applied</Badge>
+            )}
             <span className="ml-auto flex items-center gap-2">
               <Button onClick={() => void onSave()} disabled={!dirty || saving}>
                 {saving ? "Saving…" : `Save as v${nextVersion}`}
@@ -241,6 +281,15 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
                   disabled={dirty || job?.status === "running"}
                 >
                   {job?.status === "running" ? "Rendering…" : "Render"}
+                </Button>
+              )}
+              {cut.status === "rendered" && (
+                <Button
+                  variant="outline"
+                  onClick={() => void onApprove()}
+                  disabled={dirty || approving}
+                >
+                  {approving ? "Judging…" : "Approve"}
                 </Button>
               )}
             </span>
@@ -267,6 +316,16 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
             <p role="alert" className="rounded-md bg-destructive/10 px-2.5 py-1.5 text-sm text-destructive">
               Render failed: {job.error}
             </p>
+          )}
+          {approveFailures.length > 0 && (
+            <ul role="alert" className="flex flex-col gap-1 rounded-md bg-destructive/10 px-2.5 py-1.5">
+              {approveFailures.map((f) => (
+                <li key={f.line} className="text-sm text-destructive">
+                  <span className="font-medium">line {f.line}</span> “{f.text}” —{" "}
+                  {f.matches.join("; ")}
+                </li>
+              ))}
+            </ul>
           )}
           {job?.status === "running" && (
             <p className="text-sm text-muted-foreground">
@@ -479,6 +538,19 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
         edl={edl}
         playable={detail.playable}
         onPatch={(patch) => apply((e) => patchMusic(e, patch))}
+      />
+
+      <AssistPanel
+        projectId={projectId}
+        cutId={cut.id}
+        baseEdl={cut.edl}
+        dirty={dirty}
+        onApply={(preview, attribution) => {
+          // Deliberately NOT the manual-op funnel: Apply carries its attribution.
+          setEdl(preview);
+          setDirty(true);
+          setPendingAttribution(attribution);
+        }}
       />
     </div>
   );

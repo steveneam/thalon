@@ -15,12 +15,19 @@ import { appendEvent } from "./events";
 export type VideoCutRow = typeof videoCuts.$inferSelect;
 
 /**
- * NOTE (ADR 0010, deliberate): this repo ships NO approve door. The
- * `approved` status exists in contracts + the check constraint, but the
- * rendered → approved transition lands with B-ve.3/4 behind the judge gate
- * on the cut's caption text — an edited caption is content like any other
- * draft. The repo-surface test pins this absence.
+ * The judge receipt the approve door DEMANDS (B-ve.4, ADR 0010 invariant:
+ * an edited caption is content — no cut approves without a green verdict).
+ * `verdict` is the literal "pass": a red verdict is unrepresentable at this
+ * door, so "approve despite a fail" cannot even be typed.
  */
+export interface CutJudgeReceipt {
+  /** Which lens produced the verdict (e.g. "g1-captions"). */
+  gate: string;
+  verdict: "pass";
+  /** How many text layers the lens examined (0 = a caption-less cut). */
+  lines: number;
+}
+
 export function videoCutsRepo(db: Db) {
   return {
     /**
@@ -138,6 +145,38 @@ export function videoCutsRepo(db: Db) {
           entityId: row.id,
           event: "video_cut.rendered",
           payload: { outputRef },
+        });
+        return row;
+      });
+    },
+
+    /**
+     * rendered → approved, behind the judge gate (B-ve.4, ADR 0010): the
+     * caller hands over the green receipt — gate name + verdict + how many
+     * text layers were examined — and it lands verbatim in the event
+     * payload, so every approval carries WHAT vouched for it. The receipt
+     * type only admits `verdict: "pass"`; running the lens is the web
+     * door's job, refusing without a green receipt is this one's.
+     */
+    async approve(ctx: TenantCtx, id: string, judge: CutJudgeReceipt): Promise<VideoCutRow> {
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(videoCuts)
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("video_cut", id);
+        assertVideoCutTransition(current.status as VideoCutStatus, "approved");
+        const [row] = await tx
+          .update(videoCuts)
+          .set({ status: "approved", updatedAt: new Date() })
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_cut",
+          entityId: row.id,
+          event: "video_cut.approved",
+          payload: { judge: { ...judge } },
         });
         return row;
       });
