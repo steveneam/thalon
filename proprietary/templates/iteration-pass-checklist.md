@@ -89,6 +89,39 @@
       choreography into the new prompt explicitly (what ignites, what strains,
       in what order), then add the law as anchors — never re-prompt from the
       still alone.
+- [ ] **Lock-off beats = composite, not re-prompt** (s43 lesson): even with
+      anchor-stillness language Kling re-paints static *texture* every frame
+      (stone outlines, linework simmer — no camera drift needed). For a beat
+      that is a held frame plus one small live effect, build it locally:
+      static keeper still as base + the effect region windowed in from the
+      minted clip through a feathered mask (beat-1 proof: frame churn 0.674 →
+      0.140, 0cr). Quantify stillness with a tblend-difference YAVG pass, not
+      by eyeballing sampled frames — the s43 first check sampled 0.8s and
+      passed a clip the founder correctly rejected.
+- [ ] **Semantic flow direction is never implied** (s43 lesson,
+      founder-caught): models animate physically-natural flow (deltas drain
+      toward the sea/camera); when the story needs flow toward a destination
+      (delivery toward the towers), the prompt must name the direction, the
+      arrival, and the forbidden direction explicitly — geometry in the still
+      does not carry it.
+- [ ] **Seedance holds the creative-elaboration seat** (s43 standing
+      directive, founder-taught): on the s43 comparison the founder judged
+      Seedance's taste, animation and imagination "a lot better" than the
+      agent's conservative single-beat prompts — its rival cut had ideas
+      nobody briefed (wheel-through-window, fanned pages, clean swoop/stamp)
+      AND it self-corrected a semantic bug (page-flow direction) the
+      beat-by-beat pass missed. Standing method: (1) for any multi-beat
+      sequence, always run a low-tier Seedance multi-shot pass off the full
+      storyboard + keeper refs EARLY — treat it as the cinematographer's
+      draft, not a curiosity; (2) write briefs that hand Seedance room to
+      elaborate (story intent, mood, what must be true) instead of
+      motion-by-numbers anchor lists — reserve hard anchors for laws only;
+      (3) harvest its choreography into beat retakes; (4) the agent's seat is
+      director/editor: story structure, laws, judgment, provenance, and the
+      deterministic local assembly (ffmpeg remains the assembler of record).
+      Escalation path: with richer briefs + more materials, Seedance
+      multi-shot per ACT (2-3 beats per generation) is the candidate upgrade
+      for final films — cost it and propose at the next film.
 - [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.
