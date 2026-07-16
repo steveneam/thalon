@@ -96,12 +96,49 @@ SRT). Voiceover = optional v2 layer for a longer pillar cut only.
    uses x-ray density on the flow diagram and the dashboard's title block
    verbatim ("THALON · WORKING DIAGRAM · SHEET 01").
 
-## Status (s41, 2026-07-16): STILLS PHASE COMPLETE — 10/10 beats keeper-locked
+## Story v2 (s41 later, founder-shaped — SUPERSEDES the v1 shot list above)
 
-3.68cr total, [VID] untouched. Execution-order steps 1–2 done; step 3
-(founder checkpoint on the still set) is open — review copies beat-ordered in
-`.context/design/film-storyboard-s41/` (gitignored, index.md maps beats →
-pinned hashes → jobs; full ledger in b7.2-shot-list.md §s41). Steps 4–5
-(motion pass, cut) wait on the checkpoint.
+The founder checkpoint ran live and produced a rebuilt story ("much better" —
+founder). Three notes drove it, now ratcheted as taste directives **#7
+causal-handoff** and **#8 legibility-at-render-scale** (homes:
+`../templates/iteration-pass-checklist.md` Assets lane): every scene's exit
+object is the next scene's entry object; frames are judged at phone-width,
+never only full-res; nature keeps the night world alive (moon, pines, reeds,
+fireflies, chimney smoke), never depressing.
+
+**The chain:** world-sparks rise beyond the hills → the watchtower's beacon
+answers (1) → the sparks land on the river and bloom into note-cards (2,
+founder's image verbatim) → the falcon — planted here as the film's character
+— carries a card to the falconer's watermill (3) → the card feeds the pen;
+the draft is drawn (4) → the draft slides the chute onto the millrace and
+unfolds into post · film-strip · scroll (5) → the race narrows at the sluice
+gates under the turning wheel; ONE page held in amber (6, founder's mill) →
+the gloved hand presses a glowing wax seal; the gate lifts (7) → the falcon
+takes the sealed page skyward — the same bird that brought the signal in (8)
+→ the delta blooms: beacon towers ignite one by one in PLATFORM COLORS as the
+current reaches them (9) → pull back: the whole valley is the drawing on the
+desk; title block = **THALON + the site motto verbatim** (10, founder
+direction — no "working diagram" jargon).
+
+**Beat-9 platform treatment (DECIDED s41):** brand *colors*, never minted
+logos (trademark guidelines forbid stylized marks; diffusion garbles them).
+Facebook royal blue · Instagram magenta-pink→orange · X pure white · LinkedIn
+steel blue · TikTok cyan · YouTube scarlet (the single sanctioned red — a
+destination flame in the bloom, never on water/UI). Exact vector platform
+glyphs may join the CAPTION layer at the cut (compliant nominative use); the
+landing autoplay can run the pure color version. Beacons ignite sequentially
+as the flow arrives — the founder's "light up when it reaches them."
+
+**Grade note (motion pass):** lift night-water luminance a stop so linework
+survives phones; the v2 prompts already bake "never crushed to black."
+
+## Status (s41 close): STORYBOARD v2 COMPLETE — 10/10 beats keeper-locked, founder-approved story
+
+§V spend-to-date 8.76cr ([VID] untouched). v2 keepers + v1 archive in
+`.context/design/film-storyboard-s41/` (index.md maps beats → hashes → jobs;
+ledgers in b7.2-shot-list.md §s41). Next: motion pass (image→video per beat,
+Kling 3.0 / Seedance 2.0, get_cost preflight EACH clip, [VID] opens here;
+premium ≥40cr per-clip founder ping) → cut + captions (16:9 master, 9:16
+`reframe`, captions-only, ~45s).
 
 *v1, 2026-07-15 (s39). Ledger entries land in b7.2-shot-list.md §V as mints happen.*

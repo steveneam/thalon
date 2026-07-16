@@ -57,6 +57,17 @@
       infrastructure clutter (power lines, bare asphalt), and neighbourhood
       register (established greenery reads prestigious; bare reads cheap).
       Re-mint rather than crop around a wrong setting.
+- [ ] **Causal-handoff continuity** (s41 lesson, founder-taught): in any
+      multi-scene sequence — film beats, storyboards, scroll scenes — each
+      scene's exit object must be the next scene's entry object (spark→card,
+      card→draft, draft→gate…). If the link between two scenes exists only in
+      the narration around them, the sequence fails; name the handoff object at
+      every boundary in the plan before minting.
+- [ ] **Legibility at render scale** (s41 lesson, founder-taught): judge every
+      minted frame at phone-width/thumbnail AND compressed, not just full-res
+      on a bright monitor — subjects must survive small, dark, and moving.
+      Night palettes stay rich and readable, never crushed to near-black; a
+      frame whose subject can't be named at three inches wide is a reject.
 - [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.
