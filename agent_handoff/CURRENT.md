@@ -20,7 +20,7 @@
 
 ▎ ▸ **[founder] queue:** B-ve.4 scope + wave-2 + credit call (all at s49 opener) · transcript bulk-delete · s40 re-critique approval · leads triage · →Email dogfood.
 
-▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per mint (≥40cr = per-clip founder ping) · "IN THE DARK" preset upsell → always `declined_preset_id` · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5 · Seedance = creative-elaboration seat · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17 invariant) · **PGlite is single-process: stop the dev server before `videos:import`**.
+▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · founder `.env.local` edits BOM+CRLF — normalize · get_cost preflight per mint (≥40cr = per-clip founder ping) · "IN THE DARK" preset upsell → always `declined_preset_id` · agent launches need fresh founder approval · new list surfaces pick from DESIGN.md §5 · Seedance = creative-elaboration seat · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17 invariant) · **no clipboard bridge founder↔box: lead self-drives interactive/browser/auth flows (tmux + headless Chrome); founder only types short codes** · **PGlite is single-process: stop the dev server before `videos:import`**.
 
 ▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: PR #47 merged, branch GC'd; no open PRs; no worktrees; no Monitors; no in-flight vendor jobs; guard green at HEAD.
 
