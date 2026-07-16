@@ -1,5 +1,6 @@
 import {
   CheckCheck,
+  Clapperboard,
   Handshake,
   LayoutDashboard,
   Library,
@@ -63,6 +64,13 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: Library,
     hint: "Paste a video URL — transcript in, ready to copy, export, and ground on",
     keywords: ["transcript", "video", "url", "youtube", "ingest", "captions", "srt", "csv", "sources"],
+  },
+  {
+    label: "Videos",
+    href: "/app/videos",
+    icon: Clapperboard,
+    hint: "Video projects — takes, versioned cuts, and the reasons on record",
+    keywords: ["projects", "takes", "cuts", "rejects", "edl", "film", "editor", "provenance"],
   },
   {
     label: "Approve",
