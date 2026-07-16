@@ -1,6 +1,7 @@
 # ADR 0010 — B-video-editor chartered: EDL-driven editing over the video-project contract
 
 - **Status:** accepted (founder, 2026-07-16, session 46: ratified as proposed at the checkpoint; directed to start at s45 close)
+- **Amendment (B-ve.4 half-window, founder-confirmed s49 2026-07-16):** the frozen B-ve.1 contract re-opened ADDITIVELY for exactly four needs and re-froze at the B-ve.4 merge — (1) `video: copy` output mode (the G-score mux made expressible; stream-copy refusals at the schema door), (2) `audioCue.fadeIn` + `bitrateKbps` (the hand mux carried a 1.2s entry ease and a 192k encode the ledger never recorded — both recovered from the master's own waveform and proven by exact audio framemd5), (3) `edlDiffSchema` + `videoCutAttributionSchema` (the AI-assist wire: measured ops each carrying `why`; agent saves must carry base-cut pin + model + prompt hash + the exact diff), (4) eval origin `cut_diff_review` (migration 0011, constraint-widening only). Wave-2 + credit verdicts at the same checkpoint: slate HELD to B-ve.5/sprint end; Plus retained regardless; claude-design chartered as a landing+workspace design phase after wave 2.
 - **Context home:** `docs/research/video-editor-tools.md` (tooling survey + integration sketch; supersedes it as the decision of record)
 - **Relates to:** ADR 0004 (render-driver seam) · ADR 0008 (Sprint 7 charter this interleaves with) · ADR 0009 (TS core — this build names no Rust modules)
 
