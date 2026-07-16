@@ -84,7 +84,7 @@ const CUT: CutDetail = {
       height: 720,
       fps: 24,
       duration: 9.5,
-      video: { codec: "libx264", crf: 18, preset: "slow", pixFmt: "yuv420p" },
+      video: { mode: "encode", codec: "libx264", crf: 18, preset: "slow", pixFmt: "yuv420p" },
     },
     video: [
       { name: "b1", source: { kind: "take", ref: "motion/keepers/beat-01.mp4" }, in: 0, duration: 5 },

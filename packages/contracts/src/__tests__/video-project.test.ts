@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   assertVideoCutTransition,
   edlClipSchema,
+  edlDiffSchema,
   edlSchema,
   InvalidVideoCutTransitionError,
   panSchema,
+  videoCutAttributionSchema,
   videoSourceRefSchema,
   videoTakeSchema,
 } from "../video-project";
@@ -89,6 +91,7 @@ describe("EDL additivity + defaults", () => {
     expect(parsed.audio).toEqual([]);
     expect(parsed.captions).toBeUndefined();
     expect(parsed.output.video).toEqual({
+      mode: "encode",
       codec: "libx264",
       crf: 18,
       preset: "slow",
@@ -112,6 +115,84 @@ describe("EDL additivity + defaults", () => {
     });
     expect(parsed.audio[0].gainDb).toBe(0);
     expect(parsed.audio[0].mode).toBe("encode");
+    // B-ve.4 additive knobs default OFF — the pre-window cue above carries neither.
+    expect(parsed.audio[0].fadeIn).toBeUndefined();
+    expect(parsed.audio[0].bitrateKbps).toBeUndefined();
+  });
+});
+
+describe("copy output mode (B-ve.4 half-window: the G-score mux made expressible)", () => {
+  const scoredMux = {
+    name: "scored-mux",
+    output: { width: 1280, height: 720, fps: 24, duration: 50.775, video: { mode: "copy" } },
+    video: [
+      {
+        name: "picture",
+        source: { kind: "cut", ref: "cuts/cut-v6-endcard-graded.mp4" },
+        duration: 50.775,
+      },
+    ],
+    audio: [
+      {
+        source: { kind: "audio", ref: "music/emotional-cello_the-mountain.mp3" },
+        offset: 105,
+        fadeIn: { duration: 1.2 },
+        fadeOut: { start: 49.5, duration: 1.275 },
+        bitrateKbps: 192,
+      },
+    ],
+  };
+
+  it("accepts the scored-master shape: one untouched video-bearing clip + a measured music cue", () => {
+    const parsed = edlSchema.parse(scoredMux);
+    expect(parsed.output.video).toEqual({ mode: "copy" });
+    expect(parsed.audio[0].fadeIn).toEqual({ duration: 1.2 });
+    expect(parsed.audio[0].bitrateKbps).toBe(192);
+  });
+
+  it("the copy arm is not swallowed by the encode arm's defaults (union order pin)", () => {
+    const parsed = edlSchema.parse(scoredMux);
+    expect(parsed.output.video.mode).toBe("copy");
+    expect("codec" in parsed.output.video).toBe(false);
+  });
+
+  it("refuses what a stream copy cannot do: multiple clips, picture ops, stills, captions", () => {
+    const base = scoredMux;
+    // two clips
+    expect(
+      edlSchema.safeParse({ ...base, video: [base.video[0], base.video[0]] }).success,
+    ).toBe(false);
+    // picture re-processing
+    expect(
+      edlSchema.safeParse({
+        ...base,
+        video: [{ ...base.video[0], grade: { saturation: 1.1 } }],
+      }).success,
+    ).toBe(false);
+    expect(
+      edlSchema.safeParse({ ...base, video: [{ ...base.video[0], in: 2 }] }).success,
+    ).toBe(false);
+    // a still cannot be stream-copied into a film
+    expect(
+      edlSchema.safeParse({
+        ...base,
+        video: [{ ...base.video[0], source: { kind: "still", ref: "stills/a.png" } }],
+      }).success,
+    ).toBe(false);
+    // captions need an encode pass
+    expect(
+      edlSchema.safeParse({
+        ...base,
+        captions: {
+          style: { pointsize: 40 },
+          lines: [{ text: "hi", x: 640, y: 600, fadeIn: 1, fadeOut: 3 }],
+        },
+      }).success,
+    ).toBe(false);
+    // an empty caption block is harmless
+    expect(
+      edlSchema.safeParse({ ...base, captions: { style: { pointsize: 40 }, lines: [] } }).success,
+    ).toBe(true);
   });
 });
 
@@ -147,5 +228,63 @@ describe("cut lifecycle rulebook", () => {
     ] as const) {
       expect(() => assertVideoCutTransition(from, to)).toThrow(InvalidVideoCutTransitionError);
     }
+  });
+});
+
+describe("EDL diffs (B-ve.4: the AI-assist wire)", () => {
+  it("accepts the measured ops, each carrying its why", () => {
+    const parsed = edlDiffSchema.parse({
+      summary: "align the crescendo and clear the caption off the falcon",
+      ops: [
+        { op: "caption-move", line: 1, x: 640, y: 614, why: "clears the wing at 12.3s" },
+        {
+          op: "music-align",
+          cue: 0,
+          offset: 105,
+          fadeOut: { start: 49.5, duration: 1.275 },
+          why: "hush lands on the gate-lift, slam on the wing-snap",
+        },
+      ],
+    });
+    expect(parsed.version).toBe(1);
+    expect(parsed.ops).toHaveLength(2);
+  });
+
+  it("refuses an op without a rationale, an empty diff, and a knobless music-align", () => {
+    expect(
+      edlDiffSchema.safeParse({
+        summary: "s",
+        ops: [{ op: "caption-move", line: 0, x: 1, y: 2 }],
+      }).success,
+    ).toBe(false);
+    expect(edlDiffSchema.safeParse({ summary: "s", ops: [] }).success).toBe(false);
+    expect(
+      edlDiffSchema.safeParse({
+        summary: "s",
+        ops: [{ op: "music-align", cue: 0, why: "turns nothing" }],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("cut attribution (B-ve.4: replayable + attributed)", () => {
+  it("an operator save needs no proposal; an agent save without one is refused", () => {
+    expect(videoCutAttributionSchema.safeParse({ authoredBy: "operator" }).success).toBe(true);
+    expect(videoCutAttributionSchema.safeParse({ authoredBy: "agent" }).success).toBe(false);
+    expect(
+      videoCutAttributionSchema.safeParse({
+        authoredBy: "agent",
+        proposal: {
+          model: "claude-sonnet-5",
+          promptName: "edl-diff-proposer",
+          promptHash: "abc123",
+          diff: {
+            summary: "s",
+            ops: [{ op: "caption-move", line: 0, x: 1, y: 2, why: "w" }],
+          },
+          decidedBy: "operator",
+        },
+      }).success,
+    ).toBe(true);
   });
 });

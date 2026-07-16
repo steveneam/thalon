@@ -40,8 +40,8 @@ export interface EdlPlan {
   audioArgs: string[];
   /** Video codec args (-c:v/-crf/-preset/-pix_fmt). */
   videoArgs: string[];
-  /** Output frame rate (-r). */
-  fps: string;
+  /** Output frame rate (-r); absent for copy output mode — frame-rate forcing and stream copy don't mix. */
+  fps?: string;
   /** Output duration (-t). */
   duration: string;
 }
@@ -65,6 +65,8 @@ export function buildFfmpegArgs(
   }
   if (plan.filter !== "") args.push("-filter_complex", plan.filter);
   for (const map of plan.maps) args.push("-map", map);
-  args.push(...plan.audioArgs, ...plan.videoArgs, "-r", plan.fps, "-t", plan.duration, output);
+  args.push(...plan.audioArgs, ...plan.videoArgs);
+  if (plan.fps !== undefined) args.push("-r", plan.fps);
+  args.push("-t", plan.duration, output);
   return args;
 }

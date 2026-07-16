@@ -103,7 +103,7 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 | contract (B-ve.1) | lead terminal | `packages/contracts/**` (video-project/EDL), `packages/db` `schema/video.ts` + repos + migration (additive), `packages/engine/src/edl/**` (new) | `agent/contract/b-ve1-window` (GC'd) | merged (PR #45 — **contract FROZEN**) | — (session-46 opener; charter docs rode the same PR) | 1 |
 | surface (B-ve.2) | lead terminal | `apps/web/**` (read-only project browser) | `agent/surface/b-ve2-project-browser` (GC'd) | merged (PR #46) | B-ve.1 frozen | 2 |
 | editor (B-ve.3) | lead terminal | `apps/web/**` (timeline MVP), engine render wiring | `b-ve.3-timeline-editor` (GC'd) | merged (PR #47) | B-ve.2 | 3 |
-| ai-assist (B-ve.4) | lead terminal | `proprietary/prompts/**` (EDL-diff proposer), judge lens wiring | — | pending | B-ve.3 | 4 |
+| ai-assist (B-ve.4) | lead terminal | `proprietary/prompts/**` (EDL-diff proposer), judge lens wiring, contract half-window (`video: copy` + diff attribution, additive), approve door | `b-ve.4-ai-assist` | in_progress | B-ve.3 | 4 |
 | aspect-lens (B-ve.5) | lead terminal | `apps/web/**` (crop/pan handles), derived-EDL flows | — | pending | B-ve.3 | 5 |
 
 ## Messages (append-only)

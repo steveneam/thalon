@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { compileEdl } from "../compile";
+import { film16x9Scored } from "./fixtures/film-16x9-scored";
 import { film16x9V6 } from "./fixtures/film-16x9-v6";
 import { film9x16Master } from "./fixtures/film-9x16-master";
 import { musicCue } from "./fixtures/music-cue";
@@ -21,6 +22,7 @@ const CASES = [
   { name: "film-16x9-v6", edl: film16x9V6 },
   { name: "film-9x16-master", edl: film9x16Master },
   { name: "music-cue", edl: musicCue },
+  { name: "film-16x9-scored", edl: film16x9Scored },
 ] as const;
 
 const goldenPath = (name: string) => join(__dirname, "fixtures", `${name}.plan.json`);
@@ -49,6 +51,20 @@ describe("EDL compiler goldens", () => {
     // The score is stream-copied from input 19 (9 beats + 9 plates + endcard).
     expect(plan.maps).toEqual(["[vout]", "19:a"]);
     expect(plan.audioArgs).toEqual(["-c:a", "copy"]);
+  });
+
+  it("pins the copy-mode machinery: stream-copied picture, no -r, the G-mux audio chain", () => {
+    const plan = compileEdl(film16x9Scored);
+    expect(plan.videoArgs).toEqual(["-c:v", "copy"]);
+    // Frame-rate forcing and stream copy don't mix — no -r on a copy plan.
+    expect(plan.fps).toBeUndefined();
+    expect(plan.plates).toEqual([]);
+    // The recovered G-mux chain, in canonical order: trim → entry ease → tail ease.
+    expect(plan.filter).toBe(
+      "[1:a]atrim=start=105,asetpts=PTS-STARTPTS,afade=t=in:st=0:d=1.2,afade=t=out:st=49.5:d=1.275[aout]",
+    );
+    expect(plan.maps).toEqual(["0:v", "[aout]"]);
+    expect(plan.audioArgs).toEqual(["-c:a", "aac", "-b:a", "192k"]);
   });
 
   it("compiler caps fail loud, never silently truncate", () => {

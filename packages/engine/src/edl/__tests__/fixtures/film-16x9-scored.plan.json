@@ -1,0 +1,33 @@
+{
+  "plates": [],
+  "inputs": [
+    {
+      "source": {
+        "kind": "cut",
+        "ref": "cuts/cut-v6-endcard-graded.mp4"
+      }
+    },
+    {
+      "source": {
+        "kind": "audio",
+        "ref": "music/emotional-cello_the-mountain.mp3"
+      }
+    }
+  ],
+  "filter": "[1:a]atrim=start=105,asetpts=PTS-STARTPTS,afade=t=in:st=0:d=1.2,afade=t=out:st=49.5:d=1.275[aout]",
+  "maps": [
+    "0:v",
+    "[aout]"
+  ],
+  "audioArgs": [
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k"
+  ],
+  "videoArgs": [
+    "-c:v",
+    "copy"
+  ],
+  "duration": "50.775"
+}
