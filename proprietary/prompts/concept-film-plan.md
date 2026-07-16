@@ -63,12 +63,45 @@ shape" · "the judge holds one back" · "you release it" · "everywhere").
 SRT ships with the cut (the product's own pillar contract: video + caption/
 SRT). Voiceover = optional v2 layer for a longer pillar cut only.
 
-## Open founder picks (ask at s40 kickoff, one bundle)
+## Founder picks (RESOLVED s41, 2026-07-16 — asked as one bundle)
 
-- Aspect: 16:9 landing-first vs 9:16 social-first master (or 16:9 master +
-  9:16 re-frames via `reframe`).
-- Music: curated Pixabay pack (operator data, §6 ladder) vs captions-only
-  first cut.
-- Length target: ~45s signature scene vs ~90s pillar cut (affects clip count).
+- Aspect: **16:9 master + 9:16 re-frames via `reframe`** (landing-first,
+  social covered from the same clips).
+- Music: **captions-only first cut** (film is caption-first by decision; music
+  layered at cut review with zero re-minting if it earns it).
+- Length target: **~45s signature scene** (10 beats, 6–8 motion clips; the 90s
+  pillar cut builds later from the same banked stills + extra clips).
+- s40 re-critique: deferred again (no agent launches this session).
+
+## §0 LOOK-FIRST taste notes (s41 study: Dribbble film-title / ink-flow /
+## storyboard-animatic / dark-cinematic + Pinterest ink-in-water / blueprint)
+
+1. **One plume, one light.** The strongest ink frames isolate a single fluid
+   event against an empty field, backlit so the ink's edges glow from within.
+   Every stream beat = one laminar current, never competing swirls (directive
+   #4 temperament applies to the water too).
+2. **Ink resolves into silhouette.** The best ink shot read as a *tree* —
+   turbulence upstream condensing into a recognizable form downstream. Beats
+   2/4 stage exactly this transition; the condensation point IS the shot.
+3. **Type lives inside the scene.** Working title frames put type INTO the
+   world's texture (neon on the motel, scrawl on brick), never flat overlays.
+   Confirms caption-first-composed: captions are objects in the frame (etched
+   in the sheet, glowing on the weir), not post overlays.
+4. **Grain + duotone discipline.** Cinematic boards hold ONE desaturated world
+   + ONE loud accent. A found frame of black ink on a burnt-amber field proves
+   our exact pair (night-ink + landing-amber). Amber stays the only loud
+   channel — Two-Channel scrutiny on every frame.
+5. **The patent-sheet register.** Dark blueprint authority = linework density
+   as shading (denser = solid mass) + a formal title block. The Beat-10 close
+   uses x-ray density on the flow diagram and the dashboard's title block
+   verbatim ("THALON · WORKING DIAGRAM · SHEET 01").
+
+## Status (s41, 2026-07-16): STILLS PHASE COMPLETE — 10/10 beats keeper-locked
+
+3.68cr total, [VID] untouched. Execution-order steps 1–2 done; step 3
+(founder checkpoint on the still set) is open — review copies beat-ordered in
+`.context/design/film-storyboard-s41/` (gitignored, index.md maps beats →
+pinned hashes → jobs; full ledger in b7.2-shot-list.md §s41). Steps 4–5
+(motion pass, cut) wait on the checkpoint.
 
 *v1, 2026-07-15 (s39). Ledger entries land in b7.2-shot-list.md §V as mints happen.*
