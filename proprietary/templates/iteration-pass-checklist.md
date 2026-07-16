@@ -122,6 +122,16 @@
       Escalation path: with richer briefs + more materials, Seedance
       multi-shot per ACT (2-3 beats per generation) is the candidate upgrade
       for final films — cost it and propose at the next film.
+- [ ] **Score selection is measured, never vibes** (s44 lesson — the audio
+      sibling of "quantify stillness"): candidate music is judged by a
+      per-second RMS-envelope map against the beat arc (rise into the climax
+      beat, fall/cadence at the close) — a window scorer over every offset of
+      every candidate finds real crescendos and real endings that name-based
+      picking misses (the s44 "cadence on the sheet" cut came from the scorer,
+      not the track list). And single-pass `loudnorm` is a *dynamic* gain — it
+      flattened a candidate's entire build (+0.6dB where the storyboard needed
+      a crescendo); use static gain for score work and re-measure the envelope
+      AFTER the mux.
 - [ ] No vendor URLs anywhere — every asset served from our storage (B7.1 pin).
 - [ ] No watermarked/free-tier asset on the page.
 - [ ] Console clean; no layout shift on load; static-first holds.
