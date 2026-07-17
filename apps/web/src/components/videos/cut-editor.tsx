@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Clapperboard } from "lucide-react";
-import type { Edl, VideoCutAttribution } from "@thalon/contracts";
+import {
+  VIDEO_DERIVE_ASPECTS,
+  type Edl,
+  type VideoCutAttribution,
+  type VideoDeriveAspect,
+} from "@thalon/contracts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +18,7 @@ import { ErrorNotice } from "@/components/workspace/error-notice";
 import { cn } from "@/lib/utils";
 import {
   approveCut,
+  deriveCut,
   fetchCutDetail,
   fetchProjectDetail,
   fetchRenderJob,
@@ -21,6 +27,7 @@ import {
   startRender,
   type CaptionRefusal,
 } from "@/lib/videos/client";
+import { patchClipCrop } from "@/lib/videos/frame";
 import {
   laneDuration,
   nextVersionFor,
@@ -38,6 +45,7 @@ import type { CutDetail, ProjectDetail, RenderJobView } from "@/lib/videos/types
 import { useListKeys } from "@/lib/workspace/keyboard";
 import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import { AssistPanel } from "./assist-panel";
+import { FrameComposer } from "./frame-composer";
 import { MusicLane } from "./music-lane";
 import { NumField } from "./num-field";
 
@@ -150,6 +158,14 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
         name: cut.name,
         edl,
         ...(pendingAttribution ? { attribution: pendingAttribution } : {}),
+        // B-ve.5: a derived cut's new versions carry the parent pin forward.
+        ...(cut.lineage
+          ? {
+              meta: {
+                lineage: { parentCutId: cut.lineage.parentCutId, aspect: cut.lineage.aspect },
+              },
+            }
+          : {}),
       });
       setCut(saved);
       setEdl(saved.edl);
@@ -175,6 +191,21 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
       setJob(fired);
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "render failed to start");
+    }
+  };
+
+  const [deriving, setDeriving] = useState<VideoDeriveAspect | null>(null);
+  const onDerive = async (aspect: VideoDeriveAspect) => {
+    if (!cut) return;
+    setDeriving(aspect);
+    setNotice(null);
+    try {
+      const { cut: derived } = await deriveCut(projectId, cut.id, aspect);
+      router.push(`/app/videos/${projectId}/edit?cut=${derived.id}`);
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "derive failed");
+    } finally {
+      setDeriving(null);
     }
   };
 
@@ -266,11 +297,38 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
               v{cut.version}
             </Badge>
             <Badge variant={cut.status === "draft" ? "outline" : "secondary"}>{cut.status}</Badge>
+            {cut.lineage && (
+              <Badge variant="outline" className="u-tabular">
+                {cut.lineage.aspect} · from {cut.lineage.parentName ?? "?"} v
+                {cut.lineage.parentVersion ?? "?"}
+              </Badge>
+            )}
+            {cut.lineage &&
+              cut.lineage.parentVersion !== null &&
+              cut.lineage.parentLatestVersion !== null &&
+              cut.lineage.parentLatestVersion > cut.lineage.parentVersion && (
+                <Badge variant="signal">parent now v{cut.lineage.parentLatestVersion}</Badge>
+              )}
             {dirty && <Badge variant="signal">unsaved edits</Badge>}
             {pendingAttribution?.authoredBy === "agent" && (
               <Badge variant="signal">agent proposal applied</Badge>
             )}
             <span className="ml-auto flex items-center gap-2">
+              {VIDEO_DERIVE_ASPECTS.map((aspect) => (
+                <Button
+                  key={aspect}
+                  variant="outline"
+                  onClick={() => void onDerive(aspect)}
+                  disabled={dirty || deriving !== null}
+                  title={
+                    dirty
+                      ? "Save first — derive reads the stored EDL"
+                      : `New ${aspect} cut derived from this one (measured seeds, 0 credits)`
+                  }
+                >
+                  {deriving === aspect ? "Deriving…" : `Derive ${aspect}`}
+                </Button>
+              ))}
               <Button onClick={() => void onSave()} disabled={!dirty || saving}>
                 {saving ? "Saving…" : `Save as v${nextVersion}`}
               </Button>
@@ -478,6 +536,15 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
                   </>
                 )}
               </div>
+              {selectedClip.crop && (
+                <FrameComposer
+                  projectId={projectId}
+                  sourceRef={selectedClip.source.ref}
+                  playable={detail.playable}
+                  crop={selectedClip.crop}
+                  onPatch={(crop) => apply((e) => patchClipCrop(e, selected, crop))}
+                />
+              )}
               {!selectedIsOverlay && (
                 <SwapPicker
                   detail={detail}

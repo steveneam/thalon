@@ -1,7 +1,22 @@
-import { edlSchema, type TenantCtx, type VideoCutStatus, type VideoTakeDisposition, type VideoTakeKind } from "@thalon/contracts";
+import {
+  edlSchema,
+  videoCutLineageSchema,
+  type TenantCtx,
+  type VideoCutStatus,
+  type VideoTakeDisposition,
+  type VideoTakeKind,
+} from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
 import { mediaRootOf } from "./media-root";
-import type { CutDetail, CutView, EdlSummary, ProjectDetail, ProjectSummary, TakeView } from "./types";
+import type {
+  CutDetail,
+  CutLineageView,
+  CutView,
+  EdlSummary,
+  ProjectDetail,
+  ProjectSummary,
+  TakeView,
+} from "./types";
 
 /**
  * B-ve.2 read layer: view shapes over the frozen B-ve.1 repos. Zero writes —
@@ -29,6 +44,35 @@ export function summarizeEdl(stored: unknown): EdlSummary {
     height: edl.output.height,
     fps: edl.output.fps,
     duration: edl.output.duration,
+  };
+}
+
+/**
+ * B-ve.5: resolve a cut's `meta.lineage` against its project's cut list —
+ * parent name/version from the pinned row, plus that name's LATEST version
+ * for the staleness signal. A meta without lineage (every pre-window cut)
+ * resolves to null; a malformed one too (the write doors validate, so
+ * malformed means legacy hand-writes — the surface stays quiet, not loud).
+ */
+export function lineageViewFor(
+  meta: unknown,
+  projectCuts: { id: string; name: string; version: number }[],
+): CutLineageView | null {
+  const raw =
+    typeof meta === "object" && meta !== null ? (meta as { lineage?: unknown }).lineage : undefined;
+  if (raw === undefined) return null;
+  const parsed = videoCutLineageSchema.safeParse(raw);
+  if (!parsed.success) return null;
+  const parent = projectCuts.find((c) => c.id === parsed.data.parentCutId) ?? null;
+  const latest = parent
+    ? projectCuts.reduce((max, c) => (c.name === parent.name ? Math.max(max, c.version) : max), 0)
+    : null;
+  return {
+    parentCutId: parsed.data.parentCutId,
+    aspect: parsed.data.aspect,
+    parentName: parent?.name ?? null,
+    parentVersion: parent?.version ?? null,
+    parentLatestVersion: latest,
   };
 }
 
@@ -77,6 +121,7 @@ export async function getCutDetail(
 ): Promise<CutDetail | null> {
   const cut = await repos.videoCuts.get(ctx, cutId);
   if (!cut || cut.projectId !== projectId) return null;
+  const projectCuts = await repos.videoCuts.list(ctx, projectId);
   return {
     id: cut.id,
     name: cut.name,
@@ -84,6 +129,7 @@ export async function getCutDetail(
     status: cut.status as VideoCutStatus,
     outputRef: cut.outputRef,
     edl: edlSchema.parse(cut.edl),
+    lineage: lineageViewFor(cut.meta, projectCuts),
     createdAt: cut.createdAt.toISOString(),
   };
 }
@@ -128,6 +174,7 @@ export async function getProjectDetail(
           status: c.status as VideoCutStatus,
           outputRef: c.outputRef,
           edl: summarizeEdl(c.edl),
+          lineage: lineageViewFor(c.meta, cuts),
           createdAt: c.createdAt.toISOString(),
         }),
       )

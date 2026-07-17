@@ -44,6 +44,20 @@ export interface EdlSummary {
   duration: number;
 }
 
+/**
+ * B-ve.5: a derived cut's lineage, resolved for the surface. `parentName`/
+ * `parentVersion` name the pinned row; `parentLatestVersion` is that name's
+ * newest version — when it is ahead of the pin the surface shows honest
+ * staleness ("derived from v6 · parent now at v8"). NO auto-sync exists.
+ */
+export interface CutLineageView {
+  parentCutId: string;
+  aspect: string;
+  parentName: string | null;
+  parentVersion: number | null;
+  parentLatestVersion: number | null;
+}
+
 export interface CutView {
   id: string;
   name: string;
@@ -52,6 +66,8 @@ export interface CutView {
   /** Project-relative ref of the rendered output (recordRender). */
   outputRef: string | null;
   edl: EdlSummary;
+  /** B-ve.5: present on derived cuts. */
+  lineage: CutLineageView | null;
   createdAt: string;
 }
 
@@ -63,6 +79,8 @@ export interface CutDetail {
   status: VideoCutStatus;
   outputRef: string | null;
   edl: Edl;
+  /** B-ve.5: present on derived cuts. */
+  lineage: CutLineageView | null;
   createdAt: string;
 }
 

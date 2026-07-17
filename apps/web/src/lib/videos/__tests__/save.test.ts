@@ -115,3 +115,25 @@ describe("save attribution (B-ve.4: every save is attributed, agent saves carry 
     });
   });
 });
+
+describe("save lineage (B-ve.5: derived cuts carry the parent pin forward)", () => {
+  it("a valid meta.lineage validates, normalizes into the stored meta, and is returned for the route's parent check", () => {
+    const lineage = { parentCutId: "cut-1", aspect: "9:16" };
+    const planned = planCutSave([], { name: "film-9x16", edl: VALID_EDL, meta: { lineage } });
+    expect(planned).toMatchObject({ ok: true, lineage, input: { meta: { lineage } } });
+  });
+
+  it("a malformed lineage refuses 400 — garbage provenance never stores", () => {
+    const planned = planCutSave([], {
+      name: "film-9x16",
+      edl: VALID_EDL,
+      meta: { lineage: { parentCutId: "cut-1", aspect: "vertical" } },
+    });
+    expect(planned).toMatchObject({ ok: false, status: 400 });
+  });
+
+  it("a save without lineage plans exactly as before (additivity) and reports lineage null", () => {
+    const planned = planCutSave([], { name: "film", edl: VALID_EDL });
+    expect(planned).toMatchObject({ ok: true, lineage: null });
+  });
+});

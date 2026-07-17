@@ -38,6 +38,8 @@ interface CutManifestEntry {
   version: number;
   edl: string | Record<string, unknown>;
   outputRef?: string;
+  /** B-ve.5: derived-cut provenance — parent named by (name, version), resolved to its row id here. */
+  lineage?: { parent: { name: string; version: number }; aspect: string };
 }
 
 async function main(): Promise<number> {
@@ -141,6 +143,34 @@ async function main(): Promise<number> {
         status = "rendered";
       }
       console.log(`cut ${entry.name} v${entry.version}: ${fresh ? "created" : "exists"} (${status})`);
+    }
+
+    // B-ve.5 lineage backfill: stamp meta.lineage on manifest cuts that
+    // declare a parent (the pre-derive-door masters). stampLineage is
+    // one-way + idempotent — a replay is a silent no-op, a CONFLICTING
+    // stamp fails the import loudly.
+    const withLineage = cutsManifest.filter((e) => e.lineage);
+    if (withLineage.length > 0) {
+      const allCuts = await handle.repos.videoCuts.list(ctx, project.id);
+      const byNameVersion = (name: string, version: number) =>
+        allCuts.find((c) => c.name === name && c.version === version) ?? null;
+      for (const entry of withLineage) {
+        const row = byNameVersion(entry.name, entry.version);
+        const parent = byNameVersion(entry.lineage!.parent.name, entry.lineage!.parent.version);
+        if (!row || !parent) {
+          console.error(
+            `lineage for ${entry.name} v${entry.version}: ${!row ? "cut" : `parent ${entry.lineage!.parent.name} v${entry.lineage!.parent.version}`} not found`,
+          );
+          return 1;
+        }
+        const { stamped } = await handle.repos.videoCuts.stampLineage(ctx, row.id, {
+          parentCutId: parent.id,
+          aspect: entry.lineage!.aspect,
+        });
+        console.log(
+          `lineage ${entry.name} v${entry.version} ← ${parent.name} v${parent.version} (${entry.lineage!.aspect}): ${stamped ? "stamped" : "already on record"}`,
+        );
+      }
     }
     return 0;
   } finally {
