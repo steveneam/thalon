@@ -153,6 +153,43 @@ export const icpSchema = z.object({
 export type IcpInput = z.input<typeof icpSchema>;
 export type Icp = z.infer<typeof icpSchema>;
 
+/** A learned multiplier is a positive scale on a resolved weight — 1 is neutral; ≤0 would erase or invert a signal, which is config's job (weights), never the learn loop's. */
+const multiplier = z.number().positive().finite();
+
+/**
+ * B-crm.5: the learn loop's per-signal weight multipliers — applied ON TOP
+ * of the resolved weights (code default ← icp override), so an operator's
+ * explicit weight config is scaled, never replaced. All four signals are
+ * always present (1 = the loop had nothing conclusive to say).
+ */
+export const leadWeightMultipliersSchema = z.object({
+  relevance: multiplier,
+  fit: multiplier,
+  completeness: multiplier,
+  recency: multiplier,
+});
+export type LeadWeightMultipliers = z.infer<typeof leadWeightMultipliersSchema>;
+
+/**
+ * One learn-loop pass as the lead_weight_states repo validates it at the
+ * write door (the leadScoreRecordSchema pattern). `profileHash` is the ICP
+ * hash the loop ran against — application binds to it, so profile drift
+ * disarms a learned state until the loop re-runs. `evidenceHash` is the
+ * structural idempotence key: replaying the loop over the same verdicts
+ * appends nothing.
+ */
+export const leadWeightStateRecordSchema = z.object({
+  multipliers: leadWeightMultipliersSchema,
+  /** One readable line per signal (and per dealbreaker term) — WHY each weight moved or held. */
+  reasons: z.array(z.string()).default([]),
+  /** The counts/posteriors/Wilson bounds behind the reasons — the audit trail's numbers. */
+  evidence: z.record(z.string(), z.unknown()).default({}),
+  profileHash: z.string().min(1),
+  evidenceHash: z.string().min(1),
+});
+export type LeadWeightStateRecordInput = z.input<typeof leadWeightStateRecordSchema>;
+export type LeadWeightStateRecord = z.infer<typeof leadWeightStateRecordSchema>;
+
 /**
  * One scoring result as the lead_scores repo validates it at the write
  * door. `profileHash` is the hash of the ICP block that produced the score —

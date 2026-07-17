@@ -25,6 +25,7 @@ describe("tenancy ratchet", () => {
         "fanout_runs",
         "judge_results",
         "lead_scores",
+        "lead_weight_states",
         "leads",
         "llm_cache",
         "monitored_areas",

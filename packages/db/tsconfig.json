@@ -1,4 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@thalon/contracts": ["../contracts/src/index.ts"],
+      "@thalon/platform": ["../platform/src/index.ts"]
+    }
+  },
   "include": ["src", "drizzle.config.ts"]
 }
