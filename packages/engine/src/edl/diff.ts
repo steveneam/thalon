@@ -62,6 +62,17 @@ export function applyEdlDiff(base: Edl, diff: EdlDiff): Edl {
         if (op.fadeOut !== undefined) cue.fadeOut = op.fadeOut;
         break;
       }
+      default: {
+        // Additive-kind ratchet (B-ve.7 half-window): a contract op kind
+        // without an engine arm must refuse, never silently no-op — a
+        // dropped op would let base + diff "replay-verify" an EDL the diff
+        // never produced. The cast keeps this arm alive even when the
+        // switch above is exhaustive.
+        throw new EdlDiffApplyError(
+          i,
+          `op kind "${(op as { op: string }).op}" has no engine arm yet`,
+        );
+      }
     }
   });
   return edlSchema.parse(next);

@@ -254,6 +254,57 @@ describe("EDL diffs (B-ve.4: the AI-assist wire)", () => {
     expect(parsed.ops).toHaveLength(2);
   });
 
+  it("accepts a clip-crop reframe with static or from/to pans (B-ve.7 half-window)", () => {
+    const parsed = edlDiffSchema.parse({
+      summary: "recenter beat 4 on the desk",
+      ops: [
+        {
+          op: "clip-crop",
+          clip: 3,
+          crop: { width: 405, height: 720, x: 260 },
+          why: "desk center measured at x=462 in the 1280-wide source",
+        },
+        {
+          op: "clip-crop",
+          clip: 6,
+          crop: { width: 405, height: 720, x: { from: 0, to: 875 }, y: 0 },
+          why: "follow the flame left to right; extents measured on gridded frames",
+        },
+      ],
+    });
+    expect(parsed.ops).toHaveLength(2);
+    // Unset pan axes default to 0, mirroring cropSchema.
+    expect((parsed.ops[0] as { crop: { y: unknown } }).crop.y).toBe(0);
+  });
+
+  it("refuses an expression pan through the propose alphabet — static + from/to only", () => {
+    expect(
+      edlDiffSchema.safeParse({
+        summary: "s",
+        ops: [
+          {
+            op: "clip-crop",
+            clip: 0,
+            crop: { width: 405, height: 720, x: { expr: "min(875*t/4.5,875)" } },
+            why: "w",
+          },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(
+      edlDiffSchema.safeParse({
+        summary: "s",
+        ops: [{ op: "clip-crop", clip: 0, crop: { width: 0, height: 720 }, why: "w" }],
+      }).success,
+    ).toBe(false);
+    expect(
+      edlDiffSchema.safeParse({
+        summary: "s",
+        ops: [{ op: "clip-crop", clip: 0, crop: { width: 405, height: 720 } }],
+      }).success,
+    ).toBe(false);
+  });
+
   it("refuses an op without a rationale, an empty diff, and a knobless music-align", () => {
     expect(
       edlDiffSchema.safeParse({
