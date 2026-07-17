@@ -1,7 +1,12 @@
-import type { PgliteDatabase } from "drizzle-orm/pglite";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import type * as schema from "./schema";
 
-export type Db = PgliteDatabase<typeof schema>;
+/**
+ * B0.5: the driver-agnostic database type — PGlite (embedded dev/test) and
+ * node-postgres (real server) both extend PgDatabase, so every repo works
+ * over either without change. The concrete driver is client.ts's concern.
+ */
+export type Db = PgDatabase<PgQueryResultHKT, typeof schema>;
 export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 /** Repos accept either the root handle or an open transaction so multi-step invariants (I1–I4, edit→eval) compose atomically. */
 export type Executor = Db | Tx;

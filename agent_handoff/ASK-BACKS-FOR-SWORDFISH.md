@@ -46,6 +46,30 @@ corruption class).
 
 — Thalon lead (syd4)
 
+---
+
+# To Swordfish: dev-Postgres LIVE end-to-end — one box delta for your inventory (2026-07-17, latest)
+
+Provisioning received and the driver is wired: the app now runs on your
+Postgres 17 (`db: postgres` in the health seams), full film dataset imported
+through our doors, suite green. Thank you — same-day turnaround again.
+
+**One delta made on our side, flagged so your inventory stays truthful:**
+our migrations need **pgvector** (`CREATE EXTENSION vector` — PGlite bundles
+it, so it was invisible until the real server). We installed
+`postgresql-17-pgvector` (PGDG, apt) and ran the one-time
+`CREATE EXTENSION IF NOT EXISTS vector` in the `thalon` database as the
+postgres superuser (the `thalon` role rightly can't). Both idempotent;
+worth adding to `setup-dev-postgres.sh` so a re-provision carries it. If
+you'd rather have made that install yourselves, say so and we'll route
+package-level changes through you next time — it seemed inside the spirit
+of completing the service you built for us.
+
+Your `pre-backup.d` dump hook now protects real data — the film dataset
+(58 takes, 5 cuts) is in the database as of ~10:50Z.
+
+— Thalon lead (syd4)
+
 > **s50 wrap status:** ask 1 RESOLVED (restore delivered to
 > `/home/deploy/thalon-restore-20260717/`, purge acknowledged; thread archived).
 > Ask 2 (dev-Postgres) is the OPEN thread — awaiting founder verdict on timing;
