@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowLeft, ArrowUp, Clapperboard } from "lucide-react";
+import { ArrowDown, ArrowUp, Clapperboard } from "lucide-react";
 import {
   VIDEO_DERIVE_ASPECTS,
   type Edl,
@@ -43,11 +42,12 @@ import {
 } from "@/lib/videos/editor";
 import type { CutDetail, ProjectDetail, RenderJobView } from "@/lib/videos/types";
 import { useListKeys } from "@/lib/workspace/keyboard";
-import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import { AssistPanel } from "./assist-panel";
+import { VideosSubnav } from "./videos-subnav";
 import { FrameComposer } from "./frame-composer";
 import { MusicLane } from "./music-lane";
 import { NumField } from "./num-field";
+import { TrackView } from "./track-view";
 
 type ViewStatus = "loading" | "error" | "missing" | "ready";
 
@@ -74,13 +74,14 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
   const [notice, setNotice] = useState<string | null>(null);
   const [job, setJob] = useState<RenderJobView | null>(null);
   const [selected, setSelected] = useState(0);
-  const selectedRef = useRef<HTMLLIElement | null>(null);
   // B-ve.4: an applied agent proposal rides the next save as its attribution.
   // Any MANUAL edit after Apply clears it — the EDL is no longer base + diff,
   // and the save door would (rightly) refuse the replay check.
   const [pendingAttribution, setPendingAttribution] = useState<VideoCutAttribution | null>(null);
   const [approving, setApproving] = useState(false);
   const [approveFailures, setApproveFailures] = useState<CaptionRefusal[]>([]);
+  /** The Preview card's video — the track view's playhead scrubs it. */
+  const previewRef = useRef<HTMLVideoElement | null>(null);
 
   const load = useCallback(
     () =>
@@ -130,9 +131,6 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
     enabled: status === "ready" && edl !== null,
     bindings: { j: moveSelection(1), k: moveSelection(-1) },
   });
-  useEffect(() => {
-    selectedRef.current?.scrollIntoView?.({ block: "nearest" });
-  }, [selected]);
 
   // Fire-and-poll: the render is minutes of local x264 — poll until it settles.
   useEffect(() => {
@@ -265,7 +263,7 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
   if (!cut || !edl) {
     return (
       <div className="flex flex-col gap-4 p-4 lg:p-6">
-        <BackLink projectId={projectId} />
+        <VideosSubnav projectId={projectId} />
         <Card>
           <CardContent className="py-6 text-sm text-muted-foreground">
             No cuts to edit yet — a cut’s EDL is what the editor works on. Import or save one
@@ -286,7 +284,7 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
       <p aria-live="polite" className="sr-only">
         {selectedClip ? `Selected ${selectedClip.name}` : ""}
       </p>
-      <BackLink projectId={projectId} />
+      <VideosSubnav projectId={projectId} cutId={cut.id} />
 
       <Card>
         <CardHeader>
@@ -390,86 +388,46 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
               Rendering locally (0 credits) — minutes of x264; this page polls until it lands.
             </p>
           )}
-          {cut.status === "rendered" && cut.outputRef && (
-            <div className="flex flex-col gap-1">
-              <p className="break-all font-mono text-xs text-muted-foreground">{cut.outputRef}</p>
-              {detail.playable && (
-                <video
-                  controls
-                  preload="metadata"
-                  src={mediaUrl(projectId, cut.outputRef)}
-                  className="w-full max-w-2xl rounded-lg border border-border bg-muted"
-                />
-              )}
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)]">
+      {/* The NLE geometry (founder direction s50): preview + inspector on
+          top, then the timeline as a FULL-WIDTH band — the protagonist. */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>Timeline</CardTitle>
+            <CardTitle>Preview</CardTitle>
             <CardDescription>
-              {lane.beats.length} beat{lane.beats.length === 1 ? "" : "s"}
-              {lane.overlay ? " + endcard overlay" : ""} · assembled {assembled}s · output{" "}
-              {edl.output.duration}s
+              {cut.status !== "draft" && cut.outputRef
+                ? "The rendered cut — the ruler's playhead scrubs it."
+                : "Save and render to preview this cut (local, 0 credits)."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col gap-1">
-              {clips.map((clip, i) => (
-                <li key={`${clip.name}-${i}`} ref={i === selected ? selectedRef : undefined}>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(i)}
-                    aria-pressed={i === selected}
-                    className={cn(
-                      "flex w-full flex-wrap items-center gap-2 rounded-lg border border-border p-2.5 text-left",
-                      "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                      i === selected ? SELECTED_ROW : "hover:bg-muted/60",
-                    )}
-                  >
-                    <span className="u-tabular w-6 shrink-0 text-xs text-muted-foreground">
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">{clip.name}</span>
-                      <span className="block truncate font-mono text-xs text-muted-foreground">
-                        {baseName(clip.source.ref)}
-                      </span>
-                    </span>
-                    <span className="u-tabular shrink-0 text-xs text-muted-foreground">
-                      {clip.duration}s{clip.in > 0 ? ` · in ${clip.in}s` : ""}
-                    </span>
-                    {clip.transitionIn && (
-                      <Badge variant="outline" className="u-tabular">
-                        {clip.transitionIn.type === "overlay-fade" ? "endcard" : "xfade"}{" "}
-                        {clip.transitionIn.duration}s
-                      </Badge>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-3">
-              <NumField
-                label="output duration (s)"
-                value={edl.output.duration}
-                min={0.1}
-                onCommit={(d) => apply((e) => setOutputDuration(e, d))}
-              />
-              {!lane.overlay && Math.abs(assembled - edl.output.duration) > 0.01 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Assembled lane is {assembled}s but the output -t is {edl.output.duration}s —
-                  confirm this is deliberate.
+          <CardContent className="flex flex-col gap-1">
+            {cut.status !== "draft" && cut.outputRef ? (
+              <>
+                <p className="break-all font-mono text-xs text-muted-foreground">
+                  {cut.outputRef}
                 </p>
-              )}
-            </div>
+                {detail.playable && (
+                  <video
+                    ref={previewRef}
+                    controls
+                    preload="metadata"
+                    src={mediaUrl(projectId, cut.outputRef)}
+                    className="max-h-[420px] w-full rounded-lg border border-border bg-muted object-contain"
+                  />
+                )}
+              </>
+            ) : (
+              <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
+                No render yet for v{cut.version}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="min-w-0 self-start lg:sticky lg:top-4">
+        <Card className="min-w-0 self-start">
           <CardHeader>
             <CardTitle>Clip</CardTitle>
             <CardDescription>
@@ -559,6 +517,50 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
 
       <Card className="min-w-0">
         <CardHeader>
+          <CardTitle>Timeline</CardTitle>
+          <CardDescription>
+            {lane.beats.length} beat{lane.beats.length === 1 ? "" : "s"}
+            {lane.overlay ? " + endcard overlay" : ""} · assembled {assembled}s · output{" "}
+            {edl.output.duration}s
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TrackView
+            edl={edl}
+            selected={selected}
+            onSelect={setSelected}
+            onEdl={apply}
+            onPlayhead={(sec) => {
+              const video = previewRef.current;
+              if (video && Number.isFinite(video.duration)) {
+                video.currentTime = Math.min(sec, video.duration);
+              }
+            }}
+            posterFor={
+              detail.playable
+                ? (i) => (edl.video[i] ? mediaUrl(projectId, edl.video[i].source.ref) : null)
+                : null
+            }
+          />
+          <div className="mt-3">
+            <NumField
+              label="output duration (s)"
+              value={edl.output.duration}
+              min={0.1}
+              onCommit={(d) => apply((e) => setOutputDuration(e, d))}
+            />
+            {!lane.overlay && Math.abs(assembled - edl.output.duration) > 0.01 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Assembled lane is {assembled}s but the output -t is {edl.output.duration}s —
+                confirm this is deliberate.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="min-w-0">
+        <CardHeader>
           <CardTitle>Captions</CardTitle>
           <CardDescription>
             Plate center coordinates + fade windows — placement dodges each beat’s focal object.
@@ -620,17 +622,6 @@ export function CutEditor({ projectId, cutId }: { projectId: string; cutId: stri
         }}
       />
     </div>
-  );
-}
-
-function BackLink({ projectId }: { projectId: string }) {
-  return (
-    <Link
-      href={`/app/videos/${projectId}`}
-      className="inline-flex items-center gap-1 self-start text-xs text-primary hover:underline"
-    >
-      <ArrowLeft aria-hidden className="size-3" /> Project
-    </Link>
   );
 }
 
