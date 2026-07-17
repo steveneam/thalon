@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { edlSchema, tenantCtx, type EdlDiff, type EdlInput } from "@thalon/contracts";
+import {
+  edlDiffSchema,
+  edlSchema,
+  tenantCtx,
+  type EdlDiff,
+  type EdlInput,
+} from "@thalon/contracts";
 import { openTestDb, type DbHandle } from "@thalon/db";
 import { applyEdlDiff, EdlDiffApplyError } from "../diff";
 import { EdlProposeError, proposeEdlDiff, validateEdlDiffCandidate } from "../propose";
@@ -93,6 +99,26 @@ describe("applyEdlDiff", () => {
         ops: [{ op: "music-align", cue: 3, offset: 1, why: "w" }],
       }),
     ).toThrow(/op 0: audio cue 3 does not exist/);
+  });
+
+  it("refuses an op kind that has no engine arm — never a silent no-op", () => {
+    // Fabricated kind: pins the default arm forever, however the union grows.
+    const alien = {
+      version: 1,
+      summary: "s",
+      ops: [{ op: "sky-hook", why: "w" }],
+    } as unknown as EdlDiff;
+    expect(() => applyEdlDiff(base(), alien)).toThrow(EdlDiffApplyError);
+
+    // The inter-merge state: clip-crop parses at the contract (B-ve.7
+    // half-window) but its engine arm is B-ve.7 lane work — until it lands,
+    // dry-apply refuses. B-ve.7 lane: DELETE this second pin when the crop
+    // arm lands; your apply/refusal suite replaces it.
+    const crop = edlDiffSchema.parse({
+      summary: "s",
+      ops: [{ op: "clip-crop", clip: 0, crop: { width: 10, height: 10 }, why: "w" }],
+    });
+    expect(() => applyEdlDiff(base(), crop)).toThrow(/no engine arm/);
   });
 
   it("refuses alignment knobs on a stream-copied cue (they need an encode cue)", () => {

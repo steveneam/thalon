@@ -403,13 +403,31 @@ export type VideoCutInput = z.input<typeof videoCutInputSchema>;
 /**
  * The diff vocabulary the agent may propose — the MEASURED ops first
  * (caption placement + music alignment, ADR 0010 §B-ve.4), grown additively
- * as later seats earn their way in. A diff op is a targeted knob turn on an
+ * as later seats earn their way in: `clip-crop` joined at the B-ve.7
+ * half-window (the agent-reframe seat). A diff op is a targeted knob turn on an
  * existing EDL, never a whole-EDL replacement: the operator reads each op
  * (with its `why`), and what they approve rides the SAME save door as a
  * manual edit — compile-gated, versioned, replayable.
  */
-export const EDL_DIFF_OP_KINDS = ["caption-move", "caption-text", "music-align"] as const;
+export const EDL_DIFF_OP_KINDS = [
+  "caption-move",
+  "caption-text",
+  "music-align",
+  "clip-crop",
+] as const;
 export type EdlDiffOpKind = (typeof EDL_DIFF_OP_KINDS)[number];
+
+/**
+ * B-ve.7 (half-window, additive): the pan alphabet the AGENT may propose —
+ * static or linear from/to only. The `expr` arm never enters through the
+ * propose door: an expression is hand-measured operator craft (and an
+ * injection surface the agent has no business writing); a reframe that needs
+ * one is an operator edit.
+ */
+const proposedPanSchema = z.union([
+  z.number().finite(),
+  z.object({ from: z.number().finite(), to: z.number().finite() }),
+]);
 
 export const edlDiffOpSchema = z.discriminatedUnion("op", [
   z.object({
@@ -448,6 +466,23 @@ export const edlDiffOpSchema = z.discriminatedUnion("op", [
         o.fadeOut !== undefined,
       { message: "a music-align op must turn at least one knob" },
     ),
+  z.object({
+    op: z.literal("clip-crop"),
+    /** Index into the video (beat) lane. */
+    clip: z.number().int().min(0),
+    /**
+     * The full replacement crop window, source pixels. Bounds are checked at
+     * dry-apply against MEASURED source dims (probeSourceDims) — "measured,
+     * never estimated" binds the agent too; the schema carries only the shape.
+     */
+    crop: z.object({
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+      x: proposedPanSchema.default(0),
+      y: proposedPanSchema.default(0),
+    }),
+    why: z.string().min(1),
+  }),
 ]);
 export type EdlDiffOp = z.infer<typeof edlDiffOpSchema>;
 
