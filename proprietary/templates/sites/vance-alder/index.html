@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vance &amp; Alder — Solicitors &amp; Advisers, Sydney</title>
+<meta name="description" content="A two-principal commercial law firm for owner-run businesses. Contracts, disputes, property and succession — counsel, plainly given. A fictional demonstration site.">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+@font-face{font-family:"Newsreader";src:url("fonts/newsreader-var.woff2") format("woff2");font-weight:300 700;font-style:normal;font-stretch:normal;font-display:swap}
+@font-face{font-family:"Newsreader";src:url("fonts/newsreader-italic-var.woff2") format("woff2");font-weight:300 700;font-style:italic;font-display:swap}
+@font-face{font-family:"Courier Prime";src:url("fonts/courier-prime.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Courier Prime";src:url("fonts/courier-prime-bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Courier Prime";src:url("fonts/courier-prime-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F6F1E7;--paper-deep:#EFE8D9;--ink:#1A170F;--oxblood:#5E1F1B;--stamp:#A33327;
+  --faded:rgba(26,23,15,.62);--faint:rgba(26,23,15,.4);
+  --rule:rgba(26,23,15,.8);--hair:rgba(26,23,15,.25);
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font-family:"Newsreader",Georgia,serif;font-optical-sizing:none;font-variation-settings:"opsz" 14;font-size:17px;line-height:1.62}
+img{max-width:100%;display:block}
+.wrap{max-width:1240px;margin:0 auto;padding-left:48px;padding-right:48px}
+.mono{font-family:"Courier Prime","Courier New",monospace}
+.oxblood{color:var(--oxblood)}
+.faded{color:var(--faded)}
+.faint{color:var(--faint)}
+.rule{border-top:1px solid var(--rule)}
+.rule-hair{border-top:1px solid var(--hair)}
+.rule-double{border-top:3px double rgba(26,23,15,.85)}
+.masthead{font-variation-settings:"opsz" 72;letter-spacing:.04em;font-weight:500;line-height:1}
+.display{font-variation-settings:"opsz" 72;font-weight:400;line-height:1.02;letter-spacing:-.01em}
+.smallcaps{letter-spacing:.18em;text-transform:uppercase;font-size:11px;font-weight:500}
+.drop::first-letter{font-size:3.3em;float:left;line-height:.82;padding:6px 10px 0 0;font-variation-settings:"opsz" 72;color:var(--oxblood)}
+.platewrap{overflow:hidden;background:#EAE3D3;border:1px solid rgba(26,23,15,.2)}
+.plate{width:100%;height:100%;object-fit:cover}
+.leader{flex:1;border-bottom:1px dotted rgba(26,23,15,.45);margin:0 12px;transform:translateY(-6px)}
+.idxnum{font-variation-settings:"opsz" 72;font-size:44px;font-weight:300;color:var(--oxblood);line-height:1}
+.pullq{font-variation-settings:"opsz" 72;font-size:30px;line-height:1.25;font-style:italic;color:var(--oxblood)}
+.stamp{display:inline-block;border:2px solid var(--stamp);color:var(--stamp);letter-spacing:.22em;font-weight:700;font-size:11px;padding:5px 12px;transform:rotate(-4deg);text-transform:uppercase}
+.colrule{column-count:2;column-gap:56px;column-rule:1px solid var(--hair)}
+.colrule p{margin-bottom:1em}
+.sig{font-variation-settings:"opsz" 72;font-style:italic;font-size:26px}
+.redact{background:var(--paper);color:transparent;border-radius:1px;user-select:none;white-space:nowrap}
+.btn{display:inline-block;background:var(--ink);color:var(--paper);padding:14px 26px;letter-spacing:.18em;text-decoration:none;cursor:pointer}
+.navlink{color:var(--faded);text-decoration:none}
+.navlink:hover{color:var(--oxblood)}
+.fx{display:flex}.ac{align-items:center}.jb{justify-content:space-between}.jc{justify-content:center}.col{flex-direction:column}
+.grain{position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:50;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
+.runhead{position:fixed;top:0;left:0;right:0;background:rgba(246,241,231,.97);border-bottom:1px solid rgba(26,23,15,.35);z-index:40;transform:translateY(-110%);transition:transform 320ms ease}
+.runhead.on{transform:translateY(0)}
+.runhead .inner{position:relative;display:flex;justify-content:space-between;align-items:center;padding-top:9px;padding-bottom:9px;font-size:11px;letter-spacing:.06em}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;background:var(--oxblood);width:0%}
+.mastnav{display:flex;justify-content:center;flex-wrap:wrap;gap:34px;padding:12px 0}
+
+/* Motion is additive: hidden initial states exist only with JS present AND motion allowed. */
+@media (prefers-reduced-motion: no-preference){
+  .js .rise{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+  .js .rise.in{opacity:1;transform:none}
+  .js .develop{filter:sepia(.45) brightness(1.04) blur(3px);transform:scale(1.035);transition:filter 1.1s ease,transform 1.1s ease}
+  .js .develop.in{filter:none;transform:none}
+  .js .drawlead .leader{transform-origin:left center;transform:translateY(-6px) scaleX(0);transition:transform .9s ease .15s}
+  .js .drawlead.in .leader{transform:translateY(-6px) scaleX(1)}
+  .js .inknum{opacity:0;transition:opacity .8s ease}
+  .js .in .inknum{opacity:1}
+  .js .redact{transform-origin:left center;transform:scaleX(0);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+  .js .in .redact{transform:scaleX(1)}
+  .redact:hover{animation:refuse 260ms ease}
+  .js .stampin{opacity:0;transform:rotate(-4deg) scale(1.6);transition:opacity .38s ease,transform .38s cubic-bezier(.34,1.56,.64,1)}
+  .js .stampin.in{opacity:1;transform:rotate(-4deg) scale(1)}
+  .js .sigreveal{clip-path:inset(0 100% 0 0);transition:clip-path 1.2s ease .2s}
+  .js .in .sigreveal{clip-path:inset(0 0 0 0)}
+}
+@keyframes refuse{0%{transform:scaleX(1) translateX(0)}30%{transform:scaleX(1) translateX(-3px)}60%{transform:scaleX(1) translateX(3px)}100%{transform:scaleX(1) translateX(0)}}
+
+@media (max-width:760px){
+  .wrap{padding-left:22px;padding-right:22px}
+  .colrule{column-count:1}
+  .mobstack{flex-direction:column}
+  .mobhide{display:none}
+  .mastnav{gap:10px 22px}
+  .ledrow{flex-wrap:wrap;line-height:1.9;padding:10px 0}
+  .redact{max-width:48vw;overflow:hidden}
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="runhead" id="runhead" aria-hidden="true">
+  <div class="wrap inner mono">
+    <span class="faded">VANCE &amp; ALDER — SOLICITORS &amp; ADVISERS</span>
+    <span class="oxblood" style="font-weight:700" id="cursec">OPENING</span>
+    <span class="faded mobhide">FILE V&amp;A-2026-0117</span>
+    <div class="progress" id="progressbar"></div>
+  </div>
+</div>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="wrap" style="padding-top:34px">
+  <div class="fx jb ac mono" style="font-size:11px;letter-spacing:.06em">
+    <span class="faded">FILE V&amp;A-2026-0117</span>
+    <span class="faded mobhide">SYDNEY — COMMERCIAL &amp; PRIVATE CLIENT</span>
+    <span class="faded">EST. 1987</span>
+  </div>
+  <div class="rule-double" style="margin-top:10px"></div>
+  <div style="text-align:center;padding:26px 0 18px 0">
+    <div class="masthead" style="font-size:clamp(38px,9vw,64px)">VANCE &amp; ALDER</div>
+    <div class="smallcaps faded" style="margin-top:12px">Solicitors &amp; Advisers · Plain-English counsel for owner-run businesses</div>
+  </div>
+  <div class="rule"></div>
+  <nav class="smallcaps mastnav">
+    <a class="navlink" href="#matters">The Matters</a>
+    <a class="navlink" href="#argument">The Argument</a>
+    <a class="navlink" href="#recent">Recent Matters</a>
+    <a class="navlink" href="#counsel">Counsel</a>
+    <a class="navlink" href="#corr">Correspondence</a>
+  </nav>
+  <div class="rule-hair"></div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="wrap" data-sec="OPENING" style="padding-top:56px;padding-bottom:72px">
+  <div class="fx mobstack" style="align-items:stretch;gap:40px">
+    <div style="flex:1.1;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div class="smallcaps oxblood rise" data-io style="margin-bottom:18px">In the matter of your business</div>
+        <h1 class="display" style="font-size:clamp(42px,10.5vw,76px)"><span class="rise" data-io style="display:inline-block">Counsel,</span> <span class="rise" data-io data-delay="120" style="display:inline-block">plainly&nbsp;given.</span></h1>
+        <p class="faded rise" data-io data-delay="240" style="max-width:34em;margin-top:26px">Contracts read before they are signed. Disputes resolved before they are fought. A firm of two principals who answer their own correspondence — no juniors billed under another name, no advice that needs a second lawyer to translate it.</p>
+      </div>
+      <div class="fx ac rise" data-io data-delay="360" style="margin-top:36px;gap:18px;flex-wrap:wrap">
+        <a class="smallcaps btn" href="#corr">Open a matter</a>
+        <span class="smallcaps faded">— an hour, fixed fee, no obligation</span>
+      </div>
+    </div>
+    <figure style="flex:.9;display:flex;flex-direction:column;gap:10px">
+      <div class="platewrap" style="aspect-ratio:4/3">
+        <img class="plate develop" data-io src="assets/hero-nameplate.webp" width="1800" height="1344" alt="Brass nameplate reading Vance &amp; Alder, Solicitors, on a dark green Georgian door" fetchpriority="high">
+      </div>
+      <figcaption class="fx jb mono faint" style="font-size:11px;flex-wrap:wrap;gap:6px">
+        <span>fig. 1 — the door on Phillip Street</span>
+        <span>44 Phillip St, Sydney</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ THE MATTERS ============ -->
+<section id="matters" data-sec="INDEX OF MATTERS" style="background:var(--paper-deep);border-top:1px solid var(--rule);border-bottom:1px solid var(--hair)">
+  <div class="wrap" style="padding-top:64px;padding-bottom:64px">
+    <div class="fx jb ac" style="margin-bottom:40px;flex-wrap:wrap;gap:6px">
+      <h2 class="smallcaps" style="font-weight:500">Index of Matters</h2>
+      <span class="mono faint" style="font-size:11px">what we act in — and what we send elsewhere</span>
+    </div>
+    <div class="fx col">
+      <div class="fx ac rule-hair drawlead" data-io style="padding:26px 0;gap:28px">
+        <span class="idxnum inknum">01</span>
+        <div style="flex:1">
+          <div class="fx ac"><span class="display" style="font-size:27px">Contracts &amp; Commercial</span><span class="leader mobhide"></span><span class="mono faint mobhide" style="font-size:11px">supply · terms · partnership</span></div>
+          <p class="faded" style="margin-top:8px;max-width:44em">The agreement you are about to sign, read by someone acting only for you — and redrafted in words both sides can hold to.</p>
+        </div>
+      </div>
+      <div class="fx ac rule-hair drawlead" data-io style="padding:26px 0;gap:28px">
+        <span class="idxnum inknum">02</span>
+        <div style="flex:1">
+          <div class="fx ac"><span class="display" style="font-size:27px">Disputes &amp; Recovery</span><span class="leader mobhide"></span><span class="mono faint mobhide" style="font-size:11px">demand · negotiation · hearing</span></div>
+          <p class="faded" style="margin-top:8px;max-width:44em">Most disputes end at a well-written letter. We price the letter first, the courtroom last, and tell you honestly which one your matter needs.</p>
+        </div>
+      </div>
+      <div class="fx ac rule-hair drawlead" data-io style="padding:26px 0;gap:28px">
+        <span class="idxnum inknum">03</span>
+        <div style="flex:1">
+          <div class="fx ac"><span class="display" style="font-size:27px">Property &amp; Leases</span><span class="leader mobhide"></span><span class="mono faint mobhide" style="font-size:11px">premises · assignment · make-good</span></div>
+          <p class="faded" style="margin-top:8px;max-width:44em">The lease is usually the largest contract a small business ever signs. It deserves more than a skim on settlement morning.</p>
+        </div>
+      </div>
+      <div class="fx ac drawlead" data-io style="padding:26px 0;gap:28px;border-top:1px solid var(--hair)">
+        <span class="idxnum inknum">04</span>
+        <div style="flex:1">
+          <div class="fx ac"><span class="display" style="font-size:27px">Succession &amp; Estates</span><span class="leader mobhide"></span><span class="mono faint mobhide" style="font-size:11px">wills · powers · the handover</span></div>
+          <p class="faded" style="margin-top:8px;max-width:44em">A business that outlives its founder does so on paper written years earlier. We write that paper while it is still easy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE ARGUMENT ============ -->
+<section id="argument" class="wrap" data-sec="THE ARGUMENT" style="padding-top:72px;padding-bottom:72px">
+  <div class="fx mobstack" style="gap:44px">
+    <div style="flex:1.4">
+      <h2 class="smallcaps" style="margin-bottom:34px;font-weight:500">The Argument for a Smaller Firm</h2>
+      <div class="colrule">
+        <p class="drop">Legal advice fails in two familiar ways: it arrives late, and it arrives translated through three layers of a firm you never meet. Both are structural. A large practice must keep juniors busy and partners scarce; the person who knows your file is rarely the person who signs the advice.<sup class="oxblood">1</sup></p>
+        <p>We are structured against both failures. Two principals, one office, no leverage model. When you telephone, the person who answers has read your file, because there is no one else to have read it. Fixed fees where the scope is knowable<sup class="oxblood">2</sup>; an honest hourly account where it is not.</p>
+        <p>This is not a plea for smallness as a virtue. Some matters need a bigger machine — a float, a class action, forty jurisdictions. When yours does, we will say so in the first meeting and hand you to the right firm with a briefing note.<sup class="oxblood">3</sup> What remains — the contracts, leases, disputes and successions that owner-run businesses actually live on — is precisely the work a small firm does best.</p>
+      </div>
+      <div class="rule-hair" style="margin-top:34px;padding-top:14px">
+        <p class="mono faint" style="font-size:11.5px;line-height:1.7">1. Advice is signed by the principal who wrote it. &nbsp; 2. A written scope and price before work begins; the price moves only if the scope does, in writing. &nbsp; 3. Referrals are unpaid — we take no commission for sending you elsewhere.</p>
+      </div>
+    </div>
+    <div style="flex:.75;display:flex;flex-direction:column;gap:24px">
+      <div class="pullq rise" data-io style="border-top:3px double rgba(94,31,27,.7);padding-top:22px">“The person who answers has read your file — because there is no one else to have read it.”</div>
+      <figure style="display:flex;flex-direction:column;gap:10px">
+        <div class="platewrap" style="aspect-ratio:4/3">
+          <img class="plate develop" data-io src="assets/desk.webp" width="1400" height="1050" alt="Kraft-wrapped brief bundle tied with pale ribbon under a green banker's lamp" loading="lazy">
+        </div>
+        <figcaption class="mono faint" style="font-size:11px">fig. 2 — the morning files</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RECENT MATTERS ============ -->
+<section id="recent" data-sec="RECENT MATTERS" style="background:var(--ink);color:var(--paper)">
+  <div class="wrap" data-io style="padding-top:64px;padding-bottom:64px">
+    <div class="fx jb ac" style="margin-bottom:8px">
+      <h2 class="smallcaps" style="color:var(--paper);font-weight:500">Recent Matters</h2>
+      <span class="stamp mono stampin">Confidential</span>
+    </div>
+    <p style="color:rgba(246,241,231,.55);font-size:14px;font-style:italic;margin-bottom:34px">Client matters are confidential. They are listed here as they appear in our ledger — which is to say, not really listed at all.</p>
+    <div class="mono" style="font-size:14px;line-height:2.4">
+      <div class="fx ac ledrow" style="gap:18px;border-bottom:1px solid rgba(246,241,231,.15);padding:6px 0"><span style="color:rgba(246,241,231,.45)">M-2026-041</span><span class="redact" style="transition-delay:100ms">a client name would be here</span><span style="color:rgba(246,241,231,.8)">supply agreement renegotiated</span><span class="mobhide" style="margin-left:auto;color:rgba(246,241,231,.45)">resolved without hearing</span></div>
+      <div class="fx ac ledrow" style="gap:18px;border-bottom:1px solid rgba(246,241,231,.15);padding:6px 0"><span style="color:rgba(246,241,231,.45)">M-2026-038</span><span class="redact" style="transition-delay:220ms">this one stays private too</span><span style="color:rgba(246,241,231,.8)">lease assignment &amp; make-good</span><span class="mobhide" style="margin-left:auto;color:rgba(246,241,231,.45)">settled on exchange</span></div>
+      <div class="fx ac ledrow" style="gap:18px;border-bottom:1px solid rgba(246,241,231,.15);padding:6px 0"><span style="color:rgba(246,241,231,.45)">M-2026-033</span><span class="redact" style="transition-delay:340ms">redacted, as it should be</span><span style="color:rgba(246,241,231,.8)">recovery of trade debt</span><span class="mobhide" style="margin-left:auto;color:rgba(246,241,231,.45)">paid on demand letter</span></div>
+      <div class="fx ac ledrow" style="gap:18px;padding:6px 0"><span style="color:rgba(246,241,231,.45)">M-2026-029</span><span class="redact" style="transition-delay:460ms">confidentiality is the point</span><span style="color:rgba(246,241,231,.8)">succession deed, family company</span><span class="mobhide" style="margin-left:auto;color:rgba(246,241,231,.45)">executed</span></div>
+    </div>
+    <div class="fx mobstack" style="gap:32px;margin-top:40px;align-items:flex-end">
+      <p class="mono" style="font-size:11.5px;color:rgba(246,241,231,.4);flex:1">The bars do not lift. A firm that shows you its clients’ names would show someone yours.</p>
+      <figure style="flex:.8;display:flex;flex-direction:column;gap:10px">
+        <div class="platewrap" style="aspect-ratio:3/2;border-color:rgba(246,241,231,.2)">
+          <img class="plate develop" data-io src="assets/hands.webp" width="1400" height="933" alt="Two parties' hands at a negotiation table, one about to sign an agreement" loading="lazy">
+        </div>
+        <figcaption class="mono" style="font-size:11px;color:rgba(246,241,231,.4)">fig. 3 — the signing, faces out of frame</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COUNSEL ============ -->
+<section id="counsel" class="wrap" data-sec="COUNSEL" style="padding-top:72px;padding-bottom:72px">
+  <h2 class="smallcaps" style="margin-bottom:40px;font-weight:500">Counsel</h2>
+  <div class="fx mobstack" style="gap:44px">
+    <div data-io style="flex:1;border-top:3px double rgba(26,23,15,.85);padding-top:24px">
+      <div class="display" style="font-size:34px">Eleanor Vance</div>
+      <div class="smallcaps faded" style="margin-top:8px">Principal — Commercial &amp; Disputes</div>
+      <p class="faded" style="max-width:30em;margin-top:16px">Admitted 1998. Fifteen years in a national firm’s commercial division before concluding that the best part of the job was the client, not the leverage. Writes the demand letters that end matters.</p>
+      <div class="sig oxblood sigreveal" style="margin-top:22px">E. Vance</div>
+      <div class="rule-hair" style="margin-top:4px;max-width:220px"></div>
+    </div>
+    <div data-io style="flex:1;border-top:3px double rgba(26,23,15,.85);padding-top:24px">
+      <div class="display" style="font-size:34px">Rupert Alder</div>
+      <div class="smallcaps faded" style="margin-top:8px">Principal — Property &amp; Succession</div>
+      <p class="faded" style="max-width:30em;margin-top:16px">Admitted 2004. Acted on either side of several hundred commercial leases and the successions of family companies old enough to have outlived their founders twice. Reads the schedule everyone else skips.</p>
+      <div class="sig oxblood sigreveal" style="margin-top:22px">R. Alder</div>
+      <div class="rule-hair" style="margin-top:4px;max-width:220px"></div>
+    </div>
+    <figure style="flex:.8;display:flex;flex-direction:column;gap:10px">
+      <div class="platewrap" style="aspect-ratio:3/4">
+        <img class="plate develop" data-io src="assets/window.webp" width="1200" height="1600" alt="A tall chambers window at dusk, desk lamp reflected in the glass" loading="lazy">
+      </div>
+      <figcaption class="mono faint" style="font-size:11px">fig. 4 — chambers, close of day</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ CORRESPONDENCE ============ -->
+<footer id="corr" data-sec="CORRESPONDENCE" style="border-top:1px solid var(--rule)">
+  <div class="wrap" style="padding-top:56px;padding-bottom:44px">
+    <div class="fx jb mobstack" style="gap:40px">
+      <div>
+        <div class="masthead" style="font-size:30px">VANCE &amp; ALDER</div>
+        <div class="smallcaps faded" style="margin-top:8px">Correspondence</div>
+        <p class="faded" style="margin-top:14px;max-width:26em">44 Phillip Street, Sydney NSW 2000<br>Mornings are for matters; telephone after two.<br>correspondence@vancealder.example</p>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;gap:10px">
+        <span class="smallcaps btn">Open a matter</span>
+        <a class="mono faint navlink" style="font-size:11px" href="guide/">A demonstration site — how it was made: /guide</a>
+      </div>
+    </div>
+    <div class="rule-hair" style="margin-top:36px;padding-top:12px">
+      <div class="fx jb mono faint" style="font-size:10.5px;flex-wrap:wrap;gap:6px">
+        <span>Vance &amp; Alder is a fictional demonstration business.</span>
+        <span>Set in Newsreader &amp; Courier Prime.</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        var delay = parseInt(e.target.getAttribute("data-delay") || "0", 10);
+        setTimeout(function(){ e.target.classList.add("in"); }, reduced ? 0 : delay);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.25 });
+  document.querySelectorAll("[data-io], .stampin").forEach(function(el){ io.observe(el); });
+
+  var runhead = document.getElementById("runhead");
+  var bar = document.getElementById("progressbar");
+  var cursec = document.getElementById("cursec");
+  var secs = Array.prototype.slice.call(document.querySelectorAll("[data-sec]"));
+  function onScroll(){
+    var y = window.scrollY;
+    runhead.classList.toggle("on", y > 340);
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    if (h > 0) bar.style.width = ((y / h) * 100).toFixed(2) + "%";
+    var cur = "OPENING";
+    secs.forEach(function(s){
+      if (s.getBoundingClientRect().top < window.innerHeight * 0.4) cur = s.getAttribute("data-sec");
+    });
+    if (cursec.textContent !== cur) cursec.textContent = cur;
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>

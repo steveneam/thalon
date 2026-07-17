@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How the Vance &amp; Alder page was made</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F6F1E7;color:#1A170F;font-family:Georgia,serif;line-height:1.65;padding:72px clamp(24px,8vw,140px);max-width:900px}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin-bottom:8px}
+h2{font-size:19px;margin:40px 0 10px;color:#5E1F1B;letter-spacing:0.04em}
+p,li{font-size:16px;color:rgba(26,23,15,0.78);margin-bottom:12px}
+ul{padding-left:22px}
+a{color:#5E1F1B}
+.rule{border:none;border-top:1px solid rgba(26,23,15,0.2);margin:32px 0}
+em{color:#5E1F1B}
+</style>
+</head>
+<body>
+<h1>How this page was made</h1>
+<p><em>Vance &amp; Alder is a fictional demonstration business.</em> Every image on the landing page is AI-generated, minted specifically for this design, and recorded with full provenance (model, prompt, spend, license tier) at generation time.</p>
+
+<hr class="rule" />
+<h2>The idea</h2>
+<p>The page is built as a legal document rather than a website about lawyers: a ruled masthead, a casebook index with leader dots, a two-column argument with real footnotes, and a matter ledger whose client names are redacted — bars that swipe in, refuse on hover, and never lift, because a firm that shows you its clients&rsquo; names would show someone yours. A sticky running head carries the file number and the section you are reading past, with a thin oxblood reading-progress rule; the principals&rsquo; signatures ink themselves left to right as you reach them.</p>
+
+<h2>Method</h2>
+<ul>
+<li><strong>Look first.</strong> Studied law-firm landing pages and editorial/print design on Dribbble and Pinterest (look-and-learn only — no reference imagery is ever downloaded into the pipeline). The genre default — suited-team photography, navy and gold, &ldquo;Trusted Legal Solutions,&rdquo; stat badges, scales-of-justice statues — appeared more than fifteen times and was deliberately avoided in full.</li>
+<li><strong>Design scaffold.</strong> The page was scaffolded and then graduated to a final motion design in a working design surface before any production code, with named slots for every image.</li>
+<li><strong>Minted imagery.</strong> The hero — a brass nameplate that must legibly read VANCE &amp; ALDER, SOLICITORS — was generated with <em>Nano Banana Pro</em>, a text-precise image model, and read perfectly on the first take. Three scene plates were generated with <em>Soul v2</em> (Higgsfield). One Soul v2 take was rejected with reasons on record: it printed garbled pseudo-lettering across the file spines at the page&rsquo;s focal point and added a scales-of-justice statue from the avoided-clich&eacute; list; the retake composed every printable surface out of frame. Total image spend for the page: about 2.5 credits.</li>
+<li><strong>Code, not credits.</strong> The running head, progress rule, redaction behaviour, develop-in plates and signature reveals are plain HTML/CSS/JavaScript in one self-contained file — no frameworks, no external hosts, fonts vendored under their SIL Open Font License (Newsreader and Courier Prime).</li>
+</ul>
+
+<h2>Accessibility &amp; honesty</h2>
+<ul>
+<li>Reduced-motion users get the complete page with every bar and signature already applied; nothing animates.</li>
+<li>Without JavaScript the full page reads statically, redactions included.</li>
+<li>All copy is illustrative; no real firm, matters, clients or outcomes are described, and no unverifiable claims are made.</li>
+</ul>
+
+<h2>Iteration passes</h2>
+<ul>
+<li><strong>Pass 1</strong> — fault-hunt: the design surface&rsquo;s utility gap classes silently failed, running the masthead navigation into one string and letting the counsel columns touch; replaced with explicit gaps. Ambition: committed to the sticky running head with a reading-progress rule instead of a conventional navigation bar.</li>
+<li><strong>Pass 2</strong> — fault-hunt: 390&nbsp;px overflow from three sources (the navigation row, the 76&nbsp;px hero line, the mono ledger rows) fixed with clamps and wraps. Ambition: the matter ledger inverted to ink with paper-cream redaction bars that refuse on hover.</li>
+<li><strong>Pass 3</strong> — fault-hunt: without JavaScript the entrance states would have hidden content forever; motion-hidden states are now gated behind a <code>js</code> class so the no-script page is complete. Ambition: plates develop in like photographs in a tray, and the principals&rsquo; signatures ink themselves.</li>
+</ul>
+
+<p style="margin-top:40px"><a href="../">&larr; Back to the page</a></p>
+</body>
+</html>

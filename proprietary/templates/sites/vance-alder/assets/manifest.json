@@ -1,0 +1,30 @@
+[
+ {
+  "file": "hero-nameplate.webp",
+  "pinnedHash": "aa6e175091bc9a0f1e02b5d4536075f488726a8e4e1884db6c82a49594a4d0de",
+  "width": 1800,
+  "height": 1344,
+  "quality": 80
+ },
+ {
+  "file": "desk.webp",
+  "pinnedHash": "c9766f7fb64c76762d90ece46fc9aca0834406a3982443e6976d8d509f043f7d",
+  "width": 1400,
+  "height": 1050,
+  "quality": 76
+ },
+ {
+  "file": "hands.webp",
+  "pinnedHash": "00b3d82000bb0fb7e1e99a5aecc8deaee98e85738c5df031da868eed2930e029",
+  "width": 1400,
+  "height": 933,
+  "quality": 76
+ },
+ {
+  "file": "window.webp",
+  "pinnedHash": "078a7b2e5a473c317347edfbc26b7ebb1512f69d74572d8297b0ecbcd12ec425",
+  "width": 1200,
+  "height": 1600,
+  "quality": 76
+ }
+]
