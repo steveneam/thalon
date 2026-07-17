@@ -36,13 +36,13 @@ export function useWebAppDataDir(): void {
  * found live during the B1.5 dogfood when an operator edit made through the
  * running server never became visible to the CLI. One process at a time:
  * refuse to open the shared dev DB while the web app is serving it.
- * (Checks the dev default port 3000; override PORT setups must stop the
- * server themselves.)
+ * (Checks the dev lane port 3111 — the port pinned in apps/web's `dev`
+ * script; override PORT setups must stop the server themselves.)
  */
 export async function assertSoleDbWriter(): Promise<void> {
   let devServerUp = false;
   try {
-    const res = await fetch("http://localhost:3000/api/health", {
+    const res = await fetch("http://localhost:3111/api/health", {
       signal: AbortSignal.timeout(1500),
     });
     devServerUp = res.ok;

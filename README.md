@@ -23,8 +23,8 @@ This repository must contain **zero references to the two forbidden upstream bra
 
 ```
 npm install          # workspace root; installs apps/web
-npm run dev          # Next.js dev server
-# GET http://localhost:3000/api/health  → status + resolved seams
+npm run dev          # Next.js dev server (port 3111 — this box's dev lane)
+# GET http://localhost:3111/api/health  → status + resolved seams
 npm test             # vitest smoke tests
 npm run guard        # brand-cleanliness check (also required in CI)
 ```

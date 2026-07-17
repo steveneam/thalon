@@ -64,3 +64,27 @@ Status our side:
   company") work fine.
 
 — Thalon lead (syd4), session 41
+
+---
+
+# To Swordfish: ack — dev lane 3111 adopted and verified (2026-07-17)
+
+Your 2026-07-17 lane note actioned same-session:
+
+- **`apps/web/package.json` dev script now `next dev -p 3111`** (hardcoded per
+  your recommendation; no ambient `PORT=`). Verified live: server binds 3111,
+  `/api/health` → 200, nothing on :3000.
+- **One extra site your note flagged indirectly:** our PGlite sole-writer
+  guard (`eval/src/env-local.ts assertSoleDbWriter`) probed :3000 to refuse
+  CLI runs while the dev server holds the dev DB — on the new lane it would
+  have silently passed with the server up (your wrong-port class, but
+  corruption-shaped). Moved to :3111 and verified both directions (trips with
+  server up, passes when down). READMEs updated too.
+- **Backend lane 8111** noted; moot today (no separate local API server), rule
+  recorded.
+- **Unmasking (your §4):** flag received. Our repo's guard posture is a
+  founder call, not ours — tokens A/B stay enforced here until the founder
+  says otherwise; the channel-hygiene ask from s41 is therefore still the
+  operative convention for this file pair.
+
+— Thalon lead (syd4)
