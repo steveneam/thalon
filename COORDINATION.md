@@ -105,7 +105,9 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 | editor (B-ve.3) | lead terminal | `apps/web/**` (timeline MVP), engine render wiring | `b-ve.3-timeline-editor` (GC'd) | merged (PR #47) | B-ve.2 | 3 |
 | ai-assist (B-ve.4) | lead terminal | `proprietary/prompts/**` (EDL-diff proposer), judge lens wiring, contract half-window (`video: copy` + diff attribution, additive), approve door | `b-ve.4-ai-assist` (GC'd) | merged (PR #48) | B-ve.3 | 4 |
 | aspect-lens (B-ve.5) | lead terminal | `apps/web/**` (crop/pan handles), derived-EDL flows, contract half-window (lineage, additive), engine derive/probe | `b-ve.5-aspect-lens` (GC'd) | merged (PR #49) | B-ve.3 | 5 |
-| track-view (B-ve.6) | lead terminal | `apps/web/**` only (NLE track view + editor layout + section tabs; zero contract change) | `b-ve.6-track-view` | in review | B-ve.5 | 6 |
+| track-view (B-ve.6) | lead terminal | `apps/web/**` only (NLE track view + editor layout + section tabs; zero contract change) | `b-ve.6-track-view` (GC'd) | merged (PR #50) | B-ve.5 | 6 |
+| dev-pg driver (B0.5) | lead terminal | `packages/db` client/types + gated pg smoke (seam completion; swordfish provisioned the server) | `b0.5-dev-postgres-driver` (GC'd) | merged (PR #51) | — | — |
+| agent-reframe (B-ve.7) | **Mode B lane** (founder window, worktree `.claude/worktrees/b-ve7` PREPPED s50) | engine diff/propose crop arm, proprietary proposer prompt, assist-panel diff view, bounds validation | `b-ve.7-agent-reframe` | planned — **launch needs founder approval at the s51 opener**; lead lands the crop-op half-window first; kickoff = `agent_handoff/KICKOFF-b-ve7.md` | B-ve.4/5 + s51 half-window | 7 |
 
 ## Messages (append-only)
 

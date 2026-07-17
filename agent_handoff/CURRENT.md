@@ -10,7 +10,7 @@
 
 > Stamped 2026-07-17, session-50 wrap.
 
-**Resume · Thalon** — session 51, syd4 — **FIRST: wave-2 template mint, slate ⑥–⑩ as verdicted** (⑥ Houselights events/novel-type · ⑦ Vance & Alder legal/editorial · ⑧ Crateline logistics/brutalist · ⑨ Wagtail & Co pets/soft-organic · ⑩ Hue & Cry salon/exceptional-palette; bench: café/travel/construction/accounting/photography — ledger §s45). LOOK-FIRST discipline, get_cost preflight per mint (≥40cr = per-clip founder ping), balance 743.52/Plus. CI is BACK and green (full-matrix stamp on the merged codebase landed s50-late; staging auto-deployed the post-B-ve.6 image).
+**Resume · Thalon** — session 51, syd4 — **PARALLEL SESSION (founder-confirmed s50): main window = wave-2 mint · founder-opened Mode B window = B-ve.7 lane.** Opener order: (1) present B-ve.7 scope + get founder approval for scope AND the lane launch (fresh approval, standing rule), (2) lead lands the crop-op half-window (additive edlDiff arm, re-freeze at merge), (3) rebase the PREPPED worktree `.claude/worktrees/b-ve7` onto it and tell the founder "lane ready" (their instruction card is in this file, bottom), (4) drive **wave-2 template mint, slate ⑥–⑩ as verdicted** (⑥ Houselights events/novel-type · ⑦ Vance & Alder legal/editorial · ⑧ Crateline logistics/brutalist · ⑨ Wagtail & Co pets/soft-organic · ⑩ Hue & Cry salon/exceptional-palette; bench: café/travel/construction/accounting/photography — ledger §s45). **Per-template loop (founder direction s50): LOOK-FIRST niche study → claude-design ROUGH scaffold with named asset slots (0cr — the storyboard step) → mint TO the slots (get_cost preflight, ≥40cr = per-clip founder ping) → assemble + claude-design polish with real assets.** (The dedicated Thalon landing/workspace design phase stays AFTER wave 2 — unchanged s49 verdict.) Balance 743.52/Plus. CI is BACK and green + the CI diet is live (docs-only ≈30s). **B0.5 SHIPPED s50-late (PR #51): dev daily driver = REAL Postgres 17** (swordfish-provisioned; creds `.context/dev-postgres-from-swordfish.md`; film dataset imported, 58 takes/5 cuts incl. the 1:1 pair, all lineage stamped, v2 re-approved through the gate; `db: postgres` in health seams; single-process rules NO LONGER apply to dev — PGlite remains tests/fallback; pgvector installed + extension created, flagged to swordfish).
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → COORDINATION.md §B-video-editor (B-ve.1–.6 ALL merged) → memory `dev-db-fragility-and-pg-plan` (the incident + rebuild + restore).
 
@@ -27,6 +27,15 @@
 ## Pointer
 
 Read in order: `CLAUDE.md` → this file → COORDINATION.md §B-video-editor → `docs/adr/0010-video-editor-charter.md` (B-ve.5 + B-ve.6 amendments) → `docs/research/nle-timeline-ui-patterns.md` (the editor's design brief + B-ve.7 shape).
+
+## Founder instruction card — s51 parallel session (paste-free, 6 steps)
+
+1. Open the thalon terminal as usual (it attaches to the lead's tmux window). Say **gogogo**.
+2. The lead presents B-ve.7 scope → you approve (or trim) **scope + lane launch** in one answer.
+3. Wait for the lead to say **"lane ready"** (~30–60 min: half-window + worktree rebase; the lead starts wave-2 look-first work meanwhile).
+4. Press **Ctrl-b then c** (new tmux window, fresh shell — crash-proof like everything in this session).
+5. Type: `cd ~/work/thalon/.claude/worktrees/b-ve7 && claude` — then give it one line: **"Read agent_handoff/KICKOFF-b-ve7.md and execute it."**
+6. Press **Ctrl-b then p** to return to the lead's window. That's it — answer the lead's per-clip credit pings as they arrive; peek at the lane anytime with Ctrl-b n; the lane ends with a wrap message and the LEAD merges it. Never type into the lane mid-run except to answer its questions.
 
 ## Delta (session 50)
 
