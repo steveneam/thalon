@@ -10,6 +10,7 @@ import { CutEditor } from "../cut-editor";
 const routerPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: routerPush }),
+  usePathname: () => "/app/videos/p1/edit",
 }));
 
 // The waveform seat — never exercised in jsdom (no WebAudio); the lane's knobs are.
@@ -178,20 +179,23 @@ describe("CutEditor (B-ve.3 timeline editor MVP)", () => {
     expect(screen.queryByText("unsaved edits")).not.toBeInTheDocument();
   });
 
-  it("reorder keeps the fade rhythm position-bound (row order changes, xfade badge stays on position 2)", async () => {
+  it("reorder keeps the lane magnetic (B-ve.6 track view: chunk order flips, starts re-derive)", async () => {
     arm();
     const user = userEvent.setup();
     render(<CutEditor projectId="p1" cutId="c1" />);
     await screen.findByText("b1");
     await user.click(screen.getByRole("button", { name: "Move clip later" }));
-    // The timeline list now reads b2 then b1…
-    const list = screen.getByText("Timeline").closest("[data-slot=card]") as HTMLElement;
-    const names = within(list)
-      .getAllByText(/^b[12]$/)
-      .map((el) => el.textContent);
-    expect(names).toEqual(["b2", "b1"]);
-    // …and exactly one xfade badge remains (position-bound, never doubled or lost).
-    expect(within(list).getAllByText(/xfade/)).toHaveLength(1);
+    // The track view now reads b2 then b1 — magnetic slots, no gaps possible.
+    const track = screen.getByTestId("track-view");
+    const names = within(track)
+      .getAllByRole("button", { name: /^b[12] \(/ })
+      .map((el) => el.getAttribute("aria-label"));
+    expect(names).toEqual(["b2 (5s)", "b1 (5s)"]);
+    // The fade rhythm stayed position-bound: the transform is pinned in
+    // editor.test.ts; here the derived starts prove it (b1 starts at 4.5s).
+    expect(within(track).getByRole("button", { name: "b1 (5s)" })).toHaveStyle({
+      left: "108px", // 4.5s × 24px/s — the compiler's own offset math
+    });
   });
 
   it("with no cuts on the project, the editor says so instead of exploding", async () => {
@@ -200,6 +204,47 @@ describe("CutEditor (B-ve.3 timeline editor MVP)", () => {
     );
     render(<CutEditor projectId="p1" cutId={null} />);
     expect(await screen.findByText(/No cuts to edit yet/)).toBeInTheDocument();
+  });
+});
+
+describe("CutEditor track view (B-ve.6)", () => {
+  it("renders lanes against the time axis: proportional chunks, caption chips, music block, ruler", async () => {
+    arm();
+    render(<CutEditor projectId="p1" cutId="c1" />);
+    await screen.findByTestId("track-view");
+    const track = screen.getByTestId("track-view");
+    // Beat chunks at derived starts, width ∝ duration (24px/s default).
+    expect(within(track).getByRole("button", { name: "b1 (5s)" })).toHaveStyle({
+      left: "0px",
+      width: "120px",
+    });
+    expect(within(track).getByRole("button", { name: "b2 (5s)" })).toHaveStyle({
+      left: "108px", // 5s − 0.5s xfade = 4.5s × 24
+    });
+    // Caption chip spans its fade window at absolute time (the contract's truth).
+    expect(
+      within(track).getByRole("button", { name: "Caption: measured, not vibed" }),
+    ).toHaveStyle({ left: `${1 * 24}px`, width: `${(4 - 1) * 24}px` });
+    // Music block shows the source + offset knob value; encode mode drags.
+    expect(within(track).getByRole("button", { name: "Music (offset 3s)" })).toBeInTheDocument();
+    // Ruler + playhead slider exist.
+    expect(within(track).getByRole("slider", { name: "Playhead" })).toBeInTheDocument();
+  });
+
+  it("zoom rescales the axis and snap toggles", async () => {
+    arm();
+    const user = userEvent.setup();
+    render(<CutEditor projectId="p1" cutId="c1" />);
+    await screen.findByTestId("track-view");
+    const track = screen.getByTestId("track-view");
+    await user.click(within(track).getByRole("button", { name: "Zoom in" }));
+    expect(within(track).getByRole("button", { name: "b1 (5s)" })).toHaveStyle({
+      width: "180px", // 24 × 1.5 px/s × 5s
+    });
+    const snap = within(track).getByRole("button", { name: /snap/ });
+    expect(snap).toHaveAttribute("aria-pressed", "true");
+    await user.click(snap);
+    expect(snap).toHaveAttribute("aria-pressed", "false");
   });
 });
 

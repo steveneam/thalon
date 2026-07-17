@@ -76,6 +76,20 @@ export function trimBeat(edl: Edl, index: number, patch: { in?: number; duration
   return joinLane(edl, { ...lane, beats });
 }
 
+/**
+ * The classic NLE trim-start (B-ve.6 track view, left-edge drag): the source
+ * in-point advances and the timeline duration shrinks by the same amount —
+ * the beat's END keeps its story position (the chain ripples only by the
+ * duration change). Clamps keep it legal: in ≥ 0, duration ≥ 0.1.
+ */
+export function trimBeatStart(edl: Edl, index: number, deltaSec: number): Edl {
+  const lane = splitLane(edl);
+  if (index < 0 || index >= lane.beats.length) return edl;
+  const clip = lane.beats[index];
+  const delta = Math.max(-clip.in, Math.min(deltaSec, clip.duration - 0.1));
+  return trimBeat(edl, index, { in: clip.in + delta, duration: clip.duration - delta });
+}
+
 /** Swap a beat's source ref (take-swap). The source KIND is the clip's semantics (still = loop-hold) — it never changes on swap. */
 export function swapBeatSource(edl: Edl, index: number, ref: string): Edl {
   const lane = splitLane(edl);
