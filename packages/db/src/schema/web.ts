@@ -1,5 +1,6 @@
 import { index, pgTable, text, timestamp, uniqueIndex, uuid, integer } from "drizzle-orm/pg-core";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 /**
@@ -38,5 +39,6 @@ export const waitlist = pgTable(
     uniqueIndex("waitlist_tenant_referral_code_idx").on(t.tenantId, t.referralCode),
     // Hot path: referral counting for the effective-position math.
     index("waitlist_tenant_referred_by_idx").on(t.tenantId, t.referredBy),
+    tenantIsolation(),
   ],
 );

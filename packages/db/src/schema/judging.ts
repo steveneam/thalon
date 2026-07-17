@@ -11,6 +11,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { drafts } from "./content";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 const inList = (values: readonly string[]) =>
@@ -46,6 +47,7 @@ export const judgeResults = pgTable(
   (t) => [
     index("judge_results_draft_hash_idx").on(t.draftId, t.bodyHash),
     check("judge_results_verdict_check", sql.raw(`verdict in (${inList(VERDICTS)})`)),
+    tenantIsolation(),
   ],
 );
 
@@ -70,6 +72,7 @@ export const approvals = pgTable(
   (t) => [
     index("approvals_tenant_created_idx").on(t.tenantId, t.createdAt),
     check("approvals_action_check", sql.raw(`action in (${inList(APPROVAL_ACTIONS)})`)),
+    tenantIsolation(),
   ],
 );
 
@@ -94,7 +97,10 @@ export const editDiffs = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("edit_diffs_tenant_created_idx").on(t.tenantId, t.createdAt)],
+  (t) => [
+    index("edit_diffs_tenant_created_idx").on(t.tenantId, t.createdAt),
+    tenantIsolation(),
+  ],
 );
 
 /** An edit_diffs insert creates its eval row in the SAME transaction — "every override becomes an eval row" as a mechanism, not a habit. */
@@ -131,5 +137,6 @@ export const evalCases = pgTable(
         `origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage', 'cut_diff_review')`,
       ),
     ),
+    tenantIsolation(),
   ],
 );

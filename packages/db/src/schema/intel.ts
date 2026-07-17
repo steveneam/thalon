@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 /**
@@ -43,6 +44,7 @@ export const watchlists = pgTable(
   (t) => [
     // Hot path: the pass-3 poller loop fans out per tenant × driver.
     index("watchlists_tenant_source_idx").on(t.tenantId, t.source),
+    tenantIsolation(),
   ],
 );
 
@@ -85,6 +87,7 @@ export const monitoredAreas = pgTable(
       "monitored_areas_status_check",
       sql.raw(`status in (${MONITORED_AREA_STATUSES.map((s) => `'${s}'`).join(", ")})`),
     ),
+    tenantIsolation(),
   ],
 );
 
@@ -139,5 +142,6 @@ export const trendSnapshots = pgTable(
       t.account,
       t.capturedAt,
     ),
+    tenantIsolation(),
   ],
 );

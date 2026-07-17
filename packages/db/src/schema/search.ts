@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 const inList = (values: readonly string[]) => values.map((v) => `'${v}'`).join(", ");
@@ -53,6 +54,7 @@ export const searchTargets = pgTable(
     index("search_targets_tenant_status_idx").on(t.tenantId, t.status),
     check("search_targets_origin_check", sql.raw(`origin in (${inList(SEARCH_TARGET_ORIGINS)})`)),
     check("search_targets_status_check", sql.raw(`status in (${inList(SEARCH_TARGET_STATUSES)})`)),
+    tenantIsolation(),
   ],
 );
 
@@ -100,5 +102,6 @@ export const searchSnapshots = pgTable(
     // Hot path: a sweep's full capture in time order — the horizon math's
     // rising-impressions read across queries.
     index("search_snapshots_tenant_source_captured_idx").on(t.tenantId, t.source, t.capturedAt),
+    tenantIsolation(),
   ],
 );
