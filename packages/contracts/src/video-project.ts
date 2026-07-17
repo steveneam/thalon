@@ -496,3 +496,37 @@ export const videoCutAttributionSchema = z
     message: "an agent-authored cut must carry its proposal (replayable + attributed)",
   });
 export type VideoCutAttribution = z.infer<typeof videoCutAttributionSchema>;
+
+/* ------------------------------------------------------------------ */
+/* B-ve.5 (ADR 0010): derived cuts — the aspect-lens lineage pin.      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Aspect presets a cut can be derived FOR. Aspect variants are own-engine
+ * recuts, never vendor reframe (ADR 0010 invariant); the canvas pairs are
+ * the two film masters' proven geometry family.
+ */
+export const VIDEO_DERIVE_ASPECTS = ["9:16", "1:1"] as const;
+export type VideoDeriveAspect = (typeof VIDEO_DERIVE_ASPECTS)[number];
+
+export const DERIVE_CANVAS: Record<VideoDeriveAspect, { width: number; height: number }> = {
+  "9:16": { width: 1080, height: 1920 },
+  "1:1": { width: 1080, height: 1080 },
+};
+
+/**
+ * Cut lineage (stored under the cut row's `meta.lineage`, validated at the
+ * derive/save doors and immutable once stamped — no table change, the
+ * meta.attribution pattern): which cut this one was DERIVED from and the
+ * aspect it recomposes for. The pin is by cut id — one row = one immutable
+ * (name, version) — so the surface can show honest staleness ("derived from
+ * v6 · parent now at v8") with NO auto-sync: a parent edit never touches a
+ * derived cut (auto-apply does not exist).
+ */
+export const videoCutLineageSchema = z.object({
+  /** The parent cut row this EDL was seeded from. */
+  parentCutId: z.string().min(1),
+  /** Declared target aspect, "W:H". */
+  aspect: z.string().regex(/^\d{1,3}:\d{1,3}$/),
+});
+export type VideoCutLineage = z.infer<typeof videoCutLineageSchema>;
