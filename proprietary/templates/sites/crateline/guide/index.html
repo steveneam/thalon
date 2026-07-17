@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crateline — how this page was made</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:"Saira Stencil One";src:url(../fonts/saira-stencil-one-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Archivo";src:url(../fonts/archivo-var.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../fonts/plex-mono-400.woff2) format("woff2");font-weight:400;font-display:swap}
+:root{--ink:#141311;--paper:#EAE6DB;--bone:#F4F1E8;--orange:#E05A1C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:"Archivo",sans-serif;font-size:16px;line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+h1{font-family:"Saira Stencil One",sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(30px,6vw,44px);line-height:1.05}
+h2{font-family:"Saira Stencil One",sans-serif;font-weight:400;text-transform:uppercase;font-size:20px;margin:36px 0 10px;letter-spacing:.04em}
+p,li{max-width:66ch}
+p{margin:12px 0}
+ul{padding-left:22px;margin:12px 0}
+a{color:var(--ink)}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:13px}
+.tbl{border:1px solid var(--ink);background:var(--bone);margin:16px 0}
+.tbl .r{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(20,19,17,.25);font-family:"IBM Plex Mono",monospace;font-size:13px}
+.tbl .r:last-child{border-bottom:none}
+.tag{display:inline-block;border:2px solid var(--orange);color:var(--orange);font-family:"Saira Stencil One",sans-serif;text-transform:uppercase;padding:2px 10px;font-size:14px;letter-spacing:.1em;transform:rotate(-2deg);margin-bottom:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">Method note</span>
+  <h1>How this page was made</h1>
+  <p><strong>Crateline is a fictional demonstration business.</strong> Every figure on the landing page — lanes, transit times, fleet counts, the on-time rate — is illustrative copy for a demo, not a real service. <strong>All imagery is AI-generated.</strong></p>
+
+  <h2>Design</h2>
+  <p>The build started with a look-first study of logistics landing pages, brutalist web design and cargo stencil typography. The genre default for freight sites — ocean-vessel photography, navy/teal, generic supply-chain copy, dashboard screenshots — was deliberately refused. Instead the page borrows freight's own paperwork: the layout reads as a shipping manifest (ruled ledgers, a waybill, a container data panel), set in a clean stencil face beside a data mono, on bone paper with container safety-orange as the one loud colour. Motion is limited to what a depot does: stamps thunk in, counters tick, the status board changes. The structure never animates.</p>
+  <p>Type: Saira Stencil One, Archivo and IBM Plex Mono — all SIL Open Font License, vendored locally with their licenses. The page is a single self-contained file: no frameworks, no CDNs, no external requests, with reduced-motion and no-JS fallbacks.</p>
+
+  <h2>Imagery</h2>
+  <p>Three images were generated through the Higgsfield API on a paid license tier, and every original is pinned in a content-addressed store with a full provenance manifest (model, prompt, credits, license tier). The models below are the models that actually ran.</p>
+  <div class="tbl">
+    <div class="r"><span>Hero — freight yard at dusk</span><span>nano_banana_2 · first take</span></div>
+    <div class="r"><span>Container door — stencilled CRATELINE</span><span>nano_banana_2 · first take</span></div>
+    <div class="r"><span>Wrapped pallet on dock</span><span>soul v2 · first take</span></div>
+  </div>
+  <p class="mono">Honesty note: the pallet photo grew a small in-world "73" bay placard on the forklift mast that the prompt did not ask for; the published crop removes it. No image contains real signage, brands or people.</p>
+
+  <h2>Iteration passes</h2>
+  <ul>
+    <li><strong>Pass 1 (fault-hunt):</strong> section numbering regularised (01–04); hero copy regrouped so the headline+lede and the waybill anchor the column; trackline stamp/wire animation verified live; favicon added to clear the only 404.</li>
+    <li><strong>Pass 2 (ambition-push):</strong> cursor floodlight over the hero yard (fine pointers only), depot ticker between hero and lanes, live-cycling waybill status, counters on the capacity panel, stamp-in sequence on the tracking line.</li>
+    <li><strong>Pass 3 (fault-hunt):</strong> 390&nbsp;px pass — no horizontal overflow, ledger scrolls in its own container, sticky header verified; reduced-motion audit (all animation gated, stamps and wire render static); no-JS audit (everything visible, ticker static).</li>
+  </ul>
+
+  <p class="mono" style="margin-top:40px"><a href="../">← back to the page</a></p>
+</div>
+</body>
+</html>

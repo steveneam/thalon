@@ -1,0 +1,5 @@
+[
+  { "file": "hero-yard.webp", "pinnedHash": "dcecfb1762ecdaf320b508e54c44f79c8cc09381c76d0df34c99feee140a6d1c", "width": 1280, "height": 1600, "quality": 78 },
+  { "file": "door-stencil.webp", "pinnedHash": "7c3a1ce36be544361838aaa4eb4e49aa9d832a68e94c2c5ff61adf492b1ff5cf", "width": 1300, "height": 1300, "quality": 78 },
+  { "file": "pallet-dock.webp", "pinnedHash": "4fb9feb8a891a3bba3ca76aae27a13251ae806ed5d387451eae2f6b1498d4193", "width": 1680, "height": 720, "quality": 78 }
+]

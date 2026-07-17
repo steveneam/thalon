@@ -1,0 +1,15 @@
+{
+  "slug": "crateline",
+  "name": "Crateline",
+  "vertical": "logistics-road-freight",
+  "oneLiner": "Pallet freight between Sydney, Melbourne and Brisbane — depot to door, one waybill, tracked to the pallet.",
+  "axes": {
+    "primary": "brutalist-raw",
+    "secondary": "data-instrument"
+  },
+  "paletteSeed": "freight paperwork on bone paper — near-black ink, unbleached bone/kraft, container safety-orange as the ONE loud colour, oxide stamp red for stamped marks; stencil white on ink panels",
+  "typeDirection": "Saira Stencil One (container-marking display register, clean cuts, never distressed) + IBM Plex Mono (manifest/data register, tabular numerals) + Archivo variable (workhorse body) — all OFL, vendored",
+  "motionBudget": "stamps move, structure doesn't: ink stamps thunk in (hero IN TRANSIT, tracking line sequence, form LODGED), the tracking wire draws, data-panel counters tick once, the waybill status cycles like a depot board, a cursor floodlight over the hero yard on fine pointers; depot ticker belt; reduced-motion gets everything static and pre-stamped, no-JS shows all content",
+  "wave": 2,
+  "built": "2026-07-17"
+}
