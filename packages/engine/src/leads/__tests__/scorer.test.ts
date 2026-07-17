@@ -89,6 +89,35 @@ describe("scoreLead (B-crm.2) — deterministic math with readable reasons", () 
     expect(breakdown.components.completeness).toBeGreaterThan(0); // still reported
   });
 
+  it("learned multipliers scale the resolved weights, show in the breakdown, and land a reason line — neutral multipliers change nothing (B-crm.5)", () => {
+    const rolesOnly = icpSchema.parse({ description: ICP.description, roles: ["owner"] });
+    const roleLead = lead({ role: "Owner", createdAtMs: NOW - 100 * DAY_MS });
+    const base = scoreLead(roleLead, rolesOnly, { lead: null, icp: null }, {}, NOW);
+
+    const learned = scoreLead(
+      roleLead,
+      rolesOnly,
+      { lead: null, icp: null },
+      { learnedMultipliers: { relevance: 1, fit: 2, completeness: 1, recency: 0.5 } },
+      NOW,
+    );
+    // Applied weights are the operator-visible provenance: resolved × learned.
+    expect(learned.weights).toEqual({ relevance: 1, fit: 2, completeness: 1, recency: 0.5 });
+    // armed: fit(1, w2) + completeness(0.2, w1) + recency(0.0071, w0.5) → 2.20355/3.5.
+    expect(learned.score).toBe(0.6296);
+    expect(learned.reasons.at(-1)).toBe("learned weight adjustments applied: fit ×2, recency ×0.5");
+
+    // All-neutral multipliers: byte-identical to no learned layer at all.
+    const neutral = scoreLead(
+      roleLead,
+      rolesOnly,
+      { lead: null, icp: null },
+      { learnedMultipliers: { relevance: 1, fit: 1, completeness: 1, recency: 1 } },
+      NOW,
+    );
+    expect(neutral).toEqual(base);
+  });
+
   it("recency decays on the configured half-life; ICP weight overrides apply without filling defaults", () => {
     const old = lead({ createdAtMs: NOW - 14 * DAY_MS });
     const breakdown = scoreLead(old, ICP, { lead: null, icp: null }, { recencyHalfLifeDays: 14 }, NOW);

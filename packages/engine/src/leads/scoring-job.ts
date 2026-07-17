@@ -1,4 +1,9 @@
-import { icpSchema, type Icp, type TenantCtx } from "@thalon/contracts";
+import {
+  icpSchema,
+  leadWeightMultipliersSchema,
+  type Icp,
+  type TenantCtx,
+} from "@thalon/contracts";
 import { sha256Hex, stableStringify, type LeadRow, type Repos } from "@thalon/db";
 import { getObjectStore, getTracer, modelTiers, readEnv, type ObjectStore } from "@thalon/platform";
 import { embedChunks } from "../ingest";
@@ -15,10 +20,18 @@ import {
  * B-crm.2 scoring job — deterministic, idempotent, zero LLM calls. Scores
  * every NEW lead and re-scores SCORED leads whose latest score was produced
  * by a different ICP (profile drift is detectable because lead_scores rows
- * carry the hash of the ICP that produced them). Replaying the same run
- * (same clock, same profile) appends nothing — the lead_scores structural
- * key does the work. Dismissed leads are never scored: dismissal is
- * operator signal, the job respects it.
+ * carry the hash of the ICP that produced them) OR by a different learned
+ * weight state (B-crm.5: lead_scores rows carry `weight_state_id`, so a
+ * weight move invalidates exactly the rows it shaped — no timestamp
+ * heuristics). Replaying the same run (same clock, same profile, same
+ * state) appends nothing — the lead_scores structural key does the work.
+ * Dismissed leads are never scored: dismissal is operator signal, the job
+ * respects it.
+ *
+ * Learned-state application binds to the profile hash: a state computed
+ * under a prior ICP is simply not found by latestForProfile, so profile
+ * drift re-scores with BASE weights until the learn job re-runs — learned
+ * adjustments never silently outlive the profile they were earned under.
  */
 
 export interface LeadScoringRequest {
@@ -46,6 +59,8 @@ export interface LeadScoringResult {
   rescored: number;
   /** Hash of the ICP block this run scored against (provenance for callers). */
   profileHash: string | null;
+  /** B-crm.5: the learned weight state applied this run (null = base weights). */
+  weightStateId: string | null;
 }
 
 /** The one place a lead row becomes the scorer's projection. */
@@ -79,19 +94,32 @@ export async function runLeadScoring(
       scored: 0,
       rescored: 0,
       profileHash: null,
+      weightStateId: null,
     };
   }
   const icp: Icp = icpSchema.parse(profile.icp);
   const profileHash = sha256Hex(stableStringify(icp));
   const scoredAt = new Date(request.nowMs);
 
+  // B-crm.5: the newest learned weight state for THIS profile (a drifted
+  // profile finds none — base weights until the learn job re-runs).
+  // Validated again at the read seam even though the write door parsed it.
+  const weightState = await repos.leadWeightStates.latestForProfile(ctx, profileHash);
+  const learnedMultipliers = weightState
+    ? leadWeightMultipliersSchema.parse(weightState.multipliers)
+    : undefined;
+  const weightStateId = weightState?.id ?? null;
+
   // Candidates: every NEW lead, plus SCORED leads whose latest score came
-  // from a different ICP (or is missing — a healed half-state).
+  // from a different ICP or a different learned weight state (or is
+  // missing — a healed half-state).
   const fresh = await repos.leads.list(ctx, { status: "new" });
   const drifted: LeadRow[] = [];
   for (const lead of await repos.leads.list(ctx, { status: "scored" })) {
     const latest = await repos.leadScores.latestByLead(ctx, lead.id);
-    if (!latest || latest.profileHash !== profileHash) drifted.push(lead);
+    if (!latest || latest.profileHash !== profileHash || latest.weightStateId !== weightStateId) {
+      drifted.push(lead);
+    }
   }
   const candidates = [...fresh, ...drifted];
 
@@ -138,7 +166,7 @@ export async function runLeadScoring(
       scorable,
       icp,
       { lead: vectorsByLead.get(lead.id) ?? null, icp: icpVector },
-      request.config ?? {},
+      { learnedMultipliers, ...request.config },
       request.nowMs,
     );
     const signals: Record<string, number> = {
@@ -154,6 +182,7 @@ export async function runLeadScoring(
       reasons: breakdown.reasons,
       signals,
       profileHash,
+      weightStateId,
       scoredAt,
     });
     if (created) {
@@ -169,5 +198,6 @@ export async function runLeadScoring(
     scored: appended,
     rescored,
     profileHash,
+    weightStateId,
   };
 }

@@ -9,5 +9,7 @@
 export * from "./csv";
 export * from "./csv-import";
 export * from "./intake";
+export * from "./learn";
+export * from "./learn-job";
 export * from "./scorer";
 export * from "./scoring-job";

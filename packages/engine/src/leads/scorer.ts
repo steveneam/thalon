@@ -1,5 +1,6 @@
 import {
   leadRankerWeightsSchema,
+  leadWeightMultipliersSchema,
   type Icp,
   type LeadRankerWeightOverrides,
   type LeadRankerWeights,
@@ -30,6 +31,14 @@ export const leadScorerConfigSchema = z.object({
   weights: leadRankerWeightsSchema.default({ relevance: 1, fit: 1, completeness: 1, recency: 1 }),
   /** Recency half-life: a lead captured this many days ago scores 0.5 on recency. */
   recencyHalfLifeDays: z.number().positive().default(14),
+  /**
+   * B-crm.5: the learn loop's per-signal multipliers, applied ON TOP of the
+   * resolved weights (code default ← icp override ← learned scale) — the
+   * operator's explicit config is scaled, never replaced. Absent = base
+   * weights, byte-identical to the pre-learn scorer. Never silent: any
+   * non-neutral multiplier lands its own reason line.
+   */
+  learnedMultipliers: leadWeightMultipliersSchema.optional(),
 });
 export type LeadScorerConfigInput = z.input<typeof leadScorerConfigSchema>;
 export type LeadScorerConfig = z.infer<typeof leadScorerConfigSchema>;
@@ -143,7 +152,19 @@ export function scoreLead(
   nowMs: number = 0,
 ): LeadScoreBreakdown {
   const config = leadScorerConfigSchema.parse(configInput);
-  const weights = resolveLeadWeights(config.weights, icp.weights);
+  const resolved = resolveLeadWeights(config.weights, icp.weights);
+  // Learned multipliers scale the resolved weights; `weights` in the
+  // breakdown is what ACTUALLY weighted the sum (operator-visible
+  // provenance, same as before the learn loop existed).
+  const learned = config.learnedMultipliers;
+  const weights: LeadRankerWeights = learned
+    ? {
+        relevance: round4(resolved.relevance * learned.relevance),
+        fit: round4(resolved.fit * learned.fit),
+        completeness: round4(resolved.completeness * learned.completeness),
+        recency: round4(resolved.recency * learned.recency),
+      }
+    : resolved;
   const searchableText = [lead.name, lead.company, lead.role, lead.website, lead.notes, lead.painPoint]
     .map((v) => v?.trim() ?? "")
     .filter(Boolean)
@@ -208,6 +229,17 @@ export function scoreLead(
     `completeness ${round2(completeness)} (${present.length}/${CONTACT_FIELDS.length} contact fields present)`,
     `recency ${round2(recency)} (captured ${round2(ageDays)}d ago, half-life ${config.recencyHalfLifeDays}d)`,
   );
+  // The learned layer is never silent: every non-neutral multiplier is
+  // named on the score itself. WHY each weight moved lives on the tenant's
+  // lead weight state (the learn loop's own reasons).
+  if (learned) {
+    const adjustments = (["relevance", "fit", "completeness", "recency"] as const)
+      .filter((signal) => learned[signal] !== 1)
+      .map((signal) => `${signal} ×${round2(learned[signal])}`);
+    if (adjustments.length > 0) {
+      reasons.push(`learned weight adjustments applied: ${adjustments.join(", ")}`);
+    }
+  }
 
   // Dealbreakers are hard zeros with their own leading reason (ratified
   // build plan) — components stay visible so the operator sees what the
