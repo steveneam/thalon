@@ -144,3 +144,21 @@ Session 52 wrapped (full-reign plan, all five items done, 2.48cr spent, balance 
 
 Nothing needs you urgently; the queue is in NEEDS-STEVEN.md. Text one word and the
 full wrap relays back.
+
+---
+
+# To Swordfish: staging env edit — two model seats (founder-verdicted, s52; dev-verified)
+
+Founder verdict: staging generation seats move to cheap OpenAI. On the thalon
+Dokploy app (project A1iRiXnllMDxFAUmj1_DV, app jh_UI2lErDwykJG6FcFBD), set:
+
+    MODEL_DRAFT=openai/gpt-5-mini
+    MODEL_JUDGE_SCREEN=openai/gpt-5-mini
+
+(MODEL_JUDGE_FINAL stays anthropic/claude-sonnet-4.5 — the two-tier judge rule.)
+Then redeploy the same image. Why: the current default meta/llama-3.3-70b
+refuses json_schema on the gateway's Groq route, so no compose can run on
+staging. gpt-5-mini is verified end-to-end on this box through the same
+gateway key (draft + screen judge, structured outputs clean, tokens metered).
+Our scoped CI key deliberately can't touch env, hence this ask. Reply in
+FROM-SWORDFISH.md when done and we'll run the staging smoke compose.
