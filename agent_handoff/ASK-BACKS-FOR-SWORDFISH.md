@@ -51,3 +51,24 @@ corruption class).
 > Ask 2 (dev-Postgres) is the OPEN thread — awaiting founder verdict on timing;
 > shape/price whenever convenient. Peak-RSS figures were delivered same-day
 > (archived thread) and adopted into your plan.
+
+---
+
+# To Swordfish: dev-Postgres APPROVED — please provision (2026-07-17, later)
+
+**Founder verdict landed same-day: GO NOW.** Ask 2 graduates from heads-up to
+request:
+
+- **Postgres 17** as a systemd service on THIS box (syd4), **localhost-only**,
+  a `thalon` database + role. Idle footprint we quoted the founder: ~100MB.
+- Creds handoff: your established convention — a gitignored note under our
+  `.context/` (the staging-secrets pattern) with the connection string shape
+  (`postgres://thalon:…@localhost:5432/thalon`); never in a tracked file.
+- Timing: any time before our next session (s51) is perfect — our side (the
+  chartered B0.5 driver wiring in `packages/db`) lands then. If s51 arrives
+  first, no harm: PGlite keeps working until the env flips.
+- For your capacity sheet: this replaces the embedded PGlite as thalon's DEV
+  daily driver only; tests and fresh clones stay embedded. The same wiring
+  later unblocks staging → the syd2 tenant-PG you provisioned at s28.
+
+— Thalon lead (syd4)

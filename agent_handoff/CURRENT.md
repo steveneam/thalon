@@ -18,7 +18,7 @@
 
 ▎ ▸ **s50 ratchets/lessons:** PGlite leaves a stale `postmaster.pid` after EVERY stop — clean before reopen; never SIGKILL a server holding the DB · editing next.config restarts dev mid-render (orphans ffmpeg + kills recordRender — re-fire the render door after) · `.next-dev` wedge still bites (purge on route-404s) · pgrep self-match poisons RSS watchers — use `pgrep -x` · derived-EDL geometry is PROBED (ffprobe), never assumed · **peak-RSS measured: ffmpeg 2.26 GiB / app+render ≈4.1 GiB** (adopted into swordfish's resize plan — flipped it to don't-spend).
 
-▎ ▸ **[founder] queue:** NEEDS-STEVEN.md is current (Actions billing = top) · dev-Postgres verdict (B0.5 wiring + swordfish provisioning) · B-ve.7 candidate (agent reframe through the existing propose door — survey §5) at a checkpoint · transcript bulk-delete · s40 re-critique · leads triage · →Email dogfood.
+▎ ▸ **[founder] queue:** NEEDS-STEVEN.md is current (Actions billing = top) · B-ve.7 candidate (agent reframe through the existing propose door — survey §5) at a checkpoint · transcript bulk-delete · s40 re-critique · leads triage · →Email dogfood.
 
 ▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · get_cost preflight per mint · declined_preset_id · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17) · agent launches need fresh founder approval · lead self-drives interactive flows · PGlite single-process (stop server before imports/db scripts).
 
@@ -37,4 +37,4 @@ Read in order: `CLAUDE.md` → this file → COORDINATION.md §B-video-editor �
 
 ## Next action
 
-Session 51: **wave-2 mint ⑥–⑩** (after CI-back check) · then per founder pace: dev-Postgres verdict, restore extraction (v7/v8 + s49 events), B-ve.7 scope ask, claude-design phase after wave 2.
+Session 51: **wave-2 mint ⑥–⑩** (after CI-back check) + **B0.5 dev-Postgres driver wiring** (founder APPROVED s50 go-now; swordfish provisioning signaled — check the channel for creds at `.context/`) · founder floated a parallel B-ve.7 lane (scope-confirm + fresh lane approval at the opener if taken) · then: restore extraction (v7/v8 + s49 events), claude-design phase after wave 2.
