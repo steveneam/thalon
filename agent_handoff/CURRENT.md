@@ -20,7 +20,9 @@
 
 ▎ ▸ **[founder] queue:** NEEDS-STEVEN.md current · v7/v8 + s49-events restore extraction (`/home/deploy/thalon-restore-20260717/`, no deadline) · transcript bulk-delete · s40 re-critique · leads triage · →Email dogfood · month-end credit call still due (§V shipped, balance ≈740.6).
 
-▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · get_cost preflight per mint · declined_preset_id · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17) · agent/lane launches need fresh founder approval · lead self-drives interactive flows · dev = real Postgres (PGlite = tests/fallback only).
+▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · get_cost preflight per mint · declined_preset_id · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17) · agent/lane launches need fresh founder approval — **but ALL launch mechanics are the lead's: `scripts/launch-lane.sh <window> <worktree> <kickoff>` (s51 ratchet; founder instruction cards retired)** · lead self-drives interactive flows · dev = real Postgres (PGlite = tests/fallback only).
+
+▎ ▸ **Parallel option for s52 (founder floated s51-close; present at the opener for fresh approval):** the wave-2 slate is dependency-independent (disjoint `sites/<slug>/` dirs + separate claude-design projects) — **lead builds ⑦ Vance & Alder in the main window while ONE lane builds ⑧ Crateline in parallel** (prep worktree → `launch-lane.sh`), then ⑨/⑩ the same way. Halves the slate's wall-clock; founder judges two alive designs per round. Caveat to say out loud: template taste is calibrated in the lead (s51 lessons ride the kickoff + meta-prompt, but the founder should expect one taste round per lane site). Optional third cheap lane: restore extraction (pure local data work, 0cr, zero conflicts).
 
 ▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: PRs #52 + #53 merged; no open PRs; no worktrees; no lanes; no Monitors; no in-flight renders/vendor jobs; all stale branches pruned; guard green at HEAD; KICKOFF-b-ve7.md removed (in git history).
 
