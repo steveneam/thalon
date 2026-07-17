@@ -104,7 +104,7 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 | surface (B-ve.2) | lead terminal | `apps/web/**` (read-only project browser) | `agent/surface/b-ve2-project-browser` (GC'd) | merged (PR #46) | B-ve.1 frozen | 2 |
 | editor (B-ve.3) | lead terminal | `apps/web/**` (timeline MVP), engine render wiring | `b-ve.3-timeline-editor` (GC'd) | merged (PR #47) | B-ve.2 | 3 |
 | ai-assist (B-ve.4) | lead terminal | `proprietary/prompts/**` (EDL-diff proposer), judge lens wiring, contract half-window (`video: copy` + diff attribution, additive), approve door | `b-ve.4-ai-assist` (GC'd) | merged (PR #48) | B-ve.3 | 4 |
-| aspect-lens (B-ve.5) | lead terminal | `apps/web/**` (crop/pan handles), derived-EDL flows | — | pending | B-ve.3 | 5 |
+| aspect-lens (B-ve.5) | lead terminal | `apps/web/**` (crop/pan handles), derived-EDL flows, contract half-window (lineage, additive), engine derive/probe | `b-ve.5-aspect-lens` | in review | B-ve.3 | 5 |
 
 ## Messages (append-only)
 
