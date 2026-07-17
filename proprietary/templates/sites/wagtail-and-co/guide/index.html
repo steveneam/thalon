@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wagtail &amp; Co — how this page was made</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:"Baloo 2";src:url(../fonts/baloo2-var.woff2) format("woff2");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Karla";src:url(../fonts/karla-var.woff2) format("woff2");font-weight:300 800;font-display:swap}
+@font-face{font-family:"Gochi Hand";src:url(../fonts/gochi-hand-400.woff2) format("woff2");font-weight:400;font-display:swap}
+:root{--paper:#F6F1E7;--ink:#2E2519;--clay:#C96F4A;--sage:#7D8B6A}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:"Karla",sans-serif;font-size:16px;line-height:1.65}
+.wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+h1{font-family:"Baloo 2",sans-serif;font-weight:700;font-size:clamp(30px,6vw,44px);line-height:1.08}
+h2{font-family:"Baloo 2",sans-serif;font-weight:600;font-size:21px;margin:36px 0 10px}
+p,li{max-width:66ch}
+p{margin:12px 0}
+ul{padding-left:22px;margin:12px 0}
+a{color:var(--ink)}
+.tag{display:inline-block;font-family:"Gochi Hand",cursive;color:var(--clay);font-size:22px;transform:rotate(-2deg);margin-bottom:14px}
+.tbl{border:2px solid var(--ink);border-radius:16px;background:#fff;margin:16px 0;overflow:hidden}
+.tbl .r{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(46,37,25,.15);font-size:14px}
+.tbl .r:last-child{border-bottom:none}
+.small{font-size:13.5px;color:var(--sage)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">the honest bit</span>
+  <h1>How this page was made</h1>
+  <p><strong>Wagtail &amp; Co is a fictional demonstration business.</strong> The dogs, the day journal, the rates and the suburbs list are illustrative copy for a demo — no real service exists. <strong>All imagery is AI-generated.</strong> Banjo and Pip, regrettably, are not real dogs.</p>
+
+  <h2>Design</h2>
+  <p>A look-first study of pet-care sites and hand-drawn organic web design came first. The pet genre default — rounded SaaS cards, cartoon mascots, bright blue cheer — was set aside. The page instead reads as a dog's day journal: warm photography carries the page while the hand-drawn register lives in the margins (a leash line that draws itself down the day as you scroll, handwritten annotations, an underline that behaves like a crayon). Soft pacing on cream paper; nothing thunks, everything eases.</p>
+  <p>Type: Baloo 2, Karla and Gochi Hand — all SIL Open Font License, vendored locally with their licenses. Single self-contained file, no frameworks, no external requests, reduced-motion and no-JS complete.</p>
+
+  <h2>Imagery</h2>
+  <p>Three photographs were generated through the Higgsfield API on a paid license tier; each original is pinned in a content-addressed store with full provenance (model, prompt, credits, license tier). The models named are the models that actually ran.</p>
+  <div class="tbl">
+    <div class="r"><span>Hero — Banjo in the park at golden hour</span><span>soul v2 · first take</span></div>
+    <div class="r"><span>The big walk — four dogs, plane trees</span><span>soul v2 · first take</span></div>
+    <div class="r"><span>The nap — Pip on the corduroy cushion</span><span>soul v2 · first take</span></div>
+  </div>
+  <p class="small">Honesty note: the hero prompt asked for no leash; a faint lead strap is visible low in the frame's shadow. No real signage, brands or people appear anywhere.</p>
+
+  <h2>Iteration passes</h2>
+  <ul>
+    <li><strong>Pass 1 (fault-hunt):</strong> journal reveal + leash-line draw verified live in the browser (entries ease in as they arrive, the line draws with scroll progress); all three images confirmed loading; hero annotation position checked against the blob mask.</li>
+    <li><strong>Pass 2 (ambition-push + structure):</strong> nap polaroid moved beside its text at desktop widths to fix the journal's rhythm; breathing blob mask on the hero; crayon underline; live-easing entries; dead CSS pruned.</li>
+    <li><strong>Pass 3 (fault-hunt):</strong> 390&nbsp;px pass (single column journal, leash hidden, no horizontal overflow), reduced-motion audit (blob static, entries visible, line pre-drawn), no-JS audit (all content visible without any script).</li>
+  </ul>
+
+  <p class="small" style="margin-top:40px"><a href="../">← back to the page</a></p>
+</div>
+</body>
+</html>
