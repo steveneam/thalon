@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+# CI diet (founder-approved 2026-07-17, net-positive-speedups directive):
+# superseded PR runs are cancelled — the newest commit's run is the one that
+# matters. main is NEVER cancelled: every main commit keeps its full stamp.
+concurrency:
+  group: ci-guard-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   ci-grep-guard:
     name: ci-grep-guard
@@ -15,6 +22,49 @@ jobs:
         shell: pwsh
         run: ./scripts/ci-grep-guard.ps1
 
+  # CI diet, part 2: docs-only changes skip the heavy jobs. QUALITY-PINNED
+  # CONSERVATIVE: only `docs/**`, `agent_handoff/**`, and ROOT-level *.md
+  # count as docs — everything else (including proprietary/** prompts, which
+  # are hash-pinned runtime data) is code and runs the full matrix. Any
+  # doubt (unknown base, force push, empty diff) fails safe to code=true.
+  # The grep guard above runs UNCONDITIONALLY — it is the hard constraint.
+  changes:
+    name: changes (docs-only detector)
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            RANGE="$BASE...HEAD"
+          else
+            BASE="${{ github.event.before }}"
+            RANGE="$BASE..HEAD"
+          fi
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
+            echo "unknown base — failing safe to code=true"
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CHANGED="$(git diff --name-only "$RANGE")"
+          echo "changed files:"; echo "$CHANGED"
+          if [ -z "$CHANGED" ]; then
+            echo "empty diff — failing safe to code=true"
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          elif echo "$CHANGED" | grep -qvE '^(docs/|agent_handoff/|[^/]+\.md$)'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docs-only — heavy jobs skip (guard already ran)"
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # The suite is the CI long pole (~1050 tests, a fresh embedded Postgres
   # per db test file), so it runs SHARDED (founder direction 2026-07-08:
   # sharding saves wall-clock and vitest partitions by file, so it is
@@ -23,6 +73,8 @@ jobs:
   # the split (branch protection never has to change).
   checks:
     name: checks (typecheck + lint)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +91,8 @@ jobs:
 
   test-shards:
     name: test (shard ${{ matrix.shard }}/3)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # every shard reports — a red run shows ALL failures, not the first shard's
@@ -55,14 +109,19 @@ jobs:
 
   test:
     name: test
-    needs: [checks, test-shards]
+    needs: [changes, checks, test-shards]
     if: always() # the gate must REPORT on failure, not skip (a skipped required check blocks nothing)
     runs-on: ubuntu-latest
     steps:
-      - name: Every shard + the checks lane succeeded
+      - name: Every shard + the checks lane succeeded (or the diff was provably docs-only)
         run: |
-          test "${{ needs.checks.result }}" = "success"
-          test "${{ needs.test-shards.result }}" = "success"
+          if test "${{ needs.changes.outputs.code }}" = "false"; then
+            test "${{ needs.checks.result }}" = "skipped"
+            test "${{ needs.test-shards.result }}" = "skipped"
+          else
+            test "${{ needs.checks.result }}" = "success"
+            test "${{ needs.test-shards.result }}" = "success"
+          fi
 
   # B6.7 (ADR 0007): the production build must stay green — Dockerfile.web
   # runs exactly this build, so a PR that breaks `next build` (or silently
@@ -71,6 +130,8 @@ jobs:
   # to the RFC-2606 placeholder and no data dir is touched.
   web-build:
     name: web-build
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,6 +156,8 @@ jobs:
   # manually per eval/README.md.
   eval-gate:
     name: eval-gate
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -114,6 +177,8 @@ jobs:
 
   infra-tests:
     name: infra-tests
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
