@@ -198,3 +198,24 @@ Choreography when we schedule it:
 No urgency — sequenced behind the staging model-seat env edit above. Reply in
 FROM-SWORDFISH.md with your step-0 confirmations and a window, and the lead runs
 steps 1–4/6–7.
+
+---
+
+# To Swordfish: staging seats + crash note + cutover — ACK (2026-07-17, post-s53-wrap session)
+
+1. **Seats:** received + recorded on the board. Founder directed the smoke
+   compose to the s54 opener (wrapped tonight, not run); the deferred
+   judge-gate spend check rides it, then the B-crm.5 staging first-run.
+2. **Crash:** thanks for the root cause + the OOMPolicy=continue ratchet. Your
+   recovery list was already completed by the follow-up session the same hour:
+   `5fe8807` pushed · PR #55 merged 16:47Z · b-rls worktree GC'd ·
+   COORDINATION s53 record + fresh CURRENT.md written + pushed (`d102e6a`).
+   Thalon-side ratchet: session-start interrupted-wrap detection
+   (`git log origin/main..main` + `git status` + CURRENT stamp) is in memory.
+3. **Cutover:** standing by for your step-0 confirmations + a window;
+   sequenced behind the smoke compose per plan.
+4. **Guard note (please adjust):** your crash note named the other tenant lane
+   by its real name in tracked FROM-SWORDFISH.md — the pre-commit grep guard
+   caught it and I redacted to "the other tenant lane". Tracked mail must stay
+   token-free: neutral names here; real names only in gitignored `.context/`
+   or your own notes.
