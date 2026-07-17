@@ -19,8 +19,17 @@ import { proposeDiff, rejectProposal, type DiffProposal } from "@/lib/videos/cli
 
 function opTarget(op: EdlDiffOp, base: Edl): string {
   if (op.op === "music-align") return `music cue ${op.cue}`;
+  if (op.op === "clip-crop") {
+    const name = base.video[op.clip]?.name;
+    return `clip ${op.clip}${name ? ` “${name}”` : ""}`;
+  }
   const text = base.captions?.lines[op.line]?.text;
   return `line ${op.line}${text ? ` “${text}”` : ""}`;
+}
+
+/** Pan values in a proposed crop are static or from/to only (the propose-door fence). */
+function panLabel(p: number | { from: number; to: number }): string {
+  return typeof p === "number" ? `${p}` : `${p.from}→${p.to}`;
 }
 
 function opChange(op: EdlDiffOp, base: Edl): string {
@@ -40,6 +49,10 @@ function opChange(op: EdlDiffOp, base: Edl): string {
         knobs.push(`tail ease → ${op.fadeOut.duration}s @ ${op.fadeOut.start}s`);
       return knobs.join(" · ");
     }
+    // Minimal inter-merge label (B-ve.7 half-window). B-ve.7 lane: replace
+    // with the readable old → new window render (source-pixel values).
+    case "clip-crop":
+      return `→ ${op.crop.width}×${op.crop.height} @ (${panLabel(op.crop.x)}, ${panLabel(op.crop.y)})`;
   }
 }
 
