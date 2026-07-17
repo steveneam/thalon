@@ -8,14 +8,14 @@
 
 ## Resume prompt (session 54, syd4 — paste verbatim; "gogogo" boots this too)
 
-> Stamped 2026-07-17, session-53 wrap (completed post-crash). **The s52 parallel grant covered exactly the s53 slate and is now SPENT — any s54 lane/subagent launch needs fresh founder approval.**
+> Stamped 2026-07-17, session-53 wrap (completed post-crash; grant + verdicts updated live the same evening). **s54 GRANT ON RECORD (founder, live): "do ⑧ ⑨ ⑩ landing pages and divide the other tasks with the rest of the lane parallel workflows" — the division is named in COORDINATION Active lanes; lane launches for exactly that slate are PRE-AUTHORIZED (weights-ui now; b-crm4-send only on his proposal verdict). Anything beyond it = ask.**
 
 **Resume · Thalon** — session 54, syd4:
 
 1. **Staging smoke compose FIRST (gate OPEN, founder-directed s54 opener):** the model-seat env edit LANDED late s53 (swordfish mail ~17:00Z, ack'd — both seats verified on the staging service + redeployed): run the smoke compose (seat = openai/gpt-5-mini, dev-verified s52) + the deferred judge-gate spend check, then the B-crm.5 staging first-run. Still open with `bash scripts/peer-mail-check.sh` — expected next: cutover step-0 confirmations + a window (top of swordfish's Next list) → lead runs steps 1–4/6–7 of the ASK-BACKS choreography (`scripts/migrate-pglite-to-tenant-pg.ts`, dry-run first, always).
-2. **⑧ CRATELINE — UNGATED** (Orchard House founder-approved live at s53-close, no fix round): logistics / brutalist primary via the proven loop; commit+push immediately on ship; founder review, then ⑨ ⑩.
-3. **B-crm.5 follow-ups:** weights UI surface (learned-weight provenance in the leads queue) + staging first-run (rides 1a).
-4. **Fillers:** transcript bulk-delete pass (founder GO stands; s53 deferred it and the recorded reason died with the crash — re-scope at pickup, duplicates live in the library) · B-crm.4 back-half = proposal filed (`5fe8807`), BUILD WAITS on the founder verdict.
+2. **Launch LANE weights-ui** (granted; `scripts/launch-lane.sh`, branch `lane/b-crm5-weights-ui`, owns `apps/web/**` — the one web writer): learned-weight provenance surface in the leads queue; lead reviews + merges. If the founder verdicts the B-crm.4 proposal, lane b-crm4-send activates too — otherwise it stays blocked:founder-verdict.
+3. **⑧ ⑨ ⑩ — ALL THREE THIS SESSION (founder-directed):** ⑧ Crateline (logistics / brutalist) → ⑨ Wagtail & Co (pets / soft-organic) → ⑩ Hue & Cry (salon / exceptional-palette), each via the proven loop, design lead-authored (never delegated), commit+push each on ship; reviews batch at the wave-2 checkpoint or live if the founder's around.
+4. **Fillers between mint/render waits:** transcript bulk-delete pass (founder GO stands; s53's deferral reason died with the crash — re-scope, founder-visible delete set before executing) · B-crm.5 staging first-run (behind the smoke compose).
 5. **Next checkpoint items (lane-B opens, full detail in COORDINATION-ARCHIVE.md s53 record):** ratify the cache exemption · B-rls.2 charter candidate (withTenantSession adoption → non-owner app role → FORCE) · standing scratch-admin role for the gated pg test · ms-fidelity caveat.
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → `bash scripts/peer-mail-check.sh` → COORDINATION.md (the live board — pruned 2026-07-17; s53 close record = COORDINATION-ARCHIVE.md tail) → memories `higgsfield-kompozy-assignment` + `crm-lead-scoring-candidate` + `vps-deploy-swordfish` (s53 entries) → `.context/notes/lane-wrap-b-rls-s53.md` (full lane-B record incl. the honest RLS scope statement).
@@ -40,4 +40,4 @@ Read in order: `CLAUDE.md` → this file → COORDINATION.md (live board) + COOR
 
 ## Next action
 
-Session 54 = staging smoke compose first (gate open, founder-directed opener), then ⑧ Crateline (approved + ungated); cutover unblocks on swordfish's step-0 + window; transcript bulk-delete re-scope rides the first app boot. No standing lane grant — ask before launching. Founder-gated backlog unchanged: re-critique, credit call, B6.7 domains, ⑨ ⑩, post-wave-2 design phase.
+Session 54 = smoke compose opener → launch lane weights-ui (granted) → the three-site run ⑧ ⑨ ⑩ with fillers between waits; cutover if swordfish's window lands. The grant covers exactly the COORDINATION division — anything new = ask. Expected spend ≈10–25cr across the three sites (balance ≈730), get_cost preflight per mint, ≥40cr = ping. Founder-gated backlog unchanged: re-critique, credit call, B6.7 domains, ⑨ ⑩, post-wave-2 design phase.
