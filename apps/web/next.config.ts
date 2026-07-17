@@ -24,6 +24,22 @@ const nextConfig: NextConfig = {
   // orphaned process. `next dev` sets NODE_ENV=development; build/start set
   // production, so the split is total.
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
+  // DEV ONLY (founder direction s50): opening the dev box's root lands in
+  // the workspace — the operator's daily door is /app, not the marketing
+  // landing. Non-permanent and development-gated: production keeps the
+  // landing at / (stealth posture unchanged). Escape hatch for design work:
+  // `/?landing` still serves the landing page in dev.
+  async redirects() {
+    if (process.env.NODE_ENV !== "development") return [];
+    return [
+      {
+        source: "/",
+        destination: "/app",
+        permanent: false,
+        missing: [{ type: "query", key: "landing" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
