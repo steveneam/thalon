@@ -62,6 +62,23 @@ export function applyEdlDiff(base: Edl, diff: EdlDiff): Edl {
         if (op.fadeOut !== undefined) cue.fadeOut = op.fadeOut;
         break;
       }
+      case "clip-crop": {
+        const clip = next.video[op.clip];
+        if (!clip) {
+          throw new EdlDiffApplyError(
+            i,
+            `video clip ${op.clip} does not exist (the cut has ${next.video.length})`,
+          );
+        }
+        if (next.output.video.mode === "copy") {
+          throw new EdlDiffApplyError(
+            i,
+            "the picture is stream-copied — a crop window needs an encode timeline",
+          );
+        }
+        clip.crop = op.crop;
+        break;
+      }
       default: {
         // Additive-kind ratchet (B-ve.7 half-window): a contract op kind
         // without an engine arm must refuse, never silently no-op — a

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import type { Edl, EdlDiffOp, VideoCutAttribution } from "@thalon/contracts";
+import type { Crop, Edl, EdlDiffOp, Pan, VideoCutAttribution } from "@thalon/contracts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,9 +27,16 @@ function opTarget(op: EdlDiffOp, base: Edl): string {
   return `line ${op.line}${text ? ` “${text}”` : ""}`;
 }
 
-/** Pan values in a proposed crop are static or from/to only (the propose-door fence). */
-function panLabel(p: number | { from: number; to: number }): string {
-  return typeof p === "number" ? `${p}` : `${p.from}→${p.to}`;
+/** A pan coordinate, readably: static value, from→to sweep, or the raw expression (a base crop can carry operator craft; a PROPOSED crop never does — the propose-door fence). */
+function panLabel(p: Pan): string {
+  if (typeof p === "number") return `${p}`;
+  return "expr" in p ? p.expr : `${p.from}→${p.to}`;
+}
+
+/** A crop window in source pixels; an absent crop is the uncropped full frame. */
+function cropLabel(crop: Crop | undefined): string {
+  if (!crop) return "full frame";
+  return `${crop.width}×${crop.height} @ (${panLabel(crop.x)}, ${panLabel(crop.y)})`;
 }
 
 function opChange(op: EdlDiffOp, base: Edl): string {
@@ -49,10 +56,10 @@ function opChange(op: EdlDiffOp, base: Edl): string {
         knobs.push(`tail ease → ${op.fadeOut.duration}s @ ${op.fadeOut.start}s`);
       return knobs.join(" · ");
     }
-    // Minimal inter-merge label (B-ve.7 half-window). B-ve.7 lane: replace
-    // with the readable old → new window render (source-pixel values).
+    // The reframe render (B-ve.7): the clip's current window → the proposed
+    // one, source-pixel values — the operator verifies the move in one look.
     case "clip-crop":
-      return `→ ${op.crop.width}×${op.crop.height} @ (${panLabel(op.crop.x)}, ${panLabel(op.crop.y)})`;
+      return `${cropLabel(base.video[op.clip]?.crop)} → ${cropLabel(op.crop)}`;
   }
 }
 
@@ -118,8 +125,9 @@ export function AssistPanel({
           Assist
         </CardTitle>
         <CardDescription>
-          The agent proposes a diff — caption placement and music alignment — against the saved
-          cut. You approve each proposal or reject it with a reason; nothing applies itself.
+          The agent proposes a diff — caption placement, music alignment, and measured clip
+          reframes — against the saved cut. You approve each proposal or reject it with a reason;
+          nothing applies itself.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
