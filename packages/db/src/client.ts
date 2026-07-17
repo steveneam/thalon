@@ -14,8 +14,11 @@ import { migrate as migrateNodePg } from "drizzle-orm/node-postgres/migrator";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import pg from "pg";
+import type { TenantCtx } from "@thalon/contracts";
 import { createRepos, type Repos } from "./repos";
 import * as schema from "./schema";
+import { withTenantSession } from "./tenant-session";
+import type { Db } from "./types";
 
 /**
  * Never use `new URL("<rel>", import.meta.url)` for this: Turbopack
@@ -26,7 +29,7 @@ import * as schema from "./schema";
  * bundled route (apps/web) has a rewritten import.meta.url, so fall back to
  * walking up from cwd to the workspace's packages/db/drizzle.
  */
-function resolveMigrationsFolder(): string {
+export function resolveMigrationsFolder(): string {
   try {
     const fromSource = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "drizzle");
     if (existsSync(fromSource)) return fromSource;
@@ -53,6 +56,14 @@ export interface DbHandle {
   /** Tenant-scoped repositories — the ONLY database QUERY API this package exports (SPINE §2.6). */
   repos: Repos;
   /**
+   * RLS second belt (migration 0013): runs `fn` with `app.tenant_id` pinned
+   * transaction-locally, over repos bound to that transaction — under an
+   * RLS-enforcing (non-owner, non-superuser) role the database itself then
+   * refuses cross-tenant rows, doubling the TenantCtx scoping the repos
+   * already apply. See src/tenant-session.ts.
+   */
+  withTenantSession<T>(ctx: TenantCtx, fn: (repos: Repos) => Promise<T>): Promise<T>;
+  /**
    * B6.7 backup hook (ADR 0007 decision 5): writes a consistent gzip
    * tarball of the embedded database to `targetPath`. PGlite has no server
    * socket, so `pg_dump` cannot attach from outside, and a raw file-level
@@ -70,6 +81,7 @@ async function open(client: DbClient): Promise<DbHandle> {
   await migrate(db, { migrationsFolder });
   return {
     repos: createRepos(db),
+    withTenantSession: (ctx, fn) => withTenantSession(db as Db, ctx, fn),
     dumpTo: async (targetPath: string) => {
       const blob = await client.dumpDataDir("gzip");
       const bytes = Buffer.from(await blob.arrayBuffer());
@@ -96,6 +108,7 @@ async function openPostgres(connectionString: string): Promise<DbHandle> {
   await migrateNodePg(db, { migrationsFolder });
   return {
     repos: createRepos(db),
+    withTenantSession: (ctx, fn) => withTenantSession(db as Db, ctx, fn),
     dumpTo: async () => {
       throw new Error(
         "postgres driver: dump the server with pg_dump (backup hooks own consistency) — the in-process export door is embedded-only",

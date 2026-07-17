@@ -15,6 +15,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 const inList = (values: readonly string[]) => values.map((v) => `'${v}'`).join(", ");
@@ -48,6 +49,7 @@ export const videoProjects = pgTable(
     // Re-creating a project by name returns the existing one — idempotency
     // made structural (the search_targets get-or-create pattern).
     uniqueIndex("video_projects_tenant_name_idx").on(t.tenantId, t.name),
+    tenantIsolation(),
   ],
 );
 
@@ -97,6 +99,7 @@ export const videoTakes = pgTable(
       "video_takes_disposition_check",
       sql.raw(`disposition in (${inList(VIDEO_TAKE_DISPOSITIONS)})`),
     ),
+    tenantIsolation(),
   ],
 );
 
@@ -146,5 +149,6 @@ export const videoCuts = pgTable(
     // Hot path: the project surface lists cuts by status.
     index("video_cuts_tenant_project_status_idx").on(t.tenantId, t.projectId, t.status),
     check("video_cuts_status_check", sql.raw(`status in (${inList(VIDEO_CUT_STATUSES)})`)),
+    tenantIsolation(),
   ],
 );

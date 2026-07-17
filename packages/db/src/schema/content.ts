@@ -13,6 +13,7 @@ import {
   uuid,
   vector,
 } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 import { brandProfiles, tenants } from "./tenancy";
 
 const inList = (values: readonly string[]) =>
@@ -44,6 +45,7 @@ export const sources = pgTable(
     // B2.2: the engine's get-or-create idempotency, made structural.
     uniqueIndex("sources_tenant_content_hash_idx").on(t.tenantId, t.contentHash),
     check("sources_kind_check", sql.raw(`kind in (${inList(SOURCE_KINDS)})`)),
+    tenantIsolation(),
   ],
 );
 
@@ -76,6 +78,7 @@ export const sourceChunks = pgTable(
       "hnsw",
       t.embedding.op("vector_cosine_ops"),
     ),
+    tenantIsolation(),
   ],
 );
 
@@ -101,7 +104,10 @@ export const sourceMetrics = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("source_metrics_tenant_source_idx").on(t.tenantId, t.sourceId)],
+  (t) => [
+    index("source_metrics_tenant_source_idx").on(t.tenantId, t.sourceId),
+    tenantIsolation(),
+  ],
 );
 
 /** One row per fan-out invocation: the idempotency + provenance anchor; groups the N drafts of one run (the Approve batch unit). */
@@ -137,6 +143,7 @@ export const fanoutRuns = pgTable(
       "fanout_runs_status_check",
       sql.raw(`status in ('pending', 'running', 'complete', 'failed')`),
     ),
+    tenantIsolation(),
   ],
 );
 
@@ -173,5 +180,6 @@ export const drafts = pgTable(
     index("drafts_tenant_status_idx").on(t.tenantId, t.status),
     index("drafts_tenant_created_idx").on(t.tenantId, t.createdAt),
     check("drafts_status_check", sql.raw(`status in (${inList(DRAFT_STATUSES)})`)),
+    tenantIsolation(),
   ],
 );

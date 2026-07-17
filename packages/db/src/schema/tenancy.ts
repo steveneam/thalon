@@ -11,8 +11,16 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 
-/** Tenant #0 = self/dogfood; #2 (Sprint 2) proves config-not-code. This is the one table whose own `id` IS the tenant identifier. */
+/**
+ * Tenant #0 = self/dogfood; #2 (Sprint 2) proves config-not-code. This is the
+ * one table whose own `id` IS the tenant identifier — and therefore the one
+ * tenant-adjacent table WITHOUT a tenantIsolation() policy: resolving a tenant
+ * by slug is how per-request tenant context gets established in the first
+ * place, so it must be readable before any context exists (rls-ratchet test
+ * pins this exemption).
+ */
 export const tenants = pgTable(
   "tenants",
   {
@@ -59,5 +67,6 @@ export const brandProfiles = pgTable(
   (t) => [
     uniqueIndex("brand_profiles_tenant_version_idx").on(t.tenantId, t.version),
     index("brand_profiles_tenant_active_idx").on(t.tenantId, t.active),
+    tenantIsolation(),
   ],
 );

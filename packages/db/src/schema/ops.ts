@@ -15,6 +15,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { drafts } from "./content";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 /**
@@ -50,6 +51,7 @@ export const publishQueue = pgTable(
       "publish_queue_status_check",
       sql.raw(`status in ('pending', 'processing', 'published', 'failed', 'cancelled')`),
     ),
+    tenantIsolation(),
   ],
 );
 
@@ -75,6 +77,7 @@ export const events = pgTable(
   (t) => [
     index("events_tenant_created_idx").on(t.tenantId, t.createdAt),
     index("events_entity_idx").on(t.entityType, t.entityId),
+    tenantIsolation(),
   ],
 );
 
@@ -91,10 +94,19 @@ export const usageLedger = pgTable(
     tokensOut: bigint("tokens_out", { mode: "number" }).notNull().default(0),
     costEstimate: doublePrecision("cost_estimate").notNull().default(0),
   },
-  (t) => [primaryKey({ columns: [t.tenantId, t.day, t.model] })],
+  (t) => [primaryKey({ columns: [t.tenantId, t.day, t.model] }), tenantIsolation()],
 );
 
-/** key = hash(prompt_version + model + params + input_hash). Identical generations skip the gateway; tenant_id is for accounting — keys are content-addressed. */
+/**
+ * key = hash(prompt_version + model + params + input_hash). Identical
+ * generations skip the gateway; tenant_id is for accounting — keys are
+ * content-addressed. NO tenantIsolation() policy on the two caches, on
+ * purpose: repos/caches.ts reads them cross-tenant by design ("a hit is a
+ * hit whoever warmed it" — a key is only reachable by re-deriving it from
+ * the full input, so a cross-tenant hit reveals nothing the caller couldn't
+ * regenerate). Isolating them would silently turn every cross-tenant hit
+ * into a miss. Exemption pinned in __tests__/rls-ratchet.test.ts.
+ */
 export const llmCache = pgTable("llm_cache", {
   key: text("key").primaryKey(),
   tenantId: uuid("tenant_id")
@@ -108,7 +120,7 @@ export const llmCache = pgTable("llm_cache", {
   lastHitAt: timestamp("last_hit_at", { withTimezone: true }),
 });
 
-/** key = hash(source_set_hash + query_hash) → top-k result. */
+/** key = hash(source_set_hash + query_hash) → top-k result. Same deliberate RLS exemption as llm_cache (source_set_hash makes keys tenant-salted in practice). */
 export const retrievalCache = pgTable("retrieval_cache", {
   key: text("key").primaryKey(),
   tenantId: uuid("tenant_id")

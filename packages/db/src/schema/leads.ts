@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
 const inList = (values: readonly string[]) => values.map((v) => `'${v}'`).join(", ");
@@ -64,6 +65,7 @@ export const leads = pgTable(
     index("leads_tenant_created_idx").on(t.tenantId, t.createdAt),
     check("leads_source_check", sql.raw(`source in (${inList(LEAD_SOURCES)})`)),
     check("leads_status_check", sql.raw(`status in (${inList(LEAD_STATUSES)})`)),
+    tenantIsolation(),
   ],
 );
 
@@ -115,6 +117,7 @@ export const leadScores = pgTable(
     ),
     // Hot path: the queue's latest-score-per-lead read.
     index("lead_scores_tenant_lead_scored_idx").on(t.tenantId, t.leadId, t.scoredAt),
+    tenantIsolation(),
   ],
 );
 
