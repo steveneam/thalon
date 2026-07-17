@@ -1,0 +1,37 @@
+[
+ {
+  "file": "hero-marquee.webp",
+  "pinnedHash": "80c57e3fe2d0472344a6b53fdb734a794a933abe2cae9619f9c5e9f035acc2cc",
+  "width": 2200,
+  "height": 1228,
+  "quality": 80
+ },
+ {
+  "file": "lobby.webp",
+  "pinnedHash": "b46d831c74aef3d2c2e106ec852c6162ed7eac5b9f7532653e64b38c96430da6",
+  "width": 1400,
+  "height": 1050,
+  "quality": 76
+ },
+ {
+  "file": "stage.webp",
+  "pinnedHash": "7d7ca6251a4d09c90e472ab3d757fa674f1275793089e10bdcb6bb18dfff8020",
+  "width": 1400,
+  "height": 1050,
+  "quality": 76
+ },
+ {
+  "file": "hands.webp",
+  "pinnedHash": "2374603e1a18e2c2718dd6366a948c83ef3e8a921ab130a1493b585074a4eecb",
+  "width": 1400,
+  "height": 1050,
+  "quality": 76
+ },
+ {
+  "file": "bulb.webp",
+  "pinnedHash": "505402cafd339a267e718e83a0322a873395a976bde166cdf3efe505fb47af33",
+  "width": 1400,
+  "height": 1050,
+  "quality": 76
+ }
+]

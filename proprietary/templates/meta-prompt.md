@@ -61,7 +61,13 @@ model choice is per-slot (founder direction, from the source prompt — restored
 2026-07-14): e.g. soul-class or seedance 2.0 for cinematic stills, nano banana
 pro/2 for graphics/text/diagram-precise images, GPT-image class for graphic
 design, kling 3.0 / seedance for video — use `models_explore` recommend per
-slot; video-class mints spend real credits and stay deliberate draws. Browsing published sites for *inspiration* is
+slot; video-class mints spend real credits and stay deliberate draws.
+**Hero slots mint on the BEST image model on the roster** (founder directive
+s51 — "best image model, whichever that may be"; check per mint), and **any
+slot where legible words appear in-scene routes to the text-precise seat**:
+soul-class cannot be negative-prompted out of garbled lettering (s51, proven
+across three takes on the ⑥ marquee; nano banana rendered the exact word
+first take). Non-hero, non-text slots stay the builder's call. Browsing published sites for *inspiration* is
 fine; **downloading reference images into the pipeline is forbidden** — every
 asset on the page is a vendor-minted original, minted on the **paid tier only**,
 and pinned at mint time via the B7.1 pinning module with a full provenance

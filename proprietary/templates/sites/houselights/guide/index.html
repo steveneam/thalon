@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How the Houselights page was made</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#10222e;color:#efe8d8;font-family:Georgia,serif;line-height:1.65;padding:72px clamp(24px,8vw,140px);max-width:900px}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin-bottom:8px}
+h2{font-size:19px;margin:40px 0 10px;color:#e8a13c;letter-spacing:0.04em}
+p,li{font-size:16px;color:#d9d2c0;margin-bottom:12px}
+ul{padding-left:22px}
+a{color:#e8a13c}
+.rule{border:none;border-top:1px solid rgba(239,232,216,0.15);margin:32px 0}
+em{color:#bcd6c8}
+</style>
+</head>
+<body>
+<h1>How this page was made</h1>
+<p><em>Houselights is a fictional demonstration business.</em> Every image on the landing page is AI-generated, minted specifically for this design, and recorded with full provenance (model, prompt, spend, license tier) at generation time.</p>
+
+<hr class="rule" />
+<h2>The idea</h2>
+<p>The page is built on one conceit: the house lights dimming before a show. A scroll-driven lighting rig takes the whole page from golden hour to show-dark and then brings a warm glow back up for the close — and as the page darkens, the photographs answer: their light sources (chandeliers, the stage spot, the marquee bulb) physically brighten and bloom, the way real lights win the frame as night comes. Typography is the second instrument: a changeable letterboard rides the corner of the viewport and re-letters itself at every act of the page, the way a venue's lobby board names the night.</p>
+
+<h2>Method</h2>
+<ul>
+<li><strong>Look first.</strong> Studied event/festival and theatre design on Dribbble and Pinterest (look-and-learn only — no reference imagery is ever downloaded into the pipeline): programme-as-typography, editorial serif at poster scale, physical marquee letterboards, blue-hour signage palettes.</li>
+<li><strong>Design scaffold.</strong> The page was storyboarded and then graduated to a final design in a working design surface before any production code, with named slots for every image.</li>
+<li><strong>Minted imagery.</strong> Four scene stills were generated with <em>Soul v2</em> (Higgsfield); the hero — a marquee that must legibly read HOUSELIGHTS — was generated with <em>Nano Banana Pro</em>, a text-precise image model, after Soul v2 produced garbled lettering in two takes. Rejected takes are kept on record with their reasons. Total image spend for the page: about 3 credits.</li>
+<li><strong>Code, not credits.</strong> The letterboard, the lighting rig, the bloom, and the neon flicker are plain HTML/CSS/JavaScript in one self-contained file — no frameworks, no external hosts, fonts vendored under their SIL Open Font License.</li>
+</ul>
+
+<h2>Accessibility &amp; honesty</h2>
+<ul>
+<li>Reduced-motion users get instant letter swaps, a steady sign, and position-mapped lighting only; no autonomous animation.</li>
+<li>Without JavaScript the full page reads statically, board included.</li>
+<li>All copy is illustrative; no real venue, statistics, or events are described.</li>
+</ul>
+
+<h2>Iteration passes</h2>
+<ul>
+<li><strong>Pass 1</strong> — fault-hunt: fixed a broken stats row (labels collapsing), removed a duplicated still (the hands image appeared twice), moved the board section to full width. Ambition: committed to the re-lettering corner board instead of a static exhibit.</li>
+<li><strong>Pass 2</strong> — fault-hunt: hero text-shadow legibility over the marquee photo; blank-tile rhythm on the board. Ambition: the continuous lighting rig (dimmer + warm restore) replaced static section backgrounds as the page's arc.</li>
+<li><strong>Pass 3</strong> — fault-hunt: bloom was too subtle against the dimmer (operator review); the stills now brighten directly while the page darkens. Ambition: the closing sign ignites toward curtain and one letter carries a slow old-neon flicker.</li>
+</ul>
+
+<p style="margin-top:40px"><a href="../">&larr; Back to the page</a></p>
+</body>
+</html>
