@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orchard House — a seasonal kitchen, Adelaide Hills</title>
+<meta name="description" content="A seasonal kitchen in a working orchard. Forty-two trees, one long table, and a menu that follows them through the year. A fictional demonstration site.">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+@font-face{font-family:"Vollkorn";src:url("fonts/vollkorn-var.woff2") format("woff2");font-weight:400 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Vollkorn";src:url("fonts/vollkorn-italic-var.woff2") format("woff2");font-weight:400 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Vollkorn SC";src:url("fonts/vollkorn-sc-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Vollkorn SC";src:url("fonts/vollkorn-sc-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#241c12; --ink-soft:rgba(36,28,18,.92); --ink-faint:rgba(36,28,18,.7);
+  --paper:#f6efe3; --paper-line:rgba(36,28,18,.28);
+  --accent:#b4642a;
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{font-family:"Vollkorn",Georgia,serif;color:var(--ink);background:var(--paper)}
+body[data-season="autumn"]{--accent:#b4642a}
+body[data-season="winter"]{--accent:#5a748c}
+body[data-season="spring"]{--accent:#c77b95}
+body[data-season="summer"]{--accent:#4f7a3d}
+::selection{background:var(--accent);color:var(--paper)}
+img{max-width:100%}
+
+/* ---- fixed scene stage ---- */
+.stage{display:none}
+.js .stage{display:block;position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg{position:absolute;inset:0;background-size:cover;background-position:66% 62%;opacity:0;will-change:opacity}
+.bg.on{opacity:1}
+.sky{position:absolute;inset:0;width:100%;height:100%}
+@media (prefers-reduced-motion: reduce){ .sky{display:none} }
+
+/* ---- no-JS per-chapter scenes ---- */
+.chapter-scene{display:block;width:100%;height:auto;border:1px solid var(--paper-line)}
+.js .chapter-scene{display:none}
+
+/* ---- season rail ---- */
+.rail{display:none}
+.js .rail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:24px}
+.rail a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink-faint)}
+.rail .dot{width:9px;height:9px;border-radius:50%;border:1.5px solid currentColor;background:transparent}
+.rail .lbl{font-family:"Vollkorn SC",serif;font-size:11px;letter-spacing:.18em;opacity:0;transform:translateX(-4px);transition:opacity .25s,transform .25s}
+.rail a:hover .lbl,.rail a.now .lbl{opacity:1;transform:none}
+.rail a.now{color:var(--accent)}
+.rail a.now .dot{background:currentColor}
+@media (max-width:900px){ .js .rail{display:none} }
+
+/* ---- content flow ---- */
+.flow{position:relative;z-index:1}
+.act{min-height:100svh;padding:0 6vw}
+@media (min-width:901px){ .act{padding-left:max(6vw,132px)} }
+
+/* hero */
+.hero{display:flex;flex-direction:column;justify-content:space-between;padding-top:9svh;padding-bottom:6svh}
+.brand{max-width:560px}
+.eyebrow{font-family:"Vollkorn SC",serif;font-size:13px;letter-spacing:.26em;color:var(--ink-soft)}
+.rule{height:0;border-top:2px solid var(--ink);margin:14px 0}
+.rule.thin{border-top-width:1px;opacity:.55}
+.wordmark{font-family:"Vollkorn SC",serif;font-weight:600;font-size:clamp(46px,7vw,88px);line-height:1.02;letter-spacing:.045em;margin:10px 0 8px}
+.tagline{font-size:clamp(18px,1.6vw,21px);line-height:1.55;font-style:italic;color:var(--ink-soft);max-width:33ch}
+.begins{display:inline-flex;align-items:center;gap:14px;color:var(--ink-soft);background:rgba(246,239,227,.85);padding:10px 18px;align-self:flex-start;text-decoration:none}
+.begins .word{font-family:"Vollkorn SC",serif;font-size:14px;letter-spacing:.24em}
+.begins .arrow{font-size:20px;line-height:1;animation:drop 2.6s ease-in-out infinite}
+@keyframes drop{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(7px);opacity:1}}
+@media (prefers-reduced-motion: reduce){ .begins .arrow{animation:none} }
+
+/* chapters */
+.chapter{min-height:165vh;display:block;padding-top:34vh}
+.card{background:rgba(246,239,227,.94);max-width:470px;padding:34px 38px 30px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);box-shadow:0 1px 0 rgba(36,28,18,.18) inset}
+.js .card,.js .visit-card{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
+.js .card.in,.js .visit-card.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){ .js .card,.js .visit-card{opacity:1;transform:none;transition:none} }
+.card .ord{font-family:"Vollkorn SC",serif;font-size:13px;letter-spacing:.26em;color:var(--accent)}
+.card h2{font-family:"Vollkorn SC",serif;font-weight:600;font-size:clamp(26px,3vw,36px);letter-spacing:.05em;margin:6px 0 10px}
+.card .prose{font-size:17.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 22px}
+.menu-label{font-family:"Vollkorn SC",serif;font-size:12.5px;letter-spacing:.24em;color:var(--ink-faint);text-align:center;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.menu-label::before,.menu-label::after{content:"";flex:1;border-top:1px solid var(--paper-line)}
+.dish{margin:0 0 16px}
+.dish .line{display:flex;align-items:baseline;gap:12px;justify-content:space-between}
+.dish .name{font-weight:600;font-size:19px}
+.dish .price{font-size:17px;color:var(--accent);white-space:nowrap}
+.dish .note{font-style:italic;font-size:15.5px;color:var(--ink-faint);margin-top:2px}
+.foot{font-size:15px;font-style:italic;color:var(--ink-faint);text-align:center;border-top:1px solid var(--paper-line);padding-top:14px;margin-top:20px}
+
+/* close */
+.visit{display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8svh}
+.visit-card{background:rgba(246,239,227,.96);max-width:520px;padding:38px 42px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.visit-card h2{font-family:"Vollkorn SC",serif;font-weight:600;font-size:clamp(24px,2.6vw,32px);letter-spacing:.08em;margin:4px 0 12px}
+.visit-card p{font-size:17px;line-height:1.65;margin:0 0 10px;color:var(--ink-soft)}
+.cta{display:inline-block;margin-top:14px;font-family:"Vollkorn SC",serif;font-size:15px;letter-spacing:.18em;color:var(--paper);background:var(--ink);padding:13px 26px;text-decoration:none}
+.cta:hover{background:var(--accent)}
+.colophon{margin-top:26px;font-size:13.5px;line-height:1.6;color:var(--ink-faint)}
+.colophon a{color:var(--ink-soft)}
+@media (max-width:700px){
+  .act{padding:0 7vw}
+  .bg{background-position:46% 38%}
+  .hero{padding-top:12svh;background:linear-gradient(180deg, rgba(246,239,227,.88) 0%, rgba(246,239,227,.55) 30%, rgba(246,239,227,0) 52%, rgba(246,239,227,0) 78%, rgba(246,239,227,.7) 100%)}
+  .card,.visit-card{padding:26px 24px;max-width:none}
+  .chapter{padding-top:52vh}
+}
+</style>
+</head>
+<body data-season="autumn">
+
+<div class="stage" aria-hidden="true">
+  <div class="bg bg-autumn on" style="background-image:url('assets/backdrop-autumn.webp')"></div>
+  <div class="bg bg-winter" style="background-image:url('assets/backdrop-winter.webp')"></div>
+  <div class="bg bg-spring" style="background-image:url('assets/backdrop-spring.webp')"></div>
+  <div class="bg bg-summer" style="background-image:url('assets/backdrop-summer.webp')"></div>
+  <canvas class="sky"></canvas>
+</div>
+
+<nav class="rail" aria-label="Seasons">
+  <a href="#autumn" class="now"><span class="dot"></span><span class="lbl">Autumn</span></a>
+  <a href="#winter"><span class="dot"></span><span class="lbl">Winter</span></a>
+  <a href="#spring"><span class="dot"></span><span class="lbl">Spring</span></a>
+  <a href="#summer"><span class="dot"></span><span class="lbl">Summer</span></a>
+</nav>
+
+<div class="flow">
+  <header class="act hero">
+    <div class="brand">
+      <div class="eyebrow">Adelaide Hills &middot; a working orchard</div>
+      <div class="rule"></div>
+      <h1 class="wordmark">Orchard House</h1>
+      <div class="rule thin"></div>
+      <p class="tagline">A seasonal kitchen in a working orchard. Forty-two trees, one long table, and a menu that follows them through the year.</p>
+    </div>
+    <a class="begins" href="#autumn">
+      <span class="word">It begins in autumn</span>
+      <span class="arrow">&darr;</span>
+    </a>
+  </header>
+
+  <section class="act chapter" id="autumn">
+    <img class="chapter-scene" src="assets/backdrop-autumn.webp" loading="lazy" alt="Painterly orchard hillside in autumn: the great apple tree in amber leaf, drifts at its base, the farmhouse window lit.">
+    <div class="card">
+      <div class="ord">I. Autumn</div>
+      <h2>The Harvest</h2>
+      <p class="prose">The year&rsquo;s work comes in. Crates stack by the cellar door, the presses run, and the kitchen cooks with its arms full.</p>
+      <div class="menu-label">From the autumn card</div>
+      <div class="dish"><div class="line"><span class="name">Roast pumpkin, brown butter, sage</span><span class="price">26</span></div><div class="note">with hazelnuts from the far fence line</div></div>
+      <div class="dish"><div class="line"><span class="name">Slow duck, roasted quince, cider jus</span><span class="price">38</span></div><div class="note">the quinces poached in last year&rsquo;s cider</div></div>
+      <div class="dish"><div class="line"><span class="name">Apple galette, orchard cream</span><span class="price">18</span></div><div class="note">five varieties, one pan</div></div>
+      <div class="foot">From the rows: apples, quinces, walnuts. The cellar fills.</div>
+    </div>
+  </section>
+
+  <section class="act chapter" id="winter">
+    <img class="chapter-scene" src="assets/backdrop-winter.webp" loading="lazy" alt="The same orchard deep in winter: the tree bare, snow on the ground and the farmhouse roof, both windows warm.">
+    <div class="card">
+      <div class="ord">II. Winter</div>
+      <h2>The Rest</h2>
+      <p class="prose">The trees sleep and the pantry speaks. What autumn put away &mdash; preserved, pickled, cellared &mdash; carries the table through the cold.</p>
+      <div class="menu-label">From the winter card</div>
+      <div class="dish"><div class="line"><span class="name">Celeriac soup, toasted rye, cultured butter</span><span class="price">22</span></div><div class="note">cellar vegetables, kitchen bread</div></div>
+      <div class="dish"><div class="line"><span class="name">Braised beef cheek, mash, pickled walnut</span><span class="price">36</span></div><div class="note">the walnuts pickled green last spring</div></div>
+      <div class="dish"><div class="line"><span class="name">Preserved-quince crumble, bay custard</span><span class="price">17</span></div></div>
+      <div class="foot">The orchard rests. The pruning is done by hand; the jars come down by the dozen.</div>
+    </div>
+  </section>
+
+  <section class="act chapter" id="spring">
+    <img class="chapter-scene" src="assets/backdrop-spring.webp" loading="lazy" alt="The same orchard in spring blossom: the tree white-pink, petals ringing its base, fresh green on the hill.">
+    <div class="card">
+      <div class="ord">III. Spring</div>
+      <h2>The Blossom</h2>
+      <p class="prose">Three weeks of blossom, and the whole hill hums. The kitchen goes light and green while the bees work overtime.</p>
+      <div class="menu-label">From the spring card</div>
+      <div class="dish"><div class="line"><span class="name">Asparagus, poached egg, blossom honey</span><span class="price">24</span></div><div class="note">honey from the hives between the rows</div></div>
+      <div class="dish"><div class="line"><span class="name">Lamb shoulder, first peas, mint</span><span class="price">34</span></div></div>
+      <div class="dish"><div class="line"><span class="name">Rhubarb and custard tart</span><span class="price">16</span></div><div class="note">orchard eggs, first-pull rhubarb</div></div>
+      <div class="foot">Petal-fall decides the crop. We count hives, not hours.</div>
+    </div>
+  </section>
+
+  <section class="act chapter" id="summer">
+    <img class="chapter-scene" src="assets/backdrop-summer.webp" loading="lazy" alt="The same orchard in high summer: the tree in dense green leaf with red apples, golden evening light.">
+    <div class="card">
+      <div class="ord">IV. Summer</div>
+      <h2>The Long Table</h2>
+      <p class="prose">Tables under the tree from December to March. Lunch runs long, the light runs longer, and the first apples land before the plates are cleared.</p>
+      <div class="menu-label">From the summer card</div>
+      <div class="dish"><div class="line"><span class="name">Tomatoes, torn bread, basil oil</span><span class="price">21</span></div><div class="note">grown against the north wall</div></div>
+      <div class="dish"><div class="line"><span class="name">Chicken off the coals, charred lemon</span><span class="price">33</span></div></div>
+      <div class="dish"><div class="line"><span class="name">Stone fruit, almond, vanilla ice</span><span class="price">16</span></div><div class="note">peaches and apricots from the neighbour&rsquo;s rows</div></div>
+      <div class="foot">Everything at its ripest; nothing out of season. The year turns again.</div>
+    </div>
+  </section>
+
+  <section class="act visit">
+    <div class="visit-card">
+      <div class="eyebrow">Visit</div>
+      <h2>Orchard House, Milldale Lane, Adelaide Hills</h2>
+      <p>Lunch Thursday to Sunday from noon. Dinner Friday and Saturday. Closed on frost mornings &mdash; call ahead in July.</p>
+      <p>The menu changes with the orchard, not the calendar; what you read above is how a year tastes here.</p>
+      <a class="cta" href="mailto:table@orchard-house.example">Book a table</a>
+      <div class="colophon">Orchard House is a fictional demonstration business. The landscape is an AI-minted painterly series &mdash; one composition, four seasons. <a href="guide/">How this page was made</a>.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var bgs = {
+    autumn: document.querySelector(".bg-autumn"),
+    winter: document.querySelector(".bg-winter"),
+    spring: document.querySelector(".bg-spring"),
+    summer: document.querySelector(".bg-summer")
+  };
+  var order = ["autumn", "winter", "spring", "summer"];
+  var chapters = order.map(function (s) { return document.getElementById(s); });
+  var railLinks = Array.prototype.slice.call(document.querySelectorAll(".rail a"));
+  var canvas = document.querySelector(".sky");
+  var ctx = canvas && !reduced ? canvas.getContext("2d") : null;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    if (canvas) {
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  /* continuous season progress s in [0,3] */
+  var s = 0;
+  function computeProgress() {
+    var vh = window.innerHeight;
+    var y = window.scrollY;
+    var p = 0;
+    for (var i = 1; i < chapters.length; i++) {
+      var top = chapters[i].getBoundingClientRect().top + y;
+      var a = top - vh * 0.85, b = top - vh * 0.3;
+      var t = (y - a) / (b - a);
+      t = Math.max(0, Math.min(1, t));
+      p += t;
+    }
+    return p;
+  }
+
+  function applySeason() {
+    s = computeProgress();
+    var idx = Math.round(s);
+    idx = Math.max(0, Math.min(3, idx));
+    document.body.setAttribute("data-season", order[idx]);
+    for (var i = 0; i < order.length; i++) {
+      var w = Math.max(0, 1 - Math.abs(s - i));
+      if (reduced) w = (i === idx) ? 1 : 0;
+      bgs[order[i]].style.opacity = w;
+      if (railLinks[i]) railLinks[i].className = (i === idx) ? "now" : "";
+    }
+  }
+
+  /* cards develop in on first entry */
+  var cardEls = Array.prototype.slice.call(document.querySelectorAll(".card, .visit-card"));
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.25 });
+    cardEls.forEach(function (el) { io.observe(el); });
+  } else {
+    cardEls.forEach(function (el) { el.classList.add("in"); });
+  }
+
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(function () { applySeason(); ticking = false; });
+    }
+  }, { passive: true });
+  applySeason();
+
+  if (!ctx) return;
+
+  /* particle vocabulary: leaf / snow / petal / mote */
+  var parts = [];
+  var CAPS = { leaf: 70, snow: 120, petal: 70, mote: 18 };
+  var counts = { leaf: 0, snow: 0, petal: 0, mote: 0 };
+  var LEAF_COLORS = ["#b4642a", "#c98a3b", "#a4502a", "#8f6b2f"];
+  var PETAL_COLORS = ["#f3d7e0", "#eec6d4", "#f7e4ea"];
+  var burstFired = false;
+  var t0 = performance.now();
+
+  function canopy() {
+    var cx = W * (W < 700 ? 0.62 : 0.72);
+    return { x: cx - W * 0.22, w: W * 0.42, y: H * 0.05, h: H * 0.38 };
+  }
+  function groundY() { return H * 0.88; }
+
+  function spawn(kind, burst) {
+    if (counts[kind] >= CAPS[kind]) return;
+    var c = canopy();
+    var p = { kind: kind, t: 0, phase: Math.random() * Math.PI * 2, rest: 0 };
+    if (kind === "leaf") {
+      p.x = c.x + Math.random() * c.w; p.y = c.y + Math.random() * c.h;
+      p.vx = -8 - Math.random() * 14; p.vy = 26 + Math.random() * 26;
+      p.r = 5 + Math.random() * 5; p.rot = Math.random() * Math.PI * 2;
+      p.vr = (Math.random() - 0.5) * 2.4;
+      p.color = LEAF_COLORS[(Math.random() * LEAF_COLORS.length) | 0];
+    } else if (kind === "snow") {
+      p.x = Math.random() * W; p.y = -8;
+      p.vx = -4 - Math.random() * 8; p.vy = 34 + Math.random() * 30;
+      p.r = 1 + Math.random() * 1.8; p.color = "#ffffff";
+    } else if (kind === "petal") {
+      p.x = c.x + Math.random() * c.w; p.y = c.y + Math.random() * c.h;
+      if (burst) {
+        var a = Math.random() * Math.PI * 2, v = 30 + Math.random() * 90;
+        p.vx = Math.cos(a) * v; p.vy = Math.sin(a) * v * 0.6 - 20;
+      } else { p.vx = -6 - Math.random() * 10; p.vy = 14 + Math.random() * 18; }
+      p.r = 2.6 + Math.random() * 2.6; p.rot = Math.random() * Math.PI * 2;
+      p.vr = (Math.random() - 0.5) * 3;
+      p.color = PETAL_COLORS[(Math.random() * PETAL_COLORS.length) | 0];
+    } else {
+      p.x = c.x + Math.random() * c.w; p.y = c.y + Math.random() * (H * 0.5);
+      p.vx = (Math.random() - 0.5) * 6; p.vy = -6 - Math.random() * 8;
+      p.r = 1.2 + Math.random() * 1.4; p.color = "#e7c26a";
+    }
+    parts.push(p); counts[kind]++;
+  }
+
+  function weights() {
+    return {
+      leaf: Math.max(0, 1 - Math.abs(s - 0)),
+      snow: Math.max(0, 1 - Math.abs(s - 1)),
+      petal: Math.max(0, 1 - Math.abs(s - 2)),
+      mote: Math.max(0, 1 - Math.abs(s - 3))
+    };
+  }
+
+  var last = performance.now();
+  var acc = { leaf: 0, snow: 0, petal: 0, mote: 0 };
+  var RATES = { leaf: 9, snow: 16, petal: 6, mote: 1.6 };
+  var KIND_OF = { autumn: "leaf", winter: "snow", spring: "petal", summer: "mote" };
+  var HOME = { leaf: 0, snow: 1, petal: 2, mote: 3 };
+
+  function step(now) {
+    requestAnimationFrame(step);
+    if (document.hidden) { last = now; return; }
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    var wind = Math.sin((now - t0) / 2600) * 12;
+    var w = weights();
+
+    if (s > 1.55 && s < 2.45 && !burstFired) {
+      burstFired = true;
+      for (var bi = 0; bi < 60; bi++) spawn("petal", true);
+    }
+    if (s < 1.4 || s > 2.6) burstFired = false;
+
+    /* gust at the turn: the OUTGOING season's particles flurry mid-transition */
+    var frac = s - Math.floor(s);
+    var gust = 1 + 1.7 * Math.max(0, 1 - Math.abs(2 * frac - 1));
+    var outgoing = order[Math.max(0, Math.min(3, Math.floor(s)))];
+    for (var k in RATES) {
+      var mult = (k === KIND_OF[outgoing] && frac > 0.05) ? gust : 1;
+      acc[k] += RATES[k] * w[k] * mult * dt;
+      while (acc[k] >= 1) { spawn(k, false); acc[k]--; }
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    var gy = groundY();
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.t += dt;
+      /* far from home season (rail jump, fast scroll): fade out in flight instead of lingering */
+      if (p.doom === undefined && Math.abs(s - HOME[p.kind]) > 1.2) { p.doom = 1.2; }
+      if (p.doom !== undefined) {
+        p.doom -= dt;
+        if (p.doom <= 0) { counts[p.kind]--; parts.splice(i, 1); continue; }
+      }
+      if (p.rest > 0) {
+        p.rest -= dt;
+        var ra = Math.min(1, p.rest / 2);
+        draw(p, ra);
+        if (p.rest <= 0) { counts[p.kind]--; parts.splice(i, 1); }
+        continue;
+      }
+      p.x += (p.vx + wind * (p.kind === "mote" ? 0.3 : 1)) * dt + Math.sin(p.t * 2 + p.phase) * (p.kind === "snow" ? 0.5 : 0.9);
+      p.y += p.vy * dt;
+      if (p.rot !== undefined) p.rot += p.vr * dt;
+      var gone = p.y > H + 12 || p.x < -30 || p.x > W + 30 || (p.kind === "mote" && p.y < -12) || p.t > 26;
+      if ((p.kind === "leaf" || p.kind === "snow") && p.y >= gy) {
+        p.y = gy; p.vy = 0; p.vx = 0; p.rest = p.kind === "snow" ? 5 : 7;
+      } else if (gone) {
+        counts[p.kind]--; parts.splice(i, 1); continue;
+      }
+      draw(p, p.doom !== undefined ? Math.min(1, p.doom / 1.2) : 1);
+    }
+  }
+
+  function draw(p, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha * (p.kind === "snow" ? 0.85 : p.kind === "mote" ? 0.5 + 0.5 * Math.sin(p.t * 3 + p.phase) : 0.92);
+    ctx.translate(p.x, p.y);
+    if (p.kind === "leaf" || p.kind === "petal") {
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r, p.r * 0.55, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>

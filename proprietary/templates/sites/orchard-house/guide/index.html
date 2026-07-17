@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How the Orchard House page was made</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f6efe3;color:#241c12;font-family:Georgia,serif;line-height:1.65;padding:72px clamp(24px,8vw,140px);max-width:900px}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin-bottom:8px}
+h2{font-size:19px;margin:40px 0 10px;color:#b4642a;letter-spacing:0.04em}
+p,li{font-size:16px;color:rgba(36,28,18,0.78);margin-bottom:12px}
+ul{padding-left:22px}
+a{color:#b4642a}
+.rule{border:none;border-top:1px solid rgba(36,28,18,0.2);margin:32px 0}
+em{color:#b4642a}
+</style>
+</head>
+<body>
+<h1>How this page was made</h1>
+<p><em>Orchard House is a fictional demonstration business.</em> Every image on the landing page is AI-generated, minted specifically for this design, and recorded with full provenance (model, prompt, spend, license tier) at generation time.</p>
+
+<hr class="rule" />
+<h2>The idea</h2>
+<p>One tree, one year. The page is a single scroll through the orchard&rsquo;s four seasons: the same painted hillside &mdash; the same apple tree right of center, the same farmhouse with its lit window &mdash; crosses from autumn into winter, spring and summer as you read. The season is never a slideshow of four different pictures; it is one continuous place changing state, which is also how the fictional kitchen&rsquo;s menu works: four chapters, four cards, one orchard.</p>
+<p>The falling things are not part of the paintings. Autumn leaves tumble and settle, winter snow drifts and rests, spring blossom pops in a single burst at the turn and then floats, and summer&rsquo;s gold motes rise in the evening light &mdash; all drawn in code on a canvas over the scene, each season with its own particle shape, physics and pace, and a small &ldquo;gust at the turn&rdquo; as one season hands over to the next. With reduced motion enabled the particles are gone and the seasons swap cleanly; without JavaScript the four chapters simply show their scenes as plain images.</p>
+
+<h2>The imagery</h2>
+<p>The four backdrops are an AI-minted painterly series. The autumn master was generated first (Higgsfield, Nano Banana 2 &mdash; the vendor quietly routes &ldquo;pro&rdquo; requests to this seat on the current plan; the request and the model that actually ran are both in the provenance record). The other three seasons were then generated as edits of that master (Nano Banana Flash, image-to-image), each holding the same camera, composition and brushwork while repainting the season: bare branches and snow, full blossom over new grass, deep summer leaf with red apples. All four were keepers on the first take &mdash; 8 credits for the whole series &mdash; and every one was pinned to the content-addressed store with its full provenance manifest at mint time.</p>
+
+<h2>The type</h2>
+<p>Vollkorn &mdash; the &ldquo;wholegrain&rdquo; old-style serif &mdash; carries the whole page in two registers: the variable roman and italic for prose, dishes and notes, and Vollkorn SC&rsquo;s letterpress small caps for the wordmark, season heads and labels. One family, four seasons. Both faces are open-licensed (SIL OFL) and served from this site&rsquo;s own directory; the page makes no external requests at all.</p>
+
+<h2>Honesty notes</h2>
+<ul>
+<li>Orchard House, its menu, its address and its people are fictional; the page exists to demonstrate what this template factory can build.</li>
+<li>All landscape imagery is AI-generated, as described above &mdash; nothing was photographed, and nothing was taken from anyone else&rsquo;s work.</li>
+<li>Prices and dishes are plausible fictions, not offers.</li>
+<li>The booking address is a reserved example domain that cannot receive mail.</li>
+</ul>
+</body>
+</html>

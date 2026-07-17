@@ -1,0 +1,6 @@
+[
+  { "file": "backdrop-autumn.webp", "pinnedHash": "058f6d57df5831d81253771f9366771d17200611874f7c61dcfc88ee05d74464", "width": 1920, "height": 1280, "quality": 80 },
+  { "file": "backdrop-winter.webp", "pinnedHash": "67d0c45b398699857c391d5de6a4dca0b35f516147306cf9a0ab1ed18e3d36cc", "width": 1920, "height": 1280, "quality": 80 },
+  { "file": "backdrop-spring.webp", "pinnedHash": "335bb9eca62a9779bcf5f4b59b7e325f7c35a01ec6165606e70a7f5073ba29da", "width": 1920, "height": 1280, "quality": 80 },
+  { "file": "backdrop-summer.webp", "pinnedHash": "42c9c1da4be72a2f9028a7c3e4a02772607ed1795aac52776dfb79b8948c8ca6", "width": 1920, "height": 1280, "quality": 80 }
+]
