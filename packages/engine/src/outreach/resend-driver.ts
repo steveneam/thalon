@@ -70,7 +70,14 @@ export function createResendTransport(config: ResendTransportConfig): SendTransp
           (await response.text().catch(() => "")).slice(0, 300) || response.statusText;
         throw new ResendApiError(response.status, detail);
       }
-      const parsed = sendResponseSchema.safeParse(await response.json());
+      // The platform fetch seam deliberately exposes text(), not json().
+      let payload: unknown;
+      try {
+        payload = JSON.parse(await response.text());
+      } catch {
+        payload = undefined;
+      }
+      const parsed = sendResponseSchema.safeParse(payload);
       if (!parsed.success) {
         throw new ResendApiError(
           response.status,
