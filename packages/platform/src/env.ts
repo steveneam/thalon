@@ -69,6 +69,21 @@ const envSchema = z.object({
    * machine-to-machine one.
    */
   DB_DUMP_TOKEN: z.string().optional(),
+  /**
+   * B-crm.4 send door (s54): the Resend credential — the KEY half of the
+   * two-key arming ratchet (engine `resolveSendTransport`). The key alone
+   * must never arm live sending; without OUTREACH_SEND_ARMED the resolved
+   * transport refuses every call naming the missing arm.
+   */
+  RESEND_API_KEY: z.string().optional(),
+  /**
+   * B-crm.4 send door (s54): the founder GO — the FLAG half of the arming
+   * ratchet. Exactly the string "true" arms (with the key also present);
+   * anything else, including unset, leaves the refusing transport. Live
+   * send is a deliberate operator decision, never a side effect of a key
+   * landing in the environment.
+   */
+  OUTREACH_SEND_ARMED: z.string().optional(),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;
