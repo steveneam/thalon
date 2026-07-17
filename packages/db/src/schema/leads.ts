@@ -167,5 +167,6 @@ export const leadWeightStates = pgTable(
       t.profileHash,
       t.computedAt,
     ),
+    tenantIsolation(),
   ],
 );

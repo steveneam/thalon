@@ -57,6 +57,8 @@ const COPY_ORDER: PgTable[] = [
   schema.searchSnapshots,
   schema.waitlist,
   schema.leads,
+  // lead_weight_states before lead_scores: scores carry weight_state_id provenance (0012).
+  schema.leadWeightStates,
   schema.leadScores,
   schema.videoProjects,
   schema.videoTakes,

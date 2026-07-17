@@ -1,6 +1,6 @@
 {
-  "id": "14ff7823-7589-4430-8035-18889ce91a16",
-  "prevId": "e33bd83b-18be-4c22-98f5-785a44b7c9be",
+  "id": "49fc8a34-e01a-4272-ba71-4c257bcfa280",
+  "prevId": "7f6e9b6f-0fed-448f-9733-bd624807c0df",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1784,6 +1784,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "weight_state_id": {
+          "name": "weight_state_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "scored_at": {
           "name": "scored_at",
           "type": "timestamp with time zone",
@@ -1880,6 +1886,170 @@
           "tableTo": "leads",
           "columnsFrom": [
             "lead_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "lead_scores_weight_state_id_lead_weight_states_id_fk": {
+          "name": "lead_scores_weight_state_id_lead_weight_states_id_fk",
+          "tableFrom": "lead_scores",
+          "tableTo": "lead_weight_states",
+          "columnsFrom": [
+            "weight_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "tenant_isolation": {
+          "name": "tenant_isolation",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "public"
+          ],
+          "using": "tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid",
+          "withCheck": "tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.lead_weight_states": {
+      "name": "lead_weight_states",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profile_hash": {
+          "name": "profile_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "evidence_hash": {
+          "name": "evidence_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "multipliers": {
+          "name": "multipliers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reasons": {
+          "name": "reasons",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "evidence": {
+          "name": "evidence",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "computed_at": {
+          "name": "computed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "lead_weight_states_tenant_profile_evidence_idx": {
+          "name": "lead_weight_states_tenant_profile_evidence_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "profile_hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "evidence_hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "lead_weight_states_tenant_profile_computed_idx": {
+          "name": "lead_weight_states_tenant_profile_computed_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "profile_hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "computed_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "lead_weight_states_tenant_id_tenants_id_fk": {
+          "name": "lead_weight_states_tenant_id_tenants_id_fk",
+          "tableFrom": "lead_weight_states",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
           ],
           "columnsTo": [
             "id"

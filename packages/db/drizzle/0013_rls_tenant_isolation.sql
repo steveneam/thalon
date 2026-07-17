@@ -18,13 +18,8 @@
 --     DELETE all blocked cross-tenant, invisible without tenant context).
 --   * FORCE ROW LEVEL SECURITY is deliberately NOT set: the app does not yet
 --     pin app.tenant_id on its connections, so FORCE would zero out every
---     owner-connection read today. Adding FORCE once the app-side session
---     wiring lands is the next ratchet turn — one ALTER per table, never the
---     reverse.
---   * Deliberately WITHOUT policies: `tenants` (the identity anchor — slug
---     lookup must precede tenant context), `llm_cache` and `retrieval_cache`
---     (content-addressed cross-tenant caches by documented design, see
---     schema/ops.ts). Pinned in __tests__/rls-ratchet.test.ts.
+-- (Regenerated at the s53 lane merge on the combined tree: now 25 tables — the
+-- parallel lane's lead_weight_states joined the policy set at merge reconciliation.)
 ALTER TABLE "drafts" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "fanout_runs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "source_chunks" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -38,6 +33,7 @@ ALTER TABLE "edit_diffs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "eval_cases" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "judge_results" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "lead_scores" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "lead_weight_states" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "leads" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "events" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "publish_queue" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -62,6 +58,7 @@ CREATE POLICY "tenant_isolation" ON "edit_diffs" AS PERMISSIVE FOR ALL TO public
 CREATE POLICY "tenant_isolation" ON "eval_cases" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
 CREATE POLICY "tenant_isolation" ON "judge_results" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
 CREATE POLICY "tenant_isolation" ON "lead_scores" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
+CREATE POLICY "tenant_isolation" ON "lead_weight_states" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
 CREATE POLICY "tenant_isolation" ON "leads" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
 CREATE POLICY "tenant_isolation" ON "events" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
 CREATE POLICY "tenant_isolation" ON "publish_queue" AS PERMISSIVE FOR ALL TO public USING (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid) WITH CHECK (tenant_id = (nullif(current_setting('app.tenant_id', true), ''))::uuid);--> statement-breakpoint
