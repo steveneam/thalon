@@ -5,11 +5,15 @@ import { fileURLToPath } from "node:url";
 import {
   createDbClient,
   createMemoryDbClient,
+  readEnv,
   resolveSeams,
   type DbClient,
 } from "@thalon/platform";
+import { drizzle as drizzleNodePg } from "drizzle-orm/node-postgres";
+import { migrate as migrateNodePg } from "drizzle-orm/node-postgres/migrator";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
+import pg from "pg";
 import { createRepos, type Repos } from "./repos";
 import * as schema from "./schema";
 
@@ -79,22 +83,49 @@ async function open(client: DbClient): Promise<DbHandle> {
   };
 }
 
+/**
+ * B0.5: the real-server driver (node-postgres over DATABASE_URL). Same
+ * migrations folder, same repos — only the transport differs. `dumpTo`
+ * refuses LOUDLY here: a server-owned database is dumped by `pg_dump`
+ * (the box's pre-backup hook does exactly that); the export door exists
+ * for the EMBEDDED engine, where no external tool can attach.
+ */
+async function openPostgres(connectionString: string): Promise<DbHandle> {
+  const pool = new pg.Pool({ connectionString });
+  const db = drizzleNodePg(pool, { schema });
+  await migrateNodePg(db, { migrationsFolder });
+  return {
+    repos: createRepos(db),
+    dumpTo: async () => {
+      throw new Error(
+        "postgres driver: dump the server with pg_dump (backup hooks own consistency) — the in-process export door is embedded-only",
+      );
+    },
+    close: () => pool.end(),
+  };
+}
+
 let cached: Promise<DbHandle> | null = null;
 
 /**
- * Opens (and migrates) the seam-resolved database: embedded Postgres under
- * <dataDir>/pg in dev — each worktree gets its own — Aurora once B0.5 wires
- * the prod driver. Cached per process.
+ * Opens (and migrates) the seam-resolved database. `DATABASE_URL` set →
+ * the real Postgres server (B0.5 driver — dev daily driver on this box,
+ * Aurora-shaped for later). Unset → embedded Postgres under <dataDir>/pg
+ * (each worktree gets its own; tests + fresh clones stay zero-config).
+ * Cached per process.
  */
 export function openDb(): Promise<DbHandle> {
   if (cached) return cached;
   const seams = resolveSeams();
   if (seams.db === "postgres") {
-    return Promise.reject(
-      new Error(
-        "DATABASE_URL is set but the Aurora/Postgres driver lands with B0.5. Unset DATABASE_URL to use the embedded dev database.",
-      ),
-    );
+    const url = readEnv().DATABASE_URL;
+    if (!url) {
+      return Promise.reject(
+        new Error("db seam resolved to postgres but DATABASE_URL is empty — seam/env mismatch"),
+      );
+    }
+    cached = openPostgres(url);
+    return cached;
   }
   cached = open(createDbClient({ dataDir: seams.dataDir }));
   return cached;
