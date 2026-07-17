@@ -9,6 +9,8 @@ import {
   leadRankerWeightOverridesSchema,
   leadRankerWeightsSchema,
   leadScoreRecordSchema,
+  leadWeightMultipliersSchema,
+  leadWeightStateRecordSchema,
   normalizeLeadEmail,
 } from "../leads";
 
@@ -78,6 +80,43 @@ describe("ICP block + scorer weights (B-crm.2)", () => {
     expect(leadScoreRecordSchema.safeParse({ score: 1.01, profileHash: "abc" }).success).toBe(false);
     expect(leadScoreRecordSchema.safeParse({ score: -0.1, profileHash: "abc" }).success).toBe(false);
     expect(leadScoreRecordSchema.safeParse({ score: 0.5, profileHash: "" }).success).toBe(false);
+  });
+});
+
+describe("learn-loop shapes (B-crm.5)", () => {
+  const NEUTRAL = { relevance: 1, fit: 1, completeness: 1, recency: 1 };
+
+  it("multipliers cover all four signals and must be positive — zeroing or inverting a signal is weights config, never the learn loop's call", () => {
+    expect(leadWeightMultipliersSchema.parse({ ...NEUTRAL, fit: 2, recency: 0.5 })).toEqual({
+      relevance: 1,
+      fit: 2,
+      completeness: 1,
+      recency: 0.5,
+    });
+    expect(leadWeightMultipliersSchema.safeParse({ ...NEUTRAL, fit: 0 }).success).toBe(false);
+    expect(leadWeightMultipliersSchema.safeParse({ ...NEUTRAL, recency: -0.5 }).success).toBe(false);
+    expect(leadWeightMultipliersSchema.safeParse({ relevance: 1, fit: 1 }).success).toBe(false);
+  });
+
+  it("a weight-state record needs both hashes — profile binding and structural idempotence", () => {
+    const record = leadWeightStateRecordSchema.parse({
+      multipliers: NEUTRAL,
+      profileHash: "hash-a",
+      evidenceHash: "evidence-1",
+    });
+    expect(record.reasons).toEqual([]);
+    expect(record.evidence).toEqual({});
+    expect(
+      leadWeightStateRecordSchema.safeParse({
+        multipliers: NEUTRAL,
+        profileHash: "",
+        evidenceHash: "evidence-1",
+      }).success,
+    ).toBe(false);
+    expect(
+      leadWeightStateRecordSchema.safeParse({ multipliers: NEUTRAL, profileHash: "hash-a" })
+        .success,
+    ).toBe(false);
   });
 });
 

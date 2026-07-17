@@ -26,7 +26,12 @@ export function leadScoresRepo(db: Db) {
      */
     async append(
       ctx: TenantCtx,
-      input: { leadId: string; scoredAt: Date } & LeadScoreRecordInput,
+      input: {
+        leadId: string;
+        scoredAt: Date;
+        /** B-crm.5: the learned weight state whose multipliers shaped this pass — provenance + the re-score trigger. */
+        weightStateId?: string | null;
+      } & LeadScoreRecordInput,
     ): Promise<{ score: LeadScore; created: boolean }> {
       const record = leadScoreRecordSchema.parse(input);
       return db.transaction(async (tx) => {
@@ -45,6 +50,7 @@ export function leadScoresRepo(db: Db) {
             reasons: record.reasons,
             signals: record.signals,
             profileHash: record.profileHash,
+            weightStateId: input.weightStateId ?? null,
             scoredAt: input.scoredAt,
           })
           .onConflictDoNothing({

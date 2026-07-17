@@ -8,6 +8,7 @@ import { eventsRepo, type EventsRepo } from "./events";
 import { fanoutRunsRepo, type FanoutRunsRepo } from "./fanout-runs";
 import { judgeResultsRepo, type JudgeResultsRepo } from "./judge-results";
 import { leadScoresRepo, type LeadScoresRepo } from "./lead-scores";
+import { leadWeightStatesRepo, type LeadWeightStatesRepo } from "./lead-weight-states";
 import { leadsRepo, type LeadsRepo } from "./leads";
 import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
 import { searchSnapshotsRepo, type SearchSnapshotsRepo } from "./search-snapshots";
@@ -46,6 +47,7 @@ export interface Repos {
   waitlist: WaitlistRepo;
   leads: LeadsRepo;
   leadScores: LeadScoresRepo;
+  leadWeightStates: LeadWeightStatesRepo;
   videoProjects: VideoProjectsRepo;
   videoTakes: VideoTakesRepo;
   videoCuts: VideoCutsRepo;
@@ -76,6 +78,7 @@ export function createRepos(db: Db): Repos {
     waitlist: waitlistRepo(db),
     leads: leadsRepo(db),
     leadScores: leadScoresRepo(db),
+    leadWeightStates: leadWeightStatesRepo(db),
     videoProjects: videoProjectsRepo(db),
     videoTakes: videoTakesRepo(db),
     videoCuts: videoCutsRepo(db),

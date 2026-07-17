@@ -7,6 +7,7 @@ export type { Repos } from "./repos";
 export { leadEmailHash } from "./repos/leads";
 export type { Lead as LeadRow } from "./repos/leads";
 export type { LeadScore as LeadScoreRow } from "./repos/lead-scores";
+export type { LeadWeightState as LeadWeightStateRow } from "./repos/lead-weight-states";
 export type { MonitoredArea as MonitoredAreaRow } from "./repos/monitored-areas";
 export type { SearchSnapshot } from "./repos/search-snapshots";
 export type { SearchTarget as SearchTargetRow } from "./repos/search-targets";

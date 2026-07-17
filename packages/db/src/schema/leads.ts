@@ -90,6 +90,13 @@ export const leadScores = pgTable(
     reasons: jsonb("reasons").notNull().default([]),
     signals: jsonb("signals").notNull().default({}),
     profileHash: text("profile_hash").notNull(),
+    /**
+     * B-crm.5: the learned weight state whose multipliers shaped this pass
+     * (null = base weights). Provenance AND the re-score trigger: the
+     * scoring job compares this against the current state to know exactly
+     * which leads a weight change invalidates — no timestamp heuristics.
+     */
+    weightStateId: uuid("weight_state_id").references(() => leadWeightStates.id),
     /** The scoring job's clock (deterministic, passed in — never read in core). */
     scoredAt: timestamp("scored_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -108,5 +115,54 @@ export const leadScores = pgTable(
     ),
     // Hot path: the queue's latest-score-per-lead read.
     index("lead_scores_tenant_lead_scored_idx").on(t.tenantId, t.leadId, t.scoredAt),
+  ],
+);
+
+/**
+ * B-crm.5: the learn loop's output — per-tenant learned weight multipliers
+ * derived from lead_triage eval rows (Beta posterior per signal + Wilson
+ * gate; the research doc's no-new-data shortlist rec 1). Append-only like
+ * lead_scores: every pass that changes the evidence lands a new version, so
+ * "why did this weight move, and when" is answerable forever. `profile_hash`
+ * is the ICP hash at compute time — application binds to it (drift disarms
+ * a learned state until the loop re-runs, the lead_scores re-score
+ * discipline). `evidence_hash` makes replays structural no-ops.
+ */
+export const leadWeightStates = pgTable(
+  "lead_weight_states",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    profileHash: text("profile_hash").notNull(),
+    /** Hash of {multipliers, evidence} — the structural idempotence key. */
+    evidenceHash: text("evidence_hash").notNull(),
+    /** Per-signal positive multipliers on the resolved weights (contracts leadWeightMultipliersSchema); 1 = neutral. */
+    multipliers: jsonb("multipliers").notNull(),
+    /** One readable line per signal (and per dealbreaker term) — WHY each weight moved or held. */
+    reasons: jsonb("reasons").notNull().default([]),
+    /** Counts, posteriors, Wilson bounds — the numbers behind the reasons. */
+    evidence: jsonb("evidence").notNull().default({}),
+    /** The learn job's clock (deterministic, passed in — never read in core). */
+    computedAt: timestamp("computed_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // Replaying the loop over the same verdicts appends nothing —
+    // idempotency made structural (the lead_scores convention).
+    uniqueIndex("lead_weight_states_tenant_profile_evidence_idx").on(
+      t.tenantId,
+      t.profileHash,
+      t.evidenceHash,
+    ),
+    // Hot path: the scoring job's latest-state-for-current-profile read.
+    index("lead_weight_states_tenant_profile_computed_idx").on(
+      t.tenantId,
+      t.profileHash,
+      t.computedAt,
+    ),
   ],
 );
