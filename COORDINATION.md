@@ -107,7 +107,7 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 | aspect-lens (B-ve.5) | lead terminal | `apps/web/**` (crop/pan handles), derived-EDL flows, contract half-window (lineage, additive), engine derive/probe | `b-ve.5-aspect-lens` (GC'd) | merged (PR #49) | B-ve.3 | 5 |
 | track-view (B-ve.6) | lead terminal | `apps/web/**` only (NLE track view + editor layout + section tabs; zero contract change) | `b-ve.6-track-view` (GC'd) | merged (PR #50) | B-ve.5 | 6 |
 | dev-pg driver (B0.5) | lead terminal | `packages/db` client/types + gated pg smoke (seam completion; swordfish provisioned the server) | `b0.5-dev-postgres-driver` (GC'd) | merged (PR #51) | — | — |
-| agent-reframe (B-ve.7) | **Mode B lane** (founder window, worktree `.claude/worktrees/b-ve7` PREPPED s50) | engine diff/propose crop arm, proprietary proposer prompt, assist-panel diff view, bounds validation | `b-ve.7-agent-reframe` | **ACTIVE s51** — founder approved scope+launch at the opener; half-window MERGED (PR #52, contract re-frozen @ ff306f5); worktree rebased + toolchain verified; kickoff = `agent_handoff/KICKOFF-b-ve7.md` | B-ve.4/5 + s51 half-window | 7 |
+| agent-reframe (B-ve.7) | **Mode B lane** (founder window, worktree `.claude/worktrees/b-ve7` PREPPED s50) | engine diff/propose crop arm, proprietary proposer prompt, assist-panel diff view, bounds validation | `b-ve.7-agent-reframe` | **merged (PR #53, s51)** — lane-built in one window, lead-reviewed + live browser pass (agent proposed a measured 40px reframe on the 1:1 v2; applied + saved = **1:1 v3, first agent-reframed cut**); worktree/branch GC'd; B-ve.1–.7 = the video-editor window COMPLETE | B-ve.4/5 + s51 half-window | 7 |
 
 ## Messages (append-only)
 
