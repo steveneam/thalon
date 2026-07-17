@@ -9,7 +9,7 @@ import {
 import { outreachEmailShellOutputSchema } from "../schemas";
 import { readPromptFile } from "./prompt-file";
 
-const PROMPT_FILE = "outreach-email-generate.v2.md";
+const PROMPT_FILE = "outreach-email-generate.v3.md";
 
 /** `prompt_version` recorded on the compose run and every `outreach_email` draft's `meta` (SPINE §3.2). */
 export function outreachEmailPromptVersion(): string {

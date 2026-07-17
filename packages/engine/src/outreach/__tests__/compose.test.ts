@@ -81,7 +81,7 @@ describe("runOutreachEmail (B-crm.4 front half, keyless + networkless)", () => {
     expect(result.draft.body).toBe([meta.subject, meta.emailBody].join("\n\n"));
     expect(meta.recipient).toEqual(RECIPIENT);
     expect(meta.groundingSourceIds).toEqual([briefSourceId]);
-    expect(meta.promptVersion).toBe("outreach-email-generate.v2");
+    expect(meta.promptVersion).toBe("outreach-email-generate.v3");
 
     // The shell saw the brief as its ONLY lead material, plus voice + identity.
     expect(captured).toHaveLength(1);
