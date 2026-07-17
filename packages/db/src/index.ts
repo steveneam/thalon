@@ -2,6 +2,13 @@
 // NOT exported (SPINE §2.6) — the tenant-scoped repos on DbHandle are the API.
 export { openDb, openTestDb, resetDbForTests, type DbHandle } from "./client";
 export { TENANT_SESSION_SETTING } from "./tenant-session";
+export {
+  migratePgliteToPostgres,
+  MigratePreconditionError,
+  type MigratePgliteToPostgresOptions,
+  type MigrateReport,
+  type TableReport,
+} from "./migrate-data";
 export * from "./errors";
 export { llmCacheKey, retrievalCacheKey, sha256Hex, stableStringify } from "./hash";
 export type { Repos } from "./repos";
