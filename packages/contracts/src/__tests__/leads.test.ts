@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { cadenceConfigSchema, routingTableSchema } from "../brand-profile";
+import { brandProfileConfigSchema, cadenceConfigSchema, routingTableSchema } from "../brand-profile";
+import { DRAFT_FORMAT_REGISTRY } from "../format-registry";
 import {
   assertLeadTransition,
   canLeadTransition,
+  consentProvenanceSchema,
   icpSchema,
   InvalidLeadTransitionError,
   leadInputSchema,
@@ -12,6 +14,8 @@ import {
   leadWeightMultipliersSchema,
   leadWeightStateRecordSchema,
   normalizeLeadEmail,
+  outreachSendRecordSchema,
+  outreachSequenceSchema,
 } from "../leads";
 
 describe("lead intake shape (B-crm.1)", () => {
@@ -29,13 +33,26 @@ describe("lead intake shape (B-crm.1)", () => {
     expect(leadInputSchema.safeParse({ source: "scraped", email: "a@b.co" }).success).toBe(false);
   });
 
-  it("status rulebook: new→scored, new/scored→dismissed; dismissed is terminal until B-crm.4", () => {
+  it("status rulebook: new→scored, new/scored→dismissed; dismissed terminal (base lifecycle)", () => {
     expect(canLeadTransition("new", "scored")).toBe(true);
     expect(canLeadTransition("new", "dismissed")).toBe(true);
     expect(canLeadTransition("scored", "dismissed")).toBe(true);
     expect(canLeadTransition("scored", "new")).toBe(false);
     expect(canLeadTransition("dismissed", "new")).toBe(false);
     expect(() => assertLeadTransition("dismissed", "scored")).toThrow(InvalidLeadTransitionError);
+  });
+
+  it("B-crm.4 (s54 window): scored→contacted; unsubscribed is the TERMINAL one-way door from any live state", () => {
+    expect(canLeadTransition("scored", "contacted")).toBe(true);
+    expect(canLeadTransition("new", "contacted")).toBe(false); // never contact an unscored lead
+    expect(canLeadTransition("contacted", "dismissed")).toBe(true);
+    expect(canLeadTransition("contacted", "scored")).toBe(false);
+    for (const from of ["new", "scored", "contacted"] as const) {
+      expect(canLeadTransition(from, "unsubscribed")).toBe(true);
+    }
+    for (const to of ["new", "scored", "contacted", "dismissed"] as const) {
+      expect(canLeadTransition("unsubscribed", to)).toBe(false);
+    }
   });
 });
 
@@ -135,5 +152,84 @@ describe("cadence + routing config (B7.a/e)", () => {
       "product-updates": ["linkedin", "x"],
     });
     expect(routingTableSchema.safeParse({ bucket: [""] }).success).toBe(false);
+  });
+});
+
+describe("consent basis (B-crm.4 s54 window — AU Spam Act invariant 1)", () => {
+  it("intake may carry a known basis; omission never grants one (no default fills)", () => {
+    const carried = leadInputSchema.parse({
+      source: "waitlist",
+      email: "a@example.com",
+      consentBasis: "express",
+      consentProvenance: { note: "waitlist signup" },
+    });
+    expect(carried.consentBasis).toBe("express");
+    const omitted = leadInputSchema.parse({ source: "csv", email: "b@example.com" });
+    expect(omitted.consentBasis).toBeUndefined(); // the column default (`none`) decides
+    expect(
+      leadInputSchema.safeParse({ source: "csv", email: "c@example.com", consentBasis: "assumed" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("provenance is evidence prose — optional fields, but never empty strings", () => {
+    expect(consentProvenanceSchema.parse({})).toEqual({});
+    expect(consentProvenanceSchema.safeParse({ sourceUrl: "  " }).success).toBe(false);
+  });
+});
+
+describe("send record + sequence config (B-crm.4 s54 window)", () => {
+  it("a send record is a provider-accepted send with its audit snapshots — nothing optional but meta", () => {
+    const record = outreachSendRecordSchema.parse({
+      leadId: "lead-1",
+      draftId: "draft-1",
+      provider: "resend",
+      providerMessageId: "re_123",
+      recipientEmail: "sam@example.com",
+      bodyHash: "abc",
+      touchIndex: 0,
+    });
+    expect(record.meta).toEqual({});
+    expect(
+      outreachSendRecordSchema.safeParse({
+        leadId: "lead-1",
+        draftId: "draft-1",
+        provider: "sendgrid", // not a sanctioned provider
+        providerMessageId: "x",
+        recipientEmail: "sam@example.com",
+        bodyHash: "abc",
+        touchIndex: 0,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("sequence defaults: D0/D3/D10/D17, cap 50, Wednesday-weighted weekdays with weekends off", () => {
+    const seq = outreachSequenceSchema.parse({});
+    expect(seq.touchOffsetsDays).toEqual([0, 3, 10, 17]);
+    expect(seq.dailyBatchCap).toBe(50);
+    expect(seq.sendDayWeights).toEqual({ mon: 1, tue: 1, wed: 1.5, thu: 1, fri: 1, sat: 0, sun: 0 });
+  });
+
+  it("the ceilings are executable: cap never above 50, touches strictly increasing and ≤7", () => {
+    expect(outreachSequenceSchema.safeParse({ dailyBatchCap: 51 }).success).toBe(false);
+    expect(outreachSequenceSchema.parse({ dailyBatchCap: 10 }).dailyBatchCap).toBe(10); // lower is legal
+    expect(outreachSequenceSchema.safeParse({ touchOffsetsDays: [0, 3, 3] }).success).toBe(false);
+    expect(
+      outreachSequenceSchema.safeParse({ touchOffsetsDays: [0, 1, 2, 3, 4, 5, 6, 7] }).success,
+    ).toBe(false);
+  });
+
+  it("the brand profile's outreach block is optional and additive — a pre-window config parses byte-identical", () => {
+    const preWindow = brandProfileConfigSchema.parse({});
+    expect("outreach" in preWindow && preWindow.outreach !== undefined).toBe(false);
+    const armed = brandProfileConfigSchema.parse({ outreach: {} });
+    expect(armed.outreach?.touchOffsetsDays).toEqual([0, 3, 10, 17]);
+  });
+
+  it("exactly outreach_email carries the sendable capability", () => {
+    const sendable = Object.values(DRAFT_FORMAT_REGISTRY)
+      .filter((spec) => spec.capabilities.sendable)
+      .map((spec) => spec.format);
+    expect(sendable).toEqual(["outreach_email"]);
   });
 });

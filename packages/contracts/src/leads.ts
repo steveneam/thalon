@@ -15,18 +15,25 @@ export const LEAD_SOURCES = ["waitlist", "csv", "api"] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
 
 /**
- * Deliberately minimal lifecycle (ratified build plan): the
- * contacted/replied state machine arrives with B-crm.4's gated outreach,
- * additively. `dismissed` is terminal for now and is operator signal (the
- * dismissal becomes an eval row), never a delete.
+ * Lifecycle (B-crm.1 base + B-crm.4's outreach states, s54 window —
+ * additive, as the ratified build plan promised). `dismissed` is operator
+ * signal (the dismissal becomes an eval row), never a delete. `contacted`
+ * is set by the send door on a recorded send. `unsubscribed` is the
+ * do-not-contact TERMINAL state — INVARIANT class, the same one-way-door
+ * grade as tenancy: the cadence engine and the send door both refuse to
+ * cross it, and no transition ever leaves it. It is reachable from any
+ * live state because a do-not-contact request can arrive through any
+ * channel, contacted or not.
  */
-export const LEAD_STATUSES = ["new", "scored", "dismissed"] as const;
+export const LEAD_STATUSES = ["new", "scored", "contacted", "dismissed", "unsubscribed"] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 export const LEAD_TRANSITIONS: Readonly<Record<LeadStatus, readonly LeadStatus[]>> = {
-  new: ["scored", "dismissed"],
-  scored: ["dismissed"],
+  new: ["scored", "dismissed", "unsubscribed"],
+  scored: ["contacted", "dismissed", "unsubscribed"],
+  contacted: ["dismissed", "unsubscribed"],
   dismissed: [],
+  unsubscribed: [],
 };
 
 export function isLeadStatus(value: string): value is LeadStatus {
@@ -65,6 +72,33 @@ export function normalizeLeadEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/**
+ * AU Spam Act consent basis (B-crm.4 s54 window, §Session-53 invariant 1):
+ * a per-lead FIELD, not a vibe. The send door REFUSES `none`.
+ * `inferred-published` requires a conspicuously-published work address and
+ * a role-relevant message — the provenance records which.
+ */
+export const CONSENT_BASES = ["express", "inferred-published", "none"] as const;
+export type ConsentBasis = (typeof CONSENT_BASES)[number];
+
+export function isConsentBasis(value: string): value is ConsentBasis {
+  return (CONSENT_BASES as readonly string[]).includes(value);
+}
+
+/**
+ * Where the consent claim comes from — audit evidence, stored beside the
+ * basis. For `inferred-published`, `sourceUrl` is where the work address is
+ * conspicuously published (the lead's `sourceUrl` chip is the natural
+ * home); for `express`, `note` records how the consent arrived (e.g.
+ * "waitlist signup 2026-07-14"). Open-ended fields are deliberate: this is
+ * evidence prose for a human auditor, not machine config.
+ */
+export const consentProvenanceSchema = z.object({
+  sourceUrl: z.string().trim().min(1).optional(),
+  note: z.string().trim().min(1).optional(),
+});
+export type ConsentProvenance = z.infer<typeof consentProvenanceSchema>;
+
 /** The validated intake shape — every intake path (waitlist bridge, CSV, api) parses this at the repo write door. */
 export const leadInputSchema = z.object({
   source: z.enum(LEAD_SOURCES),
@@ -84,6 +118,13 @@ export const leadInputSchema = z.object({
   painPoint: z.string().optional(),
   /** Source-specific extras (waitlist referral context, unmapped CSV columns) — data, open shape. */
   meta: z.record(z.string(), z.unknown()).default({}),
+  /**
+   * B-crm.4 (s54 window): intake paths that KNOW the consent basis carry it
+   * in (waitlist signup = express). Unset defers to the column default
+   * (`none`) — a lead never gains sendable consent by omission.
+   */
+  consentBasis: z.enum(CONSENT_BASES).optional(),
+  consentProvenance: consentProvenanceSchema.optional(),
 });
 export type LeadInput = z.input<typeof leadInputSchema>;
 export type ParsedLeadInput = z.infer<typeof leadInputSchema>;
@@ -207,3 +248,90 @@ export const leadScoreRecordSchema = z.object({
 });
 export type LeadScoreRecordInput = z.input<typeof leadScoreRecordSchema>;
 export type LeadScoreRecord = z.infer<typeof leadScoreRecordSchema>;
+
+/**
+ * B-crm.4 (s54 window): who may carry a send. One provider today (the s28
+ * decision); the array is the one source of truth for the schema check
+ * constraint, the intel.ts `inList` convention.
+ */
+export const OUTREACH_SEND_PROVIDERS = ["resend"] as const;
+export type OutreachSendProvider = (typeof OUTREACH_SEND_PROVIDERS)[number];
+
+/**
+ * One recorded send as the outreach_sends repo validates it at the write
+ * door. A row EXISTS only for a provider-accepted send (`providerMessageId`
+ * is required) — failures live in events/op errors, never here, so the
+ * ≤cap/day count and the double-send unique key both count real sends
+ * only. `recipientEmail` and `bodyHash` are audit snapshots of what
+ * actually left, taken AT the send (the draft may later be superseded;
+ * this row never changes). `touchIndex` is which cadence touch this was
+ * (0-based); cadence state is DERIVED from this ledger + config — there is
+ * deliberately no mutable cadence-state table to drift from it.
+ */
+export const outreachSendRecordSchema = z.object({
+  leadId: z.string().min(1),
+  draftId: z.string().min(1),
+  provider: z.enum(OUTREACH_SEND_PROVIDERS),
+  providerMessageId: z.string().min(1),
+  recipientEmail: z.string().trim().max(254).pipe(z.email()),
+  bodyHash: z.string().min(1),
+  touchIndex: z.number().int().min(0),
+  /** Provider extras (batch tags, idempotency echoes) — data, open shape. */
+  meta: z.record(z.string(), z.unknown()).default({}),
+});
+export type OutreachSendRecordInput = z.input<typeof outreachSendRecordSchema>;
+export type OutreachSendRecord = z.infer<typeof outreachSendRecordSchema>;
+
+const dayWeight = z.number().min(0);
+
+/**
+ * B-crm.4 cadence design (§Session-53): per-weekday send-day weighting,
+ * Wednesday-weighted by default (survey signal), weekends off. Weights are
+ * relative preference for SCHEDULING, not gates — 0 means "never propose
+ * this day". All seven days always resolve (defaults fill), so scheduling
+ * math never branches on absence.
+ */
+export const sendDayWeightsSchema = z.object({
+  mon: dayWeight.default(1),
+  tue: dayWeight.default(1),
+  wed: dayWeight.default(1.5),
+  thu: dayWeight.default(1),
+  fri: dayWeight.default(1),
+  sat: dayWeight.default(0),
+  sun: dayWeight.default(0),
+});
+export type SendDayWeights = z.infer<typeof sendDayWeightsSchema>;
+
+/**
+ * The outreach sequence block (B-crm.4 s54 window) — per-tenant runtime
+ * config on the brand profile (brand-profile.ts `outreach`, absence
+ * disarms). Distinct from B7.a's `cadence` block on purpose: that one is
+ * posting-frequency norms the judge enforces; this one is the SEQUENCE
+ * design the send scheduler reads.
+ *
+ * - `touchOffsetsDays`: day offsets from sequence start, strictly
+ *   increasing, D0/D3/D10/D17 defaults (first follow-up peaks ~8.4% reply;
+ *   sequences beat single sends ~2.5x — the s52 survey). Max 7 touches:
+ *   over-touching is a deliverability/spam hazard, ceiling executable.
+ * - `dailyBatchCap`: ≤50/day (deliverability + the small-batch signal).
+ *   The 50 CEILING is schema-enforced — an operator can lower it, never
+ *   raise it past the bucket's invariant.
+ * - Every touch is its own judged draft — nothing here bypasses the gate.
+ */
+export const outreachSequenceSchema = z.object({
+  touchOffsetsDays: z
+    .array(z.number().int().min(0))
+    .min(1)
+    .max(7)
+    .default([0, 3, 10, 17])
+    .refine((offsets) => offsets.every((d, i) => i === 0 || d > offsets[i - 1]), {
+      message: "touchOffsetsDays must be strictly increasing",
+    }),
+  dailyBatchCap: z.number().int().positive().max(50).default(50),
+  // prefault (not default): {} runs THROUGH the schema so the per-day
+  // defaults stay the one source of truth (default() would demand a full
+  // duplicate object here).
+  sendDayWeights: sendDayWeightsSchema.prefault({}),
+});
+export type OutreachSequenceInput = z.input<typeof outreachSequenceSchema>;
+export type OutreachSequence = z.infer<typeof outreachSequenceSchema>;
