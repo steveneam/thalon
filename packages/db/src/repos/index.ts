@@ -11,6 +11,7 @@ import { leadScoresRepo, type LeadScoresRepo } from "./lead-scores";
 import { leadWeightStatesRepo, type LeadWeightStatesRepo } from "./lead-weight-states";
 import { leadsRepo, type LeadsRepo } from "./leads";
 import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
+import { outreachSendsRepo, type OutreachSendsRepo } from "./outreach-sends";
 import { searchSnapshotsRepo, type SearchSnapshotsRepo } from "./search-snapshots";
 import { searchTargetsRepo, type SearchTargetsRepo } from "./search-targets";
 import { sourceChunksRepo, type SourceChunksRepo } from "./source-chunks";
@@ -48,6 +49,7 @@ export interface Repos {
   leads: LeadsRepo;
   leadScores: LeadScoresRepo;
   leadWeightStates: LeadWeightStatesRepo;
+  outreachSends: OutreachSendsRepo;
   videoProjects: VideoProjectsRepo;
   videoTakes: VideoTakesRepo;
   videoCuts: VideoCutsRepo;
@@ -79,6 +81,7 @@ export function createRepos(db: Db): Repos {
     leads: leadsRepo(db),
     leadScores: leadScoresRepo(db),
     leadWeightStates: leadWeightStatesRepo(db),
+    outreachSends: outreachSendsRepo(db),
     videoProjects: videoProjectsRepo(db),
     videoTakes: videoTakesRepo(db),
     videoCuts: videoCutsRepo(db),

@@ -220,10 +220,10 @@ export type WebPageDraftMeta = z.infer<typeof webPageDraftMetaSchema>;
  * `expectedBody` reproduces `drafts.body` byte-for-byte (I1). The subject is
  * INSIDE the judged body on purpose: recipients read it, so the judge must
  * too. `recipient` is provenance the queue renders (To: line + the manual
- * copy-out affordance) — there is deliberately NO send capability on this
- * format; the operator copies an APPROVED draft into their own mail client
- * ("no ungated contact, ever" — the send half attaches behind the same
- * approve door when B-crm.4 is chartered).
+ * copy-out affordance). s54 window: the format is now `sendable` — the
+ * B-crm.4 send door reaches ONLY APPROVED drafts of this format ("no
+ * ungated contact, ever" holds by construction; live send stays behind its
+ * own founder-gated ops door).
  */
 export const outreachEmailDraftMetaSchema = z.object({
   subject: z.string().min(1),
@@ -252,6 +252,15 @@ export interface DraftFormatCapabilities {
   deployable: boolean;
   capturable: boolean;
   seoMeta: boolean;
+  /**
+   * B-crm.4 (s54 window): whether the approve-door send op
+   * (`outreach.send_email`) may target an APPROVED draft of this format.
+   * The op itself is engine work behind this flag; a send is recorded in
+   * `outreach_sends` (one per draft, structurally) and LIVE sending stays
+   * behind its own founder-gated ops door — this flag only says the format
+   * is eligible.
+   */
+  sendable: boolean;
 }
 
 /**
@@ -283,6 +292,7 @@ const NO_ARTIFACTS: DraftFormatCapabilities = {
   deployable: false,
   capturable: false,
   seoMeta: false,
+  sendable: false,
 };
 
 export const DRAFT_FORMAT_REGISTRY = {
@@ -355,9 +365,9 @@ export const DRAFT_FORMAT_REGISTRY = {
   outreach_email: {
     format: "outreach_email",
     meta: outreachEmailDraftMetaSchema,
-    // Draft-only by construction: no render/deploy/capture — and no send —
-    // artifact stage exists for outreach email in this sprint.
-    capabilities: NO_ARTIFACTS,
+    // s54 window: the ONE sendable format — the B-crm.4 send door attaches
+    // behind the approve gate. Still no render/deploy/capture stage.
+    capabilities: { ...NO_ARTIFACTS, sendable: true },
     artifactRefFields: [],
     expectedBody: (meta: OutreachEmailDraftMeta) => [meta.subject, meta.emailBody].join("\n\n"),
   },

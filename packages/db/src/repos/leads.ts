@@ -1,15 +1,19 @@
 import {
   assertLeadTransition,
+  consentProvenanceSchema,
+  isConsentBasis,
   isLeadStatus,
   leadInputSchema,
   normalizeLeadEmail,
+  type ConsentBasis,
+  type ConsentProvenance,
   type LeadInput,
   type LeadStatus,
   type TenantCtx,
 } from "@thalon/contracts";
 import { and, eq } from "drizzle-orm";
 import { NotFoundError } from "../errors";
-import { sha256Hex } from "../hash";
+import { sha256Hex, stableStringify } from "../hash";
 import { leads } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
@@ -50,6 +54,9 @@ export function leadsRepo(db: Db) {
             notes: parsed.notes ?? null,
             painPoint: parsed.painPoint ?? null,
             meta: parsed.meta,
+            // Unset defers to the column default `none` — consent is never gained by omission.
+            ...(parsed.consentBasis ? { consentBasis: parsed.consentBasis } : {}),
+            ...(parsed.consentProvenance ? { consentProvenance: parsed.consentProvenance } : {}),
           })
           .onConflictDoNothing({ target: [leads.tenantId, leads.emailHash] })
           .returning();
@@ -109,9 +116,10 @@ export function leadsRepo(db: Db) {
 
     /**
      * The ONLY writer of lead status. Transitions consult the contracts
-     * rulebook (new → scored · new/scored → dismissed; dismissed is terminal
-     * until B-crm.4's outreach state machine) — anything else throws before
-     * anything writes. Dismissed leads are operator signal, never deleted.
+     * rulebook (LEAD_TRANSITIONS — s54 window added `contacted` and the
+     * terminal one-way `unsubscribed`) — anything else throws before
+     * anything writes. Dismissed/unsubscribed leads are operator/recipient
+     * signal, never deleted.
      */
     async setStatus(ctx: TenantCtx, id: string, to: LeadStatus): Promise<Lead> {
       return db.transaction(async (tx) => {
@@ -135,6 +143,51 @@ export function leadsRepo(db: Db) {
           entityId: row.id,
           event: "lead.status_changed",
           payload: { from: current.status, to },
+        });
+        return row;
+      });
+    },
+
+    /**
+     * B-crm.4 (s54 window): the ONLY writer of consent. Any basis may move
+     * to any other — consent WITHDRAWAL (→ `none`) must always be
+     * recordable (Spam Act), so this is deliberately not a one-way door;
+     * the one-way door is `unsubscribed` status. Setting the values already
+     * present is a no-op and emits nothing (the setPinned convention).
+     */
+    async setConsent(
+      ctx: TenantCtx,
+      id: string,
+      input: { basis: ConsentBasis; provenance?: ConsentProvenance },
+    ): Promise<Lead> {
+      if (!isConsentBasis(input.basis)) {
+        throw new Error(`unknown consent basis "${String(input.basis)}"`);
+      }
+      const provenance = consentProvenanceSchema.parse(input.provenance ?? {});
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(leads)
+          .where(and(eq(leads.id, id), eq(leads.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("lead", id);
+        // stableStringify, not JSON.stringify: jsonb round-trips reorder keys.
+        if (
+          current.consentBasis === input.basis &&
+          stableStringify(current.consentProvenance) === stableStringify(provenance)
+        ) {
+          return current;
+        }
+        const [row] = await tx
+          .update(leads)
+          .set({ consentBasis: input.basis, consentProvenance: provenance, updatedAt: new Date() })
+          .where(and(eq(leads.id, id), eq(leads.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "lead",
+          entityId: row.id,
+          event: "lead.consent_changed",
+          payload: { from: current.consentBasis, to: input.basis },
         });
         return row;
       });

@@ -1,4 +1,4 @@
-import { LEAD_SOURCES, LEAD_STATUSES } from "@thalon/contracts";
+import { CONSENT_BASES, LEAD_SOURCES, LEAD_STATUSES } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -47,6 +47,14 @@ export const leads = pgTable(
     /** The lead's problem/need — what outreach can address (window-1b); joins the relevance embedding. */
     painPoint: text("pain_point"),
     status: text("status").notNull().default("new"),
+    /**
+     * B-crm.4 (s54 window): AU Spam Act consent basis — the send door
+     * REFUSES `none` (contracts CONSENT_BASES). Defaults to `none`: a lead
+     * never gains sendable consent by omission.
+     */
+    consentBasis: text("consent_basis").notNull().default("none"),
+    /** Audit evidence for the basis (contracts consentProvenanceSchema) — where/how consent was established. */
+    consentProvenance: jsonb("consent_provenance").notNull().default({}),
     /** Source-specific extras (waitlist referral context, unmapped CSV columns) — data, open shape. */
     meta: jsonb("meta").notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -65,6 +73,7 @@ export const leads = pgTable(
     index("leads_tenant_created_idx").on(t.tenantId, t.createdAt),
     check("leads_source_check", sql.raw(`source in (${inList(LEAD_SOURCES)})`)),
     check("leads_status_check", sql.raw(`status in (${inList(LEAD_STATUSES)})`)),
+    check("leads_consent_basis_check", sql.raw(`consent_basis in (${inList(CONSENT_BASES)})`)),
     tenantIsolation(),
   ],
 );

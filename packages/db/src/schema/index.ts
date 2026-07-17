@@ -3,6 +3,7 @@ export * from "./intel";
 export * from "./judging";
 export * from "./leads";
 export * from "./ops";
+export * from "./outreach";
 export * from "./search";
 export * from "./tenancy";
 export * from "./video";

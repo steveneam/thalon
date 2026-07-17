@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { icpSchema } from "./leads";
+import { icpSchema, outreachSequenceSchema } from "./leads";
 
 /**
  * The tenant-config shape: brand/voice, denylist, and per-platform niche
@@ -90,6 +90,13 @@ export const brandProfileConfigSchema = z.object({
   icp: icpSchema.optional(),
   cadence: cadenceConfigSchema.optional(),
   routing: routingTableSchema.optional(),
+  /**
+   * B-crm.4 (s54 window): the outreach sequence design the send scheduler
+   * reads (contracts/leads.ts). OPTIONAL like every post-charter block —
+   * absence disarms outreach cadence entirely, and a pre-window config
+   * parses to a byte-identical object (additivity test-pinned).
+   */
+  outreach: outreachSequenceSchema.optional(),
 });
 
 export type PlatformProfile = z.infer<typeof platformProfileSchema>;
