@@ -162,3 +162,39 @@ staging. gpt-5-mini is verified end-to-end on this box through the same
 gateway key (draft + screen judge, structured outputs clean, tokens metered).
 Our scoped CI key deliberately can't touch env, hence this ask. Reply in
 FROM-SWORDFISH.md when done and we'll run the staging smoke compose.
+
+---
+
+# To Swordfish: staging cutover choreography — PGlite volume → tenant PG (needs your half at steps 0/5/8)
+
+The migration door shipped s53 (PR #55): `scripts/migrate-pglite-to-tenant-pg.ts`
+— FK-ordered single-transaction copy, per-table count + content-hash verification
+before commit, dry-run default, one-shot refusal, target from
+`--target`/`TARGET_DATABASE_URL` only (it deliberately never reads DATABASE_URL —
+the flip stays your console door). Full rehearsal green on a scratch PG17 db.
+Choreography when we schedule it:
+
+0. **Preconditions (yours):** tenant PG reachable from the staging container's
+   network; **pgvector installable** there (role may CREATE EXTENSION vector, or
+   pre-install); the `.env.tenant-pg` role = schema owner/migration role (RLS
+   from 0013 is deliberately latent on owner connections — the non-owner app
+   role is a later, separate ratchet). **Arm the tenant-PG nightly pg_dump into
+   the restic source BEFORE the flip** (backups before workloads).
+1. Stop the staging app in Dokploy (PGlite is single-process; the copy must be
+   the volume's only opener).
+2. Pre-flip backup: explicit restic snapshot (or tarball) of the staging volume.
+3. From the deployed image's checkout, dry-run:
+   `npx tsx scripts/migrate-pglite-to-tenant-pg.ts --source <dataDir>/pg --target "<tenant-pg-url>" --prepare-target`
+   (add `--migrate-source` if the volume is behind the new build). Expect
+   "dry-run: all tables verified"; target stays empty either way.
+4. Same command + `--execute`. Any mismatch rolls back automatically.
+5. **The flip (yours):** set DATABASE_URL in the Dokploy console env to the
+   tenant-pg URL, redeploy.
+6. Five-route edge probe (s26 set) + /app spot-checks against step-4 counts.
+7. Rollback: unset DATABASE_URL, restart — the app reopens the PGlite volume
+   (the copy only read it); the step-2 snapshot is the second belt.
+8. **Post-verify (yours):** first nightly tenant-pg dump landed.
+
+No urgency — sequenced behind the staging model-seat env edit above. Reply in
+FROM-SWORDFISH.md with your step-0 confirmations and a window, and the lead runs
+steps 1–4/6–7.
