@@ -307,3 +307,51 @@ product demo: "Thalon found, scored, and drafted — you approved."
    **card gains an "everything else from the import" meta section** (s29 rider);
    (c) contact email on the card is too subtle — prominence tweak rides the
    same touch.
+
+## Session-53 addendum — B-crm.4 back half PROPOSAL (2026-07-17; doc only, build waits for charter)
+
+The front half (draft-only →Email through the full judge gate, copy-out on
+APPROVED) is live and founder-dogfooded (first approved email, s52). The back
+half attaches the send path behind the SAME approve door. Nothing below is
+built; this is the decision-ready shape for the next checkpoint.
+
+### The send door (Resend, per the s28 provider decision)
+
+- One metered shell op (`outreach.send_email`) reachable ONLY from an APPROVED
+  draft — send never composes, never edits; a changed draft re-enters the gate.
+  "No ungated contact, ever" holds by construction.
+- Identity: Thalon-domain sender via Resend domain verification; founder mailbox
+  at most reply-to (identity + the why in gitignored `.context/outreach/identity.md`).
+  The s28 stealth question STANDS for the checkpoint: brand-domain outreach
+  reveals the brand to recipients pre-launch — accept, neutral domain, or wait.
+- Every send = an audit event + a lead lifecycle transition (contacted), additive
+  states per the s27 direction.
+
+### AU Spam Act door invariants (from the s52 survey — ratchet as CODE at build)
+
+1. **Consent basis is a per-lead FIELD, not a vibe**: `consent_basis`
+   (express | inferred-published | none) + provenance (the `sourceUrl` chip is
+   the natural home). Send door REFUSES `none`. Inferred requires a
+   conspicuously-published work address + role-relevant message — record which.
+2. **Sender identification**: real business name + contactable identity in every
+   message body; template-enforced, judge-checked.
+3. **Working unsubscribe**: functional, honoured within the statutory window;
+   unsubscribe = terminal lifecycle state (do-not-contact) that the cadence
+   engine and the send door BOTH refuse to cross — the same one-way-door class
+   as tenancy (invariant, never loosened).
+
+### Cadence design (B7.a config, armed on platform `email`)
+
+- 4–7 touches, D0 / D3 / D10 / D17 defaults (survey: first follow-up peaks
+  ~8.4% reply; sequences beat single sends ~2.5x). Every touch is its own
+  gated draft — no auto-generated follow-up skips the judge.
+- Batches ≤50/day (deliverability + the small-batch signal from the survey);
+  Wednesday-weighted send days as the default config, operator-overridable.
+- Auto-approve stays OFF the table here — it maps to B7.b's earned-autonomy
+  ladder (s27 founder direction), not to this bucket.
+
+### Explicitly out of scope for the back half
+
+Platform DMs (the other half of the s27 B-crm.4 definition) wait for their own
+slice — email first proves the door; DM transports rail through the same shape
+later. Enrichment (B-crm.3) and discovery (B-crm.6) unchanged.
