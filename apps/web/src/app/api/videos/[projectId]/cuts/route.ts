@@ -32,6 +32,15 @@ export async function POST(
     if (!planned.ok) {
       return NextResponse.json({ error: planned.error }, { status: planned.status });
     }
+    if (planned.lineage) {
+      const parent = await repos.videoCuts.get(ctx, planned.lineage.parentCutId);
+      if (!parent || parent.projectId !== projectId) {
+        return NextResponse.json(
+          { error: "lineage parent not found in this project" },
+          { status: 422 },
+        );
+      }
+    }
     if (planned.attribution.authoredBy === "agent" && planned.attribution.proposal) {
       const base = await getCutDetail(repos, ctx, projectId, planned.attribution.proposal.baseCutId);
       if (!base) {

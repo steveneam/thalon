@@ -1,7 +1,7 @@
 import { tenantCtx, type EdlInput, type TenantCtx } from "@thalon/contracts";
 import { openTestDb, type DbHandle } from "@thalon/db";
 import { afterEach, describe, expect, it } from "vitest";
-import { getProjectDetail, listProjectSummaries, summarizeEdl } from "../queries";
+import { getCutDetail, getProjectDetail, lineageViewFor, listProjectSummaries, summarizeEdl } from "../queries";
 
 /** Minimal valid EDL (contracts edlSchema) — one beat, silent, no captions. */
 const EDL: EdlInput = {
@@ -143,5 +143,61 @@ describe("summarizeEdl", () => {
 
   it("throws loudly on a corrupt EDL (the write door guarantees validity)", () => {
     expect(() => summarizeEdl({ nonsense: true })).toThrow();
+  });
+});
+
+describe("cut lineage views (B-ve.5)", () => {
+  it("lineageViewFor resolves the pin + latest-version staleness; malformed/absent resolve null", () => {
+    const cuts = [
+      { id: "p1", name: "film-16x9", version: 1 },
+      { id: "p2", name: "film-16x9", version: 2 },
+      { id: "d1", name: "film-16x9-9x16", version: 1 },
+    ];
+    expect(lineageViewFor({ lineage: { parentCutId: "p1", aspect: "9:16" } }, cuts)).toEqual({
+      parentCutId: "p1",
+      aspect: "9:16",
+      parentName: "film-16x9",
+      parentVersion: 1,
+      parentLatestVersion: 2,
+    });
+    // A pin whose parent row is gone still shows the aspect, honestly unresolved.
+    expect(lineageViewFor({ lineage: { parentCutId: "zz", aspect: "9:16" } }, cuts)).toMatchObject(
+      { parentName: null, parentLatestVersion: null },
+    );
+    expect(lineageViewFor({ lineage: { bogus: true } }, cuts)).toBeNull();
+    expect(lineageViewFor({}, cuts)).toBeNull();
+    expect(lineageViewFor(undefined, cuts)).toBeNull();
+  });
+
+  it("getProjectDetail and getCutDetail carry the resolved lineage, staleness included", async () => {
+    // seedProject already holds film-16x9 v1 AND v2 — pinning the derived cut
+    // to v1 makes the surface's staleness signal ("parent now at v2") real.
+    const { ctx, projectId } = await seedProject();
+    const repos = handle!.repos;
+    const { cut: parent } = await repos.videoCuts.create(ctx, projectId, {
+      name: "film-16x9",
+      version: 1,
+      edl: EDL,
+    });
+    const { cut: derived } = await repos.videoCuts.create(ctx, projectId, {
+      name: "film-16x9-9x16",
+      version: 1,
+      edl: EDL,
+      meta: { lineage: { parentCutId: parent.id, aspect: "9:16" } },
+    });
+
+    const detail = await getProjectDetail(repos, ctx, projectId);
+    const derivedView = detail!.cuts.find((c) => c.id === derived.id)!;
+    expect(derivedView.lineage).toEqual({
+      parentCutId: parent.id,
+      aspect: "9:16",
+      parentName: "film-16x9",
+      parentVersion: 1,
+      parentLatestVersion: 2,
+    });
+    expect(detail!.cuts.find((c) => c.id === parent.id)!.lineage).toBeNull();
+
+    const cutDetail = await getCutDetail(repos, ctx, projectId, derived.id);
+    expect(cutDetail!.lineage).toMatchObject({ parentName: "film-16x9", parentLatestVersion: 2 });
   });
 });

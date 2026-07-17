@@ -350,6 +350,18 @@ function CutRow({
           v{cut.version}
         </Badge>
         <Badge variant={cut.status === "draft" ? "outline" : "secondary"}>{cut.status}</Badge>
+        {cut.lineage && (
+          <Badge variant="outline" className="u-tabular">
+            {cut.lineage.aspect} · from {cut.lineage.parentName ?? "?"} v
+            {cut.lineage.parentVersion ?? "?"}
+          </Badge>
+        )}
+        {cut.lineage &&
+          cut.lineage.parentVersion !== null &&
+          cut.lineage.parentLatestVersion !== null &&
+          cut.lineage.parentLatestVersion > cut.lineage.parentVersion && (
+            <Badge variant="signal">parent now v{cut.lineage.parentLatestVersion}</Badge>
+          )}
         <span className="u-tabular text-xs text-muted-foreground">
           {cut.edl.beats} beat{cut.edl.beats === 1 ? "" : "s"} · {cut.edl.captionLines} caption
           {cut.edl.captionLines === 1 ? "" : "s"} · music {cut.edl.audio} · {cut.edl.width}×

@@ -1,4 +1,4 @@
-import type { Edl, EdlDiff, VideoCutAttribution } from "@thalon/contracts";
+import type { Edl, EdlDiff, VideoCutAttribution, VideoDeriveAspect } from "@thalon/contracts";
 import { asJson } from "@/lib/approve-queue/client";
 import type { CutDetail, ProjectDetail, ProjectSummary, RenderJobView } from "./types";
 
@@ -27,15 +27,36 @@ export async function fetchCutDetail(projectId: string, cutId: string): Promise<
   return asJson<CutDetail>(res);
 }
 
-/** Save = create at version+1 (server derives the version; the frozen door never mutates). B-ve.4: an agent-attributed save carries its proposal and is replay-verified at the door. */
+/** Save = create at version+1 (server derives the version; the frozen door never mutates). B-ve.4: an agent-attributed save carries its proposal and is replay-verified at the door. B-ve.5: a derived cut's saves carry `meta.lineage` forward. */
 export async function saveCut(
   projectId: string,
-  body: { name: string; edl: Edl; attribution?: VideoCutAttribution },
+  body: {
+    name: string;
+    edl: Edl;
+    attribution?: VideoCutAttribution;
+    meta?: Record<string, unknown>;
+  },
 ): Promise<{ cut: CutDetail; created: boolean }> {
   const res = await fetch(`/api/videos/${projectId}/cuts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  });
+  return asJson<{ cut: CutDetail; created: boolean }>(res);
+}
+
+/* B-ve.5 — the aspect lens. */
+
+/** Derive a NEW cut for a target aspect: measured centered-window seeds over the parent's timeline, lineage stamped server-side. Own-engine recut, 0 credits. */
+export async function deriveCut(
+  projectId: string,
+  cutId: string,
+  aspect: VideoDeriveAspect,
+): Promise<{ cut: CutDetail; created: boolean }> {
+  const res = await fetch(`/api/videos/${projectId}/cuts/${cutId}/derive`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ aspect }),
   });
   return asJson<{ cut: CutDetail; created: boolean }>(res);
 }

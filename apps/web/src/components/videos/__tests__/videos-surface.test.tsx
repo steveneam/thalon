@@ -55,6 +55,7 @@ const DETAIL: ProjectDetail = {
       version: 6,
       status: "rendered",
       outputRef: "cuts/film-16x9-master.mp4",
+      lineage: null,
       edl: { beats: 10, captionLines: 12, audio: "encode", width: 1280, height: 720, fps: 24, duration: 50.78 },
       createdAt: "2026-07-16T00:00:00.000Z",
     },

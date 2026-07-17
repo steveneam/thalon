@@ -1,9 +1,11 @@
 import {
   edlSchema,
   videoCutAttributionSchema,
+  videoCutLineageSchema,
   type Edl,
   type VideoCutAttribution,
   type VideoCutInput,
+  type VideoCutLineage,
 } from "@thalon/contracts";
 import { stableStringify } from "@thalon/db";
 import { applyEdlDiff, compileEdl } from "@thalon/engine";
@@ -25,6 +27,11 @@ import { nextVersionFor } from "./editor";
  * agent-authored save must carry its full proposal (model + prompt pin +
  * the exact applied diff) or the contract refuses it — replayable +
  * attributed is a schema rule, not a convention (ADR 0010).
+ *
+ * B-ve.5: a derived cut's saves CARRY ITS LINEAGE forward (new versions of
+ * the same name keep the parent pin). A `meta.lineage` on the request is
+ * schema-validated here and its parent existence-checked by the route — a
+ * malformed pin refuses, it never stores as garbage provenance.
  */
 
 const saveCutRequestSchema = z.object({
@@ -35,7 +42,13 @@ const saveCutRequestSchema = z.object({
 });
 
 export type PlannedCutSave =
-  | { ok: true; input: VideoCutInput; attribution: VideoCutAttribution; edl: Edl }
+  | {
+      ok: true;
+      input: VideoCutInput;
+      attribution: VideoCutAttribution;
+      edl: Edl;
+      lineage: VideoCutLineage | null;
+    }
   | { ok: false; status: 400 | 422; error: string };
 
 export function planCutSave(
@@ -55,16 +68,30 @@ export function planCutSave(
       error: err instanceof Error ? err.message : "EDL does not compile",
     };
   }
+  const rawLineage = parsed.data.meta?.lineage;
+  let lineage: VideoCutLineage | null = null;
+  if (rawLineage !== undefined) {
+    const parsedLineage = videoCutLineageSchema.safeParse(rawLineage);
+    if (!parsedLineage.success) {
+      return { ok: false, status: 400, error: z.prettifyError(parsedLineage.error) };
+    }
+    lineage = parsedLineage.data;
+  }
   const attribution = parsed.data.attribution ?? { authoredBy: "operator" as const };
   return {
     ok: true,
     attribution,
     edl: parsed.data.edl,
+    lineage,
     input: {
       name: parsed.data.name,
       version: nextVersionFor(existingCuts, parsed.data.name),
       edl: parsed.data.edl,
-      meta: { ...(parsed.data.meta ?? {}), attribution },
+      meta: {
+        ...(parsed.data.meta ?? {}),
+        ...(lineage ? { lineage } : {}),
+        attribution,
+      },
     },
   };
 }

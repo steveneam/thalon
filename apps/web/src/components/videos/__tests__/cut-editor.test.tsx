@@ -7,8 +7,9 @@ import { server } from "@/lib/testing/server";
 import type { CutDetail, ProjectDetail } from "@/lib/videos/types";
 import { CutEditor } from "../cut-editor";
 
+const routerPush = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: routerPush }),
 }));
 
 // The waveform seat — never exercised in jsdom (no WebAudio); the lane's knobs are.
@@ -64,6 +65,7 @@ const DETAIL: ProjectDetail = {
       status: "draft",
       outputRef: null,
       edl: { beats: 2, captionLines: 1, audio: "encode", width: 1280, height: 720, fps: 24, duration: 9.5 },
+      lineage: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
   ],
@@ -75,6 +77,7 @@ const CUT: CutDetail = {
   version: 6,
   status: "draft",
   outputRef: null,
+  lineage: null,
   createdAt: "2026-07-16T00:00:00.000Z",
   edl: {
     version: 1,
@@ -197,5 +200,116 @@ describe("CutEditor (B-ve.3 timeline editor MVP)", () => {
     );
     render(<CutEditor projectId="p1" cutId={null} />);
     expect(await screen.findByText(/No cuts to edit yet/)).toBeInTheDocument();
+  });
+});
+
+describe("CutEditor aspect lens (B-ve.5)", () => {
+  const DERIVED: CutDetail = {
+    ...CUT,
+    id: "c9",
+    name: "film-9x16",
+    lineage: {
+      parentCutId: "c1",
+      aspect: "9:16",
+      parentName: "film",
+      parentVersion: 6,
+      parentLatestVersion: 8,
+    },
+    edl: {
+      ...CUT.edl,
+      name: "film-9x16",
+      output: { ...CUT.edl.output, width: 1080, height: 1920 },
+      video: CUT.edl.video.map((clip) => ({
+        ...clip,
+        crop: { width: 404, height: 720, x: 438, y: 0 },
+        scale: { width: 1080, height: 1920, flags: "lanczos" as const },
+      })),
+    },
+  };
+
+  function armDerived() {
+    const posts: unknown[] = [];
+    server.use(
+      http.get("/api/videos/p1", () => HttpResponse.json(DETAIL)),
+      http.get("/api/videos/p1/cuts/c9", () => HttpResponse.json(DERIVED)),
+      http.post("/api/videos/p1/cuts", async ({ request }) => {
+        posts.push(await request.json());
+        return HttpResponse.json(
+          { cut: { ...DERIVED, id: "c10", version: 2 }, created: true },
+          { status: 201 },
+        );
+      }),
+      http.post("/api/videos/p1/cuts/c1/derive", async ({ request }) => {
+        posts.push({ derive: await request.json() });
+        return HttpResponse.json({ cut: DERIVED, created: true }, { status: 201 });
+      }),
+    );
+    return posts;
+  }
+
+  it("a derived cut shows its parent pin and HONEST staleness; saves carry the lineage forward", async () => {
+    const posts = armDerived();
+    const user = userEvent.setup();
+    render(<CutEditor projectId="p1" cutId="c9" />);
+    await screen.findByText("b1");
+    expect(screen.getByText(/9:16 · from film v6/)).toBeInTheDocument();
+    expect(screen.getByText("parent now v8")).toBeInTheDocument();
+
+    const caption = screen.getByDisplayValue("measured, not vibed");
+    await user.clear(caption);
+    await user.type(caption, "re-placed for the vertical frame");
+    await user.click(screen.getByRole("button", { name: /^Save as v/ }));
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]).toMatchObject({
+      name: "film-9x16",
+      meta: { lineage: { parentCutId: "c1", aspect: "9:16" } },
+    });
+  });
+
+  it("the frame section measures in source pixels: fields + mode toggle drive the crop and mark the cut dirty", async () => {
+    armDerived();
+    const user = userEvent.setup();
+    render(<CutEditor projectId="p1" cutId="c9" />);
+    await screen.findByText("b1");
+    const frame = screen.getByTestId("frame-composer");
+    expect(within(frame).getByText(/window 404×720/)).toBeInTheDocument();
+    // Playback off: numbers-only editing is stated, not hidden.
+    expect(within(frame).getByText(/editable by numbers only/)).toBeInTheDocument();
+
+    await user.click(within(frame).getByRole("button", { name: "x: static → pan" }));
+    expect(within(frame).getByLabelText("x from")).toHaveValue(438);
+    expect(within(frame).getByLabelText("x to")).toHaveValue(438);
+    expect(screen.getByText("unsaved edits")).toBeInTheDocument();
+  });
+
+  it("Derive posts the aspect to the derive door and navigates to the new cut", async () => {
+    const posts = arm();
+    server.use(
+      http.post("/api/videos/p1/cuts/c1/derive", async ({ request }) => {
+        posts.push({ derive: await request.json() });
+        return HttpResponse.json({ cut: DERIVED, created: true }, { status: 201 });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<CutEditor projectId="p1" cutId="c1" />);
+    await screen.findByText("b1");
+    await user.click(screen.getByRole("button", { name: "Derive 9:16" }));
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]).toEqual({ derive: { aspect: "9:16" } });
+    await waitFor(() =>
+      expect(routerPush).toHaveBeenCalledWith("/app/videos/p1/edit?cut=c9"),
+    );
+  });
+
+  it("Derive is gated while dirty — it reads the STORED EDL", async () => {
+    arm();
+    const user = userEvent.setup();
+    render(<CutEditor projectId="p1" cutId="c1" />);
+    await screen.findByText("b1");
+    const caption = screen.getByDisplayValue("measured, not vibed");
+    await user.clear(caption);
+    await user.type(caption, "edited");
+    expect(screen.getByRole("button", { name: "Derive 9:16" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Derive 1:1" })).toBeDisabled();
   });
 });
