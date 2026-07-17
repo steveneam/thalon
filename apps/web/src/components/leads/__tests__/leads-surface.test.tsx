@@ -30,6 +30,7 @@ function card(partial: Partial<LeadCard>): LeadCard {
     reasons: ["fit 1 (role \"Owner\" matches \"owner\")", "completeness 0.8 (4/5 contact fields present)"],
     scoredAt: "2026-07-13T01:00:00.000Z",
     profileHash: "icp-v1",
+    weightStateId: null,
     extras: [],
     ...partial,
   };
@@ -42,6 +43,7 @@ function seedLeads(payload: Partial<LeadsPayload>) {
         leads: [],
         scoringArmed: true,
         currentProfileHash: "icp-v1",
+        learnedWeights: { state: null, staleForProfile: false },
         counts: { new: 0, scored: 0, dismissed: 0 },
         ...payload,
       } satisfies LeadsPayload),

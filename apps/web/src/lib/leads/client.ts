@@ -3,6 +3,7 @@ import { asJson } from "@/lib/approve-queue/client";
 import type {
   ImportReport,
   LeadsPayload,
+  LearnReport,
   ScoringReport,
   SyncReport,
   TriageAction,
@@ -31,6 +32,11 @@ export async function syncWaitlist(): Promise<{ sync: SyncReport; scoring: Scori
 /** Gateway refusals (budget, key) surface verbatim as the thrown message — the sweep convention. */
 export async function scoreLeadsNow(): Promise<ScoringReport> {
   return asJson(await fetch("/api/leads/score", { method: "POST" }));
+}
+
+/** Zero-LLM and idempotent — a replay reports `created: false` and changes nothing. */
+export async function learnWeightsNow(): Promise<LearnReport> {
+  return asJson(await fetch("/api/leads/learn", { method: "POST" }));
 }
 
 export async function triageLeads(action: TriageAction, ids: string[]): Promise<TriageResult> {

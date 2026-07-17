@@ -12,6 +12,7 @@ export async function GET() {
       leads: [],
       scoringArmed: false,
       currentProfileHash: null,
+      learnedWeights: { state: null, staleForProfile: false },
       counts: { new: 0, scored: 0, dismissed: 0 },
     });
   }

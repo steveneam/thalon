@@ -1,16 +1,18 @@
-import { icpSchema, type TenantCtx } from "@thalon/contracts";
+import { icpSchema, leadWeightMultipliersSchema, type TenantCtx } from "@thalon/contracts";
 import { sha256Hex, stableStringify, type Repos } from "@thalon/db";
 import {
   importLeadsCsv,
   runLeadScoring,
+  runLeadWeightLearning,
   syncWaitlistLeads,
   type CsvImportReport,
   type LeadScoringDeps,
   type LeadScoringResult,
+  type LeadWeightLearningResult,
   type WaitlistSyncResult,
 } from "@thalon/engine";
 import { toLeadCard } from "./serialize";
-import type { LeadsPayload } from "./types";
+import type { LeadsPayload, LearnedWeightsInfo } from "./types";
 
 /**
  * Leads service layer (the sweep-runner pattern, SPINE §80): routes stay
@@ -26,15 +28,49 @@ export async function readLeadsPayload(ctx: TenantCtx, repos: Repos): Promise<Le
   );
   const profile = await repos.brandProfiles.getActive(ctx);
   const icp = profile?.icp ? icpSchema.parse(profile.icp) : null;
+  const currentProfileHash = icp ? sha256Hex(stableStringify(icp)) : null;
   return {
     leads: cards,
     scoringArmed: icp !== null,
-    currentProfileHash: icp ? sha256Hex(stableStringify(icp)) : null,
+    currentProfileHash,
+    learnedWeights: await readLearnedWeights(ctx, repos, currentProfileHash),
     counts: {
       new: cards.filter((c) => c.status === "new").length,
       scored: cards.filter((c) => c.status === "scored").length,
       dismissed: cards.filter((c) => c.status === "dismissed").length,
     },
+  };
+}
+
+/**
+ * The provenance join (B-crm.5 back half): the newest learned state for the
+ * CURRENT ICP — exactly what the scoring job would apply on its next run.
+ * A drifted profile finds nothing; when older learning exists we say so
+ * (staleForProfile) instead of silently reporting "base weights".
+ */
+async function readLearnedWeights(
+  ctx: TenantCtx,
+  repos: Repos,
+  currentProfileHash: string | null,
+): Promise<LearnedWeightsInfo> {
+  if (!currentProfileHash) return { state: null, staleForProfile: false };
+  const state = await repos.leadWeightStates.latestForProfile(ctx, currentProfileHash);
+  if (!state) {
+    const history = await repos.leadWeightStates.list(ctx, { limit: 1 });
+    return { state: null, staleForProfile: history.length > 0 };
+  }
+  // Evidence is an open jsonb record at the write door; read the two counts defensively.
+  const evidence = (state.evidence ?? {}) as Record<string, unknown>;
+  return {
+    state: {
+      id: state.id,
+      computedAt: state.computedAt.toISOString(),
+      rows: typeof evidence.rows === "number" ? evidence.rows : 0,
+      verdicts: typeof evidence.verdicts === "number" ? evidence.verdicts : 0,
+      // Validated again at the read seam even though the write door parsed it (the scoring-job convention).
+      multipliers: leadWeightMultipliersSchema.parse(state.multipliers),
+    },
+    staleForProfile: false,
   };
 }
 
@@ -67,6 +103,16 @@ export async function scoreNow(
   deps: LeadScoringDeps = {},
 ): Promise<LeadScoringResult> {
   return runLeadScoring(ctx, repos, { nowMs: Date.now() }, deps);
+}
+
+/**
+ * B-crm.5's trigger: run the learn loop over the tenant's triage verdicts.
+ * Zero LLM calls, deterministic, idempotent — a replay over unchanged
+ * evidence appends nothing and reports `created: false`. Learning never
+ * scores: the new state applies on the NEXT scoring pass, never here.
+ */
+export async function learnNow(ctx: TenantCtx, repos: Repos): Promise<LeadWeightLearningResult> {
+  return runLeadWeightLearning(ctx, repos, { nowMs: Date.now() });
 }
 
 /**

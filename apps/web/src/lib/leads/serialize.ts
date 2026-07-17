@@ -33,6 +33,7 @@ export function toLeadCard(lead: LeadRow, latest: LeadScoreRow | null): LeadCard
     reasons: (latest?.reasons as string[] | undefined) ?? [],
     scoredAt: latest?.scoredAt.toISOString() ?? null,
     profileHash: latest?.profileHash ?? null,
+    weightStateId: latest?.weightStateId ?? null,
     extras: toExtras(meta),
   };
 }

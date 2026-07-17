@@ -30,6 +30,7 @@ function card(partial: Partial<LeadCard>): LeadCard {
     reasons: [],
     scoredAt: "2026-07-13T01:00:00.000Z",
     profileHash: "icp-v1",
+    weightStateId: null,
     extras: [],
     ...partial,
   };
@@ -42,6 +43,7 @@ function seedLeads(leads: LeadCard[]) {
         leads,
         scoringArmed: true,
         currentProfileHash: "icp-v1",
+        learnedWeights: { state: null, staleForProfile: false },
         counts: { new: 0, scored: leads.length, dismissed: 0 },
       } satisfies LeadsPayload),
     ),
