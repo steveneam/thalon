@@ -9,7 +9,6 @@ import {
 import { scoreLead, type ScorableLead } from "../scorer";
 import {
   buildTriageCorpus,
-  toVerdict,
   CORPUS_ICP,
   CORPUS_NOW,
   CORPUS_PROFILE_HASH,
