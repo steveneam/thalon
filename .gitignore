@@ -59,3 +59,6 @@ Thumbs.db
 # the local build agent still has its vault context. Do NOT remove this line.
 # ---------------------------------------------------------------------------
 .context/
+
+# a SYMLINK named node_modules (worktree lane prep) is not matched by "node_modules/" — pin both forms
+node_modules
