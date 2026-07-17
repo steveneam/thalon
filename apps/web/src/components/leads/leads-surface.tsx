@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flame, RefreshCw, Upload, Users, X } from "lucide-react";
 import { LeadCard } from "@/components/leads/lead-card";
+import { WeightsProvenance } from "@/components/leads/weights-provenance";
 import { Badge } from "@/components/ui/badge";
 import { EmptyArt } from "@/components/ui/empty-art";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import type { CreateFamily } from "@/lib/intel/types";
 import {
   fetchLeads,
   importLeadsCsv,
+  learnWeightsNow,
   promoteLeadTo,
   scoreLeadsNow,
   syncWaitlist,
@@ -129,6 +131,18 @@ export function LeadsSurface() {
       const { createHref } = await promoteLeadTo(id, family);
       router.push(createHref);
       return "Opening Create with the lead's context…";
+    });
+  }
+
+  function onLearnWeights() {
+    void run(async () => {
+      const report = await learnWeightsNow();
+      if (!report.armed) return report.reason ?? "Learning is not armed.";
+      if (report.verdicts === 0) {
+        return "Nothing to learn from yet — dismiss or hot-pick a few scored leads; every verdict teaches the ranking.";
+      }
+      if (!report.created) return "No change — the learned weights already reflect every verdict.";
+      return `Learned new weights from ${report.verdicts} verdict${report.verdicts === 1 ? "" : "s"} — Score now applies them.`;
     });
   }
 
@@ -257,6 +271,18 @@ export function LeadsSurface() {
           readable reasons.
         </p>
       )}
+
+      {payload?.scoringArmed &&
+        (payload.leads.length > 0 ||
+          payload.learnedWeights.state !== null ||
+          payload.learnedWeights.staleForProfile) && (
+          <WeightsProvenance
+            info={payload.learnedWeights}
+            leads={payload.leads}
+            busy={busy}
+            onLearn={onLearnWeights}
+          />
+        )}
 
       {importOpen && (
         <Card>
