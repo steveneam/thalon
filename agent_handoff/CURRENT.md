@@ -4,13 +4,13 @@
 
 ## Stamp
 
-2026-07-17 (session 50, syd4) · **B-ve.5 MERGED (PR #49) AND B-ve.6 TRACK VIEW MERGED (PR #50) — the video editor is now an actual editor.** Wave-2 verdict landed (MINT FULL SLATE ⑥–⑩) then re-sequenced by founder: track view first, **wave-2 mint = the s51 opener**. Suite **1367/7** local-green · guard clean · spend **0cr** (balance 743.52). ⚠ **GitHub Actions is DOWN for the repo (billing/limit — founder action, see NEEDS-STEVEN.md); #50 was admin-merged on founder approval over green LOCAL gates.**
+2026-07-17 (session 50, syd4) · **B-ve.5 MERGED (PR #49) AND B-ve.6 TRACK VIEW MERGED (PR #50) — the video editor is now an actual editor.** Wave-2 verdict landed (MINT FULL SLATE ⑥–⑩) then re-sequenced by founder: track view first, **wave-2 mint = the s51 opener**. Suite **1367/7** local-green · guard clean · spend **0cr** (balance 743.52). CI RESTORED same-session (founder topped up Actions billing): full matrix GREEN on the post-#49/#50 codebase; CI diet live and proven both arms (docs-only ≈30s, code = full matrix; superseded PR runs cancel).
 
 ## Resume prompt (session 51, syd4 — paste verbatim; "gogogo" boots this too)
 
 > Stamped 2026-07-17, session-50 wrap.
 
-**Resume · Thalon** — session 51, syd4 — **FIRST: wave-2 template mint, slate ⑥–⑩ as verdicted** (⑥ Houselights events/novel-type · ⑦ Vance & Alder legal/editorial · ⑧ Crateline logistics/brutalist · ⑨ Wagtail & Co pets/soft-organic · ⑩ Hue & Cry salon/exceptional-palette; bench: café/travel/construction/accounting/photography — ledger §s45). LOOK-FIRST discipline, get_cost preflight per mint (≥40cr = per-clip founder ping), balance 743.52/Plus. **Before minting: check CI is back** (founder fixes Actions billing; then `gh run rerun` the head run on main — #49/#50 merged on local gates and deserve a green CI stamp).
+**Resume · Thalon** — session 51, syd4 — **FIRST: wave-2 template mint, slate ⑥–⑩ as verdicted** (⑥ Houselights events/novel-type · ⑦ Vance & Alder legal/editorial · ⑧ Crateline logistics/brutalist · ⑨ Wagtail & Co pets/soft-organic · ⑩ Hue & Cry salon/exceptional-palette; bench: café/travel/construction/accounting/photography — ledger §s45). LOOK-FIRST discipline, get_cost preflight per mint (≥40cr = per-clip founder ping), balance 743.52/Plus. CI is BACK and green (full-matrix stamp on the merged codebase landed s50-late; staging auto-deployed the post-B-ve.6 image).
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → **`bash scripts/peer-mail-check.sh`** (NEW MAIL → read `agent_handoff/FROM-SWORDFISH.md` → `--ack`) → COORDINATION.md §B-video-editor (B-ve.1–.6 ALL merged) → memory `dev-db-fragility-and-pg-plan` (the incident + rebuild + restore).
 
@@ -18,7 +18,7 @@
 
 ▎ ▸ **s50 ratchets/lessons:** PGlite leaves a stale `postmaster.pid` after EVERY stop — clean before reopen; never SIGKILL a server holding the DB · editing next.config restarts dev mid-render (orphans ffmpeg + kills recordRender — re-fire the render door after) · `.next-dev` wedge still bites (purge on route-404s) · pgrep self-match poisons RSS watchers — use `pgrep -x` · derived-EDL geometry is PROBED (ffprobe), never assumed · **peak-RSS measured: ffmpeg 2.26 GiB / app+render ≈4.1 GiB** (adopted into swordfish's resize plan — flipped it to don't-spend).
 
-▎ ▸ **[founder] queue:** NEEDS-STEVEN.md is current (Actions billing = top) · B-ve.7 candidate (agent reframe through the existing propose door — survey §5) at a checkpoint · transcript bulk-delete · s40 re-critique · leads triage · →Email dogfood.
+▎ ▸ **[founder] queue:** NEEDS-STEVEN.md is current · B-ve.7 candidate (agent reframe through the existing propose door — survey §5) at a checkpoint · transcript bulk-delete · s40 re-critique · leads triage · →Email dogfood.
 
 ▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · get_cost preflight per mint · declined_preset_id · aspect variants = own-engine recut NEVER vendor reframe · edit ops = 0cr local (A17) · agent launches need fresh founder approval · lead self-drives interactive flows · PGlite single-process (stop server before imports/db scripts).
 
