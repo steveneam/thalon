@@ -34,9 +34,14 @@ export interface ExecutePlanOptions {
 }
 
 /** Same resolution order the replay test uses (env via readEnv — the platform seam is the one sanctioned door to the process environment), falling through to PATH so non-record boxes still work. */
-export function defaultBinary(name: "ffmpeg" | "magick"): string {
+export function defaultBinary(name: "ffmpeg" | "magick" | "ffprobe"): string {
   const env = readEnv();
-  const override = name === "ffmpeg" ? env.THALON_FFMPEG : env.THALON_MAGICK;
+  const override =
+    name === "ffmpeg"
+      ? env.THALON_FFMPEG
+      : name === "ffprobe"
+        ? env.THALON_FFPROBE
+        : env.THALON_MAGICK;
   if (override) return override;
   const local = join(homedir(), ".local", "bin", name);
   return existsSync(local) ? local : name;

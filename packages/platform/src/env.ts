@@ -51,6 +51,8 @@ const envSchema = z.object({
   /** B-ve.3 render binaries (ADR 0010): where ffmpeg/ImageMagick live on THIS box. Unset = ~/.local/bin, then PATH (engine edl/execute.ts). Box-local config, never code. */
   THALON_FFMPEG: z.string().optional(),
   THALON_MAGICK: z.string().optional(),
+  /** B-ve.5 source-geometry probe (ADR 0010): ffprobe for measured crop seeding. Same resolution ladder as THALON_FFMPEG. */
+  THALON_FFPROBE: z.string().optional(),
   /**
    * B6.7 workspace gate (ADR 0007 decision 4, invariant): `user:password`
    * for the app-level basic-auth proxy over every non-public route. Unset

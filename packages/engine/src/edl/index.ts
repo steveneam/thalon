@@ -25,3 +25,12 @@ export {
   type ExecutePlanResult,
 } from "./execute";
 export { buildFfmpegArgs, type EdlPlan, type PlanInput, type PlateSpec } from "./plan";
+export {
+  centeredCropFor,
+  DeriveEdlError,
+  deriveEdl,
+  type DeriveEdlOptions,
+  type SourceDimensions,
+  type SourceDimsByRef,
+} from "./derive";
+export { probeSourceDims, SourceProbeError, type ProbeOptions } from "./probe";
