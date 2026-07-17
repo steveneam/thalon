@@ -280,7 +280,7 @@ describe("video cuts repo (B-ve.1)", () => {
     expect(events.map((e) => e.event)).toEqual(["video_cut.created", "video_cut.rendered"]);
   });
 
-  it("repo surface is pinned — the approve door landed at B-ve.4 behind the judge gate, nothing else has crept in", async () => {
+  it("repo surface is pinned — approve landed at B-ve.4, stampLineage at B-ve.5; nothing else has crept in", async () => {
     const { repos } = await setup();
     expect(Object.keys(repos.videoCuts).sort()).toEqual([
       "approve",
@@ -288,7 +288,63 @@ describe("video cuts repo (B-ve.1)", () => {
       "get",
       "list",
       "recordRender",
+      "stampLineage",
     ]);
+  });
+
+  it("stampLineage (B-ve.5): stamps once with an event, identical replay is a no-op, a different lineage fails loud, parent must live in the same project", async () => {
+    const { ctx, other, repos } = await setup();
+    const { project } = await repos.videoProjects.create(ctx, { name: "film" });
+    const { project: foreignProject } = await repos.videoProjects.create(ctx, { name: "other-film" });
+    const { cut: parent } = await repos.videoCuts.create(ctx, project.id, {
+      name: "master-16x9",
+      version: 1,
+      edl: minimalEdl(),
+    });
+    const { cut: derived } = await repos.videoCuts.create(ctx, project.id, {
+      name: "master-9x16",
+      version: 1,
+      edl: minimalEdl("master-9x16"),
+    });
+    const { cut: strangerCut } = await repos.videoCuts.create(ctx, foreignProject.id, {
+      name: "elsewhere",
+      version: 1,
+      edl: minimalEdl("elsewhere"),
+    });
+    const lineage = { parentCutId: parent.id, aspect: "9:16" };
+
+    // Tenancy wall first.
+    await expect(repos.videoCuts.stampLineage(other, derived.id, lineage)).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
+    // The parent must be a cut of the SAME project.
+    await expect(
+      repos.videoCuts.stampLineage(ctx, strangerCut.id, lineage),
+    ).rejects.toBeInstanceOf(NotFoundError);
+    // Garbage lineage refuses at the zod door, nothing stores.
+    await expect(
+      repos.videoCuts.stampLineage(ctx, derived.id, {
+        parentCutId: parent.id,
+        aspect: "vertical",
+      }),
+    ).rejects.toThrow();
+
+    const first = await repos.videoCuts.stampLineage(ctx, derived.id, lineage);
+    expect(first.stamped).toBe(true);
+    expect((first.cut.meta as { lineage?: unknown }).lineage).toEqual(lineage);
+
+    // Identical replay: no-op, no second event (idempotent imports).
+    const replay = await repos.videoCuts.stampLineage(ctx, derived.id, lineage);
+    expect(replay.stamped).toBe(false);
+
+    // Lineage is one-way — a different stamp fails loud.
+    await expect(
+      repos.videoCuts.stampLineage(ctx, derived.id, { parentCutId: parent.id, aspect: "1:1" }),
+    ).rejects.toThrow(/immutable/);
+
+    const events = await repos.events.list(ctx, { entityType: "video_cut", entityId: derived.id });
+    expect(events.map((e) => e.event)).toEqual(["video_cut.created", "video_cut.lineage_stamped"]);
+    expect(events[1].payload).toEqual({ lineage });
   });
 
   it("approve door (B-ve.4): rendered -> approved only, green receipt in the event, tenancy-walled, approved terminal", async () => {

@@ -1,8 +1,10 @@
 import {
   assertVideoCutTransition,
   videoCutInputSchema,
+  videoCutLineageSchema,
   type TenantCtx,
   type VideoCutInput,
+  type VideoCutLineage,
   type VideoCutStatus,
 } from "@thalon/contracts";
 import { and, eq } from "drizzle-orm";
@@ -179,6 +181,67 @@ export function videoCutsRepo(db: Db) {
           payload: { judge: { ...judge } },
         });
         return row;
+      });
+    },
+
+    /**
+     * B-ve.5 (additive): stamp `meta.lineage` on a cut that predates the
+     * derive door (the 9:16 master import-backfill case). Lineage is
+     * IMMUTABLE once present — an identical re-stamp replays as a no-op
+     * (idempotent, no event), a DIFFERENT one fails loud: provenance is
+     * one-way. The parent must be a cut of the same project, through the
+     * tenancy wall.
+     */
+    async stampLineage(
+      ctx: TenantCtx,
+      id: string,
+      lineage: VideoCutLineage,
+    ): Promise<{ cut: VideoCutRow; stamped: boolean }> {
+      const parsed = videoCutLineageSchema.parse(lineage);
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(videoCuts)
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("video_cut", id);
+        const existing = (current.meta as { lineage?: unknown }).lineage;
+        if (existing !== undefined) {
+          const parsedExisting = videoCutLineageSchema.safeParse(existing);
+          if (
+            parsedExisting.success &&
+            parsedExisting.data.parentCutId === parsed.parentCutId &&
+            parsedExisting.data.aspect === parsed.aspect
+          ) {
+            return { cut: current, stamped: false };
+          }
+          throw new Error(
+            `video cut ${id} already carries a different lineage — lineage is immutable once stamped`,
+          );
+        }
+        const [parent] = await tx
+          .select({ id: videoCuts.id, projectId: videoCuts.projectId })
+          .from(videoCuts)
+          .where(and(eq(videoCuts.id, parsed.parentCutId), eq(videoCuts.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!parent || parent.projectId !== current.projectId) {
+          throw new NotFoundError("video_cut (lineage parent in project)", parsed.parentCutId);
+        }
+        const [row] = await tx
+          .update(videoCuts)
+          .set({
+            meta: { ...(current.meta as Record<string, unknown>), lineage: parsed },
+            updatedAt: new Date(),
+          })
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_cut",
+          entityId: row.id,
+          event: "video_cut.lineage_stamped",
+          payload: { lineage: { ...parsed } },
+        });
+        return { cut: row, stamped: true };
       });
     },
   };

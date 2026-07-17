@@ -5,8 +5,12 @@ import {
   edlDiffSchema,
   edlSchema,
   InvalidVideoCutTransitionError,
+  DERIVE_CANVAS,
   panSchema,
+  VIDEO_DERIVE_ASPECTS,
   videoCutAttributionSchema,
+  videoCutInputSchema,
+  videoCutLineageSchema,
   videoSourceRefSchema,
   videoTakeSchema,
 } from "../video-project";
@@ -285,6 +289,50 @@ describe("cut attribution (B-ve.4: replayable + attributed)", () => {
           },
           decidedBy: "operator",
         },
+      }).success,
+    ).toBe(true);
+  });
+});
+
+describe("cut lineage (B-ve.5: the aspect-lens derived-cut pin)", () => {
+  it("accepts a parent pin with a W:H aspect; refuses prose aspects and empty pins", () => {
+    expect(
+      videoCutLineageSchema.safeParse({ parentCutId: "cut-1", aspect: "9:16" }).success,
+    ).toBe(true);
+    expect(
+      videoCutLineageSchema.safeParse({ parentCutId: "cut-1", aspect: "1:1" }).success,
+    ).toBe(true);
+    expect(
+      videoCutLineageSchema.safeParse({ parentCutId: "cut-1", aspect: "vertical" }).success,
+    ).toBe(false);
+    expect(videoCutLineageSchema.safeParse({ parentCutId: "", aspect: "9:16" }).success).toBe(
+      false,
+    );
+  });
+
+  it("every derive preset has a canvas, and both film-master canvases are the pinned pairs", () => {
+    for (const aspect of VIDEO_DERIVE_ASPECTS) {
+      expect(DERIVE_CANVAS[aspect]).toBeDefined();
+    }
+    expect(DERIVE_CANVAS["9:16"]).toEqual({ width: 1080, height: 1920 });
+    expect(DERIVE_CANVAS["1:1"]).toEqual({ width: 1080, height: 1080 });
+  });
+
+  it("additivity: a pre-window cut input without meta.lineage parses unchanged", () => {
+    const cut = {
+      name: "master",
+      version: 1,
+      edl: {
+        name: "master",
+        output: { width: 1280, height: 720, fps: 24, duration: 5 },
+        video: [{ name: "b1", source: { kind: "take", ref: "motion/keepers/c.mp4" }, duration: 5 }],
+      },
+    };
+    expect(videoCutInputSchema.safeParse(cut).success).toBe(true);
+    expect(
+      videoCutInputSchema.safeParse({
+        ...cut,
+        meta: { lineage: { parentCutId: "cut-0", aspect: "9:16" } },
       }).success,
     ).toBe(true);
   });
