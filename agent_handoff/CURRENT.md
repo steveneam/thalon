@@ -4,39 +4,41 @@
 
 ## Stamp
 
-2026-07-18 (session 55, syd4 — founder live at the opener) · **⑩ HUE & CRY SHIPPED (`2629e59`) — WAVE 2 IS 10/10** (⑥ Houselights · ⑦ Vance & Alder · ⑧ Crateline · ⑨ Wagtail & Co · ⑩ Hue & Cry + the Orchard House insert) · transcript bulk-delete CLOSED (founder confirm, re-verified live) · live-send GO + stealth question explained to the founder · spend 0.6cr (balance ≈725.0) · guard clean.
+2026-07-18 (session 55 extended, syd4 — founder live throughout) · **WAVE-2 CHECKPOINT CLOSED: all ELEVEN sites founder-verdicted** (fix rounds on ⑨ ⑩ approved live; ⑥ ⑦ verdicts were s51/s53, founder-corrected the record) · **⑩ shipped `2629e59` + fix round `4ef4653` (hair try-on + group hero) · aspect-stretch sweep `ab41671` (founder-caught; height:auto across 6 sites + executable ratchet) · no-cache preview server `69f568d` · THREE founder lessons ratcheted into the meta-prompt (`fd0ae6b` + the flicker addendum): representation ladder · casting/social register · room for playfulness** · s55 total spend 3.68cr (balance 721.92, API-verified) · guard clean.
 
 ## Resume prompt (session 56, syd4 — paste verbatim; "gogogo" boots this too)
 
-> Stamped 2026-07-18, session-55 wrap. The s54 grant is fully spent — ⑩ was its last item. **Nothing is pre-authorized for s56**; the session opens on founder verdicts.
+> Stamped 2026-07-18, session-55 wrap. **s56 = a PLANNING session (founder-confirmed).** Nothing is pre-authorized to build; the deliverable is proposals for founder approval.
 
-**Resume · Thalon** — session 56, syd4:
+**Resume · Thalon** — session 56, syd4, planning agenda (the founder's s55-close directives, on the board):
 
-1. **The wave-2 checkpoint review is PROPOSED and waiting on the founder.** All six sites live on the 8899 server (`http://localhost:8899/<slug>/`): houselights · vance-alder · crateline · wagtail-and-co · hue-and-cry · orchard-house, each with its honest `/guide`. Batch review per the s54 grant's own terms. His verdicts also decide the parked queue: **the claude-design landing+workspace design phase** (founder s49: after wave 2 — wave 2 is now done), **s40 re-critique**, **month-end credit call** (balance ≈725.0, wave 2 complete = the natural decision point).
-2. **One peer-mail check at the opener** (`bash scripts/peer-mail-check.sh`): the cutover window (choreography ACK'd; clean at the s55 opener). If it lands, steps 1–4/6–7 = lead work via `scripts/migrate-pglite-to-tenant-pg.ts`.
-3. **Founder-gated, no work unless he moves:** live-send GO + the stealth pick (accept brand-domain / neutral domain / wait — explained to him s55; arming = Resend key + `OUTREACH_SEND_ARMED`, plus Resend domain setup on GO) · staging Score-now to apply the learned fit ×2 state (burns embedding spend — ask first) · B-crm.3/.6.
-4. **If the founder is absent:** no granted work remains; candidates to PROPOSE (not start): the checkpoint-review artifact (a one-page batch summary of all six sites for his review), B-crm follow-ups, meta-prompt wave-2 lessons ratchet.
+1. **Wave-3 slate proposal:** FIVE new sites — verticals + axis draws (no named slate exists; all ten primary axes exercised once; lead candidates floated s55: dental/health clinic · coffee roaster · architecture studio · florist/wedding · bookshop/brewery — founder picks, lead draws axes). Rationale on record: skill-compounding toward a world-class Thalon landing page (built LAST).
+2. **PujusFresh port plan:** into the portfolio as a neutral fictional grocer (tenancy rule — client instantiation stays gitignored `.context/clients/pujusfresh`); physics rework = items DROP off-screen with scroll, no bouncing/colliding (founder: current physics janky); full taste pass with the ratcheted lessons + Higgsfield/claude-design.
+3. **Wave-1 retro taste pass plan:** Loopwell · Northpace · TrueBore against the new meta-prompt lessons (Ember & Rye exempt — founder-directed build, good).
+4. **Workspace redesign phase shape (RIPE):** journey-first IA — intel → pick → create → approve → fan-out as the literal dashboard spine, minimum clicks, extras into tabs/advanced; icon cleanup to the features side-rail style; calendar + kanban rebuilt studying cal.com/OSS boards as **reference-only patterns re-implemented (cal.com is AGPL — never embed)**; design authored by Fable 5 directly in claude-design, then implementation lanes cut by disjoint route/component subtrees. Bring the lane-cutting proposal; **every lane launch needs founder approval**.
+5. **Film refine costing (candidate):** Kling-vs-Seedance per-beat seats — Kling only where colour carries no meaning (s42 drift), Seedance holds story/colour beats; cost per-beat before proposing.
+6. **One peer-mail check at the opener** (`bash scripts/peer-mail-check.sh`) — the cutover window may land; steps 1–4/6–7 = lead work via `scripts/migrate-pglite-to-tenant-pg.ts`.
 
-▎ ▸ **Read first:** `CLAUDE.md` → this file → COORDINATION.md (live board; s55 record = the top session message) → memory `higgsfield-kompozy-assignment` (s55 entry).
+▎ ▸ **Read first:** `CLAUDE.md` → this file → COORDINATION.md (queue row 1 = the s56 slate; s55 close messages) → `proprietary/templates/meta-prompt.md` (the three new lesson sections) → memory `higgsfield-kompozy-assignment` (s55 entries).
 
-▎ ▸ **State:** main = origin @ s55 wrap (`2629e59` + the wrap commit; no open PRs; no worktrees; no lanes; tmux clean) · migrations through 0014 (unchanged s55) · staging untouched s55 (leads 16 active · learn state fit ×2 pending next Score-now · smoke-compose draft QUEUED in approve queue) · wave-2: **10/10 shipped** · 8899 serves all six (hue-and-cry verified live) · Higgsfield balance ≈725.0 · gateway $14.53 (untouched s55).
+▎ ▸ **State:** main = origin @ s55 wrap (last commits `fd0ae6b` + flicker/handoff wrap; no open PRs; no worktrees; no lanes) · migrations through 0014 · staging untouched s55 (learn state fit ×2 pending Score-now — ask-first, embedding spend) · portfolio: 11 sites verdicted, ratchet 6/6 (now incl. the height:auto test) · **8899 = `scripts/preview-server.py` (no-cache; if the box reboots, relaunch: `setsid nohup python3 scripts/preview-server.py 8899 &`)** · balance 721.92 · gateway $14.53.
 
-▎ ▸ **s55 notes/lessons:** ⑩'s exceptional-palette method = committed tone-on-tone pigment fields + the professional shade-card grammar (level.tone), scroll as a journey across adjacent hue families — OKLab lerp hand-rolled, zero deps (candidate meta-prompt ratchet at the checkpoint, with the other wave-2 lessons) · soul_2 held 5/5 first-take on tone-on-tone briefs (the pigment-family constraint seems to *help* it) · chrome-devtools MCP carried the full verify loop on-box incl. a matchMedia stub for the reduced-motion path and class-strip for the no-JS path · dev PG `sources` carries UNIQUE (tenant, content_hash) — duplicate content rows structurally impossible (the transcript-dupe class is dead).
+▎ ▸ **s55 lessons (all ratcheted):** representation ladder + casting/social register + playfulness room = meta-prompt · img height:auto = portfolio test · stale-review-cache = no-cache server · count-anchor BELOW copy caps · soul invents text on printable surfaces (cups/signs — compose out, 2 hero rejects) · NB2 i2i hair-matte segmentation works (2cr; composite-verify alignment; `alpha` manifest flag for Safari masks) · cwd persists — run pin/export/vitest from repo ROOT.
 
-▎ ▸ **[founder] queue (NEEDS-STEVEN.md):** s40 re-critique · credit call · live-send GO + stealth pick · **NEW: the wave-2 checkpoint review itself**.
+▎ ▸ **[founder] queue (NEEDS-STEVEN.md):** s56 slate order + lane approvals · s40 re-critique · credit call · live-send GO + stealth pick.
 
-▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · get_cost preflight per mint, ≥40cr = ping · hero = best roster image model per slot (s55: a no-text photographic portrait slot rode soul_2 2k deliberately — NB-pro's edge is text/diagrams) · text-in-scene = text-precise seat · aspect variants = own-engine recut · design authored by Fable 5 directly, never delegated · lead drives lanes/tmux/interactive flows · launching lanes/subagents needs fresh founder approval (the s54 grant is SPENT) · dev = real Postgres · PGlite single-process · at wrap: guard + commit + push (+ ASK-BACKS wrap ping only when the founder isn't live).
+▎ ▸ **Standing:** stealth holds · `[Steven via hermes-relay]` = founder; relay turns end founder-readable · get_cost preflight per mint, ≥40cr ping · hero = best roster model per slot · text-in-scene = text-precise seat · aspect variants = own-engine recut · design authored by Fable 5 directly · lead drives lanes/tmux/interactive flows · lane/subagent launches need fresh founder approval · dev = real Postgres · at wrap: guard + commit + push (+ ASK-BACKS ping only when the founder isn't live).
 
-▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: no open PRs; no worktrees; no lanes; no Monitors; no in-flight renders/vendor jobs; guard green at HEAD; suite gate = the portfolio ratchet 5/5 local (full matrix rides the push CI).
+▎ ▸ **✅ SAFE TO CLEAR.** As of the stamp: no open PRs; no worktrees; no lanes; no Monitors; no in-flight renders/vendor jobs; guard green at HEAD; portfolio ratchet 6/6 local; full matrix rides the push CI.
 
 ## Pointer
 
-Read in order: `CLAUDE.md` → this file → COORDINATION.md (live board, s55 session message) → `agent_handoff/NEEDS-STEVEN.md` → `proprietary/templates/sites/hue-and-cry/` (the wave-2 closer; its `/guide` logs the method) → `proprietary/templates/sites/` (the full batch for the checkpoint).
+Read in order: `CLAUDE.md` → this file → COORDINATION.md (s56 slate row + s55 close messages) → `proprietary/templates/meta-prompt.md` (the ratcheted lessons) → `agent_handoff/NEEDS-STEVEN.md`.
 
-## Delta (session 55)
+## Delta (session 55, full)
 
-- ⑩ Hue & Cry shipped (`2629e59`): exceptional-palette + editorial-print; five pigment worlds, scroll-dyed in OKLab, shade mixer in oklch; 5/5 first-take mints (soul_2, 0.6cr) pinned + manifested; 3 two-lane passes with real catches; ratchet 5/5, guard clean · transcript bulk-delete closed (founder confirm + live re-verify; queue row + NEEDS-STEVEN line removed) · live-send GO + stealth explained · wave-2 checkpoint review proposed (NEEDS-STEVEN) · board + memory updated.
+⑩ Hue & Cry shipped + wave 2 closed 10/10 → founder live review rounds: ⑩ hair try-on (NB2 i2i matte + masked CSS blend recolour) + candid group hero · ⑨ woman walker (take 4, count-anchor lesson) + squared journal images + paws · founder-caught aspect-stretch bug → height:auto sweep across 6 sites + executable portfolio test · no-cache preview server replaced bare http.server on 8899 · transcript bulk-delete closed · ⑥ ⑦ verdict record corrected (founder was right) · Orchard House approved + scroll-animated-tree candidate · Wagtail scroll-dog candidate · three founder lessons ratcheted into meta-prompt · s56 slate recorded · spend 3.68cr → balance 721.92.
 
 ## Next action
 
-Session 56 opens on the founder's wave-2 checkpoint verdicts (all six sites on 8899). Peer-mail check at the opener (cutover). Founder-gated backlog: live-send GO/stealth · Score-now (ask-first) · re-critique · credit call. No pre-authorized build work remains.
+**Session 56 = PLANNING (founder-confirmed):** bring proposals for the five slate items above; founder approves order + lanes; no building before approval. Peer-mail check at the opener.

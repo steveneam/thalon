@@ -126,7 +126,11 @@ catch, not the founder). (4) Playful marginalia in the vertical's own visual
 language earns warmth cheaply (paw prints, formula annotations, stamped
 marks). (5) Count-anchoring: models overshoot subject counts even against
 "EXACTLY N, count them" — when a count is capped by copy, prompt for *fewer*
-than the cap so the overshoot lands inside it.
+than the cap so the overshoot lands inside it. (6) Leave room for one small
+deliberate imperfection or wink per page — the Houselights one-letter neon
+flicker (founder-suggested) is the register: a single playful flaw that makes
+a page feel alive and hand-made rather than rendered. Budget for it; don't
+polish it out.
 
 **Hero register rule (founder direction 2026-07-15 s37):** the first
 impression must be *real*. A code-drawn model, schematic, or illustration
