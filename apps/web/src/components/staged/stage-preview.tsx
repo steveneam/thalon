@@ -53,7 +53,7 @@ export function StagePreview({ aspect, scenes, note }: StagePreviewProps) {
     <section aria-label="Stage preview" className="flex flex-col gap-2 rounded-lg border border-border p-2">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Preview (low-res stub)</h3>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {aspect} · {formatMsAsClock(totalMs)}
         </span>
       </div>
@@ -97,7 +97,7 @@ export function StagePreview({ aspect, scenes, note }: StagePreviewProps) {
           </button>
         ))}
       </div>
-      {note && <p className="text-[11px] text-muted-foreground">{note}</p>}
+      {note && <p className="text-xs text-muted-foreground">{note}</p>}
     </section>
   );
 }

@@ -70,7 +70,7 @@ export function FormatDetail({ draft }: FormatDetailProps) {
 /** Shown when an operator edit changed `draft.body` without touching the generation `meta` — the structured fields below no longer match the judged text. */
 function StaleNotice({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[11px] text-muted-foreground italic" role="status">
+    <p className="text-xs text-muted-foreground italic" role="status">
       {children}
     </p>
   );
@@ -96,7 +96,7 @@ function ClipPlanDetail({ meta, stale }: { meta: ClipPlanDraftMeta; stale: boole
         <dt className="font-medium text-muted-foreground">Platform copy</dt>
         <dd className="whitespace-pre-wrap text-foreground">{meta.platformCopy}</dd>
       </dl>
-      <p className="text-[11px] text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         window {meta.windowIndex} · chunks {meta.chunkSeqs.join(", ")}
       </p>
     </div>
@@ -109,7 +109,7 @@ function DemoPlanDetail({ meta, stale }: { meta: DemoPlanDraftMeta; stale: boole
       <div className="flex flex-wrap items-center gap-1.5">
         {/* captureStatus/captureRef aren't narration-derived — stay true regardless of copy edits, never de-emphasized. */}
         <Badge variant={CAPTURE_STATUS_VARIANT[meta.captureStatus]}>capture: {meta.captureStatus}</Badge>
-        {meta.captureRef && <span className="font-mono text-[11px] text-muted-foreground">{meta.captureRef}</span>}
+        {meta.captureRef && <span className="font-mono text-2xs text-muted-foreground">{meta.captureRef}</span>}
       </div>
       {stale && (
         <StaleNotice>Edited since generation — the step narrations below reflect the original text, not the current body.</StaleNotice>
@@ -137,7 +137,7 @@ function DemoPlanDetail({ meta, stale }: { meta: DemoPlanDraftMeta; stale: boole
         </tbody>
       </table>
       {/* pageUrls are the crawl's own provenance, not narration-derived — stay true regardless of copy edits. */}
-      <p className="text-[11px] text-muted-foreground">pages: {meta.pageUrls.join(", ")}</p>
+      <p className="text-xs text-muted-foreground">pages: {meta.pageUrls.join(", ")}</p>
     </div>
   );
 }
@@ -157,7 +157,7 @@ function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
         {meta.deployRef && (
           <a
             href={meta.deployRef}
-            className="font-mono text-[11px] text-primary underline-offset-2 hover:underline"
+            className="font-mono text-2xs text-primary underline-offset-2 hover:underline"
           >
             {meta.deployRef}
           </a>
@@ -170,7 +170,7 @@ function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
         <dd className="text-foreground">{meta.description}</dd>
       </dl>
       {/* Object-store keys are unbroken tokens — without break-all this row overflows its panel (detector-caught, s39). */}
-      <p className="break-all font-mono text-[11px] text-muted-foreground">{meta.htmlRef}</p>
+      <p className="break-all font-mono text-2xs text-muted-foreground">{meta.htmlRef}</p>
     </div>
   );
 }
@@ -242,7 +242,7 @@ function OutreachEmailDetail({
           </Button>
         </div>
       ) : (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Approve to unlock copy-out — you send it yourself, from your own mail client.
         </p>
       )}
@@ -254,7 +254,7 @@ function ExemplarProvenance({ ids }: { ids: ExemplarId[] }) {
   return (
     <div className="flex flex-col gap-1" aria-label="Exemplar provenance">
       <Badge variant="secondary">Exemplar-grounded</Badge>
-      <ul className="flex flex-col gap-0.5 font-mono text-[11px] text-muted-foreground">
+      <ul className="flex flex-col gap-0.5 font-mono text-2xs text-muted-foreground">
         {ids.map((id) => (
           <li key={`${id.sourceId}:${id.chunkId}`}>
             {id.sourceId.slice(0, 8)} / {id.chunkId.slice(0, 8)}

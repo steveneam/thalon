@@ -42,7 +42,7 @@ export function CandidatePicker({ stageTitle, candidates, busy, onPick }: Candid
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{candidate.summary}</p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {scenes.length} scenes
                 {totalMs !== null && ` · ${formatMsAsClock(totalMs)}`}
                 {doc && ` · ${doc.aspect} · ${doc.pacing} pacing`}

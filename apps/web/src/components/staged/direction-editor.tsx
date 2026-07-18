@@ -69,7 +69,7 @@ export function DirectionEditor({ doc, docKey, presets, busy, accepted, onEdit, 
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Style presets">
-          <span className="text-[11px] text-muted-foreground">Profile presets:</span>
+          <span className="text-xs text-muted-foreground">Profile presets:</span>
           {presets.map((preset) => (
             <Button
               key={preset.key}

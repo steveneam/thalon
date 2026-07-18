@@ -117,28 +117,28 @@ export function ProfileEditor() {
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <Field label="Company">
-              <input aria-label="Company" className={inputClass} value={form.company} onChange={(e) => set("company", e.target.value)} />
+              <input id="profile-company" name="company" aria-label="Company" className={inputClass} value={form.company} onChange={(e) => set("company", e.target.value)} />
             </Field>
             <Field label="One-liner" hint="What the company does, for whom — one sentence.">
-              <input aria-label="One-liner" className={inputClass} value={form.oneLiner} onChange={(e) => set("oneLiner", e.target.value)} />
+              <input id="profile-one-liner" name="oneLiner" aria-label="One-liner" className={inputClass} value={form.oneLiner} onChange={(e) => set("oneLiner", e.target.value)} />
             </Field>
             <Field label="Philosophy" hint="The why behind the content.">
-              <textarea aria-label="Philosophy" rows={2} className={inputClass} value={form.philosophy} onChange={(e) => set("philosophy", e.target.value)} />
+              <textarea id="profile-philosophy" name="philosophy" aria-label="Philosophy" rows={2} className={inputClass} value={form.philosophy} onChange={(e) => set("philosophy", e.target.value)} />
             </Field>
             <Field label="Audience">
-              <textarea aria-label="Audience" rows={2} className={inputClass} value={form.audience} onChange={(e) => set("audience", e.target.value)} />
+              <textarea id="profile-audience" name="audience" aria-label="Audience" rows={2} className={inputClass} value={form.audience} onChange={(e) => set("audience", e.target.value)} />
             </Field>
             <Field label="Offers" hint="One per line — short, checkable.">
-              <textarea aria-label="Offers" rows={3} className={inputClass} value={form.offers} onChange={(e) => set("offers", e.target.value)} />
+              <textarea id="profile-offers" name="offers" aria-label="Offers" rows={3} className={inputClass} value={form.offers} onChange={(e) => set("offers", e.target.value)} />
             </Field>
             <Field label="Facts" hint="One per line — durable company facts.">
-              <textarea aria-label="Facts" rows={3} className={inputClass} value={form.facts} onChange={(e) => set("facts", e.target.value)} />
+              <textarea id="profile-facts" name="facts" aria-label="Facts" rows={3} className={inputClass} value={form.facts} onChange={(e) => set("facts", e.target.value)} />
             </Field>
             <Field label="Topics" hint="One per line — the content pillars. Seeds intel areas and keyword compilation.">
-              <textarea aria-label="Topics" rows={3} className={inputClass} value={form.topics} onChange={(e) => set("topics", e.target.value)} />
+              <textarea id="profile-topics" name="topics" aria-label="Topics" rows={3} className={inputClass} value={form.topics} onChange={(e) => set("topics", e.target.value)} />
             </Field>
             <Field label="Links" hint={'One per line as "label: url" — site, github, socials.'}>
-              <textarea aria-label="Links" rows={3} className={inputClass} value={form.links} onChange={(e) => set("links", e.target.value)} />
+              <textarea id="profile-links" name="links" aria-label="Links" rows={3} className={inputClass} value={form.links} onChange={(e) => set("links", e.target.value)} />
             </Field>
           </CardContent>
         </Card>
@@ -151,7 +151,7 @@ export function ProfileEditor() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <textarea aria-label="Denylist" rows={4} className={inputClass} value={form.denylist} onChange={(e) => set("denylist", e.target.value)} />
+            <textarea id="profile-denylist" name="denylist" aria-label="Denylist" rows={4} className={inputClass} value={form.denylist} onChange={(e) => set("denylist", e.target.value)} />
           </CardContent>
         </Card>
 
@@ -166,10 +166,10 @@ export function ProfileEditor() {
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <Field label="Voice (JSON)">
-              <textarea aria-label="Voice JSON" rows={6} className={`${inputClass} font-mono text-xs`} value={form.voiceJson} onChange={(e) => set("voiceJson", e.target.value)} placeholder='{ "tone": "direct, technical" }' />
+              <textarea id="profile-voice-json" name="voiceJson" aria-label="Voice JSON" rows={6} className={`${inputClass} font-mono text-xs`} value={form.voiceJson} onChange={(e) => set("voiceJson", e.target.value)} placeholder='{ "tone": "direct, technical" }' />
             </Field>
             <Field label="Platform profiles (JSON)">
-              <textarea aria-label="Platform profiles JSON" rows={6} className={`${inputClass} font-mono text-xs`} value={form.platformProfilesJson} onChange={(e) => set("platformProfilesJson", e.target.value)} placeholder='{ "linkedin": { "tone": "professional", "charLimit": 3000 } }' />
+              <textarea id="profile-platform-profiles-json" name="platformProfilesJson" aria-label="Platform profiles JSON" rows={6} className={`${inputClass} font-mono text-xs`} value={form.platformProfilesJson} onChange={(e) => set("platformProfilesJson", e.target.value)} placeholder='{ "linkedin": { "tone": "professional", "charLimit": 3000 } }' />
             </Field>
           </CardContent>
         </Card>

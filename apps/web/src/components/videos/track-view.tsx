@@ -41,7 +41,7 @@ function LaneLabel({ children }: { children: string }) {
   return (
     <span
       aria-hidden
-      className="u-eyebrow pointer-events-none sticky left-0 z-0 float-left mt-0.5 rounded-r bg-background/60 px-1.5 text-[9px] leading-4 text-muted-foreground/80"
+      className="u-eyebrow pointer-events-none sticky left-0 z-0 float-left mt-0.5 rounded-r bg-background/60 px-1.5 text-2xs leading-4 text-muted-foreground/80"
     >
       {children}
     </span>
@@ -261,7 +261,7 @@ export function TrackView({
             aria-label="Playhead"
             aria-valuenow={playhead ?? 0}
             tabIndex={0}
-            className="u-tabular relative h-6 cursor-col-resize border-b border-border text-[10px] text-muted-foreground"
+            className="u-tabular relative h-6 cursor-col-resize border-b border-border text-2xs text-muted-foreground"
             onPointerDown={(e) => {
               beginDrag({ kind: "playhead" }, e);
               movePlayhead(e.clientX);
@@ -293,7 +293,7 @@ export function TrackView({
                     e,
                   )
                 }
-                className="absolute top-1 h-6 cursor-grab truncate rounded border border-primary/50 bg-primary/10 px-1 text-left text-[10px] leading-5 hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="absolute top-1 h-6 cursor-grab truncate rounded border border-primary/50 bg-primary/10 px-1 text-left text-2xs leading-5 hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 style={{
                   left: line.fadeIn * pxPerSec,
                   width: Math.max(10, (line.fadeOut - line.fadeIn) * pxPerSec),
@@ -385,10 +385,10 @@ export function TrackView({
                       style={{ width: chunk.fadeIn * pxPerSec }}
                     />
                   )}
-                  <span className="relative truncate rounded-sm bg-background/80 px-1 text-[11px] font-medium leading-4 [align-self:start]">
+                  <span className="relative truncate rounded-sm bg-background/80 px-1 text-xs font-medium leading-4 [align-self:start]">
                     {chunk.name}
                   </span>
-                  <span className="u-tabular relative mt-auto truncate rounded-sm bg-background/70 px-1 text-[10px] leading-4 text-muted-foreground [align-self:start]">
+                  <span className="u-tabular relative mt-auto truncate rounded-sm bg-background/70 px-1 text-2xs leading-4 text-muted-foreground [align-self:start]">
                     {isOverlay ? `freeze ${chunk.start}s` : `${chunk.duration}s`}
                   </span>
                 </div>
@@ -412,7 +412,7 @@ export function TrackView({
                   );
                 }}
                 className={cn(
-                  "absolute inset-x-0 top-1 flex h-8 items-center gap-2 truncate rounded-md border px-2 text-[10px]",
+                  "absolute inset-x-0 top-1 flex h-8 items-center gap-2 truncate rounded-md border px-2 text-2xs",
                   cue.mode === "copy"
                     ? "cursor-default border-border bg-muted/40 text-muted-foreground"
                     : "cursor-grab border-sky-700/50 bg-sky-500/10 hover:bg-sky-500/20",
@@ -428,7 +428,7 @@ export function TrackView({
                 </span>
               </div>
             ) : (
-              <p className="px-2 pt-2 text-[10px] text-muted-foreground">silent cut — no music lane</p>
+              <p className="px-2 pt-2 text-2xs text-muted-foreground">silent cut — no music lane</p>
             )}
           </div>
 

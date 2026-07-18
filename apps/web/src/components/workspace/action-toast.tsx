@@ -39,7 +39,7 @@ export function ActionToast({ toast, onClear }: { toast: ToastState | null; onCl
   return (
     <div
       role="status"
-      className="anim-toast fixed bottom-4 left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground shadow-md"
+      className="anim-toast fixed bottom-4 left-1/2 z-[60] flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground shadow-md"
     >
       <span className="min-w-0">{toast.message}</span>
       {toast.action && (
