@@ -266,10 +266,21 @@ A new surface that reaches for a removal word picks from this table; a
 audited clean 2026-07-15: intel/leads = Dismiss, library = Delete,
 approve = Reject, Create chips = Remove.
 
-### List-surface grammar *(consistency slice, session 40)*
+### List-surface grammar *(consistency slice, session 40; fifth recipe session 56)*
 
-Four recipes, each defined once — a list surface that reinvents any of them
+Five recipes, each defined once — a list surface that reinvents any of them
 is a defect:
+
+**The Bounded-List Rule** *(founder direction, session 56 — workspace
+redesign input)*. A list that grows with data (leads, activity, runs,
+library rows) never grows the page with it: past a short threshold it lives
+in a bounded region — fixed-height internal scroll, tabs, or
+pagination/numbering — chosen per surface and stated in the design.
+Page geometry is independent of list length; sibling sections keep their
+dimensions as data accumulates. An unbounded "just keep listing" surface is
+the defect this retires. The workspace-redesign Phase D designs must state
+each list's bound; the redesigned dashboard is the first conformance
+surface.
 
 **The Selected-Row Recipe.** Exactly one selected/current-row treatment:
 the action-blue tint (`SELECTED_ROW` in `lib/workspace/selected-row.ts`).
