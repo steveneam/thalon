@@ -65,6 +65,7 @@ const PAIRS: Array<[string, string, number]> = [
   ["card-foreground", "card", 7],
   ["signal", "background", 4.5], // heat scores / needs-you counts as text
   ["signal-foreground", "signal", 4.5], // text on outlier/opportunity badges
+  ["ok", "background", 4.5], // judge PASS verdicts as text (s62 audit tokenization)
 ];
 
 describe.each([":root", ".dark"])("design tokens %s — WCAG AA (B6.1)", (selector) => {

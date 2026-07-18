@@ -469,7 +469,9 @@ export function LibrarySurface() {
               </CardDescription>
               {payload.sources.length > 0 && (
                 <p className="u-eyebrow text-muted-foreground">
-                  keys · j/k open · x pick · d delete
+                  {payload.sources.length} transcript{payload.sources.length === 1 ? "" : "s"} ·
+                  list is bounded — scrolls internally past the fold · keys · j/k open · x pick ·
+                  d delete
                 </p>
               )}
             </CardHeader>
@@ -495,7 +497,10 @@ export function LibrarySurface() {
                   </p>
                 </div>
               ) : (
-                <ul className="flex flex-col gap-1.5">
+                <ul
+                  aria-label="Transcript shelf"
+                  className="flex max-h-96 flex-col gap-1.5 overflow-y-auto"
+                >
                   {payload.sources.map((row) => (
                     <li
                       key={row.id}

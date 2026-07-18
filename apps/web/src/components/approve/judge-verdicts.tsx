@@ -108,7 +108,7 @@ export function JudgeVerdicts({ results, bodyHash }: JudgeVerdictsProps) {
           className={cn(
             "text-xs font-semibold",
             overall === "pass"
-              ? "text-[oklch(0.5_0.1_160)]"
+              ? "text-ok"
               : overall === "pending"
                 ? "text-muted-foreground"
                 : "text-destructive",
@@ -125,7 +125,7 @@ export function JudgeVerdicts({ results, bodyHash }: JudgeVerdictsProps) {
               className={cn(
                 "w-4 shrink-0 text-center font-mono text-xs font-bold",
                 row.verdict === "pass"
-                  ? "text-[oklch(0.5_0.1_160)]"
+                  ? "text-ok"
                   : row.verdict === "fail"
                     ? "text-destructive"
                     : "text-muted-foreground",

@@ -47,6 +47,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-ok: var(--ok);
   --color-signal: var(--signal);
   --color-signal-foreground: var(--signal-foreground);
   --color-heat-1: var(--heat-1);
@@ -99,6 +100,10 @@
   --accent: oklch(0.93 0.015 250);
   --accent-foreground: oklch(0.3 0.05 255);
   --destructive: oklch(0.577 0.245 27.325);
+  /* Semantic PASS state (judge verdicts) — the same class as --destructive:
+   * a state color, not a third channel; the ✓/word always carries the state
+   * (s62 audit: was hard-coded per-component; AA-pinned like every token). */
+  --ok: oklch(0.5 0.1 160);
   --border: oklch(0.9 0.008 255);
   --input: oklch(0.9 0.008 255);
   --ring: oklch(0.5 0.115 252);
@@ -153,6 +158,7 @@
   --accent: oklch(0.25 0.016 260);
   --accent-foreground: oklch(0.95 0.015 250);
   --destructive: oklch(0.63 0.19 25);
+  --ok: oklch(0.72 0.12 160);
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 13%);
   --ring: oklch(0.72 0.12 76);
@@ -186,6 +192,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Placeholders were browser-default gray (below AA on paper); the muted
+   * ink is the AA-pinned reading of "secondary text" (s62 audit). */
+  ::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
   }
   /* Scoped dark surfaces (landing, /brand) get dark-scheme form controls
    * and scrollbars even though the document root is light. */

@@ -93,7 +93,10 @@ export function RunsList() {
             </div>
           )}
           {status === "success" && runs.length > 0 && (
-            <ul className="flex flex-col gap-2">
+            <ul
+              aria-label="Run history"
+              className="flex max-h-[34rem] flex-col gap-2 overflow-y-auto"
+            >
               {runs.map((run) => (
                 <li
                   key={run.id}
@@ -145,6 +148,12 @@ export function RunsList() {
                 </li>
               ))}
             </ul>
+          )}
+          {status === "success" && runs.length > 0 && (
+            <p className="u-eyebrow mt-2 text-muted-foreground">
+              {runs.length} run{runs.length === 1 ? "" : "s"} · list is bounded — scrolls internally
+              past the fold
+            </p>
           )}
         </CardContent>
       </Card>

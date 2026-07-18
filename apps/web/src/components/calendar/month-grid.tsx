@@ -34,7 +34,7 @@ export function MonthGrid({ cells, itemsByDay, selectedKey, onSelectDay }: Month
           </span>
         ))}
       </div>
-      <div className="grid grid-cols-7 auto-rows-[minmax(6.75rem,auto)]">
+      <div className="grid grid-cols-7 auto-rows-[minmax(6.75rem,auto)] max-sm:auto-rows-[minmax(3.5rem,auto)]">
         {cells.map((cell) => {
           const items = itemsByDay.get(cell.key) ?? [];
           const more = Math.max(0, items.length - CELL_CHIP_CAP);
@@ -44,7 +44,9 @@ export function MonthGrid({ cells, itemsByDay, selectedKey, onSelectDay }: Month
               key={cell.key}
               data-testid={`day-cell-${cell.key}`}
               className={cn(
-                "relative flex min-w-0 flex-col gap-1 border-t border-l border-border p-1.5",
+                // overflow-hidden is the belt: a chip must never bleed into the
+                // neighbouring day and read as the wrong date.
+                "relative flex min-w-0 flex-col gap-1 overflow-hidden border-t border-l border-border p-1.5",
                 !cell.inMonth && "bg-muted/40",
                 selected && "bg-primary/5 outline-2 outline-primary -outline-offset-2",
               )}
@@ -61,18 +63,32 @@ export function MonthGrid({ cells, itemsByDay, selectedKey, onSelectDay }: Month
               >
                 {cell.date.getDate()}
               </button>
-              {items.slice(0, CELL_CHIP_CAP).map((item) => (
-                <SlotChip key={item.id} item={item} />
-              ))}
-              {more > 0 && (
-                <button
-                  type="button"
-                  onClick={() => onSelectDay(cell.key)}
-                  className="u-eyebrow self-start text-primary hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              {/* Phones: cells are too narrow for chip anatomy (time + title +
+                  status word) — the month shows each day's COUNT and the day
+                  panel carries the full chips; the day button's aria-label
+                  already announces the count. Desktop keeps the chips. */}
+              {items.length > 0 && (
+                <span
+                  aria-hidden
+                  className="u-tabular self-start rounded-full bg-muted px-1.5 text-2xs font-medium sm:hidden"
                 >
-                  +{more} more
-                </button>
+                  {items.length}
+                </span>
               )}
+              <div className="flex min-w-0 flex-col gap-1 max-sm:hidden">
+                {items.slice(0, CELL_CHIP_CAP).map((item) => (
+                  <SlotChip key={item.id} item={item} />
+                ))}
+                {more > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => onSelectDay(cell.key)}
+                    className="u-eyebrow self-start text-primary hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    +{more} more
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}

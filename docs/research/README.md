@@ -13,5 +13,6 @@
 | [platform-publish-params.md](platform-publish-params.md) | Per-platform publish parameters (founder question, 2026-07-07 session 20) | **parked** — publisher adapters are Sprint 3+; revisit at that charter |
 | [sites-surface-plan.md](sites-surface-plan.md) | W-sites — the Sites surface: research + build plan (s60, queued for s61) | **live** — drives the W-sites build (GO s61) |
 | [video-editor-tools.md](video-editor-tools.md) | B-video-editor — open-source tooling survey + integration shape | **historical** — fed the B-ve charter (ADR-0010, window complete) |
+| [workspace-audit-s62.md](workspace-audit-s62.md) | W-audit (c)+(d): full impeccable audit + the s40 consistency re-critique over the Phase-I workspace | **live** — 18/20 after same-session fixes; carries the queued follow-up list (harden/typeset micro-passes, runs-status engine question) |
 | [workspace-phase-d-designs.md](workspace-phase-d-designs.md) | Workspace Phase D — design record (opened s58 · design-complete s59, checkpoint-ripe) | **live** — design-of-record ledger for the shipped Phase I workspace |
 | [workspace-ux-v2.md](workspace-ux-v2.md) | Workspace UX v2 research (Sprint 6 / wave-3 re-plan checkpoint) | **live** — ratified workspace UX foundation; DESIGN.md cites it |
