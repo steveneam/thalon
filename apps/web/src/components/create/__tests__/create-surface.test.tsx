@@ -23,22 +23,29 @@ const CONTEXT: CreateContext = {
   text: "Rendered our whole launch video from HTML.",
 };
 
-describe("CreateSurface — the context spine (wave-3 §3)", () => {
-  it("renders the intel context as chips, pre-fills the working title, and pre-picks the family", () => {
+describe("CreateSurface — the handoff that never re-asks (Phase I design #5)", () => {
+  it("renders the six typed chips, seeds the working title AND the prompt, and pre-picks the family", () => {
     render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
 
-    // Pre-fill, never re-ask: the picked title is the working title.
-    expect(screen.getByLabelText("Creation prompt")).toHaveValue(CONTEXT.title);
+    // Pre-fill, never re-ask: title into the working-title field, angle +
+    // hook pre-written into the prompt — scan-and-adjust, not author-from-scratch.
+    expect(screen.getByLabelText(/working title/i)).toHaveValue(CONTEXT.title);
+    const prompt = screen.getByLabelText(/the prompt/i);
+    expect(prompt).toHaveValue(
+      `Open on the hook: “${CONTEXT.hook}” Angle: ${CONTEXT.angle}.`,
+    );
     // The exit door's family arrives pre-picked (still changeable).
-    expect(screen.getByRole("button", { name: /video/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^video$/i, pressed: true })).toBeInTheDocument();
 
     const chips = screen.getByLabelText("Intel context");
     for (const value of [CONTEXT.title!, CONTEXT.angle!, CONTEXT.hook!, CONTEXT.areaName!]) {
       expect(within(chips).getByText(value)).toBeInTheDocument();
     }
-    // The score reads as a heat grade (bar + word), the number lives in the tooltip.
-    expect(within(chips).getByRole("img", { name: "heat hot — rank score 0.90 of 1" })).toBeInTheDocument();
-    expect(within(chips).getByRole("link", { name: /original item/i })).toHaveAttribute(
+    // Heat is a typed chip: band word carried in text (never colour alone),
+    // exact score in the tooltip.
+    expect(within(chips).getByText("hot · 90")).toBeInTheDocument();
+    // Source is a typed chip whose value links to the original item.
+    expect(within(chips).getByRole("link", { name: /example\.com/i })).toHaveAttribute(
       "href",
       CONTEXT.sourceUrl,
     );
@@ -55,6 +62,27 @@ describe("CreateSurface — the context spine (wave-3 §3)", () => {
     expect(within(chips).getByText(CONTEXT.title!)).toBeInTheDocument();
   });
 
+  it("the goal gradient is honest: context ✓ only when context genuinely arrived, profile unticked without one", async () => {
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+    const journey = screen.getByRole("list", { name: /where this brief sits/i });
+    expect(within(journey).getByText("context ✓")).toBeInTheDocument();
+    // The test world has no active profile — the step must NOT wear a fake tick.
+    expect(within(journey).queryByText("profile ✓")).not.toBeInTheDocument();
+    // Settings say so honestly too, pointing at the profile door.
+    expect(await screen.findByText(/no profile yet/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /create one in profiles/i })).toHaveAttribute(
+      "href",
+      "/app/profiles",
+    );
+  });
+
+  it("intel's suggestion stays visible when the operator picks a different family", async () => {
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+    await user.click(screen.getByRole("button", { name: /^post$/i }));
+    expect(screen.getByText(/intel suggested Video — you chose Post/i)).toBeInTheDocument();
+  });
+
   it("a search target-this context pre-picks Page and carries the keyword", () => {
     render(
       <CreateSurface
@@ -68,7 +96,7 @@ describe("CreateSurface — the context spine (wave-3 §3)", () => {
         }}
       />,
     );
-    expect(screen.getByRole("button", { name: /page/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^page$/i, pressed: true })).toBeInTheDocument();
     expect(
       within(screen.getByLabelText("Intel context")).getByText("what is content automation"),
     ).toBeInTheDocument();
@@ -76,7 +104,7 @@ describe("CreateSurface — the context spine (wave-3 §3)", () => {
 
   it("without context the surface behaves as before — legacy prompt/keyword doors intact", () => {
     render(<CreateSurface initialPrompt="hello" initialKeyword="" context={null} />);
-    expect(screen.getByLabelText("Creation prompt")).toHaveValue("hello");
+    expect(screen.getByLabelText(/the prompt/i)).toHaveValue("hello");
     expect(screen.queryByLabelText("Intel context")).not.toBeInTheDocument();
   });
 });
@@ -109,7 +137,7 @@ describe("CreateSurface — the →Email compose door (B-crm.4 front half)", () 
     const user = userEvent.setup();
     render(<CreateSurface initialPrompt="" initialKeyword="" context={LEAD_CONTEXT} />);
 
-    expect(screen.getByRole("button", { name: /email/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^email$/i, pressed: true })).toBeInTheDocument();
     // Never sent automatically — the surface says so before composing.
     expect(screen.getByText(/It is never sent/)).toBeInTheDocument();
 
@@ -155,9 +183,31 @@ describe("CreateSurface — the →Email compose door (B-crm.4 front half)", () 
   it("the Email family without a lead context is an honest pointer to the lead-card exit, not a dead button", async () => {
     const user = userEvent.setup();
     render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /email/i }));
+    await user.click(screen.getByRole("button", { name: /^email$/i }));
     expect(screen.getByText(/use the → Email exit on a lead card/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /compose email draft/i })).not.toBeInTheDocument();
+  });
+});
+
+describe("CreateSurface — honest doors per family", () => {
+  it("video's live door is the Advanced staged brief; one-prompt says so instead of faking a generate button", async () => {
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+    // One-prompt (default): the honest seam statement + the switch.
+    expect(screen.getByText(/the live door is the Advanced staged brief/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /open the advanced staged brief/i }));
+    // Advanced: the staged brief walk, outcome named.
+    expect(screen.getByRole("link", { name: /walk the staged brief/i })).toHaveAttribute(
+      "href",
+      "/app/approve",
+    );
+  });
+
+  it("post states the B6.6 seam honestly — no dead primary button", async () => {
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+    await user.click(screen.getByRole("button", { name: /^post$/i }));
+    expect(screen.getByText(/Live post generation isn.t connected on this surface yet/i)).toBeInTheDocument();
   });
 });
 
@@ -168,13 +218,13 @@ describe("CreateContextLoader — the capture-id door", () => {
     render(<CreateContextLoader contextId={capture.id} initialPrompt="" initialKeyword="" />);
 
     expect(await screen.findByLabelText("Intel context")).toBeInTheDocument();
-    expect(screen.getByLabelText("Creation prompt")).toHaveValue(card.dossier!.titles[1]);
-    expect(screen.getByRole("button", { name: /post/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByLabelText(/working title/i)).toHaveValue(card.dossier!.titles[1]);
+    expect(screen.getByRole("button", { name: /^post$/i, pressed: true })).toBeInTheDocument();
   });
 
   it("a stale capture id degrades to a plain Create, never an error page", async () => {
     render(<CreateContextLoader contextId="intel-capture-nope" initialPrompt="" initialKeyword="" />);
-    expect(await screen.findByLabelText("Creation prompt")).toBeInTheDocument();
+    expect(await screen.findByLabelText(/the prompt/i)).toBeInTheDocument();
     expect(screen.queryByLabelText("Intel context")).not.toBeInTheDocument();
   });
 });

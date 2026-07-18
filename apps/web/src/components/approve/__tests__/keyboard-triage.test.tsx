@@ -2,34 +2,44 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   draftA,
   FIXTURE_DRAFT_A_ID,
   FIXTURE_DRAFT_B_ID,
+  FIXTURE_DRAFT_C_ID,
 } from "@/lib/approve-queue/fixtures";
 import { server } from "@/lib/testing/server";
 import { ApproveQueue } from "../approve-queue";
 
-describe("ApproveQueue — keyboard triage (B6.2 [+])", () => {
-  it("j/k move the selection through the grid", async () => {
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
+  it("j/k move the selection through the queue (FIFO order) and clamp at the ends", async () => {
     const user = userEvent.setup();
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
 
-    // Run 2 auto-selects draft A first.
-    const buttonA = await within(grid).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` });
-    expect(buttonA).toHaveAttribute("aria-pressed", "true");
+    // The oldest waiting draft auto-selects (draft A).
+    const rowA = await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` });
+    expect(rowA).toHaveAttribute("aria-pressed", "true");
+
+    // Queue order is age-FIFO with a stable tiebreak: A → C → B.
+    await user.keyboard("j");
+    const rowC = within(queue).getByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}` });
+    await waitFor(() => expect(rowC).toHaveAttribute("aria-pressed", "true"));
 
     await user.keyboard("j");
-    const buttonB = within(grid).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` });
-    await waitFor(() => expect(buttonB).toHaveAttribute("aria-pressed", "true"));
+    const rowB = within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` });
+    await waitFor(() => expect(rowB).toHaveAttribute("aria-pressed", "true"));
     // Clamped at the end of the list.
     await user.keyboard("j");
-    expect(buttonB).toHaveAttribute("aria-pressed", "true");
+    expect(rowB).toHaveAttribute("aria-pressed", "true");
 
     await user.keyboard("k");
-    await waitFor(() => expect(buttonA).toHaveAttribute("aria-pressed", "true"));
+    await waitFor(() => expect(rowC).toHaveAttribute("aria-pressed", "true"));
   });
 
   it("'a' approves the selected queued draft; typing in a field never triggers shortcuts", async () => {
@@ -46,14 +56,13 @@ describe("ApproveQueue — keyboard triage (B6.2 [+])", () => {
     );
 
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    const panel = screen.getByRole("region", { name: "Approve panel" });
-    await within(grid).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` });
-    await within(panel).findByText("Run2 LinkedIn draft");
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+    await screen.findByRole("region", { name: "Approve queue" });
+    await within(detail).findByText("Run2 LinkedIn draft");
 
     // 'e' opens the editor (queued draft is editable)…
     await user.keyboard("e");
-    const textarea = await within(panel).findByRole("textbox", { name: "Edit draft body" });
+    const textarea = await within(detail).findByRole("textbox", { name: "Edit draft body" });
     // …and single-letter keys typed INSIDE it are just text, not actions.
     await user.type(textarea, "ajr");
     expect(approved).toHaveLength(0);
@@ -63,5 +72,34 @@ describe("ApproveQueue — keyboard triage (B6.2 [+])", () => {
     await user.keyboard("{Escape}");
     await user.keyboard("a");
     await waitFor(() => expect(approved).toEqual([FIXTURE_DRAFT_A_ID]));
+  });
+
+  it("'r' goes through the NAMED confirm — confirms stay intact under keyboard triage", async () => {
+    const user = userEvent.setup();
+    const rejected: string[] = [];
+    server.use(
+      http.post("/api/drafts/:draftId/reject", ({ params }) => {
+        rejected.push(params.draftId as string);
+        return HttpResponse.json({
+          approval: { id: "appr", tenantId: "t", draftId: params.draftId, actor: "operator", action: "reject", editedBody: null, createdAt: "2026-07-04T11:00:00.000Z" },
+          draft: { ...draftA, status: "rejected" },
+        });
+      }),
+    );
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+
+    render(<ApproveQueue />);
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+    await within(detail).findByText("Run2 LinkedIn draft");
+
+    // Declined confirm: nothing happens.
+    await user.keyboard("r");
+    expect(confirmSpy).toHaveBeenCalledWith(expect.stringMatching(/Reject this linkedin draft/));
+    expect(rejected).toHaveLength(0);
+
+    // Accepted confirm: the reject records.
+    confirmSpy.mockReturnValue(true);
+    await user.keyboard("r");
+    await waitFor(() => expect(rejected).toEqual([FIXTURE_DRAFT_A_ID]));
   });
 });

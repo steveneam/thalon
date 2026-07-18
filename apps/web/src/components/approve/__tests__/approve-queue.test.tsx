@@ -4,7 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import {
+  draftC,
   FIXTURE_DRAFT_B_ID,
+  FIXTURE_DRAFT_C_ID,
   FIXTURE_RUN_1_ID,
   FIXTURE_RUN_2_ID,
   run,
@@ -12,21 +14,20 @@ import {
 import { server } from "@/lib/testing/server";
 import { ApproveQueue } from "../approve-queue";
 
-describe("ApproveQueue — 3-zone layout", () => {
-  it("consumes a ?run= deep link: the linked run is selected instead of the newest (provenance lands on the entity)", async () => {
+describe("ApproveQueue — flat queue + detail (Phase I design #6)", () => {
+  it("consumes a ?run= deep link: selection lands on that run's drafts (provenance lands on the entity)", async () => {
     window.history.replaceState(null, "", `/app/approve?run=${FIXTURE_RUN_1_ID}`);
     try {
       render(<ApproveQueue />);
-      const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-      await within(grid).findByText("Run1 LinkedIn draft");
-      expect(within(grid).queryByText("Run2 LinkedIn draft")).not.toBeInTheDocument();
+      const detail = await screen.findByRole("region", { name: "Draft detail" });
+      await within(detail).findByText("Run1 LinkedIn draft");
     } finally {
       window.history.replaceState(null, "", "/app/approve");
     }
   });
 
-  it("defaults to the OLDEST run with waiting drafts, not merely the newest (critique P1, s39)", async () => {
-    // Newest run has nothing waiting; the older run holds the operator's work.
+  it("defaults to the OLDEST waiting draft across runs, not merely the newest run (critique P1, s39)", async () => {
+    // The newest run has nothing waiting; the older run holds the operator's work.
     server.use(
       http.get("/api/runs", () =>
         HttpResponse.json({
@@ -36,37 +37,47 @@ describe("ApproveQueue — 3-zone layout", () => {
           ],
         }),
       ),
+      http.get(`/api/runs/${FIXTURE_RUN_1_ID}/drafts`, () =>
+        HttpResponse.json({ drafts: [{ ...draftC, status: "queued" }] }),
+      ),
     );
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    // Run 1's draft renders — the queue landed on the waiting work.
-    await within(grid).findByText("Run1 LinkedIn draft");
-    // The feed row wears the waiting badge (word + count, signal channel).
-    const feed = screen.getByRole("region", { name: "Fan-out run feed" });
-    expect(within(feed).getByText("1 wait")).toBeInTheDocument();
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    // Run 1's queued draft is selected — the queue landed on the waiting work.
+    const rowC = await within(queue).findByRole("button", {
+      name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}`,
+    });
+    expect(rowC).toHaveAttribute("aria-pressed", "true");
+    // The header wears the waiting count on the signal channel, word carried
+    // (draft-level truth: run 2's queued draft + run 1's queued draft).
+    expect(screen.getByText("2 waiting")).toBeInTheDocument();
   });
 
-  it("feed selection drives the grid, and grid selection drives the panel", async () => {
+  it("queue selection drives the detail pane", async () => {
     const user = userEvent.setup();
     render(<ApproveQueue />);
 
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    const panel = screen.getByRole("region", { name: "Approve panel" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
 
-    // Newest run auto-selects; zone 2 renders its drafts and zone 3 shows the first one.
-    await within(grid).findByText("Run2 LinkedIn draft");
-    expect(within(grid).queryByText("Run1 LinkedIn draft")).not.toBeInTheDocument();
-    await within(panel).findByText("Run2 LinkedIn draft");
+    // The oldest waiting draft auto-selects; the detail shows it.
+    await within(detail).findByText("Run2 LinkedIn draft");
 
-    // Zone 2 -> zone 3: selecting the other draft in this run swaps the panel.
-    await user.click(within(grid).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(panel).findByText("Run2 X draft");
-    expect(within(panel).getByText("Blocked — disagreement")).toBeInTheDocument();
+    // Selecting the blocked sibling swaps the detail — with its verdict.
+    await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
+    await within(detail).findByText("Run2 X draft");
+    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
 
-    // Zone 1 -> zone 2: selecting the older run swaps the grid (and the panel with it).
-    await user.click(screen.getByRole("button", { name: `Select run ${FIXTURE_RUN_1_ID}` }));
-    await within(grid).findByText("Run1 LinkedIn draft");
-    expect(within(grid).queryByText("Run2 LinkedIn draft")).not.toBeInTheDocument();
-    await within(panel).findByText("Run1 LinkedIn draft");
+    // Any row is reachable — terminal drafts stay reviewable (the publish door lives here).
+    await user.click(
+      within(queue).getByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}` }),
+    );
+    await within(detail).findByText("Run1 LinkedIn draft");
+  });
+
+  it("the queue list is bounded and states its count (Bounded-List Rule)", async () => {
+    render(<ApproveQueue />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    await within(queue).findByText(/list is bounded — scrolls internally past 9/);
   });
 });

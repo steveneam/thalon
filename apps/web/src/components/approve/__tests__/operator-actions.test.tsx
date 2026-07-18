@@ -7,7 +7,7 @@ import { draftB, FIXTURE_DRAFT_B_ID, fixtureDraftDetails } from "@/lib/approve-q
 import { server } from "@/lib/testing/server";
 import { ApproveQueue } from "../approve-queue";
 
-describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
+describe("ApproveQueue — operator actions", () => {
   it("panel refreshes to the post-edit, post-re-judge state after save-edit", async () => {
     const user = userEvent.setup();
     const editedBody = "Run2 X draft, now with more detail.";
@@ -17,7 +17,7 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
       http.post(`/api/drafts/${FIXTURE_DRAFT_B_ID}/edit`, async ({ request }) => {
         const { editedBody: sentBody } = (await request.json()) as { editedBody: string };
         edited = true;
-        // The server now runs the judge lane in the SAME request (judge-runner.ts) — a
+        // The server runs the judge lane in the SAME request (judge-runner.ts) — a
         // successful response reflects the fully-judged outcome (queued), never "judging".
         return HttpResponse.json({
           approval: {
@@ -46,24 +46,23 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
     );
 
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    const panel = screen.getByRole("region", { name: "Approve panel" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
 
-    await within(grid).findByText("Run2 X draft");
-    await user.click(within(grid).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(panel).findByText("Run2 X draft");
-    expect(within(panel).getByText("Blocked — disagreement")).toBeInTheDocument();
+    await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
+    await within(detail).findByText("Run2 X draft");
+    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
 
-    await user.click(within(panel).getByRole("button", { name: "Edit" }));
-    const textarea = within(panel).getByRole("textbox", { name: "Edit draft body" });
+    await user.click(within(detail).getByRole("button", { name: "Edit" }));
+    const textarea = within(detail).getByRole("textbox", { name: "Edit draft body" });
     await user.clear(textarea);
     await user.type(textarea, editedBody);
-    await user.click(within(panel).getByRole("button", { name: "Save edit" }));
+    await user.click(within(detail).getByRole("button", { name: /save edit/i }));
 
-    await within(panel).findByText(editedBody);
+    await within(detail).findByText(editedBody);
     expect(edited).toBe(true);
-    expect(within(panel).queryByText("Blocked — disagreement")).not.toBeInTheDocument();
-    expect(within(panel).getByText("Pass")).toBeInTheDocument();
+    expect(within(detail).queryByText("Blocked — disagreement")).not.toBeInTheDocument();
+    expect(within(detail).getByText("Pass")).toBeInTheDocument();
   });
 
   it("re-judge retries a blocked draft unmodified through the dedicated action and reaches the fully-judged outcome (queued)", async () => {
@@ -89,19 +88,18 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
     );
 
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    const panel = screen.getByRole("region", { name: "Approve panel" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
 
-    await within(grid).findByText("Run2 X draft");
-    await user.click(within(grid).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(panel).findByText("Run2 X draft");
-    expect(within(panel).getByText("Blocked — disagreement")).toBeInTheDocument();
+    await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
+    await within(detail).findByText("Run2 X draft");
+    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
 
-    const reJudgeButton = within(panel).getByRole("button", { name: "Re-judge" });
+    const reJudgeButton = within(detail).getByRole("button", { name: "Re-judge" });
     expect(reJudgeButton).toBeEnabled();
     await user.click(reJudgeButton);
 
-    await within(panel).findByText("Pass");
+    await within(detail).findByText("Pass");
     expect(reJudged).toBe(true);
   });
 
@@ -115,19 +113,18 @@ describe("ApproveQueue — Sprint-1 follow-ups (B2.6)", () => {
     );
 
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    const panel = screen.getByRole("region", { name: "Approve panel" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
 
-    await within(grid).findByText("Run2 X draft");
-    await user.click(within(grid).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(panel).findByText("Run2 X draft");
+    await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
+    await within(detail).findByText("Run2 X draft");
 
-    await user.click(within(panel).getByRole("button", { name: "Re-judge" }));
+    await user.click(within(detail).getByRole("button", { name: "Re-judge" }));
 
-    expect(await within(panel).findByRole("alert")).toHaveTextContent(/over its daily token budget/);
+    expect(await within(detail).findByRole("alert")).toHaveTextContent(/over its daily token budget/);
     // No unhandled GET override was registered for this test — the refresh
     // that follows a failed action re-fetches the draft's real current
     // state rather than papering over the failure with stale "success" data.
-    expect(within(panel).getByText("Blocked — disagreement")).toBeInTheDocument();
+    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
   });
 });

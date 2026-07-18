@@ -3,28 +3,29 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { ApproveQueue } from "@/components/approve/approve-queue";
-import { FIXTURE_STAGED_RUN_ID } from "@/lib/staged-flow/fixtures";
+import { FIXTURE_STORYBOARD_DRAFT_ID } from "@/lib/staged-flow/fixtures";
 
 /**
- * The advanced-mode walk, end to end against the MSW seam: feed → staged
+ * The advanced-mode walk, end to end against the MSW seam: queue → staged
  * surface → rail navigation → candidate pick → direction editing → advance
  * gate → polish → final stage. The operator reacts to visible artifacts at
  * every step, and every interaction lands in the capture log.
  */
 async function openStagedSurface(user: ReturnType<typeof userEvent.setup>) {
   render(<ApproveQueue />);
-  await user.click(await screen.findByRole("button", { name: `Select run ${FIXTURE_STAGED_RUN_ID}` }));
+  await user.click(
+    await screen.findByRole("button", { name: `Select video draft ${FIXTURE_STORYBOARD_DRAFT_ID}` }),
+  );
   return await screen.findByRole("region", { name: "Staged video flow" });
 }
 
 describe("StagedFlow — the B5.4 advanced-mode surface", () => {
-  it("selecting the staged run swaps zones 2+3 for the staged surface, landing on the current stage's candidates", async () => {
+  it("selecting a stage-artifact draft swaps the detail pane for the staged surface, landing on the current stage's candidates", async () => {
     const user = userEvent.setup();
     const surface = await openStagedSurface(user);
 
-    // The classic zones are gone; the plan's stages render as the rail.
-    expect(screen.queryByRole("region", { name: "Per-platform fan-out grid" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Approve panel" })).not.toBeInTheDocument();
+    // The plain detail pane is gone; the plan's stages render as the rail.
+    expect(screen.queryByRole("region", { name: "Draft detail" })).not.toBeInTheDocument();
     expect(within(surface).getByRole("button", { name: "View stage 1: Structure" })).toBeInTheDocument();
     expect(within(surface).getByRole("button", { name: "View stage 2: Scenes & effects" })).toBeInTheDocument();
     // Polish is locked until the flow reaches it.
@@ -88,16 +89,18 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
     expect(within(surface).getByText(/1 interaction/)).toBeInTheDocument();
   });
 
-  it("classic runs keep the 3-zone flow untouched", async () => {
+  it("classic drafts keep the plain list + detail flow untouched", async () => {
     const user = userEvent.setup();
     render(<ApproveQueue />);
-    const grid = await screen.findByRole("region", { name: "Per-platform fan-out grid" });
-    await within(grid).findByText("Run2 LinkedIn draft");
-    expect(screen.getByRole("region", { name: "Approve panel" })).toBeInTheDocument();
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+    await within(detail).findByText("Run2 LinkedIn draft");
     expect(screen.queryByRole("region", { name: "Staged video flow" })).not.toBeInTheDocument();
-    // The staged run rides the feed as its own row.
-    expect(screen.getByRole("button", { name: `Select run ${FIXTURE_STAGED_RUN_ID}` })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: `Select run ${FIXTURE_STAGED_RUN_ID}` }));
+    // The staged chain rides the queue as its own row.
+    const stagedRow = within(queue).getByRole("button", {
+      name: `Select video draft ${FIXTURE_STORYBOARD_DRAFT_ID}`,
+    });
+    await user.click(stagedRow);
     await screen.findByRole("region", { name: "Staged video flow" });
   });
 });

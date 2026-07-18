@@ -34,14 +34,14 @@ describe("ApproveQueue — zero-inbox state (B6.2 [+])", () => {
         <ApproveQueue />
       </PulseProvider>,
     );
-    // Wait for the feed to settle, then assert the banner never showed.
-    await screen.findByRole("region", { name: "Fan-out run feed" });
+    // Wait for the queue to settle, then assert the banner never showed.
+    await screen.findByRole("region", { name: "Approve queue" });
     expect(screen.queryByText("Inbox zero.")).not.toBeInTheDocument();
   });
 
   it("renders no banner outside the shell (no pulse provider)", async () => {
     render(<ApproveQueue />);
-    await screen.findByRole("region", { name: "Fan-out run feed" });
+    await screen.findByRole("region", { name: "Approve queue" });
     expect(screen.queryByText("Inbox zero.")).not.toBeInTheDocument();
   });
 });

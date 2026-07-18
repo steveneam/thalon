@@ -15,8 +15,7 @@ const componentsDir = path.resolve(
  * the recipe (s40 consistency slice; DESIGN.md §5 "The Selected-Row Recipe").
  */
 const SELECTION_SURFACES = [
-  "approve/feed-panel.tsx",
-  "approve/fanout-grid.tsx",
+  "approve/queue-list.tsx",
   "library/library-surface.tsx",
   "leads/lead-card.tsx",
   "runs/runs-list.tsx",

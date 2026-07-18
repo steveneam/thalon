@@ -1,21 +1,29 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   draftA,
   draftB,
+  draftC,
   FIXTURE_DRAFT_A_ID,
+  FIXTURE_RUN_1_ID,
   FIXTURE_RUN_2_ID,
+  run,
 } from "@/lib/approve-queue/fixtures";
 import { server } from "@/lib/testing/server";
 import { ApproveQueue } from "../approve-queue";
 
-describe("ApproveQueue — batch approve (B6.2)", () => {
-  it("approves every QUEUED draft in the run through the single-draft endpoint; blocked drafts untouched", async () => {
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("ApproveQueue — batch approve", () => {
+  it("approves every WAITING draft in queue order behind one named confirm; blocked and staged drafts untouched", async () => {
     const user = userEvent.setup();
     const approved: string[] = [];
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
 
     server.use(
       http.post("/api/drafts/:draftId/approve", ({ params }) => {
@@ -40,28 +48,45 @@ describe("ApproveQueue — batch approve (B6.2)", () => {
     );
 
     render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
 
-    // Run 2 auto-selects: draft A is queued, draft B is blocked → count 1.
-    const batchButton = await within(grid).findByRole("button", { name: "Approve all queued (1)" });
+    // The classic fixtures hold ONE waiting draft (A queued; B blocked; the
+    // staged storyboard is queued but advances through its own staged flow,
+    // never a batch approve).
+    const batchButton = await screen.findByRole("button", { name: "Approve all waiting (1)" });
     await user.click(batchButton);
 
+    expect(confirmSpy).toHaveBeenCalledWith(expect.stringMatching(/Approve all 1 waiting draft/));
     await waitFor(() => expect(approved).toEqual([FIXTURE_DRAFT_A_ID]));
-    // Grid refreshed to the post-approve state; nothing left to batch.
-    await within(grid).findByRole("button", { name: "Approve all queued (0)" });
-    expect(within(grid).getByRole("button", { name: "Approve all queued (0)" })).toBeDisabled();
+    // Queue refreshed to the post-approve state; nothing left to batch.
+    const drained = await screen.findByRole("button", { name: "Approve all waiting (0)" });
+    expect(drained).toBeDisabled();
   });
 
-  it("stays disabled when the run has no queued drafts", async () => {
-    render(<ApproveQueue />);
-    const grid = screen.getByRole("region", { name: "Per-platform fan-out grid" });
-    const feed = screen.getByRole("region", { name: "Fan-out run feed" });
+  it("a declined confirm approves nothing", async () => {
     const user = userEvent.setup();
+    const approved: string[] = [];
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    server.use(
+      http.post("/api/drafts/:draftId/approve", ({ params }) => {
+        approved.push(params.draftId as string);
+        return HttpResponse.json({});
+      }),
+    );
 
-    // Run 1 holds only an approved draft.
-    await within(feed).findAllByRole("button");
-    await user.click(within(feed).getByRole("button", { name: /Select run 11111111/ }));
-    const batchButton = await within(grid).findByRole("button", { name: "Approve all queued (0)" });
+    render(<ApproveQueue />);
+    await user.click(await screen.findByRole("button", { name: "Approve all waiting (1)" }));
+    expect(approved).toHaveLength(0);
+  });
+
+  it("stays disabled when nothing waits", async () => {
+    server.use(
+      http.get("/api/runs", () =>
+        HttpResponse.json({ runs: [run(FIXTURE_RUN_1_ID, "2026-07-03T09:00:00.000Z")] }),
+      ),
+      http.get(`/api/runs/${FIXTURE_RUN_1_ID}/drafts`, () => HttpResponse.json({ drafts: [draftC] })),
+    );
+    render(<ApproveQueue />);
+    const batchButton = await screen.findByRole("button", { name: "Approve all waiting (0)" });
     expect(batchButton).toBeDisabled();
   });
 });
