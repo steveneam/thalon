@@ -1,0 +1,46 @@
+[
+  {
+    "file": "hero-bench.webp",
+    "pinnedHash": "20e629d2dbc15ce4dc5efdc0f9b8652e7e0a71c35574e1d8f2fe6eef5f28f019",
+    "width": 2048,
+    "height": 1024,
+    "quality": 80,
+    "position": "top"
+  },
+  {
+    "file": "micro-crystal.webp",
+    "pinnedHash": "9a2b19633bb982ec3b21d0267c113c5f447c55ff4bb8b9a4de9ba391f23957a7",
+    "width": 1300,
+    "height": 867,
+    "quality": 72
+  },
+  {
+    "file": "micro-membrane.webp",
+    "pinnedHash": "3e1b13c116464a872f7f20c364595c0442a11922be18927b375c42032518bb8b",
+    "width": 1300,
+    "height": 867,
+    "quality": 70
+  },
+  {
+    "file": "micro-cell.webp",
+    "pinnedHash": "c67635bfe2fe04af42fa7b69f9bf5f3466ea7aaae0c46eba284ffdd04679513e",
+    "width": 1400,
+    "height": 933,
+    "quality": 80
+  },
+  {
+    "file": "consumables.webp",
+    "pinnedHash": "5049bb451507d6cd12ba1760f6a0cba32e737002a5e3a2077a3603f11cf0aabf",
+    "width": 1400,
+    "height": 933,
+    "quality": 78
+  },
+  {
+    "file": "air-courtyard.webp",
+    "pinnedHash": "c59d7946a2153ebf4aaffc9191bea38a31b63f43db4857c3f6b9a3ea8c7bce34",
+    "width": 2048,
+    "height": 1024,
+    "quality": 80,
+    "position": "centre"
+  }
+]

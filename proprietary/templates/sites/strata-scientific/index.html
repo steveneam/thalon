@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strata Scientific — Consumables &amp; Reagents · Catalogue No. 7</title>
+<meta name="description" content="Strata Scientific supplies reagents, filtration and cell-culture consumables to manufacturers and labs — batch-traceable, certificate with every shipment.">
+<meta name="theme-color" content="#f6f4ef">
+<style>
+/* ————————————————————————————————————————————————
+   STRATA SCIENTIFIC — Catalogue No. 7, a print catalog built as a slide tray.
+   Editorial/print leads; data-instrument supports. Colour lives ONLY inside
+   the micrograph figure windows — the field stays paper/ink/lab-blue.
+   Text: Newsreader (optical-size serif, masthead→caption). Mono: IBM Plex Mono.
+   The one moving system is the FOCUS RACK (figures rack blur→sharp on enter).
+   ———————————————————————————————————————————————— */
+@font-face {
+  font-family: "Newsreader";
+  src: url("fonts/newsreader-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plex Mono";
+  src: url("fonts/ibm-plex-mono-v20-latin-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plex Mono";
+  src: url("fonts/ibm-plex-mono-v20-latin-600.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  --paper: #f6f4ef;
+  --paper-2: #efece4;
+  --ink: #1c2530;
+  --ink-soft: #55606d;
+  --blue: #1f3a63;
+  --blue-line: rgba(31, 58, 99, 0.22);
+  --rule: rgba(28, 37, 48, 0.32);
+  --frost: #e7e9ec;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --mono: "Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.6;
+  font-size: 1.125rem;
+}
+img { max-width: 100%; height: auto; display: block; }
+::selection { background: #dfe6f0; color: var(--ink); }
+a { color: var(--blue); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.mono { font-family: var(--mono); }
+.wrap { max-width: 74rem; margin-inline: auto; padding-inline: clamp(1.25rem, 4vw, 3.5rem); }
+.folio {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+
+/* ——— masthead / cover ——— */
+.masthead { border-bottom: 2px solid var(--ink); }
+.masthead .top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 1rem 0 0.9rem; gap: 1rem; flex-wrap: wrap;
+}
+.brand {
+  font-weight: 620; font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing: 0.01em;
+}
+.brand .est { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--ink-soft); font-weight: 400; margin-left: 0.6rem; vertical-align: 0.35em; }
+.contents {
+  display: flex; gap: 1.2rem; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-soft);
+  padding: 0.6rem 0 0.9rem; border-top: 1px solid var(--blue-line);
+}
+.contents a { color: var(--ink-soft); text-decoration: none; }
+.contents a:hover { color: var(--blue); }
+
+.cover { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3rem); }
+.cover h1 {
+  font-weight: 240; font-size: clamp(2.6rem, 7vw, 5.5rem); line-height: 1.02;
+  letter-spacing: -0.01em; max-width: 16ch;
+}
+.cover h1 em { font-style: italic; color: var(--blue); }
+.cover .lede {
+  margin-top: 1.5rem; max-width: 42ch; font-size: 1.2rem; color: var(--ink-soft);
+}
+.cover-figure { margin-top: clamp(2rem, 5vw, 3.5rem); position: relative; }
+.cover-figure img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; }
+
+/* ——— section scaffolding ——— */
+section { padding: clamp(3rem, 6vw, 5.5rem) 0; border-bottom: 1px solid var(--blue-line); }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; border-bottom: 2px solid var(--ink); padding-bottom: 0.6rem; }
+.sec-head h2 { font-weight: 360; font-size: clamp(1.6rem, 3.4vw, 2.4rem); }
+.sec-body { max-width: 60ch; margin-top: 1.4rem; }
+.sec-body p + p { margin-top: 1rem; }
+
+/* ——— the slide (each product family) ——— */
+.slide {
+  display: grid; grid-template-columns: 1.15fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem); margin-top: 2rem; align-items: start;
+}
+@media (max-width: 52rem) { .slide { grid-template-columns: 1fr; } }
+.specimen {
+  background: #10151c; padding: 0.6rem; border: 1px solid var(--ink);
+  position: relative;
+}
+.specimen img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+/* frosted label edge — the code-drawn slide label */
+.label {
+  display: flex; justify-content: space-between; gap: 0.75rem;
+  background: var(--frost); color: var(--ink);
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em;
+  padding: 0.5rem 0.6rem; text-transform: uppercase;
+}
+.label b { font-weight: 600; }
+/* the SVG scale bar overlays the specimen */
+.scalebar {
+  position: absolute; left: 1rem; top: 1rem;
+  font-family: var(--mono); font-size: 0.62rem; color: #eef2f7;
+  display: flex; align-items: center; gap: 0.4rem; opacity: 0.92;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.scalebar .bar { display: block; height: 3px; width: 60px; background: #eef2f7; box-shadow: 0 0 0 1px rgba(0,0,0,0.4); }
+
+.spec-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.8rem; }
+.spec-table caption { text-align: left; font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--ink-soft); padding-bottom: 0.6rem; }
+.spec-table th, .spec-table td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--blue-line); }
+.spec-table th { font-weight: 600; color: var(--ink-soft); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.spec-table td:last-child, .spec-table th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.slide-note { font-size: 0.95rem; color: var(--ink-soft); margin-top: 1rem; }
+
+/* ——— the instrument: certificate + trace ——— */
+.instrument { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3rem); margin-top: 2rem; }
+@media (max-width: 52rem) { .instrument { grid-template-columns: 1fr; } }
+.certificate { border: 1px solid var(--ink); padding: 1.25rem; background: var(--paper-2); }
+.certificate h3 { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+.coa { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.82rem; margin-top: 0.75rem; }
+.coa td { padding: 0.4rem 0; border-bottom: 1px dotted var(--blue-line); }
+.coa td:last-child { text-align: right; font-weight: 600; }
+.coa .pass { color: #256149; }
+.trace { border: 1px solid var(--ink); padding: 1.25rem; background: var(--paper-2); }
+.trace h3 { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 0.75rem; }
+.trace svg { width: 100%; height: auto; display: block; }
+.trace-path { fill: none; stroke: var(--blue); stroke-width: 2; }
+html.js .trace-path { stroke-dasharray: 1400; stroke-dashoffset: 1400; }
+html.js .trace.drawn .trace-path { stroke-dashoffset: 0; transition: stroke-dashoffset 1800ms ease-out; }
+@media (prefers-reduced-motion: reduce) { html.js .trace-path { stroke-dashoffset: 0 !important; transition: none; } }
+
+/* ——— the focus rack (the one moving system) ——— */
+html.js .rack { filter: blur(8px); opacity: 0.55; transition: filter 900ms ease-out, opacity 900ms ease-out; will-change: filter, opacity; }
+html.js .rack.sharp { filter: blur(0); opacity: 1; }
+@media (prefers-reduced-motion: reduce) { html.js .rack { filter: none; opacity: 1; transition: none; } }
+
+/* ——— air band ——— */
+.air { border-bottom: none; }
+.air-figure { margin-top: 2rem; }
+.air-figure img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; border: 1px solid var(--ink); }
+.air .sec-body { max-width: 52ch; }
+.request {
+  display: inline-block; margin-top: 1.75rem; font-family: var(--mono);
+  font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--paper); background: var(--blue); padding: 0.75rem 1.25rem;
+  border-radius: 2px; text-decoration: none;
+}
+.request:hover { background: var(--ink); }
+
+/* the off-register proof mark wink */
+.proofmarks { position: relative; }
+.regmark { position: absolute; width: 22px; height: 22px; }
+.regmark svg { width: 100%; height: 100%; }
+.regmark.tl { top: 8px; left: 8px; }
+.regmark.tr { top: 8px; right: 8px; }
+.regmark.bl { bottom: 8px; left: 8px; }
+.regmark.br { bottom: 6px; right: 10px; transform: rotate(6deg); }
+.regmark.br::after {
+  content: "checked twice"; position: absolute; top: 26px; right: 0;
+  font-family: var(--mono); font-size: 0.58rem; color: var(--ink-soft);
+  white-space: nowrap; letter-spacing: 0.04em;
+}
+
+footer { padding: 2.5rem 0 3rem; }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; color: var(--ink-soft); text-transform: uppercase; }
+footer a { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js");</script>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">Strata Scientific<span class="est">EST. 2004 · SUPPLY DIV.</span></div>
+      <div class="folio">Catalogue No. 7 · rev. 2026.1</div>
+    </div>
+    <nav class="contents" aria-label="Contents">
+      <a href="#standard">00 · The Standard</a>
+      <a href="#buffers">01 · Buffers &amp; Reagents</a>
+      <a href="#filtration">02 · Filtration</a>
+      <a href="#culture">03 · Cell Culture</a>
+      <a href="#air">04 · Supply &amp; Air</a>
+    </nav>
+  </div>
+</header>
+
+<!-- COVER -->
+<div class="cover proofmarks">
+  <span class="regmark tl" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="none" stroke="#1c2530" stroke-width="1"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="6"/></g></svg></span>
+  <span class="regmark tr" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="none" stroke="#1c2530" stroke-width="1"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="6"/></g></svg></span>
+  <span class="regmark bl" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="none" stroke="#1c2530" stroke-width="1"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="6"/></g></svg></span>
+  <!-- the wink: the bottom-right proof mark prints a few degrees off-register -->
+  <span class="regmark br" aria-hidden="true"><svg viewBox="0 0 24 24"><g fill="none" stroke="#1c2530" stroke-width="1"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="6"/></g></svg></span>
+  <div class="wrap">
+    <h1>The consumables behind other people's <em>results</em>.</h1>
+    <p class="lede">Reagents, filtration and cell-culture consumables — batch-traceable,
+    cold-chain kept, with a certificate of analysis in every carton.</p>
+    <figure class="cover-figure">
+      <img class="rack" src="assets/hero-bench.webp" alt="A sunlit laboratory bench, clear and amber glassware refracting low morning light, a green courtyard visible through the window beyond." width="2048" height="1024" fetchpriority="high">
+    </figure>
+  </div>
+</div>
+
+<!-- 00 THE STANDARD -->
+<section id="standard">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>The standard, kept in writing.</h2>
+      <span class="folio">00</span>
+    </div>
+    <div class="sec-body">
+      <p>Everything we ship is made to a specification and proven against it before it
+      leaves. Every lot carries a batch number that resolves — through us — to the assay,
+      the water, and the day it was made. When a paper of yours needs a supplier line,
+      ours holds up.</p>
+      <p>Below: one exemplar lot, read two ways. The certificate is what your QA signs off;
+      the trace is the purity that certificate stands on.</p>
+    </div>
+
+    <div class="instrument">
+      <div class="certificate">
+        <h3>Certificate of Analysis · lot SB-7-0412</h3>
+        <table class="coa">
+          <tbody>
+            <tr><td>Assay (HPLC)</td><td>99.4%</td></tr>
+            <tr><td>Water (Karl Fischer)</td><td>0.08%</td></tr>
+            <tr><td>Conductivity</td><td>1.1 µS/cm</td></tr>
+            <tr><td>Endotoxin</td><td>&lt; 0.05 EU/mL</td></tr>
+            <tr><td>Heavy metals</td><td>&lt; 5 ppm</td></tr>
+            <tr><td>Release</td><td class="pass">PASS</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="trace">
+        <h3>HPLC purity trace · same lot</h3>
+        <svg viewBox="0 0 400 180" role="img" aria-label="An HPLC purity trace for lot SB-7-0412: a flat baseline with one dominant sharp peak and two negligible minor peaks, showing 99.4 percent purity.">
+          <g stroke="var(--blue-line)" stroke-width="1">
+            <line x1="30" y1="150" x2="390" y2="150"/>
+            <line x1="30" y1="20" x2="30" y2="150"/>
+          </g>
+          <path class="trace-path" d="M30 148 L120 147 L160 146 L182 145 Q188 145 190 120 L196 40 Q198 26 202 40 L210 138 Q214 146 220 147 L286 146 L300 138 Q303 133 306 138 L312 147 L360 146 L390 147"/>
+          <g font-family="var(--mono)" font-size="8" fill="var(--ink-soft)">
+            <text x="188" y="34">99.4%</text>
+            <text x="300" y="130">0.4%</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 BUFFERS -->
+<section id="buffers">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Buffers &amp; Reagents</h2>
+      <span class="folio">01</span>
+    </div>
+    <div class="slide">
+      <figure class="specimen">
+        <img class="rack" src="assets/micro-crystal.webp" alt="Polarized-light micrograph of a birefringent crystal field in saturated interference colours." width="1400" height="933" loading="lazy">
+        <span class="scalebar" aria-hidden="true"><span class="bar"></span>50 µm</span>
+        <figcaption class="label"><b>01 · Buffers</b><span>−20 °C · 500 mL</span></figcaption>
+      </figure>
+      <div>
+        <table class="spec-table">
+          <caption>Analytical-grade buffers and reagents, crystallography-verified.</caption>
+          <thead><tr><th>Line</th><th>Grade</th><th>Purity</th></tr></thead>
+          <tbody>
+            <tr><td>Phosphate buffers</td><td>ACS</td><td>≥ 99.5%</td></tr>
+            <tr><td>Tris / HEPES</td><td>Molecular</td><td>≥ 99.9%</td></tr>
+            <tr><td>Fixed reagents</td><td>Analytical</td><td>≥ 99.0%</td></tr>
+            <tr><td>Custom molarity</td><td>To spec</td><td>Certified</td></tr>
+          </tbody>
+        </table>
+        <p class="slide-note">The crystal field is the reagent itself under crossed polars —
+        the colours are birefringence, not dye. Made to your molarity on request.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 FILTRATION -->
+<section id="filtration">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Filtration &amp; Consumables</h2>
+      <span class="folio">02</span>
+    </div>
+    <div class="slide">
+      <figure class="specimen">
+        <img class="rack" src="assets/micro-membrane.webp" alt="Electron-micrograph-style view of a filtration membrane fiber matrix in monochrome silver-blue." width="1400" height="933" loading="lazy">
+        <span class="scalebar" aria-hidden="true"><span class="bar"></span>10 µm</span>
+        <figcaption class="label"><b>02 · Filtration</b><span>0.22 µm · sterile</span></figcaption>
+      </figure>
+      <div>
+        <table class="spec-table">
+          <caption>Membranes, syringe filters, tips and tubes — sterile, endotoxin-tested.</caption>
+          <thead><tr><th>Item</th><th>Pore</th><th>Format</th></tr></thead>
+          <tbody>
+            <tr><td>PES membranes</td><td>0.22 µm</td><td>47 mm</td></tr>
+            <tr><td>Syringe filters</td><td>0.45 µm</td><td>25 mm</td></tr>
+            <tr><td>Filtered tips</td><td>—</td><td>10–1000 µL</td></tr>
+            <tr><td>Centrifuge tubes</td><td>—</td><td>15 / 50 mL</td></tr>
+          </tbody>
+        </table>
+        <p class="slide-note">The matrix pictured is the retention layer at working scale —
+        what stands between your prep and everything you don't want in it.</p>
+      </div>
+    </div>
+    <div class="slide" style="margin-top:2.5rem">
+      <figure class="specimen">
+        <img class="rack" src="assets/consumables.webp" alt="White laboratory consumables — unmarked pipette tips and tubes on a white surface in raking light." width="1400" height="933" loading="lazy">
+        <span class="scalebar" aria-hidden="true"><span class="bar"></span>plate scale</span>
+        <figcaption class="label"><b>02 · Plasticware</b><span>DNase / RNase-free</span></figcaption>
+      </figure>
+      <div>
+        <table class="spec-table">
+          <caption>Plasticware, certified clean, lot-traceable to the resin.</caption>
+          <thead><tr><th>Item</th><th>Certification</th><th>Pack</th></tr></thead>
+          <tbody>
+            <tr><td>Pipette tips</td><td>DNase/RNase-free</td><td>racked · 960</td></tr>
+            <tr><td>PCR plates</td><td>Low-bind</td><td>25</td></tr>
+            <tr><td>Microtubes</td><td>Sterile</td><td>500</td></tr>
+          </tbody>
+        </table>
+        <p class="slide-note">Unbranded by design — your bench, your labels. We keep the
+        resin lot on file so a contamination trace never dead-ends at us.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 CELL CULTURE -->
+<section id="culture">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Cell Culture</h2>
+      <span class="folio">03</span>
+    </div>
+    <div class="slide">
+      <figure class="specimen">
+        <img class="rack" src="assets/micro-cell.webp" alt="Fluorescence micrograph of stained cultured cells in violet and teal against a dark field." width="1400" height="933" loading="lazy">
+        <span class="scalebar" aria-hidden="true"><span class="bar"></span>20 µm</span>
+        <figcaption class="label"><b>03 · Culture</b><span>+4 °C · mycoplasma-tested</span></figcaption>
+      </figure>
+      <div>
+        <table class="spec-table">
+          <caption>Media, sera and supplements — mycoplasma- and endotoxin-tested.</caption>
+          <thead><tr><th>Line</th><th>Test</th><th>Format</th></tr></thead>
+          <tbody>
+            <tr><td>Classical media</td><td>Endotoxin &lt; 0.1 EU</td><td>500 mL</td></tr>
+            <tr><td>Fetal sera</td><td>Mycoplasma −ve</td><td>100 / 500 mL</td></tr>
+            <tr><td>Supplements</td><td>Sterility</td><td>To spec</td></tr>
+          </tbody>
+        </table>
+        <p class="slide-note">The stained field is a viability read at 20 µm — the culture
+        thriving is the whole point of everything upstream of it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 SUPPLY & AIR -->
+<section id="air" class="air">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Supply, and a little air.</h2>
+      <span class="folio">04</span>
+    </div>
+    <div class="sec-body">
+      <p>We hold stock so you don't have to gamble a run on a lead time — most lines ship
+      same day, cold chain intact, tracked to your dock. A lab is a place with windows, not
+      a basement; we like ours that way, and we suspect yours is too.</p>
+    </div>
+    <figure class="air-figure">
+      <img class="rack" src="assets/air-courtyard.webp" alt="A green courtyard with trees seen through a large open glass door from a bright, empty laboratory corridor in morning sun." width="2048" height="1024" loading="lazy">
+    </figure>
+    <a class="request" href="#standard">Request Catalogue No. 7</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Strata Scientific — a fictional demonstration business.</span>
+    <a href="guide/">How this page was made →</a>
+  </div>
+</footer>
+
+<script>
+/* Two enhancements, both complete-without-JS by default markup:
+   (1) the focus rack — figures rack blur→sharp on enter;
+   (2) the HPLC trace draws itself once on enter.
+   Neither runs under reduced motion. */
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var racks = document.querySelectorAll(".rack");
+  if (reduce || !("IntersectionObserver" in window)) {
+    racks.forEach(function (el) { el.classList.add("sharp"); });
+    document.querySelectorAll(".trace").forEach(function (el) { el.classList.add("drawn"); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) { entry.target.classList.add("sharp"); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.25 });
+  racks.forEach(function (el) { io.observe(el); });
+
+  var traceIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) { entry.target.classList.add("drawn"); traceIo.unobserve(entry.target); }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll(".trace").forEach(function (el) { traceIo.observe(el); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "slug": "strata-scientific",
+  "name": "Strata Scientific",
+  "vertical": "b2b-science-consumables-distributor",
+  "oneLiner": "Reagents, filtration and cell-culture consumables for manufacturers and labs — batch-traceable, cold-chain kept, a certificate with every carton.",
+  "axes": {
+    "primary": "editorial-print",
+    "secondary": "data-instrument"
+  },
+  "axisNote": "The page reads as a print catalog — Catalogue No. 7 — whose figure system is prepared microscope SLIDES: each product family is one slide (a frosted code-drawn label edge, a specimen window holding the family's micrograph, a code-drawn SVG scale bar, and the spec table in catalog columns). 'Strata' is enacted, not stated — chapters stack like a core sample with index tabs. Editorial-print leads (masthead, folios, rules-and-columns, registration marks); data-instrument supports (a code-drawn certificate of analysis beside a self-drawing HPLC purity trace — one batch, two readings). Distinct from Vance & Alder (⑦, legal-document grammar) by print species: ⑦ is a dossier read down a spine; this is a catalog of slide-figures, and the micrograph colour engine has no ⑦ counterpart.",
+  "paletteSeed": "paper/ink/lab-notebook-blue field; the ONLY saturated colour on the page lives inside the bounded micrograph figure windows (birefringence, fluorescence) — white editorial space everywhere else, the distinctness mechanism against ⑲'s drenched worlds and ⑰'s parchment",
+  "typeDirection": "Newsreader variable (optical-size serif — one family carries masthead to caption, the journal register natively) + IBM Plex Mono (labels, scale bars, tables, certificate) — both OFL, vendored; the restraint IS the B2B identity, no display grotesk",
+  "motionBudget": "the FOCUS RACK — figures enter ~8px blurred and rack sharp over one breath (filter blur+opacity, IntersectionObserver) — plus the HPLC trace drawing itself once on enter (stroke-dashoffset); nothing else. Reduced-motion and no-JS get sharp figures, the drawn trace, the set certificate, and the wink — complete by default markup.",
+  "wave": 4,
+  "built": "2026-07-18",
+  "castingNote": "ZERO people — a POSITIVE casting decision (the social-register dial's precision/B2B reading: humans minimal-to-absent). §8's dread-counter (the cooped-up-lab association) is carried entirely by light, air and courtyard green — the sunlit bare-glass hero and the through-the-glass courtyard band, no staff photos.",
+  "mintNote": "6 soul_2 slots, no text-precise seat (all in-scene text code-drawn). Two slots re-minted with harder compose-outs after first takes carried invented labels: the hero (bare unlabelled glassware) and the consumables field (reframed to an abstract tip-cone macro after the first take had pseudo-brand text on every tube). Two disclosed pre-pin local blurs remain (hero flask-2 molded label, one courtyard glyph); the three micrographs are abstract continuous fields — the lowest text-risk mint class."
+}
