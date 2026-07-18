@@ -22,7 +22,7 @@
 - Motion budget: the proofing-type system (font-variation + transform/opacity
   on enter) + one CSS steam drift; nothing else animates
 
-## Look-first taste notes (Dribbble café-branding · Dribbble café-landing · Pinterest morning-room register)
+## Look-first taste notes (Dribbble café-branding · Dribbble café-landing · Pinterest morning-room register · motionsites.ai motion register — founder addition, live this session)
 
 1. **The letterform borrows the food's physics.** The sweep's strongest work
    makes type edible: dough-soft rounded counters (MELO), a coffee bean seated
@@ -50,6 +50,13 @@
    class · chalkboard-font menus · pastel doodle-illustration filler · the
    dark moody bakery hero with gold serif "premium" register · the Instagram
    strip section · beans-scattered-on-dark-table branding stock.
+6. **motionsites.ai pass (no café entries; two readings kept):** the gallery's
+   dominant grammar — the dark ANIMATED-BACKGROUND hero — is the current
+   AI-landing default, one more reason this page's morning-parchment static
+   light reads hand-made against the field. The one principle worth stealing:
+   the best entries put motion IN the subject (a paper-fold ribbon carrying a
+   shipping story), never behind it — which is exactly what the proofing-type
+   system already is; no animated backdrop gets added on its account.
 
 ## The concept — TYPE THAT PROOFS LIKE DOUGH, in a room the morning fills
 

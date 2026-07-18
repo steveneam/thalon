@@ -14,12 +14,19 @@
 0. **Look first (founder direction, 2026-07-14 s35 — mandatory, before any planning).**
    Browse Dribbble and Pinterest for the vertical + drawn axes in the live browser
    (look-and-learn ONLY — downloading reference imagery into the pipeline stays
-   forbidden). Study several strong examples; compare and contrast what makes them
-   work (composition, texture, materials, type pairings, restraint); **integrate and
-   elaborate** — write 3–5 taste notes into the session log/wave plan that name what
-   this site will steal the *principle* of (never the pixels). Only then plan slots,
-   copy, and mints. Taste is seen, not remembered: skipping this step produced
-   flat-fill sections that read cheap until founder review caught them.
+   forbidden). **Also sweep motionsites.ai (founder addition, s63)** — the live
+   animated-hero gallery is the strongest MOTION-register reference of the three
+   (stills sites can't show choreography); weight it up for cinematic/animation/
+   palette-drenched draws, and read it double-edged: it also maps the current
+   AI-landing *default* (dark animated-background hero) that a distinct site must
+   refuse. Its copyable prompt products are its merchandise — never copy or adapt them;
+   principle-not-pixels applies doubly there. Study several strong examples;
+   compare and contrast what makes them work (composition, texture, materials,
+   type pairings, restraint, motion grammar); **integrate and elaborate** — write
+   3–5 taste notes into the session log/wave plan that name what this site will
+   steal the *principle* of (never the pixels). Only then plan slots, copy, and
+   mints. Taste is seen, not remembered: skipping this step produced flat-fill
+   sections that read cheap until founder review caught them.
 1. Fill every `{{slot}}` from the wave's vertical data. Instantiation values for a
    *real client* are tenant data (gitignored `.context/`); the demo verticals in the
    wave plan use neutral fictional business names.
