@@ -150,6 +150,24 @@ outdoor imagery — fields, gardens, greenery, open sky — as bands,
 backgrounds, or sides. The ⑫ garden + walk-out pair is the model: the
 brightest images on the page answer the vertical's fear, not its function.
 
+**Show the consumable result (founder direction, s60 ⑬ fix round):** for any
+vertical whose product is tasted, worn, felt, or lived in, the page must show
+what the CUSTOMER receives — not only the craft that makes it. The ⑬ model:
+coffee cards opened with the brewed cup (filter's amber-ruby translucency,
+the milk pour's texture, cold brew over ice) so a visitor can imagine colour,
+texture, and smell; beans alone sell to roasters, cups sell to drinkers.
+Sensory-outcome imagery sits beside the spec, per item where items differ.
+
+**Every expert instrument gets a lay twin (founder direction, s60 ⑬ fix
+round — "for the general public, very few would appreciate it"):** when the
+signature element is a data-instrument (curve, chart, log), pair it with a
+physical, sensory representation of the SAME information on the SAME
+clock/scroll — the ⑬ model: roast curve left, the bean itself right, five
+minted states crossfading in sync with the graph's stages. The instrument
+earns the expert's trust; the twin carries everyone else. One clock, two
+readings; the twin is never decoration — it must track the instrument's
+state exactly (reduced-motion/no-JS get the complete twin too).
+
 **Hero register rule (founder direction 2026-07-15 s37):** the first
 impression must be *real*. A code-drawn model, schematic, or illustration
 cannot carry the hero on a premium/boutique vertical — it reads cartoon, not
