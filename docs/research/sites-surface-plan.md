@@ -118,3 +118,33 @@
 
 *Owner: lead. Written s60 on founder direction; supersedes nothing. The s61
 design/look-first pass may amend §2/§3 — record deltas here.*
+
+
+## 6. Product direction — sitegen inputs (founder, s61 live; folds into the B-sitegen charter candidate)
+
+Founder direction on what the site feature becomes once the engine builds
+pages (recorded verbatim-in-spirit; charter discipline holds — designed at
+the B-sitegen charter, not scaffolded before it):
+
+1. **Three input modes for a new site**: a prompt (the existing Create
+   "page" family door) · **a website URL the engine extracts DNA from**
+   (productized look-first: the extractor emits taste NOTES — palette, type
+   register, structure, motion grammar — *principles, never pixels*; the
+   no-downloaded-imagery/licensing invariant carries over executable) · **a
+   template pick from the built portfolio** (highest paid tier only —
+   tier-gating is per-tenant capability config, data never code; the
+   15-site portfolio becomes a product asset).
+2. **Metadata/purpose block on every site** — goal (lead-gen / booking /
+   launch / portfolio) · audience · region/locale · CTA target · business
+   identity (name, vertical, contact). These map 1:1 onto the meta-prompt's
+   {{slots}}: the metadata section IS the build input.
+3. **Intel/lead → site import**: a lead/intel capture auto-populates the
+   metadata section (company, vertical, pain point → value-prop angle) —
+   the SAME capture spine the Phase-I window shipped (intel_captures +
+   capture_id lineage); a "build them a page" exit joins promote/compose.
+4. Lead additions, endorsed for the charter: **brand-profile link** (page
+   copy rides the existing judge gate — no ungated page ships) ·
+   **site versioning on the video-cut precedent** (fix rounds = recorded
+   versions with verdicts) · **published-page learn loop** (outcomes feed
+   back, the lead-scoring pattern) · publishing/domains stays the parked
+   B6.7 gate.
