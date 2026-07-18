@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprig &amp; Barrow — how this page was made</title>
+<meta name="robots" content="noindex">
+<style>
+  @font-face{font-family:'Fraunces';src:url('../fonts/fraunces-var.woff2') format('woff2');
+    font-weight:100 900;font-style:normal;font-display:swap}
+  @font-face{font-family:'Work Sans';src:url('../fonts/work-sans-var.woff2') format('woff2');
+    font-weight:100 900;font-style:normal;font-display:swap}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Work Sans',system-ui,sans-serif;font-weight:390;line-height:1.65;
+       color:oklch(0.29 0.045 55);background:oklch(0.965 0.018 85);
+       padding:clamp(2rem,6vw,4.5rem) clamp(1.2rem,6vw,4rem) 4rem;max-width:74ch;margin:0 auto}
+  h1,h2{font-family:'Fraunces',serif;font-weight:590;line-height:1.05;letter-spacing:-0.01em}
+  h1{font-size:clamp(2rem,5vw,3rem);margin-bottom:1rem}
+  h2{font-size:1.35rem;margin:2.2rem 0 0.6rem}
+  p,li{margin-bottom:0.8rem;max-width:68ch}
+  ul{padding-left:1.2rem}
+  a{color:oklch(0.45 0.15 30)}
+  .rule{border:none;border-top:1.5px dashed oklch(0.29 0.045 55 / 0.3);margin:2rem 0}
+  table{border-collapse:collapse;width:100%;font-size:0.92rem;margin:1rem 0}
+  th,td{text-align:left;padding:0.5rem 0.7rem;border-bottom:1px solid oklch(0.29 0.045 55 / 0.15);vertical-align:top}
+  th{font-weight:640}
+  code{background:oklch(0.93 0.03 80);border-radius:4px;padding:0.1em 0.35em;font-size:0.9em}
+</style>
+</head>
+<body>
+<h1>How this page was made</h1>
+<p><strong>Sprig &amp; Barrow is a fictional demonstration business.</strong> There is no
+stall, no Barrow Lane, and no figs — this page exists to show what our content factory can
+design and build for a real greengrocer. All photographic imagery is
+<strong>AI-generated</strong> (models listed below), minted on a paid license tier and
+recorded with full provenance at mint time. Nothing was scraped or stock-sourced.</p>
+
+<h2>The design</h2>
+<p>Two assigned axes drive the page. The primary is <em>physics &amp; interaction</em>: the
+day's produce rests on a chalk shelf in the hero and falls past you as you scroll — the day
+selling through. The fall is deliberately not a physics engine: every position and rotation
+is a pure function of scroll progress with per-item variance, so it is deterministic, cheap,
+and reversible (scroll back up and the day un-happens). The kilo-scale is the same idea at
+interaction scale — pick produce, the needle swings, the total reads out.</p>
+<p>The secondary axis is <em>exceptional palette</em>: each section takes its colour world
+from one produce family — market-paper cream before dawn, tomato vermilion for the crate,
+citrus amber for the scale, chard green for the hands, plum dusk for closing. The photography
+was briefed to the same palette (the citrus macro <em>is</em> the palette section's source).</p>
+<p>If you're reading with JavaScript off, or with reduced motion set: the produce simply
+rests on its shelf, and every word and price on the page is still there. The falling is
+seasoning, not the meal.</p>
+
+<h2>The imagery</h2>
+<table>
+  <tr><th>Asset</th><th>Model</th><th>Notes</th></tr>
+  <tr><td>Chalk A-frame sign (hero)</td><td>nano banana 2 (text-precise seat)</td>
+      <td>The one slot with legible words — routed to the text-accurate model; first take.</td></tr>
+  <tr><td>Tomato crate</td><td>Soul 2.0, 2k</td><td>First take.</td></tr>
+  <tr><td>Citrus macro</td><td>Soul 2.0, 2k</td><td>First take — the palette source.</td></tr>
+  <tr><td>Greengrocer portrait</td><td>Soul 2.0, 2k</td>
+      <td>Third take. Two rejected for invented label text on produce boxes; the keeper
+      composes printable surfaces out of frame. Cast candid and absorbed — no camera stare.</td></tr>
+  <tr><td>Dawn stall street</td><td>Soul 2.0, 2k</td><td>First take.</td></tr>
+</table>
+<p>The falling produce and the scale are hand-drawn inline SVG, not minted — drawn things
+stay crisp at any size, cost nothing to ship, and can be driven by scroll.</p>
+
+<h2>Build notes</h2>
+<ul>
+  <li>One self-contained HTML file. No frameworks, no external requests; the two typefaces
+      (Fraunces, Work Sans — both SIL Open Font License) are vendored beside the page.</li>
+  <li>Review passes: three full passes, each hunting faults top-to-bottom and pushing one
+      ambition item. Pass 1 caught a chalk-arrow colliding with its own note, the fig row
+      wearing a plum icon (a fig got drawn), a 4-pixel mobile overflow from the wonky
+      carrot's label, and falling produce passing <em>behind</em> translucent panels —
+      the fall was moved to the front plane, past the page instead of under it. Pass 2
+      walked every mobile section and the scale's states, and fixed an hour-carry rounding
+      bug in the new ambition item: the day clock, which reads scroll progress back as
+      market time (5:40 am at the top of the page, six in the evening at the bottom).
+      Pass 3 was the final sweep — both breakpoints, console clean, keyboard focus,
+      and the squint test against the rest of the portfolio.</li>
+  <li>Honesty rules: no fake urgency, no invented testimonials, no real address or phone.
+      The ledger's quantities are illustrative and say so here.</li>
+</ul>
+<hr class="rule">
+<p><a href="../">← Back to the stall</a></p>
+</body>
+</html>

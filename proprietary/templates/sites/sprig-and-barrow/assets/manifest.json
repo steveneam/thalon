@@ -1,0 +1,7 @@
+[
+  { "file": "crate.webp",  "pinnedHash": "3bb876f2579a6e267767a282f040cb70a4afee1c9d4bfc4693824dc0526afdba", "width": 1600, "height": 900,  "quality": 78 },
+  { "file": "citrus.webp", "pinnedHash": "799b8b2fdb5c0d3a6695b327a43233c90386fd368fe01103de4b818de8d6f0dc", "width": 1600, "height": 900,  "quality": 78 },
+  { "file": "grocer.webp", "pinnedHash": "977791166df41cd90d0c9289d3364e86134339bdeacebd947f22cf117833c0c0", "width": 1400, "height": 933,  "quality": 78 },
+  { "file": "dawn.webp",   "pinnedHash": "c11930555c0b2c776517312c67dac3374ee0187e853939713626e7e35500fbe8", "width": 1920, "height": 1080, "quality": 76 },
+  { "file": "sign.webp",   "pinnedHash": "43a13e81dfa308c3289d9fb1fa465214ba00e6e89675265635ac1a088acddfa3", "width": 780,  "height": 1040, "quality": 80 }
+]

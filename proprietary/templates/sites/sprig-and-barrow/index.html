@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprig &amp; Barrow — picked before dawn, priced by the kilo, gone by six</title>
+<meta name="description" content="The corner greengrocer. In by five, stacked by six in the morning, sold out by six at night. Everything priced by the kilo and weighed in front of you.">
+<style>
+  /* ============ fonts (vendored, OFL) ============ */
+  @font-face{font-family:'Fraunces';src:url('fonts/fraunces-var.woff2') format('woff2');
+    font-weight:100 900;font-style:normal;font-display:swap}
+  @font-face{font-family:'Fraunces';src:url('fonts/fraunces-italic-var.woff2') format('woff2');
+    font-weight:100 900;font-style:italic;font-display:swap}
+  @font-face{font-family:'Work Sans';src:url('fonts/work-sans-var.woff2') format('woff2');
+    font-weight:100 900;font-style:normal;font-display:swap}
+
+  /* ============ produce colour worlds ============ */
+  :root{
+    --paper:oklch(0.965 0.018 85);          /* market paper, before dawn   */
+    --paper-deep:oklch(0.93 0.03 80);
+    --ink:oklch(0.29 0.045 55);             /* umber ink                   */
+    --chalk:#fffdf6;
+    --tomato:oklch(0.52 0.185 28);          /* the crate                   */
+    --tomato-deep:oklch(0.38 0.13 27);
+    --tomato-hot:oklch(0.63 0.23 31);
+    --citrus:oklch(0.72 0.145 62);          /* by the kilo                 */
+    --citrus-deep:oklch(0.56 0.14 50);
+    --citrus-hot:oklch(0.80 0.16 75);
+    --leaf:oklch(0.46 0.095 145);           /* the hands                   */
+    --leaf-deep:oklch(0.335 0.075 150);
+    --chard:oklch(0.62 0.19 20);
+    --dusk:oklch(0.34 0.075 320);           /* gone by six                 */
+    --dusk-deep:oklch(0.27 0.05 260);
+    --measure:64ch;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{font-family:'Work Sans',system-ui,sans-serif;font-weight:380;color:var(--ink);
+       background:var(--paper);line-height:1.6;overflow-x:clip}
+  img{max-width:100%;height:auto;display:block}
+  a{color:inherit}
+  h1,h2{font-family:'Fraunces',serif;font-variation-settings:'opsz' 144;line-height:0.96;
+        letter-spacing:-0.015em;font-weight:590;text-wrap:balance}
+  h1{font-size:clamp(3.4rem,10.5vw,8.6rem)}
+  h2{font-size:clamp(2.4rem,6.4vw,5rem)}
+  .kicker{font-weight:640;letter-spacing:0.26em;text-transform:uppercase;font-size:0.76rem;
+          display:inline-flex;align-items:center;gap:0.7rem;margin-bottom:1.3rem}
+  .kicker::before{content:"";width:34px;height:2px;background:currentColor;opacity:0.55}
+  .lede{font-size:clamp(1.04rem,1.55vw,1.28rem);max-width:var(--measure);margin-top:1.5rem}
+  .chalkline{font-family:'Fraunces',serif;font-style:italic;font-weight:430;
+             font-variation-settings:'opsz' 30;letter-spacing:0.01em}
+
+  /* ============ nav ============ */
+  nav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;gap:1.2rem;
+      padding:0.7rem clamp(1rem,4vw,2.6rem);
+      background:color-mix(in oklab,var(--paper) 86%,transparent);
+      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+      border-bottom:1px solid color-mix(in oklab,var(--ink) 12%,transparent)}
+  .brand{display:flex;align-items:center;gap:0.6rem;text-decoration:none;
+         font-family:'Fraunces',serif;font-weight:640;font-size:1.22rem;letter-spacing:-0.01em}
+  .brand svg{width:28px;height:28px}
+  nav .links{display:flex;gap:1.3rem;margin-left:auto;font-size:0.9rem;font-weight:540}
+  nav .links a{text-decoration:none;opacity:0.72;transition:opacity 0.15s ease}
+  nav .links a:hover,nav .links a:focus-visible{opacity:1}
+  .visit-pill{border:2px solid var(--ink);border-radius:999px;padding:0.5rem 1.1rem;font-weight:640;
+              font-size:0.88rem;text-decoration:none;line-height:1;white-space:nowrap;
+              transition:background 0.15s ease,color 0.15s ease}
+  .visit-pill:hover,.visit-pill:focus-visible{background:var(--ink);color:var(--paper)}
+  @media (max-width:820px){nav .links{display:none}}
+
+  /* ============ sections ============ */
+  section,header.hero{position:relative}
+  .inner{position:relative;z-index:4;max-width:1180px;margin:0 auto;width:100%;
+         padding:clamp(4.5rem,9vh,7rem) clamp(1.2rem,5vw,3.5rem)}
+
+  /* ---------- hero ---------- */
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+        background:
+          radial-gradient(1100px 520px at 82% -10%, color-mix(in oklab,var(--citrus-hot) 26%,transparent), transparent 68%),
+          radial-gradient(900px 640px at -8% 108%, color-mix(in oklab,var(--tomato) 14%,transparent), transparent 60%),
+          var(--paper);
+        overflow:visible}
+  .hero .inner{padding-bottom:clamp(6.5rem,15vh,11rem);display:grid;
+               grid-template-columns:minmax(0,1.25fr) minmax(240px,0.75fr);
+               gap:clamp(1.5rem,4vw,3.5rem);align-items:center}
+  .hero h1 .amp{font-style:italic;font-weight:440;color:var(--tomato-hot)}
+  .hero .cta-row{display:flex;flex-wrap:wrap;gap:0.9rem;margin-top:2rem}
+  .btn{display:inline-flex;align-items:center;gap:0.55rem;border-radius:999px;
+       padding:0.95rem 1.65rem;font-weight:640;font-size:1.02rem;text-decoration:none;line-height:1;
+       transition:transform 0.16s ease,box-shadow 0.16s ease}
+  .btn.solid{background:var(--ink);color:var(--chalk);box-shadow:0 8px 26px color-mix(in oklab,var(--ink) 32%,transparent)}
+  .btn.ghost{border:2.5px solid var(--ink)}
+  .btn:hover,.btn:focus-visible{transform:translateY(-2px)}
+  @media (prefers-reduced-motion:reduce){.btn:hover,.btn:focus-visible{transform:none}}
+
+  .signcard{position:relative;justify-self:end;width:min(100%,340px);transform:rotate(2.4deg)}
+  .signcard img{border-radius:10px;box-shadow:0 26px 60px color-mix(in oklab,var(--ink) 38%,transparent)}
+  .signcard figcaption{margin-top:0.7rem;font-size:0.82rem;opacity:0.62;text-align:right}
+  @media (max-width:820px){
+    .hero .inner{grid-template-columns:1fr}
+    .signcard{justify-self:center;width:min(72vw,300px)}
+  }
+
+  /* the shelf — resting state of the day's produce (complete without JS) */
+  .shelf{position:absolute;left:0;right:0;bottom:0;height:clamp(120px,18vh,170px);z-index:3;
+         pointer-events:none}
+  .shelf::after{content:"";position:absolute;left:clamp(1rem,4vw,3rem);right:clamp(1rem,4vw,3rem);
+         bottom:clamp(28px,5vh,44px);border-bottom:3px solid color-mix(in oklab,var(--ink) 70%,transparent);
+         border-radius:2px}
+  .pp{position:absolute;bottom:clamp(28px,5vh,44px);width:56px;z-index:4;will-change:transform}
+  .pp svg{width:100%;height:auto;display:block;filter:drop-shadow(0 7px 9px color-mix(in oklab,var(--ink) 30%,transparent))}
+  .pp.falling{position:fixed;left:0;top:0;bottom:auto;z-index:55}
+  .pp.fallen{visibility:hidden}
+  .wonky-tag{position:absolute;right:-4px;top:calc(100% + 4px);
+             font-size:0.72rem;white-space:nowrap;color:var(--ink);opacity:0.7}
+
+  /* chalk annotations */
+  .chalknote{font-family:'Fraunces',serif;font-style:italic;font-weight:430;font-size:1.02rem;
+             opacity:0.82;max-width:30ch;line-height:1.4}
+  .chalknote .arrow{display:inline-block;font-size:1.35rem;line-height:1;transform:rotate(12deg);
+             margin-left:0.45rem;vertical-align:-0.15em}
+
+  /* ---------- shared full-bleed band ---------- */
+  .band{position:relative;overflow:clip}
+  .band img{width:100%;height:min(62vh,560px);object-fit:cover}
+  .band .band-title{position:absolute;inset:0;display:flex;align-items:flex-end;z-index:2;
+        background:linear-gradient(180deg,transparent 30%,color-mix(in oklab,var(--band-ink,#000) 62%,transparent) 100%)}
+  .band .band-title h2{color:var(--chalk);padding:0 clamp(1.2rem,5vw,3.5rem) clamp(1.4rem,4vh,2.6rem);
+        max-width:1180px;margin:0 auto;width:100%;text-shadow:0 3px 22px rgba(0,0,0,0.35)}
+
+  /* ---------- 2 · the crate (tomato world) ---------- */
+  #crate{background:linear-gradient(176deg,var(--tomato) 0%,var(--tomato-deep) 88%);color:var(--chalk)}
+  #crate{--band-ink:var(--tomato-deep)}
+  #crate .kicker{color:var(--citrus-hot)}
+  .ledger{margin-top:2.4rem;border:2px solid color-mix(in oklab,var(--chalk) 34%,transparent);
+          border-radius:16px;padding:clamp(1.2rem,3vw,2rem);
+          background:color-mix(in oklab,var(--tomato-deep) 40%,transparent);max-width:760px}
+  .ledger-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+          border-bottom:1.5px dashed color-mix(in oklab,var(--chalk) 40%,transparent);
+          padding-bottom:0.8rem;margin-bottom:0.4rem}
+  .ledger-head b{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:590;letter-spacing:0.02em}
+  .ledger-head span{font-size:0.8rem;letter-spacing:0.18em;text-transform:uppercase;opacity:0.75}
+  .ledger ul{list-style:none}
+  .ledger li{display:grid;grid-template-columns:34px 1fr auto;gap:0.9rem;align-items:center;
+             padding:0.72rem 0;border-bottom:1px solid color-mix(in oklab,var(--chalk) 14%,transparent);
+             font-size:0.99rem}
+  .ledger li:last-child{border-bottom:none}
+  .ledger li svg{width:30px;height:auto}
+  .ledger li .qty{font-family:'Fraunces',serif;font-weight:560;font-size:1.06rem;white-space:nowrap}
+  .ledger li small{display:block;opacity:0.72;font-size:0.85rem}
+  .ledger li.gone .what{text-decoration:line-through;text-decoration-thickness:2px;
+             text-decoration-color:color-mix(in oklab,var(--citrus-hot) 85%,transparent)}
+  .ledger li.gone .qty{opacity:0.55}
+
+  /* ---------- 3 · by the kilo (citrus world) ---------- */
+  #kilo{background:linear-gradient(176deg,var(--citrus) 0%,var(--citrus-deep) 92%);color:var(--ink)}
+  #kilo{--band-ink:var(--citrus-deep)}
+  #kilo .kicker{color:color-mix(in oklab,var(--tomato-deep) 82%,black)}
+  #kilo h2,#kilo .lede{color:oklch(0.24 0.05 50)}
+  .weigh{display:grid;grid-template-columns:minmax(280px,0.9fr) 1.1fr;gap:clamp(1.6rem,4vw,3.4rem);
+         margin-top:2.6rem;align-items:center}
+  @media (max-width:860px){.weigh{grid-template-columns:1fr}}
+  .scale-wrap{position:relative;max-width:430px;margin:0 auto;width:100%}
+  .scale-wrap svg{width:100%;height:auto;display:block}
+  #needle{transform-origin:210px 300px;transition:transform 0.9s cubic-bezier(0.22,1.6,0.36,1)}
+  @media (prefers-reduced-motion:reduce){#needle{transition:none}}
+  .pan-load{position:absolute;top:5.5%;left:50%;transform:translateX(-50%);display:flex;gap:2px;
+            align-items:flex-end;height:44px;pointer-events:none}
+  .pan-load svg{width:34px;height:auto;filter:drop-shadow(0 3px 4px rgba(60,30,0,0.35))}
+  .readout{text-align:center;margin-top:0.9rem;font-family:'Fraunces',serif;font-size:1.22rem;
+           font-weight:560;color:oklch(0.24 0.05 50)}
+  .readout b{font-size:1.55rem}
+  .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.7rem;list-style:none}
+  .chip{width:100%;display:grid;grid-template-columns:38px 1fr;gap:0.65rem;align-items:center;
+        text-align:left;border:2px solid oklch(0.24 0.05 50);border-radius:14px;
+        padding:0.6rem 0.75rem;background:color-mix(in oklab,var(--chalk) 55%,transparent);
+        font:inherit;font-size:0.9rem;color:oklch(0.24 0.05 50);cursor:pointer;
+        transition:transform 0.14s ease,background 0.14s ease}
+  .chip svg{width:34px;height:auto}
+  .chip b{display:block;font-weight:640}
+  .chip small{opacity:0.75}
+  .chip[aria-pressed="true"]{background:oklch(0.24 0.05 50);color:var(--chalk)}
+  .chip:hover{transform:translateY(-2px)}
+  @media (prefers-reduced-motion:reduce){.chip:hover{transform:none}}
+  .kilo-note{margin-top:1.6rem;opacity:0.85;color:oklch(0.24 0.05 50)}
+
+  /* ---------- 4 · the hands (leaf world) ---------- */
+  #hands{background:linear-gradient(176deg,var(--leaf) 0%,var(--leaf-deep) 90%);color:var(--chalk)}
+  #hands .kicker{color:var(--citrus-hot)}
+  .hands-grid{display:grid;grid-template-columns:1.02fr 0.98fr;gap:clamp(1.8rem,4.5vw,4rem);
+              align-items:center;margin-top:1rem}
+  @media (max-width:860px){.hands-grid{grid-template-columns:1fr}}
+  .hands-photo{position:relative;transform:rotate(-1.6deg)}
+  .hands-photo img{border-radius:12px;border:10px solid var(--chalk);
+                   box-shadow:0 26px 60px rgba(0,0,0,0.4)}
+  .hands-photo figcaption{margin-top:0.8rem;font-size:0.82rem;opacity:0.65}
+  .season{margin-top:2.6rem;border-top:1.5px dashed color-mix(in oklab,var(--chalk) 38%,transparent);
+          padding-top:1.4rem}
+  .season b{font-size:0.8rem;letter-spacing:0.22em;text-transform:uppercase;opacity:0.8}
+  .season ul{list-style:none;display:flex;flex-wrap:wrap;gap:0.6rem 1.6rem;margin-top:0.9rem;
+             font-family:'Fraunces',serif;font-size:1.18rem;font-weight:520}
+  .season li{position:relative}
+  .season li.best::after{content:"";position:absolute;left:-2%;right:-2%;bottom:-3px;height:7px;
+             background:var(--citrus-hot);opacity:0.55;border-radius:4px;transform:rotate(-0.8deg);z-index:-1}
+
+  /* ---------- 5 · gone by six (dusk world) ---------- */
+  #six{background:linear-gradient(178deg,var(--dusk) 0%,var(--dusk-deep) 86%);color:var(--chalk)}
+  #six .kicker{color:oklch(0.78 0.11 75)}
+  .visit{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;
+         margin-top:2.4rem;max-width:820px}
+  .visit-box{border:1.5px solid color-mix(in oklab,var(--chalk) 30%,transparent);border-radius:16px;
+             padding:1.2rem 1.3rem;background:color-mix(in oklab,var(--dusk-deep) 45%,transparent)}
+  .visit-box h3{font-family:'Fraunces',serif;font-size:1.02rem;font-weight:590;
+                letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.78 0.11 75);
+                margin-bottom:0.5rem}
+  .visit-box p{font-size:0.96rem;opacity:0.92}
+  .carrot-note{margin-top:2.6rem;display:flex;align-items:center;gap:1rem;opacity:0.85}
+  .carrot-note svg{width:40px;height:auto;transform:rotate(-18deg)}
+  #six .band img{height:min(56vh,520px)}
+  #six .band::after{content:"";position:absolute;inset:0;
+        background:linear-gradient(180deg,var(--dusk-deep) 0%,transparent 26%)}
+  footer{padding:1.6rem clamp(1.2rem,5vw,3.5rem) 2.2rem;font-size:0.82rem;opacity:0.68;
+         line-height:1.8;background:var(--dusk-deep);color:var(--chalk)}
+  footer a{font-weight:600}
+
+  /* reveal-on-scroll (gentle, reduced-motion aware) */
+  .rv{opacity:0;transform:translateY(22px);transition:opacity 0.7s ease,transform 0.7s ease}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+
+  /* the day clock — scroll progress read as market time */
+  #dayclock{position:fixed;left:14px;bottom:14px;z-index:70;pointer-events:none;
+            font-family:'Fraunces',serif;font-style:italic;font-weight:480;font-size:0.98rem;
+            color:var(--chalk);background:color-mix(in oklab,var(--ink) 82%,transparent);
+            border-radius:999px;padding:0.45rem 0.95rem;opacity:0;transition:opacity 0.4s ease}
+  #dayclock.on{opacity:1}
+  @media (prefers-reduced-motion:reduce){#dayclock{display:none}}
+
+  /* motion toggle */
+  #stillness{position:fixed;right:14px;bottom:14px;z-index:70;border:none;border-radius:999px;
+             padding:0.55rem 1rem;font:inherit;font-weight:640;font-size:0.8rem;cursor:pointer;
+             background:color-mix(in oklab,var(--ink) 88%,transparent);color:var(--chalk);
+             box-shadow:0 4px 18px rgba(0,0,0,0.3)}
+  @media (prefers-reduced-motion:reduce){#stillness{display:none}}
+
+  :focus-visible{outline:3px solid var(--citrus-hot);outline-offset:3px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- drawn produce — the day's crate, chalk-and-gouache register -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="p-tomato" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="36" rx="24" ry="21" fill="oklch(0.58 0.21 29)"/>
+      <path d="M10 40a24 21 0 0 0 44 0 24 17 0 0 1-44 0z" fill="oklch(0.44 0.16 27)"/>
+      <ellipse cx="24" cy="28" rx="8" ry="5" fill="oklch(0.72 0.17 40)" opacity="0.6" transform="rotate(-18 24 28)"/>
+      <path d="M32 16c-2-5 1-9 1-9s4 3 3 9c4-3 9-2 9-2s-3 5-8 5c3 2 5 6 5 6s-6 0-9-4c-3 4-9 4-9 4s2-4 5-6c-5 0-8-5-8-5s5-1 9 2z" fill="oklch(0.52 0.12 140)"/>
+    </symbol>
+    <symbol id="p-lemon" viewBox="0 0 64 48">
+      <path d="M8 24c0-11 11-18 24-18s24 7 24 18-11 18-24 18S8 35 8 24z" fill="oklch(0.86 0.16 98)"/>
+      <path d="M8 26c2 9 12 16 24 16s22-7 24-16c-4 8-13 12-24 12S12 34 8 26z" fill="oklch(0.74 0.15 92)"/>
+      <ellipse cx="22" cy="17" rx="9" ry="4.5" fill="oklch(0.95 0.09 100)" opacity="0.75" transform="rotate(-14 22 17)"/>
+      <path d="M55 22c4-1 7 2 7 2s-3 3-7 2z" fill="oklch(0.62 0.12 130)"/>
+    </symbol>
+    <symbol id="p-carrot" viewBox="0 0 40 72">
+      <path d="M20 14C29 14 33 20 32 30 30 47 24 62 20 68 16 62 10 47 8 30 7 20 11 14 20 14z" fill="oklch(0.70 0.19 45)"/>
+      <path d="M20 68c-2-4-5-11-7-19 3 3 11 3 14 0-2 8-5 15-7 19z" fill="oklch(0.58 0.17 42)"/>
+      <path d="M14 26h12M13 36h13M15 46h10" stroke="oklch(0.55 0.15 42)" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M20 14c-1-6-6-10-6-10M20 14c0-7 2-12 2-12M20 14c3-5 9-7 9-7" stroke="oklch(0.52 0.12 140)" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="p-wonky" viewBox="0 0 44 72">
+      <path d="M22 14c9 0 13 6 12 16-1 9-4 17-9 22-3 3-1 7-4 12-2-5-6-6-6-11 0-6-5-13-6-23-1-10 4-16 13-16z" fill="oklch(0.70 0.19 45)"/>
+      <path d="M21 64c-1-4-4-5-4-9 0-2-1-4-2-7 3 2 9 2 12 0-2 5-4 8-4 11-1 2-1 3-2 5z" fill="oklch(0.58 0.17 42)"/>
+      <path d="M15 26h13M14 36h14M17 46h9" stroke="oklch(0.55 0.15 42)" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M22 14c-2-6-7-9-7-9M22 14c1-7 3-11 3-11M22 14c4-4 9-6 9-6" stroke="oklch(0.52 0.12 140)" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="p-apple" viewBox="0 0 64 64">
+      <path d="M32 18c5-6 14-5 19 1 6 8 4 22-3 30-4 5-9 6-13 4l-3-1-3 1c-4 2-9 1-13-4-7-8-9-22-3-30 5-6 14-7 19-1z" fill="oklch(0.62 0.17 135)"/>
+      <path d="M15 44c4 7 11 10 17 8l3-1 3 1c4 1 9 0 12-4-5 6-11 8-15 6l-3-1-3 1c-5 2-11-2-14-10z" fill="oklch(0.5 0.13 135)" opacity="0.8"/>
+      <ellipse cx="23" cy="30" rx="6" ry="9" fill="oklch(0.8 0.14 120)" opacity="0.5" transform="rotate(-12 23 30)"/>
+      <path d="M32 18c0-5 3-9 3-9" stroke="oklch(0.4 0.07 60)" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+      <path d="M35 12c4-3 9-2 9-2s-2 5-7 5z" fill="oklch(0.52 0.12 140)"/>
+    </symbol>
+    <symbol id="p-plum" viewBox="0 0 56 60">
+      <ellipse cx="28" cy="34" rx="21" ry="22" fill="oklch(0.42 0.13 320)"/>
+      <path d="M28 12c0 0 1 12 0 44" stroke="oklch(0.3 0.09 320)" stroke-width="2.4" opacity="0.7"/>
+      <path d="M7 38a21 22 0 0 0 42 0 21 18 0 0 1-42 0z" fill="oklch(0.32 0.1 315)"/>
+      <ellipse cx="20" cy="24" rx="7" ry="5" fill="oklch(0.62 0.12 320)" opacity="0.55" transform="rotate(-20 20 24)"/>
+      <path d="M28 12c-1-5 2-8 2-8" stroke="oklch(0.4 0.07 60)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="p-orange" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="26" fill="oklch(0.75 0.17 60)"/>
+      <circle cx="32" cy="32" r="21" fill="oklch(0.85 0.13 78)"/>
+      <g stroke="oklch(0.75 0.17 60)" stroke-width="2.2">
+        <path d="M32 12v40M12 32h40M18 18l28 28M46 18L18 46" />
+      </g>
+      <circle cx="32" cy="32" r="3.5" fill="oklch(0.75 0.17 60)"/>
+    </symbol>
+    <symbol id="p-beet" viewBox="0 0 56 68">
+      <path d="M28 22c11 0 18 7 17 17-1 8-8 14-13 18-2 2-2 5-4 8-2-3-2-6-4-8-5-4-12-10-13-18-1-10 6-17 17-17z" fill="oklch(0.42 0.16 350)"/>
+      <path d="M28 60c-1-2-2-4-3-5 4 1 8-1 10-3-2 3-5 6-7 8z" fill="oklch(0.33 0.13 348)"/>
+      <path d="M28 22c-2-8-8-12-8-12M28 22c0-9 2-15 2-15M28 22c4-7 10-9 10-9" stroke="oklch(0.5 0.13 145)" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+      <ellipse cx="21" cy="34" rx="5" ry="7" fill="oklch(0.58 0.14 350)" opacity="0.5" transform="rotate(-14 21 34)"/>
+    </symbol>
+    <symbol id="p-radish" viewBox="0 0 48 64">
+      <circle cx="24" cy="36" r="17" fill="oklch(0.6 0.2 15)"/>
+      <path d="M7 38a17 17 0 0 0 34 0 17 13 0 0 1-34 0z" fill="oklch(0.48 0.16 12)"/>
+      <path d="M24 53c0 5-2 9-2 9" stroke="oklch(0.9 0.02 90)" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <ellipse cx="18" cy="29" rx="5" ry="4" fill="oklch(0.78 0.12 20)" opacity="0.6"/>
+      <path d="M24 19c-2-7-7-10-7-10M24 19c1-8 3-13 3-13M24 19c4-6 9-8 9-8" stroke="oklch(0.52 0.12 140)" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="p-sprig" viewBox="0 0 48 64">
+      <path d="M24 60C24 38 24 22 24 8" stroke="oklch(0.5 0.12 145)" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+      <path d="M24 16c-8-2-12-9-12-9s8-2 13 4zM24 16c8-2 12-9 12-9s-8-2-13 4zM24 30c-9-2-13-10-13-10s9-2 14 5zM24 30c9-2 13-10 13-10s-9-2-14 5zM24 44c-8-2-12-9-12-9s8-2 13 4zM24 44c8-2 12-9 12-9s-8-2-13 4z" fill="oklch(0.56 0.13 143)"/>
+    </symbol>
+    <symbol id="p-fig" viewBox="0 0 52 64">
+      <path d="M26 14c2 8 16 12 17 26 1 11-7 18-17 18S8 51 9 40C10 26 24 22 26 14z" fill="oklch(0.35 0.09 320)"/>
+      <path d="M10 42c1 9 8 14 16 14 7 0 14-4 16-12-3 6-9 8-16 8-8 0-13-3-16-10z" fill="oklch(0.27 0.07 315)"/>
+      <ellipse cx="19" cy="36" rx="5" ry="7" fill="oklch(0.5 0.1 330)" opacity="0.55" transform="rotate(-12 19 36)"/>
+      <path d="M26 14c-1-5 2-9 4-10" stroke="oklch(0.45 0.08 120)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="p-pear" viewBox="0 0 52 68">
+      <path d="M26 20c3-6 10-6 14 0 2 4 1 7-1 11 6 6 8 14 5 22-3 8-13 12-18 12S11 61 8 53c-3-8-1-16 5-22-2-4-3-7-1-11 4-6 11-6 14 0z" fill="oklch(0.75 0.13 110)"/>
+      <path d="M9 50c2 8 10 13 17 13 6 0 13-4 16-10-4 8-12 10-16 10-6 0-14-4-17-13z" fill="oklch(0.62 0.12 105)" opacity="0.85"/>
+      <ellipse cx="19" cy="38" rx="6" ry="9" fill="oklch(0.88 0.1 108)" opacity="0.55" transform="rotate(-10 19 38)"/>
+      <path d="M26 20c0-6 4-10 4-10" stroke="oklch(0.4 0.07 60)" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<a class="visually-hidden" href="#crate" style="position:absolute;left:-9999px">Skip to content</a>
+
+<nav aria-label="Site">
+  <a class="brand" href="#top" aria-label="Sprig and Barrow — home">
+    <svg viewBox="0 0 48 64" aria-hidden="true"><path d="M24 60C24 38 24 22 24 8" stroke="oklch(0.5 0.12 145)" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M24 16c-8-2-12-9-12-9s8-2 13 4zM24 16c8-2 12-9 12-9s-8-2-13 4zM24 30c-9-2-13-10-13-10s9-2 14 5zM24 30c9-2 13-10 13-10s-9-2-14 5zM24 44c-8-2-12-9-12-9s8-2 13 4zM24 44c8-2 12-9 12-9s-8-2-13 4z" fill="oklch(0.56 0.13 143)"/></svg>
+    Sprig <span style="font-style:italic;font-weight:440">&amp;</span> Barrow
+  </a>
+  <div class="links">
+    <a href="#crate">The crate</a>
+    <a href="#kilo">By the kilo</a>
+    <a href="#hands">The hands</a>
+  </div>
+  <a class="visit-pill" href="#six">Visit the stall</a>
+</nav>
+
+<!-- ============ 1 · BEFORE DAWN ============ -->
+<header class="hero" id="top">
+  <div class="inner">
+    <div>
+      <span class="kicker">The corner greengrocer</span>
+      <h1>Picked before dawn<span class="amp">.</span></h1>
+      <p class="lede">Sprig &amp; Barrow is a market stall with a roof. In by five, stacked by
+      six, and everything on the boards was the best thing in its row that morning. It is
+      priced by the kilo, weighed in front of you, and it does not last the day.</p>
+      <div class="cta-row">
+        <a class="btn solid" href="#crate">Today's crate&nbsp;&nbsp;↓</a>
+        <a class="btn ghost" href="#six">Find the stall</a>
+      </div>
+      <p class="chalknote" style="margin-top:2.6rem" aria-hidden="true">the whole day is on this
+      shelf — scroll, and watch it sell through<span class="arrow">↓</span></p>
+    </div>
+    <figure class="signcard">
+      <img src="assets/sign.webp" width="780" height="1040"
+           alt="A wooden A-frame chalkboard on a wet brick footpath reading Sprig and Barrow — picked before dawn, priced by the kilo, gone by six, with a chalk drawing of a carrot">
+      <figcaption>The board goes out at five.</figcaption>
+    </figure>
+  </div>
+
+  <!-- the day's produce, resting. With JS + motion it falls past as you scroll; without, it rests here, complete. -->
+  <div class="shelf" aria-hidden="true">
+    <span class="pp" data-p0="0.10" data-dp="0.20" data-spin="150"  data-amp="26" style="left:6%"><svg viewBox="0 0 64 64"><use href="#p-tomato"/></svg></span>
+    <span class="pp" data-p0="0.16" data-dp="0.19" data-spin="-190" data-amp="34" style="left:13%;width:48px"><svg viewBox="0 0 64 48"><use href="#p-lemon"/></svg></span>
+    <span class="pp" data-p0="0.24" data-dp="0.21" data-spin="240"  data-amp="22" style="left:21%;width:40px"><svg viewBox="0 0 40 72"><use href="#p-carrot"/></svg></span>
+    <span class="pp" data-p0="0.31" data-dp="0.18" data-spin="-160" data-amp="30" style="left:28%"><svg viewBox="0 0 64 64"><use href="#p-apple"/></svg></span>
+    <span class="pp" data-p0="0.38" data-dp="0.20" data-spin="200"  data-amp="26" style="left:36%;width:46px"><svg viewBox="0 0 56 60"><use href="#p-plum"/></svg></span>
+    <span class="pp" data-p0="0.45" data-dp="0.19" data-spin="-260" data-amp="38" style="left:44%;width:52px"><svg viewBox="0 0 64 64"><use href="#p-orange"/></svg></span>
+    <span class="pp" data-p0="0.52" data-dp="0.21" data-spin="180"  data-amp="24" style="left:56%;width:46px"><svg viewBox="0 0 56 68"><use href="#p-beet"/></svg></span>
+    <span class="pp" data-p0="0.60" data-dp="0.18" data-spin="-210" data-amp="30" style="left:64%;width:40px"><svg viewBox="0 0 48 64"><use href="#p-radish"/></svg></span>
+    <span class="pp" data-p0="0.67" data-dp="0.20" data-spin="140"  data-amp="42" style="left:72%;width:38px"><svg viewBox="0 0 48 64"><use href="#p-sprig"/></svg></span>
+    <span class="pp" data-p0="0.75" data-dp="0.19" data-spin="-170" data-amp="28" style="left:80%;width:44px"><svg viewBox="0 0 52 68"><use href="#p-pear"/></svg></span>
+    <span class="pp wonky" style="left:89%;width:38px"><svg viewBox="0 0 44 72"><use href="#p-wonky"/></svg>
+      <span class="wonky-tag chalkline">still counts</span></span>
+  </div>
+</header>
+
+<!-- ============ 2 · THE CRATE ============ -->
+<section id="crate" aria-labelledby="crate-h">
+  <div class="band">
+    <img src="assets/crate.webp" width="1600" height="900" loading="lazy"
+         alt="A weathered timber crate packed edge to edge with ripe heirloom tomatoes, seen from above, one cut open">
+    <div class="band-title"><h2 id="crate-h">The day starts in the dark.</h2></div>
+  </div>
+  <div class="inner">
+    <span class="kicker">In by five</span>
+    <p class="lede rv">The van is loaded while the streetlights are still on. What comes back
+    decides the whole day — there is no storeroom, no cold chain, no second delivery. If it's
+    on the stall, it came in this morning; if it's good, it's because someone said no to a
+    lot of crates before this one.</p>
+    <div class="ledger rv" role="table" aria-label="Today's crate — what came in this morning">
+      <div class="ledger-head"><b>Today's crate</b><span>chalked at 5:40</span></div>
+      <ul>
+        <li><svg aria-hidden="true" viewBox="0 0 64 64"><use href="#p-tomato"/></svg>
+            <span class="what">Heirloom tomatoes <small>vine-ripe, from the hills — the crate above</small></span>
+            <span class="qty">38&nbsp;kg</span></li>
+        <li><svg aria-hidden="true" viewBox="0 0 48 64"><use href="#p-sprig"/></svg>
+            <span class="what">Rainbow chard <small>cut yesterday evening, stems like stained glass</small></span>
+            <span class="qty">14&nbsp;kg</span></li>
+        <li><svg aria-hidden="true" viewBox="0 0 64 64"><use href="#p-orange"/></svg>
+            <span class="what">Blood oranges <small>heavy for their size — the good sign</small></span>
+            <span class="qty">26&nbsp;kg</span></li>
+        <li class="gone"><svg aria-hidden="true" viewBox="0 0 52 64"><use href="#p-fig"/></svg>
+            <span class="what">Black figs <small>gone by eleven. they always are.</small></span>
+            <span class="qty">6&nbsp;kg</span></li>
+        <li><svg aria-hidden="true" viewBox="0 0 40 72"><use href="#p-carrot"/></svg>
+            <span class="what">Dutch carrots <small>tops on, still wearing a little soil</small></span>
+            <span class="qty">22&nbsp;kg</span></li>
+        <li><svg aria-hidden="true" viewBox="0 0 48 64"><use href="#p-radish"/></svg>
+            <span class="what">Breakfast radishes <small>for the butter-and-salt people</small></span>
+            <span class="qty">9&nbsp;kg</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · BY THE KILO ============ -->
+<section id="kilo" aria-labelledby="kilo-h">
+  <div class="band">
+    <img src="assets/citrus.webp" width="1600" height="900" loading="lazy"
+         alt="Backlit blood orange and grapefruit cross-sections filling the whole frame, glowing like stained glass">
+    <div class="band-title"><h2 id="kilo-h">By the kilo.</h2></div>
+  </div>
+  <div class="inner">
+    <span class="kicker">Weighed in front of you</span>
+    <p class="lede rv">No punnets, no shrink-wrap, no small print. The scale sits where you can
+    see it, the needle settles where it settles, and what it says is what you pay. Load it up
+    and see for yourself.</p>
+
+    <div class="weigh">
+      <div class="scale-wrap rv">
+        <div class="pan-load" id="panLoad" aria-hidden="true"></div>
+        <svg viewBox="0 0 420 360" role="img" aria-labelledby="scale-title">
+          <title id="scale-title">A drawn market scale. Choose produce to load the pan and the needle shows the total.</title>
+          <!-- pan -->
+          <path d="M110 52h200l-16 26H126z" fill="oklch(0.42 0.06 50)"/>
+          <path d="M126 78h168l-8 12H134z" fill="oklch(0.33 0.05 50)"/>
+          <!-- pillar -->
+          <rect x="200" y="90" width="20" height="70" rx="6" fill="oklch(0.42 0.06 50)"/>
+          <!-- dial -->
+          <circle cx="210" cy="252" r="96" fill="var(--chalk)" stroke="oklch(0.33 0.05 50)" stroke-width="10"/>
+          <g stroke="oklch(0.33 0.05 50)" stroke-width="3.4" stroke-linecap="round">
+            <line x1="210" y1="168" x2="210" y2="182"/>
+            <line x1="141" y1="220" x2="153" y2="226"/>
+            <line x1="279" y1="220" x2="267" y2="226"/>
+            <line x1="129" y1="278" x2="143" y2="275"/>
+            <line x1="291" y1="278" x2="277" y2="275"/>
+            <line x1="164" y1="184" x2="171" y2="194"/>
+            <line x1="256" y1="184" x2="249" y2="194"/>
+          </g>
+          <text x="210" y="216" text-anchor="middle" font-family="Fraunces,serif" font-size="17" font-style="italic" fill="oklch(0.33 0.05 50)">kilos</text>
+          <!-- needle -->
+          <g id="needle">
+            <path d="M210 300 L204 262 210 178 216 262 Z" fill="oklch(0.55 0.2 25)"/>
+            <circle cx="210" cy="300" r="12" fill="oklch(0.33 0.05 50)"/>
+          </g>
+          <!-- feet -->
+          <path d="M150 344h120l10 10H140z" fill="oklch(0.33 0.05 50)"/>
+          <rect x="196" y="336" width="28" height="12" fill="oklch(0.42 0.06 50)"/>
+        </svg>
+        <p class="readout" id="readout" aria-live="polite">The pan is empty — pick something.</p>
+      </div>
+
+      <div>
+        <ul class="chips" id="chips">
+          <li><button class="chip" type="button" aria-pressed="false" data-kg="1.2" data-rate="6.5" data-sym="p-tomato" data-name="tomatoes">
+            <svg aria-hidden="true" viewBox="0 0 64 64"><use href="#p-tomato"/></svg>
+            <span><b>Tomatoes</b><small>$6.50 / kg · a good bowl ≈ 1.2 kg</small></span></button></li>
+          <li><button class="chip" type="button" aria-pressed="false" data-kg="0.8" data-rate="5" data-sym="p-lemon" data-name="lemons">
+            <svg aria-hidden="true" viewBox="0 0 64 48"><use href="#p-lemon"/></svg>
+            <span><b>Lemons</b><small>$5.00 / kg · a generous four ≈ 0.8 kg</small></span></button></li>
+          <li><button class="chip" type="button" aria-pressed="false" data-kg="1" data-rate="4" data-sym="p-carrot" data-name="carrots">
+            <svg aria-hidden="true" viewBox="0 0 40 72"><use href="#p-carrot"/></svg>
+            <span><b>Dutch carrots</b><small>$4.00 / kg · two bunches ≈ 1 kg</small></span></button></li>
+          <li><button class="chip" type="button" aria-pressed="false" data-kg="1.5" data-rate="5.5" data-sym="p-orange" data-name="blood oranges">
+            <svg aria-hidden="true" viewBox="0 0 64 64"><use href="#p-orange"/></svg>
+            <span><b>Blood oranges</b><small>$5.50 / kg · a big net ≈ 1.5 kg</small></span></button></li>
+          <li><button class="chip" type="button" aria-pressed="false" data-kg="0.9" data-rate="7" data-sym="p-beet" data-name="beetroot">
+            <svg aria-hidden="true" viewBox="0 0 56 68"><use href="#p-beet"/></svg>
+            <span><b>Beetroot</b><small>$7.00 / kg · a bunch ≈ 0.9 kg</small></span></button></li>
+          <li><button class="chip" type="button" aria-pressed="false" data-kg="0.6" data-rate="9" data-sym="p-pear" data-name="pears">
+            <svg aria-hidden="true" viewBox="0 0 52 68"><use href="#p-pear"/></svg>
+            <span><b>Beurré pears</b><small>$9.00 / kg · three ripe ≈ 0.6 kg</small></span></button></li>
+        </ul>
+        <p class="kilo-note chalkline rv">the needle rounds down. always has.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 · THE HANDS ============ -->
+<section id="hands" aria-labelledby="hands-h">
+  <div class="inner">
+    <span class="kicker">The hands</span>
+    <h2 id="hands-h">Someone chose this.</h2>
+    <div class="hands-grid">
+      <p class="lede rv" style="margin-top:0.6rem">Nothing here arrived by conveyor. Every bunch
+      was picked up, turned over, smelled, and chosen — or put back — by someone who has done
+      it since before you were up. That judgement is the whole shop. The growers get named at
+      the stall, the seconds get sold as seconds, and the wonky ones sit proudly at the end
+      of the shelf.</p>
+      <figure class="hands-photo rv">
+        <img src="assets/grocer.webp" width="1400" height="933" loading="lazy"
+             alt="A greengrocer in a plain green apron, absorbed in gathering an armful of rainbow chard under a striped market awning">
+        <figcaption>Chard, chosen. AI-minted portrait — see the guide.</figcaption>
+      </figure>
+    </div>
+    <div class="season rv">
+      <b>Best right now</b>
+      <ul>
+        <li class="best">tomatoes</li>
+        <li class="best">rainbow chard</li>
+        <li class="best">blood oranges</li>
+        <li>figs</li>
+        <li class="best">basil</li>
+        <li>beetroot</li>
+        <li>quinces</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · GONE BY SIX ============ -->
+<section id="six" aria-labelledby="six-h">
+  <div class="inner">
+    <span class="kicker">Gone by six</span>
+    <h2 id="six-h">We sell out. That's the point.</h2>
+    <p class="lede rv">A stall that never runs out is buying too much. Come at seven for the
+    pick of it, come at five for a kind price on what's left, come at six and we'll see you
+    tomorrow — the van's already being swept out.</p>
+    <div class="visit rv">
+      <div class="visit-box"><h3>Where</h3><p>12 Barrow Lane — the corner with the striped
+        awning. You'll hear the crates before you see them.</p></div>
+      <div class="visit-box"><h3>When</h3><p>Tuesday to Saturday, dawn until six — or until
+        the boards are empty, whichever comes first.</p></div>
+      <div class="visit-box"><h3>How</h3><p>Bring a bag, or borrow a box from the stack.
+        The scale does the talking; card or coins both fine.</p></div>
+    </div>
+    <p class="carrot-note rv" aria-hidden="true">
+      <svg viewBox="0 0 44 72"><use href="#p-wonky"/></svg>
+      <span class="chalkline">the wonky carrot is still on the shelf. it always is.</span>
+    </p>
+  </div>
+  <div class="band">
+    <img src="assets/dawn.webp" width="1920" height="1080" loading="lazy"
+         alt="A greengrocer stall at blue-hour dawn, crates stacked under a striped awning and a string of warm bulbs, the wet street empty">
+  </div>
+  <footer>
+    Sprig &amp; Barrow is a fictional demonstration business; this page is a design template.
+    Imagery is AI-generated and disclosed in <a href="guide/">the guide</a> — including how the
+    falling produce works. No tomatoes were bruised in the making.
+  </footer>
+</section>
+
+<span id="dayclock" aria-hidden="true">5:40 am</span>
+<button id="stillness" type="button" aria-pressed="false" title="Pause the falling produce">stillness</button>
+
+<script>
+(() => {
+  "use strict";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- reveal on scroll ---------- */
+  const rv = document.querySelectorAll(".rv");
+  if ("IntersectionObserver" in window && !reduce) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }), { threshold: 0.18 });
+    rv.forEach((el) => io.observe(el));
+  } else rv.forEach((el) => el.classList.add("in"));
+
+  /* ---------- the falling crate (primary axis) ----------
+     Deterministic scroll-driven kinematics: every transform below is a pure
+     function of scroll progress. No engine, no collisions, no springs —
+     scroll back up and the day un-happens. */
+  let still = false;
+  const pieces = [...document.querySelectorAll(".pp[data-p0]")].map((el) => ({
+    el, p0: +el.dataset.p0, dp: +el.dataset.dp, spin: +el.dataset.spin,
+    amp: +el.dataset.amp, startX: 0, startY: 0,
+  }));
+
+  function measure() {
+    const sMax = document.documentElement.scrollHeight - innerHeight;
+    for (const p of pieces) {
+      /* where the piece rests, in document coords — its fall starts exactly there */
+      const wasFalling = p.el.classList.contains("falling");
+      p.el.classList.remove("falling");
+      const r = p.el.getBoundingClientRect();
+      p.startX = r.left + scrollX;
+      p.startY = r.top + scrollY;
+      p.scrollAt = p.p0 * sMax;           /* scrollY when this piece lets go   */
+      if (wasFalling) p.el.classList.add("falling");
+    }
+    return sMax;
+  }
+
+  let sMax = 1;
+  const clock = document.getElementById("dayclock");
+  function tellTime(p) {
+    /* the stall's day: 5:40 at the top of the page, 6:00 pm at the bottom */
+    const mins = Math.round((340 + p * (1080 - 340)) / 5) * 5;
+    const h24 = Math.floor(mins / 60), m = mins % 60;
+    const h12 = ((h24 + 11) % 12) + 1;
+    clock.textContent = `${h12}:${String(m).padStart(2, "0")} ${h24 < 12 ? "am" : "pm"}`;
+    clock.classList.toggle("on", p > 0.03 && p < 0.985);
+  }
+  function fall() {
+    const p = sMax > 0 ? scrollY / sMax : 0;
+    tellTime(p);
+    for (const it of pieces) {
+      if (still || reduce || p < it.p0) {
+        it.el.classList.remove("falling");
+        it.el.style.transform = "";
+        it.el.classList.remove("fallen");
+        continue;
+      }
+      const t = Math.min((p - it.p0) / it.dp, 1);
+      const y0 = it.startY - it.scrollAt;               /* viewport y at release */
+      const y  = y0 + t * t * (innerHeight * 1.25 - y0);
+      const x  = it.startX + Math.sin(t * 6.4 + it.startX) * it.amp * t;
+      it.el.classList.add("falling");
+      it.el.classList.toggle("fallen", t >= 1 && y > innerHeight + 80);
+      it.el.style.transform = `translate(${x}px, ${y}px) rotate(${it.spin * t}deg)`;
+    }
+  }
+
+  if (!reduce && pieces.length) {
+    const boot = () => { sMax = measure(); fall(); };
+    let raf = 0;
+    addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; fall(); }); }, { passive: true });
+    let rrf = 0;
+    addEventListener("resize", () => { if (!rrf) rrf = requestAnimationFrame(() => { rrf = 0; boot(); }); });
+    if (document.readyState === "complete") boot(); else addEventListener("load", boot);
+
+    const btn = document.getElementById("stillness");
+    btn.addEventListener("click", () => {
+      still = !still;
+      btn.setAttribute("aria-pressed", String(still));
+      btn.textContent = still ? "let it fall" : "stillness";
+      fall();
+    });
+  } else {
+    document.getElementById("stillness").hidden = true;
+  }
+
+  /* ---------- the kilo scale ---------- */
+  const needle = document.getElementById("needle");
+  const readout = document.getElementById("readout");
+  const panLoad = document.getElementById("panLoad");
+  const chips = [...document.querySelectorAll(".chip")];
+  const AUD = (n) => "$" + n.toFixed(2).replace(/\.00$/, "");
+  function weigh() {
+    const on = chips.filter((c) => c.getAttribute("aria-pressed") === "true");
+    const kg = on.reduce((s, c) => s + +c.dataset.kg, 0);
+    const cost = on.reduce((s, c) => s + +c.dataset.kg * +c.dataset.rate, 0);
+    /* 0 kg → -128°, 8 kg → +128°, floor to the dial's honesty */
+    const deg = Math.min(kg / 8, 1) * 256 - 128;
+    needle.style.transform = `rotate(${kg ? deg : -128}deg)`;
+    panLoad.replaceChildren(...on.map((c) => {
+      const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      s.setAttribute("viewBox", "0 0 64 72");
+      const u = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      u.setAttribute("href", "#" + c.dataset.sym);
+      s.append(u); return s;
+    }));
+    readout.innerHTML = kg
+      ? `<b>${kg.toFixed(1).replace(/\.0$/, "")} kg</b> on the pan — ${on.map((c) => c.dataset.name).join(", ")} — ${AUD(cost)}`
+      : "The pan is empty — pick something.";
+  }
+  chips.forEach((c) => c.addEventListener("click", () => {
+    c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    weigh();
+  }));
+})();
+</script>
+</body>
+</html>

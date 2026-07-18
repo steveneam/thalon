@@ -1,0 +1,16 @@
+{
+  "slug": "sprig-and-barrow",
+  "name": "Sprig & Barrow",
+  "vertical": "retail-greengrocer",
+  "oneLiner": "The corner greengrocer — picked before dawn, priced by the kilo, gone by six.",
+  "axes": {
+    "primary": "physics-interaction",
+    "secondary": "exceptional-palette"
+  },
+  "paletteSeed": "produce colour worlds — one family per section: market-paper cream → tomato vermilion → citrus amber → chard green → plum dusk; chalk white annotations carry the stall's voice throughout",
+  "typeDirection": "Fraunces variable (soft wonky display serif, market-poster warmth; italic = chalk voice) + Work Sans (body) — both OFL, vendored",
+  "motionBudget": "one deterministic gravity: the day's crate empties as you scroll — drawn produce falls past the viewport, position/rotation pure functions of scroll progress with per-item variance (no engine, no collisions, scroll up and it all flies back); the kilo-scale instrument swings its needle on interaction; reduced-motion/no-JS = the full shelf resting in the hero, complete content",
+  "port": "generic re-design of the gitignored client grocer instantiation (client copy untouched); simulation physics deliberately replaced with scroll-driven kinematics",
+  "wave": 2.5,
+  "built": "2026-07-18"
+}
