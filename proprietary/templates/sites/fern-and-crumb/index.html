@@ -175,9 +175,24 @@ figcaption {
   font-family: var(--display);
   font-variation-settings: "wght" 740, "BNCE" 30, "INFM" 62;
   font-size: clamp(1.9rem, 4vw, 2.9rem);
-  margin: 1.6em 0 0.5em; color: var(--fern-deep);
+  margin: 0 0 0.5em; color: var(--fern-deep);
 }
-.menu h3:first-child { margin-top: 0; }
+/* each menu section pairs a dish photo with its list, image side alternating */
+.menu-section {
+  display: grid; grid-template-columns: minmax(0, 320px) 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem); align-items: center;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+.menu-section:first-child { margin-top: 1.75rem; }
+.menu-section:nth-child(even) .dish { order: 2; }
+.dish img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0.75rem; }
+.dish figcaption {
+  margin-top: 0.55rem; font-size: 0.85rem; font-style: italic; color: var(--espresso);
+}
+@media (max-width: 46rem) {
+  .menu-section { grid-template-columns: 1fr; gap: 1.25rem; }
+  .menu-section:nth-child(even) .dish { order: 0; }
+}
 .menu ul { list-style: none; max-width: 44rem; }
 .menu li {
   display: flex; align-items: baseline; gap: 0.75rem;
@@ -352,29 +367,55 @@ footer .measure { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: sp
     <p class="eyebrow">The board</p>
     <h2 id="board-head" class="chapter-head proof">Written fresh, priced plainly.</h2>
     <div class="menu">
-      <h3>Espresso</h3>
-      <ul>
-        <li><span class="item">short black</span><span class="note">our rotating single, pulled honest</span><span class="price">4</span></li>
-        <li><span class="item">flat white</span><span class="note">the fern lives here</span><span class="price">4.5</span></li>
-        <li><span class="item">batch filter</span><span class="note">brewed on the hour, never before</span><span class="price">5</span></li>
-        <li><span class="item">cold brew</span><span class="note">steeped overnight, like the dough</span><span class="price">5.5</span></li>
-      </ul>
-      <h3>Bakes</h3>
-      <ul>
-        <li>
-          <span class="item">croissan<span class="bite"><span class="bitten">t</span></span></span>
-          <span class="note">out at 7:05 — someone always gets to it first</span><span class="price">5.5</span>
-        </li>
-        <li><span class="item">morning bun</span><span class="note">seeded, honeyed, built for one hand</span><span class="price">6</span></li>
-        <li><span class="item">poppy swirl</span><span class="note">dark, glossy, a little serious</span><span class="price">6</span></li>
-        <li><span class="item">sourdough loaf</span><span class="note">whole, to take the morning home</span><span class="price">9</span></li>
-      </ul>
-      <h3>Morning plates</h3>
-      <ul>
-        <li><span class="item">ricotta toast</span><span class="note">on yesterday's sourdough, today's honey</span><span class="price">14</span></li>
-        <li><span class="item">eggs on sourdough</span><span class="note">soft, buttered, no theatrics</span><span class="price">16</span></li>
-        <li><span class="item">seasonal bowl</span><span class="note">whatever the market was proud of</span><span class="price">17</span></li>
-      </ul>
+      <div class="menu-section">
+        <figure class="dish">
+          <img src="assets/flat-white.webp" alt="A flat white in a plain terracotta cup with a fern-leaf poured in the crema, steam rising, morning light and plants behind." width="1000" height="750" loading="lazy">
+          <figcaption>the flat white — the fern lives here</figcaption>
+        </figure>
+        <div class="menu-list">
+          <h3>Espresso</h3>
+          <ul>
+            <li><span class="item">short black</span><span class="note">our rotating single, pulled honest</span><span class="price">4</span></li>
+            <li><span class="item">flat white</span><span class="note">the fern lives here</span><span class="price">4.5</span></li>
+            <li><span class="item">batch filter</span><span class="note">brewed on the hour, never before</span><span class="price">5</span></li>
+            <li><span class="item">cold brew</span><span class="note">steeped overnight, like the dough</span><span class="price">5.5</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <figure class="dish">
+          <img src="assets/morning-bun.webp" alt="A golden seeded, honey-glazed morning bun on a plain plate in warm morning light." width="1000" height="750" loading="lazy">
+          <figcaption>the morning bun — seeded, honeyed</figcaption>
+        </figure>
+        <div class="menu-list">
+          <h3>Bakes</h3>
+          <ul>
+            <li>
+              <span class="item">croissan<span class="bite"><span class="bitten">t</span></span></span>
+              <span class="note">out at 7:05 — someone always gets to it first</span><span class="price">5.5</span>
+            </li>
+            <li><span class="item">morning bun</span><span class="note">seeded, honeyed, built for one hand</span><span class="price">6</span></li>
+            <li><span class="item">poppy swirl</span><span class="note">dark, glossy, a little serious</span><span class="price">6</span></li>
+            <li><span class="item">sourdough loaf</span><span class="note">whole, to take the morning home</span><span class="price">9</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <figure class="dish">
+          <img src="assets/ricotta-toast.webp" alt="Ricotta toast on rustic sourdough topped with diced red onion, cherry tomatoes, fresh herbs and a drizzle of olive oil, in warm morning light." width="1000" height="750" loading="lazy">
+          <figcaption>ricotta toast — tomato, red onion, herbs</figcaption>
+        </figure>
+        <div class="menu-list">
+          <h3>Morning plates</h3>
+          <ul>
+            <li><span class="item">ricotta toast</span><span class="note">tomato, red onion, herbs, a good olive oil</span><span class="price">14</span></li>
+            <li><span class="item">eggs on sourdough</span><span class="note">soft, buttered, no theatrics</span><span class="price">16</span></li>
+            <li><span class="item">seasonal bowl</span><span class="note">whatever the market was proud of</span><span class="price">17</span></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -383,7 +424,7 @@ footer .measure { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: sp
 <section class="chapter keeper" aria-labelledby="keeper-head">
   <div class="measure">
     <div class="keeper-grid">
-      <img src="assets/barista.webp" alt="A barista in a rust waffle-knit sweater absorbed in pouring steamed milk at a matte black espresso machine, plants and morning light behind her." width="1100" height="1650" loading="lazy">
+      <img src="assets/barista.webp" alt="A barista in a rust waffle-knit sweater absorbed in pouring steamed milk, steam rising from the cup, warm low autumn light and softly blurred plants behind her." width="1100" height="1650" loading="lazy">
       <div>
         <p class="eyebrow">The keeper</p>
         <h2 id="keeper-head" class="chapter-head proof">Someone's always minding the pour.</h2>

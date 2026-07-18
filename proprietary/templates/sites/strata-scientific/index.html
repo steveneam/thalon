@@ -144,6 +144,35 @@ section { padding: clamp(3rem, 6vw, 5.5rem) 0; border-bottom: 1px solid var(--bl
 .spec-table td:last-child, .spec-table th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 .slide-note { font-size: 0.95rem; color: var(--ink-soft); margin-top: 1rem; }
 
+/* ——— the slide tray (horizontal scroll — the concept made literal) ——— */
+.tray-hint {
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.06em;
+  color: var(--ink-soft); margin-top: 1.5rem;
+}
+.tray {
+  display: flex; gap: 1.25rem;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  padding: 1.5rem clamp(1.25rem, 4vw, 3.5rem) 1.75rem;
+  margin-top: 0.5rem;
+  scrollbar-color: var(--blue-line) transparent;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-left: clamp(1.25rem, 4vw, 3.5rem);
+}
+.tray:focus-visible { outline: 2px solid var(--blue); outline-offset: -6px; }
+.tray::-webkit-scrollbar { height: 8px; }
+.tray::-webkit-scrollbar-thumb { background: var(--blue-line); border-radius: 4px; }
+.tray-card {
+  flex: 0 0 auto; width: min(84vw, 400px);
+  scroll-snap-align: start;
+  border: 1px solid var(--ink); background: var(--paper);
+  display: flex; flex-direction: column;
+}
+.tray-card .specimen { border: 0; border-bottom: 1px solid var(--ink); }
+.tray-card .card-body { padding: 1.1rem 1.2rem 1.3rem; }
+.tray-card .spec-table caption { font-size: 0.95rem; padding-bottom: 0.5rem; }
+.tray-card .slide-note { font-size: 0.9rem; margin-top: 0.85rem; }
+
 /* ——— the instrument: certificate + trace ——— */
 .instrument { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3rem); margin-top: 2rem; }
 @media (max-width: 52rem) { .instrument { grid-template-columns: 1fr; } }
@@ -210,10 +239,8 @@ footer a { color: var(--ink-soft); }
     </div>
     <nav class="contents" aria-label="Contents">
       <a href="#standard">00 · The Standard</a>
-      <a href="#buffers">01 · Buffers &amp; Reagents</a>
-      <a href="#filtration">02 · Filtration</a>
-      <a href="#culture">03 · Cell Culture</a>
-      <a href="#air">04 · Supply &amp; Air</a>
+      <a href="#catalogue">01 · The Catalogue</a>
+      <a href="#air">02 · Supply &amp; Air</a>
     </nav>
   </div>
 </header>
@@ -283,22 +310,26 @@ footer a { color: var(--ink-soft); }
   </div>
 </section>
 
-<!-- 01 BUFFERS -->
-<section id="buffers">
+<!-- 01 THE CATALOGUE · the slide tray, pushed horizontally -->
+<section id="catalogue">
   <div class="wrap">
     <div class="sec-head">
-      <h2>Buffers &amp; Reagents</h2>
+      <h2>The catalogue</h2>
       <span class="folio">01</span>
     </div>
-    <div class="slide">
+    <p class="tray-hint">Four families on the tray. <span aria-hidden="true">Push the slides across →</span></p>
+  </div>
+
+  <div class="tray" role="region" aria-label="Product families — scroll horizontally" tabindex="0">
+    <article class="tray-card">
       <figure class="specimen">
         <img class="rack" src="assets/micro-crystal.webp" alt="Polarized-light micrograph of a birefringent crystal field in saturated interference colours." width="1400" height="933" loading="lazy">
         <span class="scalebar" aria-hidden="true"><span class="bar"></span>50 µm</span>
         <figcaption class="label"><b>01 · Buffers</b><span>−20 °C · 500 mL</span></figcaption>
       </figure>
-      <div>
+      <div class="card-body">
         <table class="spec-table">
-          <caption>Analytical-grade buffers and reagents, crystallography-verified.</caption>
+          <caption>Analytical-grade buffers &amp; reagents, crystallography-verified.</caption>
           <thead><tr><th>Line</th><th>Grade</th><th>Purity</th></tr></thead>
           <tbody>
             <tr><td>Phosphate buffers</td><td>ACS</td><td>≥ 99.5%</td></tr>
@@ -307,29 +338,20 @@ footer a { color: var(--ink-soft); }
             <tr><td>Custom molarity</td><td>To spec</td><td>Certified</td></tr>
           </tbody>
         </table>
-        <p class="slide-note">The crystal field is the reagent itself under crossed polars —
-        the colours are birefringence, not dye. Made to your molarity on request.</p>
+        <p class="slide-note">The crystal field is the reagent itself under crossed
+        polars — the colours are birefringence, not dye.</p>
       </div>
-    </div>
-  </div>
-</section>
+    </article>
 
-<!-- 02 FILTRATION -->
-<section id="filtration">
-  <div class="wrap">
-    <div class="sec-head">
-      <h2>Filtration &amp; Consumables</h2>
-      <span class="folio">02</span>
-    </div>
-    <div class="slide">
+    <article class="tray-card">
       <figure class="specimen">
-        <img class="rack" src="assets/micro-membrane.webp" alt="Electron-micrograph-style view of a filtration membrane fiber matrix in monochrome silver-blue." width="1400" height="933" loading="lazy">
+        <img class="rack" src="assets/micro-membrane.webp" alt="Electron-micrograph-style view of a filtration membrane fiber matrix in monochrome silver-blue." width="1300" height="867" loading="lazy">
         <span class="scalebar" aria-hidden="true"><span class="bar"></span>10 µm</span>
         <figcaption class="label"><b>02 · Filtration</b><span>0.22 µm · sterile</span></figcaption>
       </figure>
-      <div>
+      <div class="card-body">
         <table class="spec-table">
-          <caption>Membranes, syringe filters, tips and tubes — sterile, endotoxin-tested.</caption>
+          <caption>Membranes &amp; syringe filters — sterile, endotoxin-tested.</caption>
           <thead><tr><th>Item</th><th>Pore</th><th>Format</th></tr></thead>
           <tbody>
             <tr><td>PES membranes</td><td>0.22 µm</td><td>47 mm</td></tr>
@@ -338,17 +360,18 @@ footer a { color: var(--ink-soft); }
             <tr><td>Centrifuge tubes</td><td>—</td><td>15 / 50 mL</td></tr>
           </tbody>
         </table>
-        <p class="slide-note">The matrix pictured is the retention layer at working scale —
-        what stands between your prep and everything you don't want in it.</p>
+        <p class="slide-note">The matrix pictured is the retention layer at working
+        scale — what stands between your prep and everything you don't want in it.</p>
       </div>
-    </div>
-    <div class="slide" style="margin-top:2.5rem">
+    </article>
+
+    <article class="tray-card">
       <figure class="specimen">
-        <img class="rack" src="assets/consumables.webp" alt="White laboratory consumables — unmarked pipette tips and tubes on a white surface in raking light." width="1400" height="933" loading="lazy">
-        <span class="scalebar" aria-hidden="true"><span class="bar"></span>plate scale</span>
-        <figcaption class="label"><b>02 · Plasticware</b><span>DNase / RNase-free</span></figcaption>
+        <img class="rack" src="assets/consumables.webp" alt="A repeating field of clear laboratory pipette tips seen from above." width="1400" height="933" loading="lazy">
+        <span class="scalebar" aria-hidden="true"><span class="bar"></span>rack scale</span>
+        <figcaption class="label"><b>03 · Plasticware</b><span>DNase / RNase-free</span></figcaption>
       </figure>
-      <div>
+      <div class="card-body">
         <table class="spec-table">
           <caption>Plasticware, certified clean, lot-traceable to the resin.</caption>
           <thead><tr><th>Item</th><th>Certification</th><th>Pack</th></tr></thead>
@@ -358,29 +381,20 @@ footer a { color: var(--ink-soft); }
             <tr><td>Microtubes</td><td>Sterile</td><td>500</td></tr>
           </tbody>
         </table>
-        <p class="slide-note">Unbranded by design — your bench, your labels. We keep the
-        resin lot on file so a contamination trace never dead-ends at us.</p>
+        <p class="slide-note">Unbranded by design — your bench, your labels. We keep
+        the resin lot on file so a contamination trace never dead-ends at us.</p>
       </div>
-    </div>
-  </div>
-</section>
+    </article>
 
-<!-- 03 CELL CULTURE -->
-<section id="culture">
-  <div class="wrap">
-    <div class="sec-head">
-      <h2>Cell Culture</h2>
-      <span class="folio">03</span>
-    </div>
-    <div class="slide">
+    <article class="tray-card">
       <figure class="specimen">
         <img class="rack" src="assets/micro-cell.webp" alt="Fluorescence micrograph of stained cultured cells in violet and teal against a dark field." width="1400" height="933" loading="lazy">
         <span class="scalebar" aria-hidden="true"><span class="bar"></span>20 µm</span>
-        <figcaption class="label"><b>03 · Culture</b><span>+4 °C · mycoplasma-tested</span></figcaption>
+        <figcaption class="label"><b>04 · Cell culture</b><span>+4 °C · mycoplasma-tested</span></figcaption>
       </figure>
-      <div>
+      <div class="card-body">
         <table class="spec-table">
-          <caption>Media, sera and supplements — mycoplasma- and endotoxin-tested.</caption>
+          <caption>Media, sera &amp; supplements — mycoplasma- and endotoxin-tested.</caption>
           <thead><tr><th>Line</th><th>Test</th><th>Format</th></tr></thead>
           <tbody>
             <tr><td>Classical media</td><td>Endotoxin &lt; 0.1 EU</td><td>500 mL</td></tr>
@@ -388,10 +402,10 @@ footer a { color: var(--ink-soft); }
             <tr><td>Supplements</td><td>Sterility</td><td>To spec</td></tr>
           </tbody>
         </table>
-        <p class="slide-note">The stained field is a viability read at 20 µm — the culture
-        thriving is the whole point of everything upstream of it.</p>
+        <p class="slide-note">The stained field is a viability read at 20 µm — the
+        culture thriving is the point of everything upstream of it.</p>
       </div>
-    </div>
+    </article>
   </div>
 </section>
 
@@ -400,15 +414,16 @@ footer a { color: var(--ink-soft); }
   <div class="wrap">
     <div class="sec-head">
       <h2>Supply, and a little air.</h2>
-      <span class="folio">04</span>
+      <span class="folio">02</span>
     </div>
     <div class="sec-body">
       <p>We hold stock so you don't have to gamble a run on a lead time — most lines ship
-      same day, cold chain intact, tracked to your dock. A lab is a place with windows, not
-      a basement; we like ours that way, and we suspect yours is too.</p>
+      same day, cold chain intact, tracked to your dock. A lab is a place with a view, not
+      a basement; ours looks out over the valley, and we suspect the good days at yours
+      feel a little like this too.</p>
     </div>
     <figure class="air-figure">
-      <img class="rack" src="assets/air-courtyard.webp" alt="A green courtyard with trees seen through a large open glass door from a bright, empty laboratory corridor in morning sun." width="2048" height="1024" loading="lazy">
+      <img class="rack" src="assets/window-view.webp" alt="The view from a high floor of the institute through a floor-to-ceiling window: green fields, a river and a road leading in, distant mountains under a clear sky." width="2048" height="1024" loading="lazy">
     </figure>
     <a class="request" href="#standard">Request Catalogue No. 7</a>
   </div>

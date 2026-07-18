@@ -29,16 +29,37 @@
   },
   {
     "file": "barista.webp",
-    "pinnedHash": "00f2af2e468d9fda9558439b98d0e33e27b14139bf0d0f6cbb0e7209d53b484b",
+    "pinnedHash": "ee6e13bef35e56e1989f1653dca8a0b23822e3e3443062d6f931f0534ddc214a",
     "width": 1100,
     "height": 1650,
-    "quality": 78
+    "quality": 80
   },
   {
     "file": "rack.webp",
     "pinnedHash": "9e5ecd43168fd222cf4436a27316c132b14e38772ce3f3a4609c2305fce33d9e",
     "width": 1400,
     "height": 933,
+    "quality": 78
+  },
+  {
+    "file": "flat-white.webp",
+    "pinnedHash": "601ed8100d5df6d36ba31873ba366313ed3892a122b310843a02bdd9e635b90d",
+    "width": 1000,
+    "height": 750,
+    "quality": 78
+  },
+  {
+    "file": "morning-bun.webp",
+    "pinnedHash": "dd16761a018ab4741f91cb4c2f263ab4b1344073c1474c4742185ed850206557",
+    "width": 1000,
+    "height": 750,
+    "quality": 78
+  },
+  {
+    "file": "ricotta-toast.webp",
+    "pinnedHash": "8f7d72b1ad22d4eba76ffdb937e8580eba7572ead687f178357c514bf2cb927a",
+    "width": 1000,
+    "height": 750,
     "quality": 78
   }
 ]
