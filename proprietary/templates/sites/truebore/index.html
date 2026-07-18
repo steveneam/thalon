@@ -71,7 +71,7 @@ body{
 }
 ::selection{background:var(--yellow);color:var(--ink);}
 :focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
-.dark :focus-visible,.dark :focus-visible{outline-color:var(--yellow);}
+.dark :focus-visible{outline-color:var(--yellow);}
 img{max-width:100%;height:auto;display:block;}
 a{color:inherit;}
 .skip{
@@ -221,8 +221,17 @@ h1 .win.struck::after{
   border-block:3px solid var(--ink);background:var(--yellow);
   overflow:hidden;padding-block:.55rem;position:relative;
 }
-.strip-track{display:flex;gap:0;white-space:nowrap;width:max-content;}
-.motion-on .strip-track{animation:strip 26s linear infinite;}
+/* static default: the list wraps so no-JS / reduced-motion readers get every
+   item; the loop copy only duplicates (and nowraps) when it actually animates */
+.strip-track{display:flex;gap:0;flex-wrap:wrap;white-space:normal;}
+.strip-track span + span{display:none;}
+.motion-on .strip-track{
+  flex-wrap:nowrap;white-space:nowrap;width:max-content;
+  animation:strip 26s linear infinite;
+}
+.motion-on .strip-track span + span{display:inline-block;}
+/* the loop separator only exists when the loop does — no orphan dash at rest */
+.motion-on .strip-track span::after{content:"\00a0— ";}
 .strip span{
   font-weight:600;font-size:var(--t-small);letter-spacing:.18em;text-transform:uppercase;
   padding-inline:.5rem;
@@ -254,9 +263,22 @@ h1 .win.struck::after{
 .svc p{margin-top:.6rem;font-size:var(--t-small);color:var(--ink-soft);}
 
 /* ---------------- parts bin ---------------- */
-#parts .intro{max-width:44rem;margin-bottom:1.8rem;}
+#parts .intro-grid{
+  display:grid;grid-template-columns:minmax(0,42rem) minmax(16rem,1fr);
+  gap:1.6rem 2.5rem;align-items:center;margin-bottom:1.8rem;
+}
+@media (max-width:899px){#parts .intro-grid{grid-template-columns:1fr;}}
+#parts .intro{max-width:44rem;}
+.callout-fig{
+  position:relative;margin:0;border:3px solid var(--ink);background:var(--paper);
+  box-shadow:8px 8px 0 var(--ink);
+}
+.callout-fig .fig-chip{left:.9rem;top:-.85rem;transform:none;}
+.callout-fig img{border-bottom:2px solid var(--ink);}
+.callout-fig figcaption{padding:.55rem .8rem;font-size:var(--t-small);color:var(--ink-soft);}
 .bin-shell{position:relative;border:3px solid var(--ink);background:var(--conc-2);}
-.bin-canvas{display:none;width:100%;height:clamp(380px,55vh,540px);touch-action:pan-y;}
+/* svh, not vh: mobile URL-bar collapse must not resize (and re-tip) the bin */
+.bin-canvas{display:none;width:100%;height:clamp(380px,55vh,540px);height:clamp(380px,55svh,540px);touch-action:pan-y;}
 .bin-shell.live .bin-canvas{display:block;}
 .bin-static{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;padding:1.4rem;}
 @media (max-width:599px){.bin-static{grid-template-columns:repeat(2,1fr);}}
@@ -293,6 +315,36 @@ h1 .win.struck::after{
 .step.on .num{background:var(--yellow);}
 .step h3{font-family:var(--display);font-weight:400;font-size:1.15rem;text-transform:uppercase;margin-top:.7rem;}
 .step p{font-size:var(--t-small);color:var(--ink-soft);margin-top:.45rem;}
+
+/* ---------------- job sheet (the protocol, stamped) ---------------- */
+.jobcard{
+  max-width:56rem;margin:2.4rem 0 0;border:3px solid var(--ink);
+  background:var(--paper);box-shadow:8px 8px 0 var(--ink);
+}
+.jc-head{
+  display:flex;justify-content:space-between;align-items:baseline;gap:.5rem 1.5rem;
+  flex-wrap:wrap;border-bottom:3px solid var(--ink);background:var(--conc);
+  padding:.7rem 1rem;
+}
+.jc-title{font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.05;text-transform:uppercase;}
+.jc-rows{list-style:none;padding:0;margin:0;}
+.jc-row{
+  display:grid;grid-template-columns:4.6rem minmax(0,1fr) auto;
+  gap:.35rem 1rem;align-items:center;padding:.55rem 1rem;
+}
+.jc-row + .jc-row{border-top:2px solid var(--conc-2);}
+.jc-t{
+  font-weight:600;font-size:var(--t-small);font-variant-numeric:tabular-nums;
+  background:var(--yellow);border:2px solid var(--ink);
+  padding:.05rem .3rem;justify-self:start;
+}
+.jc-e{font-weight:600;font-size:var(--t-small);text-transform:uppercase;letter-spacing:.08em;}
+.jc-d{color:var(--ink-soft);font-size:var(--t-small);}
+.jc-row .dial{display:block;}
+@media (max-width:599px){
+  .jc-row{grid-template-columns:4.3rem minmax(0,1fr);}
+  .jc-row .dial{grid-column:2;}
+}
 
 /* ---------------- rates ---------------- */
 .rate-note{margin-bottom:1.2rem;}
@@ -396,7 +448,7 @@ footer .dim{color:var(--ink-soft);}
 
   <div class="wrap">
     <div class="pipe-stage">
-      <span class="fig-chip a" aria-hidden="true">Fig.1 — gate valve · drag to close</span>
+      <span class="fig-chip a" aria-hidden="true" id="figChipA">Fig.1 — gate valve</span>
       <span class="fig-chip b" aria-hidden="true">Fig.2 — active leak</span>
       <svg id="pipeSvg" viewBox="0 0 1200 250" role="img" aria-labelledby="pipeTitle">
         <title id="pipeTitle">A water pipe with an open gate valve and a leaking joint. The valve wheel can be turned to stop the leak.</title>
@@ -465,7 +517,7 @@ footer .dim{color:var(--ink-soft);}
         <div class="row"><span>Water lost</span><span class="val water" id="gLitres">0.0 L</span></div>
         <div class="row"><span>Clock</span><span class="val" id="gClock">T+0.0 s</span></div>
         <hr>
-        <div id="valveStatus" role="status">Valve open — 0% closed. Drag the yellow wheel.</div>
+        <div id="valveStatus" role="status">Valve open — scripts are off, so the wheel won't turn. Today water keeps its record.</div>
       </aside>
     </div>
   </div>
@@ -480,7 +532,7 @@ footer .dim{color:var(--ink-soft);}
 <div class="strip" role="note" aria-label="What counts as an emergency">
   <p class="sr-only">Emergencies we answer: burst mains, blocked drains, no hot water, gas smell, flooded laundry, slab leaks — 24 hours.</p>
   <div class="strip-track" aria-hidden="true">
-    <span>Burst main — Blocked drain — No hot water — Gas smell — Flooded laundry — Slab leak — 24 hrs —&nbsp;</span><span>Burst main — Blocked drain — No hot water — Gas smell — Flooded laundry — Slab leak — 24 hrs —&nbsp;</span>
+    <span>Burst main — Blocked drain — No hot water — Gas smell — Flooded laundry — Slab leak — 24 hrs</span><span>Burst main — Blocked drain — No hot water — Gas smell — Flooded laundry — Slab leak — 24 hrs</span>
   </div>
 </div>
 
@@ -527,9 +579,17 @@ footer .dim{color:var(--ink-soft);}
       <span class="label">Sec. 02 — inventory</span>
       <h2>The van is the warehouse</h2>
     </div>
-    <p class="intro">A call-out that ends with <em>"we'll be back Tuesday with the part"</em> is a failed
-    call-out. TrueBore vans carry the couple-hundred fittings that close most jobs on the first visit.
-    These are from the bin — real weight, real clunk. Go on, pick up the wrench.</p>
+    <div class="intro-grid">
+      <p class="intro">A call-out that ends with <em>"we'll be back Tuesday with the part"</em> is a failed
+      call-out. TrueBore vans carry the couple-hundred fittings that close most jobs on the first visit.
+      These are from the bin — real weight, real clunk. Go on, pick up the wrench.</p>
+      <figure class="callout-fig">
+        <span class="fig-chip" aria-hidden="true">Fig.3 — bin to hand</span>
+        <img src="assets/callout.webp" width="1400" height="933" loading="lazy"
+             alt="A plumber crouched at an outdoor copper line, head down and absorbed, tightening a brass fitting with a yellow-handled wrench">
+        <figcaption>Brass, copper, and the yellow-handled wrench — the bin, on the job.</figcaption>
+      </figure>
+    </div>
 
     <div class="bin-shell" id="binShell">
       <canvas class="bin-canvas" id="binCanvas" aria-hidden="true"></canvas>
@@ -572,12 +632,43 @@ footer .dim{color:var(--ink-soft);}
       <div class="step" data-step="0"><span class="num" aria-hidden="true">01</span>
         <h3>Call</h3><p>A plumber answers — not a phone tree, not a pager service. Say the word "water" and we're moving.</p></div>
       <div class="step" data-step="1"><span class="num" aria-hidden="true">02</span>
-        <h3>Triage</h3><p>Shut-off guidance on the line, free, while the van is already rolling toward you.</p></div>
+        <h3>Triage</h3><p>A plumber talks you to the meter box and the shut-off, free. The damage stops climbing.</p></div>
       <div class="step" data-step="2"><span class="num" aria-hidden="true">03</span>
         <h3>Arrive</h3><p>A licensed plumber and a stocked van at your door. The quote comes before the wrench.</p></div>
       <div class="step" data-step="3"><span class="num" aria-hidden="true">04</span>
         <h3>Fix &amp; prove</h3><p>Repaired, pressure-tested, compliance certificate in your inbox before the van leaves the kerb.</p></div>
     </div>
+
+    <figure class="jobcard">
+      <figcaption class="jc-head">
+        <span class="jc-title">Job sheet — burst flexi hose, laundry</span>
+        <span class="label">Sample replay · fictional demo</span>
+      </figcaption>
+      <ol class="jc-rows">
+        <li class="jc-row"><span class="jc-t">02:04</span>
+          <div><span class="jc-e">Call answered</span> <span class="jc-d">— a plumber, third ring. No pager, no queue.</span></div></li>
+        <li class="jc-row"><span class="jc-t">02:06</span>
+          <div><span class="jc-e">Van rolling</span> <span class="jc-d">— dispatched mid-call, while you're still talking.</span></div></li>
+        <li class="jc-row"><span class="jc-t">02:11</span>
+          <div><span class="jc-e">Mains off</span> <span class="jc-d">— talked through at the meter box, free. The water stops 31 minutes before the van arrives.</span></div></li>
+        <li class="jc-row"><span class="jc-t">02:42</span>
+          <div><span class="jc-e">At the door</span> <span class="jc-d">— licensed plumber, stocked van.</span></div></li>
+        <li class="jc-row"><span class="jc-t">02:49</span>
+          <div><span class="jc-e">Quote signed</span> <span class="jc-d">— price in writing before the wrench comes out.</span></div></li>
+        <li class="jc-row"><span class="jc-t">03:41</span>
+          <div><span class="jc-e">Pressure test</span> <span class="jc-d">— 1500&nbsp;kPa held 15 minutes. Passed.</span></div>
+          <svg class="dial" width="74" height="74" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="44" fill="var(--paper)" stroke="var(--ink)" stroke-width="4"></circle>
+            <path d="M17.1 69 A38 38 0 0 1 82.9 31" fill="none" stroke="var(--yellow)" stroke-width="7"></path>
+            <path d="M13.6 71 L21.4 66.5 M13.6 29 L21.4 33.5 M50 8 V17 M86.4 29 L78.6 33.5 M86.4 71 L78.6 66.5"
+                  stroke="var(--ink)" stroke-width="3"></path>
+            <path d="M50 50 L76 35" stroke="var(--ink)" stroke-width="4"></path>
+            <circle cx="50" cy="50" r="5" fill="var(--ink)"></circle>
+          </svg></li>
+        <li class="jc-row"><span class="jc-t">03:58</span>
+          <div><span class="jc-e">Certificate sent</span> <span class="jc-d">— compliance PDF in the inbox; the van is still at the kerb.</span></div></li>
+      </ol>
+    </figure>
   </div>
 </section>
 
@@ -667,7 +758,12 @@ function applyMotion() {
   if (want === motionOn) return;
   motionOn = want;
   document.documentElement.classList.toggle("motion-on", motionOn);
-  if (motionOn) { last = performance.now(); rafId = requestAnimationFrame(frame); }
+  if (motionOn) {
+    last = performance.now(); rafId = requestAnimationFrame(frame);
+    // motion enabled while the bin is already on screen: re-observe so the
+    // IntersectionObserver re-fires with current state and can boot the physics
+    if (!bin) { binIO.unobserve(binShell); binIO.observe(binShell); }
+  }
   else if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 }
 toggle.addEventListener("click", () => {
@@ -812,6 +908,15 @@ function setValve(deg) {
     const recall = $("#recall");
     recall.textContent = `You stopped the demo leak in ${state.clock.toFixed(1)} seconds. At 2 a.m. it won't be a demo — save the number.`;
     recall.classList.add("show");
+    // the wink: every valve on earth gives exactly one more drip after you win
+    setTimeout(() => {
+      if (!motionOn) return;
+      const pt = leakPoint();
+      drops.push({ x: pt.x, y: pt.y, vy: 30, r: 3.4 });
+      setTimeout(() => {
+        if (motionOn) valveStatus.textContent += " …and one last drip. There's always one.";
+      }, 950);
+    }, 2300);
   } else if (state.stoppedAt === null) {
     valveStatus.textContent = pct === 0 ? "Valve open — 0% closed. Drag the yellow wheel." : `Valve ${pct}% closed — keep turning.`;
   }
@@ -840,6 +945,7 @@ const endDrag = () => { dragging = false; wheelHit.classList.remove("grabbing");
 wheelHit.addEventListener("pointerup", endDrag);
 wheelHit.addEventListener("pointercancel", endDrag);
 wheelHit.addEventListener("keydown", (ev) => {
+  if (state.stoppedAt !== null && state.valve >= 1) return; // locked after victory, same as pointer
   const stepDeg = 22.5;
   if (ev.key === "ArrowRight" || ev.key === "ArrowUp") { setValve(wheelDeg + stepDeg); ev.preventDefault(); }
   else if (ev.key === "ArrowLeft" || ev.key === "ArrowDown") { setValve(wheelDeg - stepDeg); ev.preventDefault(); }
@@ -1148,6 +1254,7 @@ $("#copyBtn").addEventListener("click", async () => {
 });
 
 /* ---------- boot ---------- */
+$("#figChipA").textContent += " · drag to close"; // only promised once script makes it true
 setValve(0);
 setProto(1); // full pipe for the static page…
 if (userWantsMotion()) {
