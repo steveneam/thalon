@@ -44,6 +44,26 @@ describe("library surface (session-19 rider)", () => {
     expect(within(row).queryAllByText(/./, { selector: "[data-slot=badge]" }).length).toBeLessThanOrEqual(1);
   });
 
+  it("every web-origin row wears a way back + the thumbnail when captured (Source-Link Rule)", async () => {
+    seedLibraryRow({
+      uri: "https://youtube.com/watch?v=abc",
+      title: "How the judge gate works",
+      thumbnailUrl: "https://i.ytimg.test/vi/abc/hq.jpg",
+    });
+    render(<LibrarySurface />);
+    const link = await screen.findByRole("link", {
+      name: /open the original source of how the judge gate works/i,
+    });
+    expect(link).toHaveAttribute("href", "https://youtube.com/watch?v=abc");
+    expect(link).toHaveAttribute("target", "_blank");
+    // The visual identity rides the row; a thumbnail-less row simply has none.
+    const row = screen.getByRole("button", { name: /^how the judge gate works/i });
+    expect(within(row).getByRole("presentation")).toHaveAttribute(
+      "src",
+      "https://i.ytimg.test/vi/abc/hq.jpg",
+    );
+  });
+
   it("sends parsed tags with the ingest request and collapses the fresh transcript", async () => {
     let capturedTags: string[] | undefined;
     server.use(

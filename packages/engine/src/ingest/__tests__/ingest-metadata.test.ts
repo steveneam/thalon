@@ -37,8 +37,8 @@ function fakeProvider(): TranscriptProvider {
   };
 }
 
-function fixedTitleFetcher(title: string | null): VideoTitleFetcher {
-  return { fetchTitle: async () => title };
+function fixedTitleFetcher(title: string | null, thumbnailUrl: string | null = null): VideoTitleFetcher {
+  return { fetchMeta: async () => ({ title, thumbnailUrl }) };
 }
 
 async function setup(): Promise<{ ctx: TenantCtx; repos: Repos; objectStore: LocalObjectStore }> {
@@ -67,7 +67,10 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
       { url: "https://platform.test/watch?v=1", tags: ["tooling", "video"] },
       {
         transcriptProvider: fakeProvider(),
-        titleFetcher: fixedTitleFetcher("Deterministic pipelines, explained"),
+        titleFetcher: fixedTitleFetcher(
+          "Deterministic pipelines, explained",
+          "https://img.platform.test/v1/hq.jpg",
+        ),
         embedder: createFakeEmbeddingDriver(1536),
         objectStore,
         capTokens: 1_000_000,
@@ -76,6 +79,7 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
 
     const meta = (await repos.sources.get(ctx, result.sourceId))!.meta as Record<string, unknown>;
     expect(meta.title).toBe("Deterministic pipelines, explained");
+    expect(meta.thumbnailUrl).toBe("https://img.platform.test/v1/hq.jpg");
     expect(meta.tags).toEqual(["tooling", "video"]);
 
     const relevance = meta.areaRelevance as AreaRelevance[];
@@ -113,6 +117,7 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
 
     const meta = (await repos.sources.get(ctx, result.sourceId))!.meta as Record<string, unknown>;
     expect(meta.title).toBe(url);
+    expect("thumbnailUrl" in meta).toBe(false);
     expect("tags" in meta).toBe(false);
     expect("areaRelevance" in meta).toBe(false);
   });
@@ -126,7 +131,7 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
       {
         transcriptProvider: fakeProvider(),
         titleFetcher: {
-          fetchTitle: async () => {
+          fetchMeta: async () => {
             throw new Error("oEmbed down");
           },
         },
@@ -142,39 +147,48 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
 });
 
 describe("youTubeOEmbedTitleFetcher (injected fetch — networkless)", () => {
-  it("asks oEmbed only for YouTube hosts and returns the title", async () => {
+  it("asks oEmbed only for YouTube hosts and returns title + thumbnail from the one call", async () => {
     const requested: string[] = [];
     const fetcher = youTubeOEmbedTitleFetcher(async (url) => {
       requested.push(url);
-      return { ok: true, json: async () => ({ title: "A real title" }) };
+      return {
+        ok: true,
+        json: async () => ({ title: "A real title", thumbnail_url: "https://i.ytimg.test/vi/x/hq.jpg" }),
+      };
     });
-    expect(await fetcher.fetchTitle("https://www.youtube.com/watch?v=tZQ9SNw4TYQ")).toBe(
-      "A real title",
-    );
+    expect(await fetcher.fetchMeta("https://www.youtube.com/watch?v=tZQ9SNw4TYQ")).toEqual({
+      title: "A real title",
+      thumbnailUrl: "https://i.ytimg.test/vi/x/hq.jpg",
+    });
     expect(requested[0]).toBe(
       `https://www.youtube.com/oembed?url=${encodeURIComponent("https://www.youtube.com/watch?v=tZQ9SNw4TYQ")}&format=json`,
     );
-    expect(await fetcher.fetchTitle("https://vimeo.com/123")).toBeNull();
+    expect(await fetcher.fetchMeta("https://vimeo.com/123")).toEqual({ title: null, thumbnailUrl: null });
     expect(requested).toHaveLength(1); // non-YouTube host never hits the network
   });
 
-  it("returns null on HTTP failure, junk JSON, and thrown fetches — never throws", async () => {
+  it("degrades field-by-field: non-https thumbnail dropped, blank title dropped", async () => {
     expect(
-      await youTubeOEmbedTitleFetcher(async () => ({ ok: false, json: async () => ({}) })).fetchTitle(
+      await youTubeOEmbedTitleFetcher(async () => ({
+        ok: true,
+        json: async () => ({ title: "  ", thumbnail_url: "http://insecure.test/t.jpg" }),
+      })).fetchMeta("https://youtu.be/x"),
+    ).toEqual({ title: null, thumbnailUrl: null });
+  });
+
+  it("returns nulls on HTTP failure, junk JSON, and thrown fetches — never throws", async () => {
+    const NO_META = { title: null, thumbnailUrl: null };
+    expect(
+      await youTubeOEmbedTitleFetcher(async () => ({ ok: false, json: async () => ({}) })).fetchMeta(
         "https://youtu.be/x",
       ),
-    ).toBeNull();
-    expect(
-      await youTubeOEmbedTitleFetcher(async () => ({ ok: true, json: async () => ({ title: "  " }) })).fetchTitle(
-        "https://youtu.be/x",
-      ),
-    ).toBeNull();
+    ).toEqual(NO_META);
     expect(
       await youTubeOEmbedTitleFetcher(async () => {
         throw new Error("network down");
-      }).fetchTitle("https://youtu.be/x"),
-    ).toBeNull();
-    expect(await youTubeOEmbedTitleFetcher().fetchTitle("not a url")).toBeNull();
+      }).fetchMeta("https://youtu.be/x"),
+    ).toEqual(NO_META);
+    expect(await youTubeOEmbedTitleFetcher().fetchMeta("not a url")).toEqual(NO_META);
   });
 });
 

@@ -41,6 +41,18 @@ describe("TrendsTab (dossier launchpad, Phase D design #4)", () => {
     }
   });
 
+  it("every rising row with a url wears its own way back — not just the expanded dossier (Source-Link Rule)", async () => {
+    render(<TrendsTab />);
+    await screen.findByText("4 rising");
+
+    for (const row of ranked.slice(1)) {
+      if (!row.url) continue;
+      const link = screen.getByRole("link", { name: `Open the original post from @${row.account}` });
+      expect(link).toHaveAttribute("href", row.url);
+      expect(link).toHaveAttribute("target", "_blank");
+    }
+  });
+
   it("a rising row click expands that card — one dossier at a time", async () => {
     const user = userEvent.setup();
     render(<TrendsTab />);

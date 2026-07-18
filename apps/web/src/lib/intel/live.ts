@@ -20,6 +20,7 @@ export function toTrendCard(card: SweepCard): TrendCard {
     source: card.source,
     externalId: card.externalId,
     url: card.url,
+    thumbnailUrl: card.thumbnailUrl,
     text: card.text,
     account: card.account,
     publishedAt: new Date(card.publishedAtMs).toISOString(),

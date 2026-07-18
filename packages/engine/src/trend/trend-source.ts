@@ -12,6 +12,8 @@ export interface TrendItem {
   externalId: string;
   /** Canonical URL of the item, when the platform provides one. */
   url?: string;
+  /** Platform thumbnail for visual items (video/imagery) — the Source-Link Rule's visual identity; drivers pass it through when the API provides one, never synthesize it. */
+  thumbnailUrl?: string;
   /** The extractable text for this platform tier. */
   text: string;
   /** Account/author handle the item belongs to — the velocity baseline group. */

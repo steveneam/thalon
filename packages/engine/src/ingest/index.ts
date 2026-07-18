@@ -36,7 +36,12 @@ export {
   type VideoUrlIngestRequest,
   type VideoUrlIngestResult,
 } from "./ingest-video-url";
-export { youTubeOEmbedTitleFetcher, type FetchLike, type VideoTitleFetcher } from "./video-title";
+export {
+  youTubeOEmbedTitleFetcher,
+  type FetchLike,
+  type VideoOEmbedMeta,
+  type VideoTitleFetcher,
+} from "./video-title";
 export {
   centroid,
   scoreAreaRelevance,

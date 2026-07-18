@@ -37,7 +37,9 @@ import { youTubeOEmbedTitleFetcher, type VideoTitleFetcher } from "./video-title
  * B6.6 rider (session-19 Library UX mini-contract — additive meta keys the
  * web Library reads; pre-rider rows simply lack them, degrading honestly):
  * `meta.title` (YouTube oEmbed, keyless/quota-free; the URL on any
- * failure), `meta.tags` (operator-set, stored verbatim),
+ * failure), `meta.thumbnailUrl` (same oEmbed call — the Source-Link Rule's
+ * visual identity; absent when the platform offers none),
+ * `meta.tags` (operator-set, stored verbatim),
  * `meta.areaRelevance` (the transcript's chunk-embedding centroid scored
  * against the tenant's active monitored areas via the B6.4 ranker's
  * embedding path — ./area-relevance.ts).
@@ -57,7 +59,7 @@ export interface VideoUrlIngestRequest {
 export interface VideoUrlIngestDeps {
   /** Explicit provider override (tests / callers); defaults to the env-selected registry driver. */
   transcriptProvider?: TranscriptProvider;
-  /** Display-title seam (tests inject; default = keyless YouTube oEmbed). */
+  /** Display-metadata seam — title + thumbnail (tests inject; default = keyless YouTube oEmbed). */
   titleFetcher?: VideoTitleFetcher;
   embedder?: EmbeddingDriver;
   tracer?: Tracer;
@@ -122,14 +124,19 @@ export async function ingestVideoUrl(
   const rawRef = objectKey("transcripts", contentHash, "json");
   await objectStore.put(rawRef, transcriptJson);
 
-  // B6.6 rider metadata — NEVER blocks ingest: the title seam degrades to
-  // the URL (belt-and-braces catch in case an injected fetcher throws), and
-  // areaRelevance is absent when there are no active areas / no embeddings.
+  // B6.6 rider metadata — NEVER blocks ingest: the oEmbed seam degrades to
+  // the URL / no thumbnail (belt-and-braces catch in case an injected fetcher
+  // throws), and areaRelevance is absent when there are no active areas / no
+  // embeddings.
   let fetchedTitle: string | null;
+  let fetchedThumbnail: string | null;
   try {
-    fetchedTitle = await (deps.titleFetcher ?? youTubeOEmbedTitleFetcher()).fetchTitle(request.url);
+    const oembed = await (deps.titleFetcher ?? youTubeOEmbedTitleFetcher()).fetchMeta(request.url);
+    fetchedTitle = oembed.title;
+    fetchedThumbnail = oembed.thumbnailUrl;
   } catch {
     fetchedTitle = null;
+    fetchedThumbnail = null;
   }
   const areaRelevance = await scoreAreaRelevance(
     ctx,
@@ -147,6 +154,7 @@ export async function ingestVideoUrl(
       transcriptProvider: provider.name,
       segmentCount: segments.length,
       title: fetchedTitle ?? request.url,
+      ...(fetchedThumbnail ? { thumbnailUrl: fetchedThumbnail } : {}),
       ...(request.tags?.length ? { tags: request.tags } : {}),
       ...(areaRelevance ? { areaRelevance } : {}),
       ...request.meta,

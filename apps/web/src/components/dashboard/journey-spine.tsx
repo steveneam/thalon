@@ -184,6 +184,18 @@ export function JourneySpine({ counts, plan, trends, unknown, now }: JourneySpin
                 </span>
               </div>
               <p className="line-clamp-2 text-xs font-medium leading-snug">{topCard.text}</p>
+              {/* The way back at every representation (Source-Link Rule) —
+                  the peek links its origin, not just the expanded dossier. */}
+              {topCard.url && (
+                <a
+                  href={topCard.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="self-start text-2xs text-primary hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                >
+                  original post ↗
+                </a>
+              )}
             </Peek>
           )}
           {trends && (

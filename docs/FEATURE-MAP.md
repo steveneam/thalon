@@ -20,6 +20,7 @@ flowchart LR
     LE[Leads]
     LI[Library]
     VI[Videos]
+    SI[Sites]
     RU[Runs]
     PR[Profiles]
     SE[Settings]
@@ -44,7 +45,7 @@ flowchart LR
 |---|---|---|
 | Journey dashboard (stations, week strip, needs-you) | rail → Journey, or `/app` | reachable |
 | Intel trends + dossier launchpad | spine station 01 → "Open intel", or nothing in rail (journey surface) | reachable |
-| Intel: original-post link | expanded dossier card → "original post ↗" | **partial — expanded card ONLY; rising-list rows and station-01 peek have no way back (Source-Link Rule breach)** |
+| Intel: original-post link | expanded dossier card → "original post ↗" · every rising row → ↗ anchor · station-01 peek → "original post ↗" | reachable (Source-Link sweep, s62 — conformance-tested) |
 | Intel: search/horizon tab | Intel → "Search" tab | reachable |
 | Intel: watchlist add/pause | Intel header chip row | reachable |
 | Intel: Sweep now | Intel header | reachable |
@@ -60,16 +61,17 @@ flowchart LR
 | Leads board (Pipeline) | Leads → "Pipeline" tab | reachable |
 | Learn-from-feedback loop | Leads → scoring-weights strip → "Learn from feedback" | reachable |
 | Library: ingest URL/captions, transcript, export, delete | rail → Library | reachable |
-| Library: way back to the source URL | — | **ORPHANED — the DB stores `sources.uri` but no surface ever renders it; a pasted URL is unrecoverable by a human (Source-Link Rule breach)** |
-| Source thumbnails (library + intel) | — | **missing everywhere — no visual identity for any ingested/ranked source** |
-| Videos: projects, cuts, takes, propose | rail → Videos | **partial — the surface works but is EMPTY of content: zero video_projects rows exist** |
+| Library: way back to the source URL | shelf row → ↗ anchor beside the row; open transcript header → the linked URL | reachable (Source-Link sweep, s62; non-web uris stay identity text, never fake links) |
+| Source thumbnails (library + intel) | library shelf rows + intel cards/rising rows show them where captured | partial by data, not by code — plumbed end-to-end (oEmbed `meta.thumbnailUrl` at ingest; `thumbnailUrl` through sweep→wire): NEW library ingests carry one; pre-rider rows and demo intel cards honestly have none; live intel thumbs arrive with the B6.5 platform drivers |
+| Videos: projects, cuts, takes, propose | rail → Videos | reachable (dev: the concept film registered + playable since s61; staging follows the swordfish import) |
 | Concept film (s41–44) | /app/videos → thalon-concept-film (dev: REGISTERED + playable — 58 takes, 8 cuts, media route verified s61) | **staging pending per-box import (ASK-BACKS s61 → swordfish); was mis-read as globally orphaned at s60** |
 | Runs history + failure triage | rail → Runs | reachable |
 | Profiles (brand voice, versions) | rail foot → Profiles; topbar switcher → "Manage profiles" | reachable |
 | Settings (seams, drivers, budget, watchlist) | rail foot → Settings | reachable |
 | ⌘K command palette | topbar button; Ctrl/⌘-K | reachable |
 | Own-site blog (published pages land here) | `/blog` — public site, not linked from the workspace | **partial — no workspace path to what got published** |
-| Portfolio sites (16 landing pages) | — (8899 dev preview only) | **ORPHANED from the workspace — W-sites queued (`docs/research/sites-surface-plan.md`) is the fix** |
+| Sites gallery (the portfolio in the workspace) | rail → Sites | reachable (W-sites, s61 — facet chips, j/k/enter, verdict chips) |
+| Sites dossier (live preview + record + /guide) | Sites → a card → dossier (iframe w/ desktop/390 toggles) | reachable (dev reads the local dir; staging origin arms with the founder's Dokploy service + `TEMPLATES_PREVIEW_ARMED`) |
 | Template `/guide` pages | each site → footer "how this page was made" | reachable (within each site) |
 | Send door (B-crm.4, disarmed) | Leads → Email compose → the door states its disarmed status | reachable (honest door) |
 

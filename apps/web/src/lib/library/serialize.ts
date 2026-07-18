@@ -36,6 +36,10 @@ export function toLibraryRow(source: Source): LibrarySourceRow {
     id: source.id,
     uri: source.uri,
     title: typeof meta.title === "string" && meta.title.trim() !== "" ? meta.title : null,
+    thumbnailUrl:
+      typeof meta.thumbnailUrl === "string" && /^https:\/\//.test(meta.thumbnailUrl)
+        ? meta.thumbnailUrl
+        : null,
     tags: readTags(meta.tags),
     areaRelevance: readAreaRelevance(meta.areaRelevance),
     provider: typeof meta.transcriptProvider === "string" ? meta.transcriptProvider : null,

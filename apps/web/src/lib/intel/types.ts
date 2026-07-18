@@ -45,6 +45,8 @@ export interface TrendCard {
   source: string;
   externalId: string;
   url?: string;
+  /** Platform thumbnail for visual origins (Source-Link Rule) — absent until a live driver provides one; never synthesized for demo cards. */
+  thumbnailUrl?: string;
   text: string;
   account: string;
   publishedAt: string;

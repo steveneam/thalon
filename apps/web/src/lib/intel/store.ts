@@ -74,6 +74,7 @@ function cardPayload(card: TrendCard): Record<string, unknown> {
     score: card.score,
     text: card.text,
     url: card.url ?? null,
+    thumbnailUrl: card.thumbnailUrl ?? null,
   };
 }
 

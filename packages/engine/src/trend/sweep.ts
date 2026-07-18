@@ -48,6 +48,8 @@ const sweepCardSchema = z.object({
   source: z.string().min(1),
   externalId: z.string().min(1),
   url: z.string().optional(),
+  /** Platform thumbnail passthrough (Source-Link Rule visual identity) — absent when the driver offers none. */
+  thumbnailUrl: z.string().optional(),
   text: z.string(),
   account: z.string(),
   publishedAtMs: z.number(),
@@ -182,6 +184,7 @@ export async function runTrendSweep(
       source: source.name,
       externalId: row.item.externalId,
       url: row.item.url,
+      thumbnailUrl: row.item.thumbnailUrl,
       text: row.item.text,
       account: row.item.account,
       publishedAtMs: row.item.publishedAt,

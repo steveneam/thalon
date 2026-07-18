@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronRight, Copy, Download, FileText, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Copy, Download, ExternalLink, FileText, Trash2 } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,11 @@ import type { AreaRelevance, LibraryPayload, LibrarySourceRow, TranscriptPayload
 import { cn } from "@/lib/utils";
 
 type SurfaceStatus = "loading" | "error" | "success";
+
+/** Only web origins get a click-out — a non-http uri (local media path) is identity, not a link. */
+function webOrigin(uri: string | null): string | null {
+  return uri && /^https?:\/\//.test(uri) ? uri : null;
+}
 
 /** "ai, hooks , ai" → ["ai", "hooks"] — trimmed, deduped, capped to the ingest schema's 12. */
 export function parseTags(raw: string): string[] {
@@ -371,9 +376,23 @@ export function LibrarySurface() {
                       : ""}
                   </span>
                 </CardTitle>
-                {transcript.uri && (
-                  <CardDescription className="break-all">{transcript.uri}</CardDescription>
-                )}
+                {transcript.uri &&
+                  (webOrigin(transcript.uri) ? (
+                    // The way back to the source (DESIGN.md §5 Source-Link Rule) —
+                    // the stored uri is a link at every representation, never plain text.
+                    <CardDescription className="break-all">
+                      <a
+                        href={transcript.uri}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                      >
+                        {transcript.uri} ↗
+                      </a>
+                    </CardDescription>
+                  ) : (
+                    <CardDescription className="break-all">{transcript.uri}</CardDescription>
+                  ))}
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 <div className="flex flex-wrap gap-2">
@@ -504,6 +523,17 @@ export function LibrarySurface() {
                           transcript?.sourceId === row.id && SELECTED_ROW,
                         )}
                       >
+                        {/* Visual identity for visual sources (Source-Link Rule):
+                            the oEmbed thumbnail, when the ingest captured one.
+                            Pre-rider rows and non-visual sources simply have none. */}
+                        {row.thumbnailUrl && (
+                          <img
+                            src={row.thumbnailUrl}
+                            alt=""
+                            loading="lazy"
+                            className="h-9 w-14 shrink-0 rounded-md border border-border object-cover"
+                          />
+                        )}
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-medium">
                             {row.title ?? row.uri ?? row.id}
@@ -531,6 +561,20 @@ export function LibrarySurface() {
                           </span>
                         )}
                       </button>
+                      {/* The way back to the origin (Source-Link Rule) — a
+                          sibling anchor, never nested inside the open button. */}
+                      {webOrigin(row.uri) && (
+                        <a
+                          href={row.uri!}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`Open the original source of ${row.title ?? row.uri}`}
+                          title="Open the original source"
+                          className="flex items-center self-stretch rounded-lg border border-border px-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                        >
+                          <ExternalLink aria-hidden className="size-3.5" />
+                        </a>
+                      )}
                       <Button
                         variant="destructive"
                         size="sm"

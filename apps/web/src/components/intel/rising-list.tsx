@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ExternalLink } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
 import { compactCount } from "@/components/intel/launchpad";
 import type { TrendCard } from "@/lib/intel/types";
@@ -62,17 +63,45 @@ export function RisingList({ rows, cursorId, picked, busy, onOpen, onPick }: Ris
               onClick={() => onOpen(row.id)}
               className={cn(
                 "flex min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-transparent px-2 py-2 text-left transition-colors hover:bg-muted",
+                // Phones: the title wraps onto its own full-width line —
+                // heat/metrics never squeeze the text to nothing at 390.
+                "max-sm:flex-wrap max-sm:gap-y-1",
                 "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                 cursorId === row.id && SELECTED_ROW,
               )}
             >
               <HeatGrade score={row.score} className="shrink-0" />
-              <span className="min-w-0 flex-1 truncate text-xs font-medium">{row.text}</span>
-              <span className="u-tabular shrink-0 text-2xs text-muted-foreground">
+              {/* Visual identity when the origin has one (Source-Link Rule) — demo rows carry none. */}
+              {row.thumbnailUrl && (
+                <img
+                  src={row.thumbnailUrl}
+                  alt=""
+                  loading="lazy"
+                  className="h-6 w-10 shrink-0 rounded border border-border object-cover"
+                />
+              )}
+              <span className="min-w-0 flex-1 truncate text-xs font-medium max-sm:order-last max-sm:w-full max-sm:flex-none">
+                {row.text}
+              </span>
+              <span className="u-tabular shrink-0 text-2xs text-muted-foreground max-sm:ml-auto">
                 {typeof row.metrics.views === "number" && <>{compactCount(row.metrics.views)} · </>}
                 {timeAgo(row.publishedAt)}
               </span>
             </button>
+            {/* The way back at THIS representation too (Source-Link Rule) — a
+                sibling anchor, never nested in the expand button. */}
+            {row.url && (
+              <a
+                href={row.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Open the original post from @${row.account}`}
+                title="Open the original post"
+                className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+              >
+                <ExternalLink aria-hidden className="size-3.5" />
+              </a>
+            )}
           </li>
         ))}
       </ul>

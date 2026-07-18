@@ -90,6 +90,34 @@ export function TrendCard({ card, selected, cursor, busy, onSelect, onPromote, o
 
       <h2 className="text-base leading-snug font-semibold">{card.text}</h2>
 
+      {/* Visual identity for visual origins (Source-Link Rule): the platform
+          thumbnail, itself the way back when the url exists. Demo cards carry
+          none — nothing is synthesized. */}
+      {card.thumbnailUrl &&
+        (card.url ? (
+          <a
+            href={card.url}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open the original post"
+            className="self-start rounded-lg focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <img
+              src={card.thumbnailUrl}
+              alt=""
+              loading="lazy"
+              className="h-20 w-32 rounded-lg border border-border object-cover"
+            />
+          </a>
+        ) : (
+          <img
+            src={card.thumbnailUrl}
+            alt=""
+            loading="lazy"
+            className="h-20 w-32 self-start rounded-lg border border-border object-cover"
+          />
+        ))}
+
       <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
         <span>@{card.account}</span>
         {typeof views === "number" && (
