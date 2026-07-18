@@ -25,14 +25,19 @@
    wave plan use neutral fictional business names.
 2. Draw the design axes (see menu below) **before** the build starts and record the
    draw in the wave plan. No two sites in a wave share a primary axis.
-3. **Design in claude-design first — the founder's per-template loop (s51; ⑥/⑦
-   proved it; RESTORED s61 after silently drifting out at the s53–54 cadence
-   compression, founder-caught).** Scaffold the page in a claude-design project
-   with named asset slots, iterate to the *alive* final there (motion included,
-   founder taste check when he's around), and only then land the final assembly
-   in the repo. Mints target the scaffold's named slots. Serve note: claude-design
-   https pages block localhost assets — iterate with real assets by serving the
-   dc.html copies off the 8899 static server.
+3. **Pre-plan the design BEFORE building — the discipline that matters
+   (founder A/B verdict, s61).** The loop question was tested head-to-head:
+   ⑮ ran the full claude-design loop (scaffold → alive final → landing) vs
+   ⑬/⑭ code-direct; the founder's read on the record — the quality came from
+   **pre-plan direction** (look-first sweep · a written concept with the
+   scroll mechanism decided · per-slot mint briefs · decision annotations),
+   not from the mock tool: "maybe our engine is sufficient for now rather
+   than claude design." Standing: the MANDATORY stage is the pre-plan
+   (concept + mechanisms + slots written down before any code or mints);
+   claude-design is an OPTIONAL tool when a founder-reviewable mock is
+   wanted before build. (History: the claude-design stage was the s51 loop,
+   drifted out s53–54, was restored s61, and retired-to-optional the same
+   day by this A/B.)
 4. Hand the instantiated prompt to the build agent as the task brief. The gates in
    §Non-negotiable gates are part of the prompt, not commentary.
 
