@@ -63,6 +63,15 @@ a{color:var(--ink)}
     around section corners for playfulness (decorative, hidden from screen readers).
     Re-verified: 390&nbsp;px (a 2px overflow from the enlarged tilted polaroid's corners
     was clipped at its container), desktop walk, images loading, console clean.</li>
+    <li><strong>Pass 5 (founder review round, continued):</strong> founder caught both
+    journal images rendering vertically stretched — the page's image reset lacked
+    <code>height:auto</code>, so width-constrained images kept their literal height
+    attributes. Fixed at the root here and across five sibling sites carrying the same
+    latent bug, both journal photographs now display as true squares (the walk is a
+    centre-square crop of the keeper) per founder direction, every image on all eleven
+    portfolio sites was measured programmatically for displayed-vs-natural aspect at
+    desktop and 390&nbsp;px (zero violations), and the lesson became a permanent
+    repo test so it cannot recur.</li>
   </ul>
 
   <p class="small" style="margin-top:40px"><a href="../">← back to the page</a></p>

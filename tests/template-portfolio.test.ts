@@ -72,6 +72,21 @@ describe("template portfolio", () => {
     }
   });
 
+  it("img elements with size attributes have height:auto in the site's CSS (s55 stretch lesson)", () => {
+    // A width/height-attributed <img> whose CSS constrains only max-width renders
+    // at the literal height attribute when narrowed — vertically stretched. Caught
+    // by founder review on wagtail s55; every site with attributed imgs must carry
+    // height:auto (or size every img via explicit object-fit rules).
+    for (const slug of slugs) {
+      const index = readFileSync(path.join(sitesDir, slug, "index.html"), "utf8");
+      if (!/<img[^>]+width="\d+"[^>]+height="\d+"/.test(index)) continue;
+      expect(
+        /img\s*{[^}]*height\s*:\s*auto/.test(index) || /height\s*:\s*auto/.test(index),
+        `${slug}/index.html has width/height-attributed <img> but no height:auto rule — narrowed images will stretch`,
+      ).toBe(true);
+    }
+  });
+
   it("every asset file is manifested with a 64-hex pinned hash, and vice versa", () => {
     for (const slug of slugs) {
       const assetsDir = path.join(sitesDir, slug, "assets");
