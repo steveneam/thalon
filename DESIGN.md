@@ -271,6 +271,20 @@ approve = Reject, Create chips = Remove.
 Five recipes, each defined once — a list surface that reinvents any of them
 is a defect:
 
+**The Source-Link Rule** *(founder direction, session 60 — "that's the
+number one rule in terms of sources: always have a way to look back at
+them")*. Any content the engine ingested, ranked, or derived — an intel
+card, a library transcript, a judged draft, a lead enriched from the web —
+carries a human-clickable way back to its origin at EVERY representation of
+it, not only the expanded/detail view: external content links to the
+original post/page (the stored `sources.uri` / card `url` is surfaced,
+never swallowed at ingest); internal derivations link their lineage (the
+approve consent strip is the model). Where the origin is visual (a video, a
+post with imagery), the reference also carries a thumbnail so a human can
+recognize it. A surface that shows derived content with no way back is a
+defect — audited by the W-audit sweep and enforced for new surfaces at
+review.
+
 **The Bounded-List Rule** *(founder direction, session 56 — workspace
 redesign input)*. A list that grows with data (leads, activity, runs,
 library rows) never grows the page with it: past a short threshold it lives
