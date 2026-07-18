@@ -7,4 +7,3 @@
 - [2026-07-14] Month-end Higgsfield credit call (balance 718.36; waves 1-2 closed + ⑪ Sprig & Barrow shipped, wave 3 approved ≤15cr est.)
 - [2026-07-17] B-crm.4 live-send GO (door is built+merged, deliberately disarmed): the s28 stealth question — brand-domain outreach reveals the brand pre-launch; accept / neutral domain / wait. Also needs Resend domain setup when you GO.
 - [2026-07-18] s58 opener: one-word confirm on the THREE T-lane launches (T-loopwell · T-northpace · T-truebore taste-pass lanes, Fable-pinned, staggered) — you moved these out of s57; W-research + remints + Sprig & Barrow are done
-- [2026-07-18] ⑪ Sprig & Barrow glance when convenient: http://localhost:8899/sprig-and-barrow/ (scroll the whole day through; the falling produce reverses if you scroll back up)
