@@ -12,7 +12,7 @@
 |------|-------|-------------|--------|--------|-------------|
 | W-spine | **lead (in-session)** | `apps/web/src/app/app/{page,layout}.tsx` + `components/{dashboard,workspace,ui}/**` — app shell, journey-spine dashboard, canonical icon rail + per-surface icon sweep | `lane/w-spine` | **merged** (`65e4cf9`, s60 — visual-passed 1440+390 on live dev data, 3 honesty catches fixed; + the Linux worktree-setup ratchet `c1dee7f`) | 1 ✅ |
 | W-intel | lane (`KICKOFF-w-intel.md`) | `components/{intel,library}/**` + `app/app/{intel,library}/**` (library untouched — design doesn't reach it) | `lane/w-intel` | **merged** (`5d8d77f`, s60 — lane wrapped in 22m; lead review + rebased visual pass 1440+390, console clean; suite 532/532 on merged main) | 2 ✅ |
-| W-create | lane (`KICKOFF-w-create.md`) | `components/{create,approve,staged}/**` + `app/app/{create,approve}/**` | `lane/w-create` | in_progress | 3 |
+| W-create | lane (`KICKOFF-w-create.md`) | `components/{create,approve,staged}/**` + `app/app/{create,approve}/**` (+ one declared 3-line boundary touch: the selected-row conformance test's surface list, deleted zones → queue-list) | `lane/w-create` | **merged** (`4822a48`, s60 — lane wrapped in 27m, six honest deviations all data-driven; lead review + rebased visual pass incl. the full intel→create chip seam live; suite 549/549 on merged main) | 3 ✅ |
 | W-boards | lane (`KICKOFF-w-boards.md`) | NEW `components/{calendar,board}/**` + NEW `app/app/calendar/**` + `app/app/leads/**` + `components/leads/**` (board tab mount, minimal diff) | `lane/w-boards` | pending (staggered start) | 4 |
 
 ## Work queue (open items + their gates)
