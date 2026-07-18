@@ -335,3 +335,18 @@ export const outreachSequenceSchema = z.object({
 });
 export type OutreachSequenceInput = z.input<typeof outreachSequenceSchema>;
 export type OutreachSequence = z.infer<typeof outreachSequenceSchema>;
+
+// ---------------------------------------------------------------------------
+// Operator-owned pipeline stage (Phase-I window, s61): the leads board's
+// drag target. Deliberately SEPARATE from `status` — status stays the
+// engine-owned lifecycle (scoring + the send door write it); stage is the
+// operator's own read of the relationship and only ever operator-written.
+// A lead starts unstaged (null): the board falls back to status-derived
+// columns until the operator first stages it.
+
+export const LEAD_STAGES = ["inbox", "qualified", "in_conversation", "won", "parked"] as const;
+export type LeadStage = (typeof LEAD_STAGES)[number];
+
+export function isLeadStage(value: string): value is LeadStage {
+  return (LEAD_STAGES as readonly string[]).includes(value);
+}

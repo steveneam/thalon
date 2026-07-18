@@ -1,4 +1,4 @@
-import { CONSENT_BASES, LEAD_SOURCES, LEAD_STATUSES } from "@thalon/contracts";
+import { CONSENT_BASES, LEAD_SOURCES, LEAD_STAGES, LEAD_STATUSES } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -48,6 +48,14 @@ export const leads = pgTable(
     painPoint: text("pain_point"),
     status: text("status").notNull().default("new"),
     /**
+     * Phase-I window (s61): the operator-owned pipeline stage — the leads
+     * board's drag target. SEPARATE from `status` (engine-owned lifecycle)
+     * on purpose; null = unstaged, the board derives columns from status
+     * until the operator first stages the lead. Written only via
+     * leads.setStage (events-audited).
+     */
+    stage: text("stage"),
+    /**
      * B-crm.4 (s54 window): AU Spam Act consent basis — the send door
      * REFUSES `none` (contracts CONSENT_BASES). Defaults to `none`: a lead
      * never gains sendable consent by omission.
@@ -70,9 +78,14 @@ export const leads = pgTable(
     uniqueIndex("leads_tenant_email_hash_idx").on(t.tenantId, t.emailHash),
     // Hot paths: the scoring job reads NEW leads; the queue reads by status.
     index("leads_tenant_status_idx").on(t.tenantId, t.status),
+    index("leads_tenant_stage_idx").on(t.tenantId, t.stage),
     index("leads_tenant_created_idx").on(t.tenantId, t.createdAt),
     check("leads_source_check", sql.raw(`source in (${inList(LEAD_SOURCES)})`)),
     check("leads_status_check", sql.raw(`status in (${inList(LEAD_STATUSES)})`)),
+    check(
+      "leads_stage_check",
+      sql.raw(`stage is null or stage in (${inList(LEAD_STAGES)})`),
+    ),
     check("leads_consent_basis_check", sql.raw(`consent_basis in (${inList(CONSENT_BASES)})`)),
     tenantIsolation(),
   ],

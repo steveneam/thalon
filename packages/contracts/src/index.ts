@@ -13,3 +13,4 @@ export * from "./source";
 export * from "./stage-registry";
 export * from "./tenant";
 export * from "./video-project";
+export * from "./workspace";

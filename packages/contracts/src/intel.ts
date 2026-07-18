@@ -72,3 +72,31 @@ export const monitoredAreaSchema = z.object({
 });
 export type MonitoredAreaInput = z.input<typeof monitoredAreaSchema>;
 export type MonitoredArea = z.infer<typeof monitoredAreaSchema>;
+
+// ---------------------------------------------------------------------------
+// Intel captures (Phase-I window, s61): the operator-action spine the
+// workspace already runs in memory (promote / dismiss / target-this /
+// lead-promote all record a capture; Create resolves context FROM one)
+// gains a durable shape. The payload stays an open record — capture
+// context is per-family vocabulary (data), the KINDS list is the closed
+// set the check constraint enforces.
+
+export const CAPTURE_KINDS = [
+  "trend_dismiss",
+  "trend_promote",
+  "search_target_this",
+  "lead_promote",
+] as const;
+export type CaptureKind = (typeof CAPTURE_KINDS)[number];
+
+export function isCaptureKind(value: string): value is CaptureKind {
+  return (CAPTURE_KINDS as readonly string[]).includes(value);
+}
+
+export const intelCaptureSchema = z.object({
+  kind: z.enum(CAPTURE_KINDS),
+  /** The structured context the capture carries (titles/angles/hook for a promote, the dismissed card for a dismiss) — open shape, per-family vocabulary. */
+  payload: z.record(z.string(), z.unknown()).default({}),
+});
+export type IntelCaptureInput = z.input<typeof intelCaptureSchema>;
+export type IntelCaptureShape = z.infer<typeof intelCaptureSchema>;

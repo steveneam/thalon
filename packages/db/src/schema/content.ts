@@ -13,6 +13,7 @@ import {
   uuid,
   vector,
 } from "drizzle-orm/pg-core";
+import { intelCaptures } from "./intel";
 import { tenantIsolation } from "./rls";
 import { brandProfiles, tenants } from "./tenancy";
 
@@ -168,6 +169,13 @@ export const drafts = pgTable(
     meta: jsonb("meta").notNull().default({}),
     /** Written ONLY by the transition function in repos/drafts.ts (SPINE §1.1). */
     status: text("status").notNull().default("generated"),
+    /**
+     * Phase-I window (s61): the capture this draft descended from (intel
+     * promote / lead promote), when one exists — Approve's lineage chain
+     * gains its intel node. Nullable on purpose: pre-window drafts and
+     * direct composes have no capture.
+     */
+    captureId: uuid("capture_id").references(() => intelCaptures.id),
     generationKey: text("generation_key").notNull().unique(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -179,6 +187,7 @@ export const drafts = pgTable(
   (t) => [
     index("drafts_tenant_status_idx").on(t.tenantId, t.status),
     index("drafts_tenant_created_idx").on(t.tenantId, t.createdAt),
+    index("drafts_tenant_capture_idx").on(t.tenantId, t.captureId),
     check("drafts_status_check", sql.raw(`status in (${inList(DRAFT_STATUSES)})`)),
     tenantIsolation(),
   ],
