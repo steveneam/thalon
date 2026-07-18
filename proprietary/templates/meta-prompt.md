@@ -76,7 +76,13 @@ rather than negative-prompting, or route the slot to the text-precise seat.
 Corollary (⑬, s60): "vintage/heritage" MACHINERY reads as painted brand
 livery — asking it to be plain makes the livery ornate; modernize the object
 instead ("seamless matte housing, one continuous surface") and describe the
-finish positively. A near-clean take with one small garbled patch may take a
+finish positively. Corollary (⑭, s61): WORN FABRIC is a printable surface —
+work shirts grow lettered chest badges, brooches, and athletic sleeve
+stripes across takes even when every "no logos" negative is stacked (three
+⑭ rejects in a row); woven/collared workwear attracts invented branding,
+plain KNIT garments resist it — cast the subject in a matte knit ("plain
+waffle-knit jumper, one continuous surface") instead of negative-prompting
+the shirt. A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so. Non-hero, non-text slots stay the
 builder's call. Browsing published sites for *inspiration* is
 fine; **downloading reference images into the pipeline is forbidden** — every
