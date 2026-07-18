@@ -2,12 +2,14 @@ import {
   assertLeadTransition,
   consentProvenanceSchema,
   isConsentBasis,
+  isLeadStage,
   isLeadStatus,
   leadInputSchema,
   normalizeLeadEmail,
   type ConsentBasis,
   type ConsentProvenance,
   type LeadInput,
+  type LeadStage,
   type LeadStatus,
   type TenantCtx,
 } from "@thalon/contracts";
@@ -219,6 +221,41 @@ export function leadsRepo(db: Db) {
           entityId: row.id,
           event: "lead.pin_changed",
           payload: { pinned },
+        });
+        return row;
+      });
+    },
+
+    /**
+     * Phase-I window (s61): the operator-owned pipeline stage — the leads
+     * board's drag write door. Stage is the OPERATOR's read of the
+     * relationship, fully separate from the engine-owned `status`
+     * lifecycle; any stage→stage move is legal (a board drag is an
+     * opinion, not a state machine). Setting the current value is a no-op
+     * and emits nothing; `null` un-stages (back to status-derived columns).
+     */
+    async setStage(ctx: TenantCtx, id: string, stage: LeadStage | null): Promise<Lead> {
+      if (stage !== null && !isLeadStage(stage)) {
+        throw new Error(`invalid lead stage: ${String(stage)}`);
+      }
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(leads)
+          .where(and(eq(leads.id, id), eq(leads.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("lead", id);
+        if (current.stage === stage) return current;
+        const [row] = await tx
+          .update(leads)
+          .set({ stage, updatedAt: new Date() })
+          .where(and(eq(leads.id, id), eq(leads.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "lead",
+          entityId: row.id,
+          event: "lead.stage_set",
+          payload: { from: current.stage, to: stage },
         });
         return row;
       });

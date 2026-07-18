@@ -40,6 +40,8 @@ const COPY_ORDER: PgTable[] = [
   schema.sourceChunks,
   schema.sourceMetrics,
   schema.fanoutRuns,
+  // intel_captures BEFORE drafts (0015): drafts.capture_id references it.
+  schema.intelCaptures,
   schema.drafts,
   schema.judgeResults,
   schema.approvals,
@@ -65,6 +67,9 @@ const COPY_ORDER: PgTable[] = [
   schema.videoProjects,
   schema.videoTakes,
   schema.videoCuts,
+  // Phase-I window (0015): planned_slots after drafts; saved_views is leaf config.
+  schema.plannedSlots,
+  schema.savedViews,
 ];
 
 const INSERT_BATCH = 200;

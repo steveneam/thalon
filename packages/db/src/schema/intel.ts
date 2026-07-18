@@ -1,4 +1,4 @@
-import { MONITORED_AREA_STATUSES } from "@thalon/contracts";
+import { MONITORED_AREA_STATUSES, CAPTURE_KINDS } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -12,6 +12,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
+
+const inList = (values: readonly string[]) => values.map((v) => `'${v}'`).join(", ");
 
 /**
  * B4.3: per-tenant watchlists as durable runtime config (CHARTER B3.12 —
@@ -142,6 +144,37 @@ export const trendSnapshots = pgTable(
       t.account,
       t.capturedAt,
     ),
+    tenantIsolation(),
+  ],
+);
+
+/**
+ * Phase-I window (s61): the operator-action capture spine, persisted. The
+ * workspace has run captures in memory since wave 3 (promote / dismiss /
+ * target-this / lead-promote each record one; Create resolves context FROM
+ * a capture id) — this table is that spine's durable home. Append-only in
+ * spirit: a capture records an action that happened; nothing updates it.
+ * The spine's station-02 list and the drafts.capture_id lineage read here.
+ */
+export const intelCaptures = pgTable(
+  "intel_captures",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    /** contracts CAPTURE_KINDS — the closed action vocabulary. */
+    kind: text("kind").notNull(),
+    /** The structured context the capture carries — open per-family shape (contracts intelCaptureSchema). */
+    payload: jsonb("payload").notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // Station 02's hot path: a tenant's recent captures, newest first.
+    index("intel_captures_tenant_created_idx").on(t.tenantId, t.createdAt),
+    check("intel_captures_kind_check", sql.raw(`kind in (${inList(CAPTURE_KINDS)})`)),
     tenantIsolation(),
   ],
 );

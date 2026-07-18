@@ -8,3 +8,4 @@ export * from "./search";
 export * from "./tenancy";
 export * from "./video";
 export * from "./web";
+export * from "./workspace";
