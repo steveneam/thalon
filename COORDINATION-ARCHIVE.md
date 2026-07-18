@@ -234,3 +234,13 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 |------|-------|-------------|--------|--------|------------|-------------|
 | weights-ui | lead-launched worktree (`scripts/launch-lane.sh`) | `apps/web/**` (leads queue: learned-weight provenance surface — the ONE web writer this wave) | `lane/b-crm5-weights-ui` | **merged** (PR #57, s54; worktree GC'd) | PR #54 merged ✅ · contract untouched · no migrations | 1 ✅ |
 | b-crm4-send | lead-launched worktree (`scripts/launch-lane.sh`) — **ACTIVATED: founder approved the proposal live 2026-07-17 evening ("activate the b-crm4-send")** | send door + cadence per the §Session-53 proposal (Resend, AU Spam Act invariants as code, 4–7 touches D0/3/10/17, ≤50/batch; NO live send without a separate founder GO — build to the door) | `lane/b-crm4-send` | **merged** (PR #58, s54; lane died on usage credits pre-verify — lead salvaged, fixed one real bug its own test caught, verified 48/48, committed; worktree GC'd) | s54 contract window MERGED (PR #56, migration 0014) · disjoint from weights-ui (`apps/web`) and templates | 2 ✅ |
+
+## s58 T-lane slate (archived at the s60 opener — all three merged s58)
+
+**s58 GRANT (founder, live, 2026-07-18): "GO — all three"** on the wave-1 taste-pass lanes as named in the s57 division. Launched STAGGERED per the 8GiB standing rec (starts spread ~25 min); Fable-5 default model carried the design-pin; code-only, no minting, remint inputs pre-exported s57. Lead reviewed each diff + ran the visual pass (throwaway 8898 server over the worktrees) and merged; worktrees + branches GC'd; kickoffs retired.
+
+| lane | owns (glob) | branch | status | outcome |
+|------|-------------|--------|--------|---------|
+| T-loopwell | `proprietary/templates/sites/loopwell/` | `lane/t-loopwell` | **merged** (`73d3858`, s58) | chart-claims audit (retention/funnel redrawn to match copy), step-3 reading aggregates the live sample stream, log-scale pricing volume rules, pen-test wink |
+| T-northpace | `proprietary/templates/sites/northpace/` | `lane/t-northpace` | **merged** (`c6a4f04` via `f0ba3b2`, s58) | method prose → cadence rail / sample week / bending fortnight / tier block-shapes, first-light casting swap, session chart redrawn time-linear (50:00 honesty fix), snooze wink |
+| T-truebore | `proprietary/templates/sites/truebore/` | `lane/t-truebore` | **merged** (`ec4c199` via `cea7819`, s58) | stamped job-sheet instrument, callout.webp Fig.3 placement, static-marquee no-JS fix, svh bin fix, courtesy-drip wink |
