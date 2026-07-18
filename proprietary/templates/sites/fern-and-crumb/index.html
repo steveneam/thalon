@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fern &amp; Crumb — a corner café, open from first light</title>
+<meta name="description" content="Fern & Crumb is a corner bakery-café: sourdough drawn at six, the fern poured not printed, window seats under a street tree. Open 7:00–14:00.">
+<meta name="theme-color" content="#faf0dc">
+<style>
+/* ————————————————————————————————————————————————
+   FERN & CRUMB — type that proofs like dough.
+   Display: Shantell Sans (variable — wght + BNCE bounce + INFM informality;
+   the proofing entrance animates the axes themselves). Body: Karla.
+   The morning arc is static per-chapter parchment temperature, not a clock.
+   ———————————————————————————————————————————————— */
+@font-face {
+  font-family: "Shantell Sans";
+  src: url("fonts/shantell-sans-var.woff2") format("woff2");
+  font-weight: 300 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Karla";
+  src: url("fonts/karla-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+:root {
+  --paper: #f7efe1;
+  --ink: #2e211a;
+  --espresso: #58402f;
+  --fern: #3d6b4b;
+  --fern-deep: #2c523a;
+  --terracotta: #c26a45;      /* graphics only (dots, rims) — fails AA as small text */
+  --rust-text: #9d4b2a;       /* the AA-passing text register of the same warmth */
+  --crema: #e9cb9d;
+  --line: rgba(46, 33, 26, 0.16);
+  --display: "Shantell Sans", "Comic Sans MS", cursive;
+  --body: "Karla", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  font-family: var(--body);
+  font-weight: 420;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.6;
+  font-size: 1.0625rem;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+::selection { background: var(--crema); color: var(--ink); }
+
+a { color: var(--fern-deep); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--terracotta); }
+:focus-visible { outline: 3px solid var(--terracotta); outline-offset: 3px; border-radius: 2px; }
+
+/* ——— the proofing type system (THE one animation system) ——— */
+.proof {
+  font-family: var(--display);
+  font-variation-settings: "wght" 640, "BNCE" 26, "INFM" 52;
+  line-height: 1.04;
+  letter-spacing: 0.01em;
+}
+html.js .proof:not(.risen) {
+  font-variation-settings: "wght" 320, "BNCE" -42, "INFM" 4;
+  transform: scaleY(0.955) translateY(8px);
+  opacity: 0.7;
+}
+html.js .proof {
+  transition:
+    font-variation-settings 1100ms cubic-bezier(0.24, 1, 0.32, 1),
+    transform 1100ms cubic-bezier(0.24, 1, 0.32, 1),
+    opacity 700ms ease-out;
+  will-change: font-variation-settings, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.js .proof:not(.risen) {
+    font-variation-settings: "wght" 640, "BNCE" 26, "INFM" 52;
+    transform: none; opacity: 1;
+  }
+  html.js .proof { transition: none; }
+}
+
+/* ——— layout primitives ——— */
+.chapter { padding: clamp(4rem, 9vw, 8rem) clamp(1.25rem, 5vw, 4rem); }
+.measure { max-width: 72rem; margin-inline: auto; }
+.prose { max-width: 34em; }
+.eyebrow {
+  font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--rust-text);
+}
+.chapter-head { font-size: clamp(2.1rem, 4.6vw, 3.4rem); margin: 0.35em 0 0.55em; }
+
+/* the cup-stamp divider */
+.stamp { display: flex; justify-content: center; padding: 0 0 clamp(2rem, 5vw, 3.5rem); }
+.stamp svg { width: 64px; height: 64px; opacity: 0.85; }
+
+/* ——— chapter 1 · hero (first light) ——— */
+.hero { background: #faf0dc; padding-bottom: 0; }
+.hero-inner { max-width: 72rem; margin-inline: auto; text-align: center; }
+.wordmark {
+  font-size: clamp(3.2rem, 11.5vw, 9rem);
+  display: inline-flex; align-items: baseline; gap: 0.08em; flex-wrap: wrap; justify-content: center;
+  color: var(--ink);
+}
+.wordmark .amp {
+  width: 0.72em; height: 0.72em; align-self: center; flex: none;
+  transform: translateY(0.04em);
+}
+.hero-tag { font-size: clamp(1.05rem, 2vw, 1.3rem); margin-top: 1.4rem; color: var(--espresso); }
+.hero-meta {
+  margin-top: 1.1rem; font-weight: 700; font-size: 0.9375rem; letter-spacing: 0.08em;
+  color: var(--fern-deep);
+}
+.hero-figure { margin-top: clamp(2.5rem, 6vw, 4.5rem); }
+.hero-figure img { width: 100%; }
+
+/* ——— chapter 2 · the morning bake ——— */
+.bake { background: #f7efe2; }
+.oven-line { margin: 2.5rem 0 3rem; }
+.oven-line ol {
+  list-style: none; display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  border-top: 2px solid var(--ink); position: relative;
+}
+.oven-line li { padding: 1rem 0.75rem 0 0; position: relative; }
+.oven-line li::before {
+  content: ""; position: absolute; top: -6px; left: 0;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--ink);
+}
+.oven-line li.fire::before { background: var(--terracotta); border-color: var(--terracotta); }
+@media (max-width: 40rem) {
+  /* narrow: the timeline turns vertical — a left spine, dots on the rule */
+  .oven-line ol { grid-template-columns: 1fr; border-top: 0; border-left: 2px solid var(--ink); }
+  .oven-line li { padding: 0 0 1.1rem 1.25rem; }
+  .oven-line li::before { top: 0.42rem; left: -7px; }
+}
+.oven-time { font-family: var(--display); font-variation-settings: "wght" 700, "BNCE" 12, "INFM" 30; font-size: 1.25rem; display: block; }
+.oven-what { font-size: 0.9rem; color: var(--espresso); }
+.bake-grid {
+  display: grid; gap: clamp(1.25rem, 3vw, 2.5rem);
+  grid-template-columns: 1.5fr 1fr; align-items: end; margin-top: 1rem;
+}
+@media (max-width: 44rem) { .bake-grid { grid-template-columns: 1fr; } }
+figcaption {
+  font-size: 0.875rem; color: var(--espresso); padding-top: 0.6rem;
+  border-bottom: 1px solid var(--line); padding-bottom: 0.6rem;
+}
+
+/* ——— chapter 3 · the pour ——— */
+.pour { background: #f5ece0; }
+.pour-grid {
+  display: grid; gap: clamp(1.5rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(0, 460px) 1fr; align-items: center;
+}
+@media (max-width: 50rem) { .pour-grid { grid-template-columns: 1fr; } }
+.pour-grid img { border-radius: 50%; }
+
+/* ——— chapter 4 · the room (full morning) ——— */
+.room { background: #f9f3e7; }
+.room figure { margin-top: 2.25rem; }
+
+/* ——— chapter 5 · the board ——— */
+.board { background: #f4ebdc; }
+.menu { margin-top: 1.5rem; }
+.menu h3 {
+  font-family: var(--display);
+  font-variation-settings: "wght" 740, "BNCE" 30, "INFM" 62;
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  margin: 1.6em 0 0.5em; color: var(--fern-deep);
+}
+.menu h3:first-child { margin-top: 0; }
+.menu ul { list-style: none; max-width: 44rem; }
+.menu li {
+  display: flex; align-items: baseline; gap: 0.75rem;
+  padding: 0.45rem 0; border-bottom: 1px dotted var(--line);
+}
+.menu .item {
+  font-family: var(--display);
+  font-variation-settings: "wght" 520, "BNCE" 18, "INFM" 40;
+  font-size: 1.35rem; white-space: nowrap;
+}
+.menu .note { color: var(--espresso); font-size: 0.9375rem; flex: 1; }
+.menu .price { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* the wink: a bite out of the croissant's last letter, crumbs beneath */
+.bite { position: relative; display: inline-block; }
+.bite .bitten {
+  display: inline-block;
+  -webkit-mask-image: radial-gradient(circle at 82% 12%, transparent 0 0.24em, #000 0.25em);
+          mask-image: radial-gradient(circle at 82% 12%, transparent 0 0.24em, #000 0.25em);
+}
+.bite::after {
+  content: ""; position: absolute; right: -0.18em; bottom: -0.12em;
+  width: 4px; height: 4px; border-radius: 50%; background: var(--espresso);
+  box-shadow: 7px 3px 0 -1px var(--espresso), -2px 6px 0 -1px var(--espresso);
+  opacity: 0.75;
+}
+
+/* ——— chapter 6 · the keeper ——— */
+.keeper { background: #f9f0de; }
+.keeper-grid {
+  display: grid; gap: clamp(1.5rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(0, 380px) 1fr; align-items: center;
+}
+@media (max-width: 50rem) { .keeper-grid { grid-template-columns: 1fr; } }
+.hours { margin-top: 1.5rem; }
+.hours dt {
+  font-family: var(--display); font-variation-settings: "wght" 640, "BNCE" 20, "INFM" 45;
+  font-size: 1.15rem; margin-top: 0.9rem;
+}
+.hours dd { color: var(--espresso); }
+.cta {
+  display: inline-block; margin-top: 2rem;
+  font-family: var(--display);
+  font-variation-settings: "wght" 700, "BNCE" 26, "INFM" 55;
+  font-size: 1.3rem; color: var(--paper); background: var(--fern-deep);
+  padding: 0.7em 1.3em; border-radius: 999px;
+}
+
+footer {
+  padding: 2.5rem clamp(1.25rem, 5vw, 4rem) 3rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.875rem; color: var(--espresso); background: #f9f0de;
+}
+footer .measure { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js");</script>
+
+<!-- ① HERO · first light -->
+<header class="chapter hero">
+  <div class="hero-inner">
+    <h1 class="wordmark proof">
+      <span>FERN</span>
+      <!-- the ampersand IS the latte fern — the name's two halves joined by the pour -->
+      <svg class="amp" viewBox="0 0 100 100" role="img" aria-label="and">
+        <circle cx="50" cy="50" r="47" fill="#e9cb9d"/>
+        <circle cx="50" cy="50" r="47" fill="none" stroke="#c26a45" stroke-width="5"/>
+        <g fill="none" stroke="#fdf8ee" stroke-width="5.5" stroke-linecap="round">
+          <path d="M50 84 C 47 66, 47 42, 50 20"/>
+          <path d="M50 72 C 42 70, 34 64, 30 56"/>
+          <path d="M50 72 C 58 70, 66 64, 70 56"/>
+          <path d="M50 58 C 43 56, 36 51, 33 44"/>
+          <path d="M50 58 C 57 56, 64 51, 67 44"/>
+          <path d="M50 44 C 45 42, 40 38, 38 32"/>
+          <path d="M50 44 C 55 42, 60 38, 62 32"/>
+          <path d="M50 31 C 46 29, 43 26, 42 22"/>
+          <path d="M50 31 C 54 29, 57 26, 58 22"/>
+        </g>
+      </svg>
+      <span>CRUMB</span>
+    </h1>
+    <p class="hero-tag">A corner room, a hot oven, and the morning let in.</p>
+    <p class="hero-meta">OPEN FROM FIRST LIGHT · 7:00–14:00 · CORNER OF ALDER &amp; MAY</p>
+  </div>
+  <figure class="hero-figure">
+    <img src="assets/hero-morning.webp" alt="Early sun raking across a timber café table: a steaming terracotta cup and a croissant on a plain plate, a monstera leaf casting a fern-like shadow, the street tree soft through the window." width="2048" height="1152" fetchpriority="high">
+  </figure>
+</header>
+
+<!-- ② THE MORNING BAKE -->
+<section class="chapter bake" aria-labelledby="bake-head">
+  <div class="measure">
+    <p class="eyebrow">The morning bake</p>
+    <h2 id="bake-head" class="chapter-head proof">Proofed overnight, drawn at six.</h2>
+    <p class="prose">The dough goes to bed before we do. By the time the corner gets its sun,
+    the first loaves are out and the lamination is blistered and singing. What you smell
+    from the door is the schedule below, kept daily.</p>
+
+    <div class="oven-line" role="img" aria-label="The daily oven timeline: first fire at 5:30, sourdough out at 6:10, doors open with the first pour at 7:00, croissants out at 7:05, second bake at 9:40, last pour at 2 pm.">
+      <ol>
+        <li class="fire"><span class="oven-time">5:30</span><span class="oven-what">first fire</span></li>
+        <li><span class="oven-time">6:10</span><span class="oven-what">sourdough out</span></li>
+        <li><span class="oven-time">7:00</span><span class="oven-what">doors + first pour</span></li>
+        <li><span class="oven-time">7:05</span><span class="oven-what">croissants out</span></li>
+        <li><span class="oven-time">9:40</span><span class="oven-what">second bake</span></li>
+        <li><span class="oven-time">14:00</span><span class="oven-what">last pour</span></li>
+      </ol>
+    </div>
+
+    <div class="bake-grid">
+      <figure>
+        <img src="assets/crumb.webp" alt="A torn sourdough loaf held open, backlit — sunlight glowing through the open crumb structure, steam rising." width="1400" height="933" loading="lazy">
+        <figcaption>The crumb is the signature. Torn, never sliced, for the first taste.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/rack.webp" alt="Three bakes cooling on a bare wire rack in raking morning light: a croissant, a seeded morning bun, and a poppy-seed swirl, steam rising." width="1400" height="933" loading="lazy">
+        <figcaption>First rack of the day — croissant, morning bun, poppy swirl.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ③ THE POUR -->
+<section class="chapter pour" aria-labelledby="pour-head">
+  <div class="measure">
+    <div class="pour-grid">
+      <img src="assets/pour.webp" alt="Latte art mid-pour in a plain terracotta cup, the milk ribbon drawing a fern rosette across the crema." width="1200" height="1200" loading="lazy">
+      <div>
+        <p class="eyebrow">The pour</p>
+        <h2 id="pour-head" class="chapter-head proof">The fern is poured, not printed.</h2>
+        <p class="prose">Our mark is the rosette — the same one the milk draws when the pour
+        is patient and the crema is fresh. If it comes out a little different every time,
+        that's the point. Beans from small roasters, rotated monthly; milk from one dairy
+        we can name if you ask.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stamp" aria-hidden="true">
+  <svg viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44" fill="none" stroke="#c26a45" stroke-width="3" stroke-dasharray="4 6" stroke-linecap="round"/>
+    <g fill="none" stroke="#3d6b4b" stroke-width="4" stroke-linecap="round">
+      <path d="M50 74 C 48 62, 48 44, 50 28"/>
+      <path d="M50 62 C 44 60, 38 56, 36 50"/>
+      <path d="M50 62 C 56 60, 62 56, 64 50"/>
+      <path d="M50 48 C 45 46, 41 43, 40 38"/>
+      <path d="M50 48 C 55 46, 59 43, 60 38"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ④ THE ROOM · full morning -->
+<section class="chapter room" aria-labelledby="room-head">
+  <div class="measure">
+    <p class="eyebrow">The room</p>
+    <h2 id="room-head" class="chapter-head proof">Window seats under a street tree.</h2>
+    <p class="prose">The corner gets its light at eight and keeps it till close. Plants inside,
+    a tree outside, and the kind of table you stay at longer than you meant to. Bring
+    someone, or bring the paper — both count as company here.</p>
+    <figure>
+      <img src="assets/pair.webp" alt="Two friends at the window table leaning toward each other laughing, two flat whites and a shared croissant between them, the street tree bright through the glass." width="1600" height="1067" loading="lazy">
+      <figcaption>The window table, mid-morning. The croissant is shared; the opinions are not.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ⑤ THE BOARD -->
+<section class="chapter board" aria-labelledby="board-head">
+  <div class="measure">
+    <p class="eyebrow">The board</p>
+    <h2 id="board-head" class="chapter-head proof">Written fresh, priced plainly.</h2>
+    <div class="menu">
+      <h3>Espresso</h3>
+      <ul>
+        <li><span class="item">short black</span><span class="note">our rotating single, pulled honest</span><span class="price">4</span></li>
+        <li><span class="item">flat white</span><span class="note">the fern lives here</span><span class="price">4.5</span></li>
+        <li><span class="item">batch filter</span><span class="note">brewed on the hour, never before</span><span class="price">5</span></li>
+        <li><span class="item">cold brew</span><span class="note">steeped overnight, like the dough</span><span class="price">5.5</span></li>
+      </ul>
+      <h3>Bakes</h3>
+      <ul>
+        <li>
+          <span class="item">croissan<span class="bite"><span class="bitten">t</span></span></span>
+          <span class="note">out at 7:05 — someone always gets to it first</span><span class="price">5.5</span>
+        </li>
+        <li><span class="item">morning bun</span><span class="note">seeded, honeyed, built for one hand</span><span class="price">6</span></li>
+        <li><span class="item">poppy swirl</span><span class="note">dark, glossy, a little serious</span><span class="price">6</span></li>
+        <li><span class="item">sourdough loaf</span><span class="note">whole, to take the morning home</span><span class="price">9</span></li>
+      </ul>
+      <h3>Morning plates</h3>
+      <ul>
+        <li><span class="item">ricotta toast</span><span class="note">on yesterday's sourdough, today's honey</span><span class="price">14</span></li>
+        <li><span class="item">eggs on sourdough</span><span class="note">soft, buttered, no theatrics</span><span class="price">16</span></li>
+        <li><span class="item">seasonal bowl</span><span class="note">whatever the market was proud of</span><span class="price">17</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ THE KEEPER -->
+<section class="chapter keeper" aria-labelledby="keeper-head">
+  <div class="measure">
+    <div class="keeper-grid">
+      <img src="assets/barista.webp" alt="A barista in a rust waffle-knit sweater absorbed in pouring steamed milk at a matte black espresso machine, plants and morning light behind her." width="1100" height="1650" loading="lazy">
+      <div>
+        <p class="eyebrow">The keeper</p>
+        <h2 id="keeper-head" class="chapter-head proof">Someone's always minding the pour.</h2>
+        <p class="prose">Small room, small crew, one machine we keep spotless. We learn your
+        order by the second visit and your name by the third — no loyalty card required,
+        that's just what corners are for.</p>
+        <dl class="hours">
+          <dt>Hours</dt>
+          <dd>Every day, 7:00 – 14:00. The oven decides public holidays.</dd>
+          <dt>Find us</dt>
+          <dd>Corner of Alder &amp; May — under the big street tree.</dd>
+        </dl>
+        <p class="cta">The first pour's at seven.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="measure">
+    <span>Fern &amp; Crumb is a fictional demonstration business.</span>
+    <a href="guide/">How this page was made</a>
+  </div>
+</footer>
+
+<script>
+/* The proofing entrance — the page's ONE animation system.
+   Default markup is fully proofed (no-JS complete); this only stages the
+   rise, and never under reduced motion. */
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll(".proof").forEach(function (el) { el.classList.add("risen"); });
+    return;
+  }
+  if (!("IntersectionObserver" in window)) {
+    document.querySelectorAll(".proof").forEach(function (el) { el.classList.add("risen"); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("risen");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll(".proof").forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>

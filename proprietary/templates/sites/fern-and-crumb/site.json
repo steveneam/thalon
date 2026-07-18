@@ -1,0 +1,17 @@
+{
+  "slug": "fern-and-crumb",
+  "name": "Fern & Crumb",
+  "vertical": "hospitality-cafe",
+  "oneLiner": "A corner bakery-café: sourdough drawn at six, the fern poured not printed, window seats under a street tree.",
+  "axes": {
+    "primary": "novel-typography",
+    "secondary": "soft-organic"
+  },
+  "axisNote": "The signature system is the type itself: Shantell Sans variable, whose BOUNCE and INFORMALITY axes let headlines PROOF like dough as they enter the viewport — arriving light, flat and slightly compressed, then swelling to full weight and bounce (the page's one animation system; default markup is fully proofed, so no-JS and reduced-motion are complete). Every letterform belongs to the café's own grammar — wordmark, cup-stamp divider, oven timeline, the fully code-drawn menu board — and the ampersand is drawn as the latte-fern rosette (the name's two halves joined by the pour). Soft-organic is carried by the morning-parchment world and the urban-nature register (§casting 9: the monstera shadow mirroring the fern, the street tree through glass); the drenched single-colour register was deliberately refused and reserved for ⑲.",
+  "paletteSeed": "flour-cream/parchment field with a static per-chapter morning arc (first light → full morning → the room at ten — temperature grading, deliberately NOT a scroll clock); espresso ink, fern green, terracotta warm, crema gold as the only accents",
+  "typeDirection": "Shantell Sans variable (display — wght + BNCE + INFM axes ARE the proofing mechanism; portfolio-new) + Karla variable (body; quiet humanist counterpoint) — both OFL, vendored; Fraunces was the pre-plan call but was swapped at build: it already carries Ember & Rye and Sprig & Barrow, and portfolio distinctness beats a pre-plan pin",
+  "motionBudget": "the proofing type entrance (font-variation-settings + transform via IntersectionObserver, ~1.1s one breath per headline) and nothing else; reduced-motion and no-JS get the complete fully-proofed page; the wink is the bitten final t of the croissant menu entry (mask-image notch + three crumb dots), visible statically",
+  "wave": 4,
+  "built": "2026-07-18",
+  "castingNote": "social-register dial applied: people appear exactly twice — the engaged window-table PAIR (food-casting corollary verbatim: attractive young couple engaged with each other, food near, faces present never zoomed, never camera-staring) and ONE absorbed young female barista (cafés lead female or warm young male; plain rust waffle-knit, NO apron — embroidery magnet). Hero and food stills keep the object as protagonist."
+}

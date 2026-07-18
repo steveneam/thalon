@@ -1,0 +1,44 @@
+[
+  {
+    "file": "hero-morning.webp",
+    "pinnedHash": "9f57ba8dec977c21ca389f18ada5b5020773482b3014c326fac53dd2066f8521",
+    "width": 2048,
+    "height": 1152,
+    "quality": 80
+  },
+  {
+    "file": "crumb.webp",
+    "pinnedHash": "1e8cd61751f678cc853fb8d657f2cdb14d454258221524be66d566d8319305fc",
+    "width": 1400,
+    "height": 933,
+    "quality": 78
+  },
+  {
+    "file": "pour.webp",
+    "pinnedHash": "87ac8cc1f3da27b28f404d7c101652a4cad5136fad9aee4bd38c14c0faf054ab",
+    "width": 1200,
+    "height": 1200,
+    "quality": 78
+  },
+  {
+    "file": "pair.webp",
+    "pinnedHash": "648f1fc41eae70a649cb644d0ea286061a57823382422f99ecbcf797522a1ea6",
+    "width": 1600,
+    "height": 1067,
+    "quality": 80
+  },
+  {
+    "file": "barista.webp",
+    "pinnedHash": "00f2af2e468d9fda9558439b98d0e33e27b14139bf0d0f6cbb0e7209d53b484b",
+    "width": 1100,
+    "height": 1650,
+    "quality": 78
+  },
+  {
+    "file": "rack.webp",
+    "pinnedHash": "9e5ecd43168fd222cf4436a27316c132b14e38772ce3f3a4609c2305fce33d9e",
+    "width": 1400,
+    "height": 933,
+    "quality": 78
+  }
+]
