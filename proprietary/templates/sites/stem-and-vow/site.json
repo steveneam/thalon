@@ -1,0 +1,21 @@
+{
+  "slug": "stem-and-vow",
+  "name": "Stem & Vow",
+  "vertical": "florist-weddings",
+  "oneLiner": "A wedding florist that takes one order at a time and times every bloom to the hour — everything peaks at the vow.",
+  "axes": {
+    "primary": "cinematic-imagery",
+    "secondary": "soft-organic"
+  },
+  "axisNote": "second cinematic-imagery exercise after Ember & Rye — wedding photography IS this vertical's language, so minted fast-prime photography carries the page and the code stays out of the way; the casting doctrine's hardest vertical defused STRUCTURALLY: every human frame is close-crop detail grammar (hands, held bouquets, from-behind) so faces and camera-stares compose out by framing",
+  "paletteSeed": "the palette IS the countdown: market green-grey (T-72) through bench putty and cool-room dark to van tan and vow gold on cream — ONE deep rose reserved for the handwritten marginalia; refused: blush gauze, shop grids, posed-couple romance, petal-fall",
+  "typeDirection": "Cormorant Garamond (romantic but EDITORIAL high-contrast serif — never gauze) + Nunito Sans (honest text) + Caveat (the order-book scrawl — the florist's own hand as the soft-organic register) — all OFL, vendored, portfolio-new",
+  "motionBudget": "one 72-hour countdown told in five chapters with the SAME bouquet as the causal-handoff object in every frame; the scroll grammar is the FOCUS PULL (each chapter photo racks from defocus to sharp at centre-scroll — wedding-film rack focus, the founder's bokeh direction made structural) + a halation veil whose warmth accrues with progress toward T-0; bloom triptych = the lay twin of the timing craft; reduced-motion/no-JS = everything sharp, gentle fixed veil, complete story",
+  "wave": 3,
+  "built": "2026-07-18",
+  "verdict": {
+    "status": "awaiting",
+    "note": "built s61 on the full claude-design loop (scaffold + alive final) — the loop A/B the founder asked for",
+    "at": "2026-07-18"
+  }
+}

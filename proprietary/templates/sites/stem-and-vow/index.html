@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stem &amp; Vow — wedding florist. Everything peaks at the vow.</title>
+<meta name="description" content="A wedding florist that takes one order at a time and times every bloom to the hour. One bouquet, followed for 72 hours — everything peaks at the vow.">
+<style>
+@font-face{font-family:'Cormorant Garamond';src:url('fonts/cormorant-garamond-v21-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Cormorant Garamond';src:url('fonts/cormorant-garamond-v21-latin-600.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Cormorant Garamond';src:url('fonts/cormorant-garamond-v21-latin-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Nunito Sans';src:url('fonts/nunito-sans-v19-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Nunito Sans';src:url('fonts/nunito-sans-v19-latin-700.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Caveat';src:url('fonts/caveat-v23-latin-500.woff2') format('woff2');font-weight:500;font-display:swap}
+
+:root{
+  --cream:#f4efe6; --ink:#2b2721; --soft:#5a5348; --rose:#8e3d4e; --hair:rgba(90,83,72,.25);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Nunito Sans',system-ui,sans-serif;
+  --hand:'Caveat',cursive;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.65;overflow-x:clip}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+.skip{position:absolute;left:-999px;top:0;background:var(--rose);color:#fff;padding:.6rem 1rem;z-index:99;font-weight:700}
+.skip:focus{left:0}
+:focus-visible{outline:2px solid var(--rose);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---------- header ---------- */
+header.top{position:absolute;inset:0 0 auto 0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:1.2rem clamp(1rem,4vw,2.5rem);color:#fff8ea}
+.wordmark{font-family:var(--serif);font-weight:600;font-size:1.3rem;letter-spacing:.04em;text-decoration:none}
+.wordmark em{font-style:italic;font-weight:400}
+.top nav{display:flex;gap:1.5rem;font-size:.85rem}
+.top nav a{text-decoration:none;opacity:.85}
+.top nav a:hover{opacity:1}
+@media (max-width:560px){.top nav a:not(:last-child){display:none}}
+
+/* ---------- hero (cold open: the payoff first) ---------- */
+.hero{position:relative;min-height:100svh;display:grid;grid-template-columns:100%;align-content:end;isolation:isolate}
+.hero .art{position:absolute;inset:0;z-index:-1;overflow:clip}
+.hero .art img{width:100%;height:100%;object-fit:cover;object-position:62% 40%}
+.hero .art::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(43,30,20,.35),transparent 30%,rgba(43,30,20,.12) 60%,rgba(30,20,14,.72) 96%)}
+.hero-copy{padding:0 clamp(1.2rem,5vw,3.5rem) clamp(2.2rem,7vh,4.5rem);max-width:44rem;color:#fff8ea}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.7rem,7.5vw,5.2rem);line-height:1.02;text-shadow:0 1px 30px rgba(60,35,18,.45)}
+.hero h1 em{font-style:italic}
+.hero .lede{margin-top:1rem;max-width:40ch;font-size:clamp(1rem,1.5vw,1.12rem);color:#f8ecd4}
+.hero .hand{font-family:var(--hand);font-weight:500;font-size:1.45rem;color:#ffe9bd;margin-top:1.3rem;transform:rotate(-2deg);display:inline-block}
+
+/* ---------- countdown chapters ---------- */
+.chapter{min-height:96svh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(1.2rem,4vw,3rem);align-items:center;padding:clamp(2.5rem,7vh,5rem) clamp(1.2rem,5vw,4rem)}
+.chapter.flip{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+.chapter.flip .photo{order:2}
+@media (max-width:760px){.chapter,.chapter.flip{grid-template-columns:1fr;min-height:0}.chapter.flip .photo{order:0}}
+.photo{position:relative;border-radius:2px;overflow:hidden;box-shadow:0 22px 60px rgba(43,39,33,.22);will-change:filter}
+.photo img{width:100%;height:auto}
+.copy .t{font-family:var(--hand);font-weight:500;font-size:1.55rem;color:var(--rose);transform:rotate(-1.5deg);display:inline-block;margin-bottom:.4rem}
+.copy h2{font-family:var(--serif);font-weight:400;font-size:clamp(1.8rem,3.6vw,2.7rem);line-height:1.08}
+.copy p{margin-top:.85rem;max-width:46ch;color:var(--soft)}
+.copy .scrawl{font-family:var(--hand);font-weight:500;font-size:1.3rem;color:#6d6558;transform:rotate(1deg);display:inline-block;margin-top:1.1rem;border-bottom:2px solid rgba(142,61,78,.25);padding-bottom:.15rem}
+
+/* bloom triptych — the lay twin of the timing craft */
+.bloom{display:flex;gap:.7rem;margin-top:1.2rem}
+.bloom figure{flex:1;margin:0;position:relative;border-radius:2px;overflow:hidden}
+.bloom figcaption{position:absolute;bottom:.35rem;left:.55rem;font-family:var(--hand);font-weight:500;color:#fff;font-size:1.05rem;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+
+/* the halation arc */
+.halation{position:fixed;inset:0;pointer-events:none;background:radial-gradient(70% 60% at 50% 40%,rgba(255,224,166,.3),transparent 75%);opacity:0;transition:opacity .3s linear;z-index:1}
+
+/* ---------- close ---------- */
+.vow-close{min-height:64svh;display:grid;place-items:center;text-align:center;background:linear-gradient(var(--cream),#f0e2c8 55%,#ecd9b4);padding:4.5rem 1.5rem;position:relative;z-index:2}
+.vow-close h2{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.4vw,3.2rem);max-width:24ch;line-height:1.1}
+.vow-close p{margin-top:1rem;max-width:48ch;color:var(--soft)}
+.vow-close .hand{font-family:var(--hand);font-weight:500;font-size:1.5rem;color:var(--rose);margin-top:1.4rem;display:inline-block;transform:rotate(-1.5deg);text-decoration:none;border-bottom:2px solid rgba(142,61,78,.3);padding-bottom:.1rem}
+.vow-close .fine{font-size:.85rem;color:#8a7f6d;margin-top:2rem}
+
+footer{background:#efe6d4;border-top:1px solid var(--hair);padding:1.5rem 0 2rem;font-size:.85rem;color:#6d6355;position:relative;z-index:2}
+footer .cols{max-width:72rem;margin-inline:auto;padding-inline:clamp(1rem,4vw,2.5rem);display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
+footer a{color:var(--rose)}
+footer .hand{font-family:var(--hand);font-weight:500;font-size:1.05rem}
+
+@media (prefers-reduced-motion:reduce){
+  .photo{filter:none !important}
+  .halation{opacity:.3 !important;transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="halation" id="halation" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="wordmark" href="#">Stem <em>&amp;</em> Vow</a>
+  <nav aria-label="Page">
+    <a href="#story">The 72 hours</a>
+    <a href="#book">Your date</a>
+  </nav>
+</header>
+
+<main id="main">
+
+<section class="hero" aria-label="Stem &amp; Vow — wedding florist">
+  <div class="art">
+    <img src="assets/hero-vow.webp" width="2048" height="1152" alt="A bridal bouquet of garden roses held at her side in golden evening light, the white dress soft at the edge of frame, everything behind melted into warm bokeh." fetchpriority="high">
+  </div>
+  <div class="hero-copy">
+    <h1>Everything peaks<br><em>at the vow.</em></h1>
+    <p class="lede">Stem &amp; Vow is a wedding florist. One order at a time, timed to the hour — so the flowers are at their absolute best for the fifteen minutes that matter most.</p>
+    <span class="hand" aria-hidden="true">— 72 hours earlier ↓</span>
+  </div>
+</section>
+
+<div id="story"></div>
+
+<section class="chapter" aria-label="T minus 72 hours — the market">
+  <div class="photo" data-focus>
+    <img src="assets/market.webp" width="1400" height="1867" loading="lazy" alt="Armfuls of tulips, ranunculus and garden roses crowded in water at a dawn market, a florist's arm in a plain dark sleeve reaching in to lift stems in cold blue-grey light.">
+  </div>
+  <div class="copy">
+    <span class="t">T−72 hours · Thursday, 4:40am</span>
+    <h2>The market, before the city wakes.</h2>
+    <p>Every order starts in the cold: choosing stems for how they'll look on Saturday afternoon, not how they look now. Buying for the vow, three days out.</p>
+    <span class="scrawl">garden roses — tight. they'll make it. ✓</span>
+  </div>
+</section>
+
+<section class="chapter flip" aria-label="T minus 48 hours — the bench">
+  <div class="photo" data-focus>
+    <img src="assets/bench.webp" width="1400" height="1867" loading="lazy" alt="A florist's hands taping the bound stems of a half-built bridal bouquet on a timber bench, clippings scattered, soft morning window light.">
+  </div>
+  <div class="copy">
+    <span class="t">T−48 · Friday morning</span>
+    <h2>Built by hand, stem by stem.</h2>
+    <p>Wired, taped, balanced — a bouquet is engineering that has to look like it fell together. One extra stem goes in that isn't on the order. It never is.</p>
+    <span class="scrawl">+1 for luck (don't tell)</span>
+  </div>
+</section>
+
+<section class="chapter" aria-label="T minus 24 hours — the cool room">
+  <div class="photo" data-focus>
+    <img src="assets/cool-room.webp" width="1400" height="1867" loading="lazy" alt="The finished bouquet lying on kraft paper on a cool-room shelf in one cold overhead light, deep shadow all around.">
+  </div>
+  <div class="copy">
+    <span class="t">T−24 · Friday night</span>
+    <h2>The quiet part: timing the bloom.</h2>
+    <p>This is the craft nobody sees. Flowers open on their own clock — the skill is making that clock strike 3pm Saturday. Cut early, held cold, woken on time.</p>
+    <div class="bloom">
+      <figure>
+        <img src="assets/bloom-bud.webp" width="900" height="1200" loading="lazy" alt="A tightly closed coral rosebud, sepals still wrapping it, dewed, against darkness.">
+        <figcaption>10pm — tight</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/bloom-open.webp" width="900" height="1200" loading="lazy" alt="The rose half-open, mid-unfurl, dew on the outer petals.">
+        <figcaption>2am — opening</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/bloom-peak.webp" width="900" height="1200" loading="lazy" alt="The rose fully open at its peak in warm light.">
+        <figcaption>Sat 2:50pm — peak</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="chapter flip" aria-label="T minus 4 hours — the drive">
+  <div class="photo" data-focus>
+    <img src="assets/van.webp" width="1400" height="1867" loading="lazy" alt="The bouquet wrapped in plain white tissue lying across a van seat with the seatbelt pulled over it, soft first morning light.">
+  </div>
+  <div class="copy">
+    <span class="t">T−4 · Saturday, 11am</span>
+    <h2>Delivered like it's the rings.</h2>
+    <p>Wrapped, belted in, and driven like glass. The venue gets its arch and tables; the bouquet goes to the door in person, into the right hands, on time.</p>
+    <span class="scrawl">bride's mum answered. cried. (they always do)</span>
+  </div>
+</section>
+
+<section class="chapter" aria-label="T zero — the vow">
+  <div class="photo" data-focus>
+    <img src="assets/vow.webp" width="1400" height="1867" loading="lazy" alt="At the ceremony: her hand carrying the bouquet at her side against the fall of the white dress, a suited figure dissolved in golden light beyond — one taller stem rising above the roses.">
+  </div>
+  <div class="copy">
+    <span class="t">T−0 · Saturday, 3pm</span>
+    <h2>At peak. Exactly on time.</h2>
+    <p>Fifteen minutes where everything the last three days were for is simply… there, at its best, asking for no attention at all. That's the job done.</p>
+    <span class="scrawl">find the extra stem. it made it to the vow.</span>
+  </div>
+</section>
+
+<section class="vow-close" id="book" aria-labelledby="book-title">
+  <div>
+    <h2 id="book-title">Weddings, one order at a time — booked by the season, not the dozen.</h2>
+    <p>We take a small number of weddings each season so every order gets its three days. If your date is free, it's yours entirely.</p>
+    <a class="hand" href="#book">Tell us your date. We'll tell you what's blooming. →</a>
+    <p class="fine">Buttonholes, arbours and table work ride along with every bouquet — priced by what's in season, told to you straight.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="cols">
+    <span><b>Stem &amp; Vow</b> · Petersham · weddings only</span>
+    <span class="hand" aria-hidden="true">the extra stem is always in</span>
+    <span><a href="guide/">How this page was made</a></span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return; // CSS holds: sharp photos, gentle fixed veil
+  const photos = Array.from(document.querySelectorAll('[data-focus]'));
+  const veil = document.getElementById('halation');
+  const MAX_BLUR = 14;
+  let ticking = false;
+  function drive() {
+    ticking = false;
+    const mid = innerHeight / 2;
+    for (const el of photos) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > innerHeight + 200) continue;
+      const center = r.top + r.height / 2;
+      const d = Math.min(1, Math.max(0, (Math.abs(center - mid) - innerHeight * 0.12) / (innerHeight * 0.55)));
+      const blur = d * d * MAX_BLUR;
+      el.style.filter = blur < 0.4 ? 'none' : `blur(${blur.toFixed(1)}px) saturate(${(1 - d * 0.25).toFixed(2)})`;
+    }
+    const p = Math.min(1, Math.max(0, scrollY / (document.body.scrollHeight - innerHeight)));
+    veil.style.opacity = (p * p * 0.9).toFixed(3);
+  }
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(drive); } }, { passive: true });
+  addEventListener('resize', drive, { passive: true });
+  drive();
+})();
+</script>
+</body>
+</html>

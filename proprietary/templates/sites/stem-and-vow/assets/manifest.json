@@ -1,0 +1,65 @@
+[
+ {
+  "file": "hero-vow.webp",
+  "pinnedHash": "68c129b1203c6fcab10d9b19dfa9a60c997fdeb62ee2a3e64b401c590b2c7b4e",
+  "width": 2048,
+  "height": 1152,
+  "quality": 78
+ },
+ {
+  "file": "market.webp",
+  "pinnedHash": "664ec222bd15be1c5491982ab9e8951a587de96f7bc2ed1a5519bbc0b5ab0529",
+  "width": 1400,
+  "height": 1867,
+  "quality": 75
+ },
+ {
+  "file": "bench.webp",
+  "pinnedHash": "191f771ffa8a0f126eeb0a827f9c24fe91ce3fe77434c05e6a191680fdd76e17",
+  "width": 1400,
+  "height": 1867,
+  "quality": 75
+ },
+ {
+  "file": "cool-room.webp",
+  "pinnedHash": "be8327af9ad00a8c2b09e823bb2384d4ac947b182bc2a4b3e9fa976fe25eda80",
+  "width": 1400,
+  "height": 1867,
+  "quality": 75
+ },
+ {
+  "file": "van.webp",
+  "pinnedHash": "5319eaec8818cea08a8bcc9e837918f5e49e61b57061b2a8feffae6c724883ac",
+  "width": 1400,
+  "height": 1867,
+  "quality": 75
+ },
+ {
+  "file": "vow.webp",
+  "pinnedHash": "b593ccece513cd76945f817aacf5b2bccebfd714838a326cf7712a6d772266ed",
+  "width": 1400,
+  "height": 1867,
+  "quality": 75
+ },
+ {
+  "file": "bloom-bud.webp",
+  "pinnedHash": "6f4f3150093f63acab8862e0c1baf859a91a9353f8fea7b33661ce4d1c6f4c79",
+  "width": 900,
+  "height": 1200,
+  "quality": 75
+ },
+ {
+  "file": "bloom-open.webp",
+  "pinnedHash": "1566246f80f7351b417d6f99421d761753e0aa2b61708b29e3af0f5b755ba32e",
+  "width": 900,
+  "height": 1200,
+  "quality": 75
+ },
+ {
+  "file": "bloom-peak.webp",
+  "pinnedHash": "d57522452ca20d5e34c54a6eaa10d246753dfb43c376e700c10f944aeca589c5",
+  "width": 900,
+  "height": 1200,
+  "quality": 75
+ }
+]

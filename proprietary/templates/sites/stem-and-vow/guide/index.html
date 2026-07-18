@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How this page was made — Stem &amp; Vow</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:'Cormorant Garamond';src:url('../fonts/cormorant-garamond-v21-latin-600.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Nunito Sans';src:url('../fonts/nunito-sans-v19-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Nunito Sans';src:url('../fonts/nunito-sans-v19-latin-700.woff2') format('woff2');font-weight:700;font-display:swap}
+:root{--paper:#f4efe6;--ink:#2b2721;--soft:#5a5348;--hair:rgba(90,83,72,.3);--rose:#8e3d4e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;font-size:1.02rem}
+main{max-width:44rem;margin-inline:auto;padding:3.5rem 1.2rem 4rem}
+h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:2.1rem;line-height:1.12;margin-bottom:.4rem}
+h2{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:2.4rem 0 .7rem;border-bottom:1px solid var(--hair);padding-bottom:.4rem;font-weight:700}
+p{margin-bottom:.9rem}
+p.lede{color:var(--soft);font-size:1.06rem}
+ul{margin:0 0 .9rem 1.2rem}
+li{margin-bottom:.45rem}
+a{color:var(--rose)}
+strong{color:#000}
+.tbl{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:.9rem}
+.tbl th{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);text-align:left;font-weight:700;padding:.35rem .5rem;border-bottom:1px solid var(--soft)}
+.tbl td{padding:.45rem .5rem;border-bottom:1px solid var(--hair);vertical-align:top}
+.back{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:var(--rose);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="../">← Stem &amp; Vow</a>
+<h1 style="margin-top:1.2rem">How this page was made</h1>
+<p class="lede">Stem &amp; Vow is a fictional demonstration business — a portfolio piece showing what this content factory produces. No real florist, weddings, or suburb address is being advertised; the times, the order-book notes, and the place name are plausible fiction written to show how a real wedding florist's work would live on a page like this. All imagery is AI-generated.</p>
+
+<h2>Concept</h2>
+<p>A design survey of the wedding-florist genre found two defaults: the flower-shop e-commerce grid (burgundy and blush, "shop by occasion") and the wedding-romance template (posed couple hero, dream-wedding language, stat counters, petal-fall animations). Both were refused. The gap nobody fills: the florist as <strong>craft</strong> — the cold market run, the bench, and above all the timing, because a wedding florist's real skill is making flowers peak at 3pm Saturday.</p>
+<p>So <strong>the page is a 72-hour countdown told through one bouquet</strong>. It opens at the payoff — the bouquet at the vow — then "72 hours earlier" runs the story back: market, bench, cool room, van, and returns to the ceremony with everything at peak. The same bouquet carries every frame. The scroll grammar is the <strong>focus pull</strong>: each chapter photograph racks from soft to sharp as it centres, the way a wedding film racks focus — and a warm halation quietly builds as you approach the vow, so the page gets dreamier exactly as the story does. The handwritten margin notes are the florist's own order book.</p>
+<p>Design axes (assigned): cinematic-imagery primary — the photography carries the page and the code stays out of the way — with soft-organic secondary (the handwriting, the paper, the pacing). Type: Cormorant Garamond, Nunito Sans, Caveat — all OFL, served locally. Zero external requests; no analytics.</p>
+
+<h2>The honest details</h2>
+<ul>
+  <li>Every human frame uses close-crop wedding-photography grammar — hands, a held bouquet, a figure dissolved in bokeh — so nobody stares at the camera and no face carries the page. That is both the professional register and a deliberate honesty choice for AI imagery.</li>
+  <li>The bloom triptych (tight → opening → peak) is the lay reading of the timing craft: one clock, told in petals rather than words.</li>
+  <li>The wink: one extra stem goes into every order, unlisted — it appears in the bench note, and the taller stem is findable in the ceremony photograph.</li>
+  <li>No packages, no urgency, no testimonials. The close asks for a date, because that is how this business would actually work.</li>
+  <li>Without JavaScript (or with reduced motion) every photograph is simply sharp and the story reads complete, top to bottom.</li>
+</ul>
+
+<h2>Imagery — models, credits, and what was rejected</h2>
+<table class="tbl">
+<tr><th>Asset</th><th>Model</th><th>Take</th><th>Credits</th></tr>
+<tr><td>Hero / ceremony pair (vow bouquet)</td><td>soul_2 · 2k</td><td>1st</td><td>0.24</td></tr>
+<tr><td>Market dawn</td><td>soul_2 · 2k</td><td>2nd</td><td>0.24</td></tr>
+<tr><td>The bench</td><td>soul_2 · 2k</td><td>1st</td><td>0.12</td></tr>
+<tr><td>Cool room</td><td>soul_2 · 2k</td><td>2nd</td><td>0.24</td></tr>
+<tr><td>The van</td><td>soul_2 · 2k</td><td>3rd</td><td>0.36</td></tr>
+<tr><td>Bloom triptych ×3</td><td>soul_2 · 2k</td><td>2nd, 1st, 1st</td><td>0.48</td></tr>
+</table>
+<p>The rejects are a faithful record of what image models do to florists: the first market take grew pseudo-text labels on four bucket bodies (the keeper reframes over the rims so no bucket body is in frame); the first cool-room take invented a printed card <em>inside</em> the arrangement (the keeper lies the bouquet down — cards belong to standing shop arrangements, so the composition removed the habitat); the first van take printed a fake brand on the delivery box and the second grew window stickers (the keeper looks straight down at the seat so no glass or box exists in frame); the first bud was half-open and the wrong colour for its triptych siblings (retaken as a truly closed coral bud). One keeper carries a small disclosed local blur: a faint pseudo-print patch on the cool-room bouquet's paper collar, softened before pinning — that and nothing else was hand-retouched. Total spend 1.68 credits including rejects.</p>
+
+<h2>Method + passes</h2>
+<p>This page ran the full per-template design loop: a look-first genre survey, a scaffold with named asset slots in the design tool, an "alive" pass that proved the focus-pull and halation mechanics on placeholder frames, and only then the minted photography and this build. Iteration passes (fault-hunt + ambition lanes each) are logged here as they run:</p>
+<ul id="passlog">
+  <li>Pass 1 — desktop walk on the live render: the rack-focus mechanic verified frame by frame (centred chapter sharp, neighbours 6–14px defocused, both scroll directions), the halation veil measured accruing 0 → 0.82 across the countdown; hero scrim contrast checked over the brightest dress areas; console clean; zero external requests.</li>
+  <li>Pass 2 — 390 px: no horizontal scroll at exactly 390; the nav collapses to the one Your-date link; hero, chapters, triptych and close all walked; the focus pull holds on the narrow layout.</li>
+  <li>Pass 3 — honesty + access sweep: keyboard walk (skip link, nav, the date CTA, the guide link — focus ring on all); without JavaScript every photo is simply sharp and the story reads complete (the blur only ever comes FROM JavaScript, so the page degrades to the finished sharp essay); reduced-motion holds a gentle fixed veil; every alt describes its actual frame, including the taller +1 stem in the ceremony image. Squint test against the other fifteen portfolio sites: nothing else is a photographic countdown. Ceiling call: the focus pull + halation IS the page's one loud mechanism; the photography does the rest on purpose.</li>
+</ul>
+
+<h2>Provenance</h2>
+<p>Every image was minted on the paid tier and pinned at mint time into content-addressed storage with a full provenance manifest (model, prompt, parameters, credits, license tier, job id). The files this page serves are deterministic derivations (resize, re-encode) of those pinned originals.</p>
+</main>
+</body>
+</html>

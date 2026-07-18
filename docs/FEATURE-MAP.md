@@ -69,7 +69,7 @@ flowchart LR
 | Settings (seams, drivers, budget, watchlist) | rail foot → Settings | reachable |
 | ⌘K command palette | topbar button; Ctrl/⌘-K | reachable |
 | Own-site blog (published pages land here) | `/blog` — public site, not linked from the workspace | **partial — no workspace path to what got published** |
-| Portfolio sites (15 landing pages) | — (8899 dev preview only) | **ORPHANED from the workspace — W-sites queued (`docs/research/sites-surface-plan.md`) is the fix** |
+| Portfolio sites (16 landing pages) | — (8899 dev preview only) | **ORPHANED from the workspace — W-sites queued (`docs/research/sites-surface-plan.md`) is the fix** |
 | Template `/guide` pages | each site → footer "how this page was made" | reachable (within each site) |
 | Send door (B-crm.4, disarmed) | Leads → Email compose → the door states its disarmed status | reachable (honest door) |
 
