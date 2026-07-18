@@ -193,8 +193,16 @@ never with a wish for faces. Social verticals (dining, cafés, salons, pet
 care, weddings — the product is experienced with or through people) earn
 human elements in frame (the ⑩ laughing-friends hero is the model: what's
 sold NEEDS people); nature/object still leads and people are the warmth
-layer — candid, absorbed, often close-crop or bokeh-soft (the ⑮ grammar),
-counted like the wink: one or two moments, seasoning not cast. Craft/trade
+layer — candid, absorbed, counted like the wink: one or two moments,
+seasoning not cast. **Food-scene casting corollary (founder correction,
+s62): hands-only compositions are NOT the safe default for food — cropped
+hands over plates can read unhygienic to part of the audience. The working
+composition is a candid, attractive young PAIR (couple or friends) engaged
+with EACH OTHER, food nearby in the frame — the ⑩ model made food-forward:
+the dish stays a protagonist, the people supply the social proof and the
+eye-candy warmth, faces present but never the zoomed-in subject and never
+camera-staring. The ⑮ close-crop/bokeh grammar remains for verticals where
+faces must compose OUT (weddings), not for dining tables. Craft/trade
 verticals get ONE absorbed practitioner as the trust signal (the ⑯
 roofer / ⑫ dentist model: nature primary, the person secondary). Precision/
 B2B verticals (science consumables, logistics) keep humans minimal-to-absent

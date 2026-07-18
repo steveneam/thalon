@@ -4,6 +4,7 @@
 
 | doc | covers | status |
 |---|---|---|
+| [arming-plan-sprint8.md](arming-plan-sprint8.md) | "Sprint 8: Arm It Live" — the product-arming research + bucket shapes (live intel drivers · social publisher seam · one-prompt video/pillar #1 · live send · B-sitegen pointer) | **live** — plan-of-record waiting behind wave 4; becomes bucket text at the re-charter |
 | [boards-calendar-ui-patterns.md](boards-calendar-ui-patterns.md) | Boards + content-calendar UI patterns — survey for workspace redesign Phase D | **historical** — fed Phase D (done s58-59); reference-only survey |
 | [engaging-clips.md](engaging-clips.md) | Engaging clips research (Sprint 6 / founder feedback on the first B6.3 renders) | **historical** — film work; film parked post-landing |
 | [hyperframes-integration.md](hyperframes-integration.md) | Hyperframes integration research (Sprint 5 / A11) | **historical** — render-driver survey; Hyperframes = default, Remotion = swap path |
