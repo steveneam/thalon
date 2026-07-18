@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, ExternalLink, FileText, Globe, Video, X } from "lucide-react";
+import { Check, Copy, X } from "lucide-react";
 import { HeatGrade } from "@/components/intel/heat-grade";
+import { compactCount, freshnessStamp, suggestedExit } from "@/components/intel/launchpad";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import type { CreateFamily, TrendCard as TrendCardData } from "@/lib/intel/types";
 import { timeAgo } from "@/lib/workspace/format";
+import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import { cn } from "@/lib/utils";
 
 export interface TrendPromotePick {
@@ -20,35 +21,43 @@ interface TrendCardProps {
   card: TrendCardData;
   /** Checkbox multi-select for bulk Dismiss (FRONTEND §0 parity, s40). */
   selected: boolean;
+  /** The keyboard cursor rests here (j/k) — worn as a focus-style ring. */
+  cursor: boolean;
   busy: boolean;
   onSelect: (cardId: string, selected: boolean) => void;
   onPromote: (cardId: string, pick: TrendPromotePick) => void;
   onDismiss: (cardId: string) => void;
 }
 
-const EXITS: Array<{ family: CreateFamily; label: string; icon: typeof Video }> = [
-  { family: "video", label: "Video", icon: Video },
-  { family: "post", label: "Post", icon: FileText },
-  { family: "page", label: "Page", icon: Globe },
+const EXITS: Array<{ family: CreateFamily; label: string }> = [
+  { family: "video", label: "Video" },
+  { family: "post", label: "Post" },
+  { family: "page", label: "Page" },
 ];
 
-function pct(ratio: number | null): string {
-  return ratio === null ? "–" : `${(ratio * 100).toFixed(1)}%`;
-}
-
 /**
- * One ranked item as a DOSSIER + LAUNCHPAD (wave-3, workspace-ux-v2.md §3):
- * outlier badge, WHY it's rising (reason strings verbatim), engagement
- * ratios — plus ready titles/angles/hook and per-family exits. The selected
- * title/angle ride the promote capture, so Create opens pre-filled and the
- * operator never retypes what intel already knew.
+ * The EXPANDED dossier card — the launchpad (Phase D design #4, ux-v2 §1/§3
+ * made concrete): heat + outlier + honest freshness stamp, provenance with
+ * the original link, why-it's-moving (ranker reason strings VERBATIM — the
+ * wire type carries no prose paragraph, and invented prose would violate the
+ * honest-claims rule), ready titles with copy buttons, angles, one hook —
+ * then the three per-family exits with a "suggested" pre-pick (word +
+ * heavier border, never color-alone, never a gate). Whatever title/angle is
+ * picked rides the promote capture: Create receives the capture id, not a
+ * query-string prompt, and the operator never retypes context.
+ *
+ * Bounds (design #4): titles cap at 4 and angles at 3 in the wire type;
+ * more lives nowhere — the card is a launchpad, not an archive.
  */
-export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss }: TrendCardProps) {
+export function TrendCard({ card, selected, cursor, busy, onSelect, onPromote, onDismiss }: TrendCardProps) {
   const [titleIndex, setTitleIndex] = useState(0);
   const [angleIndex, setAngleIndex] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
   // Const binding so the dossier narrowing survives into JSX callbacks.
   const dossier = card.dossier;
+  const suggested = suggestedExit(card);
+  const freshness = freshnessStamp(card);
+  const views = card.metrics.views;
 
   function copy(key: string, text: string) {
     void navigator.clipboard?.writeText(text);
@@ -58,8 +67,14 @@ export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss
   }
 
   return (
-    <Card data-testid={`trend-card-${card.id}`} className="gap-3">
-      <CardHeader className="flex-row flex-wrap items-center gap-2">
+    <div
+      data-testid={`trend-card-${card.id}`}
+      className={cn(
+        "flex flex-col gap-3 rounded-xl border border-primary/50 bg-card p-4",
+        cursor && "ring-3 ring-ring/50",
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2">
         <input
           type="checkbox"
           aria-label={`Select trend from @${card.account}`}
@@ -67,116 +82,108 @@ export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss
           onChange={(e) => onSelect(card.id, e.target.checked)}
           className="size-4 accent-primary"
         />
-        <Badge variant="outline" className="font-mono">{card.source}</Badge>
-        <span className="text-xs text-muted-foreground">@{card.account}</span>
-        <time dateTime={card.publishedAt} className="text-xs text-muted-foreground">
-          {timeAgo(card.publishedAt)}
-        </time>
-        <span className="ml-auto flex items-center gap-2">
-          {card.isOutlier && <Badge variant="signal">outlier</Badge>}
-          <HeatGrade score={card.score} />
-        </span>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <p className="text-sm leading-snug">
-          {card.text}
-          {card.url && (
+        <HeatGrade score={card.score} />
+        {card.isOutlier && <Badge variant="signal">outlier</Badge>}
+        {freshness && <span className="u-eyebrow text-muted-foreground">{freshness}</span>}
+        <span className="u-eyebrow ml-auto text-muted-foreground">#{card.id}</span>
+      </div>
+
+      <h2 className="text-base leading-snug font-semibold">{card.text}</h2>
+
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+        <span>@{card.account}</span>
+        {typeof views === "number" && (
+          <>
+            <span aria-hidden>·</span>
+            <span className="u-tabular">{compactCount(views)} views</span>
+          </>
+        )}
+        <span aria-hidden>·</span>
+        <time dateTime={card.publishedAt}>{timeAgo(card.publishedAt)}</time>
+        {card.url && (
+          <>
+            <span aria-hidden>·</span>
             <a
               href={card.url}
               target="_blank"
               rel="noreferrer"
-              aria-label="Open the original item"
-              className="ml-1.5 inline-flex align-middle text-muted-foreground hover:text-primary"
+              className="text-primary hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              <ExternalLink aria-hidden className="size-3.5" />
+              original post ↗
             </a>
-          )}
-        </p>
-        <dl className="u-tabular flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
-          <div className="flex gap-1.5">
-            <dt>shares/views</dt>
-            <dd className="font-medium text-foreground">{pct(card.shareToView)}</dd>
-          </div>
-          <div className="flex gap-1.5">
-            <dt>bookmarks/views</dt>
-            <dd className="font-medium text-foreground">{pct(card.bookmarkToView)}</dd>
-          </div>
-          {typeof card.metrics.views === "number" && (
-            <div className="flex gap-1.5">
-              <dt>views</dt>
-              <dd className="font-medium text-foreground">{card.metrics.views.toLocaleString()}</dd>
-            </div>
-          )}
-        </dl>
-        <div>
-          <p className="u-eyebrow mb-1 text-muted-foreground">why it&rsquo;s rising · {card.areaName}</p>
-          <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-            {card.reasons.map((reason) => (
-              <li key={reason} className="flex items-baseline gap-1.5">
-                <span aria-hidden className="size-1 shrink-0 self-center rounded-full bg-signal/70" />
-                {reason}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* The dossier: ready-to-fire creative context. Selection is the
-            smart default at the seam — whatever is selected rides the exit.
-            Live cards carry no dossier until title/angle generation arms
-            (gateway top-up) — the honest note renders instead, never
-            fabricated titles. */}
-        {!dossier && (
-          <p className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-            Ready titles &amp; angles arm with the gateway top-up — the exits below still carry this
-            item&rsquo;s full context into Create.
-          </p>
+          </>
         )}
-        {dossier && (
-        <details className="group rounded-lg border border-border">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted [&::-webkit-details-marker]:hidden">
-            <span className="u-eyebrow text-muted-foreground">dossier</span>
-            {dossier.titles.length} titles · {dossier.angles.length} angles · hook
-            <span aria-hidden className="ml-auto text-muted-foreground transition-transform group-open:rotate-90">
-              ›
-            </span>
-          </summary>
-          <div className="flex flex-col gap-3 border-t border-border px-3 py-3">
-            <div role="radiogroup" aria-label="Ready titles" className="flex flex-col gap-1">
-              <p className="u-eyebrow text-muted-foreground">titles — pick one, it rides the exit</p>
-              {dossier.titles.map((title, i) => (
-                <div key={title} className="flex items-start gap-1.5">
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={titleIndex === i}
-                    onClick={() => setTitleIndex(i)}
-                    className={cn(
-                      "flex-1 rounded-md border px-2 py-1.5 text-left text-xs transition-colors",
-                      "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                      titleIndex === i
-                        ? "border-primary/50 bg-primary/10 font-medium"
-                        : "border-transparent hover:bg-muted",
-                    )}
-                  >
-                    {title}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Copy title: ${title}`}
-                    onClick={() => copy(`title-${i}`, title)}
-                    className="mt-1 rounded-md p-1 text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                  >
-                    {copied === `title-${i}` ? (
-                      <Check aria-hidden className="size-3.5" />
-                    ) : (
-                      <Copy aria-hidden className="size-3.5" />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
+        <span aria-hidden>·</span>
+        <span>area: {card.areaName}</span>
+        <Badge variant="outline" className="font-mono">{card.source}</Badge>
+      </p>
+
+      <div>
+        <p className="u-eyebrow mb-1 text-muted-foreground">why it&rsquo;s moving</p>
+        <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+          {card.reasons.map((reason) => (
+            <li key={reason} className="flex items-baseline gap-1.5">
+              <span aria-hidden className="size-1 shrink-0 self-center rounded-full bg-signal/70" />
+              {reason}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Live cards carry no dossier until title/angle generation arms
+          (gateway top-up) — the honest note renders instead, never
+          fabricated titles. */}
+      {!dossier && (
+        <p className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+          Ready titles &amp; angles arm with the gateway top-up — the exits below still carry this
+          item&rsquo;s full context into Create.
+        </p>
+      )}
+      {dossier && (
+        <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
+          <div role="radiogroup" aria-label="Ready titles" className="flex flex-col gap-1">
+            <p className="u-eyebrow text-muted-foreground">
+              ready titles · {dossier.titles.length} — the pick rides the exit
+            </p>
+            {dossier.titles.map((title, i) => (
+              <div
+                key={title}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 transition-colors hover:border-primary",
+                  titleIndex === i && SELECTED_ROW,
+                )}
+              >
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={titleIndex === i}
+                  onClick={() => setTitleIndex(i)}
+                  className={cn(
+                    "min-w-0 flex-1 text-left text-xs",
+                    titleIndex === i && "font-medium",
+                    "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                  )}
+                >
+                  {title}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Copy title: ${title}`}
+                  onClick={() => copy(`title-${i}`, title)}
+                  className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                >
+                  {copied === `title-${i}` ? (
+                    <Check aria-hidden className="size-3.5" />
+                  ) : (
+                    <Copy aria-hidden className="size-3.5" />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col gap-3">
             <div role="radiogroup" aria-label="Suggested angles" className="flex flex-col gap-1">
-              <p className="u-eyebrow text-muted-foreground">angles</p>
+              <p className="u-eyebrow text-muted-foreground">angles · {dossier.angles.length}</p>
               {dossier.angles.map((angle, i) => (
                 <button
                   key={angle}
@@ -185,13 +192,12 @@ export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss
                   aria-checked={angleIndex === i}
                   onClick={() => setAngleIndex(i)}
                   className={cn(
-                    "rounded-md border px-2 py-1.5 text-left text-xs transition-colors",
-                    "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                    angleIndex === i
-                      ? "border-primary/50 bg-primary/10 font-medium"
-                      : "border-transparent hover:bg-muted",
+                    "flex items-baseline gap-1.5 rounded-md border border-transparent px-2 py-1 text-left text-xs transition-colors hover:bg-muted",
+                    angleIndex === i && cn(SELECTED_ROW, "font-medium"),
+                    "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                   )}
                 >
+                  <span aria-hidden>•</span>
                   {angle}
                 </button>
               ))}
@@ -204,7 +210,7 @@ export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss
                   type="button"
                   aria-label="Copy hook"
                   onClick={() => copy("hook", dossier.hook)}
-                  className="rounded-md p-1 not-italic text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="rounded-md p-1 text-muted-foreground not-italic transition-colors hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                 >
                   {copied === "hook" ? (
                     <Check aria-hidden className="size-3.5" />
@@ -215,27 +221,44 @@ export function TrendCard({ card, selected, busy, onSelect, onPromote, onDismiss
               </p>
             </div>
           </div>
-        </details>
-        )}
-      </CardContent>
-      <CardFooter className="flex-wrap gap-2">
-        {/* Per-family exits — three doors, one capture spine. */}
-        {EXITS.map(({ family, label, icon: Icon }) => (
-          <Button
-            key={family}
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            aria-label={`Create ${family} from this`}
-            onClick={() => onPromote(card.id, { family, titleIndex, angleIndex })}
-          >
-            <Icon aria-hidden data-icon="inline-start" /> → {label}
-          </Button>
-        ))}
-        <Button size="sm" variant="ghost" disabled={busy} onClick={() => onDismiss(card.id)} className="ml-auto">
+        </div>
+      )}
+
+      {/* Per-family exits — three doors, one capture spine. The suggested
+          door wears word + heavier border (a default, not a gate). */}
+      <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+        <span className="u-eyebrow text-muted-foreground">one-click exits — context rides along</span>
+        {EXITS.map(({ family, label }) => {
+          const isSuggested = family === suggested.family;
+          return (
+            <Button
+              key={family}
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              aria-label={`Create ${family} from this${isSuggested ? " — suggested" : ""}`}
+              title={isSuggested ? suggested.reason : undefined}
+              onClick={() => onPromote(card.id, { family, titleIndex, angleIndex })}
+              className={cn(
+                "border-primary/50 text-primary hover:bg-primary/5 hover:text-primary",
+                isSuggested && "border-2 border-primary font-semibold",
+              )}
+            >
+              → {label}
+              {isSuggested && <span className="font-normal"> · suggested</span>}
+            </Button>
+          );
+        })}
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={busy}
+          onClick={() => onDismiss(card.id)}
+          className="ml-auto text-muted-foreground"
+        >
           <X aria-hidden data-icon="inline-start" /> Dismiss
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -13,7 +13,7 @@ describe("intel trends bulk dismiss (s40 parity, FRONTEND §0)", () => {
     const user = userEvent.setup();
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
+    await screen.findByText("4 rising");
 
     const checkboxes = screen.getAllByRole("checkbox", { name: /^select trend from @/i });
     expect(checkboxes.length).toBeGreaterThanOrEqual(2);
@@ -21,15 +21,29 @@ describe("intel trends bulk dismiss (s40 parity, FRONTEND §0)", () => {
     await user.click(checkboxes[1]);
     expect(screen.getByText("2 selected")).toBeInTheDocument();
 
-    const before = screen.getAllByTestId(/^trend-card-/).length;
+    const before = screen.getAllByTestId(/^trend-(card|row)-/).length;
     await user.click(screen.getByRole("button", { name: "Dismiss selected" }));
     expect(confirmSpy).toHaveBeenCalledExactlyOnceWith("Dismiss 2 selected cards?");
     await waitFor(() =>
-      expect(screen.getAllByTestId(/^trend-card-/)).toHaveLength(before - 2),
+      expect(screen.getAllByTestId(/^trend-(card|row)-/)).toHaveLength(before - 2),
     );
     expect(await screen.findByRole("status")).toHaveTextContent(/dismissed 2 cards/i);
     // The bar cleared with the selection.
     expect(screen.queryByText("2 selected")).not.toBeInTheDocument();
     confirmSpy.mockRestore();
+  });
+
+  it("x picks the cursor card for bulk (the shared j/k grammar)", async () => {
+    const user = userEvent.setup();
+    render(<TrendsTab />);
+    await screen.findByText("4 rising");
+
+    await user.keyboard("x");
+    expect(screen.getByText("1 selected")).toBeInTheDocument();
+    await user.keyboard("jx");
+    expect(screen.getByText("2 selected")).toBeInTheDocument();
+    // x toggles: unpick the second card again.
+    await user.keyboard("x");
+    expect(screen.getByText("1 selected")).toBeInTheDocument();
   });
 });

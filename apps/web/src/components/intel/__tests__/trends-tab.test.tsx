@@ -11,56 +11,54 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
 }));
 
-describe("TrendsTab", () => {
-  it("renders demo cards with outlier badges, reason strings, and engagement ratios", async () => {
+// The launchpad sorts by rank score (presentation-side): demo-trend-3 (0.90)
+// leads, then -1 (0.87), -2 (0.66), -4 (0.48).
+const ranked = [...fixtureTrendCards].sort((a, b) => b.score - a.score);
+
+describe("TrendsTab (dossier launchpad, Phase D design #4)", () => {
+  it("expands the top-ranked card as the dossier; the rest are bounded rising rows with a stated count", async () => {
     render(<TrendsTab />);
 
-    expect(await screen.findByText(/demo dataset/i)).toBeInTheDocument();
-    // Outlier badge on the outlier cards only.
-    expect(screen.getAllByText("outlier")).toHaveLength(
-      fixtureTrendCards.filter((c) => c.isOutlier).length,
+    expect(await screen.findByText("4 rising")).toBeInTheDocument();
+    const card = screen.getByTestId(`trend-card-${ranked[0].id}`);
+    // The dossier headline is the trend text; reasons render VERBATIM.
+    expect(within(card).getByRole("heading", { level: 2 })).toHaveTextContent(ranked[0].text);
+    expect(within(card).getByText(ranked[0].reasons[0])).toBeInTheDocument();
+    // Provenance: the original link + the area, on the card.
+    expect(within(card).getByRole("link", { name: /original post/i })).toHaveAttribute(
+      "href",
+      ranked[0].url,
     );
-    // A reason string renders verbatim (the ranker.ts grammar).
+    expect(within(card).getByText(`area: ${ranked[0].areaName}`)).toBeInTheDocument();
+    expect(within(card).getByText("outlier")).toBeInTheDocument();
+
+    // Everything else is a compact row inside the bounded region, count stated.
     expect(
-      screen.getByText('relevance 0.81 to area "AI content automation" (embedding cosine 0.62)'),
+      screen.getByText(/3 more rising · list is bounded — scrolls internally past 6/),
     ).toBeInTheDocument();
-    // Engagement ratios in the stat strip.
-    expect(screen.getAllByText("2.5%").length).toBeGreaterThanOrEqual(1);
+    for (const row of ranked.slice(1)) {
+      expect(screen.getByTestId(`trend-row-${row.id}`)).toBeInTheDocument();
+    }
   });
 
-  it("filters cards client-side by area chip", async () => {
+  it("a rising row click expands that card — one dossier at a time", async () => {
     const user = userEvent.setup();
     render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
+    await screen.findByText("4 rising");
 
-    const chip = screen.getByRole("button", { name: /Short-form video tooling/ });
-    await user.click(chip);
-    expect(screen.queryByTestId("trend-card-demo-trend-1")).not.toBeInTheDocument();
-    expect(screen.getByTestId("trend-card-demo-trend-3")).toBeInTheDocument();
-
-    // Toggling the chip off restores everything.
-    await user.click(chip);
-    expect(screen.getByTestId("trend-card-demo-trend-1")).toBeInTheDocument();
-  });
-
-  it("dismiss removes the card; the dismissal is captured, not deleted", async () => {
-    const user = userEvent.setup();
-    render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
-
-    const card = screen.getByTestId("trend-card-demo-trend-2");
-    await user.click(within(card).getByRole("button", { name: /dismiss/i }));
-    await waitFor(() =>
-      expect(screen.queryByTestId("trend-card-demo-trend-2")).not.toBeInTheDocument(),
-    );
+    await user.click(screen.getByRole("button", { name: `Expand trend from @${ranked[2].account}` }));
+    expect(screen.getByTestId(`trend-card-${ranked[2].id}`)).toBeInTheDocument();
+    // The previous launchpad went back to being a row.
+    expect(screen.queryByTestId(`trend-card-${ranked[0].id}`)).not.toBeInTheDocument();
+    expect(screen.getByTestId(`trend-row-${ranked[0].id}`)).toBeInTheDocument();
   });
 
   it("a per-family exit routes to Create with a capture id — the context spine, not a prompt string", async () => {
     const user = userEvent.setup();
     render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
+    await screen.findByText("4 rising");
 
-    const card = screen.getByTestId("trend-card-demo-trend-1");
+    const card = screen.getByTestId(`trend-card-${ranked[0].id}`);
     await user.click(within(card).getByRole("button", { name: /create video from this/i }));
     await waitFor(() => expect(push).toHaveBeenCalled());
     expect(String(push.mock.calls.at(-1)![0])).toContain("/app/create?ctx=");
@@ -69,57 +67,86 @@ describe("TrendsTab", () => {
     const capture = listIntelCaptures().at(-1)!;
     expect(capture.payload).toMatchObject({
       family: "video",
-      title: fixtureTrendCards[0].dossier!.titles[0],
-      hook: fixtureTrendCards[0].dossier!.hook,
+      title: ranked[0].dossier!.titles[0],
+      hook: ranked[0].dossier!.hook,
     });
   });
 
-  it("the dossier opens with titles/angles/hook, and a selected title rides the exit", async () => {
+  it("a picked title rides the exit, and the suggested door wears the word — never color alone", async () => {
     const user = userEvent.setup();
     render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
+    await screen.findByText("4 rising");
 
-    const card = screen.getByTestId("trend-card-demo-trend-1");
-    await user.click(within(card).getByText(/dossier/i));
-    expect(within(card).getByText(fixtureTrendCards[0].dossier!.hook, { exact: false })).toBeInTheDocument();
-
-    // Pick the second ready title, then exit through → Post.
-    await user.click(
-      within(card).getByRole("radio", { name: fixtureTrendCards[0].dossier!.titles[1] }),
-    );
-    await user.click(within(card).getByRole("button", { name: /create post from this/i }));
+    const card = screen.getByTestId(`trend-card-${ranked[0].id}`);
+    await user.click(within(card).getByRole("radio", { name: ranked[0].dossier!.titles[1] }));
+    // Thread-shaped source → the Post exit carries the suggested emphasis,
+    // as a WORD in the accessible name (a default, not a gate).
+    const postExit = within(card).getByRole("button", { name: /create post from this — suggested/i });
+    await user.click(postExit);
     await waitFor(() => expect(push).toHaveBeenCalled());
     const capture = listIntelCaptures().at(-1)!;
     expect(capture.payload).toMatchObject({
       family: "post",
-      title: fixtureTrendCards[0].dossier!.titles[1],
+      title: ranked[0].dossier!.titles[1],
     });
   });
 
-  it("stamps the sweep cadence honestly — demo mode invites the FIRST sweep, sweep-now is armed (B6.5)", async () => {
+  it("dismiss hands the launchpad to the next card — captured, not deleted", async () => {
+    const user = userEvent.setup();
     render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
+    await screen.findByText("4 rising");
 
-    expect(screen.getByText(/last swept/i)).toBeInTheDocument();
+    const card = screen.getByTestId(`trend-card-${ranked[0].id}`);
+    await user.click(within(card).getByRole("button", { name: /dismiss/i }));
+    await waitFor(() =>
+      expect(screen.queryByTestId(`trend-card-${ranked[0].id}`)).not.toBeInTheDocument(),
+    );
+    // The next-ranked card takes the launchpad slot; the dismissal is a capture row.
+    expect(screen.getByTestId(`trend-card-${ranked[1].id}`)).toBeInTheDocument();
+    expect(listIntelCaptures().at(-1)!.kind).toBe("trend_dismiss");
+    expect(await screen.findByRole("status")).toHaveTextContent(/card dismissed/i);
+  });
+
+  it("stamps the sweep cadence honestly — demo drivers named, sweep-now armed", async () => {
+    render(<TrendsTab />);
+    await screen.findByText("4 rising");
+
     expect(screen.getByText(/sweeps every 4h — run the first one now/i)).toBeInTheDocument();
+    expect(screen.getByText(/demo drivers until B6\.5 arms/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /sweep now/i })).toBeEnabled();
   });
 
-  it("adds a monitored area through the manager and shows it with a zero-card chip", async () => {
+  it("watchlist adds an area in place; the zero-card chip stays visible (the live-poll seam)", async () => {
     const user = userEvent.setup();
     render(<TrendsTab />);
-    await screen.findByText(/demo dataset/i);
+    await screen.findByText("4 rising");
 
+    await user.click(screen.getByRole("button", { name: /add area or keyword/i }));
     await user.type(screen.getByLabelText("Area name"), "Answer engines");
     await user.type(
       screen.getByLabelText("Area description"),
       "AEO/GEO — how AI assistants cite and recommend products",
     );
-    await user.click(screen.getByRole("button", { name: /add area/i }));
+    await user.click(screen.getByRole("button", { name: "Add area" }));
 
-    // The row AND its filter chip both render the new area's name.
-    expect(await screen.findAllByText("Answer engines")).toHaveLength(2);
-    // The chip carries 0 cards — the B6.5 seam stays visible.
-    expect(screen.getByRole("button", { name: /Answer engines 0/ })).toBeInTheDocument();
+    // The chip renders even though no card ranks against it yet.
+    expect(await screen.findByRole("button", { name: "Edit area Answer engines" })).toBeInTheDocument();
+  });
+
+  it("watchlist × pauses — never deletes — and the paused chip can resume", async () => {
+    const user = userEvent.setup();
+    render(<TrendsTab />);
+    await screen.findByText("4 rising");
+
+    await user.click(screen.getByRole("button", { name: /add area or keyword/i }));
+    await user.type(screen.getByLabelText("Area name"), "Voice cloning");
+    await user.type(screen.getByLabelText("Area description"), "Founder-voice cloning tools and backlash");
+    await user.click(screen.getByRole("button", { name: "Add area" }));
+    await screen.findByRole("button", { name: "Edit area Voice cloning" });
+
+    await user.click(screen.getByRole("button", { name: "Pause area Voice cloning" }));
+    expect(await screen.findByText("paused")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Resume area Voice cloning" }));
+    expect(await screen.findByRole("button", { name: "Pause area Voice cloning" })).toBeInTheDocument();
   });
 });
