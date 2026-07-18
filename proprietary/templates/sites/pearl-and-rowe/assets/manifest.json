@@ -7,17 +7,31 @@
     "quality": 74
   },
   {
-    "file": "first-visit.webp",
-    "pinnedHash": "9a1266229a2fd73baf78d178b87d23a965e24f8fbfe5b16265803cc3e51294f4",
+    "file": "tray-linen.webp",
+    "pinnedHash": "4434f7aa0ef262778a7fb0e4de4b728dfc8d6c0a121b0a9747e5a78d35838132",
+    "width": 1400,
+    "height": 1050,
+    "quality": 74
+  },
+  {
+    "file": "talk-through.webp",
+    "pinnedHash": "2f6340bb6267e55e7776c349e11b3eaef28d245e4cd05c398d47d3bc1846bfac",
     "width": 1400,
     "height": 1867,
     "quality": 74
   },
   {
-    "file": "tray-linen.webp",
-    "pinnedHash": "4434f7aa0ef262778a7fb0e4de4b728dfc8d6c0a121b0a9747e5a78d35838132",
-    "width": 1400,
-    "height": 1050,
+    "file": "garden.webp",
+    "pinnedHash": "50f0e7f6c5e2b96ee4a73e6b1700ca28dca6834c721ae3168878310e86d62ebe",
+    "width": 1600,
+    "height": 1200,
+    "quality": 74
+  },
+  {
+    "file": "morning-walk.webp",
+    "pinnedHash": "f834cbd6d1ad3c79c29ced3c0191858e832a4f8946dcaa30c0563f217c0d8298",
+    "width": 1920,
+    "height": 1080,
     "quality": 74
   }
 ]

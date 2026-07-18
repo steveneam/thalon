@@ -130,7 +130,19 @@ than the cap so the overshoot lands inside it. (6) Leave room for one small
 deliberate imperfection or wink per page — the Houselights one-letter neon
 flicker (founder-suggested) is the register: a single playful flaw that makes
 a page feel alive and hand-made rather than rendered. Budget for it; don't
-polish it out.
+polish it out. (7) **Lead archetypes are cast per vertical (founder
+direction, s59):** professional/serious verticals (dental, legal, finance,
+trades like electrical or roofing) lead MALE — older, with visible
+experience, where wisdom itself is the trust signal (the ⑫ silver-bearded
+dentist correction is the model case); warmth/human-touch verticals (pet
+care, childcare) lead FEMALE; hospitality/cafés lead female or a warm
+handsome young male. Cast whoever the customer hopes to see at the door.
+(8) **Counter the vertical's dread-association with nature and light
+(founder direction, s59):** where a vertical's mental image is confinement
+(dental chairs, clinics, waiting rooms), the page carries bright, sunny,
+outdoor imagery — fields, gardens, greenery, open sky — as bands,
+backgrounds, or sides. The ⑫ garden + walk-out pair is the model: the
+brightest images on the page answer the vertical's fear, not its function.
 
 **Hero register rule (founder direction 2026-07-15 s37):** the first
 impression must be *real*. A code-drawn model, schematic, or illustration
