@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sparkwright Electrical — we turn houses on</title>
+<meta name="description" content="A master electrician's practice: rewires, switchboards, safety and the faults nobody else can find. Done once, done right.">
+<style>
+/* ---------- fonts (vendored, OFL) ---------- */
+@font-face{font-family:'Bricolage Grotesque';src:url('fonts/bricolage-grotesque-v9-latin-800.woff2') format('woff2');font-weight:800;font-display:swap}
+@font-face{font-family:'Bricolage Grotesque';src:url('fonts/bricolage-grotesque-v9-latin-600.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Public Sans';src:url('fonts/public-sans-v21-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Public Sans';src:url('fonts/public-sans-v21-latin-700.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-v20-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-v20-latin-600.woff2') format('woff2');font-weight:600;font-display:swap}
+
+/* ---------- tokens ---------- */
+:root{
+  --night:#0a1322;      /* opening dark */
+  --night-2:#0d1830;    /* scene dark */
+  --night-3:#122036;    /* services */
+  --night-4:#182842;    /* craft */
+  --dawn-mid:#7e91a9;
+  --cream:#f5eee1;      /* morning */
+  --ink:#251d12;        /* ink on cream */
+  --paper:#e9eef5;      /* text on dark */
+  --dim:#93a3b8;        /* secondary on dark */
+  --plan:#79c0f7;       /* plan-line cyan */
+  --plan-dim:rgba(121,192,247,.5);
+  --amber:#ffb454;      /* energized — reserved */
+  --amber-deep:#e08b1d;
+  --amber-ink:#8a5410;  /* amber-family ink for text on cream */
+  --hair:rgba(147,163,184,.25);
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Bricolage Grotesque',sans-serif;
+  --text:'Public Sans',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{font-family:var(--text);background:var(--night);color:var(--paper);line-height:1.6;overflow-x:clip}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+.skip{position:absolute;left:-999px;top:0;background:var(--amber);color:#231503;padding:.6rem 1rem;z-index:99;font-weight:700;border-radius:0 0 .4rem 0}
+.skip:focus{left:0}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.wrap{max-width:72rem;margin-inline:auto;padding-inline:clamp(1rem,4vw,2.5rem)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.chip{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--plan);display:inline-flex;align-items:center;gap:.55rem}
+.chip::before{content:"";width:1.4rem;height:1px;background:var(--plan-dim)}
+
+/* ---------- header ---------- */
+header.top{position:absolute;inset:0 0 auto 0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:1.1rem clamp(1rem,4vw,2.5rem)}
+.wordmark{font-family:var(--disp);font-weight:800;font-size:1.15rem;letter-spacing:.02em;text-decoration:none;display:flex;align-items:center;gap:.5rem}
+.wordmark .bolt{width:.85rem;height:1.15rem;flex:none}
+.wordmark .bolt path{fill:var(--amber)}
+.top nav{display:flex;gap:1.4rem;font-size:.85rem;white-space:nowrap}
+@media (max-width:560px){.top nav a:not(:last-child){display:none}}
+.top nav a{text-decoration:none;color:var(--dim)}
+.top nav a:hover{color:var(--paper)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:100svh;display:grid;grid-template-columns:100%;align-content:end;isolation:isolate}
+.hero .art{position:absolute;inset:0;z-index:-1;overflow:clip}
+.hero .art img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
+.hero .art::after{content:"";position:absolute;inset:0;background:
+  linear-gradient(to bottom,rgba(10,19,34,.55),rgba(10,19,34,.05) 34%,rgba(10,19,34,.16) 62%,rgba(10,19,34,.93) 96%)}
+.hero-copy{padding-block:0 clamp(2.2rem,6vh,4.5rem)}
+.hero h1{font-family:var(--disp);font-weight:800;font-size:clamp(2.7rem,8.2vw,5.6rem);line-height:.98;letter-spacing:-.015em;max-width:11ch}
+.hero h1 .on{color:var(--amber)}
+.hero .lede{margin-top:1.1rem;max-width:44ch;color:var(--paper);font-size:clamp(1rem,1.6vw,1.15rem)}
+.hero .sub{margin-top:.5rem;color:var(--dim);font-size:.9rem;max-width:52ch}
+.cta-row{margin-top:1.6rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+.btn{font-family:var(--disp);font-weight:600;text-decoration:none;padding:.78rem 1.5rem;border-radius:.45rem;font-size:.95rem}
+.btn-amber{background:var(--amber);color:#231503}
+.btn-amber:hover{background:#ffc37a}
+.btn-ghost{border:1px solid var(--hair);color:var(--paper)}
+.btn-ghost:hover{border-color:var(--dim)}
+.afterhours{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;color:var(--dim);text-wrap:balance}
+
+/* ---------- energize scene ---------- */
+.energize{background:linear-gradient(var(--night),var(--night-2) 12%,var(--night-2));position:relative}
+.scene-track{height:560svh;position:relative}
+.scene-sticky{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:1fr minmax(280px,25rem);gap:1rem;align-items:center;max-width:80rem;margin-inline:auto;padding:4.5rem clamp(1rem,3vw,2.5rem) 1rem;overflow:clip}
+.scene-head{position:absolute;top:1.6rem;left:0;right:0;text-align:center;padding-inline:1rem}
+.scene-head .chip{justify-content:center}
+.scene-head .chip::before{display:none}
+.scene-head h2{font-family:var(--disp);font-weight:600;font-size:clamp(1.15rem,2.4vw,1.6rem);margin-top:.3rem}
+
+/* the 3-D house (decorative — the panel is the accessible twin) */
+.stage{perspective:1300px;perspective-origin:50% 38%;display:grid;place-items:center;min-height:min(58svh,34rem)}
+.rig{transform-style:preserve-3d;transform:rotateX(var(--pitch,-22deg)) rotateY(var(--yaw,-24deg)) scale(var(--zoom,1));width:0;height:0}
+.rig,.rig *{transform-style:preserve-3d}
+.house{--W:min(46vw,30rem);--D:calc(var(--W)*.62);--H:calc(var(--W)*.30);position:absolute;translate:-50% -50%}
+.f{position:absolute;left:50%;top:50%;border:1.5px solid var(--plan-dim);background:rgba(18,32,54,.3);box-shadow:0 0 10px rgba(121,192,247,.12)}
+.floor{width:var(--W);height:var(--D);transform:translate(-50%,-50%) rotateX(90deg);background:
+  repeating-linear-gradient(0deg,rgba(121,192,247,.09) 0 1px,transparent 1px 12%),
+  repeating-linear-gradient(90deg,rgba(121,192,247,.09) 0 1px,transparent 1px 12%),
+  rgba(15,27,46,.5)}
+.wall{height:var(--H)}
+.w-front{width:var(--W);transform:translate(-50%,-100%) translate3d(0,0,calc(var(--D)/2))}
+.w-back{width:var(--W);transform:translate(-50%,-100%) translate3d(0,0,calc(var(--D)/-2))}
+.w-left{width:var(--D);transform:translate(-50%,-100%) rotateY(90deg) translate3d(0,0,calc(var(--W)/-2))}
+.w-right{width:var(--D);transform:translate(-50%,-100%) rotateY(90deg) translate3d(0,0,calc(var(--W)/2))}
+/* roof: pitched gable — two slopes, two gable triangles, one ridge edge */
+.house{--RISE:calc(var(--D)*.32);--RL:calc(var(--D)*.594)}
+.roof-s{position:absolute;left:50%;top:50%;width:var(--W);height:var(--RL);border:1.5px solid var(--plan-dim);background:rgba(18,32,54,.3);box-shadow:0 0 10px rgba(121,192,247,.1);transform-origin:50% 0}
+.roof-front{transform:translate(-50%,0) translateY(calc((var(--H) + var(--RISE))*-1)) rotateX(-57.4deg)}
+.roof-back{transform:translate(-50%,0) translateY(calc((var(--H) + var(--RISE))*-1)) rotateX(57.4deg)}
+.gable{position:absolute;left:50%;top:50%;width:var(--D);height:var(--RISE);background:rgba(24,40,66,.45);clip-path:polygon(50% 0,100% 100%,0 100%);filter:drop-shadow(0 0 4px rgba(121,192,247,.25))}
+.gable-l{transform:translate(-50%,-100%) translateY(calc(var(--H)*-1)) rotateY(90deg) translate3d(0,0,calc(var(--W)/-2))}
+.gable-r{transform:translate(-50%,-100%) translateY(calc(var(--H)*-1)) rotateY(90deg) translate3d(0,0,calc(var(--W)/2))}
+.ridge{position:absolute;left:50%;top:50%;width:var(--W);height:0;border-top:1.5px solid rgba(121,192,247,.7);box-shadow:0 0 8px rgba(121,192,247,.35);transform:translate(-50%,0) translateY(calc((var(--H) + var(--RISE))*-1))}
+/* rooms: lit plates on the floor plane */
+.room{position:absolute;border:1px solid rgba(121,192,247,.35);transition:background 1.1s ease,box-shadow 1.1s ease,border-color 1.1s ease}
+.rooms{width:var(--W);height:var(--D);transform:translate(-50%,-50%) rotateX(-90deg) translateZ(1px);position:absolute;left:50%;top:50%}
+.r-living {left:2%;  top:3%;  width:40%; height:53%}
+.r-kitchen{left:2%;  top:60%; width:40%; height:37%}
+.r-hall   {left:44%; top:3%;  width:14%; height:94%}
+.r-bed    {left:60%; top:3%;  width:38%; height:45%}
+.r-garage {left:60%; top:52%; width:38%; height:45%}
+.room.lit{background:radial-gradient(closest-side,rgba(255,180,84,.55),rgba(255,180,84,.14) 78%,transparent);border-color:rgba(255,180,84,.6);box-shadow:0 0 26px rgba(255,180,84,.28)}
+.room .tag{position:absolute;left:50%;top:50%;translate:-50% -50%;font-family:var(--mono);font-size:min(.58rem,2.4vw);letter-spacing:.12em;color:var(--plan-dim)}
+.room.lit .tag{color:#ffd9a0}
+/* windows on front wall */
+.win{position:absolute;bottom:18%;width:12%;height:34%;border:1.5px solid rgba(121,192,247,.55);background:linear-gradient(rgba(121,192,247,.12) 0 0) 50% 0/1.5px 100% no-repeat,linear-gradient(rgba(121,192,247,.12) 0 0) 0 52%/100% 1.5px no-repeat,rgba(10,19,34,.5);transition:background 1.1s ease,box-shadow 1.1s ease}
+.win.lit{background:linear-gradient(rgba(10,19,34,.55) 0 0) 50% 0/1.5px 100% no-repeat,linear-gradient(rgba(10,19,34,.55) 0 0) 0 52%/100% 1.5px no-repeat,rgba(255,180,84,.8);box-shadow:0 0 18px rgba(255,180,84,.5);border-color:rgba(255,196,120,.9)}
+.w-front .win:nth-child(1){left:8%}
+.w-front .win:nth-child(2){left:26%}
+.w-front .win:nth-child(3){left:62%}
+.w-front .win:nth-child(4){left:80%}
+.door{position:absolute;left:46%;bottom:0;width:8%;height:52%;border:1px solid rgba(121,192,247,.4);transition:background 1.1s ease,box-shadow 1.1s ease}
+.door.lit{background:rgba(255,180,84,.55);box-shadow:0 0 14px rgba(255,180,84,.4)}
+/* service fixtures: hot-water unit + split-system on the side wall */
+.unit{position:absolute;bottom:4%;border:1.5px solid rgba(121,192,247,.5);background:rgba(10,19,34,.5);transition:background 1s ease,box-shadow 1s ease,border-color 1s ease}
+.unit.hws{left:8%;width:8%;height:58%}
+.unit.ac{left:22%;width:14%;height:26%}
+.unit.lit{background:rgba(255,180,84,.6);box-shadow:0 0 14px rgba(255,180,84,.45);border-color:rgba(255,196,120,.85)}
+/* porch: a light cone down the facade + a pool on the ground in front */
+.w-front .porch{position:absolute;left:41%;top:26%;width:18%;height:130%;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);background:linear-gradient(rgba(255,180,84,.5),rgba(255,180,84,0) 90%);opacity:0;transition:opacity 1.2s ease;border:0;box-shadow:none}
+.w-front .porch.lit{opacity:1}
+.apron{position:absolute;left:50%;top:50%;width:calc(var(--W)*.55);height:calc(var(--D)*.6);transform:translate(-50%,-50%) rotateX(90deg) translateY(calc(var(--D)*.78));background:radial-gradient(ellipse at 50% 12%,rgba(255,180,84,.45),transparent 68%);opacity:0;transition:opacity 1.2s ease}
+.apron.lit{opacity:1}
+
+/* the switchboard (the accessible instrument) */
+.panel{background:rgba(9,16,29,.86);border:1px solid var(--hair);border-radius:.7rem;padding:1.1rem 1.1rem 1rem;font-family:var(--mono);backdrop-filter:blur(3px);max-width:25rem;width:100%;justify-self:end}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--hair);padding-bottom:.6rem}
+.panel-head .live{color:var(--amber)}
+.breakers{list-style:none;margin-top:.55rem}
+.bk{display:grid;grid-template-columns:2.4rem 1fr auto;align-items:center;gap:.7rem;padding:.42rem 0;border-bottom:1px dashed rgba(147,163,184,.15);font-size:.78rem}
+.bk .sw{width:2.05rem;height:1.05rem;border:1px solid var(--dim);border-radius:.2rem;position:relative;background:rgba(147,163,184,.08)}
+.bk .sw::after{content:"";position:absolute;left:.14rem;top:.14rem;width:.72rem;height:.68rem;background:var(--dim);border-radius:.12rem;transition:translate .25s ease,background .25s ease}
+.bk.on .sw{border-color:var(--amber-deep)}
+.bk.on .sw::after{translate:.95rem 0;background:var(--amber)}
+.bk .lbl{letter-spacing:.05em;color:var(--paper)}
+.bk .lbl small{display:block;font-size:.62rem;color:var(--dim);letter-spacing:.03em}
+.bk.on .lbl small{color:#d9b58a}
+.bk .amp{font-size:.66rem;color:var(--dim)}
+.bk.mystery .sw{border-style:dashed}
+.bk.mystery .lbl{color:var(--dim);font-style:italic}
+.rcd-row{display:flex;align-items:center;gap:.7rem;padding-top:.65rem}
+#rcd{font-family:var(--mono);font-weight:600;font-size:.7rem;letter-spacing:.12em;background:none;border:1.5px solid var(--plan);color:var(--plan);border-radius:.3rem;padding:.38rem .8rem;cursor:pointer}
+#rcd:hover{background:rgba(121,192,247,.12)}
+#rcd:disabled{opacity:.45;cursor:default}
+.rcd-note{font-size:.66rem;color:var(--dim);line-height:1.45}
+.readout{margin-top:.7rem;display:flex;justify-content:space-between;font-size:.72rem;color:var(--dim)}
+.readout b{color:var(--amber);font-weight:600;font-size:1rem}
+.mystery-note{margin-top:.7rem;font-size:.68rem;color:var(--dim);line-height:1.5;border-top:1px solid var(--hair);padding-top:.6rem;min-height:2.6em}
+.scene-foot{position:absolute;bottom:1.1rem;left:0;right:0;text-align:center;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+@media (max-width:960px){
+  .scene-sticky{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto;padding-top:.9rem;gap:.3rem;align-content:start}
+  .scene-head{position:static;order:-1;padding-inline:0}
+  .scene-head h2{font-size:1rem}
+  .stage{min-height:0}
+  .house{--W:min(62vw,15rem)}
+  .panel{justify-self:center;padding:.75rem .75rem .65rem}
+  .bk{padding:.28rem 0;font-size:.7rem}
+  .bk .lbl small{font-size:.58rem}
+  .rcd-note{font-size:.6rem}
+  .readout{margin-top:.5rem}
+  .mystery-note{min-height:0;margin-top:.45rem;padding-top:.45rem}
+  .scene-foot{display:none}
+}
+
+/* ---------- services ---------- */
+.services{background:linear-gradient(var(--night-2),var(--night-3));padding-block:clamp(3.5rem,9vh,6.5rem)}
+.services h2,.craft h2,.morning h2{font-family:var(--disp);font-weight:800;font-size:clamp(1.7rem,4vw,2.6rem);line-height:1.06;letter-spacing:-.01em;margin:.5rem 0 1rem}
+.services .intro{color:var(--dim);max-width:52ch;margin-bottom:2.2rem}
+.svc{list-style:none;border-top:1px solid var(--hair)}
+.svc li{display:grid;grid-template-columns:4.2rem 1fr;gap:1rem;padding:1.05rem 0;border-bottom:1px solid var(--hair)}
+.svc .cnum{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--plan);padding-top:.25rem}
+.svc h3{font-family:var(--disp);font-weight:600;font-size:1.12rem}
+.svc p{color:var(--dim);font-size:.92rem;max-width:62ch;margin-top:.15rem}
+.svc .get{display:block;margin-top:.4rem;font-size:.8rem;color:#d9b58a}
+.svc .get b{color:var(--amber);font-weight:700}
+.svc li.wink .cnum,.svc li.wink h3{color:var(--dim);font-style:italic}
+
+/* ---------- craft ---------- */
+.craft{background:linear-gradient(var(--night-3),var(--night-4));padding-block:clamp(3.5rem,9vh,6.5rem)}
+.craft-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(1.2rem,3vw,2.6rem);align-items:start;margin-top:1.6rem}
+.craft figure img{border-radius:.6rem}
+.craft figcaption{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;color:var(--dim);margin-top:.55rem}
+.craft .copy p{color:var(--dim);max-width:56ch;margin-bottom:1rem}
+.craft .copy p strong{color:var(--paper)}
+.portrait-row{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(1.2rem,3vw,2.6rem);align-items:center;margin-top:clamp(2.2rem,6vh,3.6rem)}
+@media (max-width:820px){.craft-grid,.portrait-row{grid-template-columns:1fr}.portrait-row figure{order:-1}}
+
+/* ---------- dawn bridge + morning ---------- */
+.dawn{height:clamp(14rem,34vh,22rem);background:linear-gradient(to bottom,var(--night-4),#3a4a63 34%,var(--dawn-mid) 62%,#d9c9ad 86%,var(--cream))}
+.morning{background:var(--cream);color:var(--ink);padding-block:clamp(3.5rem,9vh,6rem)}
+.morning .chip{color:var(--amber-ink)}
+.morning .chip::before{background:rgba(138,84,16,.4)}
+.morning-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.2rem,3vw,2.6rem);align-items:center;margin-top:1.4rem}
+@media (max-width:820px){.morning-grid{grid-template-columns:1fr}}
+.morning figure img{border-radius:.6rem}
+.morning p{max-width:54ch;margin-bottom:1rem;color:#4c4030}
+.morning p strong{color:var(--ink)}
+.morning .btn-amber{background:var(--amber-deep);color:#fff8ec}
+.morning .btn-amber:hover{background:#c77a15}
+.morning .fine{font-size:.85rem;color:#6b5c46}
+
+/* ---------- footer ---------- */
+footer{background:var(--cream);color:#6b5c46;border-top:1px solid rgba(138,84,16,.18);padding:1.6rem 0 2.2rem;font-size:.82rem}
+footer .cols{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:baseline}
+footer a{color:#8a5410}
+footer .mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  .room,.win,.door,.porch,.apron,.dot,.bk .sw::after{transition:none}
+  .scene-track{height:auto}
+  .scene-sticky{position:static;height:auto;padding-top:5.5rem}
+}
+</style>
+</head>
+<body>
+<noscript><style>
+  .scene-track{height:auto}
+  .scene-sticky{position:static;height:auto}
+  .scene-foot{display:none}
+  #rcd{display:none}
+  .rcd-note{margin-left:0}
+</style></noscript>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <a class="wordmark" href="#" aria-label="Sparkwright Electrical — home">
+    <svg class="bolt" viewBox="0 0 12 17" aria-hidden="true"><path d="M7.2 0 0 9.6h4.1L3.4 17l8.6-10.4H7.6L9.9 0z"/></svg>
+    SPARKWRIGHT
+  </a>
+  <nav aria-label="Page">
+    <a href="#board">The board</a>
+    <a href="#craft">The work</a>
+    <a href="#book">Book</a>
+  </nav>
+</header>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" aria-label="Sparkwright Electrical">
+  <div class="art">
+    <img src="assets/hero-dusk.webp" width="2048" height="1152" alt="A single-storey weatherboard home at blue-hour dusk, every window glowing warm amber, framed by established trees, a brick path leading to the lit front door." fetchpriority="high">
+  </div>
+  <div class="wrap hero-copy">
+    <p class="chip">Master electrician · Lic. 348121C</p>
+    <h1>We turn houses <span class="on">on</span>.</h1>
+    <p class="lede">Sparkwright is a one-man master-electrician practice: rewires, switchboard upgrades, safety, and the faults nobody else can find.</p>
+    <p class="sub">Twenty-two years on the tools. The person who answers the phone is the person who does the work.</p>
+    <div class="cta-row">
+      <a class="btn btn-amber" href="#book">Book a visit</a>
+      <a class="btn btn-ghost" href="#energize">Watch a house come on</a>
+    </div>
+    <p class="afterhours" style="margin-top:1rem">Faults don't keep office hours. Neither do we.</p>
+  </div>
+</section>
+
+<!-- ================= ENERGIZE SCENE ================= -->
+<section class="energize" id="energize" aria-labelledby="energize-title">
+  <div class="scene-track" id="scene-track">
+    <div class="scene-sticky" id="scene" data-c="7">
+      <div class="scene-head">
+        <p class="chip">The re-energize — a rewire, replayed</p>
+        <h2 id="energize-title">Scroll: the board goes back in, circuit by circuit</h2>
+      </div>
+
+      <div class="stage" aria-hidden="true">
+        <div class="rig" id="rig">
+          <div class="house">
+            <div class="f floor"></div>
+            <div class="rooms">
+              <div class="room r-living lit"  data-c="1"><span class="tag">LIVING</span></div>
+              <div class="room r-kitchen lit" data-c="2"><span class="tag">KITCHEN</span></div>
+              <div class="room r-hall lit"    data-c="1"><span class="tag">HALL</span></div>
+              <div class="room r-bed lit"     data-c="1"><span class="tag">BED</span></div>
+              <div class="room r-garage lit"  data-c="5"><span class="tag">GARAGE</span></div>
+            </div>
+            <div class="f wall w-front">
+              <span class="win lit" data-c="1"></span>
+              <span class="win lit" data-c="1"></span>
+              <span class="win lit" data-c="1"></span>
+              <span class="win lit" data-c="1"></span>
+              <span class="door lit" data-c="6"></span>
+              <span class="porch lit" data-c="6"></span>
+            </div>
+            <div class="f wall w-back"></div>
+            <div class="f wall w-left">
+              <span class="unit hws lit" data-c="3"></span>
+              <span class="unit ac lit" data-c="4"></span>
+            </div>
+            <div class="f wall w-right">
+              <span class="win lit" data-c="5" style="left:64%"></span>
+            </div>
+            <div class="roof-s roof-front"></div>
+            <div class="roof-s roof-back"></div>
+            <div class="gable gable-l"></div>
+            <div class="gable gable-r"></div>
+            <div class="ridge"></div>
+            <div class="apron lit" data-c="6"></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel" aria-labelledby="panel-title">
+        <div class="panel-head"><span id="panel-title">Switchboard · replay</span><span class="live" id="panel-state">ENERGIZED</span></div>
+        <ol class="breakers" id="breakers">
+          <li class="bk on" data-c="1"><span class="sw" aria-hidden="true"></span><span class="lbl">C1 · LIGHTS<small>living · hall · beds</small></span><span class="amp">10A</span></li>
+          <li class="bk on" data-c="2"><span class="sw" aria-hidden="true"></span><span class="lbl">C2 · KITCHEN &amp; POWER<small>bench circuits, no more tripping the toaster</small></span><span class="amp">20A</span></li>
+          <li class="bk on" data-c="3"><span class="sw" aria-hidden="true"></span><span class="lbl">C3 · HOT WATER<small>tank on its own breaker, where it belongs</small></span><span class="amp">16A</span></li>
+          <li class="bk on" data-c="4"><span class="sw" aria-hidden="true"></span><span class="lbl">C4 · AIR<small>the split system, wired for summer</small></span><span class="amp">16A</span></li>
+          <li class="bk on" data-c="5"><span class="sw" aria-hidden="true"></span><span class="lbl">C5 · GARAGE<small>workshop bench, charger-ready</small></span><span class="amp">16A</span></li>
+          <li class="bk on" data-c="6"><span class="sw" aria-hidden="true"></span><span class="lbl">C6 · GARDEN &amp; PORCH<small>the path home, lit</small></span><span class="amp">10A</span></li>
+          <li class="bk mystery"><span class="sw" aria-hidden="true"></span><span class="lbl">C7 · MYSTERY<small>see below</small></span><span class="amp">?</span></li>
+        </ol>
+        <div class="rcd-row">
+          <button id="rcd" type="button">TEST</button>
+          <p class="rcd-note" id="rcd-note">The safety switch. Press it — everything drops in 30&nbsp;milliseconds. That's the point.</p>
+        </div>
+        <div class="readout" aria-live="off"><span><b id="kw">4.4</b> kW drawing</span><span id="ncirc">6/6 circuits live</span></div>
+        <p class="mystery-note" id="mystery-note">C7 is the hallway switch nobody can explain. Every house has one. We find them.</p>
+      </aside>
+
+      <p class="scene-foot" id="scene-foot">As-built drawing · replayed from the board</p>
+      <p class="sr-only">A rewire replay: as the page scrolls, six circuits energize in order — lights, kitchen and power, hot water, air conditioning, garage, then garden and porch — the switchboard on the right flips each breaker on and the load readout climbs to 4.4 kilowatts. The seventh breaker, labelled mystery, stays off. Without scrolling, the house is shown fully energized.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section class="services" id="board" aria-labelledby="services-title">
+  <div class="wrap">
+    <p class="chip">The board, read as a menu</p>
+    <h2 id="services-title">Every job leaves a labelled breaker.</h2>
+    <p class="intro">No call-out menu of tricks — just the work a house actually needs, each circuit named, tested, and written on the board in a hand you can read.</p>
+    <ol class="svc">
+      <li>
+        <span class="cnum">C-01</span>
+        <div><h3>Rewires — full and partial</h3>
+        <p>Old rubber and cloth wiring out, new cable in, walls patched behind us. Staged so you live at home the whole time.</p>
+        <span class="get"><b>You get:</b> a house that passes any inspection you throw at it, and insurance that stays valid.</span></div>
+      </li>
+      <li>
+        <span class="cnum">C-02</span>
+        <div><h3>Switchboard upgrades</h3>
+        <p>Fuse boxes and sun-perished boards replaced with safety switches on every circuit — labelled properly, photographed, documented.</p>
+        <span class="get"><b>You get:</b> a board your next electrician will silently thank you for.</span></div>
+      </li>
+      <li>
+        <span class="cnum">C-03</span>
+        <div><h3>Fault-finding</h3>
+        <p>The speciality. The light that flickers only on rainy Tuesdays, the breaker that trips at 6 pm, the warm patch on the wall. We don't guess; we measure until it confesses.</p>
+        <span class="get"><b>You get:</b> the actual cause, fixed — not a part swapped on a hunch.</span></div>
+      </li>
+      <li>
+        <span class="cnum">C-04</span>
+        <div><h3>Safety switches &amp; smoke alarms</h3>
+        <p>RCDs tested to trip in milliseconds, interconnected photoelectric alarms, and a written record of both.</p>
+        <span class="get"><b>You get:</b> the 30&nbsp;ms that makes a fault an anecdote instead of an ambulance.</span></div>
+      </li>
+      <li>
+        <span class="cnum">C-05</span>
+        <div><h3>Lighting, power &amp; kitchens</h3>
+        <p>Circuits planned for how you actually live: benches that run the kettle, toaster and air-fryer at once, dimmers that don't buzz, light where you read.</p>
+        <span class="get"><b>You get:</b> rooms you want to be in after dark.</span></div>
+      </li>
+      <li>
+        <span class="cnum">C-06</span>
+        <div><h3>EV chargers, sheds &amp; outdoors</h3>
+        <p>Dedicated charger circuits sized against your board's real headroom, weatherproof garden power, sensor lights that only mind their own business.</p>
+        <span class="get"><b>You get:</b> a car that's full every morning, on the cheap overnight rate.</span></div>
+      </li>
+      <li class="wink">
+        <span class="cnum">C-07</span>
+        <div><h3>Mystery switches</h3>
+        <p>Diagnosed and either given a job or retired with honour. Every house has one; three in ten stay unsolved industry-wide. Ours is better than that.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= CRAFT ================= -->
+<section class="craft" id="craft" aria-labelledby="craft-title">
+  <div class="wrap">
+    <p class="chip">Work you'll never see</p>
+    <h2 id="craft-title">Wired like it will be seen.</h2>
+    <div class="craft-grid">
+      <figure>
+        <img src="assets/craft-runs.webp" width="2016" height="1000" loading="lazy" alt="An electrician's weathered hands guiding two white cables through matching gentle curves into neatly clipped parallel runs across a plaster wall, lit by warm raking lamplight.">
+        <figcaption>Cable dressed flat and parallel — the part of the job that gets plastered over.</figcaption>
+      </figure>
+      <div class="copy">
+        <p><strong>Most of our work disappears behind a wall within the week.</strong> That's exactly why it's done neatly: the next person to open that wall — in five years or thirty — reads the work like a note left for them.</p>
+        <p>Runs combed flat and clipped at even spacing. Junctions where the drawing says they are. A board labelled in plain words, not scribble. None of it makes the lights brighter. All of it makes the house honest.</p>
+        <p>It's the same reason the van is tidy and the boots come off at the door: how you do the small things is how you do the wiring.</p>
+      </div>
+    </div>
+    <div class="portrait-row">
+      <div class="copy">
+        <p><strong>Sparkwright is one person, on purpose.</strong> The master electrician who quotes your job runs the cable, terminates the board, tests every circuit, and signs the certificate — one pair of hands, one standard, twenty-two years in.</p>
+        <p>No apprentice learning on your switchboard. No subcontractor you've never met. If the phone rings at ten past nine on a Sunday because the power's out and the fridge is warming, the voice that answers is the one that fixes it.</p>
+      </div>
+      <figure>
+        <img src="assets/portrait.webp" width="1600" height="1067" loading="lazy" alt="A silver-haired electrician in a plain navy work shirt, photographed in profile, eyes fixed upward on the slim light panel he is fitting, his face lit warmly by the panel against a deep blue room.">
+        <figcaption>Fitting the last panel on a rewire — the hands that quoted the job.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DAWN BRIDGE + MORNING ================= -->
+<div class="dawn" aria-hidden="true"></div>
+
+<section class="morning" id="book" aria-labelledby="morning-title">
+  <div class="wrap">
+    <p class="chip">The morning after</p>
+    <h2 id="morning-title">Then you forget about us. That's the job.</h2>
+    <div class="morning-grid">
+      <div>
+        <p><strong>The best review an electrician can get is silence:</strong> the kettle just boils, the shower is hot, the garden lights come on at dusk and mind their own business, and nobody thinks about the switchboard at all.</p>
+        <p>Before the van leaves, every circuit is tested and the certificate of electrical safety is in your inbox. After that, the house simply works — mornings like this one.</p>
+        <div class="cta-row">
+          <a class="btn btn-amber" href="#book">Book a visit</a>
+        </div>
+        <p class="fine" style="margin-top:1rem">Or just send a photo of the thing that's bothering you — the board, the light, the scorched power point — and we'll tell you honestly whether it needs us.</p>
+      </div>
+      <figure>
+        <img src="assets/morning-light.webp" width="2048" height="1152" loading="lazy" alt="A timber kitchen in low morning sunlight, a kettle steaming on the bench and lush garden greenery filling the wide window.">
+      </figure>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <span><b>Sparkwright Electrical</b> · Naremburn · Lic. 348121C</span>
+    <span class="mono">EST. 2004 · MASTER ELECTRICIAN</span>
+    <span><a href="guide/">How this page was made</a></span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const scene = document.getElementById('scene');
+  const track = document.getElementById('scene-track');
+  const rig = document.getElementById('rig');
+  const kw = document.getElementById('kw');
+  const ncirc = document.getElementById('ncirc');
+  const state = document.getElementById('panel-state');
+  const rcd = document.getElementById('rcd');
+  if (!scene || !track) return;
+
+  const litEls = Array.from(scene.querySelectorAll('.room,.win,.door,.porch,.apron,.unit'));
+  const bks = Array.from(scene.querySelectorAll('.bk[data-c]'));
+  const LOAD = [0, 0.4, 1.6, 2.6, 3.4, 4.0, 4.4];   // cumulative kW after circuit N
+
+  function apply(n){ // n = highest energized circuit, 0..6
+    litEls.forEach(el => {
+      const c = +el.dataset.c;
+      el.classList.toggle('lit', !!c && c <= n);
+    });
+    bks.forEach(el => el.classList.toggle('on', +el.dataset.c <= n));
+    kw.textContent = LOAD[n].toFixed(1);
+    ncirc.textContent = n + '/6 circuits live';
+    state.textContent = n === 0 ? 'ISOLATED' : (n < 6 ? 'ENERGIZING' : 'ENERGIZED');
+    scene.dataset.c = String(n);
+  }
+
+  /* ----- RCD test: works in every mode ----- */
+  let armed = true;
+  rcd.addEventListener('click', () => {
+    if (!armed) return;
+    armed = false; rcd.disabled = true;
+    const before = +scene.dataset.c || 6;
+    apply(0);
+    state.textContent = 'TRIPPED · 28 ms';
+    setTimeout(() => {
+      let i = 0;
+      const relight = setInterval(() => {
+        i++;
+        apply(Math.min(i, before));
+        if (i >= before) {
+          clearInterval(relight);
+          armed = true; rcd.disabled = false;
+        }
+      }, reduce ? 0 : 220);
+      if (reduce) { apply(before); armed = true; rcd.disabled = false; }
+    }, 700);
+  });
+
+  if (reduce) return;          // static, fully-energized page for reduced motion
+
+  /* ----- scroll-driven replay ----- */
+  apply(0);                    // JS takes the house dark; no-JS ships it lit
+  let sTop = 0, sLen = 1, ticking = false;
+  function measure(){
+    const r = track.getBoundingClientRect();
+    sTop = r.top + scrollY;
+    sLen = Math.max(1, track.offsetHeight - innerHeight);
+  }
+  function drive(){
+    ticking = false;
+    const p = Math.min(1, Math.max(0, (scrollY - sTop) / sLen));
+    const n = p < .06 ? 0 : Math.min(6, Math.floor((p - .06) / .14) + 1);
+    if (+scene.dataset.c !== n && armed) apply(n);
+    /* camera: eye-level dark → risen reveal */
+    const yaw = -18 - p * 16, pitch = -10 - p * 14, zoom = 1 + p * .06;
+    rig.style.setProperty('--yaw', yaw + 'deg');
+    rig.style.setProperty('--pitch', pitch + 'deg');
+    rig.style.setProperty('--zoom', zoom.toFixed(3));
+  }
+  addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(drive); } }, {passive:true});
+  addEventListener('resize', () => { measure(); drive(); }, {passive:true});
+  measure(); drive();
+
+  /* pointer tilt — interaction only, gentle */
+  const stage = scene.querySelector('.stage');
+  stage.addEventListener('pointermove', e => {
+    const r = stage.getBoundingClientRect();
+    const dx = (e.clientX - r.left) / r.width - .5;
+    rig.style.setProperty('--yaw', (-18 - (Math.min(1, Math.max(0,(scrollY - sTop) / sLen))) * 16 + dx * 8) + 'deg');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "slug": "sparkwright",
+  "name": "Sparkwright Electrical",
+  "vertical": "trade-electrician",
+  "oneLiner": "A master electrician's practice — rewires, switchboards, and fault-finding, done once and done right.",
+  "axes": {
+    "primary": "high-quality-3d",
+    "secondary": "otherworldly-animation"
+  },
+  "axisNote": "second high-quality-3d exercise after Hartline — ENERGIZING a built house vs Hartline's daylight assembly of one: the CSS-3D house is already standing and dark, drawn in the electrician's own plan register (luminous edges on night blue), and scrolling flips it on circuit by circuit; the otherworldly secondary is the light itself spreading through the model and the page",
+  "paletteSeed": "night blues out of the trade's blueprint register (deep navy ink, plan-line cyan for the wireframe) with tungsten amber reserved for one thing only — an energized circuit; the page brightens chapter by chapter as circuits come on and closes in warm morning cream (tonal continuity made structural: dark start, gradual dawn, never a shock jump)",
+  "typeDirection": "Bricolage Grotesque 600/800 (characterful grotesk display — hand-made confidence, not corporate trade-site bold) + Public Sans (sturdy honest text face) + IBM Plex Mono (the instrument: breaker labels, load readout, plan legend) — all OFL, vendored, all portfolio-new",
+  "motionBudget": "one scroll-driven scene: the panel and the house on the same clock — six code-drawn breakers flip ON in order with a live load readout while the plan-register CSS-3D house gains light room by room (window planes warm, porch cone ignites); slight scroll-tied camera drift, pointer-tilt interaction-only; the RCD TEST button is the one interactive instrument (tap → the demo circuit drops in 30 ms and re-arms); breaker 7 stays labelled MYSTERY and never closes — the wink; reduced-motion + no-JS = the house fully lit, all breakers on, readout at full load, the finished job",
+  "wave": 3,
+  "built": "2026-07-18"
+}

@@ -26,6 +26,11 @@ interface ManifestEntry {
    *  opaque, black transparent. For CSS mask-image assets — Safari's
    *  -webkit-mask reads alpha only, never luminance. */
   alpha?: boolean;
+  /** Cover-crop anchor when the target aspect differs from the original
+   *  (sharp position string: "top" | "bottom" | "left" | "right" | …).
+   *  Defaults to centre. Lets a derive keep a chosen band of the pinned
+   *  original — still fully deterministic from manifest + store. */
+  position?: string;
 }
 
 async function main() {
@@ -52,7 +57,7 @@ async function main() {
     let out: Buffer;
     if (entry.alpha) {
       const lum = await sharp(original)
-        .resize(entry.width, entry.height, { fit: "cover", position: "centre" })
+        .resize(entry.width, entry.height, { fit: "cover", position: entry.position ?? "centre" })
         .greyscale()
         .blur(0.6)
         .toColourspace("b-w")
@@ -65,7 +70,7 @@ async function main() {
         .toBuffer();
     } else {
       out = await sharp(original)
-        .resize(entry.width, entry.height, { fit: "cover", position: "centre" })
+        .resize(entry.width, entry.height, { fit: "cover", position: entry.position ?? "centre" })
         .webp({ quality: entry.quality, effort: 6 })
         .toBuffer();
     }

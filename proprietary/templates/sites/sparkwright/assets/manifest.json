@@ -1,0 +1,31 @@
+[
+  {
+    "file": "hero-dusk.webp",
+    "pinnedHash": "c5172b8fdccdb8f5f8eaeed1b75ce9d9f405715cf07a43f1490426123731e888",
+    "width": 2048,
+    "height": 1152,
+    "quality": 78
+  },
+  {
+    "file": "craft-runs.webp",
+    "pinnedHash": "ff61bf1dd3c014eb42b83c8ed887a18b9efc7999b7b29f85e95dfa0296f7e7ab",
+    "width": 2016,
+    "height": 1000,
+    "quality": 75,
+    "position": "bottom"
+  },
+  {
+    "file": "morning-light.webp",
+    "pinnedHash": "ca05d39c66fabbdc3dd271660c8e23c0f53008d7a1858c365506bc5b33403472",
+    "width": 2048,
+    "height": 1152,
+    "quality": 78
+  },
+  {
+    "file": "portrait.webp",
+    "pinnedHash": "5c0a100826767fab7c1fdc7d773717832fa036bd53e152e057294ea1043e7b7f",
+    "width": 1600,
+    "height": 1067,
+    "quality": 75
+  }
+]
