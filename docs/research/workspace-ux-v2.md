@@ -1,3 +1,5 @@
+> **Status: live** — ratified workspace UX foundation; DESIGN.md cites it. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Workspace UX v2 research (Sprint 6 / wave-3 re-plan checkpoint)
 
 > Founder-directed study (2026-07-07, session 16): 34 reference screenshots + two video-essay transcripts (a third-party "Hermes Astros" agent-OS competitor-radar walkthrough, and a UX-psychology piece on habit-forming app design), read against the B6.2 workspace as merged; founder added three landing-page reference catalogs mid-session (§8). Founder verdict on the current workspace: functionally correct but "does not achieve" convenient / engaging / enjoyable / intuitive. **All recommendations below were ratified by the founder on 2026-07-07.** Reference material stays outside the repo per the standing rule (described here, never copied in). Companion docs: `docs/FRONTEND.md` (amended to point here) · `docs/research/engaging-clips.md` (the sibling wave-3 proposal).

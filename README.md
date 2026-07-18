@@ -29,7 +29,7 @@ npm test             # vitest smoke tests
 npm run guard        # brand-cleanliness check (also required in CI)
 ```
 
-Dev runs entirely on local seams: embedded Postgres (PGlite, `.data/pg/`) + local object store + inline queue + a dev auth stub. Each seam flips to its cloud driver (Aurora / S3 / SQS / Clerk) via env only — see `apps/web/.env.example`.
+Dev runs on local seams: Postgres via `DATABASE_URL` (dev box runs real Postgres; the embedded-PGlite era is over) + a local filesystem object store + inline queue + a dev auth stub. Deploys run the same shapes on VPS-local drivers (tenant Postgres + per-box object volumes); managed-cloud drivers (S3-class stores etc.) are a parked swap path behind the same env seams — see `apps/web/.env.example`.
 
 ## Layout
 
@@ -45,7 +45,7 @@ packages/
   contracts/          # types, Zod schemas, status enums — THE frozen contract
   db/                 # drizzle schema, migrations, tenant-scoped repositories
   platform/           # dev→prod seams: env, embedded-Postgres db client, store, queue, gateway, auth
-  engine/             # ingest/ + fanout/ (B1.x; core orchestration + quarantined shell/)
+  engine/             # src/: ingest · fanout · render · leads · outreach · search · trend · direction · edl and friends (core orchestration + quarantined shell/)
 tests/                # repo-wide ratchet tests (import boundaries)
 scripts/
   ci-grep-guard.ps1   # the brand-cleanliness guard (tracked-files grep; exits non-zero on any hit)

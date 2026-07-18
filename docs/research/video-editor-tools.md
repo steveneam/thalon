@@ -1,3 +1,5 @@
+> **Status: historical** — fed the B-ve charter (ADR-0010, window complete). (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # B-video-editor — open-source tooling survey + integration shape
 
 > Research for the **B-video-editor charter candidate** (founder ask, session 44:

@@ -1,3 +1,5 @@
+> **Status: parked** — publisher adapters are Sprint 3+; revisit at that charter. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Per-platform publish parameters (founder question, 2026-07-07 session 20)
 
 > **The question (founder):** every platform has its own microscopic posting parameters — IG alone splits into post/story/reel, each with hashtags, tag-people, location, AI label, audience, music, "more options" (fundraiser, hide like count, upload quality…). Some of this is deterministic and reusable across platforms, some is platform-specific. How does Thalon account for it — or do we just produce the post/video and let the user figure the rest out?

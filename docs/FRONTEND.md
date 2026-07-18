@@ -1,5 +1,7 @@
 # FRONTEND — landing page + workspace design (pass 3 / Sprint 6)
 
+> **Status note (s61):** partially superseded — the workspace sections predate the s58–60 Phase D redesign; the workspace design-of-record is `docs/research/workspace-phase-d-designs.md` + `DESIGN.md` §5. Landing-page sections remain live until the portfolio-end landing work.
+
 > Founder-directed 2026-07-06 (planning session); elaboration delegated to lead ("elaborate, imagine and integrate — I trust your best practice and creativity"). Decision record: `docs/adr/0005-pass3-recharter.md`. Charter buckets: Sprint 6, B6.1–B6.7. Reference material (founder-supplied brand mockups + 23 workspace screenshots) lives outside the repo in founder/vault space — described here, never copied in.
 
 ## 0. The one design invariant: the 10-second rule

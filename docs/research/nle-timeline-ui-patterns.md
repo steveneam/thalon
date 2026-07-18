@@ -1,3 +1,5 @@
+> **Status: historical** — fed B-ve.6 track view (merged). (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # NLE timeline UI patterns — survey → B-ve.6 track-view design brief
 
 > Researched 2026-07-17 (s50, founder-directed: "what does a good video editor

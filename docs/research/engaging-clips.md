@@ -1,3 +1,5 @@
+> **Status: historical** — film work; film parked post-landing. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Engaging clips research (Sprint 6 / founder feedback on the first B6.3 renders)
 
 > Founder verdict on the first-ever brand renders (2026-07-06, session 15): "pretty stale." Correct — and diagnosable. This doc records why, what the craft actually is (evidence-backed), what tooling we already ship for it, and the bucket-shaped proposal for the wave-3 re-plan checkpoint. Companion to `docs/research/hyperframes-integration.md` (Sprint-5 read-around); facts re-verified against the pinned hyperframes 0.7.33 package docs (`node_modules/hyperframes/dist/docs` + `dist/skills`) and https://hyperframes.heygen.com (2026-07-06).

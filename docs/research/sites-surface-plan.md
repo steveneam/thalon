@@ -1,3 +1,5 @@
+> **Status: live** — drives the W-sites build (GO s61). (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # W-sites — the Sites surface: research + build plan (s60, queued for s61)
 
 > Founder direction (s60, live): the portfolio sites live in a repo directory
@@ -11,7 +13,7 @@
 - **Per-site record**: every site ships `site.json` (slug, name, vertical,
   oneLiner, axes {primary, secondary}, paletteSeed, typeDirection,
   motionBudget, wave, built) + `assets/manifest.json` (derived images with
-  pinned hashes) + an honest `/guide` route. 14 sites at time of writing.
+  pinned hashes) + an honest `/guide` route. 15 sites at time of writing (s61).
   **No verdict field exists** — verdicts live in board prose only.
 - **Serving, local**: `scripts/preview-server.py` (no-cache, 127.0.0.1:8899)
   over `proprietary/templates/sites/` — the founder's review channel.

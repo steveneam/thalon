@@ -1,3 +1,5 @@
+> **Status: historical** — render-driver survey; Hyperframes = default, Remotion = swap path. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Hyperframes integration research (Sprint 5 / A11)
 
 > Read-around of https://hyperframes.heygen.com docs (2026-07-05, v0.7.x era), distilled per bucket. This is **kickoff reading for every Sprint-5 lane**; the B5.1 decision record (`docs/adr/0004-render-driver-default.md`) cites it. Facts below are pinned from the official docs — re-verify against the pinned package version at build time (pre-1.0: minor versions may move).

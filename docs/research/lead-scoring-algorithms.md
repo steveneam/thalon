@@ -1,3 +1,5 @@
+> **Status: superseded-by-implementation** — B-crm scoring shipped; packages/engine/src/leads is the truth. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Research — Established scoring/ranking algorithms for a deterministic, reasons-first lead scorer
 
 > Founder-commissioned survey (2026-07-13, session 27, one research agent — approved run): what CRM

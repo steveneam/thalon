@@ -1,3 +1,5 @@
+> **Status: live** — design-of-record ledger for the shipped Phase I workspace. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Workspace Phase D — design record (opened s58 · design-complete s59, checkpoint-ripe)
 
 > Phase D of the workspace redesign (founder pulled it forward post-s57; queue

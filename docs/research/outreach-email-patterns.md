@@ -1,3 +1,5 @@
+> **Status: superseded-by-implementation** — B-crm.4 outreach shipped; packages/engine/src/outreach is the truth. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Outreach email patterns — web survey (2026-07-17, s52)
 
 > Founder-directed research pass ("search up what good ones look like — B2B, B2C").

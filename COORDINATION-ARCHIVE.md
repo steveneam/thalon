@@ -244,3 +244,17 @@ Sanctioned out-of-glob, additive-only (established pattern): both subagent lanes
 | T-loopwell | `proprietary/templates/sites/loopwell/` | `lane/t-loopwell` | **merged** (`73d3858`, s58) | chart-claims audit (retention/funnel redrawn to match copy), step-3 reading aggregates the live sample stream, log-scale pricing volume rules, pen-test wink |
 | T-northpace | `proprietary/templates/sites/northpace/` | `lane/t-northpace` | **merged** (`c6a4f04` via `f0ba3b2`, s58) | method prose → cadence rail / sample week / bending fortnight / tier block-shapes, first-light casting swap, session chart redrawn time-linear (50:00 honesty fix), snooze wink |
 | T-truebore | `proprietary/templates/sites/truebore/` | `lane/t-truebore` | **merged** (`ec4c199` via `cea7819`, s58) | stamped job-sheet instrument, callout.webp Fig.3 placement, static-marquee no-JS fix, svh bin fix, courtesy-drip wink |
+
+<!-- s61 hygiene pass: the completed s60 Phase-I lane table, moved verbatim from COORDINATION.md (its "live state only" rule) -->
+
+## Active lanes — s60 workspace Phase I (founder GO at the s60 opener: "GO — all three"; s58 table → archive)
+
+**s60 GRANT (founder, live, 2026-07-18): "GO — all three"** on W-intel · W-create · W-boards as named in queue row 1. The spec of record = the seven Phase D designs (claude-design project `c86680f5-…`, read via MCP per kickoff) + `docs/research/workspace-phase-d-designs.md`. Discipline: Fable-5 default model carries the design pin · **UI-only, contract frozen** (a needed contract change = stop + report) · staggered starts ~25 min (8GiB) · Mode B via `scripts/launch-lane.sh` · lead batch-reviews, rebases lanes onto the merged spine, merges in order.
+
+| lane | owner | owns (glob) | branch | status | merge-order |
+|------|-------|-------------|--------|--------|-------------|
+| W-spine | **lead (in-session)** | `apps/web/src/app/app/{page,layout}.tsx` + `components/{dashboard,workspace,ui}/**` — app shell, journey-spine dashboard, canonical icon rail + per-surface icon sweep | `lane/w-spine` | **merged** (`65e4cf9`, s60 — visual-passed 1440+390 on live dev data, 3 honesty catches fixed; + the Linux worktree-setup ratchet `c1dee7f`) | 1 ✅ |
+| W-intel | lane (`KICKOFF-w-intel.md`) | `components/{intel,library}/**` + `app/app/{intel,library}/**` (library untouched — design doesn't reach it) | `lane/w-intel` | **merged** (`5d8d77f`, s60 — lane wrapped in 22m; lead review + rebased visual pass 1440+390, console clean; suite 532/532 on merged main) | 2 ✅ |
+| W-create | lane (`KICKOFF-w-create.md`) | `components/{create,approve,staged}/**` + `app/app/{create,approve}/**` (+ one declared 3-line boundary touch: the selected-row conformance test's surface list, deleted zones → queue-list) | `lane/w-create` | **merged** (`4822a48`, s60 — lane wrapped in 27m, six honest deviations all data-driven; lead review + rebased visual pass incl. the full intel→create chip seam live; suite 549/549 on merged main) | 3 ✅ |
+| W-boards | lane (`KICKOFF-w-boards.md`) | NEW `components/{calendar,board}/**` + NEW `app/app/calendar/**` + `app/app/leads/**` + `components/leads/**` (board tab mount — the leads diff is just the tab wiring) | `lane/w-boards` | **merged** (`df170d6`, s60 — lane wrapped in 24m; the honest headline: NO drag anywhere — both designed drags need write doors that don't exist (planned-slot store · operator-owned stage field), stated in UI copy and queued as the Phase-I contract follow-up; lead review + visual pass on month/week/board live; suite 582/582) | 4 ✅ |
+

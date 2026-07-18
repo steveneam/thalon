@@ -1,3 +1,5 @@
+> **Status: historical** — fed Phase D (done s58-59); reference-only survey. (Marker added at the s61 hygiene pass; see docs/research/README.md.)
+
 # Boards + content-calendar UI patterns — survey for workspace redesign Phase D
 
 > Researched 2026-07-18 (s57, lane W-research). Input document for the Phase D

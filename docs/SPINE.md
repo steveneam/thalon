@@ -69,15 +69,15 @@ One sentence or source in → fan-out into platform-native drafts per tenant run
 | Contracts (types, Zod schemas, status enums, tenant-config shape) | `packages/contracts` | core — **the frozen contract** | B0.3 |
 | Data layer (schema, migrations, tenant-scoped repositories) | `packages/db` | core | B0.3 |
 | Platform seams (db/object-store/queue/gateway drivers) | `packages/platform` | core | B0.2→B0.3 (moved) |
-| Ingest (source → chunks → embeddings → grounding index) | `packages/engine/ingest` | shell (extract) + core (store) | B1.1 |
-| Fan-out (source × profile × platform → drafts) | `packages/engine/fanout` | shell (generate) + core (orchestrate) | B1.2 |
+| Ingest (source → chunks → embeddings → grounding index) | `packages/engine/src/ingest` | shell (extract) + core (store) | B1.1 |
+| Fan-out (source × profile × platform → drafts) | `packages/engine/src/fanout` | shell (generate) + core (orchestrate) | B1.2 |
 | Judge harness (G1 lint · G3 two-tier grounding; G2/G4/G5 later) | `proprietary/judge` | G1 core · G2–G5 shell verdicts, core enforcement | B1.3 |
 | Prompts + niche/brand profile templates (versioned data files) | `proprietary/prompts` · `proprietary/profiles` | data | B1.2+ |
 | Approve queue / operator inbox (+ `edit_diff` capture) | `apps/web` | core UI | B1.4 |
 | Eval loop (tracing, CI eval gate, golden sets) | `eval/` | core | B0.4 |
-| Publisher (OAuth token store, per-platform adapters, mocked) | `packages/publisher` | core | Sprint 3+ |
-| Renderer (video/stills — deterministic, content-addressed) | `packages/render` | core | Sprint 3+ |
-| Analytics (generation-metadata ↔ performance join) | `packages/analytics` | core | Sprint 3+ |
+| Publisher (OAuth token store, per-platform adapters, mocked) | `packages/publisher` (aspirational — Sprint 3+, unbuilt) | core | Sprint 3+ |
+| Renderer (video/stills — deterministic, content-addressed) | `packages/engine/src/render` (folded into engine — never a separate package) | core | Sprint 3+ |
+| Analytics (generation-metadata ↔ performance join) | `packages/analytics` (aspirational — Sprint 3+, unbuilt) | core | Sprint 3+ |
 | Infra (CDK-Python stacks) | `infra/` | core | B0.5 |
 
 Interfaces between modules are **only** through `packages/contracts` types and the `events` table. `apps/web` API routes stay thin: parse/authorize → call an engine/judge service → return. No business logic in routes; no DB access outside `packages/db` repositories.
@@ -231,7 +231,7 @@ Rule of one home: every lesson lands as exactly one artifact (test, CI check, AD
 ### 4.4 Maintenance model
 
 - **Regular upkeep:** deps (monthly), prompt/profile versions (on change, via PR), golden set (grows via overrides), denylist per tenant (data change, no deploy), model-tier choices (env, revisit when gateway pricing/models shift), CDK drift (B0.5+).
-- **Likely failure points → containment:** judge false-pass (two-tier disagreement blocks; weekly triage; eval rows) · gateway cost spike (usage_ledger hard cap) · schema drift dev/prod (killed by A1 single dialect) · seam rot (each seam's prod driver gets a smoke test when first wired, then stays in CI) · platform API/audit churn (Sprint 3 long pole — file OAuth apps early; adapters isolated in `packages/publisher`) · solo bus-factor (runbooks + operational mirror + this file).
+- **Likely failure points → containment:** judge false-pass (two-tier disagreement blocks; weekly triage; eval rows) · gateway cost spike (usage_ledger hard cap) · schema drift dev/prod (killed by A1 single dialect) · seam rot (each seam's prod driver gets a smoke test when first wired, then stays in CI) · platform API/audit churn (Sprint 3 long pole — file OAuth apps early; adapters isolated in `packages/publisher` (aspirational — Sprint 3+, unbuilt)) · solo bus-factor (runbooks + operational mirror + this file).
 - **Monitoring:** Langfuse traces on every shell call (cost, latency, verdicts); `events` table is the debugging timeline; CI is the drift alarm. Uptime/alerting stays trivial until publishing exists — a failed cron on a draft pipeline loses no user data.
 - **Debt control:** file-size cap; boundary lints; "every lesson leaves a ratchet in the same change"; append-only tables never rewritten; migrations forward-only.
 - **Versioning/change management:** conventional commits; prompt/profile/schema versions recorded on every generated row (full provenance: any draft can be traced to prompt vN + profile vM + model + source hash); charter amendments founder-approved only.
