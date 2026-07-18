@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>First Crack — small-batch roastery. Every batch logged, every curve public.</title>
+<meta name="description" content="A small-batch coffee roastery named for the moment the bean opens. We publish the roast log: curves, first-crack times, development ratios. Roast days Tuesday and Friday — come hear it.">
+<style>
+/* ---------- fonts (vendored, OFL) ---------- */
+@font-face{font-family:'Young Serif';src:url('fonts/young-serif-v2-latin-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Hanken Grotesk';src:url('fonts/hanken-grotesk-v12-latin-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Hanken Grotesk';src:url('fonts/hanken-grotesk-v12-latin-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'Hanken Grotesk';src:url('fonts/hanken-grotesk-v12-latin-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Hanken Grotesk';src:url('fonts/hanken-grotesk-v12-latin-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Space Mono';src:url('fonts/space-mono-v17-latin-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Space Mono';src:url('fonts/space-mono-v17-latin-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+
+/* ---------- the roast's own palette ---------- */
+:root{
+  --paper:#f5efe3;          /* warm log-paper cream */
+  --paper-deep:#efe6d3;     /* section alternation, same family */
+  --ink:#33261c;            /* roast charcoal-brown ink, never black */
+  --ink-soft:#6b5947;
+  --hair:#d8cbb4;           /* hairline rules */
+  --grid:#e4d9c2;           /* graph-paper grid */
+  --sage:#7d8f6b;           /* green bean */
+  --gold:#c09a3e;           /* yellowing */
+  --amber:#a86528;          /* maillard */
+  --roast:#5b3a24;          /* developed bean */
+  --ember:#d94f1e;          /* FIRST CRACK ONLY — lines, band, the crack */
+  --ember-ink:#bd3c0f;      /* ember as TEXT on cream (AA); never for fills */
+  --card:#fbf7ee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  font-family:'Hanken Grotesk',system-ui,sans-serif;
+  background:var(--paper);color:var(--ink);
+  font-size:1.0625rem;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+.mono{font-family:'Space Mono',monospace}
+.micro{font-family:'Space Mono',monospace;font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.display{font-family:'Young Serif',serif;font-weight:400;line-height:1.08;letter-spacing:-.01em}
+.wrap{max-width:72rem;margin-inline:auto;padding-inline:clamp(1.1rem,4vw,2.5rem)}
+section{position:relative}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:2px}
+.skip{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--paper);padding:.5rem .9rem;z-index:99}
+.skip:focus{left:.5rem;top:.5rem}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---------- header ---------- */
+header.site{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--hair);
+}
+.site-bar{display:flex;align-items:center;gap:1.2rem;padding-block:.7rem}
+.wordmark{font-family:'Young Serif',serif;font-size:1.15rem;text-decoration:none;white-space:nowrap}
+/* the wink: the C of CRACK carries a hairline fracture once first crack has fired */
+.crack-c{position:relative;display:inline-block;transition:transform .4s ease}
+.cracked .crack-c{transform:rotate(2.4deg) translateY(1px)}
+.cracked .crack-c::after{
+  content:"";position:absolute;left:52%;top:-8%;width:1px;height:62%;
+  background:var(--ember);transform:rotate(14deg);
+}
+@media (prefers-reduced-motion:reduce){.crack-c{transition:none}}
+nav.primary{margin-left:auto;display:flex;gap:1.1rem;align-items:center;overflow-x:auto}
+nav.primary a{font-family:'Space Mono',monospace;font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink-soft);white-space:nowrap;padding-block:.35rem}
+nav.primary a:hover{color:var(--ink)}
+.roast-chip{
+  font-family:'Space Mono',monospace;font-size:.625rem;letter-spacing:.1em;
+  border:1px solid var(--hair);border-radius:2rem;padding:.3rem .7rem;
+  background:var(--card);white-space:nowrap;color:var(--ink);
+}
+.roast-chip b{color:var(--amber);font-weight:700}
+@media (max-width:40rem){.roast-chip{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:88svh;display:flex;align-items:flex-end;color:#f7efe2;isolation:isolate}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(28,18,12,.18) 0%,rgba(28,18,12,.06) 40%,rgba(24,14,9,.62) 100%)}
+.hero-inner{width:100%;padding-block:3.2rem 2.4rem}
+.hero h1{font-size:clamp(2.9rem,8vw,5.8rem);max-width:11ch}
+.hero p.lede{max-width:34rem;margin-top:1rem;font-size:clamp(1.05rem,2.2vw,1.25rem);color:#f2e6d3}
+.hero .micro{color:#d9c6a8}
+.hero-log{
+  margin-top:2rem;display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;
+  border-top:1px solid rgba(247,239,226,.35);padding-top:1rem;
+  font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#e8d8bd;
+}
+.hero-log b{color:#fff;font-weight:700}
+.scroll-cue{margin-top:1.6rem;display:inline-block;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#f2e6d3;text-decoration:none;border-bottom:1px solid rgba(247,239,226,.5);padding-bottom:.2rem}
+
+/* ---------- the roast instrument ---------- */
+#roast{background:var(--paper)}
+.roast-run{position:relative}
+.js .roast-run{height:340vh}
+.roast-stage{position:relative}
+.js .roast-stage{position:sticky;top:0;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding-block:4.5rem 2rem}
+/* flex min-size gotcha: without this the wrap refuses to shrink below the
+   svg's min-width and the PAGE h-scrolls on phones instead of the chartbox */
+.js .roast-stage .wrap{min-width:0;width:100%}
+.no-js-pad{padding-block:4.5rem}
+.roast-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem 1.4rem;margin-bottom:1.1rem}
+.roast-head h2{font-size:clamp(1.7rem,4vw,2.6rem)}
+.readout{display:flex;flex-wrap:wrap;gap:.5rem;margin-left:auto}
+.readout .cell{
+  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.08em;
+  border:1px solid var(--hair);background:var(--card);border-radius:.4rem;
+  padding:.42rem .65rem;min-width:7.2rem;text-align:left;
+}
+.readout .cell b{display:block;font-size:1.05rem;font-weight:700;letter-spacing:0;font-variant-numeric:tabular-nums}
+.readout .cell.fc b{color:var(--ember-ink)}
+.chartbox{
+  position:relative;border:1px solid var(--hair);border-radius:.6rem;
+  overflow-x:auto;overflow-y:hidden;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 27px,var(--grid) 27px 28px),
+    repeating-linear-gradient(90deg,transparent 0 27px,var(--grid) 27px 28px),
+    var(--card);
+}
+/* the instrument stays legible on phones: it scrolls sideways inside its own
+   frame (the page never h-scrolls) rather than shrinking its labels away */
+.chartbox svg{display:block;width:100%;min-width:41rem;height:auto}
+.axis{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;fill:var(--ink-soft)}
+.trace-under{stroke:var(--hair)}
+.flag text{font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.1em;fill:var(--ink)}
+.flag .t{fill:var(--ink-soft);font-size:10px}
+.flag line{stroke:var(--ink-soft);stroke-dasharray:2 3}
+.flag circle{fill:var(--card);stroke:var(--ink);stroke-width:1.4}
+.flag.fc text.n{fill:var(--ember-ink);font-weight:700;font-size:13px}
+.flag.fc line{stroke:var(--ember);stroke-dasharray:none}
+.flag.fc circle{stroke:var(--ember);stroke-width:2}
+.js .flag{opacity:0;transition:opacity .5s ease}
+.js .flag.planted{opacity:1}
+@media (prefers-reduced-motion:reduce){.js .flag{opacity:1;transition:none}}
+.devband{fill:var(--ember);opacity:.07}
+.devlabel{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.12em;fill:var(--amber)}
+.narrate{min-height:2.4rem;margin-top:1rem;font-style:italic;color:var(--ink-soft);max-width:46rem}
+.narrate b{color:var(--ember-ink);font-style:normal;font-family:'Space Mono',monospace;font-size:.8em;letter-spacing:.1em;text-transform:uppercase}
+
+/* ---------- batch log ---------- */
+#log{background:var(--paper-deep);border-block:1px solid var(--hair)}
+#log .wrap{padding-block:4.5rem}
+#log h2{font-size:clamp(1.7rem,4vw,2.4rem);margin-bottom:.4rem}
+.log-note{color:var(--ink-soft);max-width:44rem;margin-bottom:2rem}
+.logtable{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:.78rem}
+.logtable caption{text-align:left;padding-bottom:.7rem}
+.logtable th{font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-weight:400;text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--ink-soft)}
+.logtable td{padding:.62rem .7rem;border-bottom:1px solid var(--hair);white-space:nowrap;font-variant-numeric:tabular-nums}
+.logtable td.coffee{white-space:normal;font-family:'Hanken Grotesk',sans-serif;font-weight:500}
+.logtable .fc-col{color:var(--amber);font-weight:700}
+.logtable tr.human td{white-space:normal;font-style:italic;color:var(--ink-soft);font-family:'Hanken Grotesk',sans-serif;border-bottom:none;padding-top:.9rem}
+.logwrap{overflow-x:auto}
+/* the DEV cell is a tiny instrument: the 18–22% sweetness window as a track,
+   the batch's ratio as a filled bar — 446's overshoot reads at a glance */
+.devcell{display:inline-flex;align-items:center;gap:.5rem}
+.devtrack{position:relative;width:3.4rem;height:.38rem;border-radius:.25rem;background:var(--paper);border:1px solid var(--hair);overflow:hidden}
+.devtrack i{position:absolute;inset-block:0;left:0;border-radius:.25rem;background:linear-gradient(90deg,var(--gold),var(--amber))}
+.devtrack.over i{background:var(--ember)}
+
+/* ---------- coffees / cupping ---------- */
+#coffees .wrap{padding-block:4.5rem}
+#coffees h2{font-size:clamp(1.7rem,4vw,2.4rem);margin-bottom:.4rem}
+.cup-grid{display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));margin-top:2rem}
+.cup{border:1px solid var(--hair);border-radius:.6rem;background:var(--card);padding:1.4rem;display:flex;flex-direction:column;gap:.9rem}
+.cup .roastlevel{display:flex;align-items:center;gap:.5rem}
+.cup .bean-dot{width:.85rem;height:.85rem;border-radius:50%;border:1px solid var(--ink-soft)}
+.cup h3{font-family:'Young Serif',serif;font-size:1.35rem;font-weight:400}
+.cup .origin-line{color:var(--ink-soft);font-size:.92rem}
+.cup .notes{font-style:italic;color:var(--ink-soft)}
+.scorerow{display:grid;grid-template-columns:6.4rem 1fr 2.4rem;gap:.6rem;align-items:center;font-family:'Space Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scorebar{height:.42rem;border-radius:.3rem;background:var(--paper-deep);overflow:hidden}
+.scorebar i{display:block;height:100%;border-radius:.3rem;background:linear-gradient(90deg,var(--gold),var(--amber));transform-origin:left;transition:transform .9s cubic-bezier(.22,.8,.36,1)}
+.js .cup:not(.filled) .scorebar i{transform:scaleX(0)}
+@media (prefers-reduced-motion:reduce){.scorebar i{transition:none}.js .cup:not(.filled) .scorebar i{transform:none}}
+.scoreval{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink)}
+.cup .price{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed var(--hair);padding-top:.8rem;font-family:'Space Mono',monospace;font-size:.85rem}
+.cup .price b{font-size:1.05rem}
+.cup .fcstamp{font-family:'Space Mono',monospace;font-size:.625rem;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+
+/* ---------- origin band ---------- */
+#origin{color:#f7efe2;isolation:isolate;display:flex;align-items:flex-end;min-height:74svh}
+#origin img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+#origin::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,26,14,.05) 45%,rgba(20,22,12,.66) 100%)}
+#origin .wrap{padding-block:2.6rem;width:100%}
+#origin h2{font-size:clamp(1.7rem,4vw,2.4rem)}
+#origin p{max-width:38rem;color:#eee3cd;margin-top:.6rem}
+#origin .micro{color:#d9c6a8}
+
+/* ---------- roaster band ---------- */
+#craft .wrap{padding-block:4.5rem;display:grid;gap:2.4rem;grid-template-columns:1fr;align-items:center}
+@media (min-width:56rem){#craft .wrap{grid-template-columns:1.15fr 1fr}}
+#craft img{border-radius:.6rem;border:1px solid var(--hair)}
+#craft h2{font-size:clamp(1.7rem,4vw,2.4rem);margin-bottom:.8rem}
+#craft p{color:var(--ink-soft);max-width:34rem}
+#craft p+p{margin-top:.8rem}
+#craft .sig{margin-top:1.2rem}
+
+/* ---------- visit ---------- */
+#visit{background:var(--ink);color:var(--paper)}
+#visit .wrap{padding-block:4.2rem;display:grid;gap:2rem;grid-template-columns:1fr}
+@media (min-width:52rem){#visit .wrap{grid-template-columns:1.3fr 1fr 1fr}}
+#visit h2{font-family:'Young Serif',serif;font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:400;max-width:14ch}
+#visit h2 em{font-style:normal;color:var(--ember)}
+#visit .micro{color:#c9b797}
+#visit dl div{display:flex;justify-content:space-between;gap:1rem;border-bottom:1px solid #4a3a2c;padding-block:.55rem;font-family:'Space Mono',monospace;font-size:.8rem}
+#visit dt{color:#c9b797}
+#visit dd{font-variant-numeric:tabular-nums}
+#visit .addr{font-style:normal;color:#e8dcc4;line-height:1.7}
+footer{background:var(--ink);color:#a08a70;border-top:1px solid #4a3a2c}
+footer .wrap{padding-block:1.4rem;display:flex;flex-wrap:wrap;gap:.6rem 1.8rem;align-items:baseline;font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase}
+footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site">
+  <div class="wrap site-bar">
+    <a class="wordmark" href="#top" aria-label="First Crack — home">First&nbsp;<span aria-hidden="true">CRA<span class="crack-c">C</span>K</span><span class="sr-only">CRACK</span></a>
+    <span class="roast-chip">ROAST DAYS <b>TUE + FRI</b> · NEXT — TUE 07:00</span>
+    <nav class="primary" aria-label="Site">
+      <a href="#roast">The roast</a>
+      <a href="#log">Log</a>
+      <a href="#coffees">Coffees</a>
+      <a href="#origin">Origin</a>
+      <a href="#visit">Visit</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top" aria-label="First Crack roastery">
+  <img src="assets/hero-drum.webp" width="1920" height="1080" alt="Morning light in a small roastery: steam rises off the round cooling tray as the roaster leans over it, hands on the rim, watching the fresh batch — the drum roaster's chute glows behind." fetchpriority="high">
+  <div class="wrap hero-inner">
+    <p class="micro">Small-batch roastery · est. on a Tuesday</p>
+    <h1 class="display">Named for the moment the bean opens.</h1>
+    <p class="lede">At 196° the bean cracks — an audible pop, the roast's one honest clock. We roast toward that sound twice a week, and we log everything.</p>
+    <div class="hero-log">
+      <span>BATCH <b>447</b></span>
+      <span>ETHIOPIA GUJI · WASHED</span>
+      <span>CHARGE <b>204°C</b></span>
+      <span>FIRST CRACK <b>08:52</b></span>
+      <span>DEV <b>20.1%</b></span>
+    </div>
+    <a class="scroll-cue" href="#roast">Follow the roast ↓</a>
+  </div>
+</section>
+
+<!-- ================= THE ROAST INSTRUMENT ================= -->
+<section id="roast" aria-label="The roast curve, batch 447">
+  <div class="roast-run" id="roast-run">
+    <div class="roast-stage no-js-pad">
+      <div class="wrap">
+        <div class="roast-head">
+          <h2 class="display">One roast, start to finish.</h2>
+          <div class="readout" aria-hidden="true">
+            <span class="cell">TIME<b id="ro-time">11:04</b></span>
+            <span class="cell">BEAN TEMP<b id="ro-temp">214°C</b></span>
+            <span class="cell">ROR<b id="ro-ror">6.2°C/min</b></span>
+            <span class="cell fc">FIRST CRACK<b id="ro-fc">08:52</b></span>
+          </div>
+        </div>
+        <div class="chartbox">
+          <svg viewBox="0 0 1000 560" role="img" aria-labelledby="curve-title curve-desc">
+            <title id="curve-title">Roast curve for batch 447 — Ethiopia Guji, washed</title>
+            <desc id="curve-desc">Bean temperature over eleven minutes four seconds: charged at 204 degrees, falling to the turning point at 96 degrees at 1:32, climbing through the Maillard stage from 4:48, first crack at 196 degrees at 8:52, dropped at 214 degrees at 11:04 — a development ratio of 20.1 percent.</desc>
+            <!-- axes -->
+            <line x1="80" y1="500" x2="960" y2="500" stroke="var(--ink-soft)" stroke-width="1"/>
+            <line x1="80" y1="40" x2="80" y2="500" stroke="var(--ink-soft)" stroke-width="1"/>
+            <text class="axis" x="80" y="522">0:00</text>
+            <text class="axis" x="300" y="522">3:00</text>
+            <text class="axis" x="527" y="522">6:00</text>
+            <text class="axis" x="754" y="522">9:00</text>
+            <text class="axis" x="915" y="522">11:00</text>
+            <text class="axis" x="46" y="130">200°</text>
+            <text class="axis" x="46" y="300">150°</text>
+            <text class="axis" x="46" y="465">100°</text>
+            <text class="axis" x="890" y="58">BEAN °C</text>
+            <!-- development window: first crack → drop -->
+            <rect class="devband" x="758" y="40" width="169" height="460"/>
+            <text class="devlabel" x="762" y="86">DEVELOPMENT 20.1%</text>
+            <!-- the trace: faint underlay + drawn stroke -->
+            <path class="trace-under" id="trace-under" fill="none" stroke-width="2"
+              d="M80,125 C115,300 160,462 197,480 C245,472 276,440 310,408 C360,375 405,335 447,296 C500,270 560,240 616,217 C665,196 715,172 758,152 C790,140 820,130 845,122 C870,113 900,102 927,92"/>
+            <path id="trace" fill="none" stroke="url(#roastgrad)" stroke-width="3.2" stroke-linecap="round"
+              d="M80,125 C115,300 160,462 197,480 C245,472 276,440 310,408 C360,375 405,335 447,296 C500,270 560,240 616,217 C665,196 715,172 758,152 C790,140 820,130 845,122 C870,113 900,102 927,92"/>
+            <circle id="bean-dot" r="6" cx="927" cy="92" fill="var(--roast)" stroke="var(--card)" stroke-width="2"/>
+            <defs>
+              <linearGradient id="roastgrad" gradientUnits="userSpaceOnUse" x1="80" y1="0" x2="927" y2="0">
+                <stop offset="0" stop-color="var(--sage)"/>
+                <stop offset=".42" stop-color="var(--gold)"/>
+                <stop offset=".7" stop-color="var(--amber)"/>
+                <stop offset="1" stop-color="var(--roast)"/>
+              </linearGradient>
+            </defs>
+            <!-- event flags -->
+            <g class="flag" data-t="0">
+              <line x1="80" y1="125" x2="80" y2="86"/><circle cx="80" cy="125" r="4.5"/>
+              <text class="n" x="86" y="80">CHARGE</text><text class="t" x="86" y="94">204°C · 0:00</text>
+            </g>
+            <g class="flag" data-t="92">
+              <line x1="197" y1="480" x2="197" y2="435"/><circle cx="197" cy="480" r="4.5"/>
+              <text class="n" x="203" y="429">TURNING POINT</text><text class="t" x="203" y="443">96°C · 1:32</text>
+            </g>
+            <g class="flag" data-t="288">
+              <line x1="447" y1="296" x2="447" y2="248"/><circle cx="447" cy="296" r="4.5"/>
+              <text class="n" x="453" y="242">MAILLARD</text><text class="t" x="453" y="256">152°C · 4:48 — sugars brown</text>
+            </g>
+            <g class="flag fc" data-t="532">
+              <line x1="758" y1="152" x2="758" y2="88"/><circle cx="758" cy="152" r="5.5"/>
+              <text class="n" x="700" y="82">FIRST CRACK</text><text class="t" x="700" y="97">196°C · 8:52 — the bean opens</text>
+            </g>
+            <g class="flag" data-t="664">
+              <line x1="927" y1="92" x2="927" y2="120"/><circle cx="927" cy="92" r="4.5"/>
+              <text class="n" x="858" y="140">DROP</text><text class="t" x="858" y="154">214°C · 11:04</text>
+            </g>
+          </svg>
+        </div>
+        <p class="narrate" id="narrate" aria-live="off">The whole curve, annotated — batch 447 as it ran last Tuesday. With JavaScript, scrolling replays the roast; without it, you're reading the finished log, which is the same truth.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BATCH LOG ================= -->
+<section id="log" aria-label="This week's batch log">
+  <div class="wrap">
+    <h2 class="display">The log is public.</h2>
+    <p class="log-note">Every batch we sell carries its numbers. Not because numbers make coffee taste better — because a roaster who shows the log has nowhere to hide a stale batch.</p>
+    <div class="logwrap">
+      <table class="logtable">
+        <caption class="micro">WEEK OF JULY 13 · DRUM 12KG · AMBIENT 17–19°C</caption>
+        <thead>
+          <tr><th scope="col">Batch</th><th scope="col">Coffee</th><th scope="col">Charge</th><th scope="col">First crack</th><th scope="col">Drop</th><th scope="col">Dev</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>443</td><td class="coffee">Ethiopia Guji — washed</td><td>204°C</td><td class="fc-col">8:47</td><td>10:58</td><td><span class="devcell"><span class="devtrack" aria-hidden="true"><i style="width:38%"></i></span>19.8%</span></td></tr>
+          <tr><td>444</td><td class="coffee">Colombia Huila — honey</td><td>202°C</td><td class="fc-col">9:04</td><td>11:21</td><td><span class="devcell"><span class="devtrack" aria-hidden="true"><i style="width:43%"></i></span>20.3%</span></td></tr>
+          <tr><td>445</td><td class="coffee">Sumatra Kerinci — natural</td><td>200°C</td><td class="fc-col">9:12</td><td>11:40</td><td><span class="devcell"><span class="devtrack" aria-hidden="true"><i style="width:51%"></i></span>21.1%</span></td></tr>
+          <tr><td>446</td><td class="coffee">Colombia Huila — honey</td><td>202°C</td><td class="fc-col">9:06</td><td>11:42</td><td><span class="devcell"><span class="devtrack over" aria-hidden="true"><i style="width:69%"></i></span>22.9%</span></td></tr>
+          <tr><td>447</td><td class="coffee">Ethiopia Guji — washed</td><td>204°C</td><td class="fc-col">8:52</td><td>11:04</td><td><span class="devcell"><span class="devtrack" aria-hidden="true"><i style="width:41%"></i></span>20.1%</span></td></tr>
+          <tr class="human"><td></td><td colspan="5">446 ran 19 seconds long chasing sweetness and overshot — it's staff espresso now. We drink our mistakes; we don't sell them.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COFFEES ================= -->
+<section id="coffees" aria-label="Current coffees and cupping scores">
+  <div class="wrap">
+    <h2 class="display">Three coffees. Scored, not sold with adjectives.</h2>
+    <p class="log-note">We cup every roast day, blind, against the last batch. The bars are our table's medians — an honest instrument, not a boast: nothing here scores itself 10.</p>
+    <div class="cup-grid">
+      <article class="cup">
+        <div class="roastlevel"><span class="bean-dot" style="background:var(--gold)"></span><span class="micro">LIGHT · FILTER</span></div>
+        <h3>Ethiopia Guji</h3>
+        <p class="origin-line">Washed · 1,980 m · heirloom varieties</p>
+        <p class="notes">apricot · bergamot · a clean, tea-like finish</p>
+        <div class="scorerow"><span>aroma</span><span class="scorebar"><i style="width:87%"></i></span><b class="scoreval">8.7</b></div>
+        <div class="scorerow"><span>acidity</span><span class="scorebar"><i style="width:89%"></i></span><b class="scoreval">8.9</b></div>
+        <div class="scorerow"><span>body</span><span class="scorebar"><i style="width:78%"></i></span><b class="scoreval">7.8</b></div>
+        <div class="scorerow"><span>sweetness</span><span class="scorebar"><i style="width:85%"></i></span><b class="scoreval">8.5</b></div>
+        <p class="fcstamp">FC 8:52 · DEV 20.1% · ROASTED TUE</p>
+        <p class="price"><span>250 g</span><b>$21</b></p>
+      </article>
+      <article class="cup">
+        <div class="roastlevel"><span class="bean-dot" style="background:var(--amber)"></span><span class="micro">MEDIUM · BOTH WAYS</span></div>
+        <h3>Colombia Huila</h3>
+        <p class="origin-line">Honey process · 1,700 m · pink bourbon</p>
+        <p class="notes">panela · red apple · round and patient</p>
+        <div class="scorerow"><span>aroma</span><span class="scorebar"><i style="width:83%"></i></span><b class="scoreval">8.3</b></div>
+        <div class="scorerow"><span>acidity</span><span class="scorebar"><i style="width:80%"></i></span><b class="scoreval">8.0</b></div>
+        <div class="scorerow"><span>body</span><span class="scorebar"><i style="width:86%"></i></span><b class="scoreval">8.6</b></div>
+        <div class="scorerow"><span>sweetness</span><span class="scorebar"><i style="width:88%"></i></span><b class="scoreval">8.8</b></div>
+        <p class="fcstamp">FC 9:04 · DEV 20.3% · ROASTED TUE</p>
+        <p class="price"><span>250 g</span><b>$19</b></p>
+      </article>
+      <article class="cup">
+        <div class="roastlevel"><span class="bean-dot" style="background:var(--roast)"></span><span class="micro">DARKER · ESPRESSO</span></div>
+        <h3>Sumatra Kerinci</h3>
+        <p class="origin-line">Natural · 1,400 m · sigarar utang</p>
+        <p class="notes">dark cherry · cacao · a long, syrupy close</p>
+        <div class="scorerow"><span>aroma</span><span class="scorebar"><i style="width:81%"></i></span><b class="scoreval">8.1</b></div>
+        <div class="scorerow"><span>acidity</span><span class="scorebar"><i style="width:72%"></i></span><b class="scoreval">7.2</b></div>
+        <div class="scorerow"><span>body</span><span class="scorebar"><i style="width:90%"></i></span><b class="scoreval">9.0</b></div>
+        <div class="scorerow"><span>sweetness</span><span class="scorebar"><i style="width:84%"></i></span><b class="scoreval">8.4</b></div>
+        <p class="fcstamp">FC 9:12 · DEV 21.1% · ROASTED FRI</p>
+        <p class="price"><span>250 g</span><b>$18</b></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ORIGIN ================= -->
+<section id="origin" aria-label="Origin">
+  <img src="assets/origin-cherries.webp" width="1680" height="1120" alt="Ripe coffee cherries on the branch in bright high-altitude sunlight, deep red fruit among green leaves — a picker's hand reaching in mid-harvest, green hills behind." loading="lazy">
+  <div class="wrap">
+    <p class="micro">BEFORE THE ROAST</p>
+    <h2 class="display">Coffee is a fruit. It starts in the sun.</h2>
+    <p>Every bean in the drum was a cherry on a branch at altitude. We buy from farms we can name — Guji washing stations, a Huila family lot, a Kerinci cooperative — and the log's first column belongs to them.</p>
+  </div>
+</section>
+
+<!-- ================= CRAFT ================= -->
+<section id="craft" aria-label="The roaster at work">
+  <div class="wrap">
+    <img src="assets/cooling-tray.webp" alt="Fresh-dropped beans mid-sweep in the plain steel cooling tray, the rake arm crossing the frame, steam drifting in warm light — a hand guiding a wooden paddle in at the tray's edge." loading="lazy" width="1400" height="1050">
+    <div>
+      <p class="micro">TWICE A WEEK</p>
+      <h2 class="display">We roast toward a sound.</h2>
+      <p>Everything before first crack is preparation; everything after it is judgment. The window between the crack and the drop — two minutes, give or take — is where a batch becomes itself. We spend our week getting those two minutes right.</p>
+      <p>Come on a roast morning and you can hear it from the bar: a quiet, irregular popping, like rain starting on a tin roof. That sound is the only alarm clock this building has.</p>
+      <p class="sig micro">— THE BENCH AT FIRST CRACK</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VISIT ================= -->
+<section id="visit" aria-label="Visit">
+  <div class="wrap">
+    <div>
+      <h2>Come hear the <em>crack.</em></h2>
+    </div>
+    <div>
+      <p class="micro" style="margin-bottom:.6rem">HOURS</p>
+      <dl>
+        <div><dt>Mon–Fri</dt><dd>07:00–15:00</dd></div>
+        <div><dt>Sat</dt><dd>08:00–14:00</dd></div>
+        <div><dt>Sun</dt><dd>closed</dd></div>
+        <div><dt>Roast days</dt><dd>Tue + Fri 07:00</dd></div>
+      </dl>
+    </div>
+    <div>
+      <p class="micro" style="margin-bottom:.6rem">THE ROASTERY</p>
+      <address class="addr">
+        14 Turning Point Lane<br>
+        (the old print works)<br>
+        Batch pickup at the bench —<br>
+        ask what's in the cooling tray.
+      </address>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>FIRST CRACK — A DEMONSTRATION SITE</span>
+    <a href="guide/">HOW THIS PAGE WAS MADE</a>
+    <span>IMAGERY IS AI-MINTED · SEE THE GUIDE</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- cupping bars fill on reveal ---- */
+  var cups = document.querySelectorAll('.cup');
+  if ('IntersectionObserver' in window && !reduced) {
+    var cupIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('filled'); cupIO.unobserve(e.target); }
+      });
+    }, { threshold: 0.35 });
+    cups.forEach(function (c) { cupIO.observe(c); });
+  } else {
+    cups.forEach(function (c) { c.classList.add('filled'); });
+  }
+
+  /* ---- the roast: scroll-driven replay ---- */
+  var run = document.getElementById('roast-run');
+  var trace = document.getElementById('trace');
+  var dot = document.getElementById('bean-dot');
+  var flags = Array.prototype.slice.call(document.querySelectorAll('.flag'));
+  var roTime = document.getElementById('ro-time');
+  var roTemp = document.getElementById('ro-temp');
+  var roRor = document.getElementById('ro-ror');
+  var narrate = document.getElementById('narrate');
+  var header = document.querySelector('header.site');
+
+  /* sampled bean-temp profile (t seconds → °C) for readout + RoR */
+  var P = [[0,204],[30,160],[60,120],[92,96],[120,104],[180,118],[240,136],[288,152],[350,166],[420,176],[480,188],[532,196],[600,205],[664,214]];
+  var TOTAL = 664, FC_T = 532;
+
+  function tempAt(t) {
+    if (t <= 0) return P[0][1];
+    for (var i = 1; i < P.length; i++) {
+      if (t <= P[i][0]) {
+        var a = P[i - 1], b = P[i];
+        return a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]);
+      }
+    }
+    return P[P.length - 1][1];
+  }
+  function fmt(t) {
+    var m = Math.floor(t / 60), s = Math.round(t % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  var stages = [
+    [0,   'Charge. 204° of stored heat meets cold green bean — the probe plunges.'],
+    [92,  'Turning point. The bean stops cooling the drum and starts to climb.'],
+    [180, 'Drying. Water leaves the bean; the smell is grass, then bread.'],
+    [288, 'Maillard. Sugars brown, acids build — the curve flattens on purpose.'],
+    [532, '<b>FIRST CRACK.</b> The bean opens with a pop. From here, every second is flavour.'],
+    [664, 'Drop. 20.1% development — into the tray, and the room smells like the label reads.']
+  ];
+
+  var len = trace.getTotalLength();
+  trace.style.strokeDasharray = len + ' ' + len;
+
+  var cracked = false, lastStage = -1;
+  function render(t) {
+    var frac = Math.max(0, Math.min(1, t / TOTAL));
+    var drawn = len * frac;
+    trace.style.strokeDashoffset = String(len - drawn);
+    var pt = trace.getPointAtLength(drawn);
+    dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+
+    var temp = tempAt(t);
+    roTime.textContent = fmt(t);
+    roTemp.textContent = Math.round(temp) + '°C';
+    var dt = 12, ror = (tempAt(t) - tempAt(t - dt)) / dt * 60;
+    roRor.textContent = (t < 8 ? '—' : (Math.round(ror * 10) / 10) + '°C/min');
+
+    flags.forEach(function (f) {
+      f.classList.toggle('planted', t >= +f.getAttribute('data-t') - 1);
+    });
+
+    for (var i = stages.length - 1; i >= 0; i--) {
+      if (t >= stages[i][0]) {
+        if (i !== lastStage) { narrate.innerHTML = stages[i][1]; lastStage = i; }
+        break;
+      }
+    }
+
+    if (t >= FC_T && !cracked) { cracked = true; header.classList.add('cracked'); }
+    if (t < FC_T && cracked) { cracked = false; header.classList.remove('cracked'); }
+  }
+
+  if (reduced) {
+    /* reduced motion: the finished log — full curve, all flags, drop readout */
+    render(TOTAL);
+  } else {
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var rect = run.getBoundingClientRect();
+        var scrollable = rect.height - innerHeight;
+        var frac = scrollable > 0 ? Math.max(0, Math.min(1, -rect.top / scrollable)) : 1;
+        render(frac * TOTAL);
+      });
+    }
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+})();
+</script>
+</body>
+</html>

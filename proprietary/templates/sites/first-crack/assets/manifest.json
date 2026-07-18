@@ -1,0 +1,23 @@
+[
+  {
+    "file": "hero-drum.webp",
+    "pinnedHash": "ee77a6c2c6dfd6c54da01923d14c97a2c3bc059f01126b87219b65e8758d229a",
+    "width": 1920,
+    "height": 1080,
+    "quality": 74
+  },
+  {
+    "file": "origin-cherries.webp",
+    "pinnedHash": "e2e41d094afb5f1737c7dd2400ca5330a8fedecf5c977d9fd4309d7b5499b95b",
+    "width": 1680,
+    "height": 1120,
+    "quality": 74
+  },
+  {
+    "file": "cooling-tray.webp",
+    "pinnedHash": "c7d6eb603829060f72dc0cdab0aa75c3f830e0e40d85e6a17f95b18028daaa5a",
+    "width": 1400,
+    "height": 1050,
+    "quality": 74
+  }
+]

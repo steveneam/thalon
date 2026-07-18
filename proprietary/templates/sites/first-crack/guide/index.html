@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How this page was made — First Crack</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:'Young Serif';src:url('../fonts/young-serif-v2-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Hanken Grotesk';src:url('../fonts/hanken-grotesk-v12-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Hanken Grotesk';src:url('../fonts/hanken-grotesk-v12-latin-700.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Space Mono';src:url('../fonts/space-mono-v17-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+:root{--paper:#f5efe3;--ink:#33261c;--soft:#6b5947;--hair:#d8cbb4;--amber:#a86528;--ember:#d94f1e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;font-size:1.03rem}
+main{max-width:44rem;margin-inline:auto;padding:3.5rem 1.2rem 4rem}
+h1{font-family:'Young Serif',serif;font-weight:400;font-size:2rem;line-height:1.15;margin-bottom:.4rem}
+h2{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:2.4rem 0 .7rem;border-bottom:1px solid var(--hair);padding-bottom:.4rem}
+p{margin-bottom:.9rem}
+p.lede{color:var(--soft);font-size:1.08rem}
+ul{margin:0 0 .9rem 1.2rem}
+li{margin-bottom:.45rem}
+.mono{font-family:'Space Mono',monospace;font-size:.85em}
+a{color:var(--amber)}
+.tbl{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:.9rem}
+.tbl th{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);text-align:left;font-weight:400;padding:.35rem .5rem;border-bottom:1px solid var(--soft)}
+.tbl td{padding:.45rem .5rem;border-bottom:1px solid var(--hair);vertical-align:top}
+.back{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="../">← First Crack</a>
+<h1 style="margin-top:1.2rem">How this page was made</h1>
+<p class="lede">First Crack is a fictional demonstration business — a portfolio piece showing what this content factory produces. No real roastery, café, or coffee is being sold. All imagery is AI-generated. Honest note: the batch numbers, roast curves, cupping scores, and address are plausible fiction written to show how a real roaster's data would live on a page like this.</p>
+
+<h2>Concept</h2>
+<p>Coffee roasters keep the most beautiful instrument in food — the roast log — and no roastery website shows it. Design survey of the genre found the same default everywhere: kraft-bag product grids, brown-on-brown, macro bean photos (even the industry's most data-driven roaster hides its data behind a shop grid). This page refuses that default: <strong>the page IS a roast log</strong>. Scrolling replays batch 447 from charge to drop on a real-shaped curve; first crack at 8:52 is the page's one loud moment — the wordmark's C cracks and stays cracked. The palette is the roast's own gradient (green bean → gold → amber → roast brown, ember reserved for first crack), not café black.</p>
+<p>Design axes (assigned): data-instrument primary — the warm-craft register: graph paper, stamped micro-caps, printed-log tables — with cinematic imagery secondary. Type: Young Serif · Hanken Grotesk · Space Mono, all OFL, served locally. Zero external requests; no analytics.</p>
+
+<h2>The honest instrument</h2>
+<ul>
+  <li>The curve's shape is a real roast profile (charge drop to turning point, Maillard flattening, first-crack inflection, development window) — the numbers are fictional but the physics is not.</li>
+  <li>Without JavaScript (or with reduced motion) you get the finished, fully annotated log — the same truth, already told.</li>
+  <li>The batch log includes batch 446, which ran long and became staff espresso. A roaster who publishes the log publishes the misses; a demo about honest instruments has to model that too.</li>
+  <li>No fake urgency, no invented testimonials, no awards. Cupping bars top out well below 10 on purpose.</li>
+</ul>
+
+<h2>Imagery — models, credits, and what was rejected</h2>
+<table class="tbl">
+<tr><th>Asset</th><th>Model</th><th>Take</th><th>Credits</th></tr>
+<tr><td>Roastery hero (drum + cooling tray)</td><td class="mono">soul_2 · 2k</td><td>3rd</td><td>0.12</td></tr>
+<tr><td>Origin cherries</td><td class="mono">soul_2 · 2k</td><td>1st</td><td>0.12</td></tr>
+<tr><td>Cooling tray</td><td class="mono">soul_2 · 2k</td><td>1st</td><td>0.12</td></tr>
+</table>
+<p>Two hero takes were rejected for the same reason: the image model invents lettering on machine bodies. Take 1 grew a garbled brand decal and badge on the drum; take 2, told "nothing printed anywhere," produced ornate gold pseudo-livery instead (asking a machine-heritage prompt to be plain seems to read as "vintage," which means painted lettering). Take 3 switched to a modern seamless-housed roaster and came back nearly clean — one small orange decal still carried pseudo-letters, and rather than spend a fourth take we blurred that 137×78-pixel patch locally before pinning, so it reads as a worn blank label. That local edit is the only hand-retouch on the page and this paragraph is its disclosure. Rejected takes are logged with their provenance; total spend 0.60 credits including rejects.</p>
+
+<h2>Method + passes</h2>
+<p>Built as one self-contained HTML file: the curve is hand-drawn SVG, the readout and scroll replay are ~90 lines of dependency-free JavaScript, the cupping bars and log table are plain markup. Iteration passes (fault-hunt + ambition lanes each) are logged here as they run:</p>
+<ul id="passlog">
+  <li>Pass 1 — pre-render fixes: a broken CSS line removed, missing <span class="mono">.sr-only</span> defined, the chart given its own horizontal scroll on phones so axis labels stay legible (the page never scrolls sideways), unused italic font dropped, all three image alts rewritten to describe the actual frames.</li>
+  <li>Pass 2 — browser pass, both lanes. Fault-hunt: a flex min-size bug let the chart's minimum width push the whole page into horizontal scroll at 390px (fixed at the container, verified 390 exactly); the ember accent measured ~3.6:1 as text on cream and failed AA — a darker ember-ink now carries every ember word while the vivid ember keeps the lines, band, and crack; two chart labels un-crowded. Ambition: the log's DEV column became a small instrument — each batch's development ratio as a bar, with 446's overshoot in ember so the confession row reads at a glance.</li>
+  <li>Pass 3 — final sweep: keyboard walk (skip link, focus rings, no interactive element unlabeled), the chart's accessible title/description verified as the no-JS/AT twin of the replay, hero-to-log tonal cut softened, squint test against the other thirteen portfolio sites — nothing else is a graph-paper roast log. Ceiling call: the replay + crack is the page's one loud moment by design; nothing further added.</li>
+</ul>
+
+<h2>Provenance</h2>
+<p>Every image was minted on the paid tier and pinned at mint time into content-addressed storage with a full provenance manifest (model, prompt, parameters, credits, license tier, job id). The files this page serves are deterministic derivations (resize + re-encode) of those pinned originals.</p>
+</main>
+</body>
+</html>

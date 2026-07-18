@@ -1,0 +1,16 @@
+{
+  "slug": "first-crack",
+  "name": "First Crack",
+  "vertical": "food-coffee-roastery",
+  "oneLiner": "A small-batch coffee roastery that shows you the roast — every batch logged, every curve public, named for the moment the bean opens.",
+  "axes": {
+    "primary": "data-instrument",
+    "secondary": "cinematic-imagery"
+  },
+  "axisNote": "second data-instrument exercise after Loopwell — warm CRAFT instrument (printed roast log, graph-paper grid, stamped ink) vs Loopwell's cool SaaS HUD; the vertical's real language is roast curves, first-crack timing, development ratios, cupping scores",
+  "paletteSeed": "the roast's own gradient IS the palette: green-bean sage through gold and amber into roast brown on warm log-paper cream; charcoal ink; EMBER ORANGE reserved for one thing only — first crack; no kraft-bag brown-on-brown, no black-slate cafe chic",
+  "typeDirection": "Young Serif (warm chunky display serif — the craft register, one weight used with confidence) + Hanken Grotesk (humanist text sans) + Space Mono (the instrument: log numerals, axis labels, letter-spaced micro-caps) — all OFL, vendored",
+  "motionBudget": "one roast, scroll-driven: the curve draws from charge to drop as you scroll with a live time/temp/RoR readout, event flags plant themselves in order, and at 8:52 FIRST CRACK fires — the wordmark's C cracks (the one wink) and the ember accent enters the page; cupping bars fill on reveal; reduced-motion + no-JS = the complete annotated curve, all flags planted, readout at drop, cracked C already cracked",
+  "wave": 3,
+  "built": "2026-07-18"
+}
