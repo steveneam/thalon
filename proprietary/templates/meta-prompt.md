@@ -179,6 +179,16 @@ handsome young male. Cast whoever the customer hopes to see at the door.
 outdoor imagery — fields, gardens, greenery, open sky — as bands,
 backgrounds, or sides. The ⑫ garden + walk-out pair is the model: the
 brightest images on the page answer the vertical's fear, not its function.
+**Window-glazing corollary (founder, s63 ⑱ review):** when the outdoor
+counter is shown THROUGH a window, keep the glazing MINIMAL — one or two
+panes, never a mullioned grid. Multiple vertical/horizontal bars across the
+glass read as a CAGE or prison and quietly reintroduce the confinement the
+shot exists to dispel (⑱'s valley-window hero shipped with a four-pane grid
+— passed as a minor, but a single large pane would have read as pure
+openness). Prompt for "a single large pane" / "floor-to-ceiling frameless
+glass" / "one uninterrupted window"; the frame is a thin border, never a
+grille. Same caution as §9's nature-frame: the frame must open the view, not
+bar it.
 (9) **Nature is the supporting cast (founder-taught, s62 ⑯ fix round — the
 house style, stated):** the OBJECT/craft is the frame's protagonist; nature
 (landscape, greenery, weather, sky, urban nature) is the supporting cast

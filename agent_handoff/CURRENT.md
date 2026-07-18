@@ -20,7 +20,7 @@
 
 ▎ ▸ **Read first:** `CLAUDE.md` → this file → COORDINATION.md (s63 + s62 records) → `agent_handoff/NEEDS-STEVEN.md` → the ⑰ PREPLAN.
 
-▎ ▸ **State:** main = origin @ s63 wrap head (no PRs; no worktrees; no lanes; 1 tmux window) · migrations through 0015, contract frozen · portfolio: **19 sites (16 verdicted + ⑯ re-glance + ⑰/⑱ built w/ founder fix rounds applied, re-verdict welcome)** · workspace: Phase I + Sites + audit fixes + saved-views + s63 micro-passes LIVE · dev runs surface shows honest run statuses · balance **707.80** · repo-ratchets 12/12 local at wrap.
+▎ ▸ **State:** main = origin @ s63 wrap head (no PRs; no worktrees; no lanes; 1 tmux window) · migrations through 0015, contract frozen · portfolio: **19 sites — ⑯/⑰/⑱ ALL VERDICTED GOOD by the founder s63 (18 verdicted + ⑲ Tsukimi = the last of wave 4, GO not yet given)** · workspace: Phase I + Sites + audit fixes + saved-views + s63 micro-passes LIVE · dev runs surface shows honest run statuses · balance **707.80** · repo-ratchets 12/12 local at wrap · **NEW doctrine: the window-glazing corollary (§casting 8) — one/two-pane glass, never a mullioned grid (reads as a cage).**
 
 ▎ ▸ **[founder] queue (NEEDS-STEVEN.md):** ⑯ re-glance + ⑰ + ⑱ verdicts (NEW) · audit glance · Actions = wait-for-renewal · Sites + Phase I glances · Dokploy templates service + arm flag · credit call · live-send GO + stealth pick.
 
