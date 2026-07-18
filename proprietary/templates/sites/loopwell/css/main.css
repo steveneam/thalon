@@ -186,6 +186,20 @@ a:hover { color: var(--ink-strong); }
   letter-spacing: 0.14em;
   white-space: nowrap;
 }
+/* the one deliberate flaw: a pen-test scribble in the recorder's own ink */
+.plate .pen-test {
+  flex: 0 0 clamp(2.1rem, 5vw, 3rem);
+  height: 1rem;
+  overflow: visible;
+  transform: rotate(-3deg);
+}
+.plate .pen-test path {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
 
 /* ---------- hero ---------- */
 
@@ -216,7 +230,8 @@ a:hover { color: var(--ink-strong); }
 /* ---------- the recorder (signature) ---------- */
 
 .recorder {
-  margin-top: clamp(2.5rem, 6vw, 4rem);
+  /* full-bleed strip: zero out the UA's default figure margins */
+  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
   border-block: 1px solid var(--grid-major);
   background:
     repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 8px),
@@ -354,6 +369,7 @@ a:hover { color: var(--ink-strong); }
 .stroke-ink { stroke: var(--ink); fill: none; }
 .stroke-faint { stroke: var(--grid-major); fill: none; }
 .stroke-signal { stroke: var(--signal); fill: none; }
+.stroke-cobalt { stroke: var(--cobalt); fill: none; }
 .fill-cobalt { fill: var(--cobalt); }
 .fill-faint { fill: var(--grid); }
 .fill-signal { fill: var(--signal); }
@@ -485,6 +501,13 @@ a:hover { color: var(--ink-strong); }
   font-size: 0.8rem;
   font-variation-settings: "wdth" 80, "wght" 450;
   color: var(--muted);
+}
+/* event-volume rule: one shared log scale (10³–10⁸) across all tiers */
+.tier .vol {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 0.7rem;
 }
 .tier ul {
   list-style: none;

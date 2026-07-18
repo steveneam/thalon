@@ -6,7 +6,7 @@
 <meta name="description" content="How the Loopwell demonstration page was designed and built.">
 <meta name="robots" content="noindex">
 <title>Method — how the Loopwell page was made</title>
-<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="../css/main.css?v=s58">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M3 20 Q8 20 10 14 T16 12 Q20 12 20 17 T15 21 Q12 19 16 15 T24 10 L29 12' fill='none' stroke='%23c8361f' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   .guide { max-width: 46rem; margin-inline: auto; padding: clamp(3rem, 7vw, 5rem) var(--gutter) 4rem; }
@@ -137,6 +137,28 @@
     states verified honest. Ambition lane: ceiling call. The page's one memorable
     thing is the live recorder; anything further would be noise, so nothing was
     added.</li>
+    <li><b>PASS 4</b> — A later refinement pass. Fault lane: every chart's
+    countable claims were audited against the drawn geometry, and two failed.
+    The retention curve was drawn near 45% at week four where the copy claims
+    41% — it now flattens at 41% from week four, with the previous cohort
+    redrawn six points under it so “up 6 pts” is true as drawn. The funnel's
+    invite and habit bars were drawn at 50% and 34% against labels of 42% and
+    31%; both were recomputed (the adoption bars checked out exactly on their
+    shared scale). Also caught: the hero recorder was inset by the browser's
+    default figure margins instead of running edge to edge, and a stray in-page
+    style rule overrode the closing photograph's crop, cutting the image short
+    mid-band on phones. Ambition lane: install step 3 now draws its reading
+    live from step 2's sample stream — each event that ticks in extends the
+    red line, so “raw events aggregate into readings” is shown, not said.</li>
+    <li><b>PASS 5</b> — Fault lane: re-walk of the pass-4 changes. The funnel's
+    drop connector and its −38% annotation were re-anchored to the redrawn
+    invite bar; the live reading's paused states were checked — reduced-motion,
+    no-script, and unsupported-canvas visits all get the complete line, and the
+    draw only ever adds. Ambition lane: the pricing tiers gained a shared
+    log-scale event-volume rule, so 10k / 1M / 20M sit on one instrument
+    instead of only being named in lists — and the page kept one deliberate
+    flaw: a small pen-test scribble on the READINGS calibration rule, in the
+    recorder's own red ink, the way every chart-room pen gets started.</li>
   </ol>
 
   <h2>Honesty rules this page follows</h2>

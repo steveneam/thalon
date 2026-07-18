@@ -8,7 +8,7 @@
 <title>Loopwell — your product is talking. We write it down.</title>
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/martian-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/main.css?v=s58">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Cpath d='M3 20 Q8 20 10 14 T16 12 Q20 12 20 17 T15 21 Q12 19 16 15 T24 10 L29 12' fill='none' stroke='%23c8361f' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -67,7 +67,9 @@
   <!-- ============ readings ============ -->
   <section class="section" id="readings">
     <div class="wrap">
-      <div class="plate"><span class="label">READINGS</span></div>
+      <!-- the page's one deliberate flaw: a pen-test scribble on the rule,
+           the way every chart-room pen gets started -->
+      <div class="plate"><span class="label">READINGS</span><svg class="pen-test" viewBox="0 0 40 16" aria-hidden="true"><path d="M2 11 C4 3 6 15 9 6 C12 14 14 4 17 8 C20 13 23 4 26 8 C29 12 33 7 38 9"/></svg></div>
       <h2 class="section-title">Three questions, answered from the trace.</h2>
       <p class="readings-intro">Raw events are noise. Loopwell aggregates them
       into three standing instruments that update as your users move.</p>
@@ -87,10 +89,10 @@
               <text class="chart-label" x="14" y="84">50%</text>
               <text class="chart-label" x="30" y="156">w0</text>
               <text class="chart-label" x="300" y="156">w8</text>
-              <path class="stroke-ink draw" style="--len:420" stroke-width="1.4" opacity="0.35" d="M34 22 C80 60 110 92 150 100 S250 112 320 114"/>
-              <path class="stroke-ink draw" style="--len:420" stroke-width="1.4" opacity="0.6" d="M34 22 C80 55 110 84 150 92 S250 104 320 106"/>
-              <path class="stroke-signal draw" style="--len:420" stroke-width="2" d="M34 22 C80 48 110 74 150 84 S250 90 320 91"/>
-              <circle class="fill-signal" cx="176" cy="87" r="3.5"/>
+              <path class="stroke-ink draw" style="--len:420" stroke-width="1.4" opacity="0.35" d="M34 22 C70 66 112 98 152 106 C192 108 250 111 320 112"/>
+              <path class="stroke-ink draw" style="--len:420" stroke-width="1.4" opacity="0.6" d="M34 22 C70 60 112 89 152 97 C192 99 250 101 320 101"/>
+              <path class="stroke-signal draw" style="--len:420" stroke-width="2" d="M34 22 C70 54 112 82 152 90 C192 91 250 91 320 91"/>
+              <circle class="fill-signal" cx="177" cy="90.5" r="3.5"/>
             </svg>
           </figure>
           <span class="find">▸ newest cohort holds 41% at week 4: up 6 pts after onboarding rework</span>
@@ -129,16 +131,16 @@
               <g>
                 <rect class="fill-cobalt" x="30" y="26" width="280" height="18" opacity="0.85"/>
                 <rect class="fill-cobalt" x="58" y="56" width="224" height="18" opacity="0.65"/>
-                <rect class="fill-faint" x="100" y="86" width="140" height="18"/>
-                <rect class="fill-cobalt" x="122" y="116" width="96" height="18" opacity="0.5"/>
+                <rect class="fill-faint" x="111" y="86" width="118" height="18"/>
+                <rect class="fill-cobalt" x="126" y="116" width="88" height="18" opacity="0.5"/>
               </g>
               <text class="chart-label" x="30" y="20">sign up · 100%</text>
               <text class="chart-label" x="58" y="52">first project · 80%</text>
-              <text class="chart-label" x="100" y="82">invite team · 42%</text>
-              <text class="chart-label" x="122" y="112">weekly habit · 31%</text>
-              <path class="stroke-signal" stroke-width="1.6" d="M282 66 L240 94" marker-end="none"/>
-              <circle class="fill-signal" cx="240" cy="95" r="3.2"/>
-              <text x="250" y="102" font-size="9" style="fill:var(--signal-deep);font-family:var(--mono)">−38% here</text>
+              <text class="chart-label" x="111" y="82">invite team · 42%</text>
+              <text class="chart-label" x="126" y="112">weekly habit · 31%</text>
+              <path class="stroke-signal" stroke-width="1.6" d="M282 66 L229 94" marker-end="none"/>
+              <circle class="fill-signal" cx="229" cy="95" r="3.2"/>
+              <text x="238" y="102" font-size="9" style="fill:var(--signal-deep);font-family:var(--mono)">−38% here</text>
             </svg>
           </figure>
           <span class="find">▸ the invite step loses 38%: the single highest-leverage fix this quarter</span>
@@ -179,7 +181,8 @@ record({ key: <span class="s">"lw_demo_2041"</span> })
                 <line x1="24" y1="12" x2="24" y2="96"/><line x1="24" y1="96" x2="324" y2="96"/>
               </g>
               <path class="stroke-ink" stroke-width="1.3" opacity="0.4" d="M24 88 L64 84 L104 86 L144 74 L184 70 L224 60 L264 56 L304 42"/>
-              <path class="stroke-signal" stroke-width="2" d="M24 90 C90 88 140 70 200 62 S290 40 324 34"/>
+              <path id="agg-line" class="stroke-signal" stroke-width="2" d="M24 90 C90 88 140 70 200 62 S290 40 324 34"/>
+              <circle id="agg-pen" class="fill-signal" cx="324" cy="34" r="3"/>
               <text class="chart-label" x="234" y="24">weekly habit ↑</text>
             </svg>
           </div>
@@ -196,6 +199,13 @@ record({ key: <span class="s">"lw_demo_2041"</span> })
         <article class="tier">
           <h3>Bench</h3>
           <p class="price">$0 <small>forever</small></p>
+          <svg class="vol" viewBox="0 0 200 18" aria-hidden="true">
+            <line class="stroke-faint" x1="2" y1="13" x2="198" y2="13"/>
+            <g class="stroke-faint"><line x1="2" y1="10.5" x2="2" y2="15.5"/><line x1="41.2" y1="10.5" x2="41.2" y2="15.5"/><line x1="80.4" y1="10.5" x2="80.4" y2="15.5"/><line x1="119.6" y1="10.5" x2="119.6" y2="15.5"/><line x1="158.8" y1="10.5" x2="158.8" y2="15.5"/><line x1="198" y1="10.5" x2="198" y2="15.5"/></g>
+            <line class="stroke-cobalt" stroke-width="3" x1="2" y1="13" x2="41" y2="13"/>
+            <circle class="fill-cobalt" cx="41" cy="13" r="2.5"/>
+            <text class="chart-label" x="41" y="7" text-anchor="middle">10k ev / mo</text>
+          </svg>
           <ul>
             <li>1 project</li>
             <li>10,000 events / month</li>
@@ -208,6 +218,13 @@ record({ key: <span class="s">"lw_demo_2041"</span> })
           <span class="reco-tag">RECOMMENDED</span>
           <h3>Lab</h3>
           <p class="price">$49 <small>/ month</small></p>
+          <svg class="vol" viewBox="0 0 200 18" aria-hidden="true">
+            <line class="stroke-faint" x1="2" y1="13" x2="198" y2="13"/>
+            <g class="stroke-faint"><line x1="2" y1="10.5" x2="2" y2="15.5"/><line x1="41.2" y1="10.5" x2="41.2" y2="15.5"/><line x1="80.4" y1="10.5" x2="80.4" y2="15.5"/><line x1="119.6" y1="10.5" x2="119.6" y2="15.5"/><line x1="158.8" y1="10.5" x2="158.8" y2="15.5"/><line x1="198" y1="10.5" x2="198" y2="15.5"/></g>
+            <line class="stroke-cobalt" stroke-width="3" x1="2" y1="13" x2="120" y2="13"/>
+            <circle class="fill-cobalt" cx="120" cy="13" r="2.5"/>
+            <text class="chart-label" x="120" y="7" text-anchor="middle">1M ev / mo</text>
+          </svg>
           <ul>
             <li>5 projects</li>
             <li>1M events / month</li>
@@ -220,6 +237,13 @@ record({ key: <span class="s">"lw_demo_2041"</span> })
         <article class="tier">
           <h3>Observatory</h3>
           <p class="price">$199 <small>/ month</small></p>
+          <svg class="vol" viewBox="0 0 200 18" aria-hidden="true">
+            <line class="stroke-faint" x1="2" y1="13" x2="198" y2="13"/>
+            <g class="stroke-faint"><line x1="2" y1="10.5" x2="2" y2="15.5"/><line x1="41.2" y1="10.5" x2="41.2" y2="15.5"/><line x1="80.4" y1="10.5" x2="80.4" y2="15.5"/><line x1="119.6" y1="10.5" x2="119.6" y2="15.5"/><line x1="158.8" y1="10.5" x2="158.8" y2="15.5"/><line x1="198" y1="10.5" x2="198" y2="15.5"/></g>
+            <line class="stroke-cobalt" stroke-width="3" x1="2" y1="13" x2="171" y2="13"/>
+            <circle class="fill-cobalt" cx="171" cy="13" r="2.5"/>
+            <text class="chart-label" x="171" y="7" text-anchor="middle">20M ev / mo</text>
+          </svg>
           <ul>
             <li>Unlimited projects</li>
             <li>20M events / month</li>
@@ -234,7 +258,6 @@ record({ key: <span class="s">"lw_demo_2041"</span> })
   </section>
 
   <!-- ============ closing (minted image) ============ -->
-  <style>.closing img{display:block;width:100%;max-width:100%;height:auto}</style>
   <section class="closing" aria-label="Closing">
     <img src="assets/pen-chart.webp" alt="" width="2048" height="1152" loading="lazy" decoding="async">
     <div class="wrap">
@@ -261,6 +284,6 @@ record({ key: <span class="s">"lw_demo_2041"</span> })
   </div>
 </footer>
 
-<script src="js/main.js" defer></script>
+<script src="js/main.js?v=s58" defer></script>
 </body>
 </html>

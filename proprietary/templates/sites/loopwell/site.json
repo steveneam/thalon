@@ -9,7 +9,7 @@
   },
   "paletteSeed": "oklch(0.750 0.080 230) — cobalt, composed as a three-ink chart-paper system (paper white / cobalt ink / signal red)",
   "typeDirection": "Archivo variable (display wide-black + body) + Martian Mono variable (readouts) — both OFL, vendored",
-  "motionBudget": "one live instrument (hero session recorder, rAF, pauses when hidden), chart draw-ins on intersection, everything with reduced-motion alternatives",
+  "motionBudget": "one live instrument (hero session recorder, rAF, pauses when hidden), chart draw-ins on intersection, install step 3 aggregates the sample event stream live, everything with reduced-motion alternatives",
   "wave": 1,
   "built": "2026-07-14"
 }

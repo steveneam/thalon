@@ -216,6 +216,34 @@
   });
 
   /* ---------- event-log ticker (sample data, clearly labeled) ---------- */
+  /* Step 3 aggregates step 2's stream live: each sample event that ticks in
+     extends the reading's red line, so "events aggregate into readings" is
+     shown, not said. This code runs only past the reduced-motion / no-canvas
+     early return above — those visits (and no-JS) keep the complete line. */
+  const aggLine = document.getElementById("agg-line");
+  const aggPen = document.getElementById("agg-pen");
+  let aggAdvance = null;
+  if (aggLine && aggPen && aggLine.getTotalLength) {
+    const aggTotal = aggLine.getTotalLength();
+    let aggProgress = 0.55; // mid-trace at load: the trend reads at a glance
+    const setAgg = () => {
+      aggLine.style.strokeDashoffset = String(aggTotal * (1 - aggProgress));
+      const p = aggLine.getPointAtLength(aggTotal * aggProgress);
+      aggPen.setAttribute("cx", p.x.toFixed(1));
+      aggPen.setAttribute("cy", p.y.toFixed(1));
+    };
+    aggLine.style.strokeDasharray = `${aggTotal} ${aggTotal}`;
+    setAgg();
+    // flush before enabling the transition, so load doesn't animate a retract
+    void aggLine.getBoundingClientRect();
+    aggLine.style.transition = "stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1)";
+    aggAdvance = () => {
+      if (aggProgress >= 1) return;
+      aggProgress = Math.min(1, aggProgress + 0.055);
+      setAgg();
+    };
+  }
+
   const log = document.getElementById("eventlog");
   if (log) {
     const names = [
@@ -245,6 +273,7 @@
       row.innerHTML = `<time>${hh}:${mm}:${ss}</time><span class="ev-name">${name}</span> — ${detail}`;
       log.append(row);
       while (log.children.length > 6) log.firstElementChild.remove();
+      if (aggAdvance) aggAdvance(); // the reading absorbs the event
     };
     setInterval(tick, 1600);
   }
