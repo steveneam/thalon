@@ -6,4 +6,3 @@
 - [2026-07-15] s40 consistency re-critique: approved home = workspace Phase R (runs against the REDESIGNED workspace; launch confirm when Phase R opens)
 - [2026-07-14] Month-end Higgsfield credit call (balance 718.36; waves 1-2 closed + ⑪ Sprig & Barrow shipped, wave 3 approved ≤15cr est.)
 - [2026-07-17] B-crm.4 live-send GO (door is built+merged, deliberately disarmed): the s28 stealth question — brand-domain outreach reveals the brand pre-launch; accept / neutral domain / wait. Also needs Resend domain setup when you GO.
-- [2026-07-18] Glance at the ⑫ Pearl & Rowe fix round on 8899 (your four notes applied: mouth-arch chart · wise-dentist recast · word trim · garden + walk-out sun bands) — site was "good" pre-fixes
