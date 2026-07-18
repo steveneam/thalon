@@ -68,10 +68,16 @@ slot where legible words appear in-scene routes to the text-precise seat**:
 soul-class cannot be negative-prompted out of garbled lettering (s51, proven
 across three takes on the ⑥ marquee; nano banana rendered the exact word
 first take). Soul-class also invents text UNPROMPTED: any prominent printable
-surface (file spines, labels, posters) grows garbled pseudo-lettering even
-when the prompt forbids all text (s52, ⑦'s desk plate) — compose printable
-surfaces out of frame or blank-wrapped rather than negative-prompting, or
-route the slot to the text-precise seat. Non-hero, non-text slots stay the
+surface (file spines, labels, posters, wall frames, instrument handles,
+MACHINE BODIES — ⑬ put lettering on a drum roaster in 3/3 takes) grows
+garbled pseudo-lettering even when the prompt forbids all text (s52, ⑦'s
+desk plate) — compose printable surfaces out of frame or blank-wrapped
+rather than negative-prompting, or route the slot to the text-precise seat.
+Corollary (⑬, s60): "vintage/heritage" MACHINERY reads as painted brand
+livery — asking it to be plain makes the livery ornate; modernize the object
+instead ("seamless matte housing, one continuous surface") and describe the
+finish positively. A near-clean take with one small garbled patch may take a
+disclosed local blur pre-pin instead of another take — the /guide must say so. Non-hero, non-text slots stay the
 builder's call. Browsing published sites for *inspiration* is
 fine; **downloading reference images into the pipeline is forbidden** — every
 asset on the page is a vendor-minted original, minted on the **paid tier only**,
