@@ -1,5 +1,5 @@
 [
   { "file": "hero-dog.webp", "pinnedHash": "3699c1400b5939c4b34cd672b0040227f50533df4e6bc159f8dee047a1be965d", "width": 1200, "height": 1600, "quality": 80 },
-  { "file": "walk-pack.webp", "pinnedHash": "f268b2d6e80f9caaab5179452aa76ee9253ee26fd396abeacb93c51b4f4e9f18", "width": 1600, "height": 900, "quality": 80 },
-  { "file": "nap.webp", "pinnedHash": "32ebd49f03fcba213cc0192f6a8f1666e9a321de704b64b7518dadbea83e9f8b", "width": 900, "height": 900, "quality": 80 }
+  { "file": "walk-pack.webp", "pinnedHash": "6cc5c70ab1303baf69b53b681eafc0caabb97b74c11863e6274934bffc809353", "width": 1800, "height": 1200, "quality": 80 },
+  { "file": "nap.webp", "pinnedHash": "f05dd1b90ea70cdf01da5250fa612080d3ff33db127058dbe0a78630178b0922", "width": 1200, "height": 1200, "quality": 80 }
 ]

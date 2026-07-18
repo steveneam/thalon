@@ -10,7 +10,7 @@
   },
   "paletteSeed": "five pigment worlds, one per chapter, each mixed tone-on-tone from a single hue family — copper 7.44 (apricot paper, sienna ink), honey 8.3, rose 9.26, violet 5.20, blue-black 1.1 as the lights-off close; the scroll travels the shade chart through adjacent families, and with JS the paper itself takes the dye between chapters (OKLab mixing)",
   "typeDirection": "Bodoni Moda variable (fashion-didone display, italic flourishes) + Schibsted Grotesk (humanist body) + Chivo Mono (the tint-number/formula register) — all OFL, vendored",
-  "motionBudget": "scroll is the instrument: the fixed dye layer cross-fades between chapter pigments as you scroll (OKLab lerp, rAF); the hero portrait develops in once like dye processing; cards rise gently on entry; the shade rail tracks the active chapter; the mixer answers instantly. Reduced motion: hard chapter boundaries, everything pre-developed and visible. No-JS: complete content with fixed per-chapter colours",
+  "motionBudget": "scroll is the instrument: the fixed dye layer cross-fades between chapter pigments as you scroll (OKLab lerp, rAF); the hero band develops in once like dye processing; cards rise gently on entry; the shade rail tracks the active chapter; the mixer paints its shade onto a real photographed head of hair (masked CSS blend layers) and answers instantly. Reduced motion: hard chapter boundaries, everything pre-developed and visible. No-JS: complete content with fixed per-chapter colours and the natural-hair photo",
   "wave": 2,
   "built": "2026-07-18"
 }

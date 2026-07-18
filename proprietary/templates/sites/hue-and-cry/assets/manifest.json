@@ -1,5 +1,7 @@
 [
-  { "file": "hero-copper.webp", "pinnedHash": "4d1b900f8d2923ea952466fe3dd6436f5fdd44afc2ac1c6a368276c0af299ad6", "width": 1280, "height": 1920, "quality": 80 },
+  { "file": "hero-group.webp", "pinnedHash": "c8aedd62910796611be313b1132aa967c01f3517146493e74aec188dd57e3d0d", "width": 1800, "height": 1200, "quality": 80 },
+  { "file": "tryon-base.webp", "pinnedHash": "a4998f50d3a3c69e88cc791ba3deb14509cf5a6bab6b55891505904df89dd5a8", "width": 1050, "height": 1400, "quality": 80 },
+  { "file": "tryon-mask.webp", "pinnedHash": "8f9d754047c59dc5741f80874f36d49f3aae84fcd2c32926022d2c99c47ff587", "width": 1050, "height": 1400, "quality": 90, "alpha": true },
   { "file": "honey.webp", "pinnedHash": "9abfe7d2c6220cc0bd1a94ef7285cb7ba2e072f9e82537c0c835978706f5d798", "width": 1500, "height": 1000, "quality": 78 },
   { "file": "rose.webp", "pinnedHash": "03c648c24877f22dc0c12ee64b1fb2a2355c0f3966fcb93b039e5adcb56d3a5f", "width": 1200, "height": 1200, "quality": 78 },
   { "file": "violet.webp", "pinnedHash": "c0610b1b20d1049a68296e59dfa52512ec9d5a14d7cd7eae1029474b144a2d72", "width": 1080, "height": 1440, "quality": 78 },

@@ -63,7 +63,11 @@ header{position:sticky;top:0;background:rgba(246,241,231,.92);backdrop-filter:bl
 .divider path{stroke:var(--soft);stroke-width:2.5;fill:none;stroke-linecap:round}
 
 /* ————— sections ————— */
-section{padding:72px 0}
+section{padding:72px 0;position:relative}
+
+/* ————— paw prints (decorative sprinkles) ————— */
+.paw{position:absolute;pointer-events:none;user-select:none;color:var(--clay);opacity:.2;z-index:0}
+.paw svg{width:100%;height:100%;display:block;fill:currentColor}
 .sec-eyebrow{font-family:"Gochi Hand",cursive;font-size:22px;color:var(--clay);transform:rotate(-1.5deg);display:inline-block}
 h2{font-family:"Baloo 2",sans-serif;font-weight:700;font-size:clamp(32px,4.4vw,52px);line-height:1.1;margin:8px 0 14px}
 .lede{max-width:54ch;font-size:18px}
@@ -81,12 +85,12 @@ h2{font-family:"Baloo 2",sans-serif;font-weight:700;font-size:clamp(32px,4.4vw,5
 .entry .note{font-family:"Gochi Hand",cursive;font-size:20px;color:var(--sage);margin-top:10px;transform:rotate(-1.2deg);display:inline-block}
 .js .anim .entry{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
 .js .anim .entry.in{opacity:1;transform:none}
-.cols{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+.cols{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;overflow-x:clip}
 .cols>div:first-child{flex:1 1 300px;min-width:260px}
-.polaroid{background:#fff;padding:12px 12px 40px;box-shadow:0 16px 40px -20px rgba(46,37,25,.5);transform:rotate(-2.4deg);transition:transform .35s ease;max-width:340px;flex:0 1 340px;position:relative}
+.polaroid{background:#fff;padding:12px 12px 40px;box-shadow:0 16px 40px -20px rgba(46,37,25,.5);transform:rotate(-2.4deg);transition:transform .35s ease;max-width:480px;flex:0 1 480px;position:relative}
 .polaroid:hover{transform:rotate(0deg) scale(1.015)}
 .polaroid .cap{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-family:"Gochi Hand",cursive;font-size:18px;color:var(--ink)}
-.entry.wide{grid-template-columns:110px 1fr;max-width:1000px}
+.entry.wide{grid-template-columns:110px 1fr;max-width:1160px}
 .entry .media-wide{margin-top:14px;border-radius:22px;overflow:hidden;box-shadow:0 20px 50px -26px rgba(46,37,25,.5)}
 
 /* ————— pack rules ————— */
@@ -167,6 +171,8 @@ footer a{color:var(--sage)}
 <main>
   <!-- HERO -->
   <section class="hero">
+    <span class="paw" aria-hidden="true" style="top:40px;right:9%;width:34px;height:34px;transform:rotate(24deg)"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
+    <span class="paw" aria-hidden="true" style="top:104px;right:5.5%;width:29px;height:29px;transform:rotate(40deg);color:var(--sage)"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
     <div class="wrap hero-grid">
       <div>
         <span class="eyebrow">Dog day care &amp; walking · Marrickville</span>
@@ -188,6 +194,7 @@ footer a{color:var(--sage)}
 
   <!-- 01 A WAGTAIL DAY -->
   <section id="day">
+    <span class="paw" aria-hidden="true" style="bottom:34px;left:46px;width:32px;height:32px;transform:rotate(-18deg)"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
     <div class="wrap day">
       <span class="sec-eyebrow">from the day journal</span>
       <h2>A Wagtail day, hour by hour</h2>
@@ -209,7 +216,7 @@ footer a{color:var(--sage)}
           <div>
             <h3>Small packs, slow streets</h3>
             <p>Four dogs, one human, no exceptions. Plane trees, terrace shadows, the good bins on Illawarra Road. Long leads, longer sniffs.</p>
-            <div class="media-wide"><img src="assets/walk-pack.webp" width="1600" height="900" alt="A walker with four dogs on leads under plane trees in morning light" loading="lazy"></div>
+            <div class="media-wide"><img src="assets/walk-pack.webp" width="1800" height="1200" alt="A walker with three dogs on relaxed leads on a leafy footpath under big fig trees, everyone easy" loading="lazy"></div>
           </div>
         </div>
         <div class="entry">
@@ -220,7 +227,7 @@ footer a{color:var(--sage)}
               <p>Cushions in the quiet room, blinds half down. The overachievers get a snuffle mat first. Nobody has ever skipped this voluntarily.</p>
               <span class="note">record: 3 hrs 40 min (Pip)</span>
             </div>
-            <div class="polaroid"><img src="assets/nap.webp" width="900" height="900" alt="A small spaniel-cross asleep on a corduroy cushion in soft window light" loading="lazy"><span class="cap">Pip, 12:07 pm. gone.</span></div>
+            <div class="polaroid"><img src="assets/nap.webp" width="1200" height="1200" alt="A small spaniel-cross asleep on a corduroy cushion in soft window light" loading="lazy"><span class="cap">Pip, 12:07 pm. gone.</span></div>
           </div>
         </div>
         <div class="entry">
@@ -245,6 +252,7 @@ footer a{color:var(--sage)}
 
   <!-- 02 PACK RULES -->
   <section id="pack">
+    <span class="paw" aria-hidden="true" style="top:48px;right:6%;width:36px;height:36px;transform:rotate(14deg);color:var(--butter);opacity:.45"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
     <div class="wrap rules">
       <div class="rules-inner">
         <div>
@@ -268,6 +276,7 @@ footer a{color:var(--sage)}
 
   <!-- 03 RATES -->
   <section id="rates">
+    <span class="paw" aria-hidden="true" style="bottom:40px;left:5%;width:30px;height:30px;transform:rotate(-26deg);color:var(--sage)"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
     <div class="wrap">
       <span class="sec-eyebrow">simple, like a dog's needs</span>
       <h2>Rates</h2>
@@ -297,6 +306,8 @@ footer a{color:var(--sage)}
 
   <!-- 04 HELLO -->
   <section id="hello" style="padding-bottom:0">
+    <span class="paw" aria-hidden="true" style="top:64px;right:11%;width:27px;height:27px;transform:rotate(30deg)"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
+    <span class="paw" aria-hidden="true" style="top:126px;right:7.5%;width:24px;height:24px;transform:rotate(44deg);color:var(--sage)"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="20" cy="15" rx="7" ry="9"/><ellipse cx="44" cy="15" rx="7" ry="9"/><ellipse cx="7" cy="30" rx="6" ry="8"/><ellipse cx="57" cy="30" rx="6" ry="8"/><path d="M32 26c10 0 17 8 17 16 0 9-7 12-17 12s-17-3-17-12c0-8 7-16 17-16z"/></svg></span>
     <div class="wrap hello">
       <div class="hello-inner">
         <div>

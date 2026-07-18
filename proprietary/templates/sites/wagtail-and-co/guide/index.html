@@ -40,16 +40,29 @@ a{color:var(--ink)}
   <p>Three photographs were generated through the Higgsfield API on a paid license tier; each original is pinned in a content-addressed store with full provenance (model, prompt, credits, license tier). The models named are the models that actually ran.</p>
   <div class="tbl">
     <div class="r"><span>Hero — Banjo in the park at golden hour</span><span>soul v2 · first take</span></div>
-    <div class="r"><span>The big walk — four dogs, plane trees</span><span>soul v2 · first take</span></div>
-    <div class="r"><span>The nap — Pip on the corduroy cushion</span><span>soul v2 · first take</span></div>
+    <div class="r"><span>The big walk — a walker and three dogs</span><span>soul v2 · 2k · take 4</span></div>
+    <div class="r"><span>The nap — Pip on the corduroy cushion</span><span>soul v2 · 2k · retake</span></div>
   </div>
   <p class="small">Honesty note: the hero prompt asked for no leash; a faint lead strap is visible low in the frame's shadow. No real signage, brands or people appear anywhere.</p>
+  <p class="small">The walk image took four takes, honestly logged: the original showed
+  <em>five</em> dogs against this page's own "four dogs per walker, never more" rule (caught
+  at founder review), and two retakes produced six dogs on the road and a printed t-shirt.
+  The keeper shows a walker with three dogs on the footpath — under the cap, as it should
+  be. Both journal photographs were also regenerated at the higher 2k tier and displayed
+  larger after review feedback that they sat too small on the page.</p>
 
   <h2>Iteration passes</h2>
   <ul>
     <li><strong>Pass 1 (fault-hunt):</strong> journal reveal + leash-line draw verified live in the browser (entries ease in as they arrive, the line draws with scroll progress); all three images confirmed loading; hero annotation position checked against the blob mask.</li>
     <li><strong>Pass 2 (ambition-push + structure):</strong> nap polaroid moved beside its text at desktop widths to fix the journal's rhythm; breathing blob mask on the hero; crayon underline; live-easing entries; dead CSS pruned.</li>
     <li><strong>Pass 3 (fault-hunt):</strong> 390&nbsp;px pass (single column journal, leash hidden, no horizontal overflow), reduced-motion audit (blob static, entries visible, line pre-drawn), no-JS audit (all content visible without any script).</li>
+    <li><strong>Pass 4 (founder review round):</strong> the walk photograph was replaced —
+    a woman walker for calm, safe energy, exactly three dogs (under the pack cap), on the
+    footpath — and the nap regenerated at 2k; both journal images now display roughly
+    40% larger after feedback that they sat too compressed. Paw prints were sprinkled
+    around section corners for playfulness (decorative, hidden from screen readers).
+    Re-verified: 390&nbsp;px (a 2px overflow from the enlarged tilted polaroid's corners
+    was clipped at its container), desktop walk, images loading, console clean.</li>
   </ul>
 
   <p class="small" style="margin-top:40px"><a href="../">← back to the page</a></p>

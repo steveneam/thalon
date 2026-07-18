@@ -22,6 +22,10 @@ interface ManifestEntry {
   width: number;
   height: number;
   quality: number;
+  /** Luminance→alpha conversion: white areas of the pinned matte become
+   *  opaque, black transparent. For CSS mask-image assets — Safari's
+   *  -webkit-mask reads alpha only, never luminance. */
+  alpha?: boolean;
 }
 
 async function main() {
@@ -45,10 +49,26 @@ async function main() {
     if (!original) {
       throw new Error(`pinned original missing or hash-mismatched for "${entry.file}" (${key})`);
     }
-    const out = await sharp(original)
-      .resize(entry.width, entry.height, { fit: "cover", position: "centre" })
-      .webp({ quality: entry.quality, effort: 6 })
-      .toBuffer();
+    let out: Buffer;
+    if (entry.alpha) {
+      const lum = await sharp(original)
+        .resize(entry.width, entry.height, { fit: "cover", position: "centre" })
+        .greyscale()
+        .blur(0.6)
+        .toColourspace("b-w")
+        .toBuffer();
+      out = await sharp({
+        create: { width: entry.width, height: entry.height, channels: 3, background: "#fff" },
+      })
+        .joinChannel(lum)
+        .webp({ quality: entry.quality, effort: 6 })
+        .toBuffer();
+    } else {
+      out = await sharp(original)
+        .resize(entry.width, entry.height, { fit: "cover", position: "centre" })
+        .webp({ quality: entry.quality, effort: 6 })
+        .toBuffer();
+    }
     const file = path.join(siteDir, "assets", entry.file);
     writeFileSync(file, out);
     console.log(

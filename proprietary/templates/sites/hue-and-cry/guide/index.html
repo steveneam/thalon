@@ -55,21 +55,28 @@ a{color:#3D1F12}
   boundaries with everything pre-developed, and the full content works without JavaScript.</p>
 
   <h2>Imagery</h2>
-  <p>Five photographs were generated through the Higgsfield API on a paid license tier; each
-  original is pinned in a content-addressed store with full provenance (model, prompt,
-  credits, license tier). The model named is the model that actually ran. All five were
-  first-take keepers — no rejects this build.</p>
+  <p>Eight generations through the Higgsfield API on a paid license tier; every original is
+  pinned in a content-addressed store with full provenance (model, prompt, credits, license
+  tier). The models named are the models that actually ran.</p>
   <div class="tbl">
-    <div class="r"><span>Hero — the copper turn</span><span class="m">soul v2 · 2k · first take</span></div>
+    <div class="r"><span>Hero — two friends laughing over coffee</span><span class="m">soul v2 · 2k · take 3</span></div>
+    <div class="r"><span>Try-on — long natural hair, from behind</span><span class="m">soul v2 · 2k · first take</span></div>
+    <div class="r"><span>Try-on hair matte (image-to-image)</span><span class="m">nano banana 2 · 2k</span></div>
     <div class="r"><span>Honey — balayage ribbons in window light</span><span class="m">soul v2 · first take</span></div>
     <div class="r"><span>Rose — the gloss twist</span><span class="m">soul v2 · first take</span></div>
     <div class="r"><span>Violet — finger waves from behind</span><span class="m">soul v2 · first take</span></div>
     <div class="r"><span>Blue black — the studio at 7:04pm</span><span class="m">soul v2 · first take</span></div>
   </div>
-  <p class="small">Honesty note: the studio-at-night prompt asked for bare walls with no
-  shelving or bottles; a shelf of unlabelled silhouettes appears in deep shadow at frame
-  left. It was inspected at 2.2× brightness — no legible or pseudo-lettering anywhere, so
-  it stayed. No real signage, brands or people appear in any frame.</p>
+  <p class="small">Rejects, honestly: the hero took three takes — takes one and two grew
+  garbled pseudo-lettering on the coffee cups and signage (the model invents text on
+  printable surfaces), so the keeper composes the street into pure blur and puts plain
+  glazed ceramic on the table. The studio-at-night frame keeps a shelf of unlabelled
+  silhouettes in deep shadow; it was inspected at 2.2× brightness — no lettering, so it
+  stayed. No real signage, brands or people appear in any frame.</p>
+  <p class="small">The shade mixer paints a real photograph: the matte above isolates her
+  hair, and the page recolours only the masked region with CSS blend layers — hue and
+  saturation from a colour layer, depth from a soft-light layer — so the photo's own shine
+  and strand texture carry through. Nothing you touch leaves the page.</p>
 
   <h2>Iteration passes</h2>
   <ul>
@@ -91,6 +98,14 @@ a{color:#3D1F12}
     prices readable); copy honesty re-read against the imagery ("six chairs" became "a
     small room" — the night frame shows three); console clean; every network request
     stays on the page's own origin.</li>
+    <li><strong>Pass 4 (founder review round):</strong> two changes from live review. The
+    hero portrait (one woman facing the camera) was replaced with a candid group scene —
+    friends laughing, nobody looking at us — laid out as a full-width editorial band under
+    the display type. The mixer's swatch circle became the hair try-on: the shade now
+    paints onto a real photograph's hair so you can see the colour on a head, not a chip.
+    Re-verified after the change: desktop + 390&nbsp;px, no-JS neutral state, mixer layout
+    (an intrinsic-sizing bug squeezed the controls — fixed with explicit grid columns),
+    console clean.</li>
   </ul>
 
   <p class="small" style="margin-top:40px"><a href="../">← back to the page</a></p>

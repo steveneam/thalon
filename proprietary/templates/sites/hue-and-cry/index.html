@@ -93,25 +93,22 @@ html.js.motion-ok .rise.risen{opacity:1;transform:none}
 @media(max-width:44rem){#rail nav{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}#rail nav::-webkit-scrollbar{display:none}}
 
 /* ============ hero — copper 7.44 ============ */
-#copper{min-height:calc(100svh - var(--rail-h));display:grid;align-items:center}
-.hero-grid{display:grid;gap:clamp(1.5rem,4vw,4rem);align-items:center;padding-block:clamp(2.5rem,6vh,5rem)}
-@media(min-width:56rem){.hero-grid{grid-template-columns:1.15fr .85fr}}
+.hero-stack{display:grid;gap:clamp(1.6rem,3.5vh,2.6rem);padding-block:clamp(2.5rem,6vh,4.5rem) clamp(2rem,5vh,3.5rem)}
 #copper h1{font-size:clamp(3.2rem,8.4vw,7.4rem);font-weight:480;margin:.35em 0 .3em}
 #copper h1 em{font-style:italic;color:var(--w-accent)}
-.hero-copy .lede{margin-bottom:1.8rem}
+.hero-copy .lede{margin-bottom:1.6rem}
 .cta-row{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center}
 .btn{display:inline-block;font-family:var(--font-mono);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:.95em 1.5em;border-radius:2px;border:1.5px solid var(--w-ink)}
 .btn.solid{background:var(--w-ink);color:var(--w-paper)}
 .btn.solid:hover{background:var(--w-accent);border-color:var(--w-accent);color:#fff}
 .btn.quiet:hover{background:var(--w-ink);color:var(--w-paper)}
-.hero-fig{position:relative;max-width:30rem;justify-self:center;width:100%}
-.hero-fig img{border-radius:3px;box-shadow:0 30px 60px -25px rgba(61,31,18,.55)}
+.hero-fig{width:100%}
+.hero-fig img{width:100%;height:min(64svh,680px);object-fit:cover;object-position:center 32%;border-radius:4px;box-shadow:0 30px 60px -25px rgba(61,31,18,.55)}
 html.js.motion-ok .hero-fig img{filter:saturate(.06) sepia(.35);transition:filter 1.6s ease .2s}
 html.js.motion-ok.developed .hero-fig img{filter:none}
 .hero-fig figcaption{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--w-ink);opacity:.75;margin-top:.9rem}
-@media(min-width:56rem){.hero-fig figcaption{position:absolute;left:-.5rem;bottom:1.4rem;margin:0;transform:rotate(-90deg);transform-origin:left bottom;white-space:nowrap}}
 /* the copper level strip */
-.level-strip{display:flex;gap:2px;margin-top:2.6rem;max-width:34rem}
+.level-strip{display:flex;gap:2px;margin-top:2.2rem;max-width:34rem}
 .level-strip .cell{flex:1;height:2.4rem;border-radius:2px;position:relative}
 .level-strip .cell span{position:absolute;bottom:-1.5rem;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:.62rem;opacity:.7}
 .level-note{margin-top:2.4rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;opacity:.75}
@@ -121,7 +118,7 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
 #chart .head{max-width:46rem;margin-bottom:3rem}
 #chart h2{margin:.3em 0 .5em}
 .mixer{display:grid;gap:clamp(1.5rem,3.5vw,3rem);background:var(--w-light);border:1.5px solid var(--w-ink);border-radius:4px;padding:clamp(1.5rem,3.5vw,2.8rem)}
-@media(min-width:52rem){.mixer{grid-template-columns:1fr auto}}
+@media(min-width:52rem){.mixer{grid-template-columns:minmax(0,1fr) 20rem}}
 .mixer .controls{display:grid;gap:1.6rem;align-content:start}
 .mixer fieldset{border:0}
 .mixer legend{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.8rem;opacity:.85}
@@ -134,10 +131,17 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
 .tone .sw{width:.85em;height:.85em;border-radius:50%;background:var(--sw);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
 .tone input:checked+span{background:var(--w-ink);color:var(--w-light)}
 .tone input:focus-visible+span{outline:3px solid var(--w-accent);outline-offset:2px}
-.mix-out{display:grid;gap:.9rem;justify-items:center;align-content:center}
-#swatch{width:clamp(9rem,18vw,13rem);aspect-ratio:1;border-radius:50%;background:oklch(0.66 0.135 45);border:1.5px solid var(--w-ink);box-shadow:inset 0 -1.2em 2.4em rgba(0,0,0,.18),inset 0 1em 1.6em rgba(255,255,255,.22)}
+.tryon-out{display:grid;gap:1rem;justify-items:center;align-content:center}
+.tryon{position:relative;isolation:isolate;width:100%;max-width:19rem;border-radius:4px;overflow:hidden;box-shadow:0 26px 50px -24px rgba(0,0,0,.4)}
+.tryon img{display:block;width:100%;height:auto}
+.tryon .dye{position:absolute;inset:0;pointer-events:none;
+  -webkit-mask-image:url('assets/tryon-mask.webp');-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;
+  mask-image:url('assets/tryon-mask.webp');mask-size:100% 100%;mask-repeat:no-repeat}
+.tryon .tone{mix-blend-mode:color;background:var(--dye,transparent)}
+.tryon .lift{mix-blend-mode:soft-light;background:var(--liftc,#fff);opacity:var(--lift,0)}
+html.js.motion-ok .tryon .dye{transition:background .35s ease,opacity .35s ease}
 #formula{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.06em;text-align:center}
-.mix-note{font-size:.85rem;opacity:.8;max-width:52ch;margin-top:1.4rem}
+.mix-note{font-size:.85rem;opacity:.8;max-width:52ch;margin-top:.4rem}
 
 /* ============ shade chapters (honey / rose / violet) ============ */
 .shade{padding-block:clamp(4.5rem,11vh,8rem)}
@@ -204,7 +208,7 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
 <main>
 <!-- ======== 7.44 · copper — the hero ======== -->
 <section id="copper" class="chapter world-copper" data-paper="#E7A57E" data-deep="#C97B54">
-  <div class="wrap hero-grid">
+  <div class="wrap hero-stack">
     <div class="hero-copy">
       <p class="overline">Hue &amp; Cry · colour-specialist salon · King St, Newtown</p>
       <h1>Colour, <em>loudly.</em></h1>
@@ -215,24 +219,11 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
         <a class="btn solid" href="#ink">Book a colour consult</a>
         <a class="btn quiet" href="#chart">Read the chart</a>
       </div>
-      <div class="level-strip" role="img" aria-label="A copper shade strip stepping through levels one to ten, dark to light">
-        <div class="cell" style="background:oklch(.24 .05 40)"><span>1</span></div>
-        <div class="cell" style="background:oklch(.32 .07 40)"></div>
-        <div class="cell" style="background:oklch(.40 .09 41)"></div>
-        <div class="cell" style="background:oklch(.48 .11 42)"></div>
-        <div class="cell" style="background:oklch(.56 .13 43)"><span>5</span></div>
-        <div class="cell" style="background:oklch(.63 .14 44)"></div>
-        <div class="cell" style="background:oklch(.70 .13 46)"></div>
-        <div class="cell" style="background:oklch(.77 .11 50)"></div>
-        <div class="cell" style="background:oklch(.84 .08 55)"></div>
-        <div class="cell" style="background:oklch(.90 .05 60)"><span>10</span></div>
-      </div>
-      <p class="level-note">every head on this page is a chapter of our chart — scroll and the paper takes the dye</p>
     </div>
     <figure class="hero-fig rise">
-      <img src="assets/hero-copper.webp" width="1280" height="1920" fetchpriority="high"
-           alt="A woman with a vivid copper bob caught mid-turn, the hair fanning with movement, photographed against an apricot backdrop in the same colour family">
-      <figcaption>7.44 · copper intense · our chair, our colour</figcaption>
+      <img src="assets/hero-group.webp" width="1800" height="1200" fetchpriority="high"
+           alt="Two friends laughing hard together over coffee at a sunny cafe table, one with vivid copper hair pouring over her shoulder, one honey-brown, the street behind them in golden blur">
+      <figcaption>7.44 copper · 8.3 honey — walked out an hour ago</figcaption>
     </figure>
   </div>
 </section>
@@ -246,6 +237,19 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
       <p class="lede">Colourists don’t say “warm caramel”. We say <span class="tint-no">8.3</span> —
       level eight, gold tone. The number is the honest version of the promise: what your
       hair is now, what it can hold, and the exact route between the two.</p>
+      <div class="level-strip" role="img" aria-label="A copper shade strip stepping through levels one to ten, dark to light">
+        <div class="cell" style="background:oklch(.24 .05 40)"><span>1</span></div>
+        <div class="cell" style="background:oklch(.32 .07 40)"></div>
+        <div class="cell" style="background:oklch(.40 .09 41)"></div>
+        <div class="cell" style="background:oklch(.48 .11 42)"></div>
+        <div class="cell" style="background:oklch(.56 .13 43)"><span>5</span></div>
+        <div class="cell" style="background:oklch(.63 .14 44)"></div>
+        <div class="cell" style="background:oklch(.70 .13 46)"></div>
+        <div class="cell" style="background:oklch(.77 .11 50)"></div>
+        <div class="cell" style="background:oklch(.84 .08 55)"></div>
+        <div class="cell" style="background:oklch(.90 .05 60)"><span>10</span></div>
+      </div>
+      <p class="level-note">every head on this page is a chapter of our chart — scroll and the paper takes the dye</p>
     </div>
     <div class="mixer rise">
       <div class="controls">
@@ -266,15 +270,22 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
             <label class="tone"><input type="radio" name="tone" value="violet"><span><i class="sw" style="--sw:oklch(.55 .1 300)" aria-hidden="true"></i>.2 violet</span></label>
           </div>
         </fieldset>
+        <p class="mix-note">The mixer paints a real head of hair, but it’s a preview, not a
+        promise — your hair’s history decides what a formula can do, and that’s exactly what
+        the consult is for. Bring photos of the colour you want and the colour you’ve had;
+        we’ll bring the chemistry.</p>
       </div>
-      <div class="mix-out">
-        <div id="swatch" role="img" aria-label="Mixed shade preview swatch"></div>
+      <div class="tryon-out">
+        <figure class="tryon" id="tryon" role="img"
+                aria-label="Preview: level seven copper on long natural dark-brown hair">
+          <img src="assets/tryon-base.webp" width="1050" height="1400" loading="lazy"
+               alt="A woman with very long natural dark-brown hair seen from behind, seated — the canvas the shade mixer colours in">
+          <span class="dye tone" aria-hidden="true"></span>
+          <span class="dye lift" aria-hidden="true"></span>
+        </figure>
         <p id="formula" aria-live="polite">7.4 · level seven copper<br>gloss over lived-in base · 35 min</p>
       </div>
     </div>
-    <p class="mix-note rise">The mixer is a toy, not a promise — your hair’s history decides
-    what a formula can do, and that’s exactly what the consult is for. Bring photos of the
-    colour you want and the colour you’ve had; we’ll bring the chemistry.</p>
   </div>
 </section>
 
@@ -491,13 +502,19 @@ html.js.motion-ok.developed .hero-fig img{filter:none}
   var NAMES=['','black','darkest brown','dark brown','brown','light brown','dark blonde','blonde','light blonde','very light blonde','lightest blonde'];
   var TONECODE={natural:'0',ash:'1',violet:'2',gold:'3',copper:'4',red:'6'};
   var level=document.getElementById('level'),readout=document.getElementById('level-readout'),
-      tones=document.getElementById('tones'),swatch=document.getElementById('swatch'),
+      tones=document.getElementById('tones'),tryon=document.getElementById('tryon'),
       formula=document.getElementById('formula');
+  /* her natural hair on the base photo is roughly a level 5 — lift/deepen from there */
+  var BASE_LEVEL=5;
   function mixShade(){
     var lv=+level.value,tn=(tones.querySelector('input:checked')||{}).value||'copper',T=TONES[tn];
-    var L=0.20+(lv-1)*(0.72/9),C=T.c*(lv>=9?0.72:lv<=2?0.8:1);
-    swatch.style.background='oklch('+L.toFixed(3)+' '+C.toFixed(3)+' '+T.h+')';
+    var C=T.c*(lv>=9?0.72:lv<=2?0.8:1);
+    tryon.style.setProperty('--dye','oklch(0.62 '+C.toFixed(3)+' '+T.h+')');
+    var delta=lv-BASE_LEVEL;
+    tryon.style.setProperty('--liftc',delta>=0?'#fff':'#000');
+    tryon.style.setProperty('--lift',Math.min(0.9,Math.abs(delta)/5*0.9).toFixed(2));
     readout.textContent='level '+lv+' — '+NAMES[lv];
+    tryon.setAttribute('aria-label','Preview: level '+lv+' '+NAMES[lv]+' with '+T.d+' tone on long natural dark-brown hair');
     formula.innerHTML=lv+'.'+TONECODE[tn]+' · level '+(['one','two','three','four','five','six','seven','eight','nine','ten'][lv-1])+' '+tn+'<br>'+T.note+' · '+(lv>=8?'45':'35')+' min';
   }
   level.addEventListener('input',mixShade);
