@@ -2,5 +2,6 @@
   { "file": "aurora-road.webp", "pinnedHash": "bb0f5fa1d6acce408aef6b614fd0d524d99e00b195bf43d4cc1070e5bcf5bfee", "width": 1920, "height": 826,  "quality": 78 },
   { "file": "boulevard.webp",   "pinnedHash": "10ab0290a55c45c666846b54e736b2dae47236d570b4ee3cf68e31a736f6541a", "width": 1400, "height": 788,  "quality": 78 },
   { "file": "headlamp.webp",    "pinnedHash": "a38ed483441bbe6cd0677a5b0ef6f2dc2fb21d4e03052e5065af8473e35b2cc8", "width": 1400, "height": 788,  "quality": 78 },
-  { "file": "track-dawn.webp",  "pinnedHash": "32889b48f7c25dd95e54088ca2b2db0485cd8ec272216646da2c07ecf2ec1ccb", "width": 1920, "height": 1080, "quality": 76 }
+  { "file": "track-dawn.webp",  "pinnedHash": "32889b48f7c25dd95e54088ca2b2db0485cd8ec272216646da2c07ecf2ec1ccb", "width": 1920, "height": 1080, "quality": 76 },
+  { "file": "first-light.webp", "pinnedHash": "9d46c2e82a6461bb351f4d2763d17518a82e4b41be77192858e7672058a8ce2b", "width": 1400, "height": 788,  "quality": 78 }
 ]
