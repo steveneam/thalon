@@ -63,7 +63,7 @@ flowchart LR
 | Library: way back to the source URL | — | **ORPHANED — the DB stores `sources.uri` but no surface ever renders it; a pasted URL is unrecoverable by a human (Source-Link Rule breach)** |
 | Source thumbnails (library + intel) | — | **missing everywhere — no visual identity for any ingested/ranked source** |
 | Videos: projects, cuts, takes, propose | rail → Videos | **partial — the surface works but is EMPTY of content: zero video_projects rows exist** |
-| The Thalon concept film (16:9 + 9:16 masters, cuts, EDL, provenance) | — | **ORPHANED — built s41–s44 at the filesystem level, lives gitignored in `.context/design/film-storyboard-s41/`; it never entered the product's own video-project pipeline, so the product cannot show its own flagship film** |
+| Concept film (s41–44) | /app/videos → thalon-concept-film (dev: REGISTERED + playable — 58 takes, 8 cuts, media route verified s61) | **staging pending per-box import (ASK-BACKS s61 → swordfish); was mis-read as globally orphaned at s60** |
 | Runs history + failure triage | rail → Runs | reachable |
 | Profiles (brand voice, versions) | rail foot → Profiles; topbar switcher → "Manage profiles" | reachable |
 | Settings (seams, drivers, budget, watchlist) | rail foot → Settings | reachable |

@@ -384,3 +384,15 @@ Steven — s60 is wrapped, and it was a big one:
 **⑬ First Crack shipped too** (your mid-session call to use the idle capacity): the roastery where the page IS a roast log — scrolling replays a real-shaped roast curve and the wordmark cracks at 8:52. On 8899 at /first-crack/. 0.60cr, balance 716.44.
 
 **When you have ten minutes:** click through the new workspace on staging, glance at First Crack, and the two GO calls (Phase R re-critique · the contract window) are yours to make. Box reboots itself 18:30 UTC tonight for a kernel patch — everything important auto-starts.
+
+## 2026-07-18 (s61) — staging film import (W-audit item a, founder-directed)
+
+The concept film is registered + playable in DEV (video_projects row `thalon-concept-film`, 58 takes, 8 cuts; media route verified 200). STAGING's Videos surface is empty because object stores are per-box — the film bytes never reached the VPS. Ask:
+
+1. **Transfer** `~/work/thalon/.context/design/film-storyboard-s41/` (stills/ motion/ cuts/ music/ checkpoints/ + `thalon-import/` sidecars) from syd4 to the staging box via your channel (restic/rsync — ~hundreds of MB).
+2. **Run the import on the box** from the deployed web workdir against tenant-pg + the staging object volume:
+   `npm run videos:import -w @thalon/web -- --root <transferred-path> --name "thalon-concept-film" --reasons thalon-import/reasons.json --provenance thalon-import/provenance.json --cuts thalon-import/cuts.json --exclude v1-reference`
+   (The script writes ONLY through the frozen B-ve.1 repos; a reject without a reason refuses loudly — the sidecars carry all 27.)
+3. Reply with the row counts + one media-route probe status; the lead closes W-audit item (a) on your confirm.
+
+No urgency ranking against your queue — it's dogfood, not production traffic.
