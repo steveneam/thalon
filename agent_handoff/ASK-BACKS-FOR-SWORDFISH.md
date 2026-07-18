@@ -305,3 +305,13 @@ aware and directing.
 
 If anything blocks mid-sequence: just restart `thalon-web` — until step 5 the
 app config is untouched and the volume was only ever read.
+
+## syd4 16GB resize — post-reboot glance ask (s56)
+
+Founder is coordinating the BinaryLane resize of syd4 to 16GB with you
+(between our s56 and s57; rationale = the 2026-07-17 OOM class + headroom
+for the s57 parallel lanes). Small ask while you're in there: **after the
+reboot, one glance that `agent-tmux.service` and the dev Postgres unit both
+came back up** — the two things a fresh Thalon session depends on before it
+can check anything for itself. Everything else post-reboot (tmux reattach,
+preview server relaunch, stamp check) is on our s57 checklist in CURRENT.md.
