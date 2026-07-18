@@ -1,0 +1,7 @@
+[
+  { "file": "hero-copper.webp", "pinnedHash": "4d1b900f8d2923ea952466fe3dd6436f5fdd44afc2ac1c6a368276c0af299ad6", "width": 1280, "height": 1920, "quality": 80 },
+  { "file": "honey.webp", "pinnedHash": "9abfe7d2c6220cc0bd1a94ef7285cb7ba2e072f9e82537c0c835978706f5d798", "width": 1500, "height": 1000, "quality": 78 },
+  { "file": "rose.webp", "pinnedHash": "03c648c24877f22dc0c12ee64b1fb2a2355c0f3966fcb93b039e5adcb56d3a5f", "width": 1200, "height": 1200, "quality": 78 },
+  { "file": "violet.webp", "pinnedHash": "c0610b1b20d1049a68296e59dfa52512ec9d5a14d7cd7eae1029474b144a2d72", "width": 1080, "height": 1440, "quality": 78 },
+  { "file": "ink.webp", "pinnedHash": "7091b65302c6c84e55660716b40d86bbb16906184219cb1dfc8a636f0efad5d4", "width": 1600, "height": 906, "quality": 78 }
+]

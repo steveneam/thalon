@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hue &amp; Cry — how this page was made</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:'Bodoni Moda';src:url(../fonts/bodoni-moda-var.woff2) format('woff2');font-weight:400 900;font-display:swap}
+@font-face{font-family:'Bodoni Moda';src:url(../fonts/bodoni-moda-italic-var.woff2) format('woff2');font-weight:400 900;font-style:italic;font-display:swap}
+@font-face{font-family:'Schibsted Grotesk';src:url(../fonts/schibsted-grotesk-var.woff2) format('woff2');font-weight:400 900;font-display:swap}
+@font-face{font-family:'Chivo Mono';src:url(../fonts/chivo-mono-var.woff2) format('woff2');font-weight:100 900;font-display:swap}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F7DCC8;color:#3D1F12;font-family:'Schibsted Grotesk',sans-serif;font-size:16px;line-height:1.65}
+.wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+h1{font-family:'Bodoni Moda',serif;font-weight:520;font-size:clamp(30px,6vw,46px);line-height:1.05}
+h2{font-family:'Bodoni Moda',serif;font-weight:600;font-size:22px;margin:36px 0 10px}
+p,li{max-width:68ch}
+p{margin:12px 0}
+ul{padding-left:22px;margin:12px 0}
+a{color:#3D1F12}
+.tag{display:inline-block;font-family:'Chivo Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#9C3108;margin-bottom:14px}
+.tbl{border:1.5px solid #3D1F12;border-radius:6px;background:#FBEDE0;margin:16px 0;overflow:hidden}
+.tbl .r{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(61,31,18,.15);font-size:14px}
+.tbl .r:last-child{border-bottom:none}
+.tbl .m{font-family:'Chivo Mono',monospace;font-size:12.5px;white-space:nowrap}
+.small{font-size:13.5px;opacity:.75}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="tag">the honest bit</span>
+  <h1>How this page was made</h1>
+  <p><strong>Hue &amp; Cry is a fictional demonstration business.</strong> The salon, the
+  address, the prices and the correction notes are illustrative copy for a demo — no real
+  service exists, and no real client's hair is depicted. <strong>All imagery is
+  AI-generated.</strong></p>
+
+  <h2>Design</h2>
+  <p>A look-first study came before any code: salon sites (to learn the genre defaults and
+  avoid them — cream-serif "Elevate Your Look" elegance, dark-gold "premium studio" cards),
+  "colorful" landing pages (which default to purple-blue gradient mush — the exact opposite
+  of a committed palette), and real hair-dye shade cards and swatch books, which is where the
+  design actually comes from.</p>
+  <p>The page is built like a colourist's shade chart: five chapters, each a pigment world
+  mixed tone-on-tone from a single hue family — copper 7.44, honey 8.3, rose 9.26, violet
+  5.20, blue-black 1.1 — numbered the way colourists actually number tint (level.tone).
+  With JavaScript, the paper itself takes the dye: a fixed background layer cross-fades
+  between chapter pigments as you scroll, mixed in the OKLab colour space (hand-rolled,
+  ~25 lines, no libraries). The shade mixer is a toy level/tone instrument that mixes its
+  swatch in oklch() locally — nothing you touch on this page leaves the page.</p>
+  <p>Type: Bodoni Moda (display), Schibsted Grotesk (body) and Chivo Mono (the formula
+  register) — all SIL Open Font License, vendored locally with their licenses. Single
+  self-contained file, no frameworks, no external requests; reduced-motion gets hard chapter
+  boundaries with everything pre-developed, and the full content works without JavaScript.</p>
+
+  <h2>Imagery</h2>
+  <p>Five photographs were generated through the Higgsfield API on a paid license tier; each
+  original is pinned in a content-addressed store with full provenance (model, prompt,
+  credits, license tier). The model named is the model that actually ran. All five were
+  first-take keepers — no rejects this build.</p>
+  <div class="tbl">
+    <div class="r"><span>Hero — the copper turn</span><span class="m">soul v2 · 2k · first take</span></div>
+    <div class="r"><span>Honey — balayage ribbons in window light</span><span class="m">soul v2 · first take</span></div>
+    <div class="r"><span>Rose — the gloss twist</span><span class="m">soul v2 · first take</span></div>
+    <div class="r"><span>Violet — finger waves from behind</span><span class="m">soul v2 · first take</span></div>
+    <div class="r"><span>Blue black — the studio at 7:04pm</span><span class="m">soul v2 · first take</span></div>
+  </div>
+  <p class="small">Honesty note: the studio-at-night prompt asked for bare walls with no
+  shelving or bottles; a shelf of unlabelled silhouettes appears in deep shadow at frame
+  left. It was inspected at 2.2× brightness — no legible or pseudo-lettering anywhere, so
+  it stayed. No real signage, brands or people appear in any frame.</p>
+
+  <h2>Iteration passes</h2>
+  <ul>
+    <li><strong>Pass 1 (fault-hunt):</strong> full browser walk, desktop and 390&nbsp;px,
+    scroll-dye blending checked at every chapter boundary. Caught: the rotated hero caption
+    clipping at the mobile viewport edge (it now sits below the image on small screens); a
+    static/JS mismatch in the mixer's level readout; a vendored italic font face nothing
+    used (removed); a chip-tracking bug that could snap the rail back to copper around the
+    chart section; aria-current hygiene (set or removed, never "false").</li>
+    <li><strong>Pass 2 (ambition-push + colour audit):</strong> added the shade-book tabs —
+    punched swatch cards at each chapter head — and taught the wordmark to take the active
+    chapter's accent as you scroll. Measured every ink-on-paper pairing (all ≥7:1); the
+    hero's italic accent sat at 2.81:1 against the 3:1 large-text floor, so the copper
+    accent was darkened from #B33D0E to #9C3108 (3.5:1) here and on this page.</li>
+    <li><strong>Pass 3 (fault-hunt):</strong> reduced-motion path exercised via an injected
+    media stub (hard chapter colours, chip tracking intact, no develop filter, everything
+    visible); no-JS state exercised by stripping the gate classes (dye layer hidden, all
+    five chapters paint their own paper, mixer shows its static default, all content and
+    prices readable); copy honesty re-read against the imagery ("six chairs" became "a
+    small room" — the night frame shows three); console clean; every network request
+    stays on the page's own origin.</li>
+  </ul>
+
+  <p class="small" style="margin-top:40px"><a href="../">← back to the page</a></p>
+</div>
+</body>
+</html>
