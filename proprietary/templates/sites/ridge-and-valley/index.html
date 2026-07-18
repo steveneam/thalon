@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ridge &amp; Valley Roofing — re-roofing and roof plumbing for weather that means it</title>
+<meta name="description" content="Re-roofing, roof plumbing and storm repair. Built square, flashed right, guaranteed in writing. A fictional demonstration business.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1 13 8 3l7 10h-3L8 7l-4 6z' fill='%23a83a1e'/%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   RIDGE & VALLEY — the page is a roof under weather.
+   Brutalist-raw: structure IS roof anatomy. Zero border-radius
+   anywhere, on purpose — the portfolio's only fully square site.
+   ============================================================ */
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-700.woff2) format('woff2')}
+@font-face{font-family:Barlow;font-style:normal;font-weight:400;font-display:swap;src:url(fonts/barlow-400.woff2) format('woff2')}
+@font-face{font-family:Barlow;font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-600.woff2) format('woff2')}
+@font-face{font-family:'Fragment Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/fragment-mono-400.woff2) format('woff2')}
+
+:root{
+  --paper:#f2f2ef;          /* zinc white */
+  --ink:#17191b;            /* near-black */
+  --ink-soft:#3d4145;
+  --oxide:#a83a1e;          /* the ONE loud color — terracotta oxide (fills, large type) */
+  --oxide-ink:#8c2f16;      /* oxide deep enough for body-size text on paper (AA) */
+  --zinc-line:#c9cbc7;      /* hairlines */
+  --plate:#e6e6e2;          /* stamped plate fill */
+  --storm-deep:#1d262c;     /* the supercell */
+  --storm-mid:#3a4a52;
+  --gold:#e9a75d;           /* after-storm light */
+  --tarp:#2456a0;           /* the emergency tarp */
+  --display:'Barlow Condensed',Impact,sans-serif;
+  --body:Barlow,system-ui,sans-serif;
+  --mono:'Fragment Mono',ui-monospace,monospace;
+  --storm:0;                /* the scroll clock: 0 clear → 1 peak (JS-driven) */
+  --gold-mix:0;             /* the resolve: 0 → 1 evening light */
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  font-family:var(--body);color:var(--ink);background:var(--paper);
+  font-size:1.0625rem;line-height:1.55;
+  overflow-x:clip;
+}
+
+/* ---- the sky: a fixed layer behind everything (JS drives its weather).
+       Without JS it stays a quiet zinc gradient; each chapter that needs
+       weather carries its own static band instead. ---- */
+.sky{position:fixed;inset:0;z-index:-2;background:linear-gradient(#dfe3e4,#f2f2ef 60%)}
+.sky::before,.sky::after{content:"";position:absolute;inset:0;transition:none}
+.sky::before{ /* the storm */
+  background:linear-gradient(180deg,#141c21,#1d262c 45%,#3a4a52 80%,#57402e);
+  opacity:var(--storm);
+}
+.sky::after{ /* the resolve */
+  background:linear-gradient(180deg,#c3d3d9,#e9c489 70%,#e9a75d);
+  opacity:var(--gold-mix);
+}
+
+/* ---- rain: fixed streak layer, opacity + speed ride the clock ---- */
+.rain{position:fixed;inset:-20% 0;z-index:-1;pointer-events:none;opacity:calc(var(--storm)*var(--storm)*.5);
+  background:
+    repeating-linear-gradient(105deg,transparent 0 14px,rgba(226,236,240,.28) 14px 15px,transparent 15px 42px),
+    repeating-linear-gradient(105deg,transparent 0 29px,rgba(226,236,240,.16) 29px 30px,transparent 30px 71px);
+}
+.js .rain{will-change:transform}
+
+/* ---- shared grammar ---- */
+.wrap{max-width:72rem;margin:0 auto;padding:0 clamp(1rem,4vw,2.5rem)}
+.chapter{position:relative;padding:clamp(2.4rem,6vw,4.5rem) 0}
+/* content rides PAPER PLATES stacked on the weather — ink never sits on the
+   changing sky, so AA holds at every storm stage by construction */
+.chapter>.wrap{background:var(--paper);border:2px solid var(--ink);padding-top:clamp(1.5rem,3vw,2.4rem);padding-bottom:clamp(1.7rem,3.5vw,2.8rem)}
+.storm-scope>.wrap{background:transparent;border:0;padding-top:0;padding-bottom:0}
+/* every chapter hangs off a RIDGE — the load-bearing rule */
+.ridge{display:flex;align-items:center;gap:.85rem;border-top:4px solid var(--ink);padding-top:.65rem;margin-bottom:clamp(1.6rem,3.5vw,2.6rem)}
+.ridge .cap{width:1.15rem;height:.62rem;background:var(--oxide);clip-path:polygon(0 100%,50% 0,100% 100%)}
+.ridge .label{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+.ridge .count{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--ink-soft)}
+/* content columns split along VALLEY channels */
+.valley-cols{display:grid;gap:0;grid-template-columns:1fr}
+@media (min-width:56rem){
+  .valley-cols{grid-template-columns:1fr 2px 1fr}
+  .valley-cols>.valley{background:linear-gradient(var(--zinc-line),var(--ink) 50%,var(--zinc-line));margin:0 clamp(1.2rem,3vw,2.4rem)}
+}
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:.92;letter-spacing:-0.01em;text-wrap:balance}
+h2{font-size:clamp(2.6rem,7vw,4.6rem)}
+h3{font-size:clamp(1.35rem,3vw,1.9rem)}
+p{max-width:62ch}
+.lede{font-size:clamp(1.15rem,2.2vw,1.4rem);font-weight:600;max-width:34ch}
+a{color:var(--oxide-ink)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--oxide);outline-offset:2px}
+.btn{display:inline-block;background:var(--oxide);color:var(--paper);font-family:var(--display);font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em;text-decoration:none;padding:.7rem 1.6rem;border:2px solid var(--ink)}
+.btn:hover{background:var(--ink)}
+/* spec plates — the trade's own document, stamped not printed */
+.plate{background:var(--plate);border:2px solid var(--ink);font-family:var(--mono);font-size:.78rem;line-height:1.7}
+.plate dl{display:grid;grid-template-columns:auto 1fr;gap:0 1rem;padding:.8rem 1rem}
+.plate dt{color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;font-size:.68rem;align-self:baseline}
+.plate dd{font-weight:400}
+.stamp{display:inline-block;border:2px solid var(--oxide-ink);color:var(--oxide-ink);font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;padding:.18rem .5rem;transform:rotate(-1.2deg)}
+
+/* ---- header ---- */
+header.top{position:sticky;top:0;z-index:10;background:var(--paper);border-bottom:3px solid var(--ink)}
+header.top .wrap{display:flex;align-items:baseline;gap:1.2rem;padding-top:.55rem;padding-bottom:.55rem}
+.wordmark{font-family:var(--display);font-size:1.35rem;text-transform:uppercase;letter-spacing:.01em;color:var(--ink);text-decoration:none}
+.wordmark b{color:var(--oxide)}
+nav.jump{margin-left:auto;display:flex;gap:1.1rem;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em}
+nav.jump a{text-decoration:none;color:var(--ink-soft)}
+nav.jump a:hover{color:var(--oxide-ink)}
+@media (max-width:44rem){nav.jump a:not(:last-child){display:none}}
+
+/* ---- hero ---- */
+.hero{position:relative;padding:0 0 clamp(3rem,6vw,5rem)}
+.hero .frame{position:relative;border-bottom:4px solid var(--ink)}
+.hero img{display:block;width:100%;height:clamp(19rem,56vh,34rem);object-fit:cover}
+/* the R crops off the page edge — the brutalist signature move */
+.hero .title{margin-left:calc(50% - 50vw - 0.05em);font-size:clamp(4.2rem,14vw,10.5rem) !important;color:var(--ink)}
+.hero .title .amp{color:var(--oxide)}
+.hero .titleblock{padding-top:clamp(1.2rem,3vw,2rem)}
+.hero .sub{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:flex-end;margin-top:1rem}
+.hero .plate{max-width:21rem}
+
+/* ---- anatomy / the cross-section instrument ---- */
+.xsec{display:block;width:100%;height:auto}
+.xsec text{font-family:var(--mono);font-size:11.5px;fill:var(--ink);text-transform:uppercase;letter-spacing:.06em}
+.xsec .lead{stroke:var(--ink-soft);stroke-width:1;fill:none}
+.xsec .water{opacity:var(--storm)}
+.storm-scope .xsec .water{opacity:1}
+.anatomy-note{font-size:.95rem;color:var(--ink-soft)}
+
+/* ---- materials ---- */
+.mat{display:grid;gap:0;border:2px solid var(--ink);margin-bottom:clamp(1.4rem,3vw,2rem);background:var(--paper)}
+@media (min-width:56rem){.mat{grid-template-columns:1.25fr 1fr}}
+.mat img{display:block;width:100%;height:100%;min-height:15rem;object-fit:cover}
+.mat .side{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+@media (min-width:56rem){.mat .side{border-top:0;border-left:2px solid var(--ink)}}
+.mat .side h3{padding:.9rem 1rem .4rem}
+.mat .side .plate{border:0;border-top:2px solid var(--ink)}
+.mat .side .note{padding:.35rem 1rem .9rem;font-size:.95rem;color:var(--ink-soft)}
+.chips{display:flex;gap:.5rem;padding:0 1rem .9rem;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}
+.chip i{width:1.05rem;height:1.05rem;border:2px solid var(--ink);display:inline-block}
+
+/* ---- the storm test ---- */
+.storm-scope{color:var(--paper)}
+.storm-scope .panel{border:2px solid var(--ink);padding:clamp(1.2rem,3vw,2rem);
+  /* the panel carries its own rain texture — the storm chapter reads stormy
+     with no JS and under reduced motion, not just on the live clock */
+  background:
+    repeating-linear-gradient(105deg,transparent 0 18px,rgba(210,225,232,.05) 18px 19px,transparent 19px 54px),
+    var(--storm-deep);}
+.storm-scope .ridge{border-top-color:var(--paper)}
+.storm-scope .ridge .label,.storm-scope .ridge .count{color:#c8d2d7}
+.storm-scope h2{color:var(--paper)}
+.storm-scope p{color:#d5dde1}
+.gauge{font-family:var(--mono);display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));margin:1.6rem 0}
+.gauge .cell{border:1px solid #55636b;padding:.8rem .9rem}
+.gauge .k{display:block;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:#9fb0b8}
+.gauge .v{display:block;margin-top:.2rem;font-size:clamp(1.9rem,4vw,2.6rem);font-family:var(--display);color:var(--paper);font-variant-numeric:tabular-nums}
+.gauge .v small{font-family:var(--mono);font-size:.75rem;color:#9fb0b8}
+.gauge .bar{height:.5rem;background:#33424a;margin-top:.5rem;position:relative;overflow:hidden}
+.gauge .bar i{position:absolute;inset:0;transform-origin:left;background:var(--gold);transform:scaleX(var(--storm))}
+.storm-scope .xsec text{fill:#d5dde1}
+.storm-scope .xsec .lead{stroke:#7d8d95}
+/* the water RUNS — the instrument is alive, not a diagram of one */
+.xsec .water polyline,.xsec .water line{stroke-dasharray:7 6;animation:rvflow .55s linear infinite}
+@keyframes rvflow{to{stroke-dashoffset:-13}}
+@media (prefers-reduced-motion:reduce){.xsec .water polyline,.xsec .water line{animation:none;stroke-dasharray:none}}
+.rating-line{font-family:var(--mono);font-size:.78rem;color:#9fb0b8;border-top:1px solid #55636b;padding-top:.8rem}
+/* the tarp wink */
+.tarp-card{position:relative;border:2px solid var(--ink);background:var(--storm-mid);padding:1.1rem clamp(5.5rem,16vw,8rem) 1.1rem 1.2rem;margin-top:1.8rem;overflow:hidden}
+.tarp-card p{font-size:.95rem}
+.tarp{position:absolute;top:-2.6rem;right:-3.2rem;width:11rem;height:8rem;transform:rotate(12deg);
+  background:
+    radial-gradient(circle at 1rem 6.9rem,#dfe7f2 0 .16rem,transparent .26rem),
+    radial-gradient(circle at 3.4rem 7.35rem,#dfe7f2 0 .16rem,transparent .26rem),
+    radial-gradient(circle at 5.8rem 7.7rem,#dfe7f2 0 .16rem,transparent .26rem),
+    repeating-linear-gradient(0deg,var(--tarp) 0 .55rem,#2e63b4 .55rem 1.1rem),
+    repeating-linear-gradient(90deg,transparent 0 .55rem,rgba(255,255,255,.06) .55rem 1.1rem);
+  background-color:var(--tarp);
+  border:2px solid #183c74;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.tarp::after{content:"";position:absolute;left:.6rem;top:6.5rem;right:.6rem;height:2px;background:rgba(255,255,255,.25)}
+@media (max-width:44rem){.tarp{width:7.5rem;height:5.6rem;top:-1.9rem;right:-2.7rem}}
+.tarp-caption{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#c8d2d7;margin-top:.6rem}
+
+/* ---- crew ---- */
+.crew{display:grid;gap:0;border:2px solid var(--ink)}
+@media (min-width:56rem){.crew{grid-template-columns:1.4fr 1fr}}
+.crew img{display:block;width:100%;height:100%;min-height:16rem;object-fit:cover}
+.crew .side{padding:clamp(1.1rem,2.5vw,1.8rem);border-top:2px solid var(--ink);background:var(--paper)}
+@media (min-width:56rem){.crew .side{border-top:0;border-left:2px solid var(--ink)}}
+.crew ul{list-style:none;margin-top:1rem;font-family:var(--mono);font-size:.8rem;line-height:2}
+.crew li::before{content:"— ";color:var(--oxide-ink)}
+
+/* ---- after / close ---- */
+.after .frame{border:2px solid var(--ink)}
+.after img{display:block;width:100%;height:clamp(16rem,48vh,30rem);object-fit:cover}
+.after .closeline{display:flex;flex-wrap:wrap;gap:1.2rem 2.4rem;align-items:center;margin-top:1.6rem}
+.smallprint{font-size:.85rem;color:var(--ink-soft);max-width:52ch}
+
+footer{border-top:3px solid var(--ink);margin-top:clamp(3rem,6vw,5rem)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 2.4rem;padding-top:1.2rem;padding-bottom:2.2rem;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft)}
+footer a{color:var(--oxide-ink)}
+
+/* no-JS: the storm chapter carries its own weather statically */
+.storm-scope{--storm:1}
+/* JS moves the whole page onto the scroll clock */
+.js .storm-scope{--storm:inherit}
+
+@media (prefers-reduced-motion:reduce){
+  .rain{opacity:0}
+  .gauge .bar i{transform:scaleX(1)}
+}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<div class="rain" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="wordmark" href="#top">Ridge <b>&amp;</b> Valley</a>
+    <nav class="jump" aria-label="Sections">
+      <a href="#anatomy">Anatomy</a>
+      <a href="#materials">Materials</a>
+      <a href="#storm">Storm test</a>
+      <a href="#crew">Crew</a>
+      <a href="#book">Book</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" aria-label="Ridge and Valley Roofing">
+    <div class="frame">
+      <img src="assets/hero-storm.webp" width="2048" height="1152" alt="A charcoal corrugated steel roof with one brick chimney under a massive teal storm front, ember light on the horizon" fetchpriority="high">
+    </div>
+    <div class="wrap titleblock">
+      <h1 class="title hero-title">Ridge <span class="amp">&amp;</span> Valley</h1>
+      <div class="sub">
+        <p class="lede">Re-roofing and roof plumbing for weather that means it.</p>
+        <div class="plate" role="group" aria-label="Practice spec plate">
+          <dl>
+            <dt>Trade</dt><dd>Roof plumbing · re-roofing</dd>
+            <dt>Range</dt><dd>Pitched 5°–45° · low-slope tray</dd>
+            <dt>Rated</dt><dd>Coastal wind class, stated in writing</dd>
+            <dt>Basis</dt><dd>Fixed quote after inspection</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ANATOMY ================= -->
+  <section class="chapter" id="anatomy" aria-labelledby="anatomy-h">
+    <div class="wrap">
+      <div class="ridge"><span class="cap" aria-hidden="true"></span><span class="label">Chapter — anatomy</span><span class="count">R&amp;V · 01</span></div>
+      <div class="valley-cols">
+        <div>
+          <h2 id="anatomy-h">A roof is a system, not a surface</h2>
+          <p>What fails in a storm is almost never the sheet you can see. It is the
+          ridge capping that was face-fixed instead of clipped, the sarking that
+          stops short of the valley, the gutter that was never sized for the
+          catchment above it. A re-roof replaces the system.</p>
+          <p class="anatomy-note">Every line in this drawing is an item on our quote,
+          named the same way — nothing hides inside an allowance.</p>
+        </div>
+        <div class="valley" aria-hidden="true"></div>
+        <div>
+          <svg class="xsec" viewBox="0 0 560 330" role="img" aria-label="Labelled cross-section of a pitched roof: ridge cap, battens, sarking, rafters, gutter and downpipe">
+            <!-- pitch -->
+            <polygon points="60,210 280,70 500,210" fill="none" stroke="var(--ink)" stroke-width="3"/>
+            <!-- sarking (inner line) -->
+            <polyline points="80,208 280,80 480,208" fill="none" stroke="var(--oxide)" stroke-width="2" stroke-dasharray="7 4"/>
+            <!-- battens -->
+            <g stroke="var(--ink)" stroke-width="2">
+              <line x1="130" y1="166" x2="146" y2="176"/><line x1="190" y1="128" x2="206" y2="138"/><line x1="250" y1="90" x2="266" y2="100"/>
+              <line x1="330" y1="100" x2="314" y2="110"/><line x1="390" y1="138" x2="374" y2="148"/><line x1="450" y1="176" x2="434" y2="186"/>
+            </g>
+            <!-- ridge cap -->
+            <polyline points="258,72 280,58 302,72" fill="none" stroke="var(--ink)" stroke-width="6"/>
+            <!-- gutter + downpipe -->
+            <path d="M500,210 h28 v16 h-20" fill="none" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="524" y1="226" x2="524" y2="300" stroke="var(--ink)" stroke-width="6"/>
+            <!-- the water, present only under storm (CSS-gated) -->
+            <g class="water">
+              <polyline points="280,64 420,152 496,200" fill="none" stroke="#7fb2c9" stroke-width="3" stroke-linecap="square"/>
+              <line x1="524" y1="230" x2="524" y2="296" stroke="#7fb2c9" stroke-width="3"/>
+            </g>
+            <!-- labels -->
+            <text x="240" y="40">ridge cap — clipped, never face-fixed</text>
+            <line class="lead" x1="282" y1="46" x2="282" y2="58"/>
+            <text x="60" y="120">sarking</text>
+            <line class="lead" x1="92" y1="126" x2="150" y2="160"/>
+            <text x="352" y="84">battens @ 900</text>
+            <line class="lead" x1="360" y1="90" x2="330" y2="102"/>
+            <text x="300" y="256">gutter · sized to catchment</text>
+            <line class="lead" x1="472" y1="250" x2="506" y2="224"/>
+            <text x="400" y="300">downpipe</text>
+            <line class="lead" x1="472" y1="294" x2="516" y2="282"/>
+            <text x="60" y="240">pitch 5°–45°</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MATERIALS ================= -->
+  <section class="chapter" id="materials" aria-labelledby="materials-h">
+    <div class="wrap">
+      <div class="ridge"><span class="cap" aria-hidden="true"></span><span class="label">Chapter — materials</span><span class="count">R&amp;V · 02</span></div>
+      <h2 id="materials-h">Three roofs we stand behind</h2>
+      <p style="margin:.8rem 0 2rem">The material is the product — your house wears it
+      for forty years. Specs stated plainly; colours from the standard
+      colour-bonded range, chips below each.</p>
+
+      <article class="mat">
+        <img src="assets/macro-corrugated.webp" width="1400" height="933" loading="lazy" alt="Rain falling on wet charcoal profiled steel roofing, streaks catching the storm light">
+        <div class="side">
+          <h3>Profiled steel</h3>
+          <div class="plate"><dl>
+            <dt>Sheet</dt><dd>0.48 BMT, continuous lengths</dd>
+            <dt>Min pitch</dt><dd>5 degrees</dd>
+            <dt>Fixing</dt><dd>Concealed clip or crest-fixed</dd>
+            <dt>In rain</dt><dd>Loud and proud — insulate if you'd rather not hear it</dd>
+          </dl></div>
+          <div class="chips" aria-label="Colour range">
+            <span class="chip"><i style="background:#4a4d50"></i>Basalt</span>
+            <span class="chip"><i style="background:#a83a1e"></i>Oxide</span>
+            <span class="chip"><i style="background:#c9cbc7"></i>Zinc</span>
+            <span class="chip"><i style="background:#7a8071"></i>Gum</span>
+          </div>
+          <p class="note">The workhorse. Light, fast to lay, happiest on long simple pitches.</p>
+        </div>
+      </article>
+
+      <article class="mat">
+        <img src="assets/macro-terracotta.webp" width="1400" height="933" loading="lazy" alt="Wet terracotta roof tiles in overlapping courses, deep oxide red with weathered variation">
+        <div class="side">
+          <h3>Terracotta tile</h3>
+          <div class="plate"><dl>
+            <dt>Unit</dt><dd>Kiln-fired clay, interlocking</dd>
+            <dt>Min pitch</dt><dd>15 degrees</dd>
+            <dt>Fixing</dt><dd>Sarked, clipped in exposed zones</dd>
+            <dt>In rain</dt><dd>Quiet — the mass soaks the sound</dd>
+          </dl></div>
+          <div class="chips" aria-label="Colour range">
+            <span class="chip"><i style="background:#8c2f16"></i>Oxide</span>
+            <span class="chip"><i style="background:#5d3a2c"></i>Peat</span>
+            <span class="chip"><i style="background:#31353b"></i>Basalt</span>
+          </div>
+          <p class="note">Heavy, beautiful, and honest about it — the frame must be rated for the load, and we check before we quote.</p>
+        </div>
+      </article>
+
+      <article class="mat">
+        <img src="assets/macro-seam.webp" width="1400" height="933" loading="lazy" alt="Standing seam zinc roof trays with raised vertical seams under a dark storm sky">
+        <div class="side">
+          <h3>Standing seam</h3>
+          <div class="plate"><dl>
+            <dt>Tray</dt><dd>Folded on site, seams locked</dd>
+            <dt>Min pitch</dt><dd>3 degrees</dd>
+            <dt>Fixing</dt><dd>Fully concealed — no visible fastener on the field</dd>
+            <dt>In rain</dt><dd>A low drum — architects ask for it by name</dd>
+          </dl></div>
+          <div class="chips" aria-label="Colour range">
+            <span class="chip"><i style="background:#c9cbc7"></i>Zinc</span>
+            <span class="chip"><i style="background:#4a4d50"></i>Basalt</span>
+          </div>
+          <p class="note">The premium answer for low pitches and long clean planes. Costs more; outlasts the mortgage.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= THE STORM TEST ================= -->
+  <section class="chapter storm-scope" id="storm" aria-labelledby="storm-h">
+    <div class="wrap">
+      <div class="ridge"><span class="cap" aria-hidden="true"></span><span class="label">Chapter — the storm test</span><span class="count">R&amp;V · 03</span></div>
+      <div class="panel">
+        <h2 id="storm-h">The sky writes the spec</h2>
+        <p>A quote that doesn't name a wind class is a guess. Every roof we hand
+        back is rated for its site and the rating goes in the paperwork — this
+        gauge shows the storm your roof is signed off to shrug at.</p>
+
+        <div class="gauge" role="group" aria-label="Design storm gauge">
+          <div class="cell">
+            <span class="k">Rain intensity</span>
+            <span class="v"><span data-gauge="rain">88</span> <small>mm/h</small></span>
+            <span class="bar" aria-hidden="true"><i></i></span>
+          </div>
+          <div class="cell">
+            <span class="k">Gust speed</span>
+            <span class="v"><span data-gauge="gust">104</span> <small>km/h</small></span>
+            <span class="bar" aria-hidden="true"><i></i></span>
+          </div>
+          <div class="cell">
+            <span class="k">Gutter load</span>
+            <span class="v"><span data-gauge="flow">31</span> <small>L/min per DP</small></span>
+            <span class="bar" aria-hidden="true"><i></i></span>
+          </div>
+        </div>
+
+        <svg class="xsec" viewBox="0 0 560 330" role="img" aria-label="The same roof cross-section shedding storm water into the gutter and down the downpipe">
+          <polygon points="60,210 280,70 500,210" fill="none" stroke="#d5dde1" stroke-width="3"/>
+          <polyline points="80,208 280,80 480,208" fill="none" stroke="var(--gold)" stroke-width="2" stroke-dasharray="7 4"/>
+          <polyline points="258,72 280,58 302,72" fill="none" stroke="#d5dde1" stroke-width="6"/>
+          <path d="M500,210 h28 v16 h-20" fill="none" stroke="#d5dde1" stroke-width="3"/>
+          <line x1="524" y1="226" x2="524" y2="300" stroke="#d5dde1" stroke-width="6"/>
+          <g class="water">
+            <polyline points="280,64 420,152 496,200" fill="none" stroke="#7fb2c9" stroke-width="3" stroke-linecap="square"/>
+            <line x1="524" y1="230" x2="524" y2="296" stroke="#7fb2c9" stroke-width="3"/>
+          </g>
+          <text x="150" y="40">every drop takes this path — or it takes yours</text>
+          <text x="356" y="252">to the gutter</text>
+          <line class="lead" x1="450" y1="246" x2="500" y2="222"/>
+          <text x="400" y="300">down and away</text>
+          <line class="lead" x1="498" y1="294" x2="516" y2="284"/>
+        </svg>
+
+        <p class="rating-line">Design basis stated per site · the gauge above runs to the
+        coastal wind class we certify against · exceedance is what insurance is for —
+        and our flashing details are why you rarely need it.</p>
+
+        <div class="tarp-card">
+          <div class="tarp" aria-hidden="true"></div>
+          <p><strong>Storm damage right now?</strong> We carry tarps on every ute and
+          fit them free while you wait for the real fix.</p>
+          <p class="tarp-caption">temporary fix — book the permanent one</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CREW ================= -->
+  <section class="chapter" id="crew" aria-labelledby="crew-h">
+    <div class="wrap">
+      <div class="ridge"><span class="cap" aria-hidden="true"></span><span class="label">Chapter — the crew</span><span class="count">R&amp;V · 04</span></div>
+      <div class="crew">
+        <img src="assets/crew-ridge.webp" width="1600" height="1067" loading="lazy" alt="An older roofer with silver stubble in a plain dark knit jumper, seating a ridge cap by hand as the storm clears behind him">
+        <div class="side">
+          <h2 id="crew-h">Thirty years on the ridge</h2>
+          <p>The bloke who quotes your roof is the bloke who stands on it. No sales
+          layer, no subcontracted mystery crew — one licensed team, and the same
+          two hands on the ridge cap at the start and the end of the job.</p>
+          <ul>
+            <li>Licensed roof plumbing, stated on the quote</li>
+            <li>Insured for working at heights — certificates on request</li>
+            <li>Workmanship guaranteed in writing, transferable on sale</li>
+            <li>We leave the site cleaner than the storm left it</li>
+          </ul>
+          <p style="margin-top:1rem"><span class="stamp">Fixed quote · no allowances</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AFTER ================= -->
+  <section class="chapter after" id="book" aria-labelledby="after-h">
+    <div class="wrap">
+      <div class="ridge"><span class="cap" aria-hidden="true"></span><span class="label">Chapter — after the storm</span><span class="count">R&amp;V · 05</span></div>
+      <div class="frame">
+        <img src="assets/calm-after.webp" width="2048" height="1152" loading="lazy" alt="The same corrugated roofline calm after the storm, gleaming wet under washed golden evening light">
+      </div>
+      <div class="closeline">
+        <h2 id="after-h" style="max-width:14ch">The quiet is the product</h2>
+        <div>
+          <a class="btn" href="#book-plate">Book an inspection</a>
+          <p class="smallprint" style="margin-top:.8rem">Before the season does it for
+          you. One visit, a torch in the roof space, and a fixed written quote —
+          or the honest news that your roof is fine and we'll see you in five years.</p>
+        </div>
+      </div>
+      <div class="plate" id="book-plate" style="margin-top:1.8rem;max-width:34rem" role="group" aria-label="Booking details">
+        <dl>
+          <dt>Book</dt><dd>This is a portfolio demonstration — the business is fictional</dd>
+          <dt>If real</dt><dd>The number would sit right here, answered seven days</dd>
+          <dt>Instead</dt><dd><a href="guide/">Read how this page was made</a></dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Ridge &amp; Valley Roofing — a fictional demonstration business</span>
+    <a href="guide/">How this page was made</a>
+    <span>Imagery AI-generated · specs illustrative</span>
+  </div>
+</footer>
+
+<script>
+/* The storm clock: one scroll-driven value.
+   Keyframes over the document: clear → building → PEAK (storm chapter) →
+   resolving → gold (close). Sky, rain, gauge and cross-section water all
+   read the same clock. Reduced-motion: everything static at honest states. */
+(function(){
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) return; // the static markup is the reduced experience
+  document.documentElement.classList.add("js");
+  var root = document.documentElement;
+  var rain = document.querySelector(".rain");
+  var gauges = {
+    rain: document.querySelector('[data-gauge="rain"]'),
+    gust: document.querySelector('[data-gauge="gust"]'),
+    flow: document.querySelector('[data-gauge="flow"]')
+  };
+  var PEAK = { rain: 88, gust: 104, flow: 31 };
+  var marks = [];
+  function measure(){
+    var vh = innerHeight;
+    var at = function(sel, f){
+      var el = document.querySelector(sel);
+      return el ? el.getBoundingClientRect().top + scrollY - vh * f : 0;
+    };
+    // scroll positions where each storm value holds
+    marks = [
+      [0, 0, 0],
+      [at("#materials", .6), .35, 0],
+      [at("#storm", .55), 1, 0],
+      [at("#crew", .5), .3, .15],
+      [at("#book", .6), 0, 1]
+    ];
+  }
+  function lerpAt(x){
+    if (x <= marks[0][0]) return [marks[0][1], marks[0][2]];
+    for (var i = 1; i < marks.length; i++){
+      if (x < marks[i][0]){
+        var a = marks[i-1], b = marks[i], t = (x - a[0]) / (b[0] - a[0] || 1);
+        return [a[1] + (b[1]-a[1])*t, a[2] + (b[2]-a[2])*t];
+      }
+    }
+    var last = marks[marks.length-1];
+    return [last[1], last[2]];
+  }
+  var rainShift = 0, lastT = 0, ticking = false;
+  function frame(t){
+    ticking = false;
+    var s = lerpAt(scrollY);
+    root.style.setProperty("--storm", s[0].toFixed(3));
+    root.style.setProperty("--gold-mix", s[1].toFixed(3));
+    var g;
+    for (g in gauges){
+      if (gauges[g]) gauges[g].textContent = Math.round(PEAK[g] * s[0]);
+    }
+    // rain falls while the storm is up
+    var dt = Math.min(48, t - lastT || 16); lastT = t;
+    if (s[0] > 0.02 && rain){
+      rainShift = (rainShift + dt * (0.35 + s[0] * 0.9)) % 4200;
+      rain.style.transform = "translateY(" + (rainShift * 0.1).toFixed(1) + "px)";
+      requestTick();
+    }
+  }
+  function requestTick(){ if (!ticking){ ticking = true; requestAnimationFrame(frame); } }
+  addEventListener("scroll", requestTick, { passive: true });
+  addEventListener("resize", function(){ measure(); requestTick(); });
+  measure(); requestTick();
+})();
+</script>
+</body>
+</html>

@@ -33,9 +33,12 @@ describe("sites catalog + gallery model (W-sites, s61)", () => {
     for (const r of records) {
       expect(r.cardImage, `${r.slug} needs a card image`).toBeTruthy();
       expect(r.assets.length, `${r.slug} needs manifest facts`).toBeGreaterThan(0);
-      // The backfill covered the whole portfolio: no site is silently unverdicted.
-      expect(r.verdict, `${r.slug} carries no verdict field`).toBeTruthy();
+      // A missing verdict is never SILENT — it resolves to the honest
+      // awaiting chip (a freshly shipped site is loudly awaiting, s62 ⑯).
+      expect(["approved", "fix-round", "awaiting"]).toContain(verdictStatus(r));
     }
+    // The s61 backfill holds: the verdicted majority carries explicit records.
+    expect(records.filter((r) => r.verdict).length).toBeGreaterThanOrEqual(16);
     const facets = facetValues(records);
     expect(facets.verticals.length).toBeGreaterThan(5);
     const filtered = applyFilters(records, { axis: "high-quality-3d" });

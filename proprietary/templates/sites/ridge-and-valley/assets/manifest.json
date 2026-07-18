@@ -1,0 +1,44 @@
+[
+  {
+    "file": "hero-storm.webp",
+    "pinnedHash": "46892b01b8f83aa7240ce079e76d7b49e5c8dbf8f54ad6c6bcf2db3134b76500",
+    "width": 2048,
+    "height": 1152,
+    "quality": 80
+  },
+  {
+    "file": "macro-corrugated.webp",
+    "pinnedHash": "aa4f9401cd7f898a4d5009868296edbb85cf81fc7798784a81c45ce563fb9670",
+    "width": 1400,
+    "height": 933,
+    "quality": 78
+  },
+  {
+    "file": "macro-terracotta.webp",
+    "pinnedHash": "b37b0111033f5dadbed505f255b4a64d9a1d99386497d7a57fdb5326956d03ce",
+    "width": 1400,
+    "height": 933,
+    "quality": 78
+  },
+  {
+    "file": "macro-seam.webp",
+    "pinnedHash": "e3e776d3401626a5adbd73fbec6b2d22a49277e84ef5e350b836089a35501e7d",
+    "width": 1400,
+    "height": 933,
+    "quality": 78
+  },
+  {
+    "file": "crew-ridge.webp",
+    "pinnedHash": "52890df3a8c804168455baae36d11c1dc1b37503f9ce9d2b36ca8255b844f76e",
+    "width": 1600,
+    "height": 1067,
+    "quality": 80
+  },
+  {
+    "file": "calm-after.webp",
+    "pinnedHash": "54dec62f4337b90174406142938f1b603a00278099fb3bad2d0dfc18f13810f0",
+    "width": 2048,
+    "height": 1152,
+    "quality": 80
+  }
+]
