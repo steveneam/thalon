@@ -42,7 +42,14 @@ describe("sites catalog + gallery model (W-sites, s61)", () => {
     expect(filtered.map((r) => r.slug)).toContain("sparkwright");
     expect(filtered.map((r) => r.slug)).toContain("hartline");
     expect(countLine(records, filtered)).toMatch(/shown · \d+ sites · \d+ approved/);
-    expect(verdictStatus(records.find((r) => r.slug === "sparkwright")!)).toBe("fix-round");
+    // Verdicts are DATA — founder calls flip them between commits, so the
+    // logic is tested against synthetic records, never a real site's current
+    // status (that pin went red the moment ⑭'s fix round was accepted, s62).
+    for (const r of records) {
+      expect(verdictStatus(r)).toBe(r.verdict?.status ?? "awaiting");
+    }
+    const unverdicted = { ...records[0], verdict: undefined };
+    expect(verdictStatus(unverdicted)).toBe("awaiting");
   });
 
   it("the image-side assembler (build-sites-catalog.mjs) emits a catalog the workspace parser accepts — the drift guard", () => {
