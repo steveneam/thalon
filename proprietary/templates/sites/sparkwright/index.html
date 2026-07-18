@@ -182,18 +182,23 @@ header.top{position:absolute;inset:0 0 auto 0;z-index:5;display:flex;justify-con
   .scene-foot{display:none}
 }
 
-/* ---------- services ---------- */
+/* ---------- services: picture cards (founder fix round s61 — the words became images) ---------- */
 .services{background:linear-gradient(var(--night-2),var(--night-3));padding-block:clamp(3.5rem,9vh,6.5rem)}
 .services h2,.craft h2,.morning h2{font-family:var(--disp);font-weight:800;font-size:clamp(1.7rem,4vw,2.6rem);line-height:1.06;letter-spacing:-.01em;margin:.5rem 0 1rem}
-.services .intro{color:var(--dim);max-width:52ch;margin-bottom:2.2rem}
-.svc{list-style:none;border-top:1px solid var(--hair)}
-.svc li{display:grid;grid-template-columns:4.2rem 1fr;gap:1rem;padding:1.05rem 0;border-bottom:1px solid var(--hair)}
-.svc .cnum{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--plan);padding-top:.25rem}
-.svc h3{font-family:var(--disp);font-weight:600;font-size:1.12rem}
-.svc p{color:var(--dim);font-size:.92rem;max-width:62ch;margin-top:.15rem}
-.svc .get{display:block;margin-top:.4rem;font-size:.8rem;color:#d9b58a}
+.services .intro{color:var(--dim);max-width:52ch;margin-bottom:2rem}
+.svc{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem 1.3rem}
+.svc li{display:block}
+.svc img{border-radius:.55rem;aspect-ratio:3/2;object-fit:cover;background:#0a1322}
+.svc h3{font-family:var(--disp);font-weight:600;font-size:1.05rem;margin-top:.7rem;display:flex;gap:.6rem;align-items:baseline}
+.svc .cnum{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--plan);flex:none}
+.svc .get{display:block;margin-top:.3rem;font-size:.8rem;color:#d9b58a;line-height:1.5}
 .svc .get b{color:var(--amber);font-weight:700}
-.svc li.wink .cnum,.svc li.wink h3{color:var(--dim);font-style:italic}
+.svc-wink{margin-top:1.6rem;padding-top:1rem;border-top:1px dashed var(--hair);font-size:.88rem;color:var(--dim);font-style:italic}
+.svc-wink .cnum{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;font-style:normal;color:var(--plan)}
+@media (max-width:860px){
+  .svc{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:1rem;margin-inline:calc(-1*clamp(1rem,4vw,2.5rem));padding-inline:clamp(1rem,4vw,2.5rem);padding-bottom:.6rem;scrollbar-width:thin}
+  .svc li{flex:0 0 76vw;scroll-snap-align:start}
+}
 
 /* ---------- craft ---------- */
 .craft{background:linear-gradient(var(--night-3),var(--night-4));padding-block:clamp(3.5rem,9vh,6.5rem)}
@@ -351,50 +356,40 @@ footer .mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em}
   <div class="wrap">
     <p class="chip">The board, read as a menu</p>
     <h2 id="services-title">Every job leaves a labelled breaker.</h2>
-    <p class="intro">No call-out menu of tricks — just the work a house actually needs, each circuit named, tested, and written on the board in a hand you can read.</p>
+    <p class="intro">No call-out menu of tricks — the work a house actually needs, shown rather than described.</p>
     <ol class="svc">
       <li>
-        <span class="cnum">C-01</span>
-        <div><h3>Rewires — full and partial</h3>
-        <p>Old rubber and cloth wiring out, new cable in, walls patched behind us. Staged so you live at home the whole time.</p>
-        <span class="get"><b>You get:</b> a house that passes any inspection you throw at it, and insurance that stays valid.</span></div>
+        <img src="assets/svc-rewire.webp" width="1200" height="800" loading="lazy" alt="New white cables running as a taut parallel loom through aligned holes in clean timber wall studs — a rewire in progress, staged so you live at home the whole time.">
+        <h3><span class="cnum">C-01</span>Rewires — full &amp; partial</h3>
+        <span class="get"><b>You get:</b> a house that passes any inspection, and insurance that stays valid.</span>
       </li>
       <li>
-        <span class="cnum">C-02</span>
-        <div><h3>Switchboard upgrades</h3>
-        <p>Fuse boxes and sun-perished boards replaced with safety switches on every circuit — labelled properly, photographed, documented.</p>
-        <span class="get"><b>You get:</b> a board your next electrician will silently thank you for.</span></div>
+        <img src="assets/svc-board.webp" width="1200" height="800" loading="lazy" alt="A brand-new switchboard enclosure freshly mounted, an electrician's hand resting on its edge — safety switches on every circuit, labelled, photographed, documented.">
+        <h3><span class="cnum">C-02</span>Switchboard upgrades</h3>
+        <span class="get"><b>You get:</b> a board your next electrician will silently thank you for.</span>
       </li>
       <li>
-        <span class="cnum">C-03</span>
-        <div><h3>Fault-finding</h3>
-        <p>The speciality. The light that flickers only on rainy Tuesdays, the breaker that trips at 6 pm, the warm patch on the wall. We don't guess; we measure until it confesses.</p>
-        <span class="get"><b>You get:</b> the actual cause, fixed — not a part swapped on a hunch.</span></div>
+        <img src="assets/svc-fault.webp" width="1200" height="800" loading="lazy" alt="Weathered hands holding two test probes to an open wall point by lamplight — fault-finding: the flicker on rainy Tuesdays, measured until it confesses.">
+        <h3><span class="cnum">C-03</span>Fault-finding</h3>
+        <span class="get"><b>You get:</b> the actual cause, fixed — not a part swapped on a hunch.</span>
       </li>
       <li>
-        <span class="cnum">C-04</span>
-        <div><h3>Safety switches &amp; smoke alarms</h3>
-        <p>RCDs tested to trip in milliseconds, interconnected photoelectric alarms, and a written record of both.</p>
-        <span class="get"><b>You get:</b> the 30&nbsp;ms that makes a fault an anecdote instead of an ambulance.</span></div>
+        <img src="assets/svc-alarm.webp" width="1200" height="800" loading="lazy" alt="A finger pressing the test button of a plain photoelectric smoke alarm on a clean ceiling — RCDs tested to trip in milliseconds, alarms interconnected, both on record.">
+        <h3><span class="cnum">C-04</span>Safety switches &amp; smoke alarms</h3>
+        <span class="get"><b>You get:</b> the 30&nbsp;ms that makes a fault an anecdote instead of an ambulance.</span>
       </li>
       <li>
-        <span class="cnum">C-05</span>
-        <div><h3>Lighting, power &amp; kitchens</h3>
-        <p>Circuits planned for how you actually live: benches that run the kettle, toaster and air-fryer at once, dimmers that don't buzz, light where you read.</p>
-        <span class="get"><b>You get:</b> rooms you want to be in after dark.</span></div>
+        <img src="assets/svc-pendant.webp" width="1200" height="800" loading="lazy" alt="Three pendant lights glowing warm over a timber kitchen bench in the evening — circuits planned for how you actually live: kettle, toaster and air-fryer at once, dimmers that don't buzz.">
+        <h3><span class="cnum">C-05</span>Lighting, power &amp; kitchens</h3>
+        <span class="get"><b>You get:</b> rooms you want to be in after dark.</span>
       </li>
       <li>
-        <span class="cnum">C-06</span>
-        <div><h3>EV chargers, sheds &amp; outdoors</h3>
-        <p>Dedicated charger circuits sized against your board's real headroom, weatherproof garden power, sensor lights that only mind their own business.</p>
-        <span class="get"><b>You get:</b> a car that's full every morning, on the cheap overnight rate.</span></div>
-      </li>
-      <li class="wink">
-        <span class="cnum">C-07</span>
-        <div><h3>Mystery switches</h3>
-        <p>Diagnosed and either given a job or retired with honour. Every house has one; three in ten stay unsolved industry-wide. Ours is better than that.</p></div>
+        <img src="assets/svc-ev.webp" width="1200" height="800" loading="lazy" alt="A plain matte-black EV charger with its cable looped neatly on a brick garage wall at dusk — a dedicated circuit sized against the board's real headroom.">
+        <h3><span class="cnum">C-06</span>EV chargers, sheds &amp; outdoors</h3>
+        <span class="get"><b>You get:</b> a car that's full every morning, on the cheap overnight rate.</span>
       </li>
     </ol>
+    <p class="svc-wink"><span class="cnum">C-07</span> · Mystery switches — diagnosed, given a job, or retired with honour. Every house has one.</p>
   </div>
 </section>
 

@@ -27,5 +27,47 @@
     "width": 1600,
     "height": 1067,
     "quality": 75
+  },
+  {
+    "file": "svc-rewire.webp",
+    "pinnedHash": "85496e05b6eed893f9f463c442d5a9232edec5b0593d962b24ed53e571e465de",
+    "width": 1200,
+    "height": 800,
+    "quality": 75
+  },
+  {
+    "file": "svc-board.webp",
+    "pinnedHash": "a441a402590bf17d17517b2045e11bb52723bb273fb161de5332d21c08a397f2",
+    "width": 1200,
+    "height": 800,
+    "quality": 75
+  },
+  {
+    "file": "svc-fault.webp",
+    "pinnedHash": "9b33f481c9cd35f16a54786d9ac14168ce9aa249317a4d22e15569d366c16191",
+    "width": 1200,
+    "height": 800,
+    "quality": 75
+  },
+  {
+    "file": "svc-alarm.webp",
+    "pinnedHash": "d52c24d4bc67f4febbf80e3d08002c699f4cf231631add05bfc237b8820de5a7",
+    "width": 1200,
+    "height": 800,
+    "quality": 75
+  },
+  {
+    "file": "svc-pendant.webp",
+    "pinnedHash": "6ececadc3facb599ae5ac578ff2a28a12b4daa6cbc1a56bac34d81a577d5faf1",
+    "width": 1200,
+    "height": 800,
+    "quality": 75
+  },
+  {
+    "file": "svc-ev.webp",
+    "pinnedHash": "652b81bda374ec135e8e11e3eb851fc9056ca29d92d7bb167dce224500f1bff2",
+    "width": 1200,
+    "height": 800,
+    "quality": 75
   }
 ]
