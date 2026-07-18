@@ -187,6 +187,20 @@ counterweight it. Portfolio positioning on the record: the nature-natural
 register (Ember & Rye · Orchard House · Sprig & Barrow · First Crack ·
 Stem & Vow) is this portfolio's A-strength; brutalist registers are
 competence, not signature.
+**The social-register dial (founder refinement, s62 wave-4 planning):** how
+much human presence a page earns scales with how SOCIAL the purchase is —
+never with a wish for faces. Social verticals (dining, cafés, salons, pet
+care, weddings — the product is experienced with or through people) earn
+human elements in frame (the ⑩ laughing-friends hero is the model: what's
+sold NEEDS people); nature/object still leads and people are the warmth
+layer — candid, absorbed, often close-crop or bokeh-soft (the ⑮ grammar),
+counted like the wink: one or two moments, seasoning not cast. Craft/trade
+verticals get ONE absorbed practitioner as the trust signal (the ⑯
+roofer / ⑫ dentist model: nature primary, the person secondary). Precision/
+B2B verticals (science consumables, logistics) keep humans minimal-to-absent
+— there the fresh twist is §8 applied hard: counter the vertical's
+cooped-up-indoor association with light, nature at the microscale
+(micrographs), and air, not with staff photos.
 
 **Show the consumable result (founder direction, s60 ⑬ fix round):** for any
 vertical whose product is tasted, worn, felt, or lived in, the page must show
