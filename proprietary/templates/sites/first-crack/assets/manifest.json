@@ -19,5 +19,61 @@
     "width": 1400,
     "height": 1050,
     "quality": 74
+  },
+  {
+    "file": "bean-green.webp",
+    "pinnedHash": "dec06ff34eccf7caaa8d05ae58bf340bd13f5959f5eef16fdf4d1dfb6cfed6c1",
+    "width": 1200,
+    "height": 1600,
+    "quality": 74
+  },
+  {
+    "file": "bean-yellow.webp",
+    "pinnedHash": "97f3432cb8f9116351f5e025b034974c0ff583b5492a98793b3705b7c7c84d45",
+    "width": 1200,
+    "height": 1600,
+    "quality": 74
+  },
+  {
+    "file": "bean-maillard.webp",
+    "pinnedHash": "d8bd79466da3432f14c30cf6a9f7ac15819de747e93ace42ee80b75a325877b7",
+    "width": 1200,
+    "height": 1600,
+    "quality": 74
+  },
+  {
+    "file": "bean-crack.webp",
+    "pinnedHash": "1258b8032223066f6422ff207dfd8ac3982ee155e4f4cf2a08269768ee17cecf",
+    "width": 1200,
+    "height": 1600,
+    "quality": 74
+  },
+  {
+    "file": "bean-drop.webp",
+    "pinnedHash": "d09f1f981a162d035fe1e42f81f46689bb37b06a2b2625d7f5687fada86e48ea",
+    "width": 1200,
+    "height": 1600,
+    "quality": 74
+  },
+  {
+    "file": "brew-filter.webp",
+    "pinnedHash": "6dd7538b37036b59514050301221055809176b11b00568fca363355fec15867d",
+    "width": 1400,
+    "height": 1050,
+    "quality": 74
+  },
+  {
+    "file": "brew-milk.webp",
+    "pinnedHash": "bed202d835e0daff8ed5b28bedbcdec179557c7f41d5d529a09dcfc51c857750",
+    "width": 1400,
+    "height": 1050,
+    "quality": 74
+  },
+  {
+    "file": "brew-cold.webp",
+    "pinnedHash": "47378aca34fd7747e00d4f4d4bdfada7f77ca6683cd346d9a429525b26a6c8dd",
+    "width": 1400,
+    "height": 1050,
+    "quality": 74
   }
 ]

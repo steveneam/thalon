@@ -90,9 +90,17 @@ describe("template portfolio", () => {
             .join("\n")
         : "";
       const styles = index + "\n" + css;
+      // The rule must sit in a selector that TARGETS img — a height:auto on
+      // any other element (⑬'s chartbox svg, s60) satisfied the old loose
+      // fallback while the images still stretched. Founder-caught twice now;
+      // the regex is the ratchet, keep it img-scoped. The sanctioned
+      // alternative stays: an img-scoped object-fit rule (loopwell's
+      // absolute cover closing image) cannot stretch either.
+      const imgScopedHeightAuto = /\bimg\b[^{}]*{[^}]*height\s*:\s*auto/.test(styles);
+      const imgScopedObjectFit = /\bimg\b[^{}]*{[^}]*object-fit\s*:/.test(styles);
       expect(
-        /img\s*{[^}]*height\s*:\s*auto/.test(styles) || /height\s*:\s*auto/.test(styles),
-        `${slug} has width/height-attributed <img> but no height:auto rule in index.html or css/ — narrowed images will stretch`,
+        imgScopedHeightAuto || imgScopedObjectFit,
+        `${slug} has width/height-attributed <img> but no img-scoped height:auto (or object-fit) rule in index.html or css/ — narrowed images will stretch`,
       ).toBe(true);
     }
   });

@@ -40,7 +40,7 @@ body{
   font-size:1.0625rem;line-height:1.6;
   -webkit-font-smoothing:antialiased;
 }
-img{max-width:100%;display:block}
+img{max-width:100%;height:auto;display:block}
 a{color:inherit}
 .mono{font-family:'Space Mono',monospace}
 .micro{font-family:'Space Mono',monospace;font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
@@ -117,6 +117,25 @@ nav.primary a:hover{color:var(--ink)}
 }
 .readout .cell b{display:block;font-size:1.05rem;font-weight:700;letter-spacing:0;font-variant-numeric:tabular-nums}
 .readout .cell.fc b{color:var(--ember-ink)}
+/* the split instrument: the curve reads left, the BEAN reads right — the
+   same roast twice, once for the log-lovers, once for everyone else */
+.roast-split{display:grid;gap:1rem;align-items:stretch}
+@media (min-width:64rem){.roast-split{grid-template-columns:1.55fr 1fr}}
+.bean-stage{position:relative;border:1px solid var(--hair);border-radius:.6rem;overflow:hidden;background:var(--card);display:flex;flex-direction:column}
+/* no-JS / pre-JS: the five states as an honest labelled filmstrip */
+.bean-frames{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--hair)}
+.bean-frames img{width:100%;height:100%;object-fit:cover;aspect-ratio:3/4}
+.bean-label{padding:.55rem .8rem;background:var(--card)}
+/* JS: the strip becomes a crossfade stack driven by the same scroll */
+@media (min-width:64rem){.js .bean-stage{min-height:16rem}}
+/* narrow: width leads, aspect follows — a min-height here would make
+   aspect-ratio derive WIDTH from it and push the page sideways (390 lesson) */
+@media (max-width:63.99rem){.js .bean-stage{width:100%;min-height:0;aspect-ratio:16/10}}
+.js .bean-frames{position:absolute;inset:0;display:block;background:none}
+.js .bean-frames img{position:absolute;inset:0;height:100%;aspect-ratio:auto;opacity:0;transition:opacity .45s ease}
+.js .bean-frames img.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.js .bean-frames img{transition:none}}
+.js .bean-label{position:absolute;left:.7rem;bottom:.7rem;padding:.3rem .6rem;border:1px solid var(--hair);border-radius:2rem;background:color-mix(in srgb,var(--card) 88%,transparent)}
 .chartbox{
   position:relative;border:1px solid var(--hair);border-radius:.6rem;
   overflow-x:auto;overflow-y:hidden;
@@ -170,6 +189,8 @@ nav.primary a:hover{color:var(--ink)}
 #coffees h2{font-size:clamp(1.7rem,4vw,2.4rem);margin-bottom:.4rem}
 .cup-grid{display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));margin-top:2rem}
 .cup{border:1px solid var(--hair);border-radius:.6rem;background:var(--card);padding:1.4rem;display:flex;flex-direction:column;gap:.9rem}
+.cup .brew{margin:-1.4rem -1.4rem .2rem;border-bottom:1px solid var(--hair)}
+.cup .brew img{border-radius:.55rem .55rem 0 0}
 .cup .roastlevel{display:flex;align-items:center;gap:.5rem}
 .cup .bean-dot{width:.85rem;height:.85rem;border-radius:50%;border:1px solid var(--ink-soft)}
 .cup h3{font-family:'Young Serif',serif;font-size:1.35rem;font-weight:400}
@@ -270,6 +291,7 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
             <span class="cell fc">FIRST CRACK<b id="ro-fc">08:52</b></span>
           </div>
         </div>
+        <div class="roast-split">
         <div class="chartbox">
           <svg viewBox="0 0 1000 560" role="img" aria-labelledby="curve-title curve-desc">
             <title id="curve-title">Roast curve for batch 447 — Ethiopia Guji, washed</title>
@@ -326,6 +348,17 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
             </g>
           </svg>
         </div>
+        <figure class="bean-stage" aria-label="What the bean looks like at each stage">
+          <div class="bean-frames">
+            <img src="assets/bean-green.webp" data-t="0" class="on" width="1200" height="1600" alt="Raw green coffee beans — matte pale sage, dense and hard." loading="lazy">
+            <img src="assets/bean-yellow.webp" data-t="180" width="1200" height="1600" alt="Beans in the drying stage — straw-yellow to tan, water leaving." loading="lazy">
+            <img src="assets/bean-maillard.webp" data-t="288" width="1200" height="1600" alt="Beans in the Maillard stage — mottled cinnamon brown, sugars browning." loading="lazy">
+            <img src="assets/bean-crack.webp" data-t="532" width="1200" height="1600" alt="Beans at first crack — medium brown, center seams split open." loading="lazy">
+            <img src="assets/bean-drop.webp" data-t="664" width="1200" height="1600" alt="Freshly dropped roasted beans — deep chestnut brown with an oily sheen." loading="lazy">
+          </div>
+          <figcaption class="bean-label micro" id="bean-label">GREEN → DRYING → MAILLARD → FIRST CRACK → DROP</figcaption>
+        </figure>
+        </div>
         <p class="narrate" id="narrate" aria-live="off">The whole curve, annotated — batch 447 as it ran last Tuesday. With JavaScript, scrolling replays the roast; without it, you're reading the finished log, which is the same truth.</p>
       </div>
     </div>
@@ -363,6 +396,7 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
     <p class="log-note">We cup every roast day, blind, against the last batch. The bars are our table's medians — an honest instrument, not a boast: nothing here scores itself 10.</p>
     <div class="cup-grid">
       <article class="cup">
+        <div class="brew"><img src="assets/brew-filter.webp" width="1400" height="1050" alt="What it brews like: filter coffee in a clear glass — translucent amber-ruby, tea-like clarity, a curl of steam." loading="lazy"></div>
         <div class="roastlevel"><span class="bean-dot" style="background:var(--gold)"></span><span class="micro">LIGHT · FILTER</span></div>
         <h3>Ethiopia Guji</h3>
         <p class="origin-line">Washed · 1,980 m · heirloom varieties</p>
@@ -375,6 +409,7 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
         <p class="price"><span>250 g</span><b>$21</b></p>
       </article>
       <article class="cup">
+        <div class="brew"><img src="assets/brew-milk.webp" width="1400" height="1050" alt="What it brews like: a white cup mid milk-pour — panela-brown coffee folding into cream, silky and round." loading="lazy"></div>
         <div class="roastlevel"><span class="bean-dot" style="background:var(--amber)"></span><span class="micro">MEDIUM · BOTH WAYS</span></div>
         <h3>Colombia Huila</h3>
         <p class="origin-line">Honey process · 1,700 m · pink bourbon</p>
@@ -387,6 +422,7 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
         <p class="price"><span>250 g</span><b>$19</b></p>
       </article>
       <article class="cup">
+        <div class="brew"><img src="assets/brew-cold.webp" width="1400" height="1050" alt="What it brews like: cold brew over clear ice — near-black with dark-cherry glints, condensation on the glass." loading="lazy"></div>
         <div class="roastlevel"><span class="bean-dot" style="background:var(--roast)"></span><span class="micro">DARKER · ESPRESSO</span></div>
         <h3>Sumatra Kerinci</h3>
         <p class="origin-line">Natural · 1,400 m · sigarar utang</p>
@@ -491,6 +527,15 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
   var roRor = document.getElementById('ro-ror');
   var narrate = document.getElementById('narrate');
   var header = document.querySelector('header.site');
+  var frames = Array.prototype.slice.call(document.querySelectorAll('.bean-frames img'));
+  var beanLabel = document.getElementById('bean-label');
+  var FRAME_LABELS = [
+    'GREEN · CHARGED 204°C',
+    'DRYING · YELLOWING',
+    'MAILLARD · BROWNING',
+    'FIRST CRACK · THE BEAN OPENS',
+    'DEVELOPED · DROPPED 214°C'
+  ];
 
   /* sampled bean-temp profile (t seconds → °C) for readout + RoR */
   var P = [[0,204],[30,160],[60,120],[92,96],[120,104],[180,118],[240,136],[288,152],[350,166],[420,176],[480,188],[532,196],[600,205],[664,214]];
@@ -540,6 +585,16 @@ footer a{color:#cbb493;text-decoration:none;border-bottom:1px solid #6b563e}
     flags.forEach(function (f) {
       f.classList.toggle('planted', t >= +f.getAttribute('data-t') - 1);
     });
+
+    // The bean panel walks the same clock as the curve.
+    var frameIdx = 0;
+    frames.forEach(function (img, i) {
+      if (t >= +img.getAttribute('data-t')) frameIdx = i;
+    });
+    frames.forEach(function (img, i) {
+      img.classList.toggle('on', i === frameIdx);
+    });
+    if (beanLabel && frames.length) beanLabel.textContent = FRAME_LABELS[frameIdx];
 
     for (var i = stages.length - 1; i >= 0; i--) {
       if (t >= stages[i][0]) {
