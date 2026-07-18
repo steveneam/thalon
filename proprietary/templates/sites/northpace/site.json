@@ -9,7 +9,7 @@
   },
   "paletteSeed": "polar night — deep blue-black (oklch(0.16 0.03 260)) under an aurora spectrum (green oklch(0.82 0.17 165) / teal / violet), closing on a cold pale dawn that arrives as a gradual grade over the final viewport, never a bright wall (tonal continuity, s35 rule); cold where the food site is warm",
   "typeDirection": "Anybody variable (wght 100–900 × wdth 50–150 — display type that sprints condensed and recovers wide, breathing on the cadence clock) + Spline Sans Mono (watch-face data, splits, timecodes) — both OFL, vendored",
-  "motionBudget": "one 180 steps-per-minute cadence clock phase-locks the whole page: living aurora canvas (rAF, pauses when hidden), glyph weight-breathing, choreographed section entrances, a scroll-driven interval-session scene, scroll-velocity type width — reduced-motion serves the complete static graded page, stills only, no pulse",
+  "motionBudget": "one 180 steps-per-minute cadence clock phase-locks the whole page: living aurora canvas (rAF, pauses when hidden), slow-tide glyph weight-breathing (swells on interaction only), choreographed section entrances, a scroll-driven interval-session scene, one once-per-visit snooze flicker at the dawn — method/program instruments are static; reduced-motion serves the complete static graded page, stills only, no pulse",
   "wave": 1,
   "built": "2026-07-14"
 }

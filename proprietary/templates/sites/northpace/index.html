@@ -258,6 +258,39 @@ html.js [data-rise].in{opacity:1;transform:none;
 .method-grid h3{margin-bottom:.7rem}
 .method-grid p{font-size:.95rem;color:var(--dim)}
 
+/* method instruments — the coaching prose shows its data (static, 0-motion) */
+.inst{margin-top:1.3rem;border-top:1px solid rgba(233,238,248,.10);padding-top:1.3rem}
+.inst-note{margin-top:.9rem;font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;max-width:none}
+.cad-rail{position:relative;height:76px;margin-top:.2rem}
+.cad-rail::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:rgba(233,238,248,.14)}
+.cad-rail::after{content:"";position:absolute;left:0;right:0;top:50%;height:10px;margin-top:-5px;
+  background:repeating-linear-gradient(90deg,rgba(233,238,248,.20) 0 1px,transparent 1px 10%)}
+.cad-mark{position:absolute;left:var(--x);transform:translateX(-50%);display:grid;justify-items:center;gap:.12rem;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:center;white-space:nowrap}
+.cad-mark b{font-size:1rem;font-weight:600;color:var(--ink);letter-spacing:.02em}
+.cad-mark .pip{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.cad-mark.you{top:0}
+.cad-mark.goal{bottom:0;color:var(--g)}
+.cad-mark.goal b{color:var(--g)}
+.cad-mark.goal .pip{background:var(--g);box-shadow:0 0 8px rgba(95,232,168,.7)}
+.readout{list-style:none;display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.1rem;font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+.readout li{border:1px solid rgba(233,238,248,.12);border-radius:6px;padding:.42em .65em;white-space:nowrap}
+.readout b{color:var(--ink);font-weight:600}
+.wk{list-style:none;display:grid;gap:.35rem;font-family:var(--mono);font-size:.7rem}
+.wk li{display:flex;align-items:baseline;gap:.7em;padding:.4em .7em;border:1px solid rgba(233,238,248,.10);border-radius:6px;color:var(--dim)}
+.wk .d{flex:0 0 2.8em;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.wk .s{flex:1;color:var(--ink)}
+.wk .why{letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.wk li.hot{border-color:rgba(95,232,168,.45)}
+.wk li.hot .s{color:var(--g)}
+.fortnight{display:flex;gap:4px;align-items:flex-end;height:76px;margin-top:.2rem}
+.fortnight i{flex:1;height:var(--h);background:rgba(233,238,248,.30);border-radius:2px 2px 0 0}
+.fortnight i.off{height:4px;background:rgba(233,238,248,.13)}
+.fortnight i.miss{height:var(--h);background:none;border:1px dashed rgba(233,238,248,.4);border-bottom:none;border-radius:2px 2px 0 0}
+.fortnight i.bent{background:rgba(84,216,216,.42)}
+.fn-read{margin-top:.9rem;font-family:var(--mono);font-size:.72rem;color:var(--dim);letter-spacing:.04em;max-width:none}
+.fn-read b{color:var(--t);font-weight:600}
+
 /* ---- programs ---- */
 .programs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
 .tier{
@@ -290,6 +323,12 @@ html.js [data-rise].in{opacity:1;transform:none;
   border-top:1px solid rgba(233,238,248,.12);padding-top:1.1rem;
 }
 .tier .price i{font-style:normal;display:block;font-size:.68rem;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;margin-top:.35rem}
+/* block shapes — each tier draws the 12 weeks it sells */
+.blockshape{display:block;width:100%;height:auto;margin-top:1.2rem}
+.blockshape rect{fill:rgba(233,238,248,.20)}
+.blockshape .q{fill:rgba(95,232,168,.55)}
+.blockshape .race{fill:var(--v)}
+.shape-note{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;margin-top:.55rem;max-width:none}
 
 /* ---- dawn close ---- */
 .dawn{
@@ -432,8 +471,9 @@ footer a:hover{color:var(--g)}
           <span class="chip"><b id="w-effort">rest</b> effort</span>
         </div>
         <svg class="session-svg" id="session-svg" viewBox="0 0 600 120" role="img" aria-label="Effort profile of the session: easy warm-up, four threshold repeats with floats between, easy cool-down">
-          <path class="base" d="M0,100 L75,100 L75,40 L150,40 L150,85 L175,85 L175,40 L250,40 L250,85 L275,85 L275,40 L350,40 L350,85 L375,85 L375,40 L450,40 L450,100 L600,100"/>
-          <path class="lit" id="lit-path" d="M0,100 L75,100 L75,40 L150,40 L150,85 L175,85 L175,40 L250,40 L250,85 L275,85 L275,40 L350,40 L350,85 L375,85 L375,40 L450,40 L450,100 L600,100"/>
+          <!-- time-linear: 1 minute = 12px, so the cursor and the plan agree at every boundary -->
+          <path class="base" d="M0,100 L120,100 L120,40 L192,40 L192,85 L216,85 L216,40 L288,40 L288,85 L312,85 L312,40 L384,40 L384,85 L408,85 L408,40 L480,40 L480,100 L600,100"/>
+          <path class="lit" id="lit-path" d="M0,100 L120,100 L120,40 L192,40 L192,85 L216,85 L216,40 L288,40 L288,85 L312,85 L312,40 L384,40 L384,85 L408,85 L408,40 L480,40 L480,100 L600,100"/>
           <circle class="cursor" id="cursor" r="5" cx="0" cy="100"/>
         </svg>
       </div>
@@ -449,7 +489,7 @@ footer a:hover{color:var(--g)}
           <li data-seg="7"><span>Rep 4 · 6:00</span><span class="eff">THRESHOLD</span></li>
           <li data-seg="8"><span>Cool down · 10:00</span><span class="eff">EASY</span></li>
         </ol>
-        <p class="plan-note">A mid-block Tuesday from the Threshold program · 48:00 total</p>
+        <p class="plan-note">A mid-block Tuesday from the Threshold program · 50:00 total</p>
       </div>
     </div>
   </div>
@@ -463,7 +503,7 @@ footer a:hover{color:var(--g)}
       <h2 id="h-hours" data-rise style="--i:1">The hours nobody sees</h2>
     </div>
     <figure class="band" data-rise style="--i:2">
-      <img src="assets/aurora-road.webp" width="1920" height="826" alt="An empty two-lane road at night running toward the horizon under a faint green aurora, a tiny runner far away on the centerline" loading="lazy">
+      <img src="assets/aurora-road.webp" width="1920" height="826" alt="An empty two-lane road at night running toward the horizon under a faint green aurora, the centerline vanishing into the dark" loading="lazy">
       <figcaption>04:58 · the north loop <i>out-and-back · 16 km</i></figcaption>
     </figure>
     <div class="hours-grid">
@@ -472,8 +512,8 @@ footer a:hover{color:var(--g)}
         <figcaption>05:12 · streetlight miles <i>steady · 10 km</i></figcaption>
       </figure>
       <figure data-rise style="--i:4">
-        <img src="assets/headlamp.webp" width="1400" height="788" alt="A runner seen from behind on a dark forest trail, a headlamp beam cutting through low fog ahead" loading="lazy">
-        <figcaption>05:47 · trail day <i>hills · 75 min</i></figcaption>
+        <img src="assets/first-light.webp" width="1400" height="788" alt="An everyday runner in a headband and long-sleeve top, side-on in an easy stride along a flat farm road at blue hour, mist low over the fields and the sun just reaching the horizon" loading="lazy">
+        <figcaption>05:47 · first light <i>long · 16 km</i></figcaption>
       </figure>
     </div>
   </div>
@@ -489,20 +529,49 @@ footer a:hover{color:var(--g)}
     <div class="method-grid">
       <article data-rise style="--i:2">
         <h3>Assess</h3>
-        <p>A gait video, your training history, and one easy run together.
-        We find your current cadence, your honest paces, and what your week
-        can actually hold.</p>
+        <p>A gait video, your training history, and one easy run together —
+        week one measures where you are.</p>
+        <div class="inst">
+          <div class="cad-rail" role="img" aria-label="Cadence rail: today 164 steps per minute, coached toward the 180 target">
+            <span class="cad-mark you" style="--x:35%"><b>164</b>today<i class="pip"></i></span>
+            <span class="cad-mark goal" style="--x:75%"><i class="pip"></i><b>180</b>target</span>
+          </div>
+          <ul class="readout">
+            <li>easy <b>6:10</b> /km</li>
+            <li>threshold <b>4:55</b> /km</li>
+            <li><b>4</b> mornings / wk</li>
+          </ul>
+        </div>
+        <p class="inst-note">week 0 readout · sample athlete</p>
       </article>
       <article data-rise style="--i:3">
         <h3>Build</h3>
-        <p>A weekly block in your inbox every Sunday night — sessions, paces,
-        and the why behind each one. Built around your mornings, not the
-        other way round.</p>
+        <p>A weekly block in your inbox every Sunday night — built around your
+        mornings, not the other way round.</p>
+        <div class="inst">
+          <ol class="wk">
+            <li><span class="d">Mon</span><span class="s">easy 40:00 + drills</span><span class="why">absorb</span></li>
+            <li class="hot"><span class="d">Tue</span><span class="s">4 × 6:00 threshold</span><span class="why">push</span></li>
+            <li><span class="d">Wed</span><span class="s">off</span><span class="why">adapt</span></li>
+            <li><span class="d">Thu</span><span class="s">hills 8 × 0:45</span><span class="why">strength</span></li>
+            <li><span class="d">Fri</span><span class="s">easy 40:00 + drills</span><span class="why">reset</span></li>
+            <li><span class="d">Sat</span><span class="s">long 16 km</span><span class="why">endure</span></li>
+            <li><span class="d">Sun</span><span class="s">off · next block lands 21:00</span><span class="why">inbox</span></li>
+          </ol>
+        </div>
+        <p class="inst-note">mid-block, Threshold program · Tuesday is the session above</p>
       </article>
       <article data-rise style="--i:4">
         <h3>Review</h3>
-        <p>We read your splits together every fortnight. The plan bends to the
-        life you actually had — missed days are data, not guilt.</p>
+        <p>Every fortnight we read your splits together, and the plan bends to
+        the life you actually had.</p>
+        <div class="inst">
+          <div class="fortnight" role="img" aria-label="Fourteen days of logged runs drawn as bars: day four is missed and stays on the chart as a dashed outline; every bar in week two sits ten percent lower — the plan bent">
+            <i style="--h:44%"></i><i style="--h:56%"></i><i class="off"></i><i class="miss" style="--h:33%"></i><i style="--h:44%"></i><i style="--h:100%"></i><i class="off"></i><i class="bent" style="--h:40%"></i><i class="bent" style="--h:50%"></i><i class="off"></i><i class="bent" style="--h:30%"></i><i class="bent" style="--h:40%"></i><i class="bent" style="--h:90%"></i><i class="off"></i>
+          </div>
+          <p class="fn-read">day 04 missed — data, not guilt · week two bends <b>−10%</b></p>
+        </div>
+        <p class="inst-note">a sample fortnight · reviewed together</p>
       </article>
     </div>
   </div>
@@ -525,6 +594,10 @@ footer a:hover{color:var(--g)}
           <li>Monthly plan review</li>
           <li>Group long run, Saturdays</li>
         </ul>
+        <svg class="blockshape" viewBox="0 0 236 34" role="img" aria-label="Twelve weeks of running volume drawn as bars: a steady aerobic rise with a cutback every fourth week">
+          <rect x="0" y="22" width="16" height="12"/><rect x="20" y="20" width="16" height="14"/><rect x="40" y="17" width="16" height="17"/><rect x="60" y="23" width="16" height="11"/><rect x="80" y="16" width="16" height="18"/><rect x="100" y="14" width="16" height="20"/><rect x="120" y="11" width="16" height="23"/><rect x="140" y="20" width="16" height="14"/><rect x="160" y="10" width="16" height="24"/><rect x="180" y="8" width="16" height="26"/><rect x="200" y="5" width="16" height="29"/><rect x="220" y="4" width="16" height="30"/>
+        </svg>
+        <p class="shape-note">12 weeks · cutback every 4th</p>
         <p class="price">$79 / month<i>sample plan pricing</i></p>
       </article>
       <article class="tier" data-rise style="--i:3">
@@ -536,6 +609,11 @@ footer a:hover{color:var(--g)}
           <li>Fortnightly splits review</li>
           <li>Race-pace rehearsals</li>
         </ul>
+        <svg class="blockshape" viewBox="0 0 236 34" role="img" aria-label="The same twelve-week build with each week's coached-quality share capped in green on the bars">
+          <rect x="0" y="22" width="16" height="12"/><rect x="20" y="20" width="16" height="14"/><rect x="40" y="17" width="16" height="17"/><rect x="60" y="23" width="16" height="11"/><rect x="80" y="16" width="16" height="18"/><rect x="100" y="14" width="16" height="20"/><rect x="120" y="11" width="16" height="23"/><rect x="140" y="20" width="16" height="14"/><rect x="160" y="10" width="16" height="24"/><rect x="180" y="8" width="16" height="26"/><rect x="200" y="5" width="16" height="29"/><rect x="220" y="4" width="16" height="30"/>
+          <rect class="q" x="0" y="22" width="16" height="3"/><rect class="q" x="20" y="20" width="16" height="4"/><rect class="q" x="40" y="17" width="16" height="5"/><rect class="q" x="60" y="23" width="16" height="3"/><rect class="q" x="80" y="16" width="16" height="5"/><rect class="q" x="100" y="14" width="16" height="6"/><rect class="q" x="120" y="11" width="16" height="6"/><rect class="q" x="140" y="20" width="16" height="4"/><rect class="q" x="160" y="10" width="16" height="7"/><rect class="q" x="180" y="8" width="16" height="7"/><rect class="q" x="200" y="5" width="16" height="8"/><rect class="q" x="220" y="4" width="16" height="8"/>
+        </svg>
+        <p class="shape-note">green = the quality share</p>
         <p class="price">$139 / month<i>sample plan pricing</i></p>
       </article>
       <article class="tier" data-rise style="--i:4">
@@ -547,6 +625,11 @@ footer a:hover{color:var(--g)}
           <li>Course-specific pacing plan</li>
           <li>Taper &amp; race-day protocol</li>
         </ul>
+        <svg class="blockshape" viewBox="0 0 236 34" role="img" aria-label="Twelve weeks of volume building to a peak at week ten, tapering for the final two weeks, race day starred at the end">
+          <rect x="0" y="18" width="16" height="16"/><rect x="20" y="16" width="16" height="18"/><rect x="40" y="13" width="16" height="21"/><rect x="60" y="20" width="16" height="14"/><rect x="80" y="12" width="16" height="22"/><rect x="100" y="10" width="16" height="24"/><rect x="120" y="7" width="16" height="27"/><rect x="140" y="17" width="16" height="17"/><rect x="160" y="6" width="16" height="28"/><rect x="180" y="4" width="16" height="30"/><rect x="200" y="14" width="16" height="20"/><rect x="220" y="22" width="16" height="12"/>
+          <path class="race" transform="translate(224,11) scale(.36)" d="M12 0l2.2 9.8L24 12l-9.8 2.2L12 24l-2.2-9.8L0 12l9.8-2.2z"/>
+        </svg>
+        <p class="shape-note">peak wk 10 · taper · race day</p>
         <p class="price">$219 / month<i>sample plan pricing</i></p>
       </article>
     </div>
@@ -567,7 +650,7 @@ footer a:hover{color:var(--g)}
     <div class="dawn-gap" aria-hidden="true"></div>
     <div class="arrived">
       <p class="kicker" data-rise style="--i:0">Northpace</p>
-      <p class="seeyou" data-rise style="--i:1" id="h-dawn">See you<br>at 05:00.</p>
+      <p class="seeyou" data-rise style="--i:1" id="h-dawn">See you<br>at <span id="alarm">05:00.</span></p>
       <div class="dawn-cta" data-rise style="--i:2">
         <a class="btn" href="mailto:hello@northpace.example">Book an intro run</a>
         <p class="dawn-note">Intro runs Tuesdays 05:30 · harbor loop · all paces</p>
@@ -689,6 +772,8 @@ footer a:hover{color:var(--g)}
     wordmarkY = wr.top + wr.height/2 + scrollY;
   }
   measureLetters();
+  /* letter centers move once the variable font arrives — re-measure or the swell misaligns */
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(measureLetters);
   var px=-1, py=-1;
   addEventListener('pointermove',function(e){ px=e.clientX; py=e.clientY; },{passive:true});
 
@@ -698,11 +783,28 @@ footer a:hover{color:var(--g)}
   var beatDot = document.getElementById('beat-dot');
 
   /* ---------- live clock (a fictional pre-dawn that creeps forward) ---------- */
-  var clockEl = document.getElementById('live-clock');
+  var clockEl = document.getElementById('live-clock'), lastClock='';
   function liveClock(t){
     var mins = 5*60+12 + Math.floor(t/60000);              /* 05:12 + a real minute per minute */
     var h=Math.floor(mins/60)%24, m=mins%60;
-    clockEl.textContent = (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+    var s=(h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+    if(s!==lastClock){ lastClock=s; clockEl.textContent=s; }
+  }
+
+  /* ---------- the snooze (once per visit, the alarm loses a round — then wins) ---------- */
+  var alarm = document.getElementById('alarm');
+  if(alarm && 'IntersectionObserver' in window){
+    var wio = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        wio.disconnect();
+        setTimeout(function(){
+          alarm.textContent = '05:09.';
+          setTimeout(function(){ alarm.textContent = '05:00.'; }, 620);
+        }, 1400);
+      });
+    },{threshold:.6});
+    wio.observe(alarm);
   }
 
   /* ---------- session scene (sticky needs room: the whole readout must fit the viewport) ---------- */
@@ -720,7 +822,7 @@ footer a:hover{color:var(--g)}
     ['Threshold',6,.9,850,64,'rep 4 of 4 — finish tall'],
     ['Cool down',10,.2,250,140,'easy — job done']
   ];
-  var TOTAL = 48;
+  var TOTAL = 50;
   var phaseWord = document.getElementById('phase-word'),
       phaseNote = document.getElementById('phase-note'),
       wElapsed = document.getElementById('w-elapsed'),
