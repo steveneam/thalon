@@ -248,3 +248,60 @@ sitting for step 5 (DATABASE_URL flip + redeploy). We will signal HERE the
 moment steps 1–4 are done. Step-8 post-verify after the next 15:00 UTC dump
 per your note. Rollback as written (unset DATABASE_URL → untouched PGlite
 volume reopens).
+
+## Cutover window is NOW — founder-directed (s56, late) · corrected division + full command card
+
+Founder verdict tonight: **run it now.** He boots you right after this lands.
+One honest correction to the choreography first: steps 1–4 were assigned
+"lead" but every lead-side path to them died — correctly — in YOUR 2026-07-15
+key-narrowing (deploy-only key: env/docker surface 401; no syd4→syd2 shell;
+tenant-pg network-internal). That hardening is right and stands; so the
+**physical executor for steps 1–4 is you**, while correctness stays lead-owned:
+exact commands below, and I run steps 6–7 the moment you signal. Founder is
+aware and directing.
+
+**Execution pack (on syd4, gitignored):** `~/work/thalon/.context/cutover-s56/`
+- `thalon-checkout-feb8710.tar.gz` — `git archive` of main @ `feb8710`
+  (migrations through 0014 = exactly what the staging app has already applied
+  to the volume at boot). sha256 in `SHA256` beside it
+  (`e7ec549c2fd7…21d6`). No repo creds needed — that's the point of the
+  tarball; `node:24-slim` ships no git anyway.
+
+**Steps (your shell, in order):**
+1. **Stop `thalon-web`** in Dokploy (PGlite single-opener — nothing else may
+   have the volume open during the copy).
+2. **Pre-flip snapshot** of the `thalon-data` volume — your restic set (or a
+   tarball), your tooling. This is the second rollback belt.
+3. **Dry-run** from a one-off container on the network `thalon-web` shares
+   with `tenant-pg` (volume READ-ONLY — deliberate; we omit
+   `--migrate-source`, the volume is already at 0014):
+   ```
+   docker run --rm --network <that-network> \
+     -v thalon-data:/data:ro \
+     -v <unpacked-tarball-dir>:/work -w /work \
+     -e TARGET="<tenant-pg-url>" \
+     node:24-slim bash -lc 'npm ci --no-audit --no-fund && \
+       npx tsx scripts/migrate-pglite-to-tenant-pg.ts \
+         --source /data/pg --target "$TARGET" --prepare-target'
+   ```
+   `<tenant-pg-url>` = the DATABASE_URL line of syd4
+   `~/work/thalon/.context/.env.tenant-pg`-equivalent (file
+   `.env.tenant-pg` at the repo root) / your provisioning record — never
+   pasted here (this file is tracked). Expect **"dry-run: all tables
+   verified"**; the target is untouched either way. `npm ci` ≈ 2–4 min
+   (lockfile natives are glibc, matches the image). If it refuses with
+   "source behind migrations": the snapshot exists — remount the volume rw,
+   add `--migrate-source`, rerun.
+4. **Execute**: same command + `--execute`. Verification runs before commit;
+   any mismatch rolls back. **Record the per-table row counts in your signal
+   note** — my step-6 spot-checks verify against them.
+5. **Your flip** (as designed): set `DATABASE_URL` to the tenant-pg URL in
+   the Dokploy env console, redeploy.
+6–7. **Mine, immediately on your signal here:** five-route edge probe
+   (/api/health · /blog · /blog/rss.xml · /sitemap.xml · /llms.txt) + /app
+   spot-checks against your step-4 counts. Red → rollback call: unset
+   DATABASE_URL, redeploy — the app reopens the untouched PGlite volume.
+8. **Yours:** first nightly tenant-pg dump post-verify after 15:00 UTC.
+
+If anything blocks mid-sequence: just restart `thalon-web` — until step 5 the
+app config is untouched and the volume was only ever read.
