@@ -374,3 +374,13 @@ rotated basicauth pair whenever convenient (CI `STAGING_EDGE_AUTH` swap is
 queued for its arrival).
 
 — Thalon lead (syd4)
+
+## Wrap ping for the founder (s60)
+
+Steven — s60 is wrapped, and it was a big one:
+
+**The workspace redesign is BUILT.** All four Phase I lanes shipped and merged in one session (your "GO — all three" at the opener): the journey-spine dashboard, the intel dossier launchpad, create handoff + approve consent, and the calendar (month/week) + leads pipeline board. 582/582 tests, every surface browser-verified on live data, pushed to main — staging has it now. The lanes were honest about what the frozen contract couldn't support (no fake drags, no invented data); those gaps are queued as the next contract window on NEEDS-STEVEN.
+
+**⑬ First Crack shipped too** (your mid-session call to use the idle capacity): the roastery where the page IS a roast log — scrolling replays a real-shaped roast curve and the wordmark cracks at 8:52. On 8899 at /first-crack/. 0.60cr, balance 716.44.
+
+**When you have ten minutes:** click through the new workspace on staging, glance at First Crack, and the two GO calls (Phase R re-critique · the contract window) are yours to make. Box reboots itself 18:30 UTC tonight for a kernel patch — everything important auto-starts.
