@@ -5,5 +5,5 @@
   { "file": "kitchen.webp",              "pinnedHash": "ba551abeee71dbcca7da047643f9c77efae392672d78950ca3918596cff0e475", "width": 980,  "height": 1470, "quality": 76 },
   { "file": "garden-room.webp",          "pinnedHash": "bd3439c67761515ad54f80ec7192283ebd74ad76c5def0e7389451587b08edf2", "width": 980,  "height": 1470, "quality": 76 },
   { "file": "stair.webp",                "pinnedHash": "e2965550af95a675ec9806195c8f72c10cc3649f69c09626e98d8b1a71d124a3", "width": 980,  "height": 1470, "quality": 76 },
-  { "file": "keys.webp",                 "pinnedHash": "59e6871aee3a06e8028da8f46f17d91b9d9878c7424bfca3cfbda1ff11e93752", "width": 1400, "height": 933,  "quality": 76 }
+  { "file": "keys-heritage.webp",        "pinnedHash": "cca9f82183aa35261f76d20f0609bf4bf7654441929d7394dad6a84db7db1133", "width": 1400, "height": 933,  "quality": 76 }
 ]

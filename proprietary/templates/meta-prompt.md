@@ -95,7 +95,11 @@ stripes across takes even when every "no logos" negative is stacked (three
 ⑭ rejects in a row); woven/collared workwear attracts invented branding,
 plain KNIT garments resist it — cast the subject in a matte knit ("plain
 waffle-knit jumper, one continuous surface") instead of negative-prompting
-the shirt. A near-clean take with one small garbled patch may take a
+the shirt. Corollary (Hartline re-pass, s62): FLAT METAL BLANKS are
+printable surfaces — modern key heads came back stamped with pseudo-brand
+text even under "no lettering" (and the wave-1 leather fob embossed
+itself); the compose-out is an object with no flat face at all (antique
+skeleton keys, turned-away heads, the fob hidden under the keys). A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so. Non-hero, non-text slots stay the
 builder's call. Browsing published sites for *inspiration* is
 fine; **downloading reference images into the pipeline is forbidden** — every
