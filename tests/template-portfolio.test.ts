@@ -16,9 +16,26 @@ import { describe, expect, it } from "vitest";
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const sitesDir = path.join(repoRoot, "proprietary", "templates", "sites");
 
+/**
+ * s63: the pre-plan-mandatory loop (meta-prompt §How-to step 3) legitimately
+ * creates a site dir holding ONLY its PREPLAN.md before any build exists.
+ * Such dirs are the recognized pre-plan stage and are exempt from the
+ * built-site checks — but ONLY in that exact shape; a dir with any other
+ * content and no index.html is still a structural failure (asserted below).
+ */
+function isPreplanStage(dir: string): boolean {
+  return (
+    !existsSync(path.join(dir, "index.html")) &&
+    readdirSync(dir).every((entry) => entry === "PREPLAN.md")
+  );
+}
+
 function siteSlugs(): string[] {
   if (!existsSync(sitesDir)) return [];
-  return readdirSync(sitesDir).filter((d) => statSync(path.join(sitesDir, d)).isDirectory());
+  return readdirSync(sitesDir).filter(
+    (d) =>
+      statSync(path.join(sitesDir, d)).isDirectory() && !isPreplanStage(path.join(sitesDir, d)),
+  );
 }
 
 /** src/href/srcset/url() targets that leave the site's own directory. */
@@ -40,6 +57,19 @@ function htmlFiles(slug: string): string[] {
 
 describe("template portfolio", () => {
   const slugs = siteSlugs();
+
+  it("a dir without a built site is EXACTLY the pre-plan stage (PREPLAN.md alone) — anything else is structural garbage", () => {
+    if (!existsSync(sitesDir)) return;
+    for (const d of readdirSync(sitesDir)) {
+      const dir = path.join(sitesDir, d);
+      if (!statSync(dir).isDirectory()) continue;
+      if (existsSync(path.join(dir, "index.html"))) continue; // built site — checked below
+      expect(
+        readdirSync(dir),
+        `${d}: no index.html, so this dir must hold ONLY PREPLAN.md (the s63 pre-plan stage)`,
+      ).toEqual(["PREPLAN.md"]);
+    }
+  });
 
   it("every site has the contract structure (site.json, index, guide, manifest)", () => {
     for (const slug of slugs) {
