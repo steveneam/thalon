@@ -99,6 +99,35 @@ backgrounds are encouraged wherever they serve the drawn axes — a safe page
 is a failed page in this portfolio. The perf floors and reduced-motion
 alternatives above are the only brakes.
 
+**The representation ladder (founder directive, s55 wave-2 checkpoint —
+his "most important point"):** for every load-bearing sentence or paragraph,
+ask: can this be *shown* instead — a minted image, a code-drawn instrument,
+an animation (imagination, real, or abstract)? If yes, show it. Representing
+information visually is not reducing it; it is the same information in a more
+visual, more artistic form. The bar: the visual must carry the same
+information load the words did (the ⑩ hair try-on replaced both a swatch
+circle AND a paragraph of imagination with direct evidence) — decorative
+substitution that drops the information is the stock-photo failure this rule
+exists to beat. Prefer code-drawn instruments when the information is
+data-shaped (0cr, and it can respond to the visitor); mint when it is
+world-shaped; the perf floors, reduced-motion alternatives, and honesty gates
+apply unchanged.
+
+**Casting & social register (founder-taught, s55):** imagery is read
+socially before it is read aesthetically. (1) Cast for the audience's trust —
+who appears in the frame shapes perceived safety and warmth (a woman walking
+the dogs reads calm and safe for pet care; two friends laughing reads joy
+where a posed model reads advertisement). (2) Landing heroes never stare
+into the camera — the Mona Lisa effect confronts the visitor; candid,
+absorbed subjects invite them. (3) Check every image's countable claims
+against the copy's promises before keeping it (a five-dog photo under a
+"four per walker, never more" pledge is an honesty fail the build pass must
+catch, not the founder). (4) Playful marginalia in the vertical's own visual
+language earns warmth cheaply (paw prints, formula annotations, stamped
+marks). (5) Count-anchoring: models overshoot subject counts even against
+"EXACTLY N, count them" — when a count is capped by copy, prompt for *fewer*
+than the cap so the overshoot lands inside it.
+
 **Hero register rule (founder direction 2026-07-15 s37):** the first
 impression must be *real*. A code-drawn model, schematic, or illustration
 cannot carry the hero on a premium/boutique vertical — it reads cartoon, not
