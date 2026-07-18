@@ -111,6 +111,16 @@ export const sourceMetrics = pgTable(
   ],
 );
 
+/**
+ * The run lifecycle words (mirrored byte-for-byte by the status check below —
+ * `inList` keeps them in lockstep). Unlike drafts, run status is operator
+ * telemetry, not a safety gate: nothing may branch on it, so its writer
+ * (`fanoutRuns.setStatus`) validates the word but deliberately enforces no
+ * transition graph — status bookkeeping must never veto a live generation run.
+ */
+export const FANOUT_RUN_STATUSES = ["pending", "running", "complete", "failed"] as const;
+export type FanoutRunStatus = (typeof FANOUT_RUN_STATUSES)[number];
+
 /** One row per fan-out invocation: the idempotency + provenance anchor; groups the N drafts of one run (the Approve batch unit). */
 export const fanoutRuns = pgTable(
   "fanout_runs",
@@ -131,6 +141,7 @@ export const fanoutRuns = pgTable(
     model: text("model").notNull(),
     params: jsonb("params").notNull().default({}),
     generationKey: text("generation_key").notNull().unique(),
+    /** Lifecycle word from FANOUT_RUN_STATUSES. Written only via fanoutRuns.setStatus (events-audited); operator telemetry, never a control-flow input. */
     status: text("status").notNull().default("pending"),
     /** B4.5 operator triage: the LAST irrecoverable failure on this run, verbatim; null once a later pass on the same run succeeds. Written only via fanoutRuns.recordLastError (events-audited). */
     lastError: text("last_error"),
@@ -142,7 +153,7 @@ export const fanoutRuns = pgTable(
     index("fanout_runs_tenant_created_idx").on(t.tenantId, t.createdAt),
     check(
       "fanout_runs_status_check",
-      sql.raw(`status in ('pending', 'running', 'complete', 'failed')`),
+      sql.raw(`status in (${inList(FANOUT_RUN_STATUSES)})`),
     ),
     tenantIsolation(),
   ],

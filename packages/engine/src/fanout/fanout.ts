@@ -179,6 +179,11 @@ export async function runFanout(
     platformsToGenerate = platforms.filter((p) => !existingPlatforms.has(p));
     if (platformsToGenerate.length === 0) {
       // Complete — zero generation calls, exactly like B1.1's fast path.
+      // Self-heal: rows written before status had a writer (or orphaned by a
+      // crash after their last draft persisted) get the honest word on touch.
+      if (existingRun.status !== "complete") {
+        await repos.fanoutRuns.setStatus(ctx, existingRun.id, "complete");
+      }
       return { runId: existingRun.id, created: false, drafts: existingDrafts };
     }
     runId = existingRun.id;
@@ -205,6 +210,10 @@ export async function runFanout(
     runGenerationKey = run.generationKey;
     created = true;
   }
+
+  // Generation work is definitely ahead (the fast path returned above), so
+  // the run is `running` — fresh, backfill replay, and crash-resume alike.
+  await repos.fanoutRuns.setStatus(ctx, runId, "running");
 
   const chunks = await repos.sourceChunks.listBySource(ctx, source.id);
   const sourceText = precomputedSourceText ?? chunks.map((chunk) => chunk.text).join("\n\n");
@@ -247,6 +256,7 @@ export async function runFanout(
   if (existingRun?.lastError) {
     await repos.fanoutRuns.recordLastError(ctx, runId, null);
   }
+  await repos.fanoutRuns.setStatus(ctx, runId, "complete");
 
   return { runId, created, drafts: [...existingDrafts, ...generated] };
 }
@@ -318,7 +328,10 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     );
     // B4.5: the run row keeps the failure for operator triage — recorded
     // BEFORE the throw so a caller that crashes still leaves the trail.
+    // lastError lands first: a crash between the two writes leaves `running`
+    // + the message (backfillable) rather than `failed` with no explanation.
     await guard.repos.fanoutRuns.recordLastError(guard.ctx, spec.runId, error.message);
+    await guard.repos.fanoutRuns.setStatus(guard.ctx, spec.runId, "failed");
     throw error;
   }
 

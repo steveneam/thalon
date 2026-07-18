@@ -1,7 +1,7 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { and, desc, eq } from "drizzle-orm";
 import { NotFoundError } from "../errors";
-import { fanoutRuns } from "../schema";
+import { FANOUT_RUN_STATUSES, fanoutRuns, type FanoutRunStatus } from "../schema";
 import type { Db, FanoutRun } from "../types";
 import { appendEvent } from "./events";
 
@@ -93,6 +93,43 @@ export function fanoutRunsRepo(db: Db) {
               ? "fanout_run.last_error_cleared"
               : "fanout_run.last_error_recorded",
           payload: message === null ? {} : { message },
+        });
+        return updated;
+      });
+    },
+
+    /**
+     * THE one writer of `fanout_runs.status` (the lifecycle words in
+     * FANOUT_RUN_STATUSES). Validates the word and audits the change (I4)
+     * but deliberately enforces NO transition graph — run status is operator
+     * telemetry, never a control-flow input, so bookkeeping must never veto
+     * a live generation run. Same-status calls are idempotent no-ops (no
+     * write, no event) so replayed orchestrations don't spam the events spine.
+     */
+    async setStatus(ctx: TenantCtx, runId: string, status: FanoutRunStatus): Promise<FanoutRun> {
+      if (!FANOUT_RUN_STATUSES.includes(status)) {
+        throw new Error(
+          `unknown fanout_run status "${status}" — expected one of: ${FANOUT_RUN_STATUSES.join(", ")}`,
+        );
+      }
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(fanoutRuns)
+          .where(and(eq(fanoutRuns.id, runId), eq(fanoutRuns.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("fanout_run", runId);
+        if (current.status === status) return current;
+        const [updated] = await tx
+          .update(fanoutRuns)
+          .set({ status })
+          .where(and(eq(fanoutRuns.id, runId), eq(fanoutRuns.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "fanout_run",
+          entityId: runId,
+          event: "fanout_run.status_changed",
+          payload: { from: current.status, to: status },
         });
         return updated;
       });

@@ -61,6 +61,15 @@ export function describeActivity(item: ActivityItem): ActivityView {
       };
     case "fanout_run.last_error_cleared":
       return { summary: "Run recovered — a later pass backfilled it", href, tone: "engine" };
+    case "fanout_run.status_changed": {
+      // The failure ALERT is last_error_recorded (it carries the message);
+      // this row is lifecycle bookkeeping, so it stays engine-tone throughout.
+      const to = payloadStr(p, "to");
+      if (to === "running") return { summary: "Run started generating", href, tone: "engine" };
+      if (to === "complete") return { summary: "Run completed", href, tone: "engine" };
+      if (to === "failed") return { summary: "Run marked failed", href, tone: "engine" };
+      return { summary: `Run status: ${to ?? "updated"}`, href, tone: "engine" };
+    }
     case "draft.created":
       return {
         summary: `Engine drafted for ${payloadStr(p, "platform") ?? "a platform"}`,

@@ -281,9 +281,12 @@ describe("runWaterfall (B2.3 end-to-end, keyless + networkless)", () => {
     const runEventsBefore = await repos.events.list(ctx, { entityType: "fanout_run" });
     expect(runEventsBefore.map((e) => e.event)).toEqual([
       "fanout_run.created",
+      "fanout_run.status_changed", // pending → running
       "fanout_run.last_error_recorded", // B4.5: x's failure is on the run row for triage
+      "fanout_run.status_changed", // running → failed
     ]);
     const runIdBefore = runEventsBefore[0].entityId;
+    expect((await repos.fanoutRuns.get(ctx, runIdBefore))?.status).toBe("failed");
     // linkedin selected both candidate windows -> 2 persisted drafts -> 2 events.
     const draftEventsBefore = await repos.events.list(ctx, { entityType: "draft" });
     expect(draftEventsBefore).toHaveLength(2);
@@ -317,8 +320,11 @@ describe("runWaterfall (B2.3 end-to-end, keyless + networkless)", () => {
     const drafts = await repos.drafts.listByRun(ctx, runIdBefore);
     expect(drafts).toHaveLength(4);
 
-    // B4.5: the completed backfill cleared the run's triage record.
-    expect((await repos.fanoutRuns.get(ctx, runIdBefore))?.lastError).toBeNull();
+    // B4.5: the completed backfill cleared the run's triage record; s63: and
+    // the lifecycle word followed (failed → running → complete).
+    const healed = await repos.fanoutRuns.get(ctx, runIdBefore);
+    expect(healed?.lastError).toBeNull();
+    expect(healed?.status).toBe("complete");
   });
 
   it("a clip_plan draft cannot reach queued or approved without passing through the judge", async () => {

@@ -29,6 +29,16 @@ describe("describeActivity", () => {
     expect(view.href).toBe("/app/runs?run=e-1");
   });
 
+  it("run lifecycle rows stay engine-tone — the failure ALERT is last_error_recorded, never doubled", () => {
+    expect(describeActivity(item("fanout_run.status_changed", "fanout_run", { from: "pending", to: "running" }))).toEqual({
+      summary: "Run started generating",
+      href: "/app/runs?run=e-1",
+      tone: "engine",
+    });
+    expect(describeActivity(item("fanout_run.status_changed", "fanout_run", { from: "running", to: "complete" })).summary).toBe("Run completed");
+    expect(describeActivity(item("fanout_run.status_changed", "fanout_run", { from: "running", to: "failed" })).tone).toBe("engine");
+  });
+
   it("credits operator-added vs engine-compiled keyword targets", () => {
     expect(
       describeActivity(item("search_target.created", "search_target", { keyword: "a", origin: "operator" })).tone,

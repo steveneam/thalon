@@ -92,6 +92,8 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
     expect(run?.tenantId).toBe(ctx.tenantId);
     expect(run?.promptVersion).toBe("fanout-generate.v1");
     expect(run?.brandProfileVersion).toBe(1);
+    // s63: the lifecycle word is real now — a finished run says so.
+    expect(run?.status).toBe("complete");
   });
 
   it("prefers a tenant-supplied platform profile over the shipped file default", async () => {
@@ -138,6 +140,31 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
     expect(drafts).toHaveLength(2);
   });
 
+  it("self-heals a pre-lifecycle row: a fast-path replay over a fully-drafted run marks it complete without a generation call", async () => {
+    const { ctx, repos, sourceId } = await setup();
+    const calls: string[] = [];
+    const driver = countingDriver(calls);
+    const first = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["linkedin", "x"] },
+      { driver, capTokens: 1_000_000 },
+    );
+    // Simulate a row written before status had a writer (the W-audit's three
+    // "pending" runs with judged drafts).
+    await repos.fanoutRuns.setStatus(ctx, first.runId, "pending");
+
+    const second = await runFanout(
+      ctx,
+      repos,
+      { sourceId, platforms: ["linkedin", "x"] },
+      { driver, capTokens: 1_000_000 },
+    );
+    expect(second.runId).toBe(first.runId);
+    expect(calls).toHaveLength(2); // still only the first call's generations
+    expect((await repos.fanoutRuns.get(ctx, first.runId))?.status).toBe("complete");
+  });
+
   it("backfills only the platforms missing after a prior irrecoverable failure, reusing the same run and the untouched draft", async () => {
     const { ctx, repos, sourceId } = await setup();
     const fake = createFakeDraftGeneratorDriver();
@@ -170,9 +197,12 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
     const runEventsBefore = await repos.events.list(ctx, { entityType: "fanout_run" });
     expect(runEventsBefore.map((e) => e.event)).toEqual([
       "fanout_run.created",
+      "fanout_run.status_changed", // pending → running
       "fanout_run.last_error_recorded", // B4.5: x's failure is on the run row for triage
+      "fanout_run.status_changed", // running → failed
     ]);
     const runIdBefore = runEventsBefore[0].entityId;
+    expect((await repos.fanoutRuns.get(ctx, runIdBefore))?.status).toBe("failed");
     const draftEventsBefore = await repos.events.list(ctx, { entityType: "draft" });
     expect(draftEventsBefore).toHaveLength(1);
     const linkedinDraftIdBefore = draftEventsBefore[0].entityId;
@@ -202,8 +232,11 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
     const drafts = await repos.drafts.listByRun(ctx, runIdBefore);
     expect(drafts).toHaveLength(2);
 
-    // B4.5: the completed backfill cleared the run's triage record.
-    expect((await repos.fanoutRuns.get(ctx, runIdBefore))?.lastError).toBeNull();
+    // B4.5: the completed backfill cleared the run's triage record; s63: and
+    // the lifecycle word followed (failed → running → complete).
+    const healed = await repos.fanoutRuns.get(ctx, runIdBefore);
+    expect(healed?.lastError).toBeNull();
+    expect(healed?.status).toBe("complete");
   });
 
   it("a fanned-out draft cannot reach queued or approved without passing through the judge", async () => {

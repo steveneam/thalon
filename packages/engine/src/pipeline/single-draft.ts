@@ -85,6 +85,11 @@ export async function runSingleDraftPipeline<TOut>(
   if (existingRun) {
     const existingDrafts = await repos.drafts.listByRun(ctx, existingRun.id);
     if (existingDrafts.length > 0) {
+      // Self-heal: rows written before status had a writer (or orphaned by a
+      // crash after the draft persisted) get the honest word on touch.
+      if (existingRun.status !== "complete") {
+        await repos.fanoutRuns.setStatus(ctx, existingRun.id, "complete");
+      }
       return { runId: existingRun.id, created: false, draft: existingDrafts[0] };
     }
     runId = existingRun.id;
@@ -97,6 +102,10 @@ export async function runSingleDraftPipeline<TOut>(
     created = true;
   }
 
+  // Generation work is definitely ahead (the fast path returned above), so
+  // the run is `running` — fresh, backfill replay, and crash-resume alike.
+  await repos.fanoutRuns.setStatus(ctx, runId, "running");
+
   const result = await plan.generate();
   if (!result.output) {
     const error = new IrrecoverableGenerationError(
@@ -106,7 +115,10 @@ export async function runSingleDraftPipeline<TOut>(
     );
     // B4.5: the run row keeps the failure for operator triage — recorded
     // BEFORE the throw so a caller that crashes still leaves the trail.
+    // lastError lands first: a crash between the two writes leaves `running`
+    // + the message (backfillable) rather than `failed` with no explanation.
     await repos.fanoutRuns.recordLastError(ctx, runId, error.message);
+    await repos.fanoutRuns.setStatus(ctx, runId, "failed");
     throw error;
   }
 
@@ -126,6 +138,7 @@ export async function runSingleDraftPipeline<TOut>(
   if (existingRun?.lastError) {
     await repos.fanoutRuns.recordLastError(ctx, runId, null);
   }
+  await repos.fanoutRuns.setStatus(ctx, runId, "complete");
 
   return { runId, created, draft };
 }

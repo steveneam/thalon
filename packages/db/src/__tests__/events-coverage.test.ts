@@ -110,6 +110,19 @@ describe("events coverage (B4.4 ratchet)", () => {
     expect((recorded?.payload as { message: string }).message).toBe("boom");
   });
 
+  it("fanoutRuns.setStatus emits fanout_run.status_changed with {from, to}", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    const [run] = await repos.fanoutRuns.list(fx.ctx);
+    await repos.fanoutRuns.setStatus(fx.ctx, run.id, "running");
+    const rows = await repos.events.list(fx.ctx, {
+      entityType: "fanout_run",
+      entityId: run.id,
+    });
+    const changed = rows.find((r) => r.event === "fanout_run.status_changed");
+    expect(changed?.payload).toEqual({ from: "pending", to: "running" });
+  });
+
   it("usage-ledger budget breach emits budget.exceeded", async () => {
     fx = await fixture();
     const { repos } = fx.handle;

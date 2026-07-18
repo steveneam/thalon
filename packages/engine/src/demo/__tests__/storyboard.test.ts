@@ -151,7 +151,9 @@ describe("generateDemoPlan (B2.5 stage 3 end-to-end, keyless + networkless)", ()
     const runEvents = await repos.events.list(ctx, { entityType: "fanout_run" });
     expect(runEvents.map((e) => e.event)).toEqual([
       "fanout_run.created",
+      "fanout_run.status_changed", // pending → running
       "fanout_run.last_error_recorded",
+      "fanout_run.status_changed", // running → failed
     ]);
 
     const second = await generateDemoPlan(
