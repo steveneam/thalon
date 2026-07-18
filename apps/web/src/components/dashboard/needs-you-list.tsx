@@ -151,9 +151,11 @@ export function NeedsYouList({ counts, status, plan, onRetry, now }: NeedsYouLis
             </button>
           ))}
       </div>
+      {/* The count lives in the header chip; the footer states only the
+          bound (a row can fold several items, so a second number would lie). */}
       {status === "success" && rows.length > 0 && (
         <p className="border-t border-border px-4 py-2 text-2xs text-muted-foreground">
-          showing all {rows.length} · the list is bounded — the page never grows with it
+          the list is bounded — the page never grows with it
         </p>
       )}
     </section>

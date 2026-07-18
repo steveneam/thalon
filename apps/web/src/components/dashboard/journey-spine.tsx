@@ -168,8 +168,11 @@ export function JourneySpine({ counts, plan, trends, unknown, now }: JourneySpin
           <div>
             <StationCount value={trends ? trends.cards.length : null} />
             <p className="text-xs text-muted-foreground">
-              topics rising in {trends ? trends.areas.length : "–"}{" "}
-              {trends?.areas.length === 1 ? "area" : "areas"}
+              {trends && trends.areas.length === 0
+                ? "topics rising — no areas watched yet"
+                : `topics rising in ${trends ? trends.areas.length : "–"} ${
+                    trends?.areas.length === 1 ? "area" : "areas"
+                  }`}
             </p>
           </div>
           {topCard && (
@@ -263,7 +266,8 @@ export function JourneySpine({ counts, plan, trends, unknown, now }: JourneySpin
           )}
           {!unknown && counts.blocked > 0 && (
             <p className="u-eyebrow text-muted-foreground">
-              {counts.blocked} more blocked by the judge — reasons attached
+              {counts.blocked}
+              {counts.queued > 0 ? " more" : ""} blocked by the judge — reasons attached
             </p>
           )}
           <Button asChild size="sm" className="mt-auto self-start">
