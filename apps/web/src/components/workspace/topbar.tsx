@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Inbox } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { OPEN_PALETTE_EVENT } from "@/components/workspace/command-palette";
 import { usePulse } from "@/components/workspace/pulse-context";
 import { cn } from "@/lib/utils";
 import { activeSurface } from "@/lib/workspace/nav";
 
 /**
- * Top bar: surface title, the tenant/profile switcher (feature 3 visible
- * from day one), and the needs-you badge — the 10-second rule's "what needs
- * me" answer, present on every surface.
+ * Top bar (Phase D spine design): tenant switcher first — whose workspace
+ * this is — then the surface title, then the two global affordances every
+ * surface carries: the needs-you chip (signal channel, the 10-second rule's
+ * "what needs me") and the command palette.
  */
 export function Topbar() {
   const pathname = usePathname();
@@ -20,37 +22,6 @@ export function Topbar() {
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
-      <div className="min-w-0 flex-1">
-        <h1 className="truncate text-lg font-semibold">{surface?.label ?? "Workspace"}</h1>
-        {surface && (
-          <p className="hidden truncate text-xs text-muted-foreground sm:block">{surface.hint}</p>
-        )}
-      </div>
-
-      <Link
-        href="/app/approve"
-        aria-label={
-          needsYou > 0 ? `${needsYou} drafts need you — open the approve queue` : "Approve queue"
-        }
-        className={cn(
-          "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors",
-          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-          needsYou > 0
-            ? "border-signal/40 bg-signal/15 font-medium text-signal hover:bg-signal/25"
-            : "border-border text-muted-foreground hover:bg-muted",
-        )}
-      >
-        <Inbox aria-hidden className="size-4" />
-        {status === "success" && needsYou === 0 ? (
-          <span className="hidden sm:inline">queue clear</span>
-        ) : (
-          <>
-            <span className="u-tabular">{status === "success" ? needsYou : "–"}</span>
-            <span className="hidden sm:inline">{needsYou === 1 ? "needs you" : "need you"}</span>
-          </>
-        )}
-      </Link>
-
       {/* Tenant/profile switcher — <details> keeps it dependency-free and
           accessible. One tenant per process today (DEMO_TENANT_SLUG, B2.1);
           the menu says so honestly instead of faking a multi-tenant list. */}
@@ -71,7 +42,7 @@ export function Topbar() {
           )}
           <ChevronDown aria-hidden className="size-3.5 text-muted-foreground transition-transform group-open:rotate-180" />
         </summary>
-        <div className="absolute right-0 top-10 z-20 w-72 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-lg">
+        <div className="absolute left-0 top-10 z-20 w-72 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-lg">
           {pulse?.tenant ? (
             <>
               <p className="text-sm font-medium">{pulse.tenant.name}</p>
@@ -104,6 +75,46 @@ export function Topbar() {
           </p>
         </div>
       </details>
+
+      <h1 className="min-w-0 truncate text-sm font-semibold">
+        {surface?.label ?? "Workspace"}
+      </h1>
+
+      <div className="flex-1" />
+
+      <Link
+        href="/app/approve"
+        aria-label={
+          needsYou > 0 ? `${needsYou} items need you — open the approve queue` : "Approve queue"
+        }
+        className={cn(
+          "inline-flex h-6 items-center gap-1 rounded-4xl px-2.5 text-xs font-medium transition-colors",
+          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          needsYou > 0
+            ? "bg-signal text-signal-foreground hover:bg-signal/80"
+            : "border border-border text-muted-foreground hover:bg-muted",
+        )}
+      >
+        {status === "success" && needsYou === 0 ? (
+          "queue clear"
+        ) : (
+          <>
+            needs you · <span className="u-tabular">{status === "success" ? needsYou : "–"}</span>
+          </>
+        )}
+      </Link>
+
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new CustomEvent(OPEN_PALETTE_EVENT))}
+        className={cn(
+          "hidden h-8 items-center gap-1.5 rounded-lg px-2.5 font-mono text-xs text-foreground sm:inline-flex",
+          "hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        )}
+      >
+        ⌘K
+        <span className="text-muted-foreground">command</span>
+      </button>
     </header>
   );
 }
