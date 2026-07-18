@@ -1,0 +1,18 @@
+{
+  "slug": "tsukimi",
+  "name": "Tsukimi",
+  "vertical": "hospitality-fine-dining-japanese",
+  "oneLiner": "A seasonal tasting menu read by moonlight — four drenched courses across one night, the kitchen following the moon.",
+  "axes": {
+    "primary": "exceptional-palette",
+    "secondary": "cinematic-imagery"
+  },
+  "axisNote": "The signature is an unforgettable colour world: FOUR drenched single-colour courses arced across a near-black night — crimson → amber → green → violet — each one ingredient glowing as a jewel out of black (the Pinterest chiaroscuro-food register). Cinematic secondary is delivered as the MOON: a code-drawn disc that crosses a fixed night sky on the scroll (the one animation system; the cinematic clock and the §9 nature-frame in one element), plus a held full-bleed black quote chapter between the colours (the omakase pacing move, the motionsites-Prisma reference). Sits deliberately between the founder's two poles: drenched single-colour (Joji) delivered with editorial Didone restraint and mono captions (Onice) — a night, not a nightclub. Distinct from every other portfolio site by being the only drenched DARK site (⑰ parchment morning, ⑱ white catalogue, First Crack warm daylight roastery).",
+  "paletteSeed": "near-black night (#0a0a0f) with four drenched course worlds — crimson #4a0a10, amber #3a2205, green #0d2417, violet #1f0f30 — each with a lit accent; the moon cream + gold #c9a24b for actions and lunar touches; per-course palette is static grading (the moon is the only motion)",
+  "typeDirection": "Bodoni Moda variable (Didone display — the luxe-editorial Onice serif pole) + Chivo Mono (course numbers, captions, the lunar-phase marker — the Joji mono pole) + Instrument Sans (body, readable on dark) — all OFL, vendored; CJK accents (月見 / 緋琥翠紫) ride Unicode system-CJK fallback, never a vendored CJK face",
+  "motionBudget": "ONE clock — the moon crosses a fixed night sky moonrise→zenith→moonset as you scroll (transform-only on a position:fixed SVG, rAF-throttled, --p scroll progress); per-course drenched backgrounds are static CSS grading. Reduced-motion and no-JS pin the moon mid-arc and render the complete night — every course, the held quote, the phase marker, the rabbit wink.",
+  "wave": 4,
+  "built": "2026-07-18",
+  "castingNote": "The four drenched course worlds are PEOPLE-FREE — the ingredient is the star (exceptional-palette showcase). ONE warm human moment at the close: an absorbed sushi chef at the omakase counter under warm lantern light, face present three-quarter but looking down at the plating, never zoomed or camera-staring (the §7 craft-practitioner model + the food-casting corollary honoured — a face present, not anonymous hands over food). Cool moonlit courses → one warm human close is the cinematic turn.",
+  "buildNote": "Wink: the rabbit in the moon (tsuki no usagi) drawn faintly in the moon disc — the Tsukimi legend, for regulars. Lunar instrument: a code-drawn moon-phase marker ('tonight · waxing gibbous') ties the fictional menu to the sky. Pre-plan deviation reconciled honestly: course I was planned as bluefin akami but the mint read as glazed concentric rounds (beet growth-rings, not tuna), so the course was reframed to beetroot cured in plum to match the image (honesty gate) — image kept, zero re-mint. 6/6 first-take, no blurs, all in-scene text code-drawn (no text-precise seat)."
+}

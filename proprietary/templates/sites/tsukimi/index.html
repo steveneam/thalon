@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsukimi — a tasting menu, read by moonlight</title>
+<meta name="description" content="Tsukimi (月見) — a seasonal tasting menu read by moonlight. Four courses across one night; the kitchen follows the moon.">
+<meta name="theme-color" content="#0a0a0f">
+<style>
+/* ————————————————————————————————————————————————
+   TSUKIMI — a tasting menu you read by moonlight.
+   Exceptional palette (primary): four drenched single-colour course worlds
+   arced across a near-black night — crimson → amber → green → violet.
+   Cinematic (secondary): the moon crosses a fixed sky on the scroll (the one
+   animation system); chiaroscuro food stills carry the register.
+   Type: Bodoni Moda (Didone display, the Onice serif pole) · Chivo Mono
+   (captions/course numbers, the Joji mono pole) · Instrument Sans (body).
+   ———————————————————————————————————————————————— */
+@font-face {
+  font-family: "Bodoni Moda";
+  src: url("fonts/bodoni-moda-var.woff2") format("woff2");
+  font-weight: 400 900; font-display: swap;
+}
+@font-face {
+  font-family: "Chivo Mono";
+  src: url("fonts/chivo-mono-var.woff2") format("woff2");
+  font-weight: 300 700; font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("fonts/instrument-sans-var.woff2") format("woff2");
+  font-weight: 400 700; font-display: swap;
+}
+
+:root {
+  --night: #0a0a0f;
+  --night-2: #0e0e15;
+  --ink-inv: #f3efe6;
+  --muted: #9a94a6;
+  --moon: #f5f1e4;
+  --gold: #c9a24b;
+  /* the four course worlds */
+  --crimson: #4a0a10;
+  --crimson-lit: #e0374a;
+  --amber: #3a2205;
+  --amber-lit: #e39a2e;
+  --green: #0d2417;
+  --green-lit: #4fb477;
+  --violet: #1f0f30;
+  --violet-lit: #a072d8;
+  --display: "Bodoni Moda", Georgia, "Times New Roman", serif;
+  --mono: "Chivo Mono", ui-monospace, monospace;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  font-family: var(--body);
+  color: var(--ink-inv);
+  background: var(--night);
+  line-height: 1.7;
+  font-size: 1.0625rem;
+  overflow-x: hidden;
+}
+img { max-width: 100%; height: auto; display: block; }
+::selection { background: var(--gold); color: var(--night); }
+a { color: var(--moon); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.mono { font-family: var(--mono); }
+.eyebrow {
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.34em;
+  text-transform: uppercase; color: var(--gold);
+}
+
+/* ——— the fixed night sky + the crossing moon (the one animation system) ——— */
+.sky {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(1200px 700px at 80% -10%, #171727 0%, transparent 60%),
+    linear-gradient(180deg, #0c0c14 0%, #08080d 100%);
+}
+.stars {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5) 50%, transparent),
+    radial-gradient(1px 1px at 65% 15%, rgba(255,255,255,0.4) 50%, transparent),
+    radial-gradient(1px 1px at 85% 45%, rgba(255,255,255,0.35) 50%, transparent),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.3) 50%, transparent),
+    radial-gradient(1px 1px at 12% 85%, rgba(255,255,255,0.3) 50%, transparent),
+    radial-gradient(1.5px 1.5px at 55% 55%, rgba(255,255,255,0.4) 50%, transparent);
+}
+.moon {
+  position: absolute;
+  /* JS sets --p (0..1 scroll progress); default mid-arc for no-JS */
+  --p: 0.5;
+  left: calc(6% + var(--p) * 82%);
+  top: calc(72% - sin(var(--p) * 3.14159) * 58%);
+  width: clamp(90px, 12vw, 150px); aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+}
+@media (prefers-reduced-motion: reduce) { .moon { --p: 0.5 !important; } }
+
+/* ——— content sits above the sky ——— */
+main { position: relative; z-index: 1; }
+.chapter {
+  min-height: 100svh; display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(3rem, 8vh, 7rem) clamp(1.25rem, 6vw, 5rem);
+  position: relative;
+}
+.measure { max-width: 72rem; margin-inline: auto; width: 100%; }
+
+/* each course tints the night with its drenched world */
+.course { --lit: var(--moon); }
+.course.crimson { background: radial-gradient(1100px 700px at 30% 50%, var(--crimson) 0%, transparent 70%); --lit: var(--crimson-lit); }
+.course.amber   { background: radial-gradient(1100px 700px at 70% 50%, var(--amber) 0%, transparent 70%); --lit: var(--amber-lit); }
+.course.green   { background: radial-gradient(1100px 700px at 30% 50%, var(--green) 0%, transparent 70%); --lit: var(--green-lit); }
+.course.violet  { background: radial-gradient(1100px 700px at 70% 50%, var(--violet) 0%, transparent 70%); --lit: var(--violet-lit); }
+
+/* ——— hero ——— */
+.hero { text-align: center; align-items: center; }
+.wordmark {
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(3.5rem, 13vw, 9rem); line-height: 0.95; letter-spacing: 0.02em;
+}
+.wordmark .kanji { font-size: 0.42em; vertical-align: 0.42em; letter-spacing: 0.1em; color: var(--gold); margin-left: 0.2em; }
+.hero-tag { font-size: clamp(1.05rem, 2vw, 1.35rem); color: var(--muted); margin-top: 1.5rem; font-style: italic; font-family: var(--display); }
+.phase {
+  display: inline-flex; align-items: center; gap: 0.55rem; margin-top: 2rem;
+  font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid rgba(201,162,75,0.35); border-radius: 999px; padding: 0.4rem 0.9rem;
+}
+.phase-disc { width: 14px; height: 14px; border-radius: 50%;
+  background: linear-gradient(90deg, transparent 0 30%, var(--moon) 30% 100%);
+  box-shadow: inset -3px 0 0 rgba(0,0,0,0.35); }
+.scrollcue { margin-top: 3rem; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
+.hero-dish { margin: clamp(2.5rem,6vw,4.5rem) auto 0; max-width: 60rem; }
+.hero-dish img { width: 100%; border-radius: 4px; }
+
+/* ——— courses ——— */
+.course-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+.course.amber .course-grid, .course.violet .course-grid { direction: rtl; }
+.course.amber .course-grid > *, .course.violet .course-grid > * { direction: ltr; }
+@media (max-width: 52rem) { .course-grid { grid-template-columns: 1fr; gap: 1.75rem; } .course.amber .course-grid, .course.violet .course-grid { direction: ltr; } }
+.course-figure img { width: 100%; border-radius: 4px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+.course-no { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--lit); }
+.course-title {
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(2.4rem, 5.5vw, 4rem); line-height: 1.02; margin: 0.35em 0 0.5em;
+}
+.course-title .cjk { color: var(--lit); font-size: 0.7em; margin-right: 0.25em; }
+.course-desc { max-width: 34em; color: #d8d3c6; }
+.course-cap { font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.06em; color: var(--muted); margin-top: 1.1rem; }
+
+/* ——— held quote ——— */
+.quote { text-align: center; align-items: center; }
+.quote blockquote {
+  font-family: var(--display); font-weight: 500; font-style: italic;
+  font-size: clamp(1.8rem, 4.4vw, 3.2rem); line-height: 1.3; max-width: 20ch;
+}
+.quote cite { display: block; margin-top: 1.75rem; font-family: var(--mono); font-style: normal; font-size: 0.76rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+
+/* ——— the counter / reserve ——— */
+.counter { background: radial-gradient(1000px 700px at 50% 90%, #2a1608 0%, transparent 70%); }
+.counter-grid { display: grid; grid-template-columns: minmax(0, 420px) 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+@media (max-width: 52rem) { .counter-grid { grid-template-columns: 1fr; } }
+.counter-figure img { width: 100%; border-radius: 4px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+.reserve-title { font-family: var(--display); font-weight: 500; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; margin-bottom: 0.6rem; }
+.seatings { margin: 1.5rem 0; }
+.seatings dt { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-top: 1rem; }
+.seatings dd { color: #d8d3c6; }
+.reserve-btn {
+  display: inline-block; margin-top: 1.5rem;
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--night); background: var(--gold); padding: 0.85rem 1.6rem; border-radius: 999px;
+}
+
+/* the rabbit-in-the-moon wink caption */
+.rabbit-note { margin-top: 2rem; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+
+footer { position: relative; z-index: 1; padding: 3rem clamp(1.25rem,6vw,5rem); border-top: 1px solid rgba(255,255,255,0.08); }
+footer .measure { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.06em; color: var(--muted); }
+footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js");</script>
+
+<!-- the fixed night sky + crossing moon (behind everything) -->
+<div class="sky" aria-hidden="true">
+  <div class="stars"></div>
+  <svg class="moon" id="moon" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="mg" cx="42%" cy="40%" r="65%">
+        <stop offset="0%" stop-color="#fffdf5"/>
+        <stop offset="70%" stop-color="#f3eeddff"/>
+        <stop offset="100%" stop-color="#d9d2bd"/>
+      </radialGradient>
+    </defs>
+    <circle cx="50" cy="50" r="46" fill="url(#mg)"/>
+    <!-- faint craters -->
+    <g fill="#d9d2bd" opacity="0.5">
+      <circle cx="36" cy="38" r="5"/><circle cx="62" cy="34" r="3.5"/>
+      <circle cx="58" cy="60" r="6"/><circle cx="40" cy="64" r="3"/>
+    </g>
+    <!-- THE WINK: the rabbit in the moon (tsuki no usagi), pounding mochi -->
+    <g fill="#cfc7b0" opacity="0.55" aria-hidden="true">
+      <path d="M54 44 q-4 -10 1 -15 q3 4 1 10 q4 -8 8 -8 q1 6 -4 11 q6 -1 9 3 q-5 3 -11 2 q5 5 4 12 q-6 -2 -9 -8 q-3 6 -9 6 q-1 -6 4 -11 q-6 1 -9 -3 q5 -3 11 -2 z"/>
+      <ellipse cx="46" cy="66" rx="7" ry="2.4"/>
+    </g>
+  </svg>
+</div>
+
+<main>
+  <!-- ① MOONRISE / HERO -->
+  <header class="chapter hero">
+    <div class="measure">
+      <p class="eyebrow">Omakase · by reservation</p>
+      <h1 class="wordmark">Tsukimi<span class="kanji" lang="ja">月見</span></h1>
+      <p class="hero-tag">A tasting menu you read by moonlight.</p>
+      <p class="phase"><span class="phase-disc" aria-hidden="true"></span> tonight · waxing gibbous · 84%</p>
+      <figure class="hero-dish">
+        <img src="assets/hero-moonlit.webp" alt="A single piece of nigiri on dark stone under a cool shaft of blue moonlight." width="1600" height="900" fetchpriority="high">
+      </figure>
+      <p class="scrollcue">the night begins ↓</p>
+    </div>
+  </header>
+
+  <!-- ② COURSE I · crimson -->
+  <section class="chapter course crimson" aria-labelledby="c1">
+    <div class="measure course-grid">
+      <figure class="course-figure">
+        <img src="assets/course-crimson.webp" alt="Glazed heirloom beetroot rounds glistening deep crimson, their rings catching the light, glowing out of black." width="1400" height="933" loading="lazy">
+      </figure>
+      <div>
+        <p class="course-no">First course</p>
+        <h2 id="c1" class="course-title"><span class="cjk" lang="ja">緋</span>Beetroot, cured in plum</h2>
+        <p class="course-desc">Heirloom beet, sliced to its rings and slow-cured in our own ume vinegar
+        until it glows. Sweet, sour, earthy — the first colour of the night, and the only one
+        the kitchen grows itself.</p>
+        <p class="course-cap">— house garden beet · three-year plum vinegar</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ COURSE II · amber -->
+  <section class="chapter course amber" aria-labelledby="c2">
+    <div class="measure course-grid">
+      <figure class="course-figure">
+        <img src="assets/course-amber.webp" alt="Burnt-amber sea urchin uni glowing on dark slate." width="1400" height="933" loading="lazy">
+      </figure>
+      <div>
+        <p class="course-no">Second course</p>
+        <h2 id="c2" class="course-title"><span class="cjk" lang="ja">琥</span>Uni, warm and gold</h2>
+        <p class="course-desc">Sea urchin the colour of a lantern, over sushi rice still warm from the hand.
+        Sweet, then briny, then gone. Eat it the moment it arrives — it will not wait for you.</p>
+        <p class="course-cap">— Hokkaidō bafun uni · graded today</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ THE HELD QUOTE -->
+  <section class="chapter quote" aria-label="From the kitchen">
+    <div class="measure">
+      <blockquote>“We do not set the menu. The moon and the market do — we only listen.”</blockquote>
+      <cite>— the kitchen, Tsukimi</cite>
+    </div>
+  </section>
+
+  <!-- ⑤ COURSE III · green -->
+  <section class="chapter course green" aria-labelledby="c3">
+    <div class="measure course-grid">
+      <figure class="course-figure">
+        <img src="assets/course-green.webp" alt="Vivid whisked matcha in a dark bowl with a dewed shiso leaf, deep green on black." width="1400" height="933" loading="lazy">
+      </figure>
+      <div>
+        <p class="course-no">Third course</p>
+        <h2 id="c3" class="course-title"><span class="cjk" lang="ja">翠</span>Matcha &amp; shiso</h2>
+        <p class="course-desc">A pause in green: matcha whisked to a bright foam, a single shiso leaf picked
+        this morning. The palate resets; the moon reaches the top of the sky.</p>
+        <p class="course-cap">— Uji first-harvest · house-grown shiso</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ COURSE IV · violet -->
+  <section class="chapter course violet" aria-labelledby="c4">
+    <div class="measure course-grid">
+      <figure class="course-figure">
+        <img src="assets/course-violet.webp" alt="A deep violet ume-plum dessert glistening with syrup and a fleck of gold leaf, glowing on black." width="1400" height="933" loading="lazy">
+      </figure>
+      <div>
+        <p class="course-no">Fourth course</p>
+        <h2 id="c4" class="course-title"><span class="cjk" lang="ja">紫</span>Ume, and gold</h2>
+        <p class="course-desc">The last colour: sour-sweet plum and cassis set into a dome so deep it reads
+        violet, a single fleck of gold leaf for the moon. The night closes the way it opened — quietly.</p>
+        <p class="course-cap">— Wakayama nanko ume · aged in its own syrup</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ THE COUNTER / RESERVE -->
+  <section class="chapter counter" aria-labelledby="reserve">
+    <div class="measure counter-grid">
+      <figure class="counter-figure">
+        <img src="assets/chef-counter.webp" alt="A sushi chef absorbed in plating at an omakase counter under warm lantern light, indigo curtain behind." width="1100" height="1650" loading="lazy">
+      </figure>
+      <div>
+        <p class="eyebrow">Moonset · the counter</p>
+        <h2 id="reserve" class="reserve-title">Eight seats. One seating. Every night the moon is up.</h2>
+        <p class="course-desc">The whole menu happens in front of you, across the counter, in about two hours.
+        We change it with the season and the sky, so no two nights are the same — and neither is the moon.</p>
+        <dl class="seatings">
+          <dt>Seatings</dt>
+          <dd>One per night, at moonrise. Eight seats at the hinoki counter.</dd>
+          <dt>Reserve</dt>
+          <dd>Bookings open with each new moon, one lunar month ahead.</dd>
+        </dl>
+        <p class="reserve-btn">Request a seat →</p>
+        <p class="rabbit-note">※ look into the moon — the rabbit is still pounding.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="measure">
+    <span>Tsukimi (月見) is a fictional demonstration business.</span>
+    <a href="guide/">How this page was made →</a>
+  </div>
+</footer>
+
+<script>
+/* The moon crosses the sky on scroll — the one animation system.
+   Default markup pins it mid-arc (--p: 0.5), so no-JS/reduced-motion is
+   complete. rAF-throttled, transform-only (left/top on a fixed element). */
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var moon = document.getElementById("moon");
+  if (!moon) return;
+  var ticking = false;
+  function update() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var p = max > 0 ? window.scrollY / max : 0.5;
+    moon.style.setProperty("--p", p.toFixed(4));
+    ticking = false;
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { window.requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+})();
+</script>
+</body>
+</html>
