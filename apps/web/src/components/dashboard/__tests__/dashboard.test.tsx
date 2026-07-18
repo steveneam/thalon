@@ -20,53 +20,60 @@ function renderDashboard() {
 }
 
 describe("Dashboard", () => {
-  it("answers the 10-second questions: what needs me, what the engine did, what to do next", async () => {
+  it("renders the journey spine: five stations with live state and their one action each", async () => {
     renderDashboard();
 
-    // The schematic spine carries the fixture counts at their stations.
-    expect(await screen.findByText("1 failed — triage")).toBeInTheDocument(); // create station alert
-    expect(screen.getByText("wait on your review")).toBeInTheDocument(); // approve station, 2 queued
-    expect(screen.getByText("need your edit")).toBeInTheDocument(); // judge station, 1 blocked
-    // Plan-backed stations: intel (areas + next sweep) and distribute (honest publish scope).
-    expect(await screen.findByText(/next sweep in \d+h/)).toBeInTheDocument();
-    expect(screen.getByText("own site today · social lands later")).toBeInTheDocument();
+    // The page IS the journey.
+    expect(screen.getByText("The pipeline, left to right")).toBeInTheDocument();
 
-    // Needs-you card: 3 = 2 queued + 1 blocked, with the queue as the action.
-    expect(await screen.findByText(/drafts wait/)).toBeInTheDocument();
-    expect(screen.getByText("queued for review")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /review queue/i })).toHaveAttribute(
+    // 01 · intel rides the trends read (fixture: demo dataset, honest about it).
+    expect(await screen.findByText(/^demo$/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open intel" })).toHaveAttribute("href", "/app/intel");
+    expect(screen.getByText(/no next sweep until live pollers arm/)).toBeInTheDocument();
+
+    // 02 · pick is a state, not a route — honest about the untracked count.
+    expect(screen.getByText(/Pick is a state, not a route/)).toBeInTheDocument();
+    expect(screen.getByText(/never retyped/)).toBeInTheDocument();
+
+    // 03 · create exits to the create surface.
+    expect(screen.getByRole("link", { name: "Open create" })).toHaveAttribute(
+      "href",
+      "/app/create",
+    );
+
+    // 04 · approve wears the signal channel: pulse fixture has 2 queued + 1 blocked.
+    expect(await screen.findByText("2 waiting")).toBeInTheDocument();
+    expect(screen.getByText(/1 more blocked by the judge — reasons attached/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Review queue" })).toHaveAttribute(
       "href",
       "/app/approve",
     );
 
-    // Activity feed attributes work to the engine, linked to its surface.
-    expect(
-      await screen.findByText("Judge passed a draft — it's in your queue"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Engine drafted for linkedin")).toBeInTheDocument();
+    // 05 · fan-out is honest about the unarmed door and exits to the calendar.
+    expect(screen.getByText(/publish door unarmed — these are plans, not uploads/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open calendar" })).toHaveAttribute(
+      "href",
+      "/app/calendar",
+    );
 
-    // Seam/driver config lives in Settings now (founder direction 2026-07-14);
-    // the dashboard only surfaces degraded health — the fixture's gateway is
-    // unconfigured, so the one health notice shows and links to Settings.
+    // The needs-you list rows ride the plan read: one queued draft + the blocked fold.
+    expect(await screen.findByText("linkedin — your review")).toBeInTheDocument();
+    expect(screen.getByText("1 draft blocked — reasons attached")).toBeInTheDocument();
+    expect(screen.getByText(/the list is bounded — the page never grows with it/)).toBeInTheDocument();
+
+    // The week strip's honest three-mark legend.
+    expect(screen.getByText("waits on you")).toBeInTheDocument();
+    expect(screen.getByText("planned slot")).toBeInTheDocument();
+
+    // Seam/driver config lives in Settings; only the degraded gateway surfaces here.
     expect(await screen.findByRole("status")).toHaveTextContent(/gateway key isn.t configured/i);
     expect(screen.getByRole("link", { name: /check settings/i })).toHaveAttribute(
       "href",
       "/app/settings",
     );
-    expect(screen.queryByText("hyperframes")).not.toBeInTheDocument();
-
-    // Schematic stations are doorways, not just counters.
-    expect(screen.getByRole("link", { name: /recent runs/i })).toHaveAttribute("href", "/app/runs");
-    expect(screen.getByRole("link", { name: /01 · Intel/i })).toHaveAttribute("href", "/app/intel");
-
-    // Quick actions cover the families.
-    expect(screen.getByRole("link", { name: /create from a prompt/i })).toHaveAttribute(
-      "href",
-      "/app/create",
-    );
   });
 
-  it("renders the first-run tutorial instead of the needs-you card on an unseeded tenant", async () => {
+  it("renders the first-run tutorial on an unseeded tenant", async () => {
     server.use(
       http.get("/api/app/pulse", () =>
         HttpResponse.json({
@@ -78,27 +85,25 @@ describe("Dashboard", () => {
       ),
     );
     renderDashboard();
-    expect(
-      await screen.findByText(/three steps to your first draft/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/three steps to your first draft/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /set up your profile/i })).toHaveAttribute(
       "href",
       "/app/profiles",
     );
-    expect(screen.queryByText(/drafts wait/)).not.toBeInTheDocument();
   });
 
   it("renders an honest error card — never a real-looking empty state — when the pulse read fails", async () => {
     server.use(http.get("/api/app/pulse", () => HttpResponse.error()));
     renderDashboard();
 
-    // The failure is named, with a retry — not "Queue clear".
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent(/couldn.t reach the engine/i);
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    // The failure is named, with a retry — not "Queue clear". (The needs-you
+    // list raises its own alert for the same outage; both are honest.)
+    const alerts = await screen.findAllByRole("alert");
+    expect(alerts.some((a) => /couldn.t reach the engine/i.test(a.textContent ?? ""))).toBe(true);
+    expect(screen.getAllByRole("button", { name: /try again/i }).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(/queue clear/i)).not.toBeInTheDocument();
 
-    // Tiles show "–", not zeros.
-    expect(screen.queryByText("0")).not.toBeInTheDocument();
+    // Pulse-backed station counts show "–", not zeros.
+    expect(screen.getAllByText("not loaded").length).toBeGreaterThanOrEqual(1);
   });
 });

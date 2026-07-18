@@ -2,66 +2,85 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BrandLockup } from "@/components/brand/marks";
-import { usePulse } from "@/components/workspace/pulse-context";
+import { BrandMark } from "@/components/brand/marks";
 import { cn } from "@/lib/utils";
-import { activeSurface, NAV_SURFACES } from "@/lib/workspace/nav";
+import { activeSurface, JOURNEY_HREFS, NAV_SURFACES, type NavSurface } from "@/lib/workspace/nav";
 
-/** Left rail (docs/FRONTEND.md §3 shell): every registered surface (lib/workspace/nav.ts), always one click away. */
+/**
+ * The icon side-rail (Phase D spine design): the journey surfaces live ON
+ * the spine, so only the extras keep rail entries — Leads · Library ·
+ * Videos · Runs, with Profiles + Settings at the foot. One icon metaphor
+ * per feature (components/ui/icons.tsx). The rail stays at every width;
+ * on narrow screens the spine stacks, the rail does not collapse.
+ */
+
+function RailLink({ surface, active }: { surface: NavSurface; active: boolean }) {
+  const Icon = surface.icon;
+  return (
+    <Link
+      href={surface.href}
+      title={surface.label}
+      aria-label={surface.label}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex size-9 items-center justify-center rounded-lg transition-colors",
+        "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        active
+          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+          : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+      )}
+    >
+      <Icon aria-hidden />
+    </Link>
+  );
+}
+
 export function Sidebar() {
   const pathname = usePathname();
-  const { pulse } = usePulse();
   const active = activeSurface(pathname);
+  const journey = NAV_SURFACES.find((s) => s.href === "/app")!;
+  const onJourney = active !== undefined && JOURNEY_HREFS.has(active.href);
 
   return (
     <aside
       aria-label="Workspace navigation"
-      className="hidden w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
+      className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-sidebar-border bg-sidebar py-3 text-sidebar-foreground"
     >
-      <div className="flex h-14 items-center border-b border-sidebar-border px-4">
-        <Link
-          href="/app"
-          className="rounded-md focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <BrandLockup />
-        </Link>
-      </div>
-      <nav className="flex flex-1 flex-col gap-0.5 p-2">
-        {NAV_SURFACES.map((surface) => {
-          const isActive = active?.href === surface.href;
-          const Icon = surface.icon;
-          return (
-            <Link
-              key={surface.href}
-              href={surface.href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
-                "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                isActive
-                  ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-              )}
-            >
-              <Icon aria-hidden className={cn("size-4", isActive && "text-primary")} />
-              <span className="flex-1">{surface.label}</span>
-              {surface.showsNeedsYou && (pulse?.needsYou ?? 0) > 0 && (
-                <span
-                  aria-label={`${pulse!.needsYou} drafts need you`}
-                  className="u-tabular inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-signal px-1.5 text-xs font-semibold text-signal-foreground"
-                >
-                  {pulse!.needsYou}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      <Link
+        href="/app"
+        aria-label="Workspace home"
+        className="mb-3 flex size-9 items-center justify-center rounded-[0.625rem] bg-foreground text-background focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <BrandMark aria-hidden className="size-5" />
+      </Link>
+      {/* The journey icon stands for the whole spine: lit on any journey
+          surface, aria-current only on the spine itself. */}
+      <Link
+        href="/app"
+        title="Journey — the spine"
+        aria-label="Journey — the spine"
+        aria-current={active?.href === "/app" ? "page" : undefined}
+        className={cn(
+          "flex size-9 items-center justify-center rounded-lg transition-colors",
+          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          onJourney
+            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+        )}
+      >
+        <journey.icon aria-hidden />
+      </Link>
+      <nav aria-label="Workspace extras" className="flex flex-col items-center gap-1">
+        {NAV_SURFACES.filter((s) => s.rail === "main").map((surface) => (
+          <RailLink key={surface.href} surface={surface} active={active?.href === surface.href} />
+        ))}
       </nav>
-      <div className="border-t border-sidebar-border p-3">
-        <p className="u-eyebrow text-muted-foreground">
-          {pulse?.tenant ? `tenant · ${pulse.tenant.slug}` : "tenant · not seeded"}
-        </p>
-      </div>
+      <div className="flex-1" />
+      <nav aria-label="Workspace account" className="flex flex-col items-center gap-1">
+        {NAV_SURFACES.filter((s) => s.rail === "foot").map((surface) => (
+          <RailLink key={surface.href} surface={surface} active={active?.href === surface.href} />
+        ))}
+      </nav>
     </aside>
   );
 }

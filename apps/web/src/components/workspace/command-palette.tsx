@@ -6,6 +6,9 @@ import { Command, CornerDownLeft } from "lucide-react";
 import { buildPaletteItems, filterPalette } from "@/lib/workspace/palette";
 import { cn } from "@/lib/utils";
 
+/** The topbar's ⌘K button opens the palette by dispatching this window event. */
+export const OPEN_PALETTE_EVENT = "thalon:open-palette";
+
 /**
  * Cmd-K command palette (B6.2 [+]) over the ONE nav registry + actions —
  * every surface and common action, one keystroke away. Plain overlay (no
@@ -19,16 +22,26 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    function reset(next: boolean | ((prev: boolean) => boolean)) {
+      setOpen(next);
+      setQuery("");
+      setIndex(0);
+    }
     function onKey(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setOpen((prev) => !prev);
-        setQuery("");
-        setIndex(0);
+        reset((prev) => !prev);
       }
     }
+    function onOpen() {
+      reset(true);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener(OPEN_PALETTE_EVENT, onOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_PALETTE_EVENT, onOpen);
+    };
   }, []);
 
   useEffect(() => {

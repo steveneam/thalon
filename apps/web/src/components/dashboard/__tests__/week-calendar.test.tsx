@@ -43,12 +43,17 @@ const plan: PlanPayload = {
 };
 
 describe("WeekCalendar", () => {
-  it("shows projected sweeps, waiting drafts as entity links, decisions, and the cadence strip", () => {
+  it("renders the three-mark grammar: engine sweeps, waits-on-you links, and the legend", () => {
     render(<WeekCalendar status="success" plan={plan} now={NOW} />);
 
-    // Today is marked; projected sweep ticks ride their days (engine WILL do).
-    expect(screen.getByText("· today")).toBeInTheDocument();
-    expect(screen.getAllByText("sweep").length).toBeGreaterThanOrEqual(5);
+    // The honest three-mark legend.
+    expect(screen.getByText("engine")).toBeInTheDocument();
+    expect(screen.getByText("waits on you")).toBeInTheDocument();
+    expect(screen.getByText("planned slot")).toBeInTheDocument();
+
+    // Today wears aria-current; projected sweeps ride their days (engine WILL do).
+    expect(document.querySelector('[aria-current="date"]')).not.toBeNull();
+    expect(screen.getAllByText(/^sweep \d+:\d+$/).length).toBeGreaterThanOrEqual(5);
 
     // Waiting drafts land on the day they started waiting and deep-link to the entity.
     expect(screen.getByRole("link", { name: /linkedin · your review/i })).toHaveAttribute(
@@ -56,7 +61,10 @@ describe("WeekCalendar", () => {
       "/app/approve?run=run-1&draft=q1",
     );
     expect(screen.getByRole("link", { name: /linkedin · needs edit/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /linkedin · approved/i })).toBeInTheDocument();
+
+    // The strip is forward-looking: decided outcomes are not marks (the
+    // three-mark grammar — approve/runs carry the record).
+    expect(screen.queryByText(/linkedin · approved/)).not.toBeInTheDocument();
 
     // Cadence allowances render as data, not promises.
     expect(screen.getByText(/linkedin ≤1\/day ≤5\/wk/)).toBeInTheDocument();
@@ -65,11 +73,26 @@ describe("WeekCalendar", () => {
     expect(screen.queryByText(/scheduled/i)).not.toBeInTheDocument();
   });
 
+  it("bounds each day at 3 marks then '+N more' (the calendar cell rule)", () => {
+    const crowded: PlanPayload = {
+      ...plan,
+      assets: [
+        asset({ draftId: "q1", judgedAt: new Date(2026, 6, 15, 6, 0).toISOString() }),
+        asset({ draftId: "q2", judgedAt: new Date(2026, 6, 15, 7, 0).toISOString() }),
+        asset({ draftId: "q3", judgedAt: new Date(2026, 6, 15, 8, 0).toISOString() }),
+        asset({ draftId: "q4", judgedAt: new Date(2026, 6, 15, 9, 0).toISOString() }),
+      ],
+    };
+    render(<WeekCalendar status="success" plan={crowded} now={NOW} />);
+    // Today: 1 sweep tick + 4 waiting = 5 marks → 3 shown, +2 more.
+    expect(screen.getByText("+2 more")).toBeInTheDocument();
+  });
+
   it("says so when no live sweep pointer exists instead of projecting fiction", () => {
     render(<WeekCalendar status="success" plan={{ ...plan, sweep: null, cadence: [] }} now={NOW} />);
     expect(screen.getByText(/no live sweeps armed yet/i)).toBeInTheDocument();
     expect(screen.getByText(/no cadence rules configured/i)).toBeInTheDocument();
-    expect(screen.queryByText("sweep")).not.toBeInTheDocument();
+    expect(screen.queryByText(/^sweep \d/)).not.toBeInTheDocument();
   });
 
   it("a failed plan read gets the named error + retry, never an empty-looking week", () => {
