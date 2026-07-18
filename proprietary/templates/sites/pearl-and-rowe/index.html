@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pearl &amp; Rowe — a calm dental studio. Nothing begins until you nod.</title>
+<meta name="description" content="A calm dental studio — every step explained before it begins, priced before the chair tilts, and nothing begins until you nod. Fictional demonstration studio.">
+<link rel="preload" href="fonts/literata-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/atkinson-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f6f1e7'/%3E%3Cpath d='M9 24 Q9 12 16 12 Q23 12 23 24 Q23 27 20.5 27 Q18.5 27 18 24 Q17.6 21.5 16 21.5 Q14.4 21.5 14 24 Q13.5 27 11.5 27 Q9 27 9 24 Z' fill='none' stroke='%235a4632' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:'Literata';src:url('fonts/literata-var.woff2') format('woff2');font-weight:200 900;font-style:normal;font-display:swap}
+@font-face{font-family:'Literata';src:url('fonts/literata-italic-var.woff2') format('woff2');font-weight:200 900;font-style:italic;font-display:swap}
+@font-face{font-family:'Atkinson Hyperlegible';src:url('fonts/atkinson-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Atkinson Hyperlegible';src:url('fonts/atkinson-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Atkinson Hyperlegible';src:url('fonts/atkinson-italic-400.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+
+:root{
+  --paper:oklch(0.962 0.014 85);
+  --paper-deep:oklch(0.935 0.02 84);
+  --cream:oklch(0.975 0.01 88);
+  --ink:oklch(0.31 0.04 62);
+  --ink-soft:oklch(0.43 0.035 62);
+  --ink-faint:oklch(0.54 0.03 65);
+  --sage:oklch(0.55 0.065 152);
+  --sage-deep:oklch(0.42 0.06 152);
+  --sage-wash:oklch(0.9 0.03 150);
+  --terra:oklch(0.5 0.125 42);
+  --terra-soft:oklch(0.62 0.11 45);
+  --terra-wash:oklch(0.92 0.03 48);
+  --butter:oklch(0.9 0.06 92);
+  --hair:oklch(0.86 0.02 80);
+  --serif:'Literata',Georgia,serif;
+  --sans:'Atkinson Hyperlegible',system-ui,sans-serif;
+  --t-small:0.9rem;
+  --t-micro:0.78rem;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:1.02rem;
+  line-height:1.65;
+  /* linen: two barely-there thread directions */
+  background-image:
+    repeating-linear-gradient(0deg, oklch(0.31 0.04 62 / 0.016) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(90deg, oklch(0.31 0.04 62 / 0.011) 0 1px, transparent 1px 9px);
+}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--terra)}
+a:hover{color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--cream);padding:.6em 1em;z-index:99}
+.skip:focus{left:0}
+:focus-visible{outline:3px solid var(--terra);outline-offset:3px}
+
+.wrap{max-width:72rem;margin-inline:auto;padding-inline:clamp(1.1rem,4vw,2.5rem)}
+section{padding-block:clamp(3.5rem,9vw,6.5rem)}
+
+h1,h2,h3{font-family:var(--serif);font-weight:480;line-height:1.12;letter-spacing:-0.01em}
+h2{font-size:clamp(1.9rem,4.2vw,3rem);max-width:22ch}
+h2 em,h1 em{font-style:italic;color:var(--sage-deep)}
+.kicker{font-size:var(--t-micro);letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;margin-bottom:1.1rem}
+.lede{font-size:1.12rem;color:var(--ink-soft);max-width:56ch;margin-top:1.2rem}
+
+/* ---- rise-in (js only, calm) ---- */
+html.js [data-rise]{opacity:0;transform:translateY(14px);transition:opacity .7s ease-out,transform .7s ease-out;transition-delay:calc(var(--i,0)*90ms)}
+html.js [data-rise].in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){html.js [data-rise]{opacity:1;transform:none;transition:none}}
+
+/* ---- header ---- */
+header.site{padding-block:1.4rem;border-bottom:1px solid var(--hair)}
+header.site .wrap{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.wordmark{font-family:var(--serif);font-size:1.35rem;font-weight:560;letter-spacing:.01em;color:var(--ink);text-decoration:none}
+.wordmark .amp{color:var(--terra);font-style:italic}
+nav.site{margin-left:auto;display:flex;gap:1.4rem;font-size:var(--t-small)}
+nav.site a{color:var(--ink-soft);text-decoration:none}
+nav.site a:hover{color:var(--terra)}
+
+/* ---- hero ---- */
+.hero{padding-block:clamp(2.5rem,6vw,4.5rem) 0}
+.hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:center}
+@media (max-width:899px){.hero-grid{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(2.5rem,6vw,4.3rem);max-width:14ch}
+.consent{margin-top:1.6rem;font-family:var(--serif);font-style:italic;font-size:1.25rem;color:var(--sage-deep);position:relative;display:inline-block}
+.consent svg{position:absolute;left:0;right:0;bottom:-0.45em;width:100%;height:0.5em;overflow:visible}
+.consent svg path{fill:none;stroke:var(--terra-soft);stroke-width:2.2;stroke-linecap:round}
+html.js .consent svg path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset 1.4s ease-out .5s}
+html.js .consent.in svg path{stroke-dashoffset:0}
+@media (prefers-reduced-motion:reduce){html.js .consent svg path{stroke-dashoffset:0;transition:none}}
+.hero-chips{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.8rem;font-size:var(--t-micro)}
+.hchip{border:1px solid var(--hair);background:var(--cream);border-radius:2rem;padding:.35em .9em;color:var(--ink-soft)}
+.hchip b{color:var(--ink);font-weight:700}
+.arch{border-radius:calc(50% / 1.15) calc(50% / 1.15) 1.1rem 1.1rem / 38% 38% 1.1rem 1.1rem;overflow:hidden;border:1px solid var(--hair);background:var(--paper-deep)}
+.arch img{width:100%;height:100%;object-fit:cover}
+.hero .arch{aspect-ratio:4/4.6;max-height:34rem}
+.hero-note{font-size:var(--t-micro);color:var(--ink-faint);margin-top:.7rem;text-align:right}
+
+/* ---- promise trio ---- */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.6rem}
+@media (max-width:899px){.trio{grid-template-columns:1fr}}
+.promise{background:var(--cream);border:1px solid var(--hair);border-radius:1.1rem 1.1rem 2.2rem 1.1rem;padding:1.6rem}
+.promise svg{width:2.6rem;height:2.6rem;margin-bottom:1rem}
+.promise svg *{fill:none;stroke:var(--sage-deep);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.promise h3{font-size:1.22rem;margin-bottom:.5rem}
+.promise p{font-size:var(--t-small);color:var(--ink-soft)}
+
+/* ---- the chart ---- */
+#chart{background:var(--paper-deep);border-block:1px solid var(--hair)}
+.chart-head{display:flex;align-items:baseline;gap:1.5rem;flex-wrap:wrap}
+.chart-note{font-size:var(--t-micro);color:var(--ink-faint);margin-left:auto;max-width:26ch;text-align:right}
+.chart-stage{display:grid;grid-template-columns:minmax(0,1fr) 17rem;gap:2rem;margin-top:2.4rem;align-items:start}
+@media (max-width:899px){.chart-stage{grid-template-columns:1fr}}
+.fdi{background:var(--cream);border:1px solid var(--hair);border-radius:1.1rem;padding:1.6rem 1.2rem}
+.jaw{display:grid;grid-template-columns:repeat(16,1fr);gap:.22rem;align-items:end}
+.jaw .tooth:nth-child(8){margin-right:.5rem}
+.jaw+.jaw{margin-top:1.1rem;padding-top:1.1rem;border-top:1px dashed var(--hair);align-items:start}
+.tooth{display:flex;flex-direction:column;align-items:center;gap:.3rem;border:0;background:none;padding:.15rem .05rem;border-radius:.5rem;cursor:pointer;font:inherit}
+.jaw.lower .tooth{flex-direction:column-reverse}
+.tooth:hover{background:var(--paper)}
+.tooth.active{background:var(--sage-wash)}
+.tooth svg{width:100%;max-width:1.7rem;height:2.1rem;overflow:visible}
+.tooth svg path{fill:var(--cream);stroke:var(--ink-faint);stroke-width:1.5;transition:fill .4s ease,stroke .4s ease}
+.tooth .n{font-size:0.62rem;font-variant-numeric:tabular-nums;letter-spacing:.04em;color:var(--ink-faint)}
+.tooth .dot{width:.42rem;height:.42rem;border-radius:50%;background:transparent;border:1px solid transparent}
+.tooth.quiet svg path{stroke:var(--sage)}
+.tooth.quiet .dot{background:var(--sage)}
+.tooth.treated svg path{fill:var(--sage-wash);stroke:var(--sage-deep)}
+.tooth.treated .dot{background:var(--sage-deep)}
+.tooth.watching svg path{stroke:var(--terra);stroke-dasharray:3 2.2}
+.tooth.watching .dot{border-color:var(--terra);background:var(--terra-wash)}
+.tooth.baby svg path{fill:var(--butter);stroke:var(--ink-soft)}
+.tooth.baby .dot{background:var(--butter);border-color:var(--ink-soft)}
+.tooth.baby svg{max-width:1.35rem;height:1.7rem}
+html.js #chart .tooth.pending svg path{stroke:var(--hair)}
+html.js #chart .tooth.pending .dot{background:transparent;border-color:transparent}
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:1.4rem;font-size:var(--t-micro);color:var(--ink-soft)}
+.legend span{display:inline-flex;align-items:center;gap:.4rem}
+.legend i{width:.6rem;height:.6rem;border-radius:50%;display:inline-block}
+.record{background:var(--cream);border:1px solid var(--hair);border-radius:1.1rem 1.1rem 1.1rem 2.2rem;padding:1.4rem;position:sticky;top:1.5rem}
+.record .rk{font-size:var(--t-micro);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+.record .rn{font-family:var(--serif);font-size:2.6rem;font-weight:480;line-height:1;margin:.35rem 0 .55rem}
+.record .rt{font-weight:700;font-size:var(--t-small)}
+.record .rd{font-size:var(--t-small);color:var(--ink-soft);margin-top:.35rem}
+.record .rq{margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--hair);font-family:var(--serif);font-style:italic;font-size:var(--t-small);color:var(--sage-deep)}
+.records-fallback{margin-top:1.6rem;font-size:var(--t-small);color:var(--ink-soft)}
+.records-fallback li{margin-left:1.2em;margin-top:.3em}
+@media (min-width:600px){html.js .records-fallback{position:absolute;left:-9999px}}
+
+/* ---- the visit ---- */
+.visit-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:start;margin-top:2.4rem}
+@media (max-width:899px){.visit-grid{grid-template-columns:1fr}}
+.tl{list-style:none;position:relative;padding-left:2rem}
+.tl::before{content:"";position:absolute;left:.55rem;top:.5rem;bottom:.5rem;width:2px;background:var(--sage-wash);border-radius:2px}
+.tl li{position:relative;padding-block:.85rem}
+.tl li::before{content:"";position:absolute;left:-1.71rem;top:1.28rem;width:.65rem;height:.65rem;border-radius:50%;background:var(--cream);border:2px solid var(--sage)}
+.tl .tt{font-variant-numeric:tabular-nums;font-weight:700;font-size:var(--t-small);color:var(--sage-deep);letter-spacing:.04em}
+.tl .te{font-family:var(--serif);font-size:1.15rem;margin-top:.1rem}
+.tl .td{font-size:var(--t-small);color:var(--ink-soft);margin-top:.15rem;max-width:44ch}
+.tl-note{margin-top:1rem;font-size:var(--t-micro);color:var(--ink-faint)}
+.visit-fig .arch{aspect-ratio:4/4.9}
+.visit-fig figcaption{font-size:var(--t-micro);color:var(--ink-faint);margin-top:.7rem;display:flex;justify-content:space-between;gap:1rem}
+
+/* ---- plans ---- */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.6rem}
+@media (max-width:899px){.plans{grid-template-columns:1fr}}
+.plan{background:var(--cream);border:1px solid var(--hair);border-radius:1.1rem;padding:1.7rem;display:flex;flex-direction:column}
+.plan.mid{border-color:var(--sage);border-width:1.5px}
+.plan h3{font-size:1.3rem}
+.plan .tag{font-size:var(--t-micro);letter-spacing:.16em;text-transform:uppercase;color:var(--sage-deep);font-weight:700;margin-bottom:.6rem}
+.plan .desc{font-size:var(--t-small);color:var(--ink-soft);margin-top:.5rem}
+.plan ul{list-style:none;margin-block:1.1rem;font-size:var(--t-small);flex:1}
+.plan li{padding-left:1.3em;position:relative;margin-top:.45em;color:var(--ink-soft)}
+.plan li::before{content:"";position:absolute;left:0;top:.52em;width:.5em;height:.5em;border-radius:50%;background:var(--sage-wash);border:1.5px solid var(--sage)}
+.plan .price{font-family:var(--serif);font-size:1.9rem;font-weight:520;border-top:1px dashed var(--hair);padding-top:1rem}
+.plan .price small{font-family:var(--sans);font-size:var(--t-micro);color:var(--ink-faint);display:block;margin-top:.3rem;font-weight:400}
+.plans-note{margin-top:1.2rem;font-size:var(--t-micro);color:var(--ink-faint)}
+
+/* ---- studio ---- */
+#studio{background:var(--paper-deep);border-block:1px solid var(--hair)}
+.studio-grid{display:grid;grid-template-columns:0.95fr 1.05fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:center;margin-top:2.4rem}
+@media (max-width:899px){.studio-grid{grid-template-columns:1fr}}
+.studio-fig .arch{aspect-ratio:5/4}
+.studio-fig figcaption{font-size:var(--t-micro);color:var(--ink-faint);margin-top:.7rem}
+.materials{list-style:none;margin-top:1.4rem}
+.materials li{display:flex;gap:.9rem;align-items:baseline;padding-block:.55rem;border-top:1px dashed var(--hair);font-size:var(--t-small)}
+.materials li:first-child{border-top:none}
+.materials b{font-weight:700;min-width:9.5rem;display:inline-block}
+.materials span{color:var(--ink-soft)}
+
+/* ---- close ---- */
+.close-sec{text-align:center}
+.close-sec h2{margin-inline:auto}
+.btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--terra);color:var(--cream);border-radius:2rem;padding:.8em 1.7em;font-weight:700;text-decoration:none;font-size:1rem;margin-top:1.8rem}
+.btn:hover{background:var(--ink);color:var(--cream)}
+.close-note{margin-top:1rem;font-size:var(--t-small);color:var(--ink-soft)}
+
+footer.site{border-top:1px solid var(--hair);padding-block:2.2rem;font-size:var(--t-micro);color:var(--ink-faint)}
+footer.site .wrap{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:space-between}
+footer.site a{color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="wrap">
+    <a class="wordmark" href="#">Pearl <span class="amp">&amp;</span> Rowe</a>
+    <nav class="site" aria-label="Site">
+      <a href="#chart">Your chart</a>
+      <a href="#visit">A visit</a>
+      <a href="#plans">Plans</a>
+      <a href="#studio">The studio</a>
+      <a href="guide/">How this was made</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ================= hero ================= -->
+  <section class="hero" aria-label="Introduction">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker" data-rise style="--i:0">Dental studio · early appointments · fictional demo</p>
+        <h1 data-rise style="--i:1">Dentistry at a <em>morning</em> pace.</h1>
+        <p class="lede" data-rise style="--i:2">A small studio with linen chairs, oak floors, and no
+        fluorescent hum. Every step is explained before it begins, priced before
+        the chair tilts — and the drill stays quiet until you've heard the plan.</p>
+        <p class="consent" data-rise style="--i:3" id="consentLine">Nothing begins until you nod.<svg viewBox="0 0 220 10" aria-hidden="true" preserveAspectRatio="none"><path style="--len:222" d="M2 7 Q55 3 110 6 T218 5"/></svg></p>
+        <div class="hero-chips" data-rise style="--i:4">
+          <span class="hchip">next gentle slot · <b>Tue 9:40</b></span>
+          <span class="hchip">first visits · <b>60 min, unhurried</b></span>
+          <span class="hchip">quiet room · <b>always</b></span>
+        </div>
+      </div>
+      <div data-rise style="--i:2">
+        <div class="arch">
+          <img src="assets/hero-morning.webp" width="1536" height="2048" alt="A calm dental room at morning: an operatory chair in oat-coloured upholstery under an arched window, oak floor and sage-green wall, a potted olive tree catching the early light" fetchpriority="high">
+        </div>
+        <p class="hero-note">the studio, 7:58 am — before the first hello</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= promises ================= -->
+  <section aria-label="How we work">
+    <div class="wrap">
+      <p class="kicker" data-rise>The three quiet rules</p>
+      <h2 data-rise style="--i:1">Calm is a <em>procedure</em> too.</h2>
+      <div class="trio">
+        <article class="promise" data-rise style="--i:2">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 32 V16 Q8 8 20 8 Q32 8 32 16 V32"/><path d="M14 32v-6M26 32v-6"/></svg>
+          <h3>Explained first</h3>
+          <p>You'll see the photos, the chart, and the why before anything else.
+          Questions are part of the appointment, not a delay to it.</p>
+        </article>
+        <article class="promise" data-rise style="--i:3">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="17" cy="17" r="8"/><path d="M23 23 L33 33"/><path d="M13 17h8M17 13v8"/></svg>
+          <h3>Checked twice</h3>
+          <p>Numbing gets its full seven minutes — timed, not guessed. We test
+          before we start, and we tell you what we're testing.</p>
+        </article>
+        <article class="promise" data-rise style="--i:4">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M10 6h20v28l-4-2.5-4 2.5-4-2.5-4 2.5-4-2.5-4 2.5z" transform="translate(2 0)"/><path d="M16 14h10M16 20h10"/></svg>
+          <h3>Priced before the chair tilts</h3>
+          <p>The number you hear standing up is the number on the way out.
+          A surprise line item is a failure on our side, never yours.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= the chart ================= -->
+  <section id="chart" aria-label="Your dental chart">
+    <div class="wrap">
+      <div class="chart-head">
+        <div>
+          <p class="kicker" data-rise>The record · FDI notation</p>
+          <h2 data-rise style="--i:1">Your mouth, <em>on record.</em></h2>
+        </div>
+        <p class="chart-note" data-rise style="--i:2">a sample chart — this is a
+        demonstration studio; scroll and the check-up happens</p>
+      </div>
+
+      <div class="chart-stage">
+        <div>
+          <div class="fdi" id="fdi" role="group" aria-label="Interactive dental chart in FDI notation — each tooth is a button opening its record" aria-describedby="fdiDesc">
+            <p id="fdiDesc" class="sr-only">Upper row teeth 18 to 11 then 21 to 28, lower row 48 to 41 then 31 to 38. Most teeth are quiet; 16 has a sealant from 2024, 25 is being watched, 36 has a crown from 2019, 46 a filling from 2022, and 53 is a retained baby tooth that never left — still doing its job.</p>
+            <div class="jaw upper" id="jawUpper">
+              <button type="button" class="tooth quiet" data-n="18" aria-label="Tooth 18 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">18</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="17" aria-label="Tooth 17 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">17</span><span class="dot"></span></button>
+              <button type="button" class="tooth treated" data-n="16" aria-label="Tooth 16 — Sealed · 2024"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">16</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="15" aria-label="Tooth 15 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">15</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="14" aria-label="Tooth 14 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">14</span><span class="dot"></span></button>
+              <button type="button" class="tooth baby" data-n="53" aria-label="Tooth 53 — Baby tooth · retained"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M8.5 1 Q13 4 13 9 L12.5 14 Q12 18.5 8.5 18.5 Q5 18.5 4.5 14 L4 9 Q4 4 8.5 1 Z"></path></svg><span class="n">53</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="12" aria-label="Tooth 12 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">12</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="11" aria-label="Tooth 11 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">11</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="21" aria-label="Tooth 21 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">21</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="22" aria-label="Tooth 22 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">22</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="23" aria-label="Tooth 23 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M8.5 1 Q13 4 13 9 L12.5 14 Q12 18.5 8.5 18.5 Q5 18.5 4.5 14 L4 9 Q4 4 8.5 1 Z"></path></svg><span class="n">23</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="24" aria-label="Tooth 24 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">24</span><span class="dot"></span></button>
+              <button type="button" class="tooth watching" data-n="25" aria-label="Tooth 25 — Watching · photo again in August"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">25</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="26" aria-label="Tooth 26 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">26</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="27" aria-label="Tooth 27 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">27</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="28" aria-label="Tooth 28 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">28</span><span class="dot"></span></button>
+            </div>
+            <div class="jaw lower" id="jawLower">
+              <button type="button" class="tooth quiet" data-n="48" aria-label="Tooth 48 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">48</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="47" aria-label="Tooth 47 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">47</span><span class="dot"></span></button>
+              <button type="button" class="tooth treated" data-n="46" aria-label="Tooth 46 — Filled · 2022"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">46</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="45" aria-label="Tooth 45 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">45</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="44" aria-label="Tooth 44 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">44</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="43" aria-label="Tooth 43 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M8.5 1 Q13 4 13 9 L12.5 14 Q12 18.5 8.5 18.5 Q5 18.5 4.5 14 L4 9 Q4 4 8.5 1 Z"></path></svg><span class="n">43</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="42" aria-label="Tooth 42 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">42</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="41" aria-label="Tooth 41 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">41</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="31" aria-label="Tooth 31 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">31</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="32" aria-label="Tooth 32 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M5 5 Q5 1.5 8.5 1.5 Q12 1.5 12 5 L12 14 Q12 18 8.5 18 Q5 18 5 14 Z"></path></svg><span class="n">32</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="33" aria-label="Tooth 33 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M8.5 1 Q13 4 13 9 L12.5 14 Q12 18.5 8.5 18.5 Q5 18.5 4.5 14 L4 9 Q4 4 8.5 1 Z"></path></svg><span class="n">33</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="34" aria-label="Tooth 34 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">34</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="35" aria-label="Tooth 35 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M4 6 Q4 1.5 8.5 1.5 Q13 1.5 13 6 L13 13.5 Q13 18.5 8.5 18.5 Q4 18.5 4 13.5 Z"></path></svg><span class="n">35</span><span class="dot"></span></button>
+              <button type="button" class="tooth treated" data-n="36" aria-label="Tooth 36 — Crowned · 2019"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">36</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="37" aria-label="Tooth 37 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">37</span><span class="dot"></span></button>
+              <button type="button" class="tooth quiet" data-n="38" aria-label="Tooth 38 — quiet"><svg viewBox="0 0 17 20" aria-hidden="true"><path d="M3 6 Q3 1 8.5 1 Q14 1 14 6 L14 14 Q14 19 11.5 19 Q9.9 19 9.5 16.5 Q9.2 15 8.5 15 Q7.8 15 7.5 16.5 Q7.1 19 5.5 19 Q3 19 3 14 Z"></path></svg><span class="n">38</span><span class="dot"></span></button>
+            </div>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span><i style="background:var(--sage)"></i>quiet</span>
+            <span><i style="background:var(--terra-wash);border:1.5px solid var(--terra)"></i>watching</span>
+            <span><i style="background:var(--sage-wash);border:1.5px solid var(--sage-deep)"></i>treated</span>
+            <span><i style="background:var(--butter);border:1.5px solid var(--ink-soft)"></i>baby tooth, retained</span>
+          </div>
+          <ul class="records-fallback">
+            <li><b>16</b> — sealed 2024, quiet since.</li>
+            <li><b>25</b> — a shadow worth watching. Photo again in August; no drill on a maybe.</li>
+            <li><b>36</b> — crowned 2019. The oldest work in the mouth, still seated true.</li>
+            <li><b>46</b> — filled 2022, tidy margins.</li>
+            <li><b>53</b> — a baby tooth that never left. Root's short, grip is fine. Still here, still counts.</li>
+          </ul>
+        </div>
+        <aside class="record" id="record" aria-live="polite">
+          <p class="rk">tooth record</p>
+          <p class="rn" id="recN">16</p>
+          <p class="rt" id="recT">Sealed · 2024</p>
+          <p class="rd" id="recD">A shallow groove sealed before it could become a story. Checked at every visit since — quiet.</p>
+          <p class="rq" id="recQ">“The best work is the work you stop needing.”</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= the visit ================= -->
+  <section id="visit" aria-label="What a first visit looks like">
+    <div class="wrap">
+      <p class="kicker" data-rise>One appointment, timed honestly</p>
+      <h2 data-rise style="--i:1">The 9 o'clock, <em>minute by minute.</em></h2>
+      <div class="visit-grid">
+        <ol class="tl" data-rise style="--i:2">
+          <li><span class="tt">08:50</span><p class="te">You arrive early, on purpose</p><p class="td">Linen chair, real coffee, no clipboard chase — your forms were two calm emails ago.</p></li>
+          <li><span class="tt">09:00</span><p class="te">The talk-through</p><p class="td">Photos on the big screen, the chart on paper. You hear everything that could happen today.</p></li>
+          <li><span class="tt">09:12</span><p class="te">The nod</p><p class="td">Or not — plenty of first visits end here, with a plan and a handshake. That's a good visit.</p></li>
+          <li><span class="tt">09:14</span><p class="te">Numbing, properly timed</p><p class="td">The full seven minutes, timed on the wall clock you can see. We wait. You breathe.</p></li>
+          <li><span class="tt">09:21</span><p class="te">The work, narrated</p><p class="td">Every instrument named before it's lifted. Raise a hand, everything stops — that's a rule, not a slogan.</p></li>
+          <li><span class="tt">09:47</span><p class="te">Rinse, review, photos</p><p class="td">You see what happened, next to what it looked like before. The chart gets its new quiet marks.</p></li>
+          <li><span class="tt">09:52</span><p class="te">Out, with the same number</p><p class="td">The price from 09:00, unchanged. Next slot suggested, never pushed.</p></li>
+        </ol>
+        <figure class="visit-fig" data-rise style="--i:3">
+          <div class="arch">
+            <img src="assets/first-visit.webp" width="1400" height="1867" alt="A dentist in an oat-coloured apron kneeling to eye level beside a seated patient, holding up a small round hand mirror while the patient, relaxed in the chair, watches her explain; the room warm with oak and sage tones, an arched window behind" loading="lazy">
+          </div>
+          <figcaption><span>09:00 · the talk-through</span><span>eye level, always</span></figcaption>
+        </figure>
+      </div>
+      <p class="tl-note" data-rise>62 minutes, door to door. The schedule holds one appointment per hour — running late is something we do to lunch, not to you.</p>
+    </div>
+  </section>
+
+  <!-- ================= plans ================= -->
+  <section id="plans" aria-label="Care plans and pricing">
+    <div class="wrap">
+      <p class="kicker" data-rise>Plans · sample pricing</p>
+      <h2 data-rise style="--i:1">Priced like a <em>menu,</em> not a mystery.</h2>
+      <div class="plans">
+        <article class="plan" data-rise style="--i:2">
+          <p class="tag">First &amp; yearly</p>
+          <h3>The Check-up</h3>
+          <p class="desc">The unhurried hour: chart, photos, clean, and the talk-through.</p>
+          <ul>
+            <li>Full FDI chart, updated</li>
+            <li>Photos you keep</li>
+            <li>Gentle scale &amp; polish</li>
+            <li>A plan in plain words</li>
+          </ul>
+          <p class="price">$145<small>sample plan pricing · rebates vary</small></p>
+        </article>
+        <article class="plan mid" data-rise style="--i:3">
+          <p class="tag">When something needs doing</p>
+          <h3>The Quiet Fix</h3>
+          <p class="desc">Fillings, seals, small repairs — narrated, numbed on the clock.</p>
+          <ul>
+            <li>Priced standing up, first</li>
+            <li>The seven-minute rule</li>
+            <li>Raise-a-hand stop, always</li>
+            <li>Review photos after</li>
+          </ul>
+          <p class="price">from $280<small>quoted exactly before you sit — the number doesn't move</small></p>
+        </article>
+        <article class="plan" data-rise style="--i:4">
+          <p class="tag">Membership</p>
+          <h3>The Full Story</h3>
+          <p class="desc">Two check-ups a year, priority gentle slots, and a chart that's never a stranger.</p>
+          <ul>
+            <li>Two unhurried hours a year</li>
+            <li>Same-week sore-tooth slots</li>
+            <li>10% off any quiet fix</li>
+            <li>Your record, always yours</li>
+          </ul>
+          <p class="price">$16<small>per month · sample plan pricing · cancel anytime, no speech</small></p>
+        </article>
+      </div>
+      <p class="plans-note" data-rise>All pricing is demonstration data for a fictional studio. The honest bit is the shape: the number first, the chair second.</p>
+    </div>
+  </section>
+
+  <!-- ================= studio ================= -->
+  <section id="studio" aria-label="The studio and its materials">
+    <div class="wrap">
+      <p class="kicker" data-rise>The room does half the work</p>
+      <h2 data-rise style="--i:1">Built like a <em>kitchen,</em> kept like a clinic.</h2>
+      <div class="studio-grid">
+        <figure class="studio-fig" data-rise style="--i:2">
+          <div class="arch">
+            <img src="assets/tray-linen.webp" width="1400" height="1050" alt="A close view of a linen-lined ceramic tray on an oak counter in morning light: the round head of a dental mirror and the curved tip of a probe rest on the linen, handles out of frame, a sprig of eucalyptus beside them" loading="lazy">
+          </div>
+          <figcaption>the eight o'clock tray — set before you arrive</figcaption>
+        </figure>
+        <div data-rise style="--i:3">
+          <p class="lede" style="margin-top:0">Sterile doesn't have to feel sterile. The instruments meet
+          hospital-grade standards; the room they live in meets yours.</p>
+          <ul class="materials">
+            <li><b>Oak &amp; linen</b><span>because nobody's shoulders drop in a white vinyl room</span></li>
+            <li><b>Morning light</b><span>the operatory faces east — the first three slots are the golden ones</span></li>
+            <li><b>One quiet room</b><span>no open bay, no overheard drilling, one patient at a time</span></li>
+            <li><b>The wall clock</b><span>big enough to time the numbing by — you're invited to watch it</span></li>
+            <li><b>Steam, not smell</b><span>sterilised on site, aired properly — the studio smells like cedar, not clinic</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= close ================= -->
+  <section class="close-sec" aria-label="Book a visit">
+    <div class="wrap">
+      <p class="kicker" data-rise>No forms at the door</p>
+      <h2 data-rise style="--i:1">Come sit down. <em>We'll talk first.</em></h2>
+      <a class="btn" href="mailto:hello@pearlandrowe.example" data-rise style="--i:2">Ask for a gentle slot</a>
+      <p class="close-note" data-rise style="--i:3">Tuesday and Thursday mornings are kept for first visits and nervous returners.<br>Tell us which one you are — or don't; we'll treat you like the second one either way.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>Pearl &amp; Rowe is a fictional demonstration business, built as a portfolio template. Imagery is AI-generated. <a href="guide/">Read how this page was made</a>.</span>
+    <span>FDI chart is sample data · no real patients</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  document.documentElement.classList.remove("no-js");
+  document.documentElement.classList.add("js");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- enhance the static FDI chart ---------- */
+  // The 32 teeth are server-rendered static HTML (no-JS serves the complete
+  // chart); JS only adds the record panel wiring and the check-up pass.
+  var RECORDS = {
+    16: { t: "Sealed \u00b7 2024", d: "A shallow groove sealed before it could become a story. Checked at every visit since \u2014 quiet.", q: "\u201cThe best work is the work you stop needing.\u201d" },
+    25: { t: "Watching \u00b7 photo again in August", d: "A shadow on the last set of photos. Could be nothing; we photograph it again rather than guess.", q: "\u201cNo drill on a maybe.\u201d" },
+    36: { t: "Crowned \u00b7 2019", d: "The oldest work in the mouth. Margins checked yearly; still seated true.", q: "\u201cGood work ages quietly.\u201d" },
+    46: { t: "Filled \u00b7 2022", d: "A tidy composite, polished flat. You'd have to be told it's there.", q: "\u201cYou'd have to be told it's there.\u201d" },
+    53: { t: "Baby tooth \u00b7 retained", d: "Never fell out, never caused trouble. Root's short, grip is fine \u2014 we check it, we leave it be.", q: "\u201cStill here. Still counts.\u201d" }
+  };
+  var order = [];
+  Array.prototype.forEach.call(document.querySelectorAll("#fdi .tooth"), function (b) {
+    var n = Number(b.getAttribute("data-n"));
+    b.addEventListener("click", function () { select(n, b); });
+    b.addEventListener("mouseenter", function () { select(n, b); });
+    order.push({ n: n, el: b });
+  });
+
+  var recN = document.getElementById("recN"), recT = document.getElementById("recT"),
+      recD = document.getElementById("recD"), recQ = document.getElementById("recQ");
+  var activeEl = null;
+  function select(n, el) {
+    var rec = RECORDS[n] || { t: "Quiet", d: "Nothing to report. Checked, photographed, left in peace — the chart's favourite kind of entry.", q: "“Quiet is a result.”" };
+    recN.textContent = String(n);
+    recT.textContent = rec.t;
+    recD.textContent = rec.d;
+    recQ.textContent = rec.q;
+    if (activeEl) activeEl.classList.remove("active");
+    el.classList.add("active");
+    activeEl = el;
+  }
+
+  /* ---------- the check-up pass (scroll-driven, calm) ---------- */
+  var chartSec = document.getElementById("chart");
+  if (!reduced && chartSec) {
+    order.forEach(function (o) { o.el.classList.add("pending"); });
+    var done = 0;
+    function onScroll() {
+      var r = chartSec.getBoundingClientRect();
+      var vh = window.innerHeight;
+      // progress: 0 when section enters, 1 when its middle band has passed
+      var p = (vh * 0.85 - r.top) / (r.height * 0.9);
+      p = Math.max(0, Math.min(1, p));
+      var target = Math.round(p * order.length);
+      while (done < target) { order[done].el.classList.remove("pending"); done++; }
+      while (done > target) { done--; order[done].el.classList.add("pending"); }
+      if (p >= 1) {
+        window.removeEventListener("scroll", onScroll);
+        order.forEach(function (o) { o.el.classList.remove("pending"); });
+        var t53 = order.filter(function (o) { return o.n === 53; })[0];
+        if (t53 && !activeEl) select(53, t53.el);
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* ---------- rise-ins + consent underline ---------- */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.18 });
+  document.querySelectorAll("[data-rise]").forEach(function (el) { io.observe(el); });
+  var consent = document.getElementById("consentLine");
+  if (consent) {
+    var cio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { consent.classList.add("in"); cio.disconnect(); } });
+    }, { threshold: 0.6 });
+    cio.observe(consent);
+  }
+})();
+</script>
+</body>
+</html>

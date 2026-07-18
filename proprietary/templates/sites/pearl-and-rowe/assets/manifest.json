@@ -1,0 +1,23 @@
+[
+  {
+    "file": "hero-morning.webp",
+    "pinnedHash": "ecb23c01e8984e7da1174f965a72fb5385693bce298ee6b9d6b97d74dfdf2aeb",
+    "width": 1536,
+    "height": 2048,
+    "quality": 74
+  },
+  {
+    "file": "first-visit.webp",
+    "pinnedHash": "9a1266229a2fd73baf78d178b87d23a965e24f8fbfe5b16265803cc3e51294f4",
+    "width": 1400,
+    "height": 1867,
+    "quality": 74
+  },
+  {
+    "file": "tray-linen.webp",
+    "pinnedHash": "4434f7aa0ef262778a7fb0e4de4b728dfc8d6c0a121b0a9747e5a78d35838132",
+    "width": 1400,
+    "height": 1050,
+    "quality": 74
+  }
+]

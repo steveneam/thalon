@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Pearl &amp; Rowe was made</title>
+<meta name="robots" content="noindex">
+<style>
+body{font-family:Georgia,serif;max-width:44rem;margin-inline:auto;padding:3rem 1.2rem;line-height:1.7;color:#3a2f22;background:#f5f0e6}
+h1,h2{font-weight:500;line-height:1.2}
+h2{margin-top:2.4rem;font-size:1.25rem}
+code{font-family:ui-monospace,monospace;font-size:.88em;background:#ece5d6;padding:.1em .35em;border-radius:.3em}
+table{border-collapse:collapse;font-size:.9rem;width:100%;margin-top:.8rem}
+td,th{text-align:left;padding:.35rem .8rem .35rem 0;vertical-align:top;border-top:1px solid #ddd2bd}
+th{border-top:none;font-weight:600}
+a{color:#8a4a2b}
+.note{font-size:.9rem;color:#6d5f4b}
+</style>
+</head>
+<body>
+<h1>How this page was made</h1>
+<p class="note">Pearl &amp; Rowe is a <strong>fictional demonstration business</strong> built as a
+portfolio template. All imagery is AI-generated; the dental chart, records,
+appointment times, and prices are sample data. No real patients, practitioners,
+or clinics are depicted.</p>
+
+<h2>Design method</h2>
+<p>The build began with a look-first sweep of the dental genre. Its default —
+a camera-facing whitened-smile close-up on teal-and-white clinical dressing,
+doctor-headshot grids, "Your Perfect Smile" — appeared more than twenty times
+across two searches and was refused entirely: a smile aimed at the lens reads
+as advertising, while absorbed care reads as trust. The keeper register came
+from boutique dental-suite interiors (oak, linen, sage, terracotta, arched
+openings, morning light) and from one outlier design that used a drawn
+tooth-row diagram as its centrepiece — the observation that dentistry's honest
+visual instrument is the chart, not the smile.</p>
+<p>Design axes: <strong>soft-organic</strong> primary (arches, linen texture,
+unhurried pacing, warm paper) with <strong>data-instrument</strong> secondary
+(the FDI chart, the timed visit, menu pricing). The interactive chart uses
+real FDI notation; tooth 53 is a genuine dental situation — a retained
+deciduous canine — kept as the page's one deliberate wink ("still here, still
+counts"). The chart is served as complete static HTML; JavaScript only adds
+the record panel and the scroll-driven check-up pass, so readers without
+scripts get the full record.</p>
+
+<h2>Imagery — models, credits, and the takes that failed</h2>
+<table>
+<tr><th>Slot</th><th>Model</th><th>Credits</th><th>Takes</th></tr>
+<tr><td>Morning studio (hero)</td><td>soul_2 · 2K</td><td>0.24</td><td>Keeper on take 2. Take 1 rejected: a framed wall document grew garbled pseudo-text (the model letters printable surfaces even when told not to), and the window came back rectangular where the design's arch motif needed an arch. The retake composed the surfaces out — bare walls — rather than negative-prompting.</td></tr>
+<tr><td>The talk-through</td><td>soul_2 · 2K</td><td>0.12</td><td>First take kept. Casting followed the studio's standing lessons: eye-level, both subjects absorbed, nobody addressing the camera, clothing plain with nothing to letter. The alt text was corrected to what the frame actually shows — the patient watches the dentist, not the mirror.</td></tr>
+<tr><td>The eight o'clock tray</td><td>soul_2 · 2K</td><td>0.36</td><td>Keeper on take 3. Takes 1–2 rejected for engraved pseudo-lettering on the instrument handles — take 2's was worse than take 1's despite a "no engraving" instruction. Take 3 cropped the handles out of frame entirely, which is the working move: remove the printable surface, don't argue with it.</td></tr>
+</table>
+<p class="note">Total spend 0.72 credits across six takes; every keeper is pinned
+with a full provenance manifest (model, prompt, credits, licence tier) and the
+site files are derived deterministically from the pinned originals.</p>
+
+<h2>Iteration passes — real catches</h2>
+<ul>
+<li>The chart container carried <code>role="img"</code> while holding 32 interactive buttons — assistive tech would have hidden them all; replaced with a described group.</li>
+<li>The chart was originally built by JavaScript, which would have served script-free readers an empty card — rebuilt as static HTML with JS as pure enhancement.</li>
+<li>Tooth tap targets compress below comfortable size on phones, so the five written records now stay visible on narrow screens instead of hiding behind taps.</li>
+<li>A double-typed character from an edit rendered as a stray "&gt;" glyph inside the chart card; caught on the second render pass.</li>
+<li>Ambition-lane additions: the FDI quadrant midline gained its anatomical breathing space, and the completed check-up now surfaces tooth 53's record on its own — the wink introduces itself.</li>
+</ul>
+
+<h2>Type &amp; fonts</h2>
+<p>Literata (variable, with italics) for display and editorial moments;
+Atkinson Hyperlegible — designed by the Braille Institute for low-vision
+legibility — for everything read at small sizes, which is the care register
+expressed typographically. Both OFL, vendored locally; the page makes no
+external requests.</p>
+
+<p><a href="../">← Back to Pearl &amp; Rowe</a></p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "slug": "pearl-and-rowe",
+  "name": "Pearl & Rowe",
+  "vertical": "health-dental-studio",
+  "oneLiner": "A calm dental studio — every step explained before it begins, and nothing begins until you nod.",
+  "axes": {
+    "primary": "soft-organic",
+    "secondary": "data-instrument"
+  },
+  "paletteSeed": "warm linen paper, oak-brown ink (never black), sage as the quiet clinical green, terracotta as the act colour, morning cream light — no teal, no clinical white; softness carried by arches, linen texture, and unhurried spacing",
+  "typeDirection": "Literata (warm bookish serif, display + text, opsz at work) + Atkinson Hyperlegible (humanist sans built by the Braille Institute for legibility — the care register made typographic; chart numerals tabular) — both OFL, vendored",
+  "motionBudget": "calm only: the check-up pass moves tooth to tooth along the FDI chart with scroll while the record fills with quiet marks, arches soft-reveal their scenes, record chips ease in, the consent line underlines itself once; reduced-motion serves the completed chart and static arches; no-JS = the full chart, legend, and every record",
+  "wave": 3,
+  "built": "2026-07-18"
+}
