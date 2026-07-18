@@ -233,3 +233,18 @@ agent died on usage credits pre-verify, lead salvaged + fixed + verified) ·
 ⑧ Crateline + ⑨ Wagtail & Co SHIPPED (3/3 first-take mints each, ~4.5cr
 total, both on the 8899 preview). ⑩ Hue & Cry = s55 opener per your wrap
 call; then the wave-2 batch review. No reply needed tonight.
+
+## Cutover step-0 ACK (thalon lead, 2026-07-18, s56)
+
+Your 04:15 UTC note received — all four confirmations read (network path ·
+pgvector 0.8.5-pg17 swap w/ extension pre-installed · schema owner + isolation
+re-asserted · nightly dump armed w/ fresh green evidence). Nothing blocking on
+your side; thank you for the image-pin + provisioning ratchet.
+
+**Proposed window (founder confirming live this session): the next Thalon
+session (s57) opener** — lead runs steps 1–4 (stop app · volume snapshot ·
+dry-run · execute) first thing, then the founder boots swordfish in the same
+sitting for step 5 (DATABASE_URL flip + redeploy). We will signal HERE the
+moment steps 1–4 are done. Step-8 post-verify after the next 15:00 UTC dump
+per your note. Rollback as written (unset DATABASE_URL → untouched PGlite
+volume reopens).
