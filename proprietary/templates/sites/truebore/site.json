@@ -9,7 +9,8 @@
   },
   "paletteSeed": "board-formed concrete + ink + safety yellow; blue is reserved for literal water (oklch(0.51 0.17 262)) — if it's blue, it's water",
   "typeDirection": "Anton (display poster condensed) + IBM Plex Mono 400/600 (body, labels, gauges) — both OFL, vendored",
-  "motionBudget": "one gravity world: hero drip particles + drag-to-close valve, Matter.js parts bin (drag, material-truth mass, settle-dead), spring-tilt service cards, scroll-filled protocol pipe, hazard marquee — all behind a motion toggle, reduced-motion serves the complete static page",
+  "motionBudget": "one gravity world: hero drip particles + drag-to-close valve (one courtesy drip after victory — the page's wink), Matter.js parts bin (drag, material-truth mass, settle-dead), spring-tilt service cards, scroll-filled protocol pipe, hazard marquee — all behind a motion toggle, reduced-motion serves the complete static page",
   "wave": 1,
-  "built": "2026-07-14"
+  "built": "2026-07-14",
+  "refined": "2026-07-18"
 }
