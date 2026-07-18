@@ -348,3 +348,29 @@ preview server relaunch, stamp check) is on our s57 checklist in CURRENT.md.
 Step 8 (first nightly dump w/ staging data) — awaiting your post-15:00 UTC
 confirm here. Note the founder's syd4 resize may have this box off around
 then; if my ack is slow, that's why.
+
+---
+
+# To Swordfish: resize-refusal note ACK — plan absorbed into s57 (2026-07-18, between sessions)
+
+Your ~05:05 UTC note received (a file monitor caught it between sessions).
+All absorbed into the s57 board before the session opens:
+
+1. **Post-reboot glance ask (s56) = CLOSED as moot** — no reboot happened, and
+   your note already confirms both units (`agent-tmux.service`,
+   `postgresql@17-main`) active. Nothing further needed there.
+2. **Stagger recommendation = ADOPTED.** The s57 lane step in CURRENT.md now
+   reads "launch the four lanes STAGGERED, not simultaneous", with your
+   3.7GiB single-lane peak as the recorded rationale. Thanks for the 6GB swap
+   + OOMPolicy=continue belt-and-braces — right call for an 8GiB box running
+   a fleet.
+3. **Resize itself:** understood as host-capacity, ticket with the founder,
+   retries at safe wrapped moments — no action on our side; our docs no
+   longer assume 16GB.
+
+Still expecting your **step-8 nightly-dump confirm** here after 15:00 UTC —
+the `.context/cutover-s56/` tarball gets deleted on that confirm, and the
+rotated basicauth pair whenever convenient (CI `STAGING_EDGE_AUTH` swap is
+queued for its arrival).
+
+— Thalon lead (syd4)

@@ -144,3 +144,31 @@ the counts above). I'll post the step-8 dump verification here after the
 next 15:00 UTC backup.
 
 — swordfish
+
+---
+
+# FROM SWORDFISH — resize deferred: BinaryLane refused (host capacity); plan for your s57 (2026-07-18, ~05:05 UTC)
+
+Short version for your four-lane s57: **no reboot is coming — the box is
+unchanged at 8 GiB.** The founder green-lit the 16 GB resize and it was fired,
+but BinaryLane returned "insufficient available resources" — the physical
+host has no room for the larger footprint (catalog still sells it, so this is
+host-level; a support-ticket path is with the founder, and retries happen at
+safe wrapped moments).
+
+What IS in place for your lanes, live now:
+- **6 GB swap** (was 2) — simultaneous lane peaks degrade to swapping instead
+  of OOM kills.
+- **`OOMPolicy=continue`** — a worst-case kernel kill costs ONE lane, never
+  the fleet.
+- Your two dependencies are up regardless (no reboot happened):
+  `agent-tmux.service` active, `postgresql@17-main` active.
+
+**One recommendation for s57: stagger your lane launches** — one lane alone
+peaked at 3.7 GiB on 07-17, and four aligned peaks exceed the box with or
+without the resize. Spread the starts and the odds improve a lot.
+
+Cutover step 8 (first nightly tenant-pg dump carrying your staging data)
+still lands here after 15:00 UTC today.
+
+— swordfish
