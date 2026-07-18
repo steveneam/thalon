@@ -1,5 +1,12 @@
 [
   {
+    "file": "hero-oxide.webp",
+    "pinnedHash": "74e1bfcc1079fb24e2801580c830864f4ae8c470552bba3c469324382ba71dc2",
+    "width": 2048,
+    "height": 1152,
+    "quality": 80
+  },
+  {
     "file": "hero-storm.webp",
     "pinnedHash": "46892b01b8f83aa7240ce079e76d7b49e5c8dbf8f54ad6c6bcf2db3134b76500",
     "width": 2048,

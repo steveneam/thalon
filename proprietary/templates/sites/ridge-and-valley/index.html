@@ -127,7 +127,8 @@ nav.jump a:hover{color:var(--oxide-ink)}
 .xsec .lead{stroke:var(--ink-soft);stroke-width:1;fill:none}
 .xsec .water{opacity:var(--storm)}
 .storm-scope .xsec .water{opacity:1}
-.anatomy-note{font-size:.95rem;color:var(--ink-soft)}
+.anatomy-frame img{display:block;width:100%;height:auto;border:2px solid var(--ink)}
+.anatomy-note{font-size:.85rem;color:var(--ink-soft);font-family:var(--mono);margin-top:.5rem;text-transform:uppercase;letter-spacing:.06em}
 
 /* ---- materials ---- */
 .mat{display:grid;gap:0;border:2px solid var(--ink);margin-bottom:clamp(1.4rem,3vw,2rem);background:var(--paper)}
@@ -182,7 +183,9 @@ nav.jump a:hover{color:var(--oxide-ink)}
   border:2px solid #183c74;box-shadow:0 4px 0 rgba(0,0,0,.35)}
 .tarp::after{content:"";position:absolute;left:.6rem;top:6.5rem;right:.6rem;height:2px;background:rgba(255,255,255,.25)}
 @media (max-width:44rem){.tarp{width:7.5rem;height:5.6rem;top:-1.9rem;right:-2.7rem}}
-.tarp-caption{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#c8d2d7;margin-top:.6rem}
+.tarp-caption{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;margin-top:.6rem}
+.tarp-caption a{color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold)}
+.tarp-caption a:hover{color:var(--paper);border-bottom-color:var(--paper)}
 
 /* ---- crew ---- */
 .crew{display:grid;gap:0;border:2px solid var(--ink)}
@@ -236,7 +239,7 @@ footer a{color:var(--oxide-ink)}
   <!-- ================= HERO ================= -->
   <section class="hero" aria-label="Ridge and Valley Roofing">
     <div class="frame">
-      <img src="assets/hero-storm.webp" width="2048" height="1152" alt="A charcoal corrugated steel roof with one brick chimney under a massive teal storm front, ember light on the horizon" fetchpriority="high">
+      <img src="assets/hero-oxide.webp" width="2048" height="1152" alt="A proud terracotta-oxide roof in full sun, its gable echoed by the mountain peak rising behind it" fetchpriority="high">
     </div>
     <div class="wrap titleblock">
       <h1 class="title hero-title">Ridge <span class="amp">&amp;</span> Valley</h1>
@@ -261,48 +264,15 @@ footer a{color:var(--oxide-ink)}
       <div class="valley-cols">
         <div>
           <h2 id="anatomy-h">A roof is a system, not a surface</h2>
-          <p>What fails in a storm is almost never the sheet you can see. It is the
-          ridge capping that was face-fixed instead of clipped, the sarking that
-          stops short of the valley, the gutter that was never sized for the
-          catchment above it. A re-roof replaces the system.</p>
-          <p class="anatomy-note">Every line in this drawing is an item on our quote,
-          named the same way — nothing hides inside an allowance.</p>
+          <p>What fails in a storm is never the sheet you can see — it's the capping,
+          the sarking, the undersized gutter. A re-roof replaces the system, and
+          every part of it is a named line on our quote. The full drawing lives in
+          the storm test below.</p>
         </div>
         <div class="valley" aria-hidden="true"></div>
-        <div>
-          <svg class="xsec" viewBox="0 0 560 330" role="img" aria-label="Labelled cross-section of a pitched roof: ridge cap, battens, sarking, rafters, gutter and downpipe">
-            <!-- pitch -->
-            <polygon points="60,210 280,70 500,210" fill="none" stroke="var(--ink)" stroke-width="3"/>
-            <!-- sarking (inner line) -->
-            <polyline points="80,208 280,80 480,208" fill="none" stroke="var(--oxide)" stroke-width="2" stroke-dasharray="7 4"/>
-            <!-- battens -->
-            <g stroke="var(--ink)" stroke-width="2">
-              <line x1="130" y1="166" x2="146" y2="176"/><line x1="190" y1="128" x2="206" y2="138"/><line x1="250" y1="90" x2="266" y2="100"/>
-              <line x1="330" y1="100" x2="314" y2="110"/><line x1="390" y1="138" x2="374" y2="148"/><line x1="450" y1="176" x2="434" y2="186"/>
-            </g>
-            <!-- ridge cap -->
-            <polyline points="258,72 280,58 302,72" fill="none" stroke="var(--ink)" stroke-width="6"/>
-            <!-- gutter + downpipe -->
-            <path d="M500,210 h28 v16 h-20" fill="none" stroke="var(--ink)" stroke-width="3"/>
-            <line x1="524" y1="226" x2="524" y2="300" stroke="var(--ink)" stroke-width="6"/>
-            <!-- the water, present only under storm (CSS-gated) -->
-            <g class="water">
-              <polyline points="280,64 420,152 496,200" fill="none" stroke="#7fb2c9" stroke-width="3" stroke-linecap="square"/>
-              <line x1="524" y1="230" x2="524" y2="296" stroke="#7fb2c9" stroke-width="3"/>
-            </g>
-            <!-- labels -->
-            <text x="240" y="40">ridge cap — clipped, never face-fixed</text>
-            <line class="lead" x1="282" y1="46" x2="282" y2="58"/>
-            <text x="60" y="120">sarking</text>
-            <line class="lead" x1="92" y1="126" x2="150" y2="160"/>
-            <text x="352" y="84">battens @ 900</text>
-            <line class="lead" x1="360" y1="90" x2="330" y2="102"/>
-            <text x="300" y="256">gutter · sized to catchment</text>
-            <line class="lead" x1="472" y1="250" x2="506" y2="224"/>
-            <text x="400" y="300">downpipe</text>
-            <line class="lead" x1="472" y1="294" x2="516" y2="282"/>
-            <text x="60" y="240">pitch 5°–45°</text>
-          </svg>
+        <div class="anatomy-frame">
+          <img src="assets/hero-storm.webp" width="2048" height="1152" loading="lazy" alt="A charcoal corrugated roof with one brick chimney as a heavy teal storm front rolls in — the weather the system is built for">
+          <p class="anatomy-note">the job, mid-warning — this is the weather the system is sized for</p>
         </div>
       </div>
     </div>
@@ -404,9 +374,13 @@ footer a{color:var(--oxide-ink)}
           </div>
         </div>
 
-        <svg class="xsec" viewBox="0 0 560 330" role="img" aria-label="The same roof cross-section shedding storm water into the gutter and down the downpipe">
+        <svg class="xsec" viewBox="0 0 560 330" role="img" aria-label="The labelled roof cross-section — ridge cap, battens, sarking, gutter and downpipe — shedding storm water into the gutter and down the downpipe">
           <polygon points="60,210 280,70 500,210" fill="none" stroke="#d5dde1" stroke-width="3"/>
           <polyline points="80,208 280,80 480,208" fill="none" stroke="var(--gold)" stroke-width="2" stroke-dasharray="7 4"/>
+          <g stroke="#d5dde1" stroke-width="2">
+            <line x1="130" y1="166" x2="146" y2="176"/><line x1="190" y1="128" x2="206" y2="138"/><line x1="250" y1="90" x2="266" y2="100"/>
+            <line x1="330" y1="100" x2="314" y2="110"/><line x1="390" y1="138" x2="374" y2="148"/><line x1="450" y1="176" x2="434" y2="186"/>
+          </g>
           <polyline points="258,72 280,58 302,72" fill="none" stroke="#d5dde1" stroke-width="6"/>
           <path d="M500,210 h28 v16 h-20" fill="none" stroke="#d5dde1" stroke-width="3"/>
           <line x1="524" y1="226" x2="524" y2="300" stroke="#d5dde1" stroke-width="6"/>
@@ -414,12 +388,19 @@ footer a{color:var(--oxide-ink)}
             <polyline points="280,64 420,152 496,200" fill="none" stroke="#7fb2c9" stroke-width="3" stroke-linecap="square"/>
             <line x1="524" y1="230" x2="524" y2="296" stroke="#7fb2c9" stroke-width="3"/>
           </g>
-          <text x="150" y="40">every drop takes this path — or it takes yours</text>
-          <text x="356" y="252">to the gutter</text>
-          <line class="lead" x1="450" y1="246" x2="500" y2="222"/>
-          <text x="400" y="300">down and away</text>
-          <line class="lead" x1="498" y1="294" x2="516" y2="284"/>
+          <text x="240" y="40">ridge cap — clipped, never face-fixed</text>
+          <line class="lead" x1="282" y1="46" x2="282" y2="58"/>
+          <text x="60" y="120">sarking</text>
+          <line class="lead" x1="92" y1="126" x2="150" y2="160"/>
+          <text x="352" y="84">battens @ 900</text>
+          <line class="lead" x1="360" y1="90" x2="330" y2="102"/>
+          <text x="60" y="240">pitch 5°–45°</text>
+          <text x="300" y="256">gutter · sized to catchment</text>
+          <line class="lead" x1="472" y1="250" x2="506" y2="224"/>
+          <text x="400" y="300">downpipe</text>
+          <line class="lead" x1="472" y1="294" x2="516" y2="282"/>
         </svg>
+        <p class="rating-line" style="border-top:0;padding-top:.4rem">every drop takes this path — or it takes yours · every named part is a line on the quote</p>
 
         <p class="rating-line">Design basis stated per site · the gauge above runs to the
         coastal wind class we certify against · exceedance is what insurance is for —
@@ -429,7 +410,7 @@ footer a{color:var(--oxide-ink)}
           <div class="tarp" aria-hidden="true"></div>
           <p><strong>Storm damage right now?</strong> We carry tarps on every ute and
           fit them free while you wait for the real fix.</p>
-          <p class="tarp-caption">temporary fix — book the permanent one</p>
+          <p class="tarp-caption"><a href="#book-plate">temporary fix — book the permanent one →</a></p>
         </div>
       </div>
     </div>

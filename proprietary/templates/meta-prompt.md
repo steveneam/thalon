@@ -168,6 +168,21 @@ handsome young male. Cast whoever the customer hopes to see at the door.
 outdoor imagery — fields, gardens, greenery, open sky — as bands,
 backgrounds, or sides. The ⑫ garden + walk-out pair is the model: the
 brightest images on the page answer the vertical's fear, not its function.
+(9) **Nature is the supporting cast (founder-taught, s62 ⑯ fix round — the
+house style, stated):** the OBJECT/craft is the frame's protagonist; nature
+(landscape, greenery, weather, sky, urban nature) is the supporting cast
+that frames, mirrors, and dignifies it; PEOPLE are subtle decoration around
+the object, never the stars. The ⑯ model case: the hero re-cast from
+storm-gloom to a terracotta roof in full sun with a mountain peak behind it
+ECHOING the gable's triangle — the landscape literally mirroring the
+subject's geometry. Applied readings: compose heroes with a natural
+backdrop that answers the subject's shape; sunny/natural glory is the trust
+register for openings (drama lives in inner chapters where the story earns
+it); when a brutalist/industrial axis is drawn, look for where nature can
+counterweight it. Portfolio positioning on the record: the nature-natural
+register (Ember & Rye · Orchard House · Sprig & Barrow · First Crack ·
+Stem & Vow) is this portfolio's A-strength; brutalist registers are
+competence, not signature.
 
 **Show the consumable result (founder direction, s60 ⑬ fix round):** for any
 vertical whose product is tasted, worn, felt, or lived in, the page must show
