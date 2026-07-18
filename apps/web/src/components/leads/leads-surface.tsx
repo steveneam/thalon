@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flame, RefreshCw, Upload, Users, X } from "lucide-react";
+import { LeadsBoard } from "@/components/board/leads-board";
 import { LeadCard } from "@/components/leads/lead-card";
 import { WeightsProvenance } from "@/components/leads/weights-provenance";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,8 @@ import type { ImportReport, LeadsPayload, TriageAction } from "@/lib/leads/types
 import { cn } from "@/lib/utils";
 import { useListKeys } from "@/lib/workspace/keyboard";
 
-type QueueTab = "queue" | "dismissed";
+/** Saved-view tabs (Phase I): the Pipeline board mounts beside the existing lists. */
+type QueueTab = "queue" | "board" | "dismissed";
 
 /**
  * The Leads queue (B-crm.2): ranked lead cards with thermal grades and
@@ -70,12 +72,22 @@ export function LeadsSurface() {
 
   const visible = useMemo(() => {
     const leads = payload?.leads ?? [];
+    // The board tab renders through LeadsBoard (its own grouping + cursor);
+    // the flat list stays empty so the list grammar below is inert there.
+    if (tab === "board") return [];
     const filtered =
       tab === "queue"
         ? leads.filter((l) => l.status !== "dismissed")
         : leads.filter((l) => l.status === "dismissed");
     return [...filtered].sort(compareLeadCards);
   }, [payload, tab]);
+
+  // The board's multi-select spans columns — the ONE named confirm says so.
+  const selectedSpan = useMemo(
+    () =>
+      new Set((payload?.leads ?? []).filter((l) => selected.has(l.id)).map((l) => l.status)).size,
+    [payload, selected],
+  );
 
   // Terminal outcomes (dismiss) confirm via the toast with a way back to the
   // Dismissed tab; informational results return a string for the notice line.
@@ -178,7 +190,8 @@ export function LeadsSurface() {
     setCursorId(visible[next].id);
   };
   useListKeys({
-    enabled: !busy && payload !== null,
+    // The board tab owns the keys there (the 2D grammar lives in LeadsBoard).
+    enabled: !busy && payload !== null && tab !== "board",
     bindings: {
       j: moveCursor(1),
       k: moveCursor(-1),
@@ -335,16 +348,23 @@ export function LeadsSurface() {
         </p>
       )}
 
-      {visible.length > 0 && (
+      {tab === "board" ? (
         <p className="u-eyebrow text-muted-foreground">
-          keys · j/k select · x pick · d dismiss · h hot
+          keys · j/k card · h/l column · x pick · d dismiss
         </p>
+      ) : (
+        visible.length > 0 && (
+          <p className="u-eyebrow text-muted-foreground">
+            keys · j/k select · x pick · d dismiss · h hot
+          </p>
+        )
       )}
 
-      <div role="tablist" aria-label="Lead lists" className="flex gap-1.5">
+      <div role="tablist" aria-label="Lead views" className="flex gap-1.5">
         {(
           [
-            { id: "queue", label: `Queue (${counts.new + counts.scored})` },
+            { id: "queue", label: `All leads (${counts.new + counts.scored})` },
+            { id: "board", label: "Pipeline" },
             { id: "dismissed", label: `Dismissed (${counts.dismissed})` },
           ] as const
         ).map((t) => (
@@ -371,12 +391,25 @@ export function LeadsSurface() {
             <X aria-hidden className="size-3.5" /> Dismiss selected
           </>
         }
-        confirmMessage={`Dismiss ${selected.size} selected lead${selected.size === 1 ? "" : "s"}?`}
+        confirmMessage={`Dismiss ${selected.size} selected lead${selected.size === 1 ? "" : "s"}${
+          tab === "board" && selectedSpan > 1 ? ` across ${selectedSpan} columns` : ""
+        }?`}
         onAction={onBulkDismiss}
         onClear={() => setSelected(new Set())}
       />
 
-      {payload && visible.length === 0 && (
+      {tab === "board" && payload && (
+        <LeadsBoard
+          leads={payload.leads}
+          selected={selected}
+          busy={busy}
+          keysEnabled
+          onSelect={onSelect}
+          onTriage={onTriage}
+        />
+      )}
+
+      {tab !== "board" && payload && visible.length === 0 && (
         <Card>
           <CardHeader>
             {tab === "queue" && <EmptyArt asset="emptyLeads" />}
