@@ -7,21 +7,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { LeadCard } from "@/lib/leads/types";
 import { cn } from "@/lib/utils";
+import { fetchViews, putView } from "@/lib/views/client";
 import { timeAgo } from "@/lib/workspace/format";
 import { useListKeys } from "@/lib/workspace/keyboard";
 import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import {
   clampCursor,
+  coerceView,
   columnLabel,
   cursorLead,
   decodeView,
-  encodeView,
   groupColumns,
   moveCursor,
   terminalCounts,
+  viewConfig,
   viewsEqual,
   wipChip,
+  BOARD_VIEW_NAME,
   BOARD_VIEW_STORAGE_KEY,
+  BOARD_VIEW_SURFACE,
   DEFAULT_VIEW,
   type BoardCursor,
   type BoardView,
@@ -45,10 +49,10 @@ interface LeadsBoardProps {
  * in its column header (Bounded-List Rule). The 2D keyboard grammar extends
  * useListKeys: j/k within the column, h/l across, x picks (multi-select spans
  * columns — the shared bulk bar counts both), d = Dismiss (this surface's
- * Four-Verbs word). HONEST LIMITS, stated in UI: drag-between-columns waits
+ * Four-Verbs word). HONEST LIMIT, stated in UI: drag-between-columns waits
  * for the operator-owned stage field (today's lifecycle is engine-owned —
- * drag would fake agency), and saved views persist per-operator only until
- * the views store lands.
+ * drag would fake agency). Saved views live in the TENANT-WIDE views store
+ * (Phase-I window; wired s62).
  */
 export function LeadsBoard({
   leads,
@@ -64,16 +68,53 @@ export function LeadsBoard({
   const cursor = clampCursor(columns, rawCursor ?? { col: 0, row: 0 });
   const atCursor = cursorLead(columns, cursor);
 
-  // The saved view (GitHub model, per-operator half): loaded lazily on the
-  // client — the board only mounts after the leads fetch, never during SSR —
-  // and edits are "yours" until Save view snapshots them back.
-  const loadStored = () =>
-    typeof window === "undefined"
-      ? DEFAULT_VIEW
-      : decodeView(window.localStorage.getItem(BOARD_VIEW_STORAGE_KEY));
-  const [view, setView] = useState<BoardView>(loadStored);
-  const [savedView, setSavedView] = useState<BoardView>(loadStored);
+  // The saved view — TENANT-WIDE store (Phase-I window, wired s62): loaded
+  // from /api/views on mount; edits are "yours" until Save view snapshots
+  // them back to the server. A legacy per-operator localStorage copy is
+  // migrated up once, then retired — the client machine never stays the
+  // only holder of a view (the storage-story rule).
+  const [view, setView] = useState<BoardView>(DEFAULT_VIEW);
+  const [savedView, setSavedView] = useState<BoardView>(DEFAULT_VIEW);
+  const [viewError, setViewError] = useState<string | null>(null);
   const unsaved = !viewsEqual(view, savedView);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const views = await fetchViews(BOARD_VIEW_SURFACE);
+        const stored = views.find((v) => v.name === BOARD_VIEW_NAME);
+        if (stored) {
+          if (cancelled) return;
+          const loaded = coerceView(stored.config);
+          setView(loaded);
+          setSavedView(loaded);
+          window.localStorage.removeItem(BOARD_VIEW_STORAGE_KEY);
+          return;
+        }
+        // One-time migration: a pre-store per-operator copy moves up.
+        const legacy = window.localStorage.getItem(BOARD_VIEW_STORAGE_KEY);
+        if (legacy) {
+          const migrated = decodeView(legacy);
+          await putView(BOARD_VIEW_SURFACE, BOARD_VIEW_NAME, viewConfig(migrated));
+          if (cancelled) return;
+          setView(migrated);
+          setSavedView(migrated);
+          window.localStorage.removeItem(BOARD_VIEW_STORAGE_KEY);
+        }
+      } catch {
+        if (cancelled) return;
+        // Views store unreachable: the legacy copy still renders (a copy,
+        // honestly local); Save view surfaces the error when attempted.
+        const legacy = decodeView(window.localStorage.getItem(BOARD_VIEW_STORAGE_KEY));
+        setView(legacy);
+        setSavedView(legacy);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useListKeys({
     enabled: keysEnabled && !busy,
@@ -131,9 +172,16 @@ export function LeadsBoard({
     });
   }
 
-  function saveView() {
-    window.localStorage.setItem(BOARD_VIEW_STORAGE_KEY, encodeView(view));
-    setSavedView(view);
+  async function saveView() {
+    setViewError(null);
+    try {
+      await putView(BOARD_VIEW_SURFACE, BOARD_VIEW_NAME, viewConfig(view));
+      setSavedView(view);
+      // The record lives server-side now — the legacy copy retires.
+      window.localStorage.removeItem(BOARD_VIEW_STORAGE_KEY);
+    } catch (err) {
+      setViewError(err instanceof Error ? err.message : "Couldn’t save the view.");
+    }
   }
 
   return (
@@ -156,11 +204,16 @@ export function LeadsBoard({
           <Button
             size="sm"
             variant="outline"
-            onClick={saveView}
-            title="Saves for you (this browser). Tenant-wide sharing lands with the views store."
+            onClick={() => void saveView()}
+            title="Saves for the whole workspace — the view lives in the tenant's views store, not this browser."
           >
             Save view
           </Button>
+        )}
+        {viewError && (
+          <span role="alert" className="text-xs text-destructive">
+            {viewError}
+          </span>
         )}
         <span className="u-eyebrow ml-auto text-muted-foreground">
           views save layout + filter + sort · yours until saved

@@ -99,12 +99,14 @@ export function cursorLead(columns: BoardColumn[], cursor: BoardCursor | null): 
 }
 
 // ---------------------------------------------------------------------------
-// Saved view — GitHub's model, scoped to what exists: view edits are YOURS
-// (bronze unsaved dot + the word) and persist per-operator (localStorage).
-// Tenant-wide sharing needs a views store that hasn't landed — flagged, not
-// faked. WIP limits are ADVISORY, per-view, product default none: the chip
-// shows `count / limit` and the WORD "over" in bronze — signal channel,
-// never a block.
+// Saved view — GitHub's model: view edits are YOURS (bronze unsaved dot +
+// the word) until Save view snapshots them to the TENANT-WIDE views store
+// (`saved_views`, Phase-I window; wired s62 by the storage-story audit — the
+// server is the system of record, a view survives the browser and the
+// machine). The old per-operator localStorage copy is read once as a
+// migration source and then retired. WIP limits are ADVISORY, per-view,
+// product default none: the chip shows `count / limit` and the WORD "over"
+// in bronze — signal channel, never a block.
 
 export interface BoardView {
   /** Advisory WIP limit per column status; absent = none (the product default). */
@@ -113,27 +115,41 @@ export interface BoardView {
 
 export const DEFAULT_VIEW: BoardView = { wipLimits: {} };
 
+/** The legacy per-operator copy (pre-views-store) — migration source only. */
 export const BOARD_VIEW_STORAGE_KEY = "thalon.leads-board.view";
+
+/** The board's one named view in the tenant-wide store (single-view board today; more tabs = more names). */
+export const BOARD_VIEW_SURFACE = "leads";
+export const BOARD_VIEW_NAME = "Board";
 
 export function encodeView(view: BoardView): string {
   return JSON.stringify(view);
 }
 
+/** BoardView → the open config record the views store carries (coerceView reads it back). */
+export function viewConfig(view: BoardView): Record<string, unknown> {
+  return { wipLimits: view.wipLimits };
+}
+
+/** Unknown shape (server config, legacy JSON) → a valid BoardView — malformed limits drop, never patch. */
+export function coerceView(parsed: unknown): BoardView {
+  if (typeof parsed !== "object" || parsed === null) return DEFAULT_VIEW;
+  const wipLimits: Partial<Record<string, number>> = {};
+  const rawLimits = (parsed as { wipLimits?: unknown }).wipLimits;
+  if (typeof rawLimits === "object" && rawLimits !== null) {
+    for (const [key, value] of Object.entries(rawLimits)) {
+      if (typeof value === "number" && Number.isInteger(value) && value > 0) {
+        wipLimits[key] = value;
+      }
+    }
+  }
+  return { wipLimits };
+}
+
 export function decodeView(raw: string | null): BoardView {
   if (!raw) return DEFAULT_VIEW;
   try {
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return DEFAULT_VIEW;
-    const wipLimits: Partial<Record<string, number>> = {};
-    const rawLimits = (parsed as { wipLimits?: unknown }).wipLimits;
-    if (typeof rawLimits === "object" && rawLimits !== null) {
-      for (const [key, value] of Object.entries(rawLimits)) {
-        if (typeof value === "number" && Number.isInteger(value) && value > 0) {
-          wipLimits[key] = value;
-        }
-      }
-    }
-    return { wipLimits };
+    return coerceView(JSON.parse(raw));
   } catch {
     return DEFAULT_VIEW;
   }

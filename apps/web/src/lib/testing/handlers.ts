@@ -91,8 +91,69 @@ function intelError(err: unknown): Response {
   throw err;
 }
 
+/**
+ * Saved views (Phase-I window store, wired s62): in-memory emulation of the
+ * /api/views upsert-by-(surface,name) contract — the board/calendar tabs'
+ * tenant-wide record in tests.
+ */
+interface TestSavedView {
+  id: string;
+  surface: string;
+  name: string;
+  config: Record<string, unknown>;
+  position: number;
+}
+let testSavedViews: TestSavedView[] = [];
+let savedViewSeq = 0;
+
+export function seedSavedView(view: Omit<TestSavedView, "id" | "position"> & { position?: number }): TestSavedView {
+  const full: TestSavedView = { id: `test-view-${++savedViewSeq}`, position: 0, ...view };
+  testSavedViews.push(full);
+  return full;
+}
+
+export function listSavedViewsTestState(): TestSavedView[] {
+  return testSavedViews;
+}
+
+export function resetSavedViewsTestState(): void {
+  testSavedViews = [];
+  savedViewSeq = 0;
+}
+
 /** Fetch-boundary mock seam for component development/tests — zero dependency on the engine/judge lanes (SPINE §5 lane map). The staged handlers wrap the SAME fake-driver store the /api/staged routes serve in dev, so tests and dev see one world. */
 export const handlers = [
+  // Saved views (Phase-I window): list + idempotent upsert-by-(surface,name).
+  http.get("/api/views", ({ request }) => {
+    const surface = new URL(request.url).searchParams.get("surface") ?? "";
+    return HttpResponse.json({
+      views: testSavedViews
+        .filter((v) => v.surface === surface)
+        .sort((a, b) => a.position - b.position || a.name.localeCompare(b.name)),
+    });
+  }),
+  http.put("/api/views", async ({ request }) => {
+    const body = (await request.json()) as {
+      surface: string;
+      name: string;
+      config?: Record<string, unknown>;
+      position?: number;
+    };
+    const existing = testSavedViews.find((v) => v.surface === body.surface && v.name === body.name);
+    if (existing) {
+      existing.config = body.config ?? {};
+      if (body.position !== undefined) existing.position = body.position;
+      return HttpResponse.json({ view: existing });
+    }
+    const created = seedSavedView({
+      surface: body.surface,
+      name: body.name,
+      config: body.config ?? {},
+      position: body.position,
+    });
+    return HttpResponse.json({ view: created });
+  }),
+
   // Library (B6.5): shelf read, ingest (tags stored verbatim), transcript read.
   http.get("/api/library", () =>
     HttpResponse.json({

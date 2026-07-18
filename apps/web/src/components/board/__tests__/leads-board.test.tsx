@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { listSavedViewsTestState, seedSavedView } from "@/lib/testing/handlers";
 import { SELECTED_ROW } from "@/lib/workspace/selected-row";
 import type { LeadCard } from "@/lib/leads/types";
 import { LeadsBoard } from "../leads-board";
-import { BOARD_VIEW_STORAGE_KEY } from "../model";
+import { BOARD_VIEW_NAME, BOARD_VIEW_STORAGE_KEY, BOARD_VIEW_SURFACE } from "../model";
 
 function lead(partial: Partial<LeadCard> & { id: string }): LeadCard {
   return {
@@ -112,7 +113,7 @@ describe("leads board (Phase I — the only v1 board)", () => {
     expect(onTriage).not.toHaveBeenCalled();
   });
 
-  it("advisory WIP limit: per-view, bronze WORD 'over', never a block — and Save view persists per-operator", async () => {
+  it("advisory WIP limit: per-view, bronze WORD 'over', never a block — and Save view snapshots to the TENANT-WIDE store", async () => {
     const user = userEvent.setup();
     vi.spyOn(window, "prompt").mockReturnValue("1");
     renderBoard();
@@ -130,7 +131,38 @@ describe("leads board (Phase I — the only v1 board)", () => {
     expect(screen.getByText("unsaved")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Save view" }));
+    await waitFor(() => expect(screen.queryByText("unsaved")).not.toBeInTheDocument());
+    // The SERVER is the system of record (storage-story rule) — never localStorage.
+    const stored = listSavedViewsTestState().find(
+      (v) => v.surface === BOARD_VIEW_SURFACE && v.name === BOARD_VIEW_NAME,
+    );
+    expect(stored?.config).toEqual({ wipLimits: { new: 1 } });
+    expect(window.localStorage.getItem(BOARD_VIEW_STORAGE_KEY)).toBeNull();
+  });
+
+  it("loads the tenant-wide view on mount — the store's limits render without any local copy", async () => {
+    seedSavedView({
+      surface: BOARD_VIEW_SURFACE,
+      name: BOARD_VIEW_NAME,
+      config: { wipLimits: { scored: 1 } },
+    });
+    renderBoard();
+    expect(await screen.findByText("1 / 1")).toBeInTheDocument();
     expect(screen.queryByText("unsaved")).not.toBeInTheDocument();
-    expect(window.localStorage.getItem(BOARD_VIEW_STORAGE_KEY)).toContain('"new":1');
+  });
+
+  it("migrates a legacy per-operator localStorage view up to the store once, then retires the key", async () => {
+    window.localStorage.setItem(BOARD_VIEW_STORAGE_KEY, JSON.stringify({ wipLimits: { new: 3 } }));
+    renderBoard();
+    await waitFor(() => {
+      const migrated = listSavedViewsTestState().find(
+        (v) => v.surface === BOARD_VIEW_SURFACE && v.name === BOARD_VIEW_NAME,
+      );
+      expect(migrated?.config).toEqual({ wipLimits: { new: 3 } });
+    });
+    expect(window.localStorage.getItem(BOARD_VIEW_STORAGE_KEY)).toBeNull();
+    // The migrated limit renders as saved state — no unsaved dot.
+    expect(screen.getByText(/2 \/ 3/)).toBeInTheDocument();
+    expect(screen.queryByText("unsaved")).not.toBeInTheDocument();
   });
 });

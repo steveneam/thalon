@@ -75,6 +75,28 @@ flowchart LR
 | Template `/guide` pages | each site → footer "how this page was made" | reachable (within each site) |
 | Send door (B-crm.4, disarmed) | Leads → Email compose → the door states its disarmed status | reachable (honest door) |
 
+## The storage story (audited s62 — W-audit item e)
+
+**Rule (founder question, s60): every save/export/import path is server-side
+system-of-record; the client machine only ever gets COPIES.** Audited s62 by
+sweeping the client code for `localStorage`/`sessionStorage`/`IndexedDB`/blob
+paths — one violation found and fixed in the same change (board saved views
+lived per-browser; now the tenant-wide `saved_views` store via `/api/views`,
+with a one-time localStorage migration that retires the key).
+
+| Data class | System of record | Notes |
+|---|---|---|
+| Relational (tenants → drafts → leads → captures, 0001–0015) | dev: Postgres 17 on this box · staging: `tenant-pg` on the VPS | per-box databases; staging nightly `pg_dumpall` 15:00 UTC rides the swordfish restic set |
+| Object store (transcripts, sweep bundles, film/video media, render refs) | per-box volumes behind the platform `ObjectStore` seam | **dev and staging stores are SEPARATE per-box volumes — dogfood imports (the concept film) run per environment** (dev registered s61; staging rides the swordfish import). AWS/S3 parked with an explicit trigger (real traffic/customers, founder s60); the seam stays fail-loud |
+| Saved views (board/calendar tabs) | `saved_views` table (Phase-I window; wired s62) | client localStorage = one-time migration source, then retired |
+| Film source masters (takes/cuts/sidecars) | gitignored `.context` design tree on the dev box | the import script materializes them INTO each environment's product store |
+| Portfolio sites | git (this repo) + the templates image | the workspace reads the built catalog through the provider seam, read-only |
+| Client-bound flows | copies only | library exports (.txt/.csv/.srt/.md) + copy-brief are generated downloads; CSV lead import is parsed server-side and the file discarded (stated in UI); the CSV template is a static download |
+
+New surface rule: anything that persists operator state ships against a
+server-side store (or an honest "not stored" statement in the UI) — a
+client-only record is a defect this section's sweep hunts.
+
 ## Standing rule this file enforces
 
 Every feature row must name a path a human can CLICK to reach it, starting

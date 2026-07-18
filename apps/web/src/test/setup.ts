@@ -6,7 +6,7 @@ import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { resetIntelStore } from "@/lib/intel/store";
 import { server } from "@/lib/testing/server";
-import { resetIntelTestState, resetLibraryTestState } from "@/lib/testing/handlers";
+import { resetIntelTestState, resetLibraryTestState, resetSavedViewsTestState } from "@/lib/testing/handlers";
 import { resetStagedFlowStore } from "@/lib/staged-flow/store";
 
 // Hermetic data dir: tests must NEVER read the developer's real `.data`
@@ -24,6 +24,7 @@ afterEach(() => {
   resetIntelStore();
   resetIntelTestState();
   resetLibraryTestState();
+  resetSavedViewsTestState();
   cleanup();
 });
 afterAll(() => server.close());
