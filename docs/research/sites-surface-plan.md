@@ -142,7 +142,17 @@ the B-sitegen charter, not scaffolded before it):
    metadata section (company, vertical, pain point → value-prop angle) —
    the SAME capture spine the Phase-I window shipped (intel_captures +
    capture_id lineage); a "build them a page" exit joins promote/compose.
-4. Lead additions, endorsed for the charter: **brand-profile link** (page
+4. **THE PRE-PLAN IS A PRODUCT STAGE (founder, s61 — after the ⑮ A/B
+   verdict):** the pre-plan direction (taste notes · concept · scroll
+   mechanism · per-slot briefs) that drove ⑮'s quality must live INSIDE the
+   page-building feature — authored **manually by the operator, automatically
+   by the AI, or co-authored in an exchange** (draft → operator edits →
+   refine). Architecture note: this maps onto seams that already exist —
+   the direction-doc contract shape and Create's staged-flow (a judged
+   stage that produces a reviewable artifact before the next stage runs);
+   the pre-plan becomes the page family's FIRST stage, gating the build
+   loop the way the storyboard gates a video.
+5. Lead additions, endorsed for the charter: **brand-profile link** (page
    copy rides the existing judge gate — no ungated page ships) ·
    **site versioning on the video-cut precedent** (fix rounds = recorded
    versions with verdicts) · **published-page learn loop** (outcomes feed

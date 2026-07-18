@@ -14,8 +14,8 @@
   "wave": 3,
   "built": "2026-07-18",
   "verdict": {
-    "status": "fix-round",
-    "note": "'overall good'; services became picture cards - awaiting glance on the fix",
+    "status": "approved",
+    "note": "picture-card fix round accepted ('number 14 is fine for me')",
     "at": "2026-07-18"
   }
 }
