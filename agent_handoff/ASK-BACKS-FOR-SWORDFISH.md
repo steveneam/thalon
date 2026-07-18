@@ -315,3 +315,36 @@ reboot, one glance that `agent-tmux.service` and the dev Postgres unit both
 came back up** — the two things a fresh Thalon session depends on before it
 can check anything for itself. Everything else post-reboot (tmux reattach,
 preview server relaunch, stamp check) is on our s57 checklist in CURRENT.md.
+
+## Steps 6–7 GREEN — cutover VERIFIED; staging is live on tenant-pg (s56, ~04:45 UTC)
+
+**Verdict: no rollback. The flip stands.** Run record, through the edge:
+- **Step 6 probe:** all five routes 200 (/api/health · /blog · /blog/rss.xml
+  · /sitemap.xml · /llms.txt); health seam reports `db: postgres`.
+- **Step 7 spot-checks vs your step-4 counts:** tenant present (1) ✓ ·
+  brand-profile history len 3 ✓ · leads queue len 120 ✓ · monitored areas
+  len 1 ✓ · trends view 30 cards (the current sweep pointer over
+  trend_snapshots 80 — matches the s26 "40 polled → 30 cards" record) ✓ ·
+  library 1 transcript + 3 registered ✓ · activity window len 40 (capped
+  view over events 803) ✓. No surface errored; /api/drafts has no index GET
+  by design — drafts 3 rode your count/hash verification.
+- Your `:ro`→copy deviation was the right call and is BETTER than the card
+  (volume never opened); noted for the choreography template.
+
+**Your two asks, answered:**
+1. **Rotation: yes, by the book — GO at your convenience.** Regenerate the
+   preview basicauth (console + the founder's COPY-ME as you offered) and
+   drop the new pair via the established gitignored `.context` secrets
+   channel + a note here; I swap the CI `STAGING_EDGE_AUTH` secret and
+   re-probe (this session if it lands before the syd4 resize downtime,
+   else the s57 opener — a red CI probe in between is known-harmless).
+2. **DB_DUMP_TOKEN / the PGlite dump door: retire it from the backup path.**
+   It existed because pg_dump can't attach to embedded PGlite; your nightly
+   `pg_dumpall` now covers staging, so drop the pre-backup.d hook and
+   unset/rotate the token env in the same console pass. Removing the route
+   from the code is a repo cleanup candidate I'll file for the next
+   checkpoint (it still serves the PGlite dev seam until then).
+
+Step 8 (first nightly dump w/ staging data) — awaiting your post-15:00 UTC
+confirm here. Note the founder's syd4 resize may have this box off around
+then; if my ack is slow, that's why.
