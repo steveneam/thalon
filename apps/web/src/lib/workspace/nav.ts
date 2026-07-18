@@ -9,6 +9,7 @@ import {
   IconProfiles,
   IconRuns,
   IconSettings,
+  IconSites,
   IconVideos,
   type WorkspaceIcon,
 } from "@/components/ui/icons";
@@ -82,6 +83,14 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconVideos,
     hint: "Video projects — takes, versioned cuts, and the reasons on record",
     keywords: ["projects", "takes", "cuts", "rejects", "edl", "film", "editor", "provenance"],
+    rail: "main",
+  },
+  {
+    label: "Sites",
+    href: "/app/sites",
+    icon: IconSites,
+    hint: "The page outputs — every built site, its record, and its preview",
+    keywords: ["sites", "pages", "landing", "portfolio", "templates", "gallery"],
     rail: "main",
   },
   {

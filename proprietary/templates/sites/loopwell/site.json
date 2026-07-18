@@ -11,5 +11,10 @@
   "typeDirection": "Archivo variable (display wide-black + body) + Martian Mono variable (readouts) — both OFL, vendored",
   "motionBudget": "one live instrument (hero session recorder, rAF, pauses when hidden), chart draw-ins on intersection, install step 3 aggregates the sample event stream live, everything with reduced-motion alternatives",
   "wave": 1,
-  "built": "2026-07-14"
+  "built": "2026-07-14",
+  "verdict": {
+    "status": "approved",
+    "note": "wave-1; s58 taste refresh approved ('definitely improved')",
+    "at": "2026-07-18"
+  }
 }

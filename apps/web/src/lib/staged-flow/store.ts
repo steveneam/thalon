@@ -194,6 +194,7 @@ function seed(): StoreState {
     meta: fixtureStoryboardMeta,
     status: "queued",
     generationKey: "gen-staged-structure",
+    captureId: null,
     createdAt,
     updatedAt: createdAt,
   };
@@ -371,6 +372,7 @@ export function pickStagedCandidate(anchorDraftId: string, candidateId: string):
 
   const bodyHash = fakeBodyHash(body);
   slot.draft = {
+    captureId: null,
     id: `staged-draft-${slot.def.key}-${state.tick}`,
     tenantId: FIXTURE_STAGED_TENANT_ID,
     fanoutRunId: state.run.id,

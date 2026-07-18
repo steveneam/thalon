@@ -11,5 +11,9 @@
   "typeDirection": "Fraunces variable (editorial display serif, opsz axis from masthead to long-form text, real italics) + Space Grotesk (film-credit kickers, timecodes, subtitle captions) — both OFL, vendored",
   "motionBudget": "scroll-driven color grade (dusk-to-embers page-wide), letterboxed title entrance, subtitle captions that fade with each chapter, rising ember particles in the closing band, magazine-spread reveal — all reduced-motion honest (static graded page, captions visible)",
   "wave": 1,
-  "built": "2026-07-14"
+  "built": "2026-07-14",
+  "verdict": {
+    "status": "approved",
+    "note": "wave-1 (taste-pass exempt, founder-directed)"
+  }
 }

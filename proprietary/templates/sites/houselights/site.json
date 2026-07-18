@@ -11,5 +11,10 @@
   "typeDirection": "Big Shoulders variable (condensed Chicago-poster display; the letterboard voice) + Big Shoulders Inline (bulb-lit channel-letter moments: wordmark and the neon sign) + Libre Caslon Text and italic (printed-programme register) — all OFL, vendored",
   "motionBudget": "one continuous scroll-driven lighting state (a dimmer takes the page toward show-dark, a warm restore rises at curtain; the stills brighten and their light sources bloom as the day loses — dusk physics) + the lobby letterboard riding the corner, re-lettering only on act changes with staggered tile flips + one slow old-neon flicker on a single letter of the closing sign; reduced-motion gets instant swaps, steady sign, position-mapped light only; no-JS gets the full static page with the board's default lines",
   "wave": 2,
-  "built": "2026-07-17"
+  "built": "2026-07-17",
+  "verdict": {
+    "status": "approved",
+    "note": "s51 live taste round; fixes founder-directed same session",
+    "at": "2026-07-17"
+  }
 }

@@ -11,5 +11,10 @@
   "typeDirection": "Baloo 2 (rounded display warmth, confident at scale) + Karla (humanist body) + Gochi Hand (the handwriting register: journal annotations, the honest asides) — all OFL, vendored",
   "motionBudget": "gentle only, nothing thunks: a leash line draws itself down the day journal with scroll, entries ease in as they arrive, the hero blob mask breathes on a slow loop, polaroids straighten on hover, the crayon underline sits still; reduced-motion gets everything static and the line pre-drawn; no-JS shows the whole day",
   "wave": 2,
-  "built": "2026-07-17"
+  "built": "2026-07-17",
+  "verdict": {
+    "status": "approved",
+    "note": "s55 fix round accepted ('ok with the new fixes')",
+    "at": "2026-07-18"
+  }
 }

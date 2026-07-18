@@ -11,5 +11,10 @@
   "typeDirection": "Saira Stencil One (container-marking display register, clean cuts, never distressed) + IBM Plex Mono (manifest/data register, tabular numerals) + Archivo variable (workhorse body) — all OFL, vendored",
   "motionBudget": "stamps move, structure doesn't: ink stamps thunk in (hero IN TRANSIT, tracking line sequence, form LODGED), the tracking wire draws, data-panel counters tick once, the waybill status cycles like a depot board, a cursor floodlight over the hero yard on fine pointers; depot ticker belt; reduced-motion gets everything static and pre-stamped, no-JS shows all content",
   "wave": 2,
-  "built": "2026-07-17"
+  "built": "2026-07-17",
+  "verdict": {
+    "status": "approved",
+    "note": "s55 checkpoint: verdict stands, untouched",
+    "at": "2026-07-18"
+  }
 }

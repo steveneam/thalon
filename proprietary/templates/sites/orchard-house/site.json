@@ -11,5 +11,10 @@
   "typeDirection": "Vollkorn variable (roman + italic — the 'wholegrain' old-style; body, dishes, prose) + Vollkorn SC 400/600 (letterpress small-caps register: wordmark, season heads, labels, rail) — one family at two registers, all OFL, vendored",
   "motionBudget": "one continuous scroll-driven season engine (autumn→winter→spring→summer): four same-composition painterly backdrops cross-fade under a code-drawn particle vocabulary — leaves tumble and settle in autumn, snow drifts and rests in winter, blossom pops in a burst then floats in spring, gold motes rise in summer — with a 'gust at the turn' as each season hands over; cards develop in once; reduced-motion gets stepped season swaps, no particles; no-JS gets all four chapters with their scenes as plain images",
   "wave": 2,
-  "built": "2026-07-17"
+  "built": "2026-07-17",
+  "verdict": {
+    "status": "approved",
+    "note": "approved twice; seasons-tree scroll animation = future candidate",
+    "at": "2026-07-17"
+  }
 }

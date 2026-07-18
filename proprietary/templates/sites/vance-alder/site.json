@@ -11,5 +11,10 @@
   "typeDirection": "Newsreader variable (one serif family used print-natively: 72-opsz display for the masthead and headlines, 14-opsz for text, real italics for the pull quote and signatures) + Courier Prime (file numbers, marginalia, the redacted ledger — the typewriter register) — all OFL, vendored",
   "motionBudget": "reading aids only, every one state-driven: a reading-progress ink rule in the sticky running head (section name swaps as you pass each matter-file section) + plates develop in like photographs (sepia/blur lifting) + index leader-dots draw across + redaction bars swipe in and REFUSE on hover (they never lift — confidentiality as motion) + the CONFIDENTIAL stamp presses in + principals' signatures ink left-to-right; reduced-motion and no-JS both get the complete static page with bars applied",
   "wave": 2,
-  "built": "2026-07-17"
+  "built": "2026-07-17",
+  "verdict": {
+    "status": "approved",
+    "note": "s53 live approval",
+    "at": "2026-07-17"
+  }
 }

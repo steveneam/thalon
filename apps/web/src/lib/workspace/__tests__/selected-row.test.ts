@@ -21,6 +21,7 @@ const SELECTION_SURFACES = [
   "library/library-surface.tsx",
   "leads/lead-card.tsx",
   "runs/runs-list.tsx",
+  "sites/sites-gallery.tsx",
 ];
 
 describe("the ONE selected-row recipe (s40 ratchet)", () => {

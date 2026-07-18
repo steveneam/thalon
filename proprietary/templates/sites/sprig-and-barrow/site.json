@@ -12,5 +12,10 @@
   "motionBudget": "one deterministic gravity: the day's crate empties as you scroll — drawn produce falls past the viewport, position/rotation pure functions of scroll progress with per-item variance (no engine, no collisions, scroll up and it all flies back); the kilo-scale instrument swings its needle on interaction; reduced-motion/no-JS = the full shelf resting in the hero, complete content",
   "port": "generic re-design of the gitignored client grocer instantiation (client copy untouched); simulation physics deliberately replaced with scroll-driven kinematics",
   "wave": 2.5,
-  "built": "2026-07-18"
+  "built": "2026-07-18",
+  "verdict": {
+    "status": "approved",
+    "note": "first no-comment verdict ('actually have no comments')",
+    "at": "2026-07-18"
+  }
 }

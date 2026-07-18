@@ -12,5 +12,10 @@
   "typeDirection": "Bodoni Moda variable (fashion-didone display, italic flourishes) + Schibsted Grotesk (humanist body) + Chivo Mono (the tint-number/formula register) — all OFL, vendored",
   "motionBudget": "scroll is the instrument: the fixed dye layer cross-fades between chapter pigments as you scroll (OKLab lerp, rAF); the hero band develops in once like dye processing; cards rise gently on entry; the shade rail tracks the active chapter; the mixer paints its shade onto a real photographed head of hair (masked CSS blend layers) and answers instantly. Reduced motion: hard chapter boundaries, everything pre-developed and visible. No-JS: complete content with fixed per-chapter colours and the natural-hair photo",
   "wave": 2,
-  "built": "2026-07-18"
+  "built": "2026-07-18",
+  "verdict": {
+    "status": "approved",
+    "note": "s55 fix round accepted",
+    "at": "2026-07-18"
+  }
 }

@@ -48,6 +48,7 @@ export function draft(
     platform,
     format: extra.format ?? null,
     body,
+    captureId: null,
     bodyHash,
     meta: extra.meta ?? {},
     status,

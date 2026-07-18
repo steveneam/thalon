@@ -90,6 +90,17 @@ export function IconVideos(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Sites: the browser frame — a page output you can visit. */
+export function IconSites(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M6 7h.01M9 7h.01" />
+    </Glyph>
+  );
+}
+
 /** Approve: the double nod. */
 export function IconApprove(props: SVGProps<SVGSVGElement>) {
   return (

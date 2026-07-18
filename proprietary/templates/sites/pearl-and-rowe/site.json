@@ -11,5 +11,10 @@
   "typeDirection": "Literata (warm bookish serif, display + text, opsz at work) + Atkinson Hyperlegible (humanist sans built by the Braille Institute for legibility — the care register made typographic; chart numerals tabular) — both OFL, vendored",
   "motionBudget": "calm only: the check-up pass moves tooth to tooth along the FDI chart with scroll while the record fills with quiet marks, arches soft-reveal their scenes, record chips ease in, the consent line underlines itself once; reduced-motion serves the completed chart and static arches; no-JS = the full chart, legend, and every record",
   "wave": 3,
-  "built": "2026-07-18"
+  "built": "2026-07-18",
+  "verdict": {
+    "status": "approved",
+    "note": "fix round closed ('much better with the site')",
+    "at": "2026-07-18"
+  }
 }
