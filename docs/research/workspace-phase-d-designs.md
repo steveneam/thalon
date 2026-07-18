@@ -1,4 +1,4 @@
-# Workspace Phase D — design record (opened s58)
+# Workspace Phase D — design record (opened s58 · design-complete s59, checkpoint-ripe)
 
 > Phase D of the workspace redesign (founder pulled it forward post-s57; queue
 > row 1). The designs themselves live in claude-design, project **"Thalon
@@ -60,15 +60,46 @@ blue only as act.
 - The approve-queue informed-consent panel + judge-reason display (ux-v2 §10
   critique backlog) — Phase D session 2 scope.
 
-## Phase D still owes (session 2)
+## Session 2 (s59) — the owed designs, DONE
 
-- Intel dossier card + per-family exits + Create context-chip handoff mocks
-  (ux-v2 §3 — the data-shape is ratified, the surfaces need their mocks).
-- Week view detail of the calendar; approve list refinements (judge reasons,
-  consent panel); icon-set cleanup pass across all surfaces.
-- Then: **founder design checkpoint** → Phase I lane map (W-spine · W-intel ·
-  W-create · W-boards, per the s56 plan; new component homes
-  `components/calendar` + `components/board` keep Phase I lanes disjoint).
+4. **Intel Dossier** — the card as launchpad (ux-v2 §1/§3 concrete): heat +
+   magnitude + outlier, provenance with source link, why-it's-moving, 4 ready
+   titles (copy buttons), 3 angles, 1 hook, per-family exits with an honest
+   "suggested" pre-pick; cadence stamp + Sweep-now in the header; watchlist
+   chips in place (auto-discovered wear a bronze "auto" word); Dismiss = the
+   quiet teaching verb; rising list bounded (14rem, count stated).
+5. **Create Handoff** — the seam that never re-asks: capture rendered as six
+   typed removable chips (title · angle · hook · source · area · heat — the
+   s52 judge-block lesson as UI); working title + prompt pre-seeded; settings
+   panel marked "profile" per row; One-prompt | Advanced toggle; honest
+   five-step goal gradient (profile ✓ context ✓ genuinely done); the
+   outcome-stating generate button names the judge gate.
+6. **Approve Consent** — informed consent: lineage chips (intel → run →
+   judge, every node a deep link), profile + model seats visible, per-check
+   judge verdicts with reasons VERBATIM (positive case included), the
+   consequence-stating approve sentence, quiet-red Reject with named confirm,
+   and the blocked-sibling inset stating the fail-closed rule in UI copy.
+7. **Calendar Week** — completes the density ladder: 06:00–20:00 window with
+   quiet hours collapsed + honest count, ONE shared time→position mapping
+   (a label may never drift from the slot it names), now-line on the act
+   channel, same drag/toast/terminal discipline as month.
+
+**Icon cleanup (design decision, not a mock):** the Spine's side-rail set is
+the canonical icon grammar — 17px, 1.5–1.8px stroke, no fills, one metaphor
+per feature (journey dots · leads person+lines · library spines · videos
+player · runs trend · profiles person · settings gear). Surfaces drop local
+icon variants and import the rail set; the per-surface sweep is Phase I
+implementation work (W-spine owns `components/ui`).
+
+## Next: the founder design checkpoint (gates Phase I)
+
+All seven designs live in the claude-design project, each with its in-file
+annotation table. The checkpoint also carries: manifest schema model/credits
+fields · headlamp.webp provenance cleanup · the Q9 recurrence flag · the Q4
+undo-after-terminal flag. On approval → Phase I lane map (W-spine lead ·
+W-intel · W-create · W-boards, per the s56 plan; new component homes
+`components/calendar` + `components/board` keep Phase I lanes disjoint by
+construction; every lane launch = fresh founder approval).
 
 *Owner: lead. Fable-5-authored per the standing design rule; no design
 subagents were run.*
