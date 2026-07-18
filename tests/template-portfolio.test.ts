@@ -80,9 +80,19 @@ describe("template portfolio", () => {
     for (const slug of slugs) {
       const index = readFileSync(path.join(sitesDir, slug, "index.html"), "utf8");
       if (!/<img[^>]+width="\d+"[^>]+height="\d+"/.test(index)) continue;
+      // "the site's CSS" includes split-out stylesheets (loopwell is the
+      // portfolio's first css/-dir site — s58 taste pass moved its rule there)
+      const cssDir = path.join(sitesDir, slug, "css");
+      const css = existsSync(cssDir)
+        ? readdirSync(cssDir)
+            .filter((f) => f.endsWith(".css"))
+            .map((f) => readFileSync(path.join(cssDir, f), "utf8"))
+            .join("\n")
+        : "";
+      const styles = index + "\n" + css;
       expect(
-        /img\s*{[^}]*height\s*:\s*auto/.test(index) || /height\s*:\s*auto/.test(index),
-        `${slug}/index.html has width/height-attributed <img> but no height:auto rule — narrowed images will stretch`,
+        /img\s*{[^}]*height\s*:\s*auto/.test(styles) || /height\s*:\s*auto/.test(styles),
+        `${slug} has width/height-attributed <img> but no height:auto rule in index.html or css/ — narrowed images will stretch`,
       ).toBe(true);
     }
   });
