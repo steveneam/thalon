@@ -25,7 +25,15 @@
    wave plan use neutral fictional business names.
 2. Draw the design axes (see menu below) **before** the build starts and record the
    draw in the wave plan. No two sites in a wave share a primary axis.
-3. Hand the instantiated prompt to the build agent as the task brief. The gates in
+3. **Design in claude-design first — the founder's per-template loop (s51; ⑥/⑦
+   proved it; RESTORED s61 after silently drifting out at the s53–54 cadence
+   compression, founder-caught).** Scaffold the page in a claude-design project
+   with named asset slots, iterate to the *alive* final there (motion included,
+   founder taste check when he's around), and only then land the final assembly
+   in the repo. Mints target the scaffold's named slots. Serve note: claude-design
+   https pages block localhost assets — iterate with real assets by serving the
+   dc.html copies off the 8899 static server.
+4. Hand the instantiated prompt to the build agent as the task brief. The gates in
    §Non-negotiable gates are part of the prompt, not commentary.
 
 ---
