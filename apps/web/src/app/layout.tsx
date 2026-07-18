@@ -42,6 +42,9 @@ export default function RootLayout({
     // opt in with a scoped `.dark` wrapper on their own page.
     <html
       lang="en"
+      // Globals set scroll-behavior:smooth; Next 16 wants the opt-in stated
+      // or it warns on every route transition.
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
