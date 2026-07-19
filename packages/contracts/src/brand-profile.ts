@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { icpSchema, outreachSequenceSchema } from "./leads";
+import { socialPublishConfigSchema } from "./social";
 
 /**
  * The tenant-config shape: brand/voice, denylist, and per-platform niche
@@ -97,6 +98,14 @@ export const brandProfileConfigSchema = z.object({
    * parses to a byte-identical object (additivity test-pinned).
    */
   outreach: outreachSequenceSchema.optional(),
+  /**
+   * Sprint-8 window 2: the social publishing block the B-pub publish door
+   * reads (contracts/social.ts) — per-platform cadence knobs behind the
+   * door's tenant-config rung. OPTIONAL like every post-charter block:
+   * absence disarms the publish door for the tenant entirely, and a
+   * pre-window config parses to a byte-identical object (test-pinned).
+   */
+  social: socialPublishConfigSchema.optional(),
 });
 
 export type PlatformProfile = z.infer<typeof platformProfileSchema>;

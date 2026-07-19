@@ -106,6 +106,16 @@ export const brandProfiles = pgTable(
     cadence: jsonb("cadence"),
     /** B7.e: content-bucket → platform routing map (contracts routingTableSchema); null = default routing. */
     routing: jsonb("routing"),
+    /**
+     * B-crm.4 outreach-sequence block (contracts outreachSequenceSchema);
+     * null = the send door is disarmed. Column landed Sprint-8 window 2 —
+     * the s54 window shipped the schema field only, so the repo dropped the
+     * block on create and the door's structural read could never find it
+     * for a real tenant (found + pinned closing the same gap for `social`).
+     */
+    outreach: jsonb("outreach"),
+    /** Sprint-8 window 2: per-platform social publishing config (contracts socialPublishConfigSchema); null = the publish door is disarmed for this tenant. */
+    social: jsonb("social"),
     version: integer("version").notNull(),
     active: boolean("active").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })

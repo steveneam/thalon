@@ -25,7 +25,7 @@ export const planTierSchema = z.enum(PLAN_TIERS);
  * constraint's regenerated migration) is the WHOLE cost of gating a new
  * surface — additive by design.
  */
-export const ENTITLEMENT_FEATURES = ["sites_templates", "crm"] as const;
+export const ENTITLEMENT_FEATURES = ["sites_templates", "crm", "social_publishing"] as const;
 export type EntitlementFeature = (typeof ENTITLEMENT_FEATURES)[number];
 export const entitlementFeatureSchema = z.enum(ENTITLEMENT_FEATURES);
 
@@ -38,6 +38,14 @@ export const entitlementFeatureSchema = z.enum(ENTITLEMENT_FEATURES);
 export const DEFAULT_PLAN_ENTITLEMENTS: Record<EntitlementFeature, readonly PlanTier[]> = {
   sites_templates: ["internal", "max"],
   crm: ["internal", "max"],
+  /**
+   * Sprint-8 window 2: social publishing joins the ladder conservatively
+   * (the founder's sites_templates/crm pattern — flip by config when the
+   * Integrations surface prices it). No door reads this key yet: dogfood
+   * arming is env-based self-only; the Integrations charter (Phase 2 of the
+   * transition plan) gates on it.
+   */
+  social_publishing: ["internal", "max"],
 };
 
 /** The per-tenant override shape at the write door (repo validates before storing). */

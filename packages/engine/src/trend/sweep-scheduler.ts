@@ -19,12 +19,12 @@ import { runTrendSweep, type TrendSweepDeps } from "./sweep";
  * sweep runs in its own try/catch and lands in `failures` with the reason
  * VERBATIM (the dossiersFailed convention: reported, never silent). A
  * failed tenant's `lastSweepAt` is untouched, so it stays due and the next
- * tick retries. Success is durably recorded through `markSwept`, which
- * appends the `sweep.schedule_swept` event the activity/Runs surfaces can
- * show. The frozen Sprint-8 contract has no failure-record door (no
- * `markFailed`, no public event append), so failure durability stops at
- * the returned result + the driver's log — flagged for the re-charter, not
- * worked around.
+ * tick retries. Success is durably recorded through `markSwept`
+ * (`sweep.schedule_swept`), failure through `markFailed`
+ * (`sweep.schedule_failed`, Sprint-8 window 2 — the door the B-arm.1 wrap
+ * flagged) — both events the activity/Runs surfaces can show. markFailed
+ * is best-effort: if the failure ledger itself throws (the DB is the thing
+ * that's down), the returned `failures` entry still reports verbatim.
  */
 
 /** The schedule fields the due-math reads — structurally the frozen `sweep_schedules` row. */
@@ -78,24 +78,20 @@ export interface RunDueSweepsResult {
 }
 
 /**
- * One scheduler pass: enumerate every tenant's schedule (system-level
- * `tenants.list`, the B4.6 precedent — due-ness is a cross-tenant
- * question), run the existing sweep path for each due tenant with the
- * schedule's own cadence as the bundle's advisory interval, and mark the
- * honest clock. Idempotent against `now`: a second pass at the same `now`
- * finds the swept tenants no longer due.
+ * One scheduler pass: enumerate every tenant's schedule in one system-level
+ * read (`sweepSchedules.listAll`, Sprint-8 window 2 — due-ness is a
+ * cross-tenant question, the `tenants.list` B4.6 precedent), run the
+ * existing sweep path for each due tenant with the schedule's own cadence
+ * as the bundle's advisory interval, and mark the honest clock. Idempotent
+ * against `now`: a second pass at the same `now` finds the swept tenants no
+ * longer due.
  */
 export async function runDueSweeps(
   deps: RunDueSweepsDeps,
   now: Date,
 ): Promise<RunDueSweepsResult> {
   const { repos } = deps;
-  const tenants = await repos.tenants.list();
-  const schedules: SweepScheduleLike[] = [];
-  for (const tenant of tenants) {
-    const row = await repos.sweepSchedules.get(tenantCtx(tenant.id));
-    if (row) schedules.push(row);
-  }
+  const schedules: SweepScheduleLike[] = await repos.sweepSchedules.listAll();
 
   const due = findDueTenants(schedules, now);
   const byTenant = new Map(schedules.map((s) => [s.tenantId, s]));
@@ -120,7 +116,14 @@ export async function runDueSweeps(
         polled: result.bundle.polled,
       });
     } catch (err) {
-      failures.push({ tenantId, reason: err instanceof Error ? err.message : String(err) });
+      const reason = err instanceof Error ? err.message : String(err);
+      failures.push({ tenantId, reason });
+      try {
+        await repos.sweepSchedules.markFailed(ctx, { at: now, reason });
+      } catch {
+        // The failure ledger itself failed (likely the same outage) — the
+        // returned failures entry above still reports the reason verbatim.
+      }
     }
   }
 

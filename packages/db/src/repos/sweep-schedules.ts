@@ -21,6 +21,16 @@ export function sweepSchedulesRepo(db: Db) {
     },
 
     /**
+     * Sprint-8 window 2: every tenant's schedule row in one read — the
+     * scheduler's due-math is a cross-tenant question, so this is a
+     * SYSTEM-level read (the `tenants.list` B4.6 precedent), deliberately
+     * not tenant-walled. Nothing tenant-facing may call it.
+     */
+    async listAll(): Promise<SweepSchedule[]> {
+      return db.select().from(sweepSchedules);
+    },
+
+    /**
      * Create-or-update the tenant's one schedule row — validated at the
      * write door (contracts bounds: 15 min floor, 24 h ceiling). Writing
      * the values the row already holds is an idempotent replay (no write,
@@ -90,6 +100,32 @@ export function sweepSchedulesRepo(db: Db) {
           payload: { at: at.toISOString() },
         });
         return row;
+      });
+    },
+
+    /**
+     * Sprint-8 window 2: the failure-record door the B-arm.1 wrap flagged —
+     * durable failure honesty for the Runs/activity surfaces. Appends the
+     * event ONLY: the row is untouched (`last_sweep_at` stays the honest
+     * success clock, the tenant stays due and retries next tick), and every
+     * real failure appends — repeat failures are repeat facts, never
+     * replays. The reason lands VERBATIM (the operator reads the actual
+     * knob to turn).
+     */
+    async markFailed(ctx: TenantCtx, input: { at: Date; reason: string }): Promise<void> {
+      await db.transaction(async (tx) => {
+        const [row] = await tx
+          .select({ id: sweepSchedules.id })
+          .from(sweepSchedules)
+          .where(eq(sweepSchedules.tenantId, ctx.tenantId))
+          .limit(1);
+        if (!row) throw new NotFoundError("sweep_schedule", ctx.tenantId);
+        await appendEvent(tx, ctx, {
+          entityType: "sweep_schedule",
+          entityId: row.id,
+          event: "sweep.schedule_failed",
+          payload: { at: input.at.toISOString(), reason: input.reason },
+        });
       });
     },
   };

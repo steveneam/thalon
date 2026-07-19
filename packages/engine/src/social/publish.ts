@@ -81,10 +81,11 @@ export async function publishApprovedDraft(
   const platform = socialPlatformSchema.parse(input.platform);
 
   // (a) draft exists (tenant-walled — repos.drafts.get throws NotFoundError),
-  // resolves to the `post` family, status APPROVED.
+  // resolves to a `publishable`-capability format (Sprint-8 window 2: the
+  // registry flag decides — never a format-name branch), status APPROVED.
   const draft = await repos.drafts.get(ctx, input.draftId);
   const spec = resolveDraftFormatSpec(draft.format);
-  if (spec.format !== "post") {
+  if (!spec.capabilities.publishable) {
     throw new SocialFormatNotPublishableError(draft.id, draft.format);
   }
   if (draft.status !== "approved") {
@@ -146,21 +147,15 @@ export async function publishApprovedDraft(
 }
 
 /**
- * FROZEN-CONTRACT GAP (Sprint-8 window, reported in the lane wrap — the
- * s54 outreach-block precedent): the db schema comment names contracts
- * `socialPublishConfigSchema` as the tenant's social block, but
- * `brandProfileConfigSchema` carries no `social` field, `brand_profiles`
- * has no `social` column, and brandProfilesRepo.create would drop it — so
- * this structural read is honestly disarmed for EVERY real tenant until
- * the contract/db half lands at a contract window. Reading the property
- * structurally (the icp/cadence/routing/outreach column pattern) keeps the
- * door byte-compatible with the column when it arrives; the block is still
- * schema-parsed at this boundary.
+ * The gap the B-pub.1 wrap reported is CLOSED (Sprint-8 window 2):
+ * `brand_profiles.social` exists and the repo carries the block, so this
+ * reads the typed column — still schema-parsed at this boundary, because a
+ * stored block must never be trusted shapeless (write-door validation is
+ * the other half of the same contract).
  */
 function readSocialConfig(profile: BrandProfile): SocialPublishConfig | null {
-  const block = (profile as { social?: unknown }).social;
-  if (block === undefined || block === null) return null;
-  return socialPublishConfigSchema.parse(block);
+  if (profile.social === undefined || profile.social === null) return null;
+  return socialPublishConfigSchema.parse(profile.social);
 }
 
 /** The ≤cap/day window start: 00:00 UTC of the calendar day `now` falls in. */

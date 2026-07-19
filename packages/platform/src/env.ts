@@ -76,6 +76,24 @@ const envSchema = z.object({
    * landing in the environment.
    */
   OUTREACH_SEND_ARMED: z.string().optional(),
+  /**
+   * B-pub (Sprint-8 window 2): the per-platform social arming pairs — the
+   * RESEND_API_KEY + OUTREACH_SEND_ARMED two-key convention, platform-scoped
+   * (engine `socialArmKeys`/`resolveSocialPublisher`). The credential alone
+   * never arms; the `*_ARMED` founder GO must be exactly the string "true",
+   * per platform, per decision. Driver-specific extras (page ids etc.) land
+   * with their driver at B-pub.2+ as their own reviewed additions.
+   */
+  SOCIAL_LINKEDIN_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_LINKEDIN_ARMED: z.string().optional(),
+  SOCIAL_X_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_X_ARMED: z.string().optional(),
+  SOCIAL_FACEBOOK_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_FACEBOOK_ARMED: z.string().optional(),
+  SOCIAL_INSTAGRAM_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_INSTAGRAM_ARMED: z.string().optional(),
+  SOCIAL_TIKTOK_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_TIKTOK_ARMED: z.string().optional(),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;

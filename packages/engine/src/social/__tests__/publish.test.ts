@@ -4,7 +4,6 @@ import {
   NotFoundError,
   openTestDb,
   sha256Hex,
-  type BrandProfile,
   type DbHandle,
   type Draft,
   type Repos,
@@ -40,40 +39,30 @@ afterEach(async () => {
 
 interface Fixture {
   ctx: TenantCtx;
-  /** The REAL repos over the frozen surface — social block unpersistable, door disarmed. */
+  /** The REAL repos over the frozen surface — the social block persists through create/getActive (Sprint-8 window 2), so no test double arms the door. */
   repos: Repos;
-  /** Repos with getActive test-doubled to carry the social block (the reported contract gap). */
-  armed: Repos;
   runId: string;
   sourceId: string;
   draftSeq: { n: number };
 }
 
-/** The reported Sprint-8 gap workaround: brand_profiles has no social column yet, so tests arm the door at the repo seam (the s54 outreach precedent). */
-function armRepos(repos: Repos, social: Record<string, unknown>): Repos {
-  return {
-    ...repos,
-    brandProfiles: {
-      ...repos.brandProfiles,
-      async getActive(c: TenantCtx) {
-        const profile = await repos.brandProfiles.getActive(c);
-        return profile ? ({ ...profile, social } as BrandProfile) : null;
-      },
-    },
-  };
-}
-
-async function setup(opts: { social?: Record<string, unknown> } = {}): Promise<Fixture> {
+/** `social: null` = create the profile WITHOUT a social block (the disarmed-tenant case); undefined = the default armed block. */
+async function setup(
+  opts: { social?: Record<string, unknown> | null } = {},
+): Promise<Fixture> {
   handle = await openTestDb();
   const { repos } = handle;
   const tenant = await repos.tenants.create({ slug: "self", name: "Self" });
   const ctx = tenantCtx(tenant.id);
+  const social =
+    opts.social === null ? undefined : (opts.social ?? { linkedin: { maxPostsPerDay: 2 } });
   const profile = await repos.brandProfiles.create(ctx, {
     config: {
       voice: {},
       denylist: [],
       platformProfiles: {},
       identity: { company: "Thalon", links: { site: "https://thalon.example" } },
+      ...(social ? { social } : {}),
     },
     activate: true,
   });
@@ -94,7 +83,6 @@ async function setup(opts: { social?: Record<string, unknown> } = {}): Promise<F
   return {
     ctx,
     repos,
-    armed: armRepos(repos, opts.social ?? { linkedin: { maxPostsPerDay: 2 } }),
     runId: run.id,
     sourceId: source.id,
     draftSeq: { n: 0 },
@@ -151,7 +139,7 @@ function door(
 ): { publisher: SocialPublisher; result: ReturnType<typeof publishApprovedDraft> } {
   const publisher = opts.publisher ?? createFakeSocialPublisher();
   const result = publishApprovedDraft(
-    { ctx: f.ctx, repos: opts.repos ?? f.armed, resolvePublisher: () => publisher },
+    { ctx: f.ctx, repos: opts.repos ?? f.repos, resolvePublisher: () => publisher },
     { draftId, platform: opts.platform ?? "linkedin" },
     opts.now ?? NOW,
   );
@@ -204,10 +192,10 @@ describe("publishApprovedDraft — the refusal ladder, rung by rung", () => {
     expect(rejection).toBeInstanceOf(SocialCredentialInvalidError);
   });
 
-  it('rung c: the REAL repo surface refuses — no "social" block persists yet (the reported contract gap, honestly disarmed)', async () => {
-    const f = await setup();
+  it('rung c: a profile without a "social" block refuses — absence disarms (the block now persists through the REAL path: the B-pub.1 gap closed at Sprint-8 window 2)', async () => {
+    const f = await setup({ social: null });
     const draft = await createPostDraft(f);
-    const rejection = await door(f, draft.id, { repos: f.repos }).result.catch((err) => err);
+    const rejection = await door(f, draft.id).result.catch((err) => err);
     expect(rejection).toBeInstanceOf(SocialPublishDisarmedError);
     expect((rejection as Error).message).toContain('"social" block');
   });
@@ -304,8 +292,8 @@ describe("publishApprovedDraft — the refusal ladder, rung by rung", () => {
     });
     // Blind the pre-check to simulate the race: the unique key must still refuse.
     const blinded: Repos = {
-      ...f.armed,
-      socialPublications: { ...f.armed.socialPublications, listForDraft: async () => [] },
+      ...f.repos,
+      socialPublications: { ...f.repos.socialPublications, listForDraft: async () => [] },
     };
     const { publisher, result } = door(f, draft.id, { repos: blinded });
     const rejection = await result.catch((err) => err);

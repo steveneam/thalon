@@ -9,7 +9,6 @@ import {
   NotFoundError,
   openTestDb,
   sha256Hex,
-  type BrandProfile,
   type DbHandle,
   type Draft,
   type LeadRow,
@@ -56,10 +55,8 @@ afterEach(async () => {
 
 interface Fixture {
   ctx: TenantCtx;
-  /** The REAL repos over the frozen surface — outreach block unpersistable, door disarmed. */
+  /** The REAL repos over the frozen surface — the outreach block persists through create/getActive (the s54 gap closed at Sprint-8 window 2), so no test double arms the door. */
   repos: Repos;
-  /** Repos with getActive test-doubled to carry the outreach block (the reported contract gap). */
-  armed: Repos;
   profile: { id: string; version: number };
   runId: string;
   sourceId: string;
@@ -67,24 +64,11 @@ interface Fixture {
   draftSeq: { n: number };
 }
 
-/** The reported s54 gap workaround: brand_profiles has no outreach column yet, so tests arm the door at the repo seam. */
-function armRepos(repos: Repos, sequence: Record<string, unknown>): Repos {
-  return {
-    ...repos,
-    brandProfiles: {
-      ...repos.brandProfiles,
-      async getActive(c: TenantCtx) {
-        const profile = await repos.brandProfiles.getActive(c);
-        return profile ? ({ ...profile, outreach: sequence } as BrandProfile) : null;
-      },
-    },
-  };
-}
-
+/** `sequence: null` = create the profile WITHOUT an outreach block (the disarmed-tenant case); undefined = `{}`, which the write door parses to the full defaults. */
 async function setup(
   opts: {
     identity?: Record<string, unknown>;
-    sequence?: Record<string, unknown>;
+    sequence?: Record<string, unknown> | null;
     consentBasis?: ConsentBasis;
   } = {},
 ): Promise<Fixture> {
@@ -92,12 +76,14 @@ async function setup(
   const { repos } = handle;
   const tenant = await repos.tenants.create({ slug: "self", name: "Self" });
   const ctx = tenantCtx(tenant.id);
+  const sequence = opts.sequence === null ? undefined : (opts.sequence ?? {});
   const profile = await repos.brandProfiles.create(ctx, {
     config: {
       voice: {},
       denylist: [],
       platformProfiles: {},
       identity: opts.identity ?? IDENTITY,
+      ...(sequence ? { outreach: sequence } : {}),
     },
     activate: true,
   });
@@ -129,7 +115,6 @@ async function setup(
   return {
     ctx,
     repos,
-    armed: armRepos(repos, opts.sequence ?? {}),
     profile: { id: profile.id, version: profile.version },
     runId: run.id,
     sourceId: source.id,
@@ -205,7 +190,7 @@ async function recordFiller(
 function door(f: Fixture, draftId: string, nowMs: number, repos?: Repos) {
   return sendApprovedEmail(
     f.ctx,
-    repos ?? f.armed,
+    repos ?? f.repos,
     { draftId, nowMs },
     { transport: createFakeSendTransport() },
   );
@@ -330,12 +315,10 @@ describe("sendApprovedEmail — the refusal ladder, arm by arm", () => {
     expect((rejection as Error).message).toContain("unsubscribe");
   });
 
-  it("arm e: the REAL frozen surface is disarmed — the reported outreach-block persistence gap, executable", async () => {
-    const f = await setup();
+  it('arm e: a profile without an "outreach" block refuses — absence disarms (the s54 persistence gap closed at Sprint-8 window 2: the block now rides the REAL path)', async () => {
+    const f = await setup({ sequence: null });
     const draft = await createOutreachDraft(f);
-    // f.repos, not f.armed: brand_profiles carries no outreach column, so the
-    // door must refuse for EVERY real tenant until the db half lands.
-    const rejection = await door(f, draft.id, WED_NOON, f.repos).catch((err) => err);
+    const rejection = await door(f, draft.id, WED_NOON).catch((err) => err);
     expect(rejection).toBeInstanceOf(OutreachDisarmedError);
     expect((rejection as Error).message).toContain('"outreach" block');
   });
@@ -402,7 +385,7 @@ describe("sendApprovedEmail — through the door (fake transport only)", () => {
     const transport = createFakeSendTransport();
     const result = await sendApprovedEmail(
       f.ctx,
-      f.armed,
+      f.repos,
       { draftId: draft.id, nowMs: WED_NOON },
       { transport },
     );
@@ -429,13 +412,13 @@ describe("sendApprovedEmail — through the door (fake transport only)", () => {
     const f = await setup();
     const transport = createFakeSendTransport();
     const first = await createOutreachDraft(f);
-    await sendApprovedEmail(f.ctx, f.armed, { draftId: first.id, nowMs: WED_NOON }, { transport });
+    await sendApprovedEmail(f.ctx, f.repos, { draftId: first.id, nowMs: WED_NOON }, { transport });
 
     const second = await createOutreachDraft(f);
     // D3 falls on Saturday (weight 0); Monday is the earliest send day past due.
     const result = await sendApprovedEmail(
       f.ctx,
-      f.armed,
+      f.repos,
       { draftId: second.id, nowMs: MON_NOON },
       { transport },
     );
@@ -451,7 +434,7 @@ describe("sendApprovedEmail — through the door (fake transport only)", () => {
     const draft = await createOutreachDraft(f);
     const transport = createFakeSendTransport({ failWith: new Error("provider down") });
     await expect(
-      sendApprovedEmail(f.ctx, f.armed, { draftId: draft.id, nowMs: WED_NOON }, { transport }),
+      sendApprovedEmail(f.ctx, f.repos, { draftId: draft.id, nowMs: WED_NOON }, { transport }),
     ).rejects.toThrow("provider down");
     expect(transport.calls).toHaveLength(1); // the door DID reach the transport
     expect(await f.repos.outreachSends.getByDraft(f.ctx, draft.id)).toBeNull();
@@ -463,7 +446,7 @@ describe("sendApprovedEmail — through the door (fake transport only)", () => {
     const draft = await createOutreachDraft(f);
     await sendApprovedEmail(
       f.ctx,
-      f.armed,
+      f.repos,
       { draftId: draft.id, nowMs: WED_NOON },
       { transport: createFakeSendTransport() },
     );
@@ -471,9 +454,9 @@ describe("sendApprovedEmail — through the door (fake transport only)", () => {
     // process just recorded — the repo's (tenant, draft) unique key must
     // still fail LOUD, never idempotent-replay (the provider call happened).
     const racing: Repos = {
-      ...f.armed,
+      ...f.repos,
       outreachSends: {
-        ...f.armed.outreachSends,
+        ...f.repos.outreachSends,
         getByDraft: async () => null,
         listForLead: async () => [],
       },
@@ -494,7 +477,7 @@ describe("sendApprovedEmail — through the door (fake transport only)", () => {
     await expect(
       sendApprovedEmail(
         f.ctx,
-        f.armed,
+        f.repos,
         { draftId: draft.id, nowMs: WED_NOON },
         { transport: resolveSendTransport(readEnv({})) },
       ),
