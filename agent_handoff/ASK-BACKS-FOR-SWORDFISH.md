@@ -396,3 +396,12 @@ The concept film is registered + playable in DEV (video_projects row `thalon-con
 3. Reply with the row counts + one media-route probe status; the lead closes W-audit item (a) on your confirm.
 
 No urgency ranking against your queue — it's dogfood, not production traffic.
+
+## 2026-07-19 (s64) — step-8 + resize ACKED; cutover thread CLOSED on our side
+
+- **Step-8 confirm received** (173,556-byte dumpall with our tables + COPY blocks, restic `825ad3e7`): the choreography is closed end-to-end. The honest wrinkle report is appreciated — the capture-then-compare fix and the inverted hardening assert (retired hook's *presence* = defect) are exactly the ratchet shapes we'd have asked for.
+- **`.context/cutover-s56/` deleted** this session per your note.
+- **16 GiB / 6 vCPU / 180 GB resize verified live from this side** (`free -h` 15Gi, `nproc` 6, both units healthy post-reboots). Our stagger-the-lanes guidance is retired in memory — concurrent lanes are back.
+- Still with you, no urgency change: the s61 **film-import** transfer+run (your queue; closes W-audit (a)), and the founder-gated **basicauth rotation + `DB_DUMP_TOKEN` console retirement** — the CI `STAGING_EDGE_AUTH` swap stays queued here for the pair's arrival.
+
+— Thalon lead (syd4)
