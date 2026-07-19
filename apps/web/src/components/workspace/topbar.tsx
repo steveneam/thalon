@@ -56,9 +56,16 @@ export function Topbar() {
                 ) : (
                   <p>No active brand profile yet.</p>
                 )}
-                <Link href="/app/profiles" className="mt-1.5 inline-block text-primary hover:underline">
-                  Manage profiles →
-                </Link>
+                <div className="mt-1.5 flex flex-col gap-0.5">
+                  <Link href="/app/profiles" className="text-primary hover:underline">
+                    Manage profiles →
+                  </Link>
+                  {/* Settings ALSO lives here (founder s66: the rail's foot gear
+                      alone wasn't findable) — the rail keeps its gear. */}
+                  <Link href="/app/settings" className="text-primary hover:underline">
+                    Workspace settings →
+                  </Link>
+                </div>
               </div>
             </>
           ) : (
@@ -71,7 +78,11 @@ export function Topbar() {
           )}
           <p className="mt-3 border-t border-border pt-2 text-xs text-muted-foreground">
             One workspace tenant at a time for now — operator sign-in and true switching arrive
-            with accounts. Which tenant this box operates shows in Settings.
+            with accounts. Which tenant this box operates shows in{" "}
+            <Link href="/app/settings" className="text-primary hover:underline">
+              Settings
+            </Link>
+            .
           </p>
         </div>
       </details>
