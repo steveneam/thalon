@@ -94,6 +94,16 @@ const envSchema = z.object({
   SOCIAL_INSTAGRAM_ARMED: z.string().optional(),
   SOCIAL_TIKTOK_ACCESS_TOKEN: z.string().optional(),
   SOCIAL_TIKTOK_ARMED: z.string().optional(),
+  /**
+   * B-pub.2 driver extras (the window-2 comment's reserved lane additions).
+   * Facebook: the target Page id — the ACCESS_TOKEN slot carries the PAGE
+   * token. Instagram: the IG professional-account user id — the config seat
+   * for the future media path (the shipped driver is a typed text-only
+   * refusal). A platform missing its extra contributes NO driver factory in
+   * `productionSocialDrivers`, so the arming ladder names it honestly.
+   */
+  SOCIAL_FACEBOOK_PAGE_ID: z.string().optional(),
+  SOCIAL_INSTAGRAM_USER_ID: z.string().optional(),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;
