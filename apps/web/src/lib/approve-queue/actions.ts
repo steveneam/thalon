@@ -1,10 +1,15 @@
-import type { TenantCtx } from "@thalon/contracts";
+import type { SocialPlatform, TenantCtx } from "@thalon/contracts";
 import type { Approval, Draft, Repos } from "@thalon/db";
 import {
+  productionSocialPublisherResolver,
+  publishApprovedDraft,
   publishWebPageToSite,
+  type PublishApprovedDraftResult,
   type PublishWebPageDeps,
   type PublishWebPageResult,
+  type SocialPublisher,
 } from "@thalon/engine";
+import { readEnv } from "@thalon/platform";
 import { runJudgeOnDraft, type JudgeRunnerDeps } from "./judge-runner";
 
 export interface ActionResult {
@@ -106,4 +111,28 @@ export async function publishApprovedPage(
   deps: PublishWebPageDeps = {},
 ): Promise<PublishWebPageResult> {
   return publishWebPageToSite(ctx, repos, { draftId, nowMs, tags }, deps);
+}
+
+/**
+ * s67: the post loop's PRODUCTION CALLER — the one wiring of the assembled
+ * platform drivers + the per-platform arming ratchet into the engine
+ * publish door. Every rung stays engine-side and typed (B-pub.1 ladder:
+ * approved-only draft, armed publisher, tenant social block, ≤cap/day,
+ * platform-scoped duplicate refusal); this seam adds NOTHING to it. The
+ * default resolver reads the validated env per call, so arming a platform
+ * is the founder's env pair (`SOCIAL_<P>_ACCESS_TOKEN` +
+ * `SOCIAL_<P>_ARMED="true"`) plus a restart — never a code change. Tests
+ * inject a fake resolver and stay keyless/offline.
+ */
+export async function publishApprovedSocial(
+  repos: Repos,
+  ctx: TenantCtx,
+  draftId: string,
+  platform: SocialPlatform,
+  now: Date,
+  resolvePublisher: (platform: SocialPlatform) => SocialPublisher = productionSocialPublisherResolver(
+    readEnv(),
+  ),
+): Promise<PublishApprovedDraftResult> {
+  return publishApprovedDraft({ ctx, repos, resolvePublisher }, { draftId, platform }, now);
 }

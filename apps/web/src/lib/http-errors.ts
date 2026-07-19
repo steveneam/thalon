@@ -1,5 +1,6 @@
 import { InvalidTransitionError, InvalidVideoCutTransitionError } from "@thalon/contracts";
 import { InvariantViolationError, NotFoundError } from "@thalon/db";
+import { PublishRefusedError } from "@thalon/engine";
 import { NextResponse } from "next/server";
 
 /** Thin routes map repo/domain errors to contract-typed JSON — no business logic, just status codes. */
@@ -10,7 +11,10 @@ export function toErrorResponse(err: unknown): NextResponse {
   if (
     err instanceof InvalidTransitionError ||
     err instanceof InvalidVideoCutTransitionError ||
-    err instanceof InvariantViolationError
+    err instanceof InvariantViolationError ||
+    // The social publish door's typed refusal ladder — a state conflict
+    // (disarmed / unconfigured / capped / duplicate), never a bad request.
+    err instanceof PublishRefusedError
   ) {
     return NextResponse.json({ error: err.message }, { status: 409 });
   }

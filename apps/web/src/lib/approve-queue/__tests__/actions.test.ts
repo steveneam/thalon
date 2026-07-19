@@ -3,9 +3,21 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { FINAL_JUDGE_GATE, webPageDraftMetaSchema } from "@thalon/contracts";
 import { BudgetExceededError, sha256Hex } from "@thalon/db";
-import { LocalObjectStore } from "@thalon/platform";
+import {
+  createFakeSocialPublisher,
+  productionSocialPublisherResolver,
+  SocialPublisherDisarmedError,
+} from "@thalon/engine";
+import { LocalObjectStore, readEnv } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
-import { approveDraft, editDraft, publishApprovedPage, reJudgeDraft, rejectDraft } from "../actions";
+import {
+  approveDraft,
+  editDraft,
+  publishApprovedPage,
+  publishApprovedSocial,
+  reJudgeDraft,
+  rejectDraft,
+} from "../actions";
 import { fixedJudgeDriver, JUDGE_FAIL, JUDGE_PASS, seedDraft, type Seeded } from "./test-helpers";
 
 let seeded: Seeded | undefined;
@@ -271,5 +283,63 @@ describe("approve-queue actions", () => {
         objectStore: new LocalObjectStore(storeRoot),
       }),
     ).rejects.toThrow(/web_page/);
+  });
+
+  it("publish-social: an approved post draft + configured platform + injected publisher lands ONE ledger row", async () => {
+    seeded = await seedDraft();
+    const { handle, ctx, draft } = seeded;
+    // The door's config rung reads the ACTIVE profile's social block — a new
+    // activated version carries it (the seed profile deliberately has none).
+    await handle.repos.brandProfiles.create(ctx, {
+      config: {
+        voice: {},
+        denylist: [],
+        platformProfiles: {},
+        social: { linkedin: { maxPostsPerDay: 2 } },
+      },
+      activate: true,
+    });
+    await handle.repos.drafts.transition(ctx, draft.id, "judging");
+    await handle.repos.judgeResults.append(ctx, { draftId: draft.id, gate: "g3_final", verdict: "pass" });
+    await handle.repos.drafts.transition(ctx, draft.id, "queued");
+    await approveDraft(handle.repos, ctx, draft.id, "operator");
+
+    const fake = createFakeSocialPublisher({ platform: "linkedin" });
+    const { publication } = await publishApprovedSocial(
+      handle.repos,
+      ctx,
+      draft.id,
+      "linkedin",
+      new Date(1_751_900_000_000),
+      () => fake,
+    );
+    expect(fake.calls).toEqual([{ draftId: draft.id, text: draft.body }]);
+    expect(publication).toMatchObject({
+      draftId: draft.id,
+      platform: "linkedin",
+      externalPostId: "fake-post-1",
+      bodyHash: draft.bodyHash,
+    });
+  });
+
+  it("publish-social: the production wiring is DISARMED by default — a keyless env refuses before any call, nothing recorded", async () => {
+    seeded = await seedDraft();
+    const { handle, ctx, draft } = seeded;
+    await handle.repos.drafts.transition(ctx, draft.id, "judging");
+    await handle.repos.judgeResults.append(ctx, { draftId: draft.id, gate: "g3_final", verdict: "pass" });
+    await handle.repos.drafts.transition(ctx, draft.id, "queued");
+    await approveDraft(handle.repos, ctx, draft.id, "operator");
+
+    await expect(
+      publishApprovedSocial(
+        handle.repos,
+        ctx,
+        draft.id,
+        "linkedin",
+        new Date(1_751_900_000_000),
+        productionSocialPublisherResolver(readEnv({})),
+      ),
+    ).rejects.toThrow(SocialPublisherDisarmedError);
+    expect(await handle.repos.socialPublications.listForDraft(ctx, draft.id)).toEqual([]);
   });
 });

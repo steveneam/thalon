@@ -1,6 +1,6 @@
 import type { SocialPlatform } from "@thalon/contracts";
-import type { ThalonEnv } from "@thalon/platform";
-import type { SocialDriverFactory } from "../registry";
+import type { EnvSource, ThalonEnv } from "@thalon/platform";
+import { resolveSocialPublisher, type SocialDriverFactory, type SocialPublisher } from "../registry";
 import { createFacebookDriver } from "./facebook";
 import { createInstagramDriver } from "./instagram";
 import { createLinkedInDriver } from "./linkedin";
@@ -42,4 +42,33 @@ export function productionSocialDrivers(
     drivers.instagram = ({ accessToken }) => createInstagramDriver({ accessToken, igUserId });
   }
   return drivers;
+}
+
+/**
+ * The post loop's production caller wiring (s67): validated env in, the
+ * publish door's per-platform resolver out. The EnvSource handed to the
+ * arming ratchet is rebuilt from the validated env's DECLARED SOCIAL_*
+ * pairs — packages/platform stays the process environment's only reader,
+ * and a key the env schema doesn't declare can never arm anything. Every
+ * resolution still walks the untouched per-platform ratchet: credential +
+ * founder-GO flag + an assembled driver, else a refusing publisher that
+ * names its missing arms.
+ */
+export function productionSocialPublisherResolver(
+  env: ThalonEnv,
+): (platform: SocialPlatform) => SocialPublisher {
+  const drivers = productionSocialDrivers(env);
+  const source: EnvSource = {
+    SOCIAL_LINKEDIN_ACCESS_TOKEN: env.SOCIAL_LINKEDIN_ACCESS_TOKEN,
+    SOCIAL_LINKEDIN_ARMED: env.SOCIAL_LINKEDIN_ARMED,
+    SOCIAL_X_ACCESS_TOKEN: env.SOCIAL_X_ACCESS_TOKEN,
+    SOCIAL_X_ARMED: env.SOCIAL_X_ARMED,
+    SOCIAL_FACEBOOK_ACCESS_TOKEN: env.SOCIAL_FACEBOOK_ACCESS_TOKEN,
+    SOCIAL_FACEBOOK_ARMED: env.SOCIAL_FACEBOOK_ARMED,
+    SOCIAL_INSTAGRAM_ACCESS_TOKEN: env.SOCIAL_INSTAGRAM_ACCESS_TOKEN,
+    SOCIAL_INSTAGRAM_ARMED: env.SOCIAL_INSTAGRAM_ARMED,
+    SOCIAL_TIKTOK_ACCESS_TOKEN: env.SOCIAL_TIKTOK_ACCESS_TOKEN,
+    SOCIAL_TIKTOK_ARMED: env.SOCIAL_TIKTOK_ARMED,
+  };
+  return (platform) => resolveSocialPublisher(platform, source, drivers);
 }

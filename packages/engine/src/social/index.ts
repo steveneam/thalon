@@ -35,6 +35,7 @@ export {
   InstagramTextOnlyUnsupportedError,
   LINKEDIN_VERSION,
   productionSocialDrivers,
+  productionSocialPublisherResolver,
   SocialDriverApiError,
   type FacebookDriverConfig,
   type InstagramDriverConfig,

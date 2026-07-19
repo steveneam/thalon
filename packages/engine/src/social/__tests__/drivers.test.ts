@@ -10,6 +10,7 @@ import {
   InstagramTextOnlyUnsupportedError,
   LINKEDIN_VERSION,
   productionSocialDrivers,
+  productionSocialPublisherResolver,
   SocialDriverApiError,
 } from "../drivers";
 import { isRefusingSocialPublisher, resolveSocialPublisher, type SocialPostInput } from "../registry";
@@ -320,5 +321,41 @@ describe("productionSocialDrivers (assembly — extras decide which factories ex
     await expect(publisher.publish(INPUT)).rejects.toBeInstanceOf(
       InstagramTextOnlyUnsupportedError,
     );
+  });
+});
+
+describe("productionSocialPublisherResolver (s67 — the production caller's one-stop wiring)", () => {
+  it("default env: every platform resolves to a refusing publisher naming its missing arms", () => {
+    const resolve = productionSocialPublisherResolver(readEnv({}));
+    const publisher = resolve("linkedin");
+    expect(publisher.name).toBe("disarmed");
+    if (!isRefusingSocialPublisher(publisher)) throw new Error("unreachable");
+    expect(publisher.refusal.message).toContain("SOCIAL_LINKEDIN_ACCESS_TOKEN");
+    expect(publisher.refusal.message).toContain("SOCIAL_LINKEDIN_ARMED");
+  });
+
+  it("an armed pair resolves ITS live driver — the validated env's SOCIAL_* keys reach the ratchet", () => {
+    const resolve = productionSocialPublisherResolver(
+      readEnv({ SOCIAL_LINKEDIN_ACCESS_TOKEN: TOKEN, SOCIAL_LINKEDIN_ARMED: "true" }),
+    );
+    expect(resolve("linkedin").name).toBe("linkedin-rest-posts");
+    // Arming one platform arms ONLY that platform.
+    expect(resolve("x").name).toBe("disarmed");
+  });
+
+  it("facebook armed without its PAGE_ID extra still refuses (no factory assembled); with it, the driver resolves", () => {
+    const armed = {
+      SOCIAL_FACEBOOK_ACCESS_TOKEN: TOKEN,
+      SOCIAL_FACEBOOK_ARMED: "true",
+    };
+    const without = productionSocialPublisherResolver(readEnv(armed))("facebook");
+    expect(without.name).toBe("disarmed");
+    if (!isRefusingSocialPublisher(without)) throw new Error("unreachable");
+    expect(without.refusal.message).toContain("facebook driver");
+
+    const withExtra = productionSocialPublisherResolver(
+      readEnv({ ...armed, SOCIAL_FACEBOOK_PAGE_ID: "1029384756" }),
+    )("facebook");
+    expect(withExtra.name).toBe("facebook-page-feed");
   });
 });
