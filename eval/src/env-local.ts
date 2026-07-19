@@ -38,8 +38,14 @@ export function useWebAppDataDir(): void {
  * refuse to open the shared dev DB while the web app is serving it.
  * (Checks the dev lane port 3111 — the port pinned in apps/web's `dev`
  * script; override PORT setups must stop the server themselves.)
+ *
+ * Postgres (`DATABASE_URL` set — the platform's db selection) is
+ * multi-writer by design: the dev server and a CLI share it safely, so the
+ * single-process rule applies to the PGlite path only. Call loadEnvLocal()
+ * first so the check sees the same DATABASE_URL the app runs with.
  */
 export async function assertSoleDbWriter(): Promise<void> {
+  if (process.env.DATABASE_URL) return;
   let devServerUp = false;
   try {
     const res = await fetch("http://localhost:3111/api/health", {

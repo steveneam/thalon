@@ -200,7 +200,8 @@ describe("webpage (web_page) key material + artifact scheme", () => {
     expect(stored).not.toBeNull();
     const html = stored!.toString("utf8");
     expect(meta.htmlRef).toBe(`web-pages/${sha256Hex(html)}.html`);
-    expect(result.draft.body).toBe(extractVisibleText(html));
+    // The claim surface = visible text + the served-but-not-visible meta description.
+    expect(result.draft.body).toBe(`${extractVisibleText(html)}\n\n${meta.description}`);
   });
 });
 

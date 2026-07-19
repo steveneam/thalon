@@ -177,8 +177,12 @@ export async function runWebPageGeneration(
       });
       // The body is the claim surface the judge reads: the page's extracted
       // visible text (title included via its <title>/<h1>), never a parallel
-      // authored summary — nothing on the page can escape the judge.
-      const body = extractVisibleText(html);
+      // authored summary — nothing on the page can escape the judge. The meta
+      // description is served (blog index, social previews) without being
+      // visible page text, so it joins the claim surface explicitly — the
+      // schema's "judged copy like everything else" promise is mechanical,
+      // not aspirational.
+      const body = `${extractVisibleText(html)}\n\n${output.description}`;
       return { platform, body, meta };
     },
   });

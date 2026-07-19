@@ -115,6 +115,9 @@ describe("runWebPageGeneration (B3.15 end-to-end, keyless + networkless)", () =>
     expect(result.draft.body).toContain("introducing what the product does");
     expect(result.draft.body).toContain("judged platform drafts");
     expect(result.draft.body).not.toMatch(/<|>/);
+    // The meta description is served without being visible page text — it is
+    // part of the judged claim surface, never a judge-escaping side channel.
+    expect(result.draft.body).toContain(meta.description);
 
     // The shell saw the brief, the grounding text, and the identity block.
     expect(captured).toHaveLength(1);
