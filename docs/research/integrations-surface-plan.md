@@ -18,6 +18,16 @@ review queues. No non-technical client will complete that. If connecting
 accounts is hard, the product's core loop (generate → judge → **publish**)
 never closes for them.
 
+## One capability, two scopes (founder s64)
+
+Social integration + posting is a SINGLE capability serving two tenancy scopes — not
+two features. **Thalon is tenant zero: its own first customer.** Thalon's launch
+presence (arming-plan §end-state — Thalon posts AS Thalon) and every paid client's
+posting run the SAME account-agnostic drivers + per-tenant credential vault + the
+entitlements seam; the only difference is which tenant's connected accounts they point
+at. Build ONCE. Thalon's own presence is the dogfood that proves the path before any
+client depends on it — Thalon runs its launch through the exact flow a client will.
+
 ## The reframe (the valuable half)
 
 **At product scale, THALON owns one registered developer app per platform;
