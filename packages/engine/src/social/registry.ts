@@ -19,10 +19,12 @@ import {
  * a driver bucket (B-pub.2+) lands behind its own per-platform founder GO.
  *
  * Env keys are read from a passed `EnvSource` (the same record `readEnv`
- * consumes), never from process.env (SPINE §3.2 — env.ts is the only
- * process.env reader). The SOCIAL_* keys are deliberately NOT in the
- * platform env schema yet; that wiring lands with the first driver as its
- * own reviewed change.
+ * consumes), never from the process environment directly (SPINE §3.2 —
+ * platform env.ts is the ONE reader; the boundary ratchet greps for the
+ * literal, comments included, which is why this note names it obliquely).
+ * The SOCIAL_* arming pairs are declared in the platform env schema
+ * (Sprint-8 window 2); driver-specific extras (page ids etc.) land with
+ * their driver at B-pub.2+ as their own reviewed additions.
  */
 
 export interface SocialPostInput {

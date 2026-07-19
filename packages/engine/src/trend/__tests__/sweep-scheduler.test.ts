@@ -188,6 +188,16 @@ describe("runDueSweeps", () => {
 
     // The failed tenant's clock is untouched — it stays due and retries next tick.
     expect((await repos.sweepSchedules.get(ctxBad))?.lastSweepAt).toBeNull();
+
+    // Sprint-8 window 2: the failure is DURABLE — markFailed appended the
+    // event with the reason verbatim, so the Runs/activity surfaces can show it.
+    const badEvents = await repos.events.list(ctxBad, { entityType: "sweep_schedule" });
+    const failed = badEvents.filter((e) => e.event === "sweep.schedule_failed");
+    expect(failed).toHaveLength(1);
+    expect((failed[0].payload as { reason: string }).reason).toBe(
+      "driver refused: boom credentials missing",
+    );
+
     const retry = await runDueSweeps({ repos, sweepDeps }, new Date(NOW.getTime() + MINUTE));
     expect(retry.due).toEqual([ctxBad.tenantId]);
   });

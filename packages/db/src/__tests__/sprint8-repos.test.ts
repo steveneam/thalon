@@ -69,16 +69,20 @@ describe("entitlements repo (Sprint-8 window — the founder's flip switch)", ()
     const { ctx, repos } = await setup();
     const self = await repos.entitlements.getEffective(ctx);
     expect(self.plan).toBe("internal");
-    expect(self.features).toEqual({ sites_templates: true, crm: true });
+    expect(self.features).toEqual({ sites_templates: true, crm: true, social_publishing: true });
 
     const starter = await repos.tenants.create({ slug: "acme", name: "Acme" });
     const eff = await repos.entitlements.getEffective(tenantCtx(starter.id));
     expect(eff.plan).toBe("starter");
-    expect(eff.features).toEqual({ sites_templates: false, crm: false });
+    expect(eff.features).toEqual({
+      sites_templates: false,
+      crm: false,
+      social_publishing: false,
+    });
 
     const paid = await repos.tenants.create({ slug: "big", name: "Big", plan: "max" });
     const top = await repos.entitlements.getEffective(tenantCtx(paid.id));
-    expect(top.features).toEqual({ sites_templates: true, crm: true });
+    expect(top.features).toEqual({ sites_templates: true, crm: true, social_publishing: true });
   });
 
   it("a per-tenant override beats the tier default both directions, and clearing restores it", async () => {
@@ -225,5 +229,83 @@ describe("sweep schedules repo (Sprint-8 window — B-arm.1's timer contract)", 
 
     expect(await repos.sweepSchedules.get(other)).toBeNull();
     await expect(repos.sweepSchedules.markSwept(other, at)).rejects.toThrow(NotFoundError);
+  });
+
+  it("window 2: listAll is the scheduler's one system-level read — every tenant's row, cross-tenant by design", async () => {
+    const { ctx, other, repos } = await setup();
+    expect(await repos.sweepSchedules.listAll()).toEqual([]);
+    await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+    await repos.sweepSchedules.upsert(other, { enabled: false, cadenceMinutes: 240 });
+    const all = await repos.sweepSchedules.listAll();
+    expect(all).toHaveLength(2);
+    expect(all.map((r) => r.tenantId).sort()).toEqual(
+      [ctx.tenantId, other.tenantId].sort(),
+    );
+  });
+
+  it("window 2: markFailed appends the failure event verbatim, leaves the row untouched, and is tenancy-walled", async () => {
+    const { ctx, other, repos } = await setup();
+    const row = await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+    const at = new Date("2026-07-19T05:00:00Z");
+    await repos.sweepSchedules.markFailed(ctx, { at, reason: "driver refused: key missing" });
+    // Repeat failures are repeat facts — every real failure appends.
+    await repos.sweepSchedules.markFailed(ctx, { at, reason: "driver refused: key missing" });
+    const rows = await repos.events.list(ctx, {
+      entityType: "sweep_schedule",
+      entityId: row.id,
+    });
+    const failed = rows.filter((r) => r.event === "sweep.schedule_failed");
+    expect(failed).toHaveLength(2);
+    expect(failed[0].payload).toEqual({
+      at: at.toISOString(),
+      reason: "driver refused: key missing",
+    });
+    // The row is untouched: last_sweep_at stays the honest SUCCESS clock.
+    expect((await repos.sweepSchedules.get(ctx))?.lastSweepAt).toBeNull();
+    await expect(
+      repos.sweepSchedules.markFailed(other, { at, reason: "x" }),
+    ).rejects.toThrow(NotFoundError);
+  });
+});
+
+describe("brand profile config columns (Sprint-8 window 2 — the outreach + social persistence gaps closed)", () => {
+  it("create carries the social and outreach blocks to the ROW, and getActive serves them back", async () => {
+    const { ctx, repos } = await setup();
+    const profile = await repos.brandProfiles.create(ctx, {
+      config: {
+        voice: {},
+        denylist: [],
+        platformProfiles: {},
+        social: { linkedin: { maxPostsPerDay: 2 } },
+        outreach: { dailyBatchCap: 5 },
+      },
+      activate: true,
+    });
+    expect(profile.social).toEqual({ linkedin: { maxPostsPerDay: 2 } });
+    // The write door parses the block, so stored outreach carries the schema defaults.
+    expect((profile.outreach as { dailyBatchCap: number }).dailyBatchCap).toBe(5);
+    const active = await repos.brandProfiles.getActive(ctx);
+    expect(active?.social).toEqual({ linkedin: { maxPostsPerDay: 2 } });
+    expect((active?.outreach as { dailyBatchCap: number }).dailyBatchCap).toBe(5);
+  });
+
+  it("absent blocks stay NULL — absence disarms the publish and send doors; invalid blocks fail loud at the door", async () => {
+    const { ctx, repos } = await setup();
+    const bare = await repos.brandProfiles.create(ctx, {
+      config: { voice: {}, denylist: [], platformProfiles: {} },
+      activate: true,
+    });
+    expect(bare.social).toBeNull();
+    expect(bare.outreach).toBeNull();
+    await expect(
+      repos.brandProfiles.create(ctx, {
+        config: {
+          voice: {},
+          denylist: [],
+          platformProfiles: {},
+          social: { linkedin: { maxPostsPerDay: 99 } },
+        },
+      }),
+    ).rejects.toThrow(); // over the contracts ceiling — nothing stores
   });
 });

@@ -176,19 +176,15 @@ export async function sendApprovedEmail(
 }
 
 /**
- * FROZEN-CONTRACT GAP (s54, reported in the lane wrap): contracts declare
- * the brand profile's optional `outreach` block, but `brand_profiles` has
- * no `outreach` column yet and brandProfilesRepo.create drops
- * `config.outreach` on the floor — so this structural read is honestly
- * disarmed for EVERY real tenant until the db half lands. Reading the
- * property structurally (the icp/cadence/routing column pattern) keeps the
- * door byte-compatible with the column when it arrives; the block is still
- * schema-parsed at this boundary.
+ * The s54 FROZEN-CONTRACT GAP is CLOSED (Sprint-8 window 2):
+ * `brand_profiles.outreach` exists and the repo carries the block, so this
+ * reads the typed column — still schema-parsed at this boundary, because a
+ * stored block must never be trusted shapeless (write-door validation is
+ * the other half of the same contract).
  */
 function readOutreachSequence(profile: BrandProfile): OutreachSequence | null {
-  const block = (profile as { outreach?: unknown }).outreach;
-  if (block === undefined || block === null) return null;
-  return outreachSequenceSchema.parse(block);
+  if (profile.outreach === undefined || profile.outreach === null) return null;
+  return outreachSequenceSchema.parse(profile.outreach);
 }
 
 /**

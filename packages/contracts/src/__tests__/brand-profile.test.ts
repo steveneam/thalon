@@ -33,6 +33,19 @@ describe("brand identity (B3.8)", () => {
     ).toBe(false);
   });
 
+  it("Sprint-8 window 2 additivity: `social` stays ABSENT on a pre-window config; supplied blocks validate against the platform ceiling", () => {
+    const config = brandProfileConfigSchema.parse({ voice: { register: "plain" } });
+    expect("social" in config).toBe(false);
+    const armed = brandProfileConfigSchema.parse({
+      social: { linkedin: { maxPostsPerDay: 2 } },
+    });
+    expect(armed.social?.linkedin?.maxPostsPerDay).toBe(2);
+    expect(
+      brandProfileConfigSchema.safeParse({ social: { linkedin: { maxPostsPerDay: 99 } } })
+        .success,
+    ).toBe(false);
+  });
+
   it("renders every populated field in stable order and skips empties", () => {
     const identity = brandIdentitySchema.parse({
       company: "Fernwood Outfitters",

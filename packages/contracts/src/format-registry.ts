@@ -261,6 +261,16 @@ export interface DraftFormatCapabilities {
    * is eligible.
    */
   sendable: boolean;
+  /**
+   * Sprint-8 window 2: whether the B-pub publish door may hand an APPROVED
+   * draft of this format to a social publisher (the sendable convention,
+   * platform-scoped). The door reads THIS flag — never a format-name
+   * branch — so making a future format postable is a registry edit, not a
+   * door edit. Live posting stays behind the per-platform arming ratchet
+   * (credential + founder GO + driver); this flag only says the format is
+   * eligible.
+   */
+  publishable: boolean;
 }
 
 /**
@@ -293,13 +303,17 @@ const NO_ARTIFACTS: DraftFormatCapabilities = {
   capturable: false,
   seoMeta: false,
   sendable: false,
+  publishable: false,
 };
 
 export const DRAFT_FORMAT_REGISTRY = {
   post: {
     format: "post",
     meta: postDraftMetaSchema,
-    capabilities: NO_ARTIFACTS,
+    // Sprint-8 window 2: the ONE publishable family — unregistered
+    // (platform-native shell-emitted) formats resolve here, so every social
+    // draft the fan-out persists is publish-eligible by construction.
+    capabilities: { ...NO_ARTIFACTS, publishable: true },
     artifactRefFields: [],
   },
   clip_plan: {

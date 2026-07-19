@@ -29,6 +29,10 @@ describe("entitlements contracts (Sprint-8 window)", () => {
     expect(isEntitled("max", "sites_templates")).toBe(true);
     expect(isEntitled("starter", "crm")).toBe(false);
     expect(isEntitled("growth", "sites_templates")).toBe(false);
+    // Sprint-8 window 2: social publishing joins the ladder on the same conservative default.
+    expect(isEntitled("internal", "social_publishing")).toBe(true);
+    expect(isEntitled("max", "social_publishing")).toBe(true);
+    expect(isEntitled("growth", "social_publishing")).toBe(false);
     expect(isEntitled("starter", "crm", [{ feature: "crm", enabled: true }])).toBe(true);
     expect(isEntitled("max", "crm", [{ feature: "crm", enabled: false }])).toBe(false);
     // an override for a DIFFERENT feature changes nothing
