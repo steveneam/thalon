@@ -79,18 +79,27 @@ describe("/api/intel sweep-armed reads", () => {
   it("503s Sweep-now before a workspace profile exists, and runs the env-selected (fake, empty) source after", async () => {
     expect((await SWEEP()).status).toBe(503);
 
-    await seedTenant();
+    const ctx = await seedTenant();
     const res = await SWEEP();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toMatchObject({ source: "fake", polled: 0, cards: 0 });
     expect(typeof body.sweptAt).toBe("string");
 
-    // Even an empty sweep arms the stamp: trends now reads the live bundle.
+    // Even an empty sweep arms the live read — but the stamp's "next sweep"
+    // is the SCHEDULE's truth (B-arm.1): without an enabled schedule it
+    // stays honestly null, never the bundle's advisory arithmetic.
     const trends = await (await TRENDS()).json();
     expect(trends.demo).toBe(false);
     expect(trends.cards).toEqual([]);
-    expect(trends.sweep.nextSweepAt).not.toBeNull();
+    expect(trends.sweep.nextSweepAt).toBeNull();
+
+    // Enabling a schedule flips the stamp to the real next-sweep time.
+    await repos!.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 240 });
+    await repos!.sweepSchedules.markSwept(ctx, new Date());
+    const scheduled = await (await TRENDS()).json();
+    expect(scheduled.sweep.nextSweepAt).not.toBeNull();
+    expect(scheduled.sweep.dueNow).toBe(false);
   });
 
   it("serves live ranked cards after a sweep — same wire shape, no dossier fabricated", async () => {

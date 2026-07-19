@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fixtureSweep } from "@/lib/intel/fixtures";
 import { liveSweepStamp, readLiveSweep, toTrendCard } from "@/lib/intel/live";
+import { applyScheduleToStamp } from "@/lib/intel/schedule-stamp";
 import { toAreaRow } from "@/lib/intel/serialize";
 import { isTrendCardDismissed, listTrendCards } from "@/lib/intel/store";
 import { getRepos } from "@/lib/repos";
@@ -23,18 +24,22 @@ export async function GET() {
   const ctx = await resolveTenantCtx(repos);
   const areas = ctx ? await repos.monitoredAreas.list(ctx) : [];
   const bundle = ctx ? await readLiveSweep(ctx.tenantId) : null;
+  // B-arm.1: the stamp's "next sweep" is the SCHEDULE's truth in both eras —
+  // enabled shows the real next time (or due-now); disabled/absent keeps the
+  // honest null (no next sweep), replacing the bundle's advisory arithmetic.
+  const schedule = ctx ? await repos.sweepSchedules.get(ctx) : null;
   if (bundle) {
     return NextResponse.json({
       areas: areas.map(toAreaRow),
       cards: bundle.cards.map(toTrendCard).filter((card) => !isTrendCardDismissed(card.id)),
       demo: false,
-      sweep: liveSweepStamp(bundle),
+      sweep: applyScheduleToStamp(liveSweepStamp(bundle), schedule, Date.now()),
     });
   }
   return NextResponse.json({
     areas: areas.map(toAreaRow),
     cards: listTrendCards(),
     demo: true,
-    sweep: fixtureSweep,
+    sweep: applyScheduleToStamp(fixtureSweep, schedule, Date.now()),
   });
 }
