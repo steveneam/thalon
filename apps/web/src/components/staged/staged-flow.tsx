@@ -101,6 +101,10 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
   const stage = flow.stages[Math.min(viewIndex, flow.stages.length - 1)];
   const isCurrent = viewIndex === flow.currentIndex;
   const isFinal = viewIndex === flow.stages.length - 1;
+  // A live flow is the s67 read-only projection of a REAL one-prompt chain —
+  // pick/edit/advance are demo-store endpoints, so their affordances hide;
+  // approve/reject/re-judge stay on the draft panel's own doors.
+  const readOnly = flow.source === "live";
   const stageDraft = stage.draft;
   const acceptedKey = stageDraft ? `${stageDraft.id}:${stageDraft.bodyHash}` : "";
   const accepted: ReadonlySet<number> = new Set(acceptedByArtifact[acceptedKey] ?? []);
@@ -129,9 +133,10 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
     <section aria-label="Staged video flow" className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-foreground">
-          Staged video — advanced mode
+          {readOnly ? "Staged video — one-prompt run" : "Staged video — advanced mode"}
           <span className="ml-2 text-xs font-normal text-muted-foreground">
-            {flow.family} plan · {flow.plan.stages.length} stages · demo drivers, no spend
+            {flow.family} plan · {flow.plan.stages.length} stages ·{" "}
+            {readOnly ? "read-only inspect; act on the draft panel" : "demo drivers, no spend"}
           </span>
         </h2>
         {stageDraft && <JudgeBadge results={stage.judgeResults} bodyHash={stageDraft.bodyHash} />}
@@ -145,7 +150,7 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
       <StageContent
         stage={stage}
         presets={flow.presets}
-        busy={busy}
+        busy={busy || readOnly}
         accepted={accepted}
         onPick={(candidateId) =>
           void withBusy(
@@ -157,7 +162,14 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
         onAccept={onAccept}
       />
       <div className="mt-auto flex flex-wrap items-center gap-2">
-        {isCurrent && !isFinal && (
+        {readOnly && (
+          <span className="text-xs text-muted-foreground">
+            {stageDraft?.status === "blocked"
+              ? "This stage is blocked — open the draft in Approve to read the verdicts and re-judge."
+              : "Live one-prompt chain — stage editing isn't wired yet; approve, reject or re-judge from the draft panel."}
+          </span>
+        )}
+        {!readOnly && isCurrent && !isFinal && (
           <>
             <Button
               size="sm"
@@ -181,7 +193,7 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
             )}
           </>
         )}
-        {!isCurrent && (
+        {!readOnly && !isCurrent && (
           <span className="text-xs text-muted-foreground">
             Stage done — the flow is at {flow.stages[flow.currentIndex].def.title}. Tweaks here still capture and
             re-judge this artifact.
@@ -193,7 +205,7 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
           </Badge>
         )}
       </div>
-      <CaptureLog captures={flow.captures} />
+      {!readOnly && <CaptureLog captures={flow.captures} />}
     </section>
   );
 }

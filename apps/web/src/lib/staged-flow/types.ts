@@ -103,6 +103,14 @@ export interface FlowStage {
 
 /** The whole staged flow, anchored at any of its stage drafts. */
 export interface StagedFlowState {
+  /**
+   * Which half of the seam served this state: "demo" = the B5.4 in-memory
+   * fixture store (interactive, fake drivers, no spend); "live" = the s67
+   * read-only projection of a REAL one-prompt chain from the drafts table
+   * (./live.ts) — the surface hides pick/edit/advance affordances, which
+   * for live chains are the unbuilt write half of pass 3.
+   */
+  source: "demo" | "live";
   family: string;
   plan: StagePlan;
   stages: FlowStage[];

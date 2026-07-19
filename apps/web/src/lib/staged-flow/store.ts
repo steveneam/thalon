@@ -281,6 +281,7 @@ export function getStagedFlow(draftId: string): StagedFlowState | null {
     candidates: slot.candidates,
   }));
   return {
+    source: "demo",
     family: FIXTURE_STAGE_PLAN.family,
     plan: FIXTURE_STAGE_PLAN,
     stages,
