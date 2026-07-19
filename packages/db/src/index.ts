@@ -28,6 +28,7 @@ export type { SearchTarget as SearchTargetRow } from "./repos/search-targets";
 export type { TrendSnapshot } from "./repos/trend-snapshots";
 export type { VideoCutRow } from "./repos/video-cuts";
 export type { IntelCaptureRow } from "./repos/intel-captures";
+export type { TenantCredential } from "./repos/tenant-credentials";
 export type { PlannedSlotRow } from "./repos/planned-slots";
 export type { SavedViewRow } from "./repos/saved-views";
 export type { VideoProject as VideoProjectRow } from "./repos/video-projects";

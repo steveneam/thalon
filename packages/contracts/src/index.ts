@@ -6,6 +6,7 @@ export * from "./draft-format";
 export * from "./draft-status";
 export * from "./entitlements";
 export * from "./format-registry";
+export * from "./integrations";
 export * from "./intel";
 export * from "./judge";
 export * from "./leads";

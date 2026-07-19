@@ -1,4 +1,5 @@
 export * from "./content";
+export * from "./integrations";
 export * from "./intel";
 export * from "./judging";
 export * from "./leads";

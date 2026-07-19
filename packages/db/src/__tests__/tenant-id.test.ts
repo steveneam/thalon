@@ -42,6 +42,7 @@ describe("tenancy ratchet", () => {
         "source_metrics",
         "sources",
         "sweep_schedules",
+        "tenant_credentials",
         "tenant_entitlements",
         "tenants",
         "trend_snapshots",

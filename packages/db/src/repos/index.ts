@@ -23,6 +23,7 @@ import { searchTargetsRepo, type SearchTargetsRepo } from "./search-targets";
 import { sourceChunksRepo, type SourceChunksRepo } from "./source-chunks";
 import { sourceMetricsRepo, type SourceMetricsRepo } from "./source-metrics";
 import { sourcesRepo, type SourcesRepo } from "./sources";
+import { tenantCredentialsRepo, type TenantCredentialsRepo } from "./tenant-credentials";
 import { tenantsRepo, type TenantsRepo } from "./tenants";
 import { trendSnapshotsRepo, type TrendSnapshotsRepo } from "./trend-snapshots";
 import { usageLedgerRepo, type UsageLedgerRepo } from "./usage-ledger";
@@ -34,6 +35,7 @@ import { watchlistsRepo, type WatchlistsRepo } from "./watchlists";
 
 export interface Repos {
   tenants: TenantsRepo;
+  tenantCredentials: TenantCredentialsRepo;
   brandProfiles: BrandProfilesRepo;
   sources: SourcesRepo;
   sourceChunks: SourceChunksRepo;
@@ -72,6 +74,7 @@ export interface Repos {
 export function createRepos(db: Db): Repos {
   return {
     tenants: tenantsRepo(db),
+    tenantCredentials: tenantCredentialsRepo(db),
     brandProfiles: brandProfilesRepo(db),
     sources: sourcesRepo(db),
     sourceChunks: sourceChunksRepo(db),
