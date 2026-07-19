@@ -5,6 +5,7 @@ export * from "./leads";
 export * from "./ops";
 export * from "./outreach";
 export * from "./search";
+export * from "./social";
 export * from "./tenancy";
 export * from "./video";
 export * from "./web";

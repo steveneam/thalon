@@ -1,8 +1,10 @@
 import { MONITORED_AREA_STATUSES, CAPTURE_KINDS } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
+  integer,
   jsonb,
   pgTable,
   text,
@@ -177,4 +179,33 @@ export const intelCaptures = pgTable(
     check("intel_captures_kind_check", sql.raw(`kind in (${inList(CAPTURE_KINDS)})`)),
     tenantIsolation(),
   ],
+);
+
+/**
+ * Sprint-8 window (B-arm.1): the per-tenant sweep-schedule config row —
+ * ONE row per tenant (unique on tenant_id), the timer contract between
+ * "Sweep now" and live pollers. Cadence bounds live in contracts
+ * (sweepScheduleConfigSchema — floor 15 min, ceiling 24 h, default 4 h);
+ * the repo validates at the write door. `last_sweep_at` is the scheduler's
+ * honest clock — set only when a sweep actually ran, so the Runs surface
+ * never claims a sweep that didn't happen.
+ */
+export const sweepSchedules = pgTable(
+  "sweep_schedules",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    enabled: boolean("enabled").notNull().default(false),
+    cadenceMinutes: integer("cadence_minutes").notNull().default(240),
+    lastSweepAt: timestamp("last_sweep_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("sweep_schedules_tenant_idx").on(t.tenantId), tenantIsolation()],
 );
