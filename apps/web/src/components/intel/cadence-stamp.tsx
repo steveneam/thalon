@@ -10,7 +10,8 @@ import { timeAgo, timeUntil } from "@/lib/workspace/format";
  * automation is FELT when it's stamped where the operator looks — a mono
  * micro-stamp in the surface header with Sweep-now beside it. Honest in both
  * eras — while the dataset is demo the stamp says so ("demo drivers until
- * B6.5 arms") and "next sweep" only renders when one is actually scheduled;
+ * B6.5 arms") and "next sweep" only renders when one is actually scheduled
+ * (B-arm.1: an enabled schedule's real time, "due now" once it arrives);
  * "Sweep now" runs a REAL sweep through the env-selected TrendSource (B6.5
  * armed it) — a driver refusal surfaces verbatim in the tab's error line,
  * never a fake spinner.
@@ -35,7 +36,9 @@ export function CadenceStamp({
           {timeAgo(sweep.lastSweptAt)}
         </time>
         {" · "}
-        {sweep.nextSweepAt ? (
+        {sweep.dueNow ? (
+          <span className="text-foreground">due now</span>
+        ) : sweep.nextSweepAt ? (
           <>
             next{" "}
             <time dateTime={sweep.nextSweepAt} className="text-foreground">

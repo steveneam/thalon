@@ -70,8 +70,10 @@ export interface SweepStamp {
   lastSweptAt: string;
   /** The cadence live polling will run at (config once B6.5 arms). */
   intervalHours: number;
-  /** null while demo — there IS no next sweep until B6.5 arms the pollers. */
+  /** The REAL next scheduled sweep (B-arm.1: lastSweepAt + cadence when a schedule is enabled) — null when no schedule is enabled, there IS no next sweep. */
   nextSweepAt: string | null;
+  /** true when an enabled schedule is already past due (or has never swept) — the scheduler runs it on its next tick. */
+  dueNow?: boolean;
 }
 
 export interface TrendsPayload {

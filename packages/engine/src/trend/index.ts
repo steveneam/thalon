@@ -76,6 +76,14 @@ export {
   type TrendSweepResult,
 } from "./sweep";
 export {
+  findDueTenants,
+  runDueSweeps,
+  type DueSweepFailure,
+  type RunDueSweepsDeps,
+  type RunDueSweepsResult,
+  type SweepScheduleLike,
+} from "./sweep-scheduler";
+export {
   generateTrendDossiers,
   type DossierCardInput,
   type GenerateDossiersDeps,
