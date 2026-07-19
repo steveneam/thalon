@@ -138,3 +138,25 @@ should be filed during wave 4 so credentials exist when B-pub opens.
 *Written s62 on the founder's re-focus directive; owner: lead; supersedes
 nothing — CHARTER.md still governs; this file becomes bucket text at the
 re-charter and then flips historical.*
+
+## The end-state / launch goal (founder, s64) — Thalon posts AS Thalon
+
+**Everything collected in the s64 credential pass is DOGFOOD SCAFFOLDING** — scattered
+personal accounts (mactechdish · maxbrenner_123 · Fieldmark placeholder · MacTechDish
+page) that prove the publish pipeline while we build. **The goal is a real Thalon-branded
+presence on every platform, publishing Thalon's own generated content as the company** —
+the deepest dogfood (Thalon generates AND publishes its own content) and the company's
+actual social launch, in one. The self/dogfood tenant BECOMES the real Thalon at launch.
+
+**Dogfood → company delta per platform (the launch checklist):**
+- **X** — rename handle to Thalon; API keys survive (key off account ID). Cheapest.
+- **LinkedIn** — a Thalon **Company Page** + the **Community Management API** review (posts AS the page vs the current member/personal-profile scope).
+- **Facebook** — a Thalon **Page** + **Meta App Review** (production/public, out of dev mode).
+- **Instagram** — a Thalon business account linked to the Thalon FB page.
+- **Threads / TikTok** — Thalon-branded accounts; TikTok's audit + (likely) an org/business developer account.
+- **Shared gates:** hosted **Terms + Privacy** pages (dependency table above) · the **stealth "go public as Thalon" decision** — branded company pages are public, so this IS the launch moment; sequence it with B6.7 domains + the landing.
+
+Implication for the build: keep the publisher drivers **account-agnostic** (key off IDs +
+per-tenant config, never a hard-coded handle) so the dogfood→Thalon swap is a config change,
+not a rebuild — which the B-pub.1 seam already does, and which the Integrations surface
+generalizes for every future tenant.
