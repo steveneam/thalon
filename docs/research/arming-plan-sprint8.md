@@ -124,6 +124,7 @@ design" the founder named, and it rides the same Create seam ①–③ feed.
 | Platform app credentials per network | ② drivers | founder + platform review queues (LinkedIn/Meta app review has lead time — **start applications early, before the sprint**) |
 | Stealth calls (posting + sending reveal the brand) | ②'s live GO · ④ | founder |
 | Resend domain | ④ | founder |
+| **Hosted Terms + Privacy pages** | ALL platform audits (TikTok now · LinkedIn Community Mgmt · Meta App Review) — they verify the URLs resolve | ties to the landing/public-site work; a shared launch gate, not per-platform |
 
 ## Proposed sequencing (for the re-charter, not self-executing)
 
