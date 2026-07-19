@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tsukimi — a tasting menu, read by moonlight</title>
-<meta name="description" content="Tsukimi (月見) — a seasonal tasting menu read by moonlight. Four courses across one night; the kitchen follows the moon.">
+<title>Tsukimi — a Japanese kitchen, read by moonlight</title>
+<meta name="description" content="Tsukimi (月見) — ramen, sushi, soba and rice dishes under the moon. A Japanese kitchen that follows the sky; four colours across one night.">
 <meta name="theme-color" content="#0a0a0f">
 <style>
 /* ————————————————————————————————————————————————
@@ -157,8 +157,12 @@ main { position: relative; z-index: 1; }
 .course-desc { max-width: 34em; color: #d8d3c6; }
 .course-cap { font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.06em; color: var(--muted); margin-top: 1.1rem; }
 
-/* ——— held quote ——— */
-.quote { text-align: center; align-items: center; }
+/* ——— held quote (over a dim view of the counter) ——— */
+.quote { text-align: center; align-items: center; position: relative; isolation: isolate; overflow: hidden; }
+.quote-bg { position: absolute; inset: 0; z-index: -1; }
+.quote-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.42; }
+.quote-bg::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--night) 0%, rgba(10,10,15,0.55) 38%, rgba(10,10,15,0.55) 62%, var(--night) 100%); }
 .quote blockquote {
   font-family: var(--display); font-weight: 500; font-style: italic;
   font-size: clamp(1.8rem, 4.4vw, 3.2rem); line-height: 1.3; max-width: 20ch;
@@ -220,9 +224,9 @@ footer a { color: var(--muted); }
   <!-- ① MOONRISE / HERO -->
   <header class="chapter hero">
     <div class="measure">
-      <p class="eyebrow">Omakase · by reservation</p>
+      <p class="eyebrow">Ramen · sushi · soba · rice</p>
       <h1 class="wordmark">Tsukimi<span class="kanji" lang="ja">月見</span></h1>
-      <p class="hero-tag">A tasting menu you read by moonlight.</p>
+      <p class="hero-tag">A menu you read by moonlight.</p>
       <p class="phase"><span class="phase-disc" aria-hidden="true"></span> tonight · waxing gibbous · 84%</p>
       <figure class="hero-dish">
         <img src="assets/hero-moonlit.webp" alt="A single piece of nigiri on dark stone under a cool shaft of blue moonlight." width="1600" height="900" fetchpriority="high">
@@ -235,15 +239,14 @@ footer a { color: var(--muted); }
   <section class="chapter course crimson" aria-labelledby="c1">
     <div class="measure course-grid">
       <figure class="course-figure">
-        <img src="assets/course-crimson.webp" alt="Glazed heirloom beetroot rounds glistening deep crimson, their rings catching the light, glowing out of black." width="1400" height="933" loading="lazy">
+        <img src="assets/course-crimson.webp" alt="A single piece of deep ruby-red akami tuna nigiri on a glossy black lacquer tray, glistening, its reflection in the lacquer." width="1300" height="867" loading="lazy">
       </figure>
       <div>
-        <p class="course-no">First course</p>
-        <h2 id="c1" class="course-title"><span class="cjk" lang="ja">緋</span>Beetroot, cured in plum</h2>
-        <p class="course-desc">Heirloom beet, sliced to its rings and slow-cured in our own ume vinegar
-        until it glows. Sweet, sour, earthy — the first colour of the night, and the only one
-        the kitchen grows itself.</p>
-        <p class="course-cap">— house garden beet · three-year plum vinegar</p>
+        <p class="course-no">01 · Sushi</p>
+        <h2 id="c1" class="course-title"><span class="cjk" lang="ja">緋</span>Akami, cut to order</h2>
+        <p class="course-desc">Lean bluefin, sliced when you sit down and laid over rice still warm
+        from the hand. The first colour of the night — deep crimson, glistening, gone in a bite.</p>
+        <p class="course-cap">— bluefin akami · warm-rice nigiri</p>
       </div>
     </div>
   </section>
@@ -252,20 +255,24 @@ footer a { color: var(--muted); }
   <section class="chapter course amber" aria-labelledby="c2">
     <div class="measure course-grid">
       <figure class="course-figure">
-        <img src="assets/course-amber.webp" alt="Burnt-amber sea urchin uni glowing on dark slate." width="1400" height="933" loading="lazy">
+        <img src="assets/course-amber.webp" alt="A black bowl of ramen with golden-amber broth glistening with fat, seared chashu, two jammy egg halves and enoki." width="1300" height="975" loading="lazy">
       </figure>
       <div>
-        <p class="course-no">Second course</p>
-        <h2 id="c2" class="course-title"><span class="cjk" lang="ja">琥</span>Uni, warm and gold</h2>
-        <p class="course-desc">Sea urchin the colour of a lantern, over sushi rice still warm from the hand.
-        Sweet, then briny, then gone. Eat it the moment it arrives — it will not wait for you.</p>
-        <p class="course-cap">— Hokkaidō bafun uni · graded today</p>
+        <p class="course-no">02 · Ramen</p>
+        <h2 id="c2" class="course-title"><span class="cjk" lang="ja">琥</span>Tonkotsu, gold and slow</h2>
+        <p class="course-desc">Pork bones simmered until the broth turns amber-gold and the fat renders
+        to glistening beads on the surface. Seared chashu, a jammy egg, noodles cut this morning.
+        Eat it hot — it will not wait for you.</p>
+        <p class="course-cap">— slow-simmered broth · noodles cut daily</p>
       </div>
     </div>
   </section>
 
-  <!-- ④ THE HELD QUOTE -->
+  <!-- ④ THE HELD QUOTE — over a dim view of the counter -->
   <section class="chapter quote" aria-label="From the kitchen">
+    <div class="quote-bg" aria-hidden="true">
+      <img src="assets/counter-night.webp" alt="" width="1600" height="900" loading="lazy">
+    </div>
     <div class="measure">
       <blockquote>“We do not set the menu. The moon and the market do — we only listen.”</blockquote>
       <cite>— the kitchen, Tsukimi</cite>
@@ -276,14 +283,14 @@ footer a { color: var(--muted); }
   <section class="chapter course green" aria-labelledby="c3">
     <div class="measure course-grid">
       <figure class="course-figure">
-        <img src="assets/course-green.webp" alt="Vivid whisked matcha in a dark bowl with a dewed shiso leaf, deep green on black." width="1400" height="933" loading="lazy">
+        <img src="assets/course-green.webp" alt="Three jade-green cha soba noodle bundles glistening on a dark round board with a shiso leaf, deep green out of black." width="1300" height="867" loading="lazy">
       </figure>
       <div>
-        <p class="course-no">Third course</p>
-        <h2 id="c3" class="course-title"><span class="cjk" lang="ja">翠</span>Matcha &amp; shiso</h2>
-        <p class="course-desc">A pause in green: matcha whisked to a bright foam, a single shiso leaf picked
-        this morning. The palate resets; the moon reaches the top of the sky.</p>
-        <p class="course-cap">— Uji first-harvest · house-grown shiso</p>
+        <p class="course-no">03 · Soba</p>
+        <h2 id="c3" class="course-title"><span class="cjk" lang="ja">翠</span>Cha soba, cold and green</h2>
+        <p class="course-desc">Buckwheat kneaded with stone-milled matcha, rinsed cold and folded into
+        glistening bundles. The palate resets in green; the moon reaches the top of the sky.</p>
+        <p class="course-cap">— stone-milled matcha · cut this morning</p>
       </div>
     </div>
   </section>
@@ -292,14 +299,15 @@ footer a { color: var(--muted); }
   <section class="chapter course violet" aria-labelledby="c4">
     <div class="measure course-grid">
       <figure class="course-figure">
-        <img src="assets/course-violet.webp" alt="A deep violet ume-plum dessert glistening with syrup and a fleck of gold leaf, glowing on black." width="1400" height="933" loading="lazy">
+        <img src="assets/course-violet.webp" alt="A grilled yaki-onigiri rice ball glazed golden on a shiso leaf beside one glossy umeboshi plum, on a rustic plate in moody light." width="1300" height="867" loading="lazy">
       </figure>
       <div>
-        <p class="course-no">Fourth course</p>
-        <h2 id="c4" class="course-title"><span class="cjk" lang="ja">紫</span>Ume, and gold</h2>
-        <p class="course-desc">The last colour: sour-sweet plum and cassis set into a dome so deep it reads
-        violet, a single fleck of gold leaf for the moon. The night closes the way it opened — quietly.</p>
-        <p class="course-cap">— Wakayama nanko ume · aged in its own syrup</p>
+        <p class="course-no">04 · Rice</p>
+        <h2 id="c4" class="course-title"><span class="cjk" lang="ja">紫</span>Yaki-onigiri, and ume</h2>
+        <p class="course-desc">A rice ball grilled until it glazes gold, and one Wakayama plum beside it,
+        sour-sweet and syrup-glossed — the last colour of the night. The night closes the way it
+        opened — quietly.</p>
+        <p class="course-cap">— Wakayama umeboshi · shiso from the house pots</p>
       </div>
     </div>
   </section>
@@ -312,16 +320,17 @@ footer a { color: var(--muted); }
       </figure>
       <div>
         <p class="eyebrow">Moonset · the counter</p>
-        <h2 id="reserve" class="reserve-title">Eight seats. One seating. Every night the moon is up.</h2>
-        <p class="course-desc">The whole menu happens in front of you, across the counter, in about two hours.
-        We change it with the season and the sky, so no two nights are the same — and neither is the moon.</p>
+        <h2 id="reserve" class="reserve-title">A counter that faces the kitchen.</h2>
+        <p class="course-desc">Everything is cooked in front of you — the broth at a rolling boil, the fish
+        cut to order, the rice balls on the grill. Come for one bowl or stay the whole night; we change
+        the menu with the season and the sky, so no two nights are the same.</p>
         <dl class="seatings">
-          <dt>Seatings</dt>
-          <dd>One per night, at moonrise. Eight seats at the hinoki counter.</dd>
+          <dt>Open</dt>
+          <dd>Every night the moon is up, dusk until it sets. Walk-ins take the counter.</dd>
           <dt>Reserve</dt>
-          <dd>Bookings open with each new moon, one lunar month ahead.</dd>
+          <dd>Tables book with each new moon, one lunar month ahead.</dd>
         </dl>
-        <p class="reserve-btn">Request a seat →</p>
+        <p class="reserve-btn">Book a table →</p>
         <p class="rabbit-note">※ look into the moon — the rabbit is still pounding.</p>
       </div>
     </div>

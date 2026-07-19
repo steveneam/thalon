@@ -8,30 +8,38 @@
   },
   {
     "file": "course-crimson.webp",
-    "pinnedHash": "1bfc37154b909368f2c8607e6529c42b5d7cfaa19993ac14d42924423d6fd0a9",
+    "pinnedHash": "09e4de205b28573aece55e8116d7afa4ed32b5e27d8c4e1ff0c047849e494459",
     "width": 1300,
     "height": 867,
     "quality": 80
   },
   {
     "file": "course-amber.webp",
-    "pinnedHash": "ab5bf370d0c1e2de3917304648b51f9fcdd11d3cc745125e9bbc6374d99059e6",
+    "pinnedHash": "b9222ae2e5b951843a856244a081849312fb2f7f0e16274e51f0fc0298b1b200",
     "width": 1300,
-    "height": 867,
-    "quality": 80
+    "height": 975,
+    "quality": 80,
+    "position": "left"
   },
   {
     "file": "course-green.webp",
-    "pinnedHash": "5fff15d26dd36c90c5b785a778cf8e5b748ddddb095cb2f8718c96501cbc45bb",
+    "pinnedHash": "5e5b6d10f007c71f888dce0d6fc2a42d2c866d69c4ac7c82926746d39d9218eb",
     "width": 1300,
     "height": 867,
     "quality": 80
   },
   {
     "file": "course-violet.webp",
-    "pinnedHash": "a3c5cb628db31820ac8869f425e366d91fb545c97aa92e08f806458894c1ab2a",
+    "pinnedHash": "f86e250ed928c47711f35fdc511eb638150e7c4aa45437805fd075d29c871ddc",
     "width": 1300,
     "height": 867,
+    "quality": 80
+  },
+  {
+    "file": "counter-night.webp",
+    "pinnedHash": "54d5000a806493bd00098cff5475e5f9a3b701769a3c38e03fa6fd832acdb17d",
+    "width": 1600,
+    "height": 900,
     "quality": 80
   },
   {

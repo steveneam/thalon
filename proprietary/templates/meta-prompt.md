@@ -107,13 +107,31 @@ printable surfaces — modern key heads came back stamped with pseudo-brand
 text even under "no lettering" (and the wave-1 leather fob embossed
 itself); the compose-out is an object with no flat face at all (antique
 skeleton keys, turned-away heads, the fob hidden under the keys). A near-clean take with one small garbled patch may take a
-disclosed local blur pre-pin instead of another take — the /guide must say so. Non-hero, non-text slots stay the
-builder's call. Browsing published sites for *inspiration* is
-fine; **downloading reference images into the pipeline is forbidden** — every
-asset on the page is a vendor-minted original, minted on the **paid tier only**,
-and pinned at mint time via the B7.1 pinning module with a full provenance
-manifest (model, prompt, credits, license tier). No surface ever holds a vendor
-URL.
+disclosed local blur pre-pin instead of another take — the /guide must say so;
+a deterministic manifest crop (position + tighter aspect in the derive) that
+composes the patch out of frame is preferred over a blur when the defect sits
+at an edge (⑲ s64, the enhancer-added spoon). Non-hero, non-text slots stay the
+builder's call. **Reference-guided minting (founder directive s64 — supersedes
+the old no-reference rule):** browsing published sites for inspiration is fine,
+AND real photographs from the web (Commons, food blogs, Pinterest-class
+boards) SHOULD be fed to the vendor as generation references whenever a slot
+keeps missing — a good reference plus a dense prompt is how humans drive these
+models, and refusing it costs takes. Rules of the workflow: (1) references are
+generation inputs ONLY — they never enter the repo, the page, or the pipeline;
+every asset on the page remains a vendor-minted original, minted on the **paid
+tier only**, pinned at mint time via the B7.1 pinning module with a full
+provenance manifest (model, prompt, credits, license tier, and the reference
+noted in params). No surface ever holds a vendor URL. (2) EYEBALL every
+reference before feeding it — the reference must ALREADY LOOK like the target:
+soul-class enhancement captions the reference image and that caption wins over
+prompt text, so a ref is for "make exactly this", never "make this but
+different" (⑲ s64: a grey-buckwheat soba ref stayed grey through two takes
+against explicit vivid-green language; the green keeper was text-only. The
+same round: a chūtoro-nigiri ref nailed first-take the tuna that text-only had
+minted as beet in ⑲'s original build). (3) Never feed watermarked stock comps
+or references carrying text overlays — watermarks and captions are pseudo-text
+seeds. (4) When the ref fights a wanted attribute, change the ref or drop it;
+don't stack adjectives against it.
 
 **Required structure:**
 - A single responsive landing page for {{vertical}}: hero + the sections the

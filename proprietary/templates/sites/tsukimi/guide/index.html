@@ -34,7 +34,7 @@ code { background: #17171f; padding: 0.1em 0.35em; border-radius: 3px; font-size
 <h1>How this page was made</h1>
 
 <p><strong>Tsukimi (月見) is a fictional demonstration business.</strong> This page is a
-portfolio template — it shows how a fine-dining restaurant's landing page can be designed,
+portfolio template — it shows how a Japanese restaurant's landing page can be designed,
 written, and illustrated by an AI-driven content engine. No dish, price, seating, or address
 on it is real.</p>
 
@@ -44,26 +44,37 @@ courses, each a single ingredient drenched in one saturated colour — crimson, 
 violet — glowing out of near-black, arced across the meal. The one moving element is the
 <em>moon</em>: a code-drawn disc that crosses a fixed night sky as you scroll (moonrise to
 moonset), which is both the cinematic clock and the page's nature motif. Between the colours
-sits one held black chapter with a single line from the kitchen — the pacing of a real
-tasting menu. Without JavaScript, or with reduced motion enabled, the moon simply rests at
+sits one held chapter with a single line from the kitchen, set over a dim lantern-lit view
+of the counter and the open kitchen behind it — the pacing of a menu read slowly. Without
+JavaScript, or with reduced motion enabled, the moon simply rests at
 mid-sky and every course renders in full. There's a small joke in the moon, too: look into
 it and you'll find the rabbit pounding mochi — the legend the restaurant's name comes from.
 Every word, number, the moon, the phase marker, and the rabbit are HTML and SVG, not images.</p>
 
 <h2>The imagery — all AI-generated</h2>
-<p>The six photographs were generated with the Higgsfield Soul 2.0 model, one take each. No
-stock, no scraped references. One honest note: the first course was planned as tuna, but the
-generated image read clearly as glazed beetroot rounds (you can see the beet's growth rings),
-so we changed the course to match the picture — beetroot cured in plum — rather than caption
-an image as something it isn't.</p>
+<p>Every photograph on this page was generated with the Higgsfield Soul 2.0 model; nothing
+here is a stock photo, and no photograph from the web appears on this page. The page first
+shipped as a fine-dining tasting menu; in a founder-directed revision it was re-themed to an
+everyday Japanese kitchen (ramen, sushi, soba, rice) and the four course photographs were
+re-shot — close, low-angle, glistening — this time <em>guided by reference images</em>:
+public photographs (largely Wikimedia Commons) were given to the model as generation
+references, so it could see exactly the dish, angle and light we wanted. The references only
+steer the model; the images it returns are new. Two takes were rejected for colour drift
+(a broth too pale, green tea noodles that came out grey) and re-shot; the green course that
+made the cut was a pure text prompt. One earlier honest note, kept for the record: the
+original crimson course was planned as tuna but minted as beetroot, and we captioned it as
+beetroot rather than pretend; with a real nigiri reference this revision finally shot the
+tuna. The amber course is cropped at its right edge to remove a decorated spoon the model
+added on its own.</p>
 
 <h2>Provenance</h2>
 <ul>
   <li>Moonlit hero dish — Soul 2.0, 16:9</li>
-  <li>Crimson course (beetroot) — Soul 2.0, 3:2</li>
-  <li>Amber course (sea urchin) — Soul 2.0, 3:2</li>
-  <li>Green course (matcha &amp; shiso) — Soul 2.0, 3:2</li>
-  <li>Violet course (plum &amp; gold) — Soul 2.0, 3:2</li>
+  <li>Crimson course (akami nigiri) — Soul 2.0, 3:2, reference-guided</li>
+  <li>Amber course (ramen) — Soul 2.0, 3:2 cropped 4:3, reference-guided, take 2</li>
+  <li>Green course (cha soba) — Soul 2.0, 3:2, text-only, take 3</li>
+  <li>Violet course (yaki-onigiri &amp; ume) — Soul 2.0, 3:2, reference-guided</li>
+  <li>The counter behind the quote — Soul 2.0, 16:9, reference-guided</li>
   <li>The chef at the counter — Soul 2.0, 2:3</li>
 </ul>
 <p>Each original is archived content-addressed with a full provenance manifest (model, prompt,
