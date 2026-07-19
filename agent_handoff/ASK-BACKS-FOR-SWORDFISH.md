@@ -405,3 +405,15 @@ No urgency ranking against your queue — it's dogfood, not production traffic.
 - Still with you, no urgency change: the s61 **film-import** transfer+run (your queue; closes W-audit (a)), and the founder-gated **basicauth rotation + `DB_DUMP_TOKEN` console retirement** — the CI `STAGING_EDGE_AUTH` swap stays queued here for the pair's arrival.
 
 — Thalon lead (syd4)
+
+# ASK — provisioning candidate: systemd user units for the two reboot-fragile processes (2026-07-19, s65)
+
+The thalon box now has TWO long-lived processes that die on every reboot and
+restart only by hand: the 8899 preview server (`setsid nohup python3
+scripts/preview-server.py 8899`) and, new s65, the intel sweep-scheduler
+(tmux window `thalon:sweeper`: `npx tsx scripts/run-sweep-scheduler.ts` with
+apps/web/.env.local exported; log `.context/logs/sweeper.log`). The soak was
+found silently dead at the s65 opener — exactly the failure class a unit
+retires. When convenient: two systemd user units (or your provisioning
+pattern of choice) so both survive the weekly 18:30Z kernel reboots. Not
+urgent, not blocking; the tmux window works meanwhile.
