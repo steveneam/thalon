@@ -51,6 +51,12 @@
  * by construction; golden tests pin the compiled plans and the gated
  * replay test rebuilds both concept-film masters from the checked-in EDL
  * fixtures.
+ * B-vid.7 landed (Sprint 8 §③): src/pipeline/one-prompt-video.ts — the
+ * one-prompt auto-run: brief ingest → the B5.2 staged drafts (judged
+ * between stages) → video project + takes plan + compile-gated draft cut
+ * through the frozen B-ve.1 repos; render/mint spend structurally
+ * impossible on the path (pure render-seam lint only — no RenderTarget,
+ * no executePlan, no vendor client).
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -70,6 +76,7 @@ export * from "./webpage";
 export * from "./trend";
 export * from "./direction";
 export * from "./pipeline/staged-video";
+export * from "./pipeline/one-prompt-video";
 export * from "./search";
 export * from "./leads";
 export * from "./outreach";
