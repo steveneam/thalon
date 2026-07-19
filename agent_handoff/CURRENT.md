@@ -10,7 +10,7 @@
 
 ▎ ▸ **Read first:** CLAUDE.md → this file → COORDINATION.md (s65 records) → NEEDS-STEVEN.md → `docs/proposals/2026-07-19-integrations-surface.md`.
 ▎ ▸ **State:** main = origin @ s65 close (no PRs, no worktrees, no lanes) · migrations through **0017** (live on dev pg) · engine: publisher seam + FOUR drivers (disarmed, no production caller) · sweep scheduler ticking (tmux `sweeper`, log `.context/logs/sweeper.log`) · one-prompt video door live (zero-spend takes) · portfolio 20 sites · balance 706.12.
-▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · Mode B lanes via launch-lane.sh (watch for the kickoff parking in the composer — one manual Enter needed s65) · **pre-commit grep-guard hook is box-level and untracked — re-install after any fresh clone** · reference-guided mints · pre-plan mandatory · Fable-direct design · wrap = guard+commit+push+local verify.
+▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · Mode B lanes via launch-lane.sh (watch for the kickoff parking in the composer — one manual Enter needed s65) · **pre-commit grep-guard hook is box-level and untracked — re-install after any fresh clone** · **merge gate of record = `npm run verify` (guard→test→typecheck→lint, fail-fast; ratcheted after two partial-gate misses — never trust a lane's gate claim, run it yourself)** · reference-guided mints · pre-plan mandatory · Fable-direct design · wrap = guard+commit+push+local verify.
 ▎ ▸ **✅ SAFE TO CLEAR** — no lanes or vendor jobs in flight; guard green at HEAD; sweeper + 8899 are persistent processes, leave them running.
 
 ## Pointer
