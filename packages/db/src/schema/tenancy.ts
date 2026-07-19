@@ -1,3 +1,4 @@
+import { ENTITLEMENT_FEATURES, PLAN_TIERS } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -12,6 +13,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { tenantIsolation } from "./rls";
+
+const inList = (values: readonly string[]) => values.map((v) => `'${v}'`).join(", ");
 
 /**
  * Tenant #0 = self/dogfood; #2 (Sprint 2) proves config-not-code. This is the
@@ -28,11 +31,56 @@ export const tenants = pgTable(
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
     status: text("status").notNull().default("active"),
+    /**
+     * Sprint-8 window (founder s64): the entitlements seam's tier key
+     * (contracts PLAN_TIERS). Column default `internal` exists ONLY for the
+     * backfill — every pre-window row is the self/dogfood tenant; the
+     * create door defaults NEW tenants to `starter` explicitly (repo).
+     */
+    plan: text("plan").notNull().default("internal"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  () => [check("tenants_status_check", sql.raw(`status in ('active', 'suspended')`))],
+  () => [
+    check("tenants_status_check", sql.raw(`status in ('active', 'suspended')`)),
+    check("tenants_plan_check", sql.raw(`plan in (${inList(PLAN_TIERS)})`)),
+  ],
+);
+
+/**
+ * Sprint-8 window (founder s64, clarified live): per-tenant entitlement
+ * OVERRIDES — the flip switch. One row = one explicit per-tenant decision
+ * that beats the tier default (contracts DEFAULT_PLAN_ENTITLEMENTS);
+ * absence of a row means the tier decides. Resolution is contracts
+ * `isEntitled` — one function, no forked rule.
+ */
+export const tenantEntitlements = pgTable(
+  "tenant_entitlements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    /** Gated surface key (contracts ENTITLEMENT_FEATURES). */
+    feature: text("feature").notNull(),
+    enabled: boolean("enabled").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // One override per feature per tenant — the upsert key.
+    uniqueIndex("tenant_entitlements_tenant_feature_idx").on(t.tenantId, t.feature),
+    check(
+      "tenant_entitlements_feature_check",
+      sql.raw(`feature in (${inList(ENTITLEMENT_FEATURES)})`),
+    ),
+    tenantIsolation(),
+  ],
 );
 
 /**

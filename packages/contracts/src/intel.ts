@@ -100,3 +100,27 @@ export const intelCaptureSchema = z.object({
 });
 export type IntelCaptureInput = z.input<typeof intelCaptureSchema>;
 export type IntelCaptureShape = z.infer<typeof intelCaptureSchema>;
+
+// ---------------------------------------------------------------------------
+// Sweep schedule (Sprint-8 window, B-arm.1): per-tenant trend-sweep timer
+// config — the one new piece of plumbing between the existing live drivers
+// and "no next sweep until live pollers arm". Durable storage is
+// `sweep_schedules` (schema/intel.ts); the scheduler lane consumes this
+// frozen shape. Floor 15 min (driver quota safety: one sweep ≈ 100–200
+// YouTube units against 10k/day), ceiling 24 h; default = the stamp
+// contract's 4 h.
+
+export const SWEEP_CADENCE_MIN_MINUTES = 15;
+export const SWEEP_CADENCE_MAX_MINUTES = 1440;
+
+export const sweepScheduleConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  cadenceMinutes: z
+    .number()
+    .int()
+    .min(SWEEP_CADENCE_MIN_MINUTES)
+    .max(SWEEP_CADENCE_MAX_MINUTES)
+    .default(240),
+});
+export type SweepScheduleConfigInput = z.input<typeof sweepScheduleConfigSchema>;
+export type SweepScheduleConfig = z.infer<typeof sweepScheduleConfigSchema>;

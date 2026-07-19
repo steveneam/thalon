@@ -3,6 +3,7 @@ import { approvalsRepo, type ApprovalsRepo } from "./approvals";
 import { brandProfilesRepo, type BrandProfilesRepo } from "./brand-profiles";
 import { cachesRepo, type CachesRepo } from "./caches";
 import { draftsRepo, type DraftsRepo } from "./drafts";
+import { entitlementsRepo, type EntitlementsRepo } from "./entitlements";
 import { evalCasesRepo, type EvalCasesRepo } from "./eval-cases";
 import { eventsRepo, type EventsRepo } from "./events";
 import { fanoutRunsRepo, type FanoutRunsRepo } from "./fanout-runs";
@@ -15,6 +16,8 @@ import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
 import { outreachSendsRepo, type OutreachSendsRepo } from "./outreach-sends";
 import { plannedSlotsRepo, type PlannedSlotsRepo } from "./planned-slots";
 import { savedViewsRepo, type SavedViewsRepo } from "./saved-views";
+import { socialPublicationsRepo, type SocialPublicationsRepo } from "./social-publications";
+import { sweepSchedulesRepo, type SweepSchedulesRepo } from "./sweep-schedules";
 import { searchSnapshotsRepo, type SearchSnapshotsRepo } from "./search-snapshots";
 import { searchTargetsRepo, type SearchTargetsRepo } from "./search-targets";
 import { sourceChunksRepo, type SourceChunksRepo } from "./source-chunks";
@@ -59,6 +62,9 @@ export interface Repos {
   intelCaptures: IntelCapturesRepo;
   plannedSlots: PlannedSlotsRepo;
   savedViews: SavedViewsRepo;
+  entitlements: EntitlementsRepo;
+  socialPublications: SocialPublicationsRepo;
+  sweepSchedules: SweepSchedulesRepo;
   // publish_queue deliberately has no repository: no publish path is wired
   // anywhere in Sprints 0–2 (charter standing discipline).
 }
@@ -94,5 +100,8 @@ export function createRepos(db: Db): Repos {
     intelCaptures: intelCapturesRepo(db),
     plannedSlots: plannedSlotsRepo(db),
     savedViews: savedViewsRepo(db),
+    entitlements: entitlementsRepo(db),
+    socialPublications: socialPublicationsRepo(db),
+    sweepSchedules: sweepSchedulesRepo(db),
   };
 }

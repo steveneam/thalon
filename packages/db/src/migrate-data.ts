@@ -70,6 +70,11 @@ const COPY_ORDER: PgTable[] = [
   // Phase-I window (0015): planned_slots after drafts; saved_views is leaf config.
   schema.plannedSlots,
   schema.savedViews,
+  // Sprint-8 window (0016): entitlements + sweep config after tenants;
+  // social_publications after drafts (it references them).
+  schema.tenantEntitlements,
+  schema.sweepSchedules,
+  schema.socialPublications,
 ];
 
 const INSERT_BATCH = 200;
