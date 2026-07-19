@@ -62,14 +62,6 @@ const envSchema = z.object({
    */
   WORKSPACE_BASIC_AUTH: z.string().optional(),
   /**
-   * B6.7 backup hook (ADR 0007 decision 5): bearer token the box's
-   * pre-backup step presents to POST /api/admin/db-dump. Unset = the hook
-   * 503s (fail closed) — it is never open, and the workspace basic-auth
-   * gate deliberately exempts the route because THIS gate is the stronger,
-   * machine-to-machine one.
-   */
-  DB_DUMP_TOKEN: z.string().optional(),
-  /**
    * B-crm.4 send door (s54): the Resend credential — the KEY half of the
    * two-key arming ratchet (engine `resolveSendTransport`). The key alone
    * must never arm live sending; without OUTREACH_SEND_ARMED the resolved

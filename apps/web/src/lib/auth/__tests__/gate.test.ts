@@ -19,9 +19,8 @@ describe("isPublicPath (a CLOSED allowlist — new routes are gated by default)"
     },
   );
 
-  it("the db-dump hook bypasses basic auth ONLY because the route carries its own fail-closed bearer gate", () => {
-    expect(isPublicPath("/api/admin/db-dump")).toBe(true);
-    expect(isPublicPath("/api/admin/db-dumpster")).toBe(false);
+  it("the retired db-dump hook is GATED again (s64: route removed, SELF_GATED empty)", () => {
+    expect(isPublicPath("/api/admin/db-dump")).toBe(false);
     expect(isPublicPath("/api/admin")).toBe(false);
   });
 });

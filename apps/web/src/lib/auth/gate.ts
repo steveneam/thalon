@@ -20,11 +20,13 @@ const PUBLIC_EXACT = new Set([
 /**
  * Routes that carry their OWN fail-closed gate (stronger than basic auth)
  * and are called machine-to-machine, so the browser-shaped basic-auth
- * challenge must not stack on top: the box's pre-backup hook calls
- * /api/admin/db-dump with its bearer token straight to the container port.
- * The route 503s when its token is unconfigured — never open.
+ * challenge must not stack on top. Empty since the s64 retirement of the
+ * PGlite-era /api/admin/db-dump hook (staging runs on tenant-pg; the box's
+ * nightly pg_dumpall replaced it — the backup side asserts the hook's
+ * ABSENCE now). The seam stays: the next machine-to-machine route lists
+ * itself here instead of widening PUBLIC_EXACT.
  */
-const SELF_GATED = new Set(["/api/admin/db-dump"]);
+const SELF_GATED = new Set<string>([]);
 
 export function isPublicPath(pathname: string): boolean {
   if (PUBLIC_EXACT.has(pathname) || SELF_GATED.has(pathname)) return true;
