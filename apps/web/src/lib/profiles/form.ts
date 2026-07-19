@@ -94,17 +94,21 @@ export function profileToForm(profile: ProfileWire | null): ProfileFormState {
   };
 }
 
-/** The window-1 blocks the editor doesn't edit but must never drop on save. */
-export type CarriedConfigBlocks = Pick<ProfileWire["config"], "icp" | "cadence" | "routing">;
+/** The non-form-backed blocks the editor doesn't edit but must never drop on save (window 1 + the window-2 outreach/social pair). */
+export type CarriedConfigBlocks = Pick<
+  ProfileWire["config"],
+  "icp" | "cadence" | "routing" | "outreach" | "social"
+>;
 
 export function formToConfig(
   form: ProfileFormState,
   /**
-   * The ACTIVE profile's non-form-backed blocks (icp · cadence · routing),
-   * carried through verbatim — a save built from the form fields alone
-   * silently dropped them, disarming lead scoring / the cadence gate /
-   * routing (found live on staging, 2026-07-14). Callers pass the fetched
-   * active wire config; absent blocks stay absent.
+   * The ACTIVE profile's non-form-backed blocks (icp · cadence · routing ·
+   * outreach · social), carried through verbatim — a save built from the
+   * form fields alone silently dropped them, disarming lead scoring / the
+   * cadence gate / routing / outreach / the social publish door (found live
+   * on staging, 2026-07-14; recurred for the window-2 pair, 2026-07-19).
+   * Callers pass the fetched active wire config; absent blocks stay absent.
    */
   carry?: CarriedConfigBlocks,
 ): { config: BrandProfileConfigInput; error: null } | { config: null; error: string } {
@@ -132,6 +136,8 @@ export function formToConfig(
       ...(carry?.icp !== undefined ? { icp: carry.icp } : {}),
       ...(carry?.cadence !== undefined ? { cadence: carry.cadence } : {}),
       ...(carry?.routing !== undefined ? { routing: carry.routing } : {}),
+      ...(carry?.outreach !== undefined ? { outreach: carry.outreach } : {}),
+      ...(carry?.social !== undefined ? { social: carry.social } : {}),
     },
     error: null,
   };

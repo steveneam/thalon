@@ -17,12 +17,15 @@ function toWire(row: BrandProfile): ProfileWire {
       denylist: (row.denylist ?? []) as string[],
       platformProfiles: (row.platformProfiles ?? {}) as Record<string, Record<string, unknown>>,
       identity: (row.identity ?? {}) as Record<string, unknown>,
-      // Window-1 blocks ride the wire whenever set (validated at the write
-      // door, hence the honest casts) — omitting them made every editor
-      // save silently drop them (2026-07-14 staging dogfood find).
+      // Non-form-backed blocks ride the wire whenever set (validated at the
+      // write door, hence the honest casts) — omitting them made every
+      // editor save silently drop them (2026-07-14 staging dogfood find;
+      // recurred for the window-2 pair, 2026-07-19).
       ...(row.icp != null ? { icp: row.icp as ProfileWire["config"]["icp"] } : {}),
       ...(row.cadence != null ? { cadence: row.cadence as ProfileWire["config"]["cadence"] } : {}),
       ...(row.routing != null ? { routing: row.routing as ProfileWire["config"]["routing"] } : {}),
+      ...(row.outreach != null ? { outreach: row.outreach as ProfileWire["config"]["outreach"] } : {}),
+      ...(row.social != null ? { social: row.social as ProfileWire["config"]["social"] } : {}),
     },
     createdAt: row.createdAt.toISOString(),
   };

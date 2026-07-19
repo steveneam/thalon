@@ -15,16 +15,20 @@ export interface ProfileWire {
     platformProfiles: Record<string, Record<string, unknown>>;
     identity: Record<string, unknown>;
     /**
-     * Window-1 blocks (icp · cadence · routing) — present on the wire only
-     * when set on the row. The editor doesn't edit them yet, but it MUST
-     * carry them through its save (formToConfig `carry`): a save built from
-     * the four form-backed blocks alone silently drops them and disarms
-     * lead scoring / the cadence gate / routing (found live, 2026-07-14
-     * staging dogfood).
+     * Non-form-backed blocks (window 1: icp · cadence · routing; window 2:
+     * outreach · social) — present on the wire only when set on the row.
+     * The editor doesn't edit them yet, but it MUST carry them through its
+     * save (formToConfig `carry`): a save built from the form-backed blocks
+     * alone silently drops them and disarms lead scoring / the cadence
+     * gate / routing / outreach / the social publish door (found live,
+     * 2026-07-14 staging dogfood; recurred for the window-2 pair, found
+     * live 2026-07-19 staging the post loop).
      */
     icp?: BrandProfileConfigInput["icp"];
     cadence?: BrandProfileConfigInput["cadence"];
     routing?: BrandProfileConfigInput["routing"];
+    outreach?: BrandProfileConfigInput["outreach"];
+    social?: BrandProfileConfigInput["social"];
   };
   createdAt: string;
 }

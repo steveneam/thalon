@@ -88,7 +88,7 @@ describe("profile form mapping", () => {
   });
 });
 
-describe("formToConfig carry — the window-1 blocks the form doesn't edit (2026-07-14 staging find)", () => {
+describe("formToConfig carry — the non-form-backed blocks the form doesn't edit (2026-07-14 staging find; window-2 pair 2026-07-19)", () => {
   const form: ProfileFormState = {
     company: "Thalon",
     oneLiner: "",
@@ -103,17 +103,21 @@ describe("formToConfig carry — the window-1 blocks the form doesn't edit (2026
     platformProfilesJson: "",
   };
 
-  it("carries icp, cadence and routing through the save verbatim", () => {
+  it("carries icp, cadence, routing, outreach and social through the save verbatim", () => {
     const carry = {
       icp: { description: "Owner-operated local services", verticals: ["plumbing"] },
       cadence: { linkedin: { maxPerDay: 2 } },
       routing: { launch: ["linkedin"] },
+      outreach: { touchOffsetsDays: [0, 3, 10], dailyBatchCap: 25 },
+      social: { linkedin: { maxPostsPerDay: 1 } },
     };
     const mapped = formToConfig(form, carry);
     expect(mapped.error).toBeNull();
     expect(mapped.config?.icp).toEqual(carry.icp);
     expect(mapped.config?.cadence).toEqual(carry.cadence);
     expect(mapped.config?.routing).toEqual(carry.routing);
+    expect(mapped.config?.outreach).toEqual(carry.outreach);
+    expect(mapped.config?.social).toEqual(carry.social);
   });
 
   it("absent blocks stay absent — no keys invented on a pre-window profile", () => {
@@ -122,6 +126,8 @@ describe("formToConfig carry — the window-1 blocks the form doesn't edit (2026
     expect(mapped.config && "icp" in mapped.config).toBe(false);
     expect(mapped.config && "cadence" in mapped.config).toBe(false);
     expect(mapped.config && "routing" in mapped.config).toBe(false);
+    expect(mapped.config && "outreach" in mapped.config).toBe(false);
+    expect(mapped.config && "social" in mapped.config).toBe(false);
 
     const noCarry = formToConfig(form);
     expect(noCarry.config && "icp" in noCarry.config).toBe(false);
