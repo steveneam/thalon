@@ -21,7 +21,8 @@
     "db:generate": "npm run generate -w @thalon/db",
     "doctor": "node scripts/doctor.mjs",
     "guard": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ci-grep-guard.ps1",
-    "guard:pwsh": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1"
+    "guard:pwsh": "pwsh -NoProfile -File scripts/ci-grep-guard.ps1",
+    "verify": "npm run guard:pwsh && npm test && npm run typecheck && npm run lint"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
