@@ -26,3 +26,18 @@ export {
   type PublishApprovedDraftInput,
   type PublishApprovedDraftResult,
 } from "./publish";
+export {
+  createFacebookDriver,
+  createInstagramDriver,
+  createLinkedInDriver,
+  createXDriver,
+  FACEBOOK_GRAPH_VERSION,
+  InstagramTextOnlyUnsupportedError,
+  LINKEDIN_VERSION,
+  productionSocialDrivers,
+  SocialDriverApiError,
+  type FacebookDriverConfig,
+  type InstagramDriverConfig,
+  type LinkedInDriverConfig,
+  type XDriverConfig,
+} from "./drivers";

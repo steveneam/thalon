@@ -20,6 +20,12 @@ import {
 } from "../errors";
 import { publishApprovedDraft } from "../publish";
 import {
+  createInstagramDriver,
+  createLinkedInDriver,
+  InstagramTextOnlyUnsupportedError,
+  SocialDriverApiError,
+} from "../drivers";
+import {
   createFakeSocialPublisher,
   resolveSocialPublisher,
   type FakeSocialPublisher,
@@ -332,6 +338,57 @@ describe("publishApprovedDraft — the happy path", () => {
     const { result } = door(f, draft.id, { publisher: failing });
     await expect(result).rejects.toThrow("platform down");
     expect(failing.calls).toHaveLength(1);
+    expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+  });
+});
+
+describe("publishApprovedDraft — B-pub.2 REAL drivers through the door (injected fetch, zero network)", () => {
+  /** A LinkedIn wire double: userinfo always answers; the create-post answer is the knob. */
+  function linkedinFetch(post: () => Response): typeof fetch {
+    return async (url) =>
+      String(url).endsWith("/v2/userinfo")
+        ? new Response(JSON.stringify({ sub: "AbC123" }), { status: 200 })
+        : post();
+  }
+
+  it("platform accepted → the ledger row carries the driver's REAL external id + permalink meta", async () => {
+    const f = await setup();
+    const draft = await createPostDraft(f);
+    const driver = createLinkedInDriver({
+      accessToken: "tok_test",
+      fetchImpl: linkedinFetch(
+        () => new Response(null, { status: 201, headers: { "x-restli-id": "urn:li:share:42" } }),
+      ),
+    });
+    const { publication } = await door(f, draft.id, { publisher: driver }).result;
+    expect(publication.externalPostId).toBe("urn:li:share:42");
+    expect(publication.meta).toMatchObject({
+      permalink: "https://www.linkedin.com/feed/update/urn:li:share:42",
+    });
+  });
+
+  it("a platform non-2xx surfaces as the driver's typed error and records NOTHING", async () => {
+    const f = await setup();
+    const draft = await createPostDraft(f);
+    const driver = createLinkedInDriver({
+      accessToken: "tok_test",
+      fetchImpl: linkedinFetch(() => new Response("commentary exceeds limits", { status: 422 })),
+    });
+    const rejection = await door(f, draft.id, { publisher: driver }).result.catch((err) => err);
+    expect(rejection).toBeInstanceOf(SocialDriverApiError);
+    expect((rejection as SocialDriverApiError).status).toBe(422);
+    expect((rejection as Error).message).not.toContain("tok_test");
+    expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+  });
+
+  it("the instagram honesty case: the armed refusal driver throws typed through the door and records NOTHING", async () => {
+    const f = await setup({ social: { instagram: { maxPostsPerDay: 1 } } });
+    const draft = await createPostDraft(f);
+    const driver = createInstagramDriver({ accessToken: "tok_test", igUserId: "178414" });
+    const rejection = await door(f, draft.id, { publisher: driver, platform: "instagram" })
+      .result.catch((err) => err);
+    expect(rejection).toBeInstanceOf(InstagramTextOnlyUnsupportedError);
+    expect((rejection as InstagramTextOnlyUnsupportedError).draftId).toBe(draft.id);
     expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
   });
 });
