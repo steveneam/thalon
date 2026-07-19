@@ -21,6 +21,8 @@ Three arcs in one session: (1) the ⑲ Tsukimi fix round off the founder's typed
 
 ## Next action — the s65 PLAN (founder asked for it; lanes launch only on his opener approval)
 
+▶▶ **THE CONSOLIDATED MAP: `docs/research/social-transition-plan.md`** (dogfood → Thalon launch → client product; one capability, two scopes; Thalon = tenant zero). Read it first — it links the arming plan, the Integrations plan, and this file into one arc, and its final section IS the s65 start.
+
 **Opener:** self-check (tmux · pg · 8899 · balance ≈706.12) · peer-mail (swordfish tails: film-import their queue · founder-gated basicauth+DB_DUMP_TOKEN console pass) · founder calls: ⑲ re-glance · which track first · gateway top-up.
 
 **Big state change this session: the publish loop can now be DOGFOODED end-to-end.** Intel is armed and flowing (bluesky, frontier-AI watchlist, 4-hourly). Social creds for **X · LinkedIn · Facebook · Instagram** are collected + read-only-validated in `.context/social-logins.md` (NOT wired, NOT armed). So s65 has two tracks the founder sequences:
