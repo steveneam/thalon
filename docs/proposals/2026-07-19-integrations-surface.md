@@ -40,13 +40,48 @@ KMS as a recorded swap path.**
   read-only validation ping (the s64 cred-collection pattern, productized) is
   what flips a card to "connected", and its stamp is the card's honesty.
 
+## Destinations, not social platforms (founder addition, s65 live)
+
+The surface's unit is a **publish destination** — anywhere judged content lands
+— not a social platform. Three destination classes, one pipeline:
+
+1. **Social platforms** (the five; drivers = B-pub.2+). Short-form; per-platform
+   style via `platformProfiles` as today.
+2. **Your website** — blog/article/long-form. The engine already ships this
+   end-to-end for tenant zero: approved `web_page` drafts deploy through
+   `packages/engine/src/webpage/deploy.ts` to the live `/blog` (slug pages +
+   RSS). FEATURE-MAP's "partial — no workspace path to what got published" gap
+   becomes this surface's published-view. Client sites = a DRIVER CLASS with
+   creds in the same vault: **Thalon-hosted blog (built-in, zero setup) ·
+   WordPress REST · Ghost Admin · generic webhook** — each card validated by a
+   read-only ping like every other integration. Long-form style/length is
+   config, not code: a `blog` key in `platformProfiles` + the routing table
+   already model per-destination register; `web_page` is the long-form format
+   and the only seoMeta-bearing one (B6.8 applies to blog posts for free).
+3. **Newsletter** (follow-on bucket, chartered not built): the same judged
+   content through Resend broadcasts — the provider is already in the stack;
+   consent/list rules make it its own bucket, never bundled into the first cut.
+
+**Dogfood consequence — the order flips:** the website is the FIRST destination
+that can go fully live: no platform review, no external ARMED gate, our own
+property, reversible. The complete generate → judge → approve → publish loop
+can run on staging before any social GO. Proposed proof-of-product moment:
+**pillar #1's blog article published to `/blog` through the real loop.**
+(Stealth holds: staging until the launch call; the public site stays unwired.)
+
+Contract-window consequence (rides the charter's B-int.0 window): a small
+**destinations registry** in contracts (destination key → class + driver) so
+cards, routing, and ledgers share one vocabulary; `social_publications` stays
+the social ledger, the web deploy door keeps its deployRef record, and the
+workspace published-view JOINS them — one "what went out where" answer.
+
 ## Buckets (proposed)
 
 | bucket | scope | gate |
 |---|---|---|
 | **B-int.0** | **Contract window** (the sprint's ONE window, opened at charter): `tenant_credentials` + repos + contracts service registry/credential shapes + card-state vocabulary. Additive; freezes before any lane. | lead, serial |
 | **B-int.1** | **Vault core:** envelope crypto, write/read doors, redaction ratchets, validate-ping seam (per-service read-only probes), server-side refresh for expiring tokens (rides the sweep-scheduler pattern). | lane after freeze |
-| **B-int.2** | **The surface:** Settings → Integrations — card per service grouped by what it powers (Intel · Social publishing · Outreach); honest states (not connected / connected-as-@handle / needs re-auth / expiring / plan-gated / review-pending); guided-manual connect flows (mode 2: step list + paste fields + validate ping — authored generic, platform-neutral language, nothing copied from gitignored notes). | lane after B-int.1 seam lands |
+| **B-int.2** | **The surface:** Settings → Integrations — card per destination grouped by what it powers (Intel · Social publishing · **Your website** · Outreach/Newsletter); honest states (not connected / connected-as-@handle / needs re-auth / expiring / plan-gated / review-pending); guided-manual connect flows (mode 2: step list + paste fields + validate ping — authored generic, platform-neutral language, nothing copied from gitignored notes); the **published-view** joining the social ledger + web deployRefs (closes FEATURE-MAP's `/blog` partial). | lane after B-int.1 seam lands |
 | **B-int.3** | **Driver rewire:** publisher + intel + outreach seams resolve credentials from the vault by tenant, and per-platform arming becomes tenant DATA (connected + tenant-armed) instead of env; the refusal ladder keeps its shape — only the rung's source changes. Env-based arming remains as the self-tenant emergency override, but the dogfood tenant MOVES ONTO THE VAULT (dogfood the real path). | lane; per-driver flip behind tests |
 | **B-int.4** | **OAuth Connect (mode 1), per platform as approvals land:** callback routes, token exchange into the vault, auto-refresh. Ships platform-by-platform behind Thalon's partner-app approvals; mode 2 never removed. | per-platform, founder files the partner-app reviews |
 
@@ -68,6 +103,11 @@ one, and the first post per platform/tenant stays behind an explicit GO.
    Terms/Privacy pages — a concrete dependency on THE LANDING, which currently
    holds at the visual-arc checkpoint. No filing is blocked *today* (dogfood
    needs none); this sequences the landing before mode 1.
+5. **Website = the first live destination** (your s65 addition): ratify the
+   destinations reframe above, the built-in blog as every tenant's zero-setup
+   website card, and **pillar #1's blog article through the real loop on
+   staging as the proof-of-product moment** — ahead of any social GO.
+   (Recommended: yes — no review gates, our property, reversible.)
 
 ## Not in scope
 
