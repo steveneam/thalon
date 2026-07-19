@@ -1,9 +1,8 @@
 # Proposal — the Integrations surface (Settings → Integrations + the per-tenant credential vault)
 
-> **Status: DRAFT for founder ratification (s65, Track B of the s65 opener call).**
-> Charters the plan seed `docs/research/integrations-surface-plan.md` into buckets.
-> Nothing here scaffolds until ratified (AGENTS.md rule 1); on ratification this
-> becomes the next ADR. Companion: `docs/research/social-transition-plan.md`
+> **Status: RATIFIED (founder, 2026-07-19 s65 live — "i'm happy with the charter") → ADR 0011.**
+> All five calls accepted as recommended. Build authority: B-int.0 contract
+> window opens s66+; lanes launch Mode B on per-launch approval as always. Companion: `docs/research/social-transition-plan.md`
 > (Phase 2 = this surface) · the s64 entitlements seam · B-pub.1/2 publisher seam.
 
 ## Why now (context, one paragraph)
