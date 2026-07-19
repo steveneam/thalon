@@ -16,8 +16,9 @@ import { fixture, type Fixture } from "./helpers";
  * repos (intel lane) and extend this same pattern; the Sprint-6 window's
  * repos (monitored areas · search targets/snapshots · waitlist) pin their
  * emissions the same way in sprint6-repos.test.ts, the Sprint-7 window's
- * (leads · lead scores) in sprint7-repos.test.ts, and the B-ve.1 window's
- * (video projects · takes · cuts) in b-ve1-repos.test.ts.
+ * (leads · lead scores) in sprint7-repos.test.ts, the B-ve.1 window's
+ * (video projects · takes · cuts) in b-ve1-repos.test.ts, and the B-int.0
+ * window's (tenant credentials vault) in b-int0-repos.test.ts.
  */
 
 let fx: Fixture | undefined;

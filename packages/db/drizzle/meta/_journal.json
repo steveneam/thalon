@@ -127,6 +127,13 @@
       "when": 1784450567949,
       "tag": "0017_sprint8_window2",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1784465178302,
+      "tag": "0018_bint0_integrations_window",
+      "breakpoints": true
     }
   ]
 }

@@ -75,6 +75,8 @@ const COPY_ORDER: PgTable[] = [
   schema.tenantEntitlements,
   schema.sweepSchedules,
   schema.socialPublications,
+  // B-int.0 window (0018): the credential vault references only tenants.
+  schema.tenantCredentials,
 ];
 
 const INSERT_BATCH = 200;

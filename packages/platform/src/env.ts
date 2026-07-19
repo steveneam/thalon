@@ -104,6 +104,15 @@ const envSchema = z.object({
    */
   SOCIAL_FACEBOOK_PAGE_ID: z.string().optional(),
   SOCIAL_INSTAGRAM_USER_ID: z.string().optional(),
+
+  /**
+   * B-int.0 (ADR 0011): the box-level master key that wraps every vault
+   * row's per-credential data key (envelope crypto, B-int.1 vault core).
+   * Absent = the vault's write door refuses — credentials can never store
+   * unencrypted. Cloud KMS is the recorded swap path behind the same
+   * wrap/unwrap seam (trigger: real traffic/customers).
+   */
+  THALON_VAULT_MASTER_KEY: z.string().optional(),
 });
 
 export type ThalonEnv = z.infer<typeof envSchema>;
