@@ -244,6 +244,20 @@ B2B verticals (science consumables, logistics) keep humans minimal-to-absent
 — there the fresh twist is §8 applied hard: counter the vertical's
 cooped-up-indoor association with light, nature at the microscale
 (micrographs), and air, not with staff photos.
+**The price-register corollary (founder-taught, s64 ⑲ review):** motion
+budget and food-macro share scale DOWN as the price point goes UP. Scroll
+choreography that performs for attention reads as *selling*, and true luxury
+doesn't sell — "quality doesn't need to shout for attention; people who know
+it just follow it." A fine-dining page's product is the ATMOSPHERE — the
+room, the setting, the view, the company — so its imagery leads with still,
+wide shots of the space and the people in it (fine dining is the most social
+food purchase; the dial reads HIGH), food in the supporting role, near-zero
+scroll choreography, generous stillness, the reservation as the only action.
+Drenched food macros + kinetic scroll grammar is a CASUAL-kitchen register —
+energetic, appetite-forward, exactly right for ramen bars and cafés (⑲'s
+re-theme is the model case: the founder moved the restaurant down-register
+to match the page's energy rather than quieting the page). Match the page's
+energy to the venue's price register before drawing any motion.
 
 **Show the consumable result (founder direction, s60 ⑬ fix round):** for any
 vertical whose product is tasted, worn, felt, or lived in, the page must show
