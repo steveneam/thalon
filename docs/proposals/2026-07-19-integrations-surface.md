@@ -103,11 +103,13 @@ one, and the first post per platform/tenant stays behind an explicit GO.
    Terms/Privacy pages — a concrete dependency on THE LANDING, which currently
    holds at the visual-arc checkpoint. No filing is blocked *today* (dogfood
    needs none); this sequences the landing before mode 1.
-5. **Website = the first live destination** (your s65 addition): ratify the
-   destinations reframe above, the built-in blog as every tenant's zero-setup
-   website card, and **pillar #1's blog article through the real loop on
-   staging as the proof-of-product moment** — ahead of any social GO.
-   (Recommended: yes — no review gates, our property, reversible.)
+5. **Website = the first live destination** (your s65 addition, with your
+   nuance: not every tenant has a site — the card is OPTIONAL like every
+   destination; unconnected = disarmed, and the Thalon-hosted blog is an
+   OFFERING a tenant may enable, never an assumption): ratify the
+   destinations reframe above and **pillar #1's blog article through the
+   real loop on staging as the proof-of-product moment** — ahead of any
+   social GO. (Recommended: yes — no review gates, our property, reversible.)
 
 ## Not in scope
 
