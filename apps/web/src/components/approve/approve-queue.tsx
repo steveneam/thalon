@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { ApprovePanel, type PanelStatus } from "@/components/approve/approve-panel";
 import { QueueList, type QueueItem, type QueueStatus } from "@/components/approve/queue-list";
@@ -33,9 +33,9 @@ function readDeepLink(): { runId: string | null; draftId: string | null } {
 }
 
 /**
- * The flat FIFO queue: every draft of every feed run, oldest first (triage
- * order — the design's list reads top-down from the longest-waiting item).
- * Ties (fixture-shaped data) break on platform then id for a stable walk.
+ * The flat queue: every draft of every feed run in one stable-sorted list
+ * (ascending by age here; the VIEW decides direction). Ties (fixture-shaped
+ * data) break on platform then id for a stable walk.
  */
 function flattenQueue(perRun: QueueItem[][]): QueueItem[] {
   return perRun.flat().sort((a, b) => {
@@ -45,6 +45,22 @@ function flattenQueue(perRun: QueueItem[][]): QueueItem[] {
   });
 }
 
+export type QueueSort = "newest" | "oldest";
+export type QueueFilter = "all" | "waiting" | "blocked";
+
+/**
+ * The operator's view over the flat queue (founder s66): NEWEST first by
+ * default, with the sort switchable and a status filter — presentation
+ * only, the stored list stays the stable ascending flatten.
+ */
+export function applyQueueView(items: QueueItem[], sort: QueueSort, filter: QueueFilter): QueueItem[] {
+  const filtered =
+    filter === "all"
+      ? items
+      : items.filter((i) => (filter === "waiting" ? i.draft.status === "queued" : i.draft.status === "blocked"));
+  return sort === "oldest" ? filtered : [...filtered].reverse();
+}
+
 /** Waiting on the operator = judge-passed (queued) or judge-blocked. */
 function isWaiting(draft: GridDraft): boolean {
   return draft.status === "queued" || draft.status === "blocked";
@@ -52,10 +68,11 @@ function isWaiting(draft: GridDraft): boolean {
 
 /**
  * Default selection honors the dashboard's promise (critique P1, s39): "N
- * drafts wait on you" must land ON waiting work — the oldest waiting draft,
- * scoped to runs whose server-derived `waiting` count claims operator work
- * (the staged demo run deliberately reports waiting: 0 so the fixture flow
- * never hijacks the mount — the count-agreement invariant).
+ * drafts wait on you" must land ON waiting work — the first waiting draft
+ * in VIEW order (newest-first by default, founder s66), scoped to runs
+ * whose server-derived `waiting` count claims operator work (the staged
+ * demo run deliberately reports waiting: 0 so the fixture flow never
+ * hijacks the mount — the count-agreement invariant).
  */
 function defaultSelection(items: QueueItem[]): string | null {
   const waiting = items.find((item) => item.run.waiting > 0 && isWaiting(item.draft));
@@ -66,6 +83,10 @@ function defaultSelection(items: QueueItem[]): string | null {
 export function ApproveQueue() {
   const [queueStatus, setQueueStatus] = useState<QueueStatus>("loading");
   const [items, setItems] = useState<QueueItem[]>([]);
+  // The operator's view knobs (founder s66): newest first by default,
+  // switchable, plus a status filter. Presentation state only.
+  const [sort, setSort] = useState<QueueSort>("newest");
+  const [filter, setFilter] = useState<QueueFilter>("all");
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   // Mirrors selectedDraftId so an in-flight panel fetch can tell, once it
   // resolves, whether the operator has since selected something else — a
@@ -96,6 +117,11 @@ export function ApproveQueue() {
   const [toast, setToast] = useState<ToastState | null>(null);
 
   const selectDraft = useCallback((draftId: string | null) => {
+    // Re-selecting the selected row is a no-op: setting "loading" here with
+    // a same-value id would strand the panel (React bails on the state set,
+    // so the detail effect never re-fires — found s66 when newest-first
+    // pre-selection made clicking the selected row possible).
+    if (draftId !== null && draftId === selectedDraftIdRef.current) return;
     selectedDraftIdRef.current = draftId;
     setSelectedDraftId(draftId);
     setPanelStatus(draftId ? "loading" : "idle");
@@ -123,13 +149,16 @@ export function ApproveQueue() {
         setItems(data);
         setQueueStatus("success");
         if (data.length === 0) return;
+        // Selection walks the DEFAULT view (newest first) — the mount-time
+        // knobs, not whatever the state holds mid-render.
+        const view = applyQueueView(data, "newest", "all");
         const { runId, draftId } = deepLinkRef.current;
         deepLinkRef.current = { runId: null, draftId: null };
-        const linkedDraft = draftId && data.some((i) => i.draft.id === draftId) ? draftId : null;
+        const linkedDraft = draftId && view.some((i) => i.draft.id === draftId) ? draftId : null;
         // A ?run= link lands on that run's own waiting work first.
-        const runItems = runId ? data.filter((i) => i.run.id === runId) : [];
+        const runItems = runId ? view.filter((i) => i.run.id === runId) : [];
         const linkedRunDraft = (runItems.find((i) => isWaiting(i.draft)) ?? runItems[0])?.draft.id ?? null;
-        selectDraft(linkedDraft ?? linkedRunDraft ?? defaultSelection(data));
+        selectDraft(linkedDraft ?? linkedRunDraft ?? defaultSelection(view));
       })
       .catch(() => {
         if (!cancelled) setQueueStatus("error");
@@ -159,6 +188,16 @@ export function ApproveQueue() {
         if (selectedDraftIdRef.current === draftId) setPanelStatus("error");
       });
   }, []);
+
+  // The rendered view: filter + direction over the stable flat list.
+  const view = useMemo(() => applyQueueView(items, sort, filter), [items, sort, filter]);
+
+  // A filter change can drop the selected draft out of the view — land the
+  // selection back on the view's own default instead of a hidden row.
+  useEffect(() => {
+    if (!selectedDraftId || view.some((i) => i.draft.id === selectedDraftId)) return;
+    selectDraft(defaultSelection(view));
+  }, [view, selectedDraftId, selectDraft]);
 
   // A stage-artifact draft (storyboard/direction_doc, B5.4) swaps the detail
   // pane for the staged-flow surface, which fetches its own flow state — the
@@ -219,13 +258,15 @@ export function ApproveQueue() {
     void withBusy(() => rejectDraft(draft.id), { message: "Draft rejected." });
   }
 
-  // Batch approve: every QUEUED draft across the queue, in queue order,
+  // Batch approve: every QUEUED draft in the CURRENT VIEW, in view order,
   // sequentially through the same single-draft endpoint (each approve still
-  // records its own approval row). One named confirm with the count (the
-  // bulk-bar convention). Stops loudly on the first failure — the refresh
-  // then shows exactly how far it got. Stage artifacts advance through
-  // their own staged surface — a batch approve must never skip that walk.
-  const queuedItems = items.filter(
+  // records its own approval row) — the button's count and the acted-on set
+  // always agree with what the operator sees. One named confirm with the
+  // count (the bulk-bar convention). Stops loudly on the first failure —
+  // the refresh then shows exactly how far it got. Stage artifacts advance
+  // through their own staged surface — a batch approve must never skip that
+  // walk.
+  const queuedItems = view.filter(
     (i) => i.draft.status === "queued" && !isStagedDraftFormat(i.draft.format),
   );
   function batchApprove() {
@@ -249,14 +290,14 @@ export function ApproveQueue() {
   // guards typing targets and modifiers; the staged surface owning the
   // detail disables the whole grammar.
   const moveSelection = (delta: 1 | -1) => (event: KeyboardEvent) => {
-    if (items.length === 0) return;
+    if (view.length === 0) return;
     event.preventDefault();
-    const current = items.findIndex((i) => i.draft.id === selectedDraftId);
-    const next = current === -1 ? 0 : Math.min(Math.max(current + delta, 0), items.length - 1);
-    selectDraft(items[next].draft.id);
+    const current = view.findIndex((i) => i.draft.id === selectedDraftId);
+    const next = current === -1 ? 0 : Math.min(Math.max(current + delta, 0), view.length - 1);
+    selectDraft(view[next].draft.id);
   };
   const actOnSelected = (verb: "approve" | "reject") => (event: KeyboardEvent) => {
-    const selected = items.find((i) => i.draft.id === selectedDraftId)?.draft;
+    const selected = view.find((i) => i.draft.id === selectedDraftId)?.draft;
     if (!selected || selected.status !== "queued") return;
     event.preventDefault();
     if (verb === "reject") {
@@ -305,6 +346,31 @@ export function ApproveQueue() {
           {waitingCount > 0 && <Badge variant="signal">{waitingCount} waiting</Badge>}
           {blockedCount > 0 && <Badge variant="secondary">{blockedCount} blocked</Badge>}
           <div className="flex-1" />
+          <label className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Sort</span>
+            <select
+              aria-label="Sort order"
+              className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as QueueSort)}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Show</span>
+            <select
+              aria-label="Status filter"
+              className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as QueueFilter)}
+            >
+              <option value="all">All</option>
+              <option value="waiting">Waiting</option>
+              <option value="blocked">Blocked</option>
+            </select>
+          </label>
           <Button
             variant="outline"
             size="sm"
@@ -327,7 +393,8 @@ export function ApproveQueue() {
           <div className={cn("min-h-0 flex-col", selectedDraftId ? "hidden md:flex" : "flex")}>
             <QueueList
               status={queueStatus}
-              items={items}
+              items={view}
+              totalCount={items.length}
               selectedDraftId={selectedDraftId}
               onSelect={selectDraft}
             />

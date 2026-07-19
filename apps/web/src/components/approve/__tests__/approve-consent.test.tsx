@@ -11,8 +11,12 @@ import { ApproveQueue } from "../approve-queue";
 
 describe("ApproveQueue — informed consent (Phase I design #6)", () => {
   it("the approve button is a sentence: consequence + the honest publish limit; reject wears its ellipsis", async () => {
+    const user = userEvent.setup();
     render(<ApproveQueue />);
     const detail = screen.getByRole("region", { name: "Draft detail" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    // Newest-first view (s66) auto-selects the blocked draft — walk to the queued one.
+    await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
     await within(detail).findByText("Run2 LinkedIn draft");
 
     expect(
@@ -25,8 +29,11 @@ describe("ApproveQueue — informed consent (Phase I design #6)", () => {
   });
 
   it("lineage: the run and judge nodes are links, the seats show profile version + models, the ?draft chip deep-links", async () => {
+    const user = userEvent.setup();
     render(<ApproveQueue />);
     const detail = screen.getByRole("region", { name: "Draft detail" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
     await within(detail).findByText("Run2 LinkedIn draft");
 
     expect(within(detail).getByRole("link", { name: /run #22222222/ })).toHaveAttribute(

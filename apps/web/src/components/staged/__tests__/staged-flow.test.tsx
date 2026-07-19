@@ -94,6 +94,8 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
     render(<ApproveQueue />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Newest-first view (s66) auto-selects the blocked draft — walk to the classic queued one.
+    await user.click(await within(queue).findByRole("button", { name: /Select linkedin draft aaaaaaaa/ }));
     await within(detail).findByText("Run2 LinkedIn draft");
     expect(screen.queryByRole("region", { name: "Staged video flow" })).not.toBeInTheDocument();
     // The staged chain rides the queue as its own row.

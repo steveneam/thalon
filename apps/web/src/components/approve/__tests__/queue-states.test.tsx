@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { draft, draftA, draftB, run } from "@/lib/approve-queue/fixtures";
 import { ApprovePanel } from "../approve-panel";
-import { formatAge, QueueList, queueStatusWord } from "../queue-list";
+import { formatExactStamp, QueueList, queueStatusWord } from "../queue-list";
 
 const RUN = run("11111111-1111-1111-1111-111111111111", "2026-07-04T09:00:00.000Z");
 const noop = () => {};
@@ -49,11 +49,15 @@ describe("queue list states (Bounded-List Rule)", () => {
     expect(queueStatusWord("rejected")).toEqual({ word: "rejected", signal: false });
   });
 
-  it("ages read compact: minutes, hours, then days", () => {
-    const now = Date.parse("2026-07-05T12:00:00.000Z");
-    expect(formatAge("2026-07-05T11:30:00.000Z", now)).toBe("30m");
-    expect(formatAge("2026-07-04T10:00:00.000Z", now)).toBe("26h");
-    expect(formatAge("2026-07-01T12:00:00.000Z", now)).toBe("4d");
+  it("stamps are the EXACT local date and time, never a relative age (founder s66)", () => {
+    // Local-clock rendering: assert the shape plus the date parts that are
+    // timezone-stable for a midday-UTC instant on this box.
+    expect(formatExactStamp("2026-07-04T10:00:00.000Z")).toMatch(/^\d{1,2} Jul 2026, \d{2}:\d{2}$/);
+    expect(formatExactStamp("2026-01-15T12:00:00.000Z")).toMatch(/^\d{1,2} Jan 2026, \d{2}:\d{2}$/);
+    // Deterministic: the same instant always renders the same stamp.
+    expect(formatExactStamp("2026-07-04T10:00:00.000Z")).toBe(
+      formatExactStamp("2026-07-04T10:00:00.000Z"),
+    );
   });
 });
 

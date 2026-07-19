@@ -25,14 +25,17 @@ export function queueStatusWord(status: string): { word: string; signal: boolean
   return { word: status, signal: false };
 }
 
-/** Compact age for the queue rows ("26h" in the design) — exact time in the title attr. */
-export function formatAge(iso: string, now = Date.now()): string {
-  const ms = Math.max(0, now - new Date(iso).getTime());
-  const minutes = Math.floor(ms / 60_000);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 48) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * Exact creation stamp for the queue rows (founder s66: every item shows the
+ * exact date AND time it was created — never a relative "26h"/"4d" age).
+ * Viewer-local clock, deterministic hand-built format (locale-proof).
+ */
+export function formatExactStamp(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /** First line of the draft body — the row's title (bodies open with the hook). */
@@ -44,6 +47,8 @@ function rowTitle(body: string): string {
 interface QueueListProps {
   status: QueueStatus;
   items: QueueItem[];
+  /** Unfiltered queue size — lets the footer and empty state tell a filtered view from a truly empty queue. Defaults to items.length. */
+  totalCount?: number;
   selectedDraftId: string | null;
   onSelect: (draftId: string) => void;
 }
@@ -51,10 +56,12 @@ interface QueueListProps {
 /**
  * The approve queue as a LIST (the s58 board decision: stages are
  * engine-derived, drag would fake agency — list + detail, never a board).
- * Oldest first (FIFO triage); bounded region per the Bounded-List Rule:
+ * Order and filter are the parent's view state (founder s66: NEWEST first
+ * by default, switchable); bounded region per the Bounded-List Rule:
  * internal scroll past ~9 rows, count stated in the footer.
  */
-export function QueueList({ status, items, selectedDraftId, onSelect }: QueueListProps) {
+export function QueueList({ status, items, totalCount, selectedDraftId, onSelect }: QueueListProps) {
+  const total = totalCount ?? items.length;
   return (
     <section aria-label="Approve queue" className="flex min-h-0 flex-col border-b border-border md:border-r md:border-b-0">
       {status === "loading" && <p className="p-4 text-sm text-muted-foreground">Loading the queue…</p>}
@@ -62,7 +69,11 @@ export function QueueList({ status, items, selectedDraftId, onSelect }: QueueLis
       {status === "success" && items.length === 0 && (
         <div className="flex flex-1 flex-col items-center justify-center gap-1 py-8">
           <EmptyArt asset="emptyApprove" />
-          <p className="text-sm text-muted-foreground">No drafts yet — new drafts land here the moment a fan-out runs.</p>
+          <p className="text-sm text-muted-foreground">
+            {total > 0
+              ? "Nothing matches this view — switch the filter to see the rest."
+              : "No drafts yet — new drafts land here the moment a fan-out runs."}
+          </p>
         </div>
       )}
       {status === "success" && items.length > 0 && (
@@ -101,7 +112,7 @@ export function QueueList({ status, items, selectedDraftId, onSelect }: QueueLis
                       className="u-eyebrow shrink-0 text-muted-foreground"
                       title={new Date(draft.createdAt).toLocaleString()}
                     >
-                      {formatAge(draft.createdAt)}
+                      {formatExactStamp(draft.createdAt)}
                     </span>
                   </button>
                 </li>
@@ -109,7 +120,7 @@ export function QueueList({ status, items, selectedDraftId, onSelect }: QueueLis
             })}
           </ul>
           <p className="u-eyebrow border-t border-border px-3.5 py-2 text-muted-foreground">
-            {items.length} of {items.length} · list is bounded — scrolls internally past 9
+            {items.length} of {total} · list is bounded — scrolls internally past 9
           </p>
         </>
       )}

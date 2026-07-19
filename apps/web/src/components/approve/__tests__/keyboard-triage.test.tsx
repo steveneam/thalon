@@ -17,26 +17,27 @@ afterEach(() => {
 });
 
 describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
-  it("j/k move the selection through the queue (FIFO order) and clamp at the ends", async () => {
+  it("j/k move the selection through the queue (newest-first view, s66) and clamp at the ends", async () => {
     const user = userEvent.setup();
     render(<ApproveQueue />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
 
-    // The oldest waiting draft auto-selects (draft A).
-    const rowA = await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` });
-    expect(rowA).toHaveAttribute("aria-pressed", "true");
+    // The first waiting draft in view order auto-selects (draft B — the view
+    // is the reversed stable flatten: B → C → A → the staged demo row).
+    const rowB = await within(queue).findByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` });
+    expect(rowB).toHaveAttribute("aria-pressed", "true");
 
-    // Queue order is age-FIFO with a stable tiebreak: A → C → B.
+    // Clamped at the top of the list.
+    await user.keyboard("k");
+    expect(rowB).toHaveAttribute("aria-pressed", "true");
+
     await user.keyboard("j");
     const rowC = within(queue).getByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}` });
     await waitFor(() => expect(rowC).toHaveAttribute("aria-pressed", "true"));
 
     await user.keyboard("j");
-    const rowB = within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` });
-    await waitFor(() => expect(rowB).toHaveAttribute("aria-pressed", "true"));
-    // Clamped at the end of the list.
-    await user.keyboard("j");
-    expect(rowB).toHaveAttribute("aria-pressed", "true");
+    const rowA = within(queue).getByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` });
+    await waitFor(() => expect(rowA).toHaveAttribute("aria-pressed", "true"));
 
     await user.keyboard("k");
     await waitFor(() => expect(rowC).toHaveAttribute("aria-pressed", "true"));
@@ -57,7 +58,9 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
 
     render(<ApproveQueue />);
     const detail = screen.getByRole("region", { name: "Draft detail" });
-    await screen.findByRole("region", { name: "Approve queue" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    // Newest-first view (s66) auto-selects the blocked draft — select the queued one.
+    await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
     await within(detail).findByText("Run2 LinkedIn draft");
 
     // 'e' opens the editor (queued draft is editable)…
@@ -90,6 +93,8 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
 
     render(<ApproveQueue />);
     const detail = screen.getByRole("region", { name: "Draft detail" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
     await within(detail).findByText("Run2 LinkedIn draft");
 
     // Declined confirm: nothing happens.

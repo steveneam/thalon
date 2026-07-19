@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import {
   draftC,
+  FIXTURE_DRAFT_A_ID,
   FIXTURE_DRAFT_B_ID,
   FIXTURE_DRAFT_C_ID,
   FIXTURE_RUN_1_ID,
@@ -26,7 +27,7 @@ describe("ApproveQueue — flat queue + detail (Phase I design #6)", () => {
     }
   });
 
-  it("defaults to the OLDEST waiting draft across runs, not merely the newest run (critique P1, s39)", async () => {
+  it("defaults to WAITING work across runs (run-count scoped), never merely the newest run (critique P1 s39; newest-first view s66)", async () => {
     // The newest run has nothing waiting; the older run holds the operator's work.
     server.use(
       http.get("/api/runs", () =>
@@ -53,26 +54,63 @@ describe("ApproveQueue — flat queue + detail (Phase I design #6)", () => {
     expect(screen.getByText("2 waiting")).toBeInTheDocument();
   });
 
-  it("queue selection drives the detail pane", async () => {
+  it("queue selection drives the detail pane (newest-first: the blocked x draft leads the view)", async () => {
     const user = userEvent.setup();
     render(<ApproveQueue />);
 
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     const detail = screen.getByRole("region", { name: "Draft detail" });
 
-    // The oldest waiting draft auto-selects; the detail shows it.
-    await within(detail).findByText("Run2 LinkedIn draft");
-
-    // Selecting the blocked sibling swaps the detail — with its verdict.
-    await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
+    // The first waiting draft in view order (newest-first) auto-selects —
+    // the blocked x draft — and its verdict shows.
     await within(detail).findByText("Run2 X draft");
     expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
+
+    // Selecting the queued sibling swaps the detail.
+    await user.click(within(queue).getByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
+    await within(detail).findByText("Run2 LinkedIn draft");
 
     // Any row is reachable — terminal drafts stay reviewable (the publish door lives here).
     await user.click(
       within(queue).getByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}` }),
     );
     await within(detail).findByText("Run1 LinkedIn draft");
+  });
+
+  it("sorts newest-first by default with the order switchable, filters by status, and rows carry the exact creation stamp (founder s66)", async () => {
+    const user = userEvent.setup();
+    render(<ApproveQueue />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    await within(queue).findByText(/list is bounded/);
+
+    const names = () =>
+      within(queue)
+        .getAllByRole("button", { name: /^Select / })
+        .map((row) => row.getAttribute("aria-label") ?? "");
+    const indexOf = (id: string) => names().findIndex((n) => n.includes(id));
+
+    // Newest first: draft B (the stable flatten reversed) leads; A sits
+    // after C on the tiebreak walk.
+    expect(names()[0]).toContain(FIXTURE_DRAFT_B_ID);
+    expect(indexOf(FIXTURE_DRAFT_C_ID)).toBeLessThan(indexOf(FIXTURE_DRAFT_A_ID));
+
+    // Every row shows the exact creation date and time, never a relative age.
+    expect(within(queue).getAllByText(/2026, \d{2}:\d{2}/)).toHaveLength(names().length);
+
+    // Flip to oldest-first: the walk inverts.
+    await user.selectOptions(screen.getByRole("combobox", { name: "Sort order" }), "oldest");
+    expect(indexOf(FIXTURE_DRAFT_A_ID)).toBeLessThan(indexOf(FIXTURE_DRAFT_C_ID));
+    expect(names()[names().length - 1]).toContain(FIXTURE_DRAFT_B_ID);
+
+    // Filter to waiting (judge-passed) only: the blocked and terminal rows
+    // leave the view, and the footer states the honest filtered-of-total count.
+    const total = names().length;
+    await user.selectOptions(screen.getByRole("combobox", { name: "Status filter" }), "waiting");
+    expect(indexOf(FIXTURE_DRAFT_A_ID)).toBeGreaterThanOrEqual(0);
+    expect(indexOf(FIXTURE_DRAFT_B_ID)).toBe(-1);
+    expect(indexOf(FIXTURE_DRAFT_C_ID)).toBe(-1);
+    expect(names().length).toBeLessThan(total);
+    expect(within(queue).getByText(new RegExp(`${names().length} of ${total} ·`))).toBeInTheDocument();
   });
 
   it("the queue list is bounded and states its count (Bounded-List Rule)", async () => {

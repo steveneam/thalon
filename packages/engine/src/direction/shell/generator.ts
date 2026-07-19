@@ -66,6 +66,15 @@ function promptFileFor(promptSlug: string): string {
   return `${promptSlug}.md`;
 }
 
+/**
+ * The 0-based/1-based bridge, stated where the JSON contract is stated:
+ * direction.md numbers scenes for humans ("## Scene 1"), the schema wants
+ * machine sceneIndex. Every scenes-bearing stage prompt carries this rule —
+ * without it, models echo the document numbering (proven twice, s66).
+ */
+const SCENE_INDEXING_RULE =
+  'INDEXING RULE: "sceneIndex" is ZERO-BASED. The document heading "Scene 1" is sceneIndex 0, "Scene 2" is sceneIndex 1, and the last "Scene N" is sceneIndex N-1. Cover every scene exactly once with these exact indices.';
+
 const identityLines = (identityBlock?: string): string[] =>
   identityBlock
     ? [`BRAND IDENTITY (operator-asserted, judge-grounded):\n${identityBlock}`]
@@ -113,10 +122,17 @@ export function gatewayDirectionScenesDriver(promptSlug: string): DirectionScene
   return async (req) => {
     const modelId = modelTiers().draft;
     const system = readPromptFile(promptFileFor(promptSlug));
-    const hints = req.visualHints.map((h) => `- scene ${h.sceneIndex + 1}: ${h.hint}`).join("\n");
+    // sceneIndex is 0-BASED while direction.md's headings are 1-based
+    // ("## Scene 1"). Render hints by sceneIndex and state the mapping
+    // outright — without it, models echo the 1-based document numbering
+    // (both llama-3.3 and sonnet-4.5 did, s66: missing [0], unknown [N]).
+    const hints = req.visualHints
+      .map((h) => `- sceneIndex ${h.sceneIndex} (document "Scene ${h.sceneIndex + 1}"): ${h.hint}`)
+      .join("\n");
     const prompt = [
       `PREFILLED DIRECTION DOCUMENT (strict direction.md — deterministic fields are pinned):\n${req.prefilledMd}`,
       ...(hints ? [`VISUAL HINTS (structure-stage guidance):\n${hints}`] : []),
+      SCENE_INDEXING_RULE,
       `VOICE: ${JSON.stringify(req.voice)}`,
       ...identityLines(req.identityBlock),
     ].join("\n\n");
@@ -146,6 +162,7 @@ export function gatewayDirectionPolishDriver(promptSlug: string): DirectionPolis
     const system = readPromptFile(promptFileFor(promptSlug));
     const prompt = [
       `CURRENT DIRECTION DOCUMENT (strict direction.md — aspect/fps/pacing and the scene set are pinned):\n${req.currentMd}`,
+      SCENE_INDEXING_RULE,
       `VOICE: ${JSON.stringify(req.voice)}`,
       ...identityLines(req.identityBlock),
       `GROUNDING SOURCES (judge-grounded — the only material narration claims may come from):\n${req.groundingText}`,
