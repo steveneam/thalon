@@ -190,13 +190,66 @@ describe("CreateSurface — the →Email compose door (B-crm.4 front half)", () 
 });
 
 describe("CreateSurface — honest doors per family", () => {
-  it("video's live door is the Advanced staged brief; one-prompt says so instead of faking a generate button", async () => {
+  it("one-prompt video is a REAL door: brief + surviving source chip ride in, queued lands with the project trail", async () => {
+    let sent: unknown;
+    server.use(
+      http.post("/api/create/video", async ({ request }) => {
+        sent = await request.json();
+        return HttpResponse.json({
+          status: "queued",
+          draftId: "d-video-1",
+          stageKeys: ["structure", "scenes_effects", "polish"],
+          projectId: "vp-1",
+          projectName: "Video: launch clips",
+          cutId: "cut-1",
+          takeCount: 3,
+        });
+      }),
+    );
     const user = userEvent.setup();
     render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    // One-prompt (default): the honest seam statement + the switch.
-    expect(screen.getByText(/the live door is the Advanced staged brief/i)).toBeInTheDocument();
+    // The door states its gate AND its spend honesty before running.
+    expect(screen.getByText(/Nothing renders or spends until you approve/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /generate video draft/i }));
+    expect(await screen.findByText(/waiting for your approval/i)).toBeInTheDocument();
+    expect(screen.getByText(/3 planned takes and a draft cut/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /review it in the approve queue/i })).toHaveAttribute(
+      "href",
+      "/app/approve",
+    );
+    expect(screen.getByRole("link", { name: /open the video project/i })).toHaveAttribute(
+      "href",
+      "/app/videos",
+    );
+    // The brief = the seeded prompt; the source chip survived, so it rides in.
+    expect(sent).toMatchObject({
+      prompt: `Open on the hook: “${CONTEXT.hook}” Angle: ${CONTEXT.angle}.`,
+      sourceUrl: CONTEXT.sourceUrl,
+    });
+  });
+
+  it("a blocked stage surfaces honestly with the stage named", async () => {
+    server.use(
+      http.post("/api/create/video", () =>
+        HttpResponse.json({
+          status: "blocked",
+          draftId: "d-video-1",
+          stageKeys: ["structure"],
+          blockedStageKey: "structure",
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+    await user.click(screen.getByRole("button", { name: /generate video draft/i }));
+    expect(await screen.findByText(/blocked the structure stage/i)).toBeInTheDocument();
+  });
+
+  it("the Advanced staged brief stays reachable — the stage-by-stage walk, outcome named", async () => {
+    const user = userEvent.setup();
+    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
     await user.click(screen.getByRole("button", { name: /open the advanced staged brief/i }));
-    // Advanced: the staged brief walk, outcome named.
     expect(screen.getByRole("link", { name: /walk the staged brief/i })).toHaveAttribute(
       "href",
       "/app/approve",

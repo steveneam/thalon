@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Mail, X } from "lucide-react";
+import { ArrowRight, Clapperboard, Mail, X } from "lucide-react";
 import { heatBand } from "@/components/intel/heat-grade";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import type { ComposeEmailResult } from "@/lib/outreach/types";
 import { fetchProfiles } from "@/lib/profiles/client";
 import type { ProfileWire } from "@/lib/profiles/types";
 import { cn } from "@/lib/utils";
+import { generateOnePromptVideo } from "@/lib/videos/one-prompt-client";
+import type { OnePromptVideoWire } from "@/lib/videos/one-prompt-types";
 
 export type { CreateFamily } from "@/lib/intel/types";
 
@@ -131,9 +133,9 @@ type ProfileState = { resolved: false } | { resolved: true; profile: ProfileWire
  * profile carries company context (settings rows marked "profile"); the
  * brief opens complete — working title seeded, prompt pre-written from
  * angle + hook — so the operator's job is scan-and-adjust, never
- * author-from-scratch. Live one-prompt generation is still the B6.6 seam:
- * doors that exist are armed (→Email compose, the staged video brief);
- * doors that don't state it honestly.
+ * author-from-scratch. Doors that exist are armed (→Email compose, the
+ * one-prompt video run, the staged video brief); doors that don't (post/
+ * page — the B6.6 seam) state it honestly.
  */
 export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, context }: CreateSurfaceProps) {
   const [workingTitle, setWorkingTitle] = useState(context?.title ?? "");
@@ -154,6 +156,7 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
     | { state: "done"; result: ComposeEmailResult }
     | { state: "error"; message: string }
   >({ state: "idle" });
+  const [video, setVideo] = useState<VideoDoorState>({ state: "idle" });
 
   // The settings column reads the ACTIVE profile (never re-ask company
   // context); a missing/failed read degrades to the honest no-profile state.
@@ -201,6 +204,26 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
       setCompose({ state: "done", result });
     } catch (err) {
       setCompose({ state: "error", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+
+  // The one-prompt video run: brief (prompt, else the working title) + the
+  // SURVIVING source chip — a pruned chip never reaches the flow.
+  async function generateVideoDraft() {
+    const brief = prompt.trim() || workingTitle.trim();
+    if (!brief) {
+      setVideo({
+        state: "error",
+        message: "Write a prompt (or a working title) first — the brief is the flow's only input.",
+      });
+      return;
+    }
+    setVideo({ state: "running" });
+    try {
+      const result = await generateOnePromptVideo({ prompt: brief, sourceUrl: chipValue("sourceUrl") });
+      setVideo({ state: "done", result });
+    } catch (err) {
+      setVideo({ state: "error", message: err instanceof Error ? err.message : String(err) });
     }
   }
 
@@ -377,7 +400,9 @@ export function CreateSurface({ initialPrompt, initialKeyword, initialFamily, co
               mode={mode}
               emailArmed={emailArmed}
               compose={compose}
+              video={video}
               onCompose={() => void composeEmailDraft()}
+              onGenerateVideo={() => void generateVideoDraft()}
               onOpenAdvanced={() => setMode("advanced")}
             />
           </div>
@@ -436,18 +461,27 @@ function GoalGradient({ profileDone, contextDone }: { profileDone: boolean; cont
   );
 }
 
+type VideoDoorState =
+  | { state: "idle" }
+  | { state: "running" }
+  | { state: "done"; result: OnePromptVideoWire }
+  | { state: "error"; message: string };
+
 /**
  * The action row under the prompt. Only doors that exist are armed
- * (honest-claims rule): →Email composes + judges for real; Video's live
- * door is the staged brief behind Advanced; Post/Page state the B6.6 seam.
- * Every armed button states its outcome and names the judge gate.
+ * (honest-claims rule): →Email composes + judges for real; Video's
+ * one-prompt door runs the WHOLE staged flow (B-vid.7) and the Advanced
+ * staged brief remains the stage-by-stage walk; Post/Page state the B6.6
+ * seam. Every armed button states its outcome and names the judge gate.
  */
 function GenerateRow({
   family,
   mode,
   emailArmed,
   compose,
+  video,
   onCompose,
+  onGenerateVideo,
   onOpenAdvanced,
 }: {
   family: CreateFamily;
@@ -458,7 +492,9 @@ function GenerateRow({
     | { state: "composing" }
     | { state: "done"; result: ComposeEmailResult }
     | { state: "error"; message: string };
+  video: VideoDoorState;
   onCompose: () => void;
+  onGenerateVideo: () => void;
   onOpenAdvanced: () => void;
 }) {
   if (family === "email") {
@@ -535,14 +571,59 @@ function GenerateRow({
       );
     }
     return (
-      <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border p-3">
+      <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
         <p className="text-sm text-muted-foreground">
-          One-prompt video generation wires into the engine next (the judge lane already exists) — today the live door
-          is the Advanced staged brief.
+          Thalon runs the whole staged flow from this one prompt —{" "}
+          <span className="font-mono text-xs">storyboard → direction doc</span>, judged at every stage — then stages
+          the video project (takes plan + first cut).{" "}
+          <span className="font-medium text-foreground">Nothing renders or spends until you approve.</span>
         </p>
-        <Button variant="outline" size="sm" className="self-start" onClick={onOpenAdvanced}>
-          Open the Advanced staged brief
-        </Button>
+        {video.state === "done" ? (
+          <div className="flex flex-col gap-1.5" role="status">
+            <p className="text-sm">
+              {video.result.status === "queued"
+                ? `Direction doc generated and judged — project “${video.result.projectName ?? "untitled"}” is staged with ${video.result.takeCount ?? 0} planned takes and a draft cut. The doc is waiting for your approval.`
+                : `The judge blocked the ${video.result.blockedStageKey ?? "current"} stage — the draft is parked for triage with its reasons in the queue.`}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild size="sm" className="self-start">
+                <Link href="/app/approve">
+                  Review it in the Approve queue <ArrowRight aria-hidden data-icon="inline-end" />
+                </Link>
+              </Button>
+              {video.result.status === "queued" && (
+                <Button asChild variant="outline" size="sm" className="self-start">
+                  <Link href="/app/videos">Open the video project</Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3">
+            {video.state === "error" && (
+              <p className="w-full text-sm text-destructive" role="alert">
+                {video.message}
+              </p>
+            )}
+            <Button className="h-9" disabled={video.state === "running"} onClick={onGenerateVideo}>
+              <Clapperboard aria-hidden data-icon="inline-start" />
+              {video.state === "running"
+                ? "Generating + judging every stage…"
+                : "Generate video draft — judged before you see it"}
+            </Button>
+            <span className="u-eyebrow text-muted-foreground">
+              or walk it stage by stage in{" "}
+              <button
+                type="button"
+                aria-label="Open the Advanced staged brief"
+                onClick={onOpenAdvanced}
+                className="font-medium text-primary hover:underline"
+              >
+                Advanced
+              </button>
+            </span>
+          </div>
+        )}
       </div>
     );
   }
