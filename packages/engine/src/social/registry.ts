@@ -130,7 +130,7 @@ export function resolveSocialPublisher(
   const factory = drivers[platform];
   if (!factory) {
     missing.push(
-      `${platform} driver (B-pub.1 ships no drivers — official-API drivers land per-platform at B-pub.2+)`,
+      `${platform} driver (none assembled — productionSocialDrivers registers linkedin/x always, facebook only with SOCIAL_FACEBOOK_PAGE_ID, instagram only with SOCIAL_INSTAGRAM_USER_ID; tiktok ships no driver)`,
     );
   }
   if (!token || !factory || missing.length > 0) {
