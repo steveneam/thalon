@@ -6,7 +6,7 @@
 
 ## Active lanes
 
-**Sprint 8 "Arm It Live" (s64 launch, founder GO "how about the arming work"; contract window 0016 FROZEN at PR #60 / `901ada7`).** Merge order: B-arm.1 → B-pub.1 → B-vid.7; lead reviews/rebases/merges each on full local verify (Actions billing-dead).
+**Sprint 8 "Arm It Live" (s64 launch, founder GO "how about the arming work"; contract window 0016 FROZEN at PR #60 / `901ada7`).** Merge order: B-arm.1 → B-pub.1 → B-vid.7; lead reviews/rebases/merges each on full local verify (Actions billing-dead). **Mode note (founder flag, same session): this launch ran as harness subagents (Mode A) — founder let it stand but restated the standing preference; every future lane launch defaults to Mode B via `scripts/launch-lane.sh` (ratcheted in lead-drives-lanes memory).**
 
 | lane | bucket | scope (files) | status |
 |---|---|---|---|
