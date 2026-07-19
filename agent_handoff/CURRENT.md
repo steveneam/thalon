@@ -19,6 +19,20 @@ CLAUDE.md → this file → COORDINATION.md (s64 lane-close record) → NEEDS-ST
 
 Three arcs in one session: (1) the ⑲ Tsukimi fix round off the founder's typed verdict, which made REFERENCE-GUIDED MINTING standing doctrine (ref must BE the target; enhancer caption beats prompt). (2) Doctrine rounds: price-register corollary (fine dining = stillness), tier-gating clarified into the ENTITLEMENTS SEAM, Mode B ratcheted as the lane default after the founder flagged the Mode-A launch. (3) Sprint 8 opened on the founder's GO and its FIRST WAVE fully merged: window 0016 frozen, then three lanes built in parallel worktrees and merged one by one on full local root-suite gates (#61 #62 #63); vid7 stopped pre-commit and the lead finished it (no agent resume). Also: db-dump door retired; swordfish cutover choreography closed; syd4 resized 16 GiB/6 vCPU.
 
-## Next action
+## Next action — the s65 PLAN (founder asked for it; lanes launch only on his opener approval)
 
-**s65 opener: self-check → peer-mail → founder calls (⑲ re-glance · arming keys · app-review filings · gateway top-up) → Sprint-8 second wave on his approval: next contract window (queued gaps in COORDINATION) then B-pub.2 LinkedIn driver / B-arm.2 soak / B-vid.8 pillar #1 — every lane Mode B via launch-lane.sh.**
+**Opener:** self-check (tmux · pg · 8899 · balance ≈706.12) · peer-mail (swordfish tails: film-import their queue · founder-gated basicauth+DB_DUMP_TOKEN console pass) · founder calls: ⑲ re-glance · which track first · gateway top-up.
+
+**Big state change this session: the publish loop can now be DOGFOODED end-to-end.** Intel is armed and flowing (bluesky, frontier-AI watchlist, 4-hourly). Social creds for **X · LinkedIn · Facebook · Instagram** are collected + read-only-validated in `.context/social-logins.md` (NOT wired, NOT armed). So s65 has two tracks the founder sequences:
+
+**Track A — CLOSE THE PUBLISH LOOP (creds ready; highest proof-of-product value):**
+1. **Next contract window FIRST** (lead, serial) — the frozen gaps: `brand_profiles` social config block · `publishable` draft-format capability · `SOCIAL_*`/platform env keys in platform env schema · `sweep.schedule_failed` event door · `sweepSchedules.listAll` · entitlement feature keys as needed.
+2. **B-pub.2 publisher DRIVERS** wired to the validated creds — LinkedIn member-post first, then X, then Meta (FB page + IG). Per-platform arming; **first dogfood post on each stays behind a per-platform founder GO** (a single reviewed test, then delete).
+3. **B-arm.2 intel soak** — already armed + flowing; run it, eval rows from dismiss/promote.
+4. **B-vid.8 pillar #1 dogfood** — real render spend, needs the gateway top-up.
+
+**Track B — INTEGRATIONS SURFACE CHARTER (founder's explicit "do it next session"):** charter from `docs/research/integrations-surface-plan.md` — Settings→Integrations so tenants connect their own accounts; the **per-tenant encrypted credential vault is the central design decision** (we have none; arming is env-based self-only); OAuth-Connect (Thalon-owns-the-partner-app) vs guided-manual modes; ties the entitlements seam + the social config block. The s64 dev-app slog IS the dogfood proof this feature matters.
+
+**Every lane = Mode B via `scripts/launch-lane.sh`, named in the approval ask.**
+
+**Founder-side between sessions (all in `.context/`, none blocking):** rotate the account passwords in `social-logins.md` · Threads + TikTok apps whenever (exact click-paths saved in `.context/developer-apps.md`; slots in the sheet) · file the **LinkedIn Community Management** + **TikTok** audits early (long review queues) · gateway top-up call.
