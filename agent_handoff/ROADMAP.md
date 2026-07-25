@@ -19,7 +19,23 @@
 Ordered by what I'd actually do. Phase 1 is buildable with zero founder input, so
 `gogogo` always has productive work; Phases 2–3 are his GOs, surfaced at the opener.
 
-### Phase 1 — B-int.2: the Integrations surface **[lead-serial — START HERE]**
+### Phase 0 — FINISH THE TUNING LAP, THEN POST ALL THREE **[lead-serial + the recorded founder GO]**
+s68 close state: the judge tuning pass CORE LANDED (final v2 + screen v3, goldens
+8→16, **30/30 tier-verdicts** on rows 1-15, final tier perfect twice consecutively;
+commit `7b81e6f`). ONE residual, golden-pinned red: g3-016 — the demonstrative
+"This is the result" passes isolated but fails in full-post context. The day's
+token rail fired twice (2M, then the documented 3.5M raise in .env.local — revisit
+at month-end); the lap rides the fresh daily budget. **s69 sequence: (1) fix the
+context-dependence lap → golden 32/32 → (2) re-judge LinkedIn `491089d0` (punchy
+body WITH the founder's line is the stored state, currently blocked) → (3) attach
+the meme image to all three drafts (store content-addressed → meta.mediaRefs;
+image `.context/social/horse-meme-2026-07-25.png`) → (4) pre-post checks (version
+pins · X app display name neutral · Little-Format call = authored-side, done) →
+(5) set the three ARMED flags → approve → publish LinkedIn + X + Facebook in one
+pass — the founder's GO is RECORDED (s68: "post all 3 together next session").**
+Queued drafts: x `a40e9c48` · facebook `74d77abb` · linkedin `491089d0` (pending).
+
+### Phase 1 — B-int.2: the Integrations surface **[lead-serial — after Phase 0]**
 The vault core (B-int.1) SHIPPED s68 — its seam is live, so the surface unblocked.
 See the Phase-4-shaped spec below (cards + guided flows + published-view); doors to
 build against: `connectDestination` / `listCredentialCards` / `validateDestination`
