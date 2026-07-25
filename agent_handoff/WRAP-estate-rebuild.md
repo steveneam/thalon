@@ -11,6 +11,11 @@ scoped under their own root class.
 | Sites | `91b6ae7` | `ccd200c` |
 | Settings → Integrations | `8bb28d5` | `dcc81f0` |
 
+Two follow-ups on top, from re-reading the pair before wrapping: `98d1855`
+(a focused control keeps its own ↵; an empty-but-successful integrations read
+says so) and `1075f1a` (the seat count reads "–" until the status read
+resolves).
+
 ---
 
 ## Sites — `Sites.dc.html`
@@ -194,6 +199,11 @@ box's state when it ran.
   design behind the rebuilt doors.
 - Cross-lane collision check: the only reused class name in my files is
   `.prompt-box` (Create ≠ Sites — the named case), and it is scoped.
+- **One deliberate divergence from the wave-1 precedent, worth backporting:**
+  Sites' ↵ binding bails when a button or link has focus, so a chip still
+  filters after j/k has moved the pick. `components/runs/runs.tsx` (and any
+  surface with both a list grammar and in-band controls) has the same latent
+  hijack and no guard — a two-line fix if you want it consistent.
 - Possible future consolidation: the destination→glyph map lives in
   `components/settings/integrations-model.ts`. It is deliberately NOT merged
   into `lib/workspace/format.ts`'s `platformLabel` — destination keys

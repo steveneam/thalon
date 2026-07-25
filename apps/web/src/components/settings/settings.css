@@ -35,6 +35,13 @@
 .settings-surface button.card-link:hover { color: var(--act-hover); }
 
 /*
+ * The disconnect confirm — a keeper (the destructive-action guard) living on
+ * the card it destroys. It wears `.int-actions`' rhythm but WRAPS: a sentence
+ * plus two buttons does not fit one third of the grid on one line.
+ */
+.settings-surface .int-confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 2px; }
+
+/*
  * The guided connect flow — a KEEPER re-entering as state behind the sheet's
  * own "Set up"/"Move into vault" action (doctrine vii), so the sheet draws
  * no chrome for it. It is authored in the sheets' own grammar: the card body

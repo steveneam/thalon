@@ -343,8 +343,8 @@ export function Integrations() {
                   </div>
                 )}
                 {confirming === card.destination && (
-                  <div className="int-actions">
-                    <span className="int-sub" style={{ flex: 1 }}>
+                  <div className="int-confirm">
+                    <span className="int-sub">
                       Disconnect {card.label}? The sealed credential is deleted; the ledger
                       remembers what already went out.
                     </span>
