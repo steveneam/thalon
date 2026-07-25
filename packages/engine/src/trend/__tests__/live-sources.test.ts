@@ -153,6 +153,49 @@ describe("youtube trend source", () => {
     );
   });
 
+  it("chunks videos.list at 50 ids — a wide sweep never sends one giant 400 (s72)", async () => {
+    // Three searches × 40 unique ids = 120 collected → 3 videos.list chunks.
+    const calls: string[] = [];
+    let searchN = 0;
+    const source = youtubeTrendSource({
+      config: { apiKey: "k-test", maxSearchesPerSweep: 3, perQueryLimit: 40 },
+      fetchImpl: (async (url: string) => {
+        calls.push(url);
+        if (url.includes("/search")) {
+          searchN++;
+          return new Response(
+            JSON.stringify({
+              items: Array.from({ length: 40 }, (_, i) => ({
+                id: { kind: "youtube#video", videoId: `s${searchN}v${i}` },
+              })),
+            }),
+            { status: 200 },
+          );
+        }
+        const idParam = new URL(url).searchParams.get("id") ?? "";
+        return new Response(
+          JSON.stringify({
+            items: idParam.split(",").map((id) => ({
+              id,
+              snippet: { title: `t ${id}`, description: "", channelId: `UC${id}`, publishedAt: "2026-07-05T09:00:00Z" },
+              statistics: { viewCount: "100" },
+            })),
+          }),
+          { status: 200 },
+        );
+      }) as typeof fetch,
+    });
+
+    const items = await source.poll({ source: "youtube", accounts: [], queries: ["a", "b", "c"] });
+    const videoCalls = calls.filter((u) => u.includes("/videos?"));
+    expect(videoCalls).toHaveLength(3);
+    for (const u of videoCalls) {
+      const n = (new URL(u).searchParams.get("id") ?? "").split(",").length;
+      expect(n).toBeLessThanOrEqual(50);
+    }
+    expect(items).toHaveLength(120);
+  });
+
   it("searches then batch-fetches statistics, coercing the API's string counters", async () => {
     const calls: string[] = [];
     const source = youtubeTrendSource({

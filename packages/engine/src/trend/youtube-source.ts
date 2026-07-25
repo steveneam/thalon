@@ -131,12 +131,21 @@ export function youtubeTrendSource(deps: YoutubeSourceDeps = {}): TrendSource {
       }
       if (videoIds.size === 0) return [];
 
-      const raw = await call("videos", {
-        part: "snippet,statistics",
-        id: [...videoIds].join(","),
-        maxResults: "50",
-      });
-      return videosResponseSchema.parse(raw).items.map((video) => ({
+      // videos.list caps `id` at 50 per call — chunk, never one giant 400.
+      // Latent while maxSearchesPerSweep=1 bounded a sweep to 25 ids; the s72
+      // ration raise let one sweep collect hundreds. videos.list is the cheap
+      // bucket (1 unit/call), so chunking costs quota-nothing.
+      const ids = [...videoIds];
+      const videos: z.infer<typeof videosResponseSchema>["items"] = [];
+      for (let i = 0; i < ids.length; i += 50) {
+        const raw = await call("videos", {
+          part: "snippet,statistics",
+          id: ids.slice(i, i + 50).join(","),
+          maxResults: "50",
+        });
+        videos.push(...videosResponseSchema.parse(raw).items);
+      }
+      return videos.map((video) => ({
         externalId: video.id,
         url: `https://www.youtube.com/watch?v=${video.id}`,
         text: [video.snippet.title, video.snippet.description].filter(Boolean).join("\n"),
