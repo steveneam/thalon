@@ -39,7 +39,15 @@ export function CreateContextLoader({ contextId, ...rest }: CreateContextLoaderP
   }, [contextId]);
 
   if (!state.resolved) {
-    return <p className="p-4 text-sm text-muted-foreground lg:p-6">Loading intel context…</p>;
+    // The sheet's own resting chrome — the surface's shell, not a bridged
+    // one-off (this file left the bridge burn-down map with Create's s74
+    // rebuild).
+    return (
+      <div className="content" style={{ gap: 16 }}>
+        <h1 className="t-headline">Create</h1>
+        <span className="t-label">Reading the capture you brought…</span>
+      </div>
+    );
   }
   return <CreateSurface {...rest} context={state.context} />;
 }
