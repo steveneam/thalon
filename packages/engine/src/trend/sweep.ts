@@ -6,6 +6,7 @@ import type { EmbeddingDriver } from "../ingest/shell/embedder";
 import type { AreaExpansionConfigInput, SweepAreaInput } from "./area-expansion";
 import { generateTrendDossiers, type DossierCardInput } from "./dossier";
 import { runTrendIntake, type TrendIntakeResult } from "./intake";
+import type { AdmissionConfigInput } from "./admission";
 import type { OutlierConfigInput } from "./outliers";
 import type { RankerConfigInput } from "./ranker";
 import type { DossierDriver } from "./shell/dossier";
@@ -91,6 +92,8 @@ export interface TrendSweepRequest {
   expansionConfig?: AreaExpansionConfigInput;
   rankerConfig?: RankerConfigInput;
   outlierConfig?: OutlierConfigInput;
+  /** B-learn L1: exemplar-admission knobs (tenant defaults + per-area overrides) — armed with conservative defaults when omitted. */
+  admissionConfig?: AdmissionConfigInput;
   /** Advisory cadence for the stamp (default 4h). */
   intervalMs?: number;
   /** Bundle card cap, score-descending (default 30) — the CUT COUNT is reported, never silent. */
@@ -165,6 +168,7 @@ export async function runTrendSweep(
       expansionConfig: request.expansionConfig,
       rankerConfig: request.rankerConfig,
       outlierConfig: request.outlierConfig,
+      admissionConfig: request.admissionConfig,
       nowMs: request.nowMs,
     },
     {

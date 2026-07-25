@@ -91,8 +91,8 @@ export interface RunDueSweepsResult {
   checked: number;
   /** Tenant ids the due-math selected at `now`. */
   due: string[];
-  /** Sweeps that ran AND were marked — `markSwept(now)` succeeded. */
-  swept: Array<{ tenantId: string; cards: number; polled: number }>;
+  /** Sweeps that ran AND were marked — `markSwept(now)` succeeded. `admitted` = exemplars the B-learn L1 admission pass created this sweep. */
+  swept: Array<{ tenantId: string; cards: number; polled: number; admitted: number }>;
   /** Per-tenant failures, verbatim (reported, never silent) — these tenants stay due and retry next tick. */
   failures: DueSweepFailure[];
   /** Tick hint for drivers: the smallest enabled cadence, or null when nothing is enabled. */
@@ -143,6 +143,7 @@ export async function runDueSweeps(
         tenantId,
         cards: result.bundle.cards.length,
         polled: result.bundle.polled,
+        admitted: result.intake.admissions.admitted.length,
       });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
