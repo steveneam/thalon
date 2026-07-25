@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   composingCount,
@@ -44,6 +45,7 @@ function nextIn(iso: string | null, now: Date): string | null {
  */
 export function Dashboard() {
   const { pulse, status: pulseStatus, refresh } = usePulse();
+  const router = useRouter();
 
   const [health, setHealth] = useState<WorkspaceStatus | null>(null);
   // One status for both plan-backed cards (week + needs-you) — they share the read.
@@ -164,13 +166,17 @@ export function Dashboard() {
         <div style={{ flex: 1 }} />
         <div className="seg">
           <span className="seg-opt on">Overview</span>
-          <span
+          {/* A button, not a Link: `.screen a` paints anchors accent-blue and
+              workspace.css is the shell contract — the week card's Today/This
+              week control sets the same precedent. */}
+          <button
+            type="button"
             className="seg-opt"
-            title="Pipeline board — lands with its exact-mock rebuild"
-            aria-disabled
+            title="The same day as pipeline columns"
+            onClick={() => router.push("/app/board")}
           >
             Board
-          </span>
+          </button>
         </div>
       </div>
 

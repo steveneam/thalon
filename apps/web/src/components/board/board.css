@@ -1,0 +1,151 @@
+/*
+ * Pipeline board — the surface's own atomics, PORTED 1:1 from the helmet
+ * <style> of docs/research/mock-sheets/Board.dc.html (DOCTRINE 0: the sheet
+ * is the blueprint). Shared classes (.card, .pill, .seg, .btn, type roles)
+ * come from workspace.css — that file is the shell contract and is not
+ * edited from here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.board-surface` — the cross-lane contract
+ * (mock-sheets README rule 6, executable as lib/__tests__/surface-css-scope).
+ * The sheets reuse class names with different values, and this surface is a
+ * TAB OF HOME: its `.cols`/`.col` grammar and the Dashboard's `.tiles`/
+ * `.home-grid` render inside the same shell, so an unscoped file here would
+ * reach straight into its own sibling.
+ *
+ * The sheet's helmet also declares `.avatar`; it is already shared in
+ * workspace.css (identical in 15 of the 16 sheets), so it is deliberately NOT
+ * duplicated here.
+ */
+
+.board-surface .cols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  min-height: 0;
+  align-items: start;
+}
+.board-surface .col {
+  background: oklch(0.17 0.009 261);
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-card);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.board-surface .col-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--n-400);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.board-surface .col-ct {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--n-900);
+  background: var(--n-200);
+  border-radius: var(--r-pill);
+  padding: 1px 7px;
+  font-variant-numeric: tabular-nums;
+}
+.board-surface .col-bd {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.board-surface .k-card {
+  background: var(--n-100);
+  border: 1px solid var(--n-400);
+  border-radius: 8px;
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color var(--motion-fast);
+}
+.board-surface .k-card:hover { border-color: var(--n-500); }
+.board-surface .k-thumb {
+  height: 54px;
+  border-radius: 5px;
+  border: 1px solid var(--n-400);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--n-200),
+    var(--n-200) 7px,
+    var(--n-100) 7px,
+    var(--n-100) 14px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.board-surface .k-thumb span {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: var(--n-800);
+}
+.board-surface .k-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.board-surface .k-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--n-900);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * App adaptations (step 2 — the NAMED kind only; each keeps the 1440×940
+ * resting render indistinguishable from the sheet).
+ *
+ * 1. REAL DOORS. The sheet's cards are `cursor: pointer` with nowhere to go;
+ *    the app ships them as links. `.screen a` (workspace.css, the shell
+ *    contract) paints anchors accent-blue, so a card link re-inherits the
+ *    sheet's own colours here rather than the shell's link colour.
+ * 2. REAL MEDIA. Where a source actually gave us a thumbnail, the sheet's
+ *    striped placeholder frame carries the real image instead (the
+ *    Source-Link Rule); the frame's geometry is unchanged.
+ * 3. OVERFLOW. A real column holds more than the fixture's four cards, so
+ *    the body scrolls INSIDE the column and the header count stays the
+ *    total (the Bounded-List Rule).
+ * 4. The sheet writes the waiting column's signal dress as inline styles on
+ *    that one column; wired, it is a state a column HAS, so it becomes a
+ *    modifier class with the sheet's exact values.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+.board-surface a.k-card { color: var(--n-1000); }
+.board-surface a.k-card:hover { color: var(--n-1000); }
+.board-surface .k-title-err { color: var(--err); }
+
+.board-surface .k-thumb-live { overflow: hidden; background: var(--n-200); }
+.board-surface .k-thumb-live img { width: 100%; height: 100%; object-fit: cover; }
+
+.board-surface .col-bd { max-height: 620px; overflow-y: auto; }
+.board-surface .col-signal { border-color: color-mix(in oklab, var(--warn) 35%, var(--n-400)); }
+.board-surface .col-ct-signal { background: var(--warn-subtle); color: var(--warn); }
+
+.board-surface .col-note { font-size: 10.5px; color: var(--n-800); line-height: 1.45; }
+.board-surface .col-note-err { color: var(--err); }
+.board-surface .bare {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.board-surface .col-retry { color: var(--act); text-decoration: underline; }
+.board-surface .bare:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.board-surface .read-error { border-color: color-mix(in oklab, var(--err) 40%, var(--n-400)); }

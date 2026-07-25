@@ -26,7 +26,11 @@ describe("Dashboard (exact-mock rebuild, Dashboard.dc.html)", () => {
     // Today header (the surface owns its headline in the sheet's grammar).
     expect(screen.getByRole("heading", { name: "Today" })).toBeInTheDocument();
     expect(screen.getByText("Overview")).toBeInTheDocument();
-    expect(screen.getByText("Board")).toBeInTheDocument();
+    // The Board option is a real door since the pipeline board's rebuild —
+    // it was a dead label ("lands with its exact-mock rebuild") before it.
+    const board = screen.getByRole("button", { name: "Board" });
+    expect(board).toHaveClass("seg-opt");
+    expect(board).not.toHaveAttribute("aria-disabled");
 
     // The four tiles wear the sheet's labels and are doors.
     expect(screen.getByText("Rising trends").closest("a")).toHaveAttribute("href", "/app/intel");
