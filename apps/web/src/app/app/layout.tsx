@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
+import "./workspace.css";
 
 /** Operator surface — never indexed (robots.ts disallows /app as well). */
 export const metadata: Metadata = {

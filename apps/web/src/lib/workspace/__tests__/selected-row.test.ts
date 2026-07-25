@@ -13,11 +13,14 @@ const componentsDir = path.resolve(
  * The list surfaces that render a selected/current row. A new list surface
  * that gains selection joins this list and imports the constant — that IS
  * the recipe (s40 consistency slice; DESIGN.md §5 "The Selected-Row Recipe").
+ * EXACT-MOCK REBUILDS leave this list (s73, DOCTRINE 0): a rebuilt surface
+ * marks selection with the mock sheets' own `.row.sel` class (ported in
+ * src/app/app/workspace.css) — one recipe there too. When the last legacy
+ * surface rebuilds, this ratchet retires with the bridge.
  */
 const SELECTION_SURFACES = [
   "approve/queue-list.tsx",
   "board/leads-board.tsx",
-  "dashboard/needs-you-list.tsx",
   "library/library-surface.tsx",
   "leads/lead-card.tsx",
   "runs/runs-list.tsx",

@@ -28,6 +28,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     gates: [],
     reasons: [],
     deployRef: null,
+    excerpt: "fixture excerpt",
     ...overrides,
   };
 }
@@ -35,7 +36,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
 function seedPlan(assets: PipelineAsset[]) {
   server.use(
     http.get("/api/app/plan", () =>
-      HttpResponse.json({ sweep: null, areas: 0, cadence: [], assets } satisfies PlanPayload),
+      HttpResponse.json({ sweep: null, areas: 0, cadence: [], assets, plannedSlots: [] } satisfies PlanPayload),
     ),
   );
 }

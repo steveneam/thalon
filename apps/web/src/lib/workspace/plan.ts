@@ -3,7 +3,13 @@ import type { Draft, JudgeResult, Repos, Source } from "@thalon/db";
 import { judgeReasons } from "@/lib/approve-queue/judge-reasons";
 import { readLiveSweep } from "@/lib/intel/live";
 import { demoTenantSlug } from "@/lib/tenant";
-import type { PipelineAsset, PlanCadenceRule, PlanPayload, PlanSweep } from "./types";
+import type {
+  PipelineAsset,
+  PlanCadenceRule,
+  PlannedSlotWire,
+  PlanPayload,
+  PlanSweep,
+} from "./types";
 
 /**
  * The dashboard plan read (§10 items 2–3): sweep pointer + cadence config +
@@ -14,7 +20,16 @@ import type { PipelineAsset, PlanCadenceRule, PlanPayload, PlanSweep } from "./t
 const PLAN_RUN_WINDOW = 20;
 const PLAN_ASSET_CAP = 40;
 
-const EMPTY_PLAN: PlanPayload = { sweep: null, areas: 0, cadence: [], assets: [] };
+const EMPTY_PLAN: PlanPayload = { sweep: null, areas: 0, cadence: [], assets: [], plannedSlots: [] };
+
+/** Excerpt bound — one row's worth of quote, never the whole body. */
+const EXCERPT_CHARS = 120;
+
+/** Exported for its unit tests — whitespace-collapsed, bounded, ellipsized. */
+export function toExcerpt(body: string): string {
+  const collapsed = body.replace(/\s+/g, " ").trim();
+  return collapsed.length <= EXCERPT_CHARS ? collapsed : `${collapsed.slice(0, EXCERPT_CHARS - 1)}…`;
+}
 
 function toCadenceRules(raw: unknown): PlanCadenceRule[] {
   if (!raw) return [];
@@ -59,6 +74,7 @@ export function toAsset(draft: Draft, judged: JudgeResult[], source: Source | nu
     gates: [...latestByGate.values()].map((r) => ({ gate: r.gate, verdict: r.verdict })),
     reasons: judgeReasons(judged, draft.bodyHash).map((r) => `${r.gateLabel}: ${r.line}`),
     deployRef: deployed ? (meta.deployRef as string) : null,
+    excerpt: toExcerpt(draft.body),
   };
 }
 
@@ -67,11 +83,17 @@ export async function readPlan(repos: Repos): Promise<PlanPayload> {
   if (!tenant) return EMPTY_PLAN;
   const ctx = tenantCtx(tenant.id);
 
-  const [bundle, areas, profile, runs] = await Promise.all([
+  const now = Date.now();
+  const [bundle, areas, profile, runs, slots] = await Promise.all([
     readLiveSweep(tenant.id),
     repos.monitoredAreas.list(ctx, { status: "active" }),
     repos.brandProfiles.getActive(ctx),
     repos.fanoutRuns.list(ctx, { limit: PLAN_RUN_WINDOW }),
+    // ±2 weeks around now — the client buckets into its local week view.
+    repos.plannedSlots.listRange(ctx, {
+      from: new Date(now - 14 * 86_400_000),
+      to: new Date(now + 14 * 86_400_000),
+    }),
   ]);
 
   const sweep: PlanSweep | null = bundle
@@ -96,10 +118,31 @@ export async function readPlan(repos: Repos): Promise<PlanPayload> {
   ]);
   const sourceById = new Map(sourceIds.map((id, i) => [id, sourceRows[i]]));
 
+  // A slot's platform comes from its draft — usually already in the feed
+  // window; the stragglers get one bounded read each (slots are few).
+  const draftById = new Map(drafts.map((d) => [d.id, d]));
+  const plannedSlots: PlannedSlotWire[] = (
+    await Promise.all(
+      slots.map(async (slot) => {
+        const draft =
+          draftById.get(slot.draftId) ??
+          (await repos.drafts.get(ctx, slot.draftId).catch(() => null));
+        if (!draft) return null;
+        return {
+          draftId: slot.draftId,
+          platform: draft.platform,
+          scheduledFor: slot.scheduledFor.toISOString(),
+          note: slot.note,
+        };
+      }),
+    )
+  ).filter((s): s is PlannedSlotWire => s !== null);
+
   return {
     sweep,
     areas: areas.length,
     cadence: toCadenceRules(profile?.cadence),
     assets: drafts.map((d, i) => toAsset(d, judgedPerDraft[i], sourceById.get(d.sourceId) ?? null)),
+    plannedSlots,
   };
 }

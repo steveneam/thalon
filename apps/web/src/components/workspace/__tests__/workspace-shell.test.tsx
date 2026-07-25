@@ -9,20 +9,20 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-describe("WorkspaceShell (wave-0 Astryx chrome)", () => {
-  it("renders the labeled nav — every surface wears its word, mock order", async () => {
+describe("WorkspaceShell (exact-mock chrome, DOCTRINE 0)", () => {
+  it("renders the sheet's rail — every surface wears its word, mock order", async () => {
     render(
       <WorkspaceShell>
         <p>surface body</p>
       </WorkspaceShell>,
     );
 
-    // The labeled side nav: all twelve surfaces render icon + word — the
-    // icon-only rail is retired (kickoff step 3; ui-overhaul-plan §2 ③).
+    // The rail: all twelve surfaces render icon + word.
     const nav = within(screen.getByRole("navigation", { name: /side/i }));
     for (const surface of NAV_SURFACES) {
-      expect(nav.getAllByRole("link", { name: new RegExp(`^${surface.label}`) }).length)
-        .toBeGreaterThanOrEqual(1);
+      expect(
+        nav.getAllByRole("link", { name: new RegExp(`^${surface.label}`) }).length,
+      ).toBeGreaterThanOrEqual(1);
     }
 
     // Order and labels exactly as the mock: Home leads (Dashboard is
@@ -48,23 +48,28 @@ describe("WorkspaceShell (wave-0 Astryx chrome)", () => {
     const leadsLinks = nav.getAllByRole("link", { name: /^Leads/ });
     expect(leadsLinks.some((el) => el.getAttribute("aria-current") === "page")).toBe(true);
 
-    // The topbar h1 names the surface (surfaces carry no chrome h1 of their own).
+    // The topbar carries no visible surface title (the sheet's grammar —
+    // surfaces own their headline); the sr-only h1 keeps the page named.
     expect(screen.getByRole("heading", { level: 1, name: "Leads" })).toBeInTheDocument();
 
-    // Needs-you chip from the pulse fixture (3 = 2 queued + 1 blocked) in
+    // Needs-you pill from the pulse fixture (3 = 2 queued + 1 blocked) in
     // the topbar — the amber signal channel carries over.
     expect(
       await screen.findByRole("link", { name: /3 items need you — open the approve queue/i }),
     ).toHaveAttribute("href", "/app/approve");
+    expect(await screen.findByText("Needs you · 3")).toBeInTheDocument();
 
-    // + Create carries over into the new topbar.
+    // The Approve rail row carries the same count.
+    expect((await nav.findAllByText("3")).length).toBeGreaterThanOrEqual(1);
+
+    // + Create carries over into the topbar.
     expect(screen.getByRole("link", { name: "+ Create" })).toHaveAttribute("href", "/app/create");
 
-    // Dark is the default; light mode ships as the toggle.
+    // Dark is the default; light mode ships as the switcher-panel toggle (keeper).
     expect(screen.getByRole("button", { name: /switch to light mode/i })).toBeInTheDocument();
 
-    // Tenant + active profile in the switcher.
-    expect((await screen.findAllByText("v3")).length).toBeGreaterThanOrEqual(1);
+    // Tenant + active profile in the topbar.
+    expect((await screen.findAllByText(/profile v3/)).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Thalon").length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByText("surface body")).toBeInTheDocument();
@@ -77,7 +82,20 @@ describe("WorkspaceShell (wave-0 Astryx chrome)", () => {
       </WorkspaceShell>,
     );
     expect(screen.queryByRole("dialog", { name: /command palette/i })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /command/i }));
+    fireEvent.click(screen.getByRole("button", { name: /command palette/i }));
     expect(screen.getByRole("dialog", { name: /command palette/i })).toBeInTheDocument();
+  });
+
+  it("stamps the theme attributes on <html> while mounted and removes them on unmount", () => {
+    const { unmount } = render(
+      <WorkspaceShell>
+        <p>surface body</p>
+      </WorkspaceShell>,
+    );
+    expect(document.documentElement.getAttribute("data-astryx-theme")).toBe("thalon");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    unmount();
+    expect(document.documentElement.getAttribute("data-astryx-theme")).toBeNull();
+    expect(document.documentElement.getAttribute("data-theme")).toBeNull();
   });
 });

@@ -35,6 +35,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     gates: [],
     reasons: [],
     deployRef: null,
+    excerpt: "fixture excerpt",
     ...overrides,
   };
 }

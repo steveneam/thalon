@@ -46,10 +46,7 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/calendar/slot-chip.tsx", 1],
   ["components/calendar/week-grid.tsx", 4],
   ["components/create/create-surface.tsx", 18],
-  ["components/dashboard/first-run-card.tsx", 1],
-  ["components/dashboard/journey-spine.tsx", 7],
-  ["components/dashboard/needs-you-list.tsx", 2],
-  ["components/dashboard/week-calendar.tsx", 5],
+  // dashboard pins burned to zero at the s73 exact-mock rebuild (DOCTRINE 0).
   ["components/intel/cadence-stamp.tsx", 1],
   ["components/intel/heat-grade.tsx", 1],
   ["components/intel/rising-list.tsx", 1],

@@ -1,15 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useSyncExternalStore } from "react";
-import { AppShell } from "@astryxdesign/core/AppShell";
-import { LinkProvider } from "@astryxdesign/core/Link";
-import { Theme } from "@astryxdesign/core/theme";
-import { thalonTheme } from "@/theme/thalon";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { CommandPalette } from "@/components/workspace/command-palette";
 import { PulseProvider } from "@/components/workspace/pulse-context";
-import { WorkspaceSideNav } from "@/components/workspace/workspace-sidenav";
-import { WorkspaceTopNav } from "@/components/workspace/workspace-topnav";
+import { WorkspaceRail } from "@/components/workspace/workspace-rail";
+import { WorkspaceTopbar } from "@/components/workspace/workspace-topbar";
+import { activeSurface } from "@/lib/workspace/nav";
 
 /** localStorage key the app layout's pre-paint script reads too. */
 export const WORKSPACE_MODE_KEY = "thalon-workspace-mode";
@@ -31,19 +28,34 @@ function readMode(): "light" | "dark" {
 }
 
 /**
- * The workspace shell (wave 0, Astryx foundation): the Thalon theme +
- * labeled AppShell chrome around every /app surface. DARK IS DEFAULT;
- * light mode ships as the topbar toggle (Theme provider mode). The Theme
- * provider stamps `data-astryx-theme="thalon"` + `data-theme` on <html>
- * while mounted (removed on unmount, so the landing keeps its own
- * register) — the globals.css bridge re-points every legacy token at the
- * theme, which is how untouched surfaces render on the new palette.
+ * The workspace shell, rebuilt exactly from the mock sheets (DOCTRINE 0,
+ * plan §5): the sheet's own `.screen` → `.rail` + `.main`/`.topbar` chrome,
+ * ported from docs/research/mock-sheets — no component-library shell. DARK
+ * IS DEFAULT; light mode ships as the switcher-panel toggle riding the
+ * theme tokens' light-dark() mapping (the founder's wave-0 keeper). The
+ * shell stamps `data-astryx-theme="thalon"` + `data-theme` on <html> while
+ * mounted (removed on unmount, so the landing keeps its own register) —
+ * the token source stays src/theme/thalon-theme.css, and the globals.css
+ * bridge keeps not-yet-rebuilt surfaces rendering until each one's rebuild
+ * deletes its legacy styling (the bridge burns to zero).
  */
 export function WorkspaceShell({ children }: { children: React.ReactNode }) {
   // localStorage is the store of record (the app layout's pre-paint script
   // reads the same key); useSyncExternalStore keeps SSR (dark default) and
   // the client preference in agreement without an effect-driven setState.
   const mode = useSyncExternalStore(subscribeMode, readMode, (): "light" | "dark" => "dark");
+  const pathname = usePathname();
+  const surface = activeSurface(pathname);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    html.setAttribute("data-astryx-theme", "thalon");
+    html.setAttribute("data-theme", mode);
+    return () => {
+      html.removeAttribute("data-astryx-theme");
+      html.removeAttribute("data-theme");
+    };
+  }, [mode]);
 
   const toggleMode = useCallback(() => {
     window.localStorage.setItem(WORKSPACE_MODE_KEY, readMode() === "dark" ? "light" : "dark");
@@ -51,23 +63,18 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Theme theme={thalonTheme} mode={mode}>
-      <LinkProvider component={Link}>
-        <PulseProvider>
-          <AppShell
-            height="auto"
-            variant="section"
-            contentPadding={0}
-            topNav={<WorkspaceTopNav mode={mode} onToggleMode={toggleMode} />}
-            sideNav={<WorkspaceSideNav />}
-          >
-            {/* Same content contract as the pre-Astryx shell: surfaces sit
-                in a min-width-0 flex column and may flex-1 to fill. */}
-            <div className="flex min-h-full min-w-0 flex-1 flex-col">{children}</div>
-          </AppShell>
-          <CommandPalette />
-        </PulseProvider>
-      </LinkProvider>
-    </Theme>
+    <PulseProvider>
+      <div className="screen">
+        <WorkspaceRail />
+        <div className="main">
+          {/* The sheet's topbar carries no surface title — surfaces own their
+              headline. The sr-only h1 keeps the page named for readers. */}
+          <h1 className="sr-only">{surface?.label ?? "Workspace"}</h1>
+          <WorkspaceTopbar mode={mode} onToggleMode={toggleMode} />
+          <div className="surface-viewport">{children}</div>
+        </div>
+      </div>
+      <CommandPalette />
+    </PulseProvider>
   );
 }

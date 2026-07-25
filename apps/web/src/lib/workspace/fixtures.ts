@@ -64,6 +64,7 @@ function fixtureAsset(overrides: Partial<PipelineAsset> & { draftId: string }): 
     ],
     reasons: [],
     deployRef: null,
+    excerpt: "Our launch video has no editor file. It has a build step.",
     ...overrides,
   };
 }
@@ -109,6 +110,14 @@ export const fixturePlan: PlanPayload = {
       publishedAt: new Date(Date.now() - 19 * 3_600_000).toISOString(),
       deployRef: "/blog/fixture-post",
     }),
+  ],
+  plannedSlots: [
+    {
+      draftId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+      platform: "facebook",
+      scheduledFor: new Date(Date.now() + 6 * 3_600_000).toISOString(),
+      note: null,
+    },
   ],
 };
 

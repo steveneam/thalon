@@ -2,23 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Popover } from "@astryxdesign/core/Popover";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { StatusDot } from "@astryxdesign/core/StatusDot";
 import type { FeedRun } from "@/lib/approve-queue/types";
 
 /**
- * The async-work tray (founder round 8, wave-0 kickoff step 3): a neutral
- * "N working" chip with a spinner while any run is in flight, a green
- * completion dot when work finished since the tray was last opened, and a
- * dropdown tray with one honest row per job. Honest by construction:
- * everything renders from the REAL run states the /api/runs feed serves —
- * stage words where a percent would be a lie, the started-time where an
- * ETA would be one. Completion raises the dot, never a modal.
- *
- * Wave 0 ships the chip+tray shell on the fan-out feed; per-pipeline
- * progress (render/mint stages) rides the same rows once those pipelines
- * report stages.
+ * The async-work tray, rebuilt exactly from the Dashboard sheet (DOCTRINE
+ * 0): the `.work-chip` "N working" pill with the completion `.notif-dot`,
+ * and the `.tray` dropdown with one honest row per job. Honest by
+ * construction: everything renders from the REAL run states the /api/runs
+ * feed serves — stage words where a percent would be a lie, the
+ * started-time where an ETA would be one. Completion raises the dot, never
+ * a modal. Quiet chrome when idle: no chip at all until something runs or
+ * finishes (the sheet draws the active state).
  */
 
 const POLL_MS = 20_000;
@@ -83,6 +77,7 @@ export function WorkTray() {
   const [jobs, setJobs] = useState<TrayJob[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unseenDone, setUnseenDone] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
   /** Runs this session saw in a working state — the honest "finished while
    * you were here" set; a run that was already complete on first load never
    * raises the dot. */
@@ -124,6 +119,22 @@ export function WorkTray() {
     };
   }, [applyJobs]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [isOpen]);
+
   const working = jobs.filter((j) => j.working);
   // The tray lists in-flight work first, then the most recent settled runs
   // so a raised dot always has its finished row visible in the list.
@@ -132,85 +143,81 @@ export function WorkTray() {
   // Quiet chrome when idle: no chip at all until something runs or finishes.
   if (working.length === 0 && unseenDone === 0) return null;
 
-  const chipLabel =
-    working.length > 0
-      ? `${working.length} working`
-      : `${unseenDone} finished`;
+  const chipLabel = working.length > 0 ? `${working.length} working` : `${unseenDone} finished`;
 
   return (
-    <Popover
-      label="Background work"
-      placement="below"
-      alignment="end"
-      // Astryx 0.1.8 types mark className/style as required picks — empty
-      // values satisfy them without styling anything.
-      className=""
-      style={{}}
-      isOpen={isOpen}
-      onOpenChange={(open: boolean) => {
-        setIsOpen(open);
-        if (open) {
-          setUnseenDone(0);
-          fetchTrayJobs()
-            .then((next) => next && applyJobs(next))
-            .catch(() => {});
-        }
-      }}
-      content={
-        <div className="w-80 p-1" data-testid="work-tray">
-          <p className="px-2 pb-1 pt-1.5 text-xs text-muted-foreground">Background work</p>
-          <ul className="flex flex-col">
-            {[...working, ...settled].map((job) => (
-              <li key={job.id}>
-                <Link
-                  href={job.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2.5 rounded-md px-2 py-2 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                >
-                  {job.working ? (
-                    <Spinner size="sm" label="In progress" />
-                  ) : (
-                    <StatusDot
-                      variant={job.failed ? "error" : "success"}
-                      label={job.failed ? "Failed" : "Done"}
-                    />
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{job.label}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {job.stage}
-                      {job.working && ` · started ${ago(job.createdAt)}`}
-                      {!job.working && job.waiting > 0 && ` · ${job.waiting} waiting review`}
-                    </span>
-                  </span>
-                  {!job.working && (
-                    <span aria-hidden className="text-xs text-muted-foreground">
-                      View →
-                    </span>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      }
-    >
+    <div ref={rootRef} style={{ display: "contents" }}>
       <button
         type="button"
+        className="work-chip"
+        aria-expanded={isOpen}
         aria-label={
           working.length > 0
             ? `${working.length} background jobs working — open the work tray`
             : `${unseenDone} background jobs finished — open the work tray`
         }
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs font-medium text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        onClick={() => {
+          const opening = !isOpen;
+          setIsOpen(opening);
+          if (opening) {
+            setUnseenDone(0);
+            fetchTrayJobs()
+              .then((next) => next && applyJobs(next))
+              .catch(() => {});
+          }
+        }}
       >
         {working.length > 0 ? (
-          <Spinner size="sm" label="Work in progress" />
+          <span className="work-spin" />
         ) : (
-          <StatusDot variant="success" label="Work finished" />
+          <span style={{ color: "var(--ok)", fontWeight: 600 }}>✓</span>
         )}
         {chipLabel}
+        {unseenDone > 0 && !isOpen && <span className="notif-dot" />}
       </button>
-    </Popover>
+      {isOpen && (
+        <div className="tray" data-testid="work-tray" role="region" aria-label="Background work">
+          <div className="tray-row">
+            <span className="t-title" style={{ fontSize: 13 }}>
+              Working
+            </span>
+            <div style={{ flex: 1 }} />
+            <span className="t-label">the engine keeps going — you get pinged here</span>
+          </div>
+          {[...working, ...settled].map((job) => (
+            <div key={job.id} className="tray-row">
+              {job.working ? (
+                <span className="work-spin" />
+              ) : (
+                <span
+                  style={{ color: job.failed ? "var(--err)" : "var(--ok)", fontWeight: 600 }}
+                  aria-label={job.failed ? "Failed" : "Done"}
+                >
+                  {job.failed ? "✕" : "✓"}
+                </span>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 500 }}>
+                  {job.label}
+                  {!job.working && ` — ${job.stage}`}
+                </div>
+                <div className="excerpt">
+                  {job.working && `${job.stage} · started ${ago(job.createdAt)}`}
+                  {!job.working &&
+                    (job.waiting > 0 ? `${job.waiting} waiting review` : ago(job.createdAt))}
+                </div>
+              </div>
+              {job.working ? (
+                <span className="t-data">{ago(job.createdAt)}</span>
+              ) : (
+                <Link className="card-link" href={job.href} onClick={() => setIsOpen(false)}>
+                  View →
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

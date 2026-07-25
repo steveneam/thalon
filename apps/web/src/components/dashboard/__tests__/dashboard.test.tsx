@@ -19,91 +19,66 @@ function renderDashboard() {
   );
 }
 
-describe("Dashboard", () => {
-  it("renders the journey spine: five stations with live state and their one action each", async () => {
+describe("Dashboard (exact-mock rebuild, Dashboard.dc.html)", () => {
+  it("renders the sheet's bands: Today header, four tiles, home grid, published strip", async () => {
     renderDashboard();
 
-    // The page IS the journey.
-    expect(screen.getByText("The pipeline, left to right")).toBeInTheDocument();
+    // Today header (the surface owns its headline in the sheet's grammar).
+    expect(screen.getByRole("heading", { name: "Today" })).toBeInTheDocument();
+    expect(screen.getByText("Overview")).toBeInTheDocument();
+    expect(screen.getByText("Board")).toBeInTheDocument();
 
-    // 01 · intel rides the trends read (fixture: demo dataset, honest about it).
-    expect(await screen.findByText(/^demo$/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open intel" })).toHaveAttribute("href", "/app/intel");
-    expect(screen.getByText(/no next sweep until live pollers arm/)).toBeInTheDocument();
-
-    // 02 · pick is a state, not a route — honest about the untracked count.
-    expect(screen.getByText(/Pick is a state, not a route/)).toBeInTheDocument();
-    expect(screen.getByText(/never retyped/)).toBeInTheDocument();
-
-    // 03 · create exits to the create surface.
-    expect(screen.getByRole("link", { name: "Open create" })).toHaveAttribute(
+    // The four tiles wear the sheet's labels and are doors.
+    expect(screen.getByText("Rising trends").closest("a")).toHaveAttribute("href", "/app/intel");
+    expect(screen.getByText("Composing").closest("a")).toHaveAttribute("href", "/app/runs");
+    expect(screen.getByText("Planned slots").closest("a")).toHaveAttribute(
       "href",
-      "/app/create",
+      "/app/calendar",
     );
+    expect(screen.getByText(/door unarmed — plans, not uploads/)).toBeInTheDocument();
 
-    // 04 · approve wears the signal channel: pulse fixture has 2 queued + 1 blocked.
-    expect(await screen.findByText("2 waiting")).toBeInTheDocument();
-    expect(screen.getByText(/1 more blocked by the judge — reasons attached/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Review queue" })).toHaveAttribute(
+    // Needs-you card: fixture rows arrive with the pulse count (2 queued + 1
+    // blocked = 3) and the blocked row shows the judge's reason honestly.
+    expect(await screen.findByText(/oldest first/)).toBeInTheDocument();
+    expect(await screen.findByText(/Blocked by the judge/)).toBeInTheDocument();
+    expect(screen.getByText(/no provided source supports this claim/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open approve →" })).toHaveAttribute(
       "href",
       "/app/approve",
     );
 
-    // 05 · fan-out is honest about the unarmed door and exits to the calendar.
-    expect(screen.getByText(/publish door unarmed — these are plans, not uploads/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open calendar" })).toHaveAttribute(
+    // Week card: the sheet's seg + local-times note + calendar door.
+    expect(screen.getByText("This week")).toBeInTheDocument();
+    expect(screen.getByText("all times local")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open calendar →" })).toHaveAttribute(
       "href",
       "/app/calendar",
     );
 
-    // The needs-you list rows ride the plan read: one queued draft + the blocked fold.
-    expect(await screen.findByText("linkedin — your review")).toBeInTheDocument();
-    expect(screen.getByText("1 draft blocked — reasons attached")).toBeInTheDocument();
-    expect(screen.getByText(/the list is bounded — the page never grows with it/)).toBeInTheDocument();
-
-    // The week strip's honest three-mark legend.
-    expect(screen.getByText("waits on you")).toBeInTheDocument();
-    expect(screen.getByText("planned slot")).toBeInTheDocument();
-
-    // Seam/driver config lives in Settings; only the degraded gateway surfaces here.
-    expect(await screen.findByRole("status")).toHaveTextContent(/gateway key isn.t configured/i);
-    expect(screen.getByRole("link", { name: /check settings/i })).toHaveAttribute(
+    // Published strip: the fixture's deployed blog post carries its live link.
+    expect(await screen.findByText("Latest published")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /view live ↗/ })).toHaveAttribute(
       "href",
-      "/app/settings",
+      "/blog/fixture-post",
     );
   });
 
-  it("renders the first-run tutorial on an unseeded tenant", async () => {
-    server.use(
-      http.get("/api/app/pulse", () =>
-        HttpResponse.json({
-          tenant: null,
-          profile: null,
-          counts: { runs: 0, runsWithErrors: 0, drafts: 0, queued: 0, blocked: 0, approved: 0 },
-          needsYou: 0,
-        }),
-      ),
-    );
-    renderDashboard();
-    expect(await screen.findByText(/three steps to your first draft/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /set up your profile/i })).toHaveAttribute(
-      "href",
-      "/app/profiles",
-    );
-  });
-
-  it("renders an honest error card — never a real-looking empty state — when the pulse read fails", async () => {
+  it("a failed pulse read is an alert with retry, never a real-looking empty state", async () => {
     server.use(http.get("/api/app/pulse", () => HttpResponse.error()));
     renderDashboard();
-
-    // The failure is named, with a retry — not "Queue clear". (The needs-you
-    // list raises its own alert for the same outage; both are honest.)
+    // Two honest alerts: the engine card AND the needs-you card's read failure.
     const alerts = await screen.findAllByRole("alert");
-    expect(alerts.some((a) => /couldn.t reach the engine/i.test(a.textContent ?? ""))).toBe(true);
-    expect(screen.getAllByRole("button", { name: /try again/i }).length).toBeGreaterThanOrEqual(1);
-    expect(screen.queryByText(/queue clear/i)).not.toBeInTheDocument();
+    expect(alerts.some((el) => /Couldn’t reach the engine/.test(el.textContent ?? ""))).toBe(true);
+    expect(screen.getAllByRole("button", { name: "Try again" }).length).toBeGreaterThanOrEqual(1);
+  });
 
-    // Pulse-backed station counts show "–", not zeros.
-    expect(screen.getAllByText("not loaded").length).toBeGreaterThanOrEqual(1);
+  it("unresolved reads show '–', never a fabricated zero", async () => {
+    server.use(
+      http.get("/api/intel/trends", () => HttpResponse.error()),
+      http.get("/api/app/plan", () => HttpResponse.error()),
+    );
+    renderDashboard();
+    // The trends tile stays unresolved when its read fails.
+    expect(await screen.findAllByText("–")).not.toHaveLength(0);
   });
 });

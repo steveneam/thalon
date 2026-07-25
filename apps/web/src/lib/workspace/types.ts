@@ -101,6 +101,21 @@ export interface PipelineAsset {
   reasons: string[];
   /** Live page URL once the own-site deploy recorded it. */
   deployRef: string | null;
+  /**
+   * First line of the draft body, whitespace-collapsed and bounded — the
+   * media-first excerpt the dashboard rows quote (founder s71: excerpts
+   * over abstractions).
+   */
+  excerpt: string;
+}
+
+/** One planned slot (Phase-I window table) as a wire row — plans, not uploads; the publish door stays unarmed. */
+export interface PlannedSlotWire {
+  draftId: string;
+  platform: string;
+  /** ISO instant the operator planned the draft for. */
+  scheduledFor: string;
+  note: string | null;
 }
 
 export interface PlanPayload {
@@ -110,6 +125,8 @@ export interface PlanPayload {
   cadence: PlanCadenceRule[];
   /** Feed-window drafts as lineage rows, newest first. */
   assets: PipelineAsset[];
+  /** Planned slots in a ±2-week server window — the client buckets into its local week. */
+  plannedSlots: PlannedSlotWire[];
 }
 
 /** Mirrors @thalon/platform resolveSeams() — names, never key material. */
