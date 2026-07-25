@@ -53,7 +53,10 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // library/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
   ["components/profiles/profile-editor.tsx", 13],
   // runs/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
-  ["components/settings/integrations-panel.tsx", 30],
+  // components/settings/integrations-panel.tsx was DELETED at the s75
+  // exact-mock rebuild (DOCTRINE 0 rule 3) — the ported surface replaced it.
+  // The Settings ROOT below has no sheet of its own in the mock, so it keeps
+  // its bridged styling until the founder calls that surface.
   ["components/settings/settings-panel.tsx", 7],
   // components/sites/sites-gallery.tsx was DELETED at the s75 exact-mock
   // rebuild (DOCTRINE 0 rule 3) — the ported surface replaced it. The
