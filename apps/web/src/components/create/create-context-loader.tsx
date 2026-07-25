@@ -43,7 +43,7 @@ export function CreateContextLoader({ contextId, ...rest }: CreateContextLoaderP
     // one-off (this file left the bridge burn-down map with Create's s74
     // rebuild).
     return (
-      <div className="content" style={{ gap: 16 }}>
+      <div className="content create-surface" style={{ gap: 16 }}>
         <h1 className="t-headline">Create</h1>
         <span className="t-label">Reading the capture you brought…</span>
       </div>

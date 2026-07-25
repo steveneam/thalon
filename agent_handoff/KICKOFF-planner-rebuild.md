@@ -46,6 +46,16 @@ surface — NEVER edit workspace.css/shell/theme/tokens). Shared classes
 workspace.css as-is. Sheet placeholder content in this step; commit it
 separately — it is the founder's structural verdict point.
 
+**SCOPE EVERY RULE in that stylesheet under a surface root class**
+(`.calendar-surface`, `.leads-surface`, …) applied beside `.content` on the
+surface's root element — mock-sheets README rule 6. The sheets REUSE class
+names with different values across surfaces, so an unscoped file silently
+restyles its neighbour the moment both land. Your surfaces are directly
+affected: `.split` differs Approve↔Leads, `.reason` differs Intel↔Leads,
+`.today` differs Calendar↔Dashboard, `.prompt-box` differs Create↔Sites,
+`.on` differs across four sheets. This is a merge-gate check, not a
+preference.
+
 **Step 2 — wire + keepers.** Real data through the EXISTING clients (no API
 changes); honest states everywhere (loading/error/empty are never
 real-looking success — a failed read says so and offers retry); weave YOUR

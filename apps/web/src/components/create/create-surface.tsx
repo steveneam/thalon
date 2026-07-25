@@ -166,7 +166,7 @@ export function CreateSurface({
   const armed = family === "video" || (family === "email" && Boolean(pick?.leadId));
 
   return (
-    <div className="content" style={{ gap: 16 }}>
+    <div className="content create-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 className="t-headline">Create</h1>
         <div style={{ flex: 1 }} />

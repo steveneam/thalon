@@ -46,6 +46,20 @@ bridge-repaint approach:
    these sheets' values), the light-mode mapping (the founder's one keeper),
    and the executable ratchets (contrast pins, mono burn-down). Everything
    visible is rebuilt to these sheets.
+6. **SCOPE EVERY SURFACE STYLESHEET** (cross-lane contract, found at the s74
+   merge gate — the intel lane raised it and a sweep proved it). Shared
+   classes live in `workspace.css`; a sheet's own helmet atomics go in
+   `components/<surface>/<surface>.css` with **every rule scoped under a
+   surface root class** (`.create-surface`, `.intel-surface`, …) applied
+   beside `.content` on the surface's root element. The sheets deliberately
+   REUSE class names with different values, so unscoped files silently
+   restyle their neighbours the moment two land. Proven collisions:
+   `.prompt-box` (Create ≠ Sites), `.split` (Approve ≠ Leads), `.reason`
+   (Intel ≠ Leads), `.prov` (Intel ≠ Videos Overview), `.ver-strip`
+   (Approve ≠ Video Dossier), `.today` (Calendar ≠ Dashboard), `.on` (four
+   sheets, all different), `.thumb-sm` and `.strip`/`.play-btn`/`.play-tri`
+   (the two video sheets). Per-surface OVERRIDES of a shared workspace.css
+   class (Approve nudges `.thumb-sm`) are exactly why this is mandatory.
 
 `theme.css` here is the mock's own stylesheet — the shell (`.rail`,
 `.topbar`, `.card`, pills, type roles) and every shared pattern. Open any
