@@ -31,14 +31,10 @@ const LEGACY_TOKEN_RE =
 const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/app/sites/page.tsx", 5],
   ["components/board/leads-board.tsx", 22],
-  // calendar-surface.tsx left the map at its step-1 exact-mock rebuild — the
-  // sheet's own classes only, ZERO bridged tokens. The sub-components below
-  // are the OLD implementation, deleted at step 2 (DOCTRINE 0 rule 3).
-  ["components/calendar/agenda-list.tsx", 9],
-  ["components/calendar/day-panel.tsx", 9],
-  ["components/calendar/month-grid.tsx", 12],
-  ["components/calendar/slot-chip.tsx", 12],
-  ["components/calendar/week-grid.tsx", 22],
+  // components/calendar/* left the map entirely at the s75 exact-mock rebuild:
+  // the surface was rebuilt from Calendar.dc.html and the old implementation
+  // (week/month/agenda grids, day panel, slot chip) was deleted in the same
+  // change (DOCTRINE 0 rule 3). The rebuild sits at ZERO bridged tokens.
   // components/create/* left the map at s74 — the surface was rebuilt from
   // Create.dc.html and the loader beside it re-trued to the sheet's chrome
   // in the same change; both sit at ZERO bridged tokens.

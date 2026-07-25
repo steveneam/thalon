@@ -35,13 +35,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/brand/page.tsx", 3],
   ["app/page.tsx", 5],
   ["components/board/leads-board.tsx", 5],
-  // calendar-surface.tsx burned to zero at its step-1 exact-mock rebuild; the
-  // sub-components below are the old implementation, deleted at step 2.
-  ["components/calendar/agenda-list.tsx", 2],
-  ["components/calendar/day-panel.tsx", 2],
-  ["components/calendar/month-grid.tsx", 3],
-  ["components/calendar/slot-chip.tsx", 1],
-  ["components/calendar/week-grid.tsx", 4],
+  // components/calendar/* burned to zero at the s75 exact-mock rebuild: the
+  // rebuilt surface speaks the sheet's type roles and its DATA labels ride the
+  // theme's mono style (no uppercase); the old implementation was deleted.
   // approve + create + dashboard + intel pins all burned to zero at their
   // exact-mock rebuilds (DOCTRINE 0, s73–s74): the rebuilt surfaces speak the
   // sheets' own type roles, and their DATA labels ride the theme's mono style

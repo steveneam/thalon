@@ -1,78 +1,101 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { CalendarSurface } from "@/components/calendar/calendar-surface";
+import { listSavedViewsTestState, seedSavedView } from "@/lib/testing/handlers";
+import { server } from "@/lib/testing/server";
+import type { PipelineAsset, PlanPayload, PlannedSlotWire } from "@/lib/workspace/types";
+
+/** Today at a fixed hour — the grid is built in the operator's local zone. */
+function today(hour: number, minute = 0): Date {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d;
+}
+
+function hoursAgo(hours: number): string {
+  return new Date(Date.now() - hours * 3_600_000).toISOString();
+}
+
+function asset(overrides: Partial<PipelineAsset> & { draftId: string }): PipelineAsset {
+  return {
+    runId: "run-1",
+    platform: "linkedin",
+    format: "post",
+    status: "queued",
+    sourceKind: "url",
+    capturedAt: null,
+    generatedAt: hoursAgo(30),
+    judgedAt: null,
+    decidedAt: null,
+    publishedAt: null,
+    gates: [],
+    reasons: [],
+    deployRef: null,
+    excerpt: "The pipeline thread — what deterministic video changes",
+    ...overrides,
+  };
+}
+
+function seedPlan(payload: Partial<PlanPayload> = {}) {
+  const plan: PlanPayload = {
+    sweep: null,
+    areas: 0,
+    cadence: [],
+    assets: [],
+    plannedSlots: [],
+    ...payload,
+  };
+  server.use(http.get("/api/app/plan", () => HttpResponse.json(plan)));
+}
+
+const PLAN_SLOT: PlannedSlotWire = {
+  draftId: "d-plan",
+  platform: "linkedin",
+  scheduledFor: today(9, 30).toISOString(),
+  note: "pipeline thread",
+};
 
 /**
- * STEP 1 of the two-step rebuild: this pins the PURE PORT of
- * docs/research/mock-sheets/Calendar.dc.html — the sheet's bands, in the
- * sheet's own classes, with the sheet's placeholder content. It is
- * deliberately structural: there is no data wiring to assert yet.
- *
- * Step 2 restores the behaviour coverage the old-design suite carried
- * (recoverable from git history at the commit before this one): the density
- * switch (month/week/agenda), the day panel, the channel/status filters, the
- * j/k keyboard grammar, and the honest read-failure state — plus the keeper
- * rows this surface owns (the calendar engine, the tenant-wide saved view).
+ * STEP 2 of the two-step rebuild: the sheet's bands (pinned structurally at
+ * the commit before this one) now carry the real plan read. These pin the
+ * honesty rules — a fabricated time, a real-looking empty week, or a door
+ * that pretends to write is a failure.
  */
-describe("Calendar (exact-mock rebuild step 1 — pure port of Calendar.dc.html)", () => {
-  it("renders the sheet's header band: title, week nav, both segmented controls", () => {
+describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
+  it("renders the sheet's bands with real data behind them", async () => {
+    seedPlan({
+      plannedSlots: [PLAN_SLOT],
+      cadence: [{ platform: "linkedin", maxPerDay: 2, minGapMinutes: 90 }],
+    });
     const { container } = render(<CalendarSurface />);
 
     expect(screen.getByRole("heading", { name: "Calendar" })).toBeInTheDocument();
-    expect(screen.getByText("21 – 27 July")).toHaveClass("t-title");
+    await screen.findByText("1 planned");
 
+    // Both segmented controls, in the sheet's order and vocabulary.
     const segs = container.querySelectorAll(".seg");
     expect(segs).toHaveLength(2);
-    // Density first, then the scope filter — the sheet's order.
     expect(Array.from(segs[0].children).map((el) => el.textContent)).toEqual([
       "Week",
       "Month",
       "Agenda",
     ]);
-    expect(segs[0].querySelector(".seg-opt.on")?.textContent).toBe("Week");
     expect(Array.from(segs[1].children).map((el) => el.textContent)).toEqual([
       "All",
       "Plans",
       "Needs you",
       "⚑ Flagged",
     ]);
-    expect(segs[1].querySelector(".seg-opt.on")?.textContent).toBe("All");
 
-    expect(screen.getByText("3 planned")).toHaveClass("pill", "pill-idle");
-    expect(
-      screen.getByText("drag to reschedule — snaps to cadence-legal slots"),
-    ).toBeInTheDocument();
-  });
-
-  it("renders the time grid: day header, waiting row, both quiet bands, seven columns", () => {
-    const { container } = render(<CalendarSurface />);
-
-    // Day header — a gutter cell plus seven days, Friday marked today.
-    const days = container.querySelectorAll(".cal-days .cal-dh");
-    expect(Array.from(days).map((el) => el.querySelector("b")?.textContent)).toEqual([
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-      "Sun",
-    ]);
-    expect(container.querySelector(".cal-dh.today b")?.textContent).toBe("Fri");
-
-    // The all-day "waiting" lane carries the amber needs-you chip.
-    expect(screen.getByText("waiting")).toHaveClass("allday-gut");
+    // The grid's own bands: seven day columns, the waiting lane, both quiet
+    // bands, the hour gutter — all the sheet's classes.
+    expect(container.querySelectorAll(".cal-days .cal-dh")).toHaveLength(7);
     expect(container.querySelectorAll(".allday .allday-cell")).toHaveLength(7);
-    expect(screen.getByText("LinkedIn · your review · 26h →")).toHaveClass("amber-chip");
-
-    // Quiet hours collapse at both ends of the day, each with its expand door.
     expect(container.querySelectorAll(".quiet")).toHaveLength(2);
-    expect(screen.getByText("00–06")).toBeInTheDocument();
-    expect(screen.getByText("21–24")).toBeInTheDocument();
-    expect(screen.getAllByText("expand")).toHaveLength(2);
-
-    // The grid itself: hour gutter 06:00–20:00, seven day columns, now-line.
+    expect(container.querySelectorAll(".grid-wrap .dcol")).toHaveLength(7);
     expect(Array.from(container.querySelectorAll(".gut span")).map((el) => el.textContent)).toEqual([
       "06:00",
       "08:00",
@@ -83,56 +106,290 @@ describe("Calendar (exact-mock rebuild step 1 — pure port of Calendar.dc.html)
       "18:00",
       "20:00",
     ]);
-    expect(container.querySelectorAll(".grid-wrap .dcol")).toHaveLength(7);
+
+    // Today is marked in both the header and its column.
+    expect(container.querySelector(".cal-dh.today")).not.toBeNull();
     expect(container.querySelector(".dcol.today")).not.toBeNull();
-    expect(container.querySelector(".nowline")).not.toBeNull();
-  });
 
-  it("renders the sheet's event grammar: done, engine, planned, the drop ghost", () => {
-    const { container } = render(<CalendarSurface />);
-
-    // Two completed events (green, dimmed), one engine event, three plans.
-    expect(container.querySelectorAll(".ev.done.ev-ok")).toHaveLength(2);
-    expect(container.querySelectorAll(".ev-plan")).toHaveLength(3);
-    expect(container.querySelectorAll(".ev-plan .grip")).toHaveLength(3);
-    expect(screen.getByText("Sweep · engine").parentElement).toHaveClass("ev");
-    expect(screen.getByText("Sweep · ran ✓").parentElement).toHaveClass("done", "ev-ok");
-
-    // Exactly one plan is selected, and the flagged plan wears the warn mark.
-    expect(container.querySelectorAll(".ev-plan.sel")).toHaveLength(1);
-    expect(container.querySelector(".ev-plan .flag")).not.toBeNull();
-
-    // The drag target reads its legality in place.
-    expect(screen.getByText("drop · 15:00 ✓ cadence-legal")).toHaveClass("ghost");
-  });
-
-  it("renders the detail popover and the footer's two honesty lines", () => {
-    const { container } = render(<CalendarSurface />);
-
-    const detail = container.querySelector(".detail");
-    expect(detail).not.toBeNull();
-    expect(detail?.textContent).toContain("Planned · LinkedIn");
-    expect(detail?.textContent).toContain("door unarmed — a plan");
-    expect(detail?.querySelector(".excerpt")).not.toBeNull();
-    expect(screen.getByText("Open draft →")).toHaveClass("card-link");
-    expect(screen.getByText("Reschedule")).toBeInTheDocument();
-    expect(screen.getByText("Remove")).toHaveClass("btn-danger");
-    expect(screen.getByText("illegal slots refuse the drop")).toBeInTheDocument();
-
-    expect(screen.getByText("Cadence — LinkedIn ≤ 2/day · X ≤ 4/day · 90m gap")).toBeInTheDocument();
+    // The footer's two lines: the tenant's REAL cadence, then the invariant.
+    expect(screen.getByText("Cadence — LinkedIn ≤ 2/day 90m gap")).toBeInTheDocument();
     expect(
       screen.getByText("Plans, not uploads — each platform’s door arms on your GO."),
     ).toBeInTheDocument();
-  });
 
-  it("carries no legacy bridge styling — the port is the sheet's classes only", () => {
-    const { container } = render(<CalendarSurface />);
-    // The old implementation was Tailwind semantic-token markup; a rebuilt
-    // surface enters the burn-down at zero (the bridge pin enforces this
-    // repo-wide, this keeps the failure local and legible).
+    // No legacy bridge styling survives the rebuild.
     expect(container.querySelector('[class*="text-muted-foreground"]')).toBeNull();
     expect(container.querySelector('[class*="bg-card"]')).toBeNull();
-    // Rule 6: the surface root carries its scope class beside .content.
     expect(container.querySelector(".content.calendar-surface")).not.toBeNull();
+  });
+
+  it("places a plan at its own time, in the sheet's dashed dress", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT] });
+    render(<CalendarSurface />);
+
+    const plan = await screen.findByText("Planned · LinkedIn");
+    const box = plan.closest(".ev");
+    expect(box).toHaveClass("ev-plan");
+    expect(box).toHaveStyle({ top: "154px" }); // 09:30 → (9.5 − 6) × 44
+    expect(box?.textContent).toContain("09:30 · pipeline thread");
+    expect(box?.querySelector(".grip")).not.toBeNull();
+  });
+
+  it("dresses published work as done and never dresses a rejection as a success", async () => {
+    seedPlan({
+      assets: [
+        asset({
+          draftId: "d-pub",
+          platform: "web",
+          status: "published",
+          decidedAt: today(11).toISOString(),
+          publishedAt: today(11).toISOString(),
+          deployRef: "/blog/post",
+        }),
+        asset({
+          draftId: "d-rej",
+          status: "rejected",
+          decidedAt: today(13).toISOString(),
+        }),
+      ],
+    });
+    const { container } = render(<CalendarSurface />);
+
+    const published = (await screen.findByText("Blog · published ✓")).closest(".ev");
+    expect(published).toHaveClass("done", "ev-ok");
+    const rejected = screen.getByText("LinkedIn · rejected").closest(".ev");
+    expect(rejected).toHaveClass("done");
+    expect(rejected).not.toHaveClass("ev-ok");
+    expect(container.querySelectorAll(".ev-ok")).toHaveLength(1);
+  });
+
+  it("the waiting lane carries what waits on you, with the hours it has waited", async () => {
+    seedPlan({
+      assets: [asset({ draftId: "d-wait", status: "queued", judgedAt: hoursAgo(26) })],
+    });
+    render(<CalendarSurface />);
+
+    const chip = await screen.findByText(/LinkedIn · your review · 26h/);
+    expect(chip).toHaveClass("amber-chip");
+    expect(chip).toHaveAttribute("href", "/app/approve?run=run-1&draft=d-wait");
+  });
+
+  it("flags a plan that breaks the tenant's own cadence, and names the rule", async () => {
+    seedPlan({
+      cadence: [{ platform: "linkedin", maxPerDay: 1 }],
+      plannedSlots: [
+        PLAN_SLOT,
+        { draftId: "d-plan-2", platform: "linkedin", scheduledFor: today(15).toISOString(), note: "second" },
+      ],
+    });
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+
+    await screen.findByText("2 planned");
+    const flagged = container.querySelectorAll(".ev-plan .flag");
+    expect(flagged).toHaveLength(1);
+
+    // The ⚑ Flagged scope shows exactly that plan, and the popover says why.
+    await user.click(screen.getByRole("button", { name: "⚑ Flagged" }));
+    expect(container.querySelectorAll(".ev")).toHaveLength(1);
+    await user.click(container.querySelector(".ev") as HTMLElement);
+    expect(
+      screen.getByText("LinkedIn is planned 2× that day — your cadence allows 1"),
+    ).toBeInTheDocument();
+  });
+
+  it("the detail popover opens on a plan and states that its doors cannot write", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+
+    await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
+
+    const detail = container.querySelector(".detail") as HTMLElement;
+    expect(detail).not.toBeNull();
+    expect(detail.textContent).toContain("door unarmed — a plan");
+    expect(within(detail).getByText("Open draft →")).toHaveAttribute(
+      "href",
+      "/app/approve?run=run-1&draft=d-plan",
+    );
+
+    // The write doors are honestly disabled — the slot store has no route.
+    const reschedule = within(detail).getByRole("button", { name: "Reschedule" });
+    const remove = within(detail).getByRole("button", { name: "Remove" });
+    expect(reschedule).toBeDisabled();
+    expect(remove).toBeDisabled();
+    expect(reschedule).toHaveAttribute("title", expect.stringContaining("read route only"));
+
+    // Selection wears the sheet's own `.sel`.
+    expect(container.querySelector(".ev-plan.sel")).not.toBeNull();
+
+    await user.click(within(detail).getByRole("button", { name: "Close" }));
+    expect(container.querySelector(".detail")).toBeNull();
+  });
+
+  it("never claims a drag it cannot do", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT] });
+    const { container } = render(<CalendarSurface />);
+    await screen.findByText("1 planned");
+
+    expect(
+      screen.getByText("drag to reschedule isn’t wired — the slot store has no write route yet"),
+    ).toBeInTheDocument();
+    // No drop ghost: there is no drag to land.
+    expect(container.querySelector(".ghost")).toBeNull();
+  });
+
+  it("projects the engine's next sweep, and nothing at all from an overdue pointer", async () => {
+    seedPlan({
+      sweep: {
+        lastSweptAt: today(6, 30).toISOString(),
+        nextSweepAt: new Date(Date.now() + 2 * 3_600_000).toISOString(),
+        intervalMs: 8 * 3_600_000,
+        source: "bluesky",
+      },
+    });
+    const { unmount } = render(<CalendarSurface />);
+    // The pointer projects a tick every interval to the end of the week.
+    expect((await screen.findAllByText("Sweep · engine")).length).toBeGreaterThan(0);
+    unmount();
+
+    seedPlan({
+      sweep: {
+        lastSweptAt: hoursAgo(72),
+        nextSweepAt: hoursAgo(48),
+        intervalMs: 8 * 3_600_000,
+        source: "bluesky",
+      },
+    });
+    render(<CalendarSurface />);
+    await screen.findByText("0 planned");
+    expect(screen.queryByText("Sweep · engine")).not.toBeInTheDocument();
+  });
+
+  it("a failed read says so and offers retry — never a quiet week", async () => {
+    let calls = 0;
+    server.use(
+      http.get("/api/app/plan", () => {
+        calls += 1;
+        return calls === 1
+          ? HttpResponse.json({ error: "engine unreachable" }, { status: 503 })
+          : HttpResponse.json({
+              sweep: null,
+              areas: 0,
+              cadence: [],
+              assets: [],
+              plannedSlots: [PLAN_SLOT],
+            } satisfies PlanPayload);
+      }),
+    );
+    const user = userEvent.setup();
+    render(<CalendarSurface />);
+
+    expect(
+      await screen.findByText(
+        "Couldn’t read the plan — this is a read failure, not an empty calendar.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("– planned")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("1 planned")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("the density switch is the keeper engine: month cells and an agenda list", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT] });
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+    await screen.findByText("1 planned");
+
+    await user.click(screen.getByRole("button", { name: "Month" }));
+    expect(container.querySelectorAll(".mcell").length % 7).toBe(0);
+    expect(container.querySelector(".mcell.today")).not.toBeNull();
+    expect(screen.getByText(/Planned · LinkedIn 09:30/)).toHaveClass("mark", "mark-plan");
+    expect(
+      screen.getByText("the plan read covers ±2 weeks — a month shows what it carries"),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Agenda" }));
+    expect(container.querySelector(".card-head .t-title")?.textContent).toBe("Agenda");
+    const row = container.querySelector(".row") as HTMLElement;
+    expect(row.textContent).toContain("Planned · LinkedIn");
+    expect(within(row).getByText("plan")).toHaveClass("pill-idle");
+  });
+
+  it("an empty week says it is empty rather than showing nothing at all", async () => {
+    seedPlan({});
+    const user = userEvent.setup();
+    render(<CalendarSurface />);
+    await screen.findByText("0 planned");
+
+    await user.click(screen.getByRole("button", { name: "Agenda" }));
+    expect(screen.getByText(/Nothing in this week/)).toBeInTheDocument();
+    expect(
+      screen.getByText("No cadence rules configured — every platform plans unconstrained."),
+    ).toBeInTheDocument();
+  });
+
+  it("restores the tenant-wide saved view, and saves changes back to it", async () => {
+    seedSavedView({
+      surface: "calendar",
+      name: "Default",
+      config: { density: "agenda", scope: "plans", expanded: false },
+    });
+    seedPlan({ plannedSlots: [PLAN_SLOT] });
+    const user = userEvent.setup();
+    render(<CalendarSurface />);
+
+    // The stored view decides the resting density and scope — no new band.
+    expect(await screen.findByText("Agenda")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Plans" })).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(screen.getByRole("button", { name: "Week" }));
+    await waitFor(() =>
+      expect(listSavedViewsTestState()[0].config).toMatchObject({
+        density: "week",
+        scope: "plans",
+      }),
+    );
+  });
+
+  it("the quiet bands count what they hide, and expanding shows the whole day", async () => {
+    seedPlan({
+      plannedSlots: [
+        { draftId: "d-early", platform: "x", scheduledFor: today(3).toISOString(), note: "early" },
+      ],
+    });
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+
+    await screen.findByText("1 planned");
+    expect(screen.getByText(/quiet hours · collapsed — 1 hidden/)).toBeInTheDocument();
+    expect(container.querySelector(".ev-plan")).toBeNull();
+
+    await user.click(screen.getAllByRole("button", { name: "expand" })[0]);
+    expect(container.querySelector(".ev-plan")).not.toBeNull();
+    expect(container.querySelector(".dcol")).toHaveStyle({ height: "1056px" });
+  });
+
+  it("keeps the one list keyboard grammar: j/k walk the week in time order", async () => {
+    seedPlan({
+      plannedSlots: [
+        PLAN_SLOT,
+        { draftId: "d-plan-2", platform: "x", scheduledFor: today(15).toISOString(), note: "later" },
+      ],
+    });
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+    await screen.findByText("2 planned");
+
+    await user.keyboard("j");
+    expect(container.querySelector(".ev.sel")?.textContent).toContain("Planned · LinkedIn");
+    await user.keyboard("j");
+    expect(container.querySelector(".ev.sel")?.textContent).toContain("Planned · X");
+    await user.keyboard("k");
+    expect(container.querySelector(".ev.sel")?.textContent).toContain("Planned · LinkedIn");
+    await user.keyboard("{Escape}");
+    expect(container.querySelector(".ev.sel")).toBeNull();
   });
 });

@@ -200,3 +200,83 @@
   padding: 4px 8px;
   cursor: pointer;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * App adaptations (step 2 — the NAMED kind only; each keeps the 1440×940
+ * resting render indistinguishable from the sheet).
+ *
+ * 1. REAL CONTROLS. The sheet draws its interactive parts as <div>/<span>;
+ *    the app must ship buttons and links so the surface is operable by
+ *    keyboard and screen reader. These rules only strip UA button chrome so
+ *    a <button> renders as the sheet's box — no geometry changes.
+ * 2. OVERFLOW. Real days overlap and real weeks have more waiting work than
+ *    a fixture cell; concurrent events split their column (see
+ *    calendar-model placeColumn) and bounded lanes count the rest honestly.
+ * 3. The month + agenda densities are the KEEPER ENGINE returning behind the
+ *    sheet's own density control. The sheet draws only Week, so they are
+ *    built from classes the sheets already own — `.cal-days`/`.cal-dh` for
+ *    the header, the Dashboard's shared `.mark`/`.marks` grammar for a day's
+ *    chips, `.row` for the agenda — plus the cell frame below, which is the
+ *    only geometry the sheets do not already carry. Flagged in the wrap:
+ *    Month and Agenda have no canvas sheet of their own.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+.calendar-surface button.ev {
+  font-family: inherit;
+  text-align: left;
+  appearance: none;
+}
+.calendar-surface button.ev:focus-visible,
+.calendar-surface .bare:focus-visible {
+  outline: 2px solid var(--act);
+  outline-offset: 1px;
+}
+.calendar-surface .bare {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.calendar-surface .quiet-toggle {
+  color: var(--act);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+.calendar-surface .quiet-toggle:hover { color: var(--act-hover); }
+.calendar-surface .detail-close { color: var(--n-800); }
+.calendar-surface .quiet-foot { border-bottom: none; border-top: 1px solid var(--n-400); }
+.calendar-surface .lane-more { font-size: 10.5px; color: var(--n-800); }
+.calendar-surface .read-error { border-color: color-mix(in oklab, var(--err) 40%, var(--n-400)); }
+
+.calendar-surface .detail-title { font-size: 12.5px; }
+.calendar-surface .detail-when { font-size: 11px; }
+.calendar-surface .detail-foot { font-size: 10.5px; }
+.calendar-surface .detail-excerpt { white-space: normal; font-size: 11.5px; }
+
+.calendar-surface .cal-month { display: grid; grid-template-columns: repeat(7, 1fr); }
+.calendar-surface .cal-month-head { border-bottom: 1px solid var(--n-400); }
+.calendar-surface .cal-month .cal-dh:first-child { border-left: none; }
+.calendar-surface .mcell {
+  border-left: 1px solid var(--n-400);
+  border-top: 1px solid var(--n-400);
+  min-height: 96px;
+  min-width: 0;
+  padding: 7px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.calendar-surface .cal-month .mcell:nth-child(7n + 1) { border-left: none; }
+.calendar-surface .cal-month .mcell:nth-child(-n + 7) { border-top: none; }
+.calendar-surface .mcell.out { opacity: 0.45; }
+.calendar-surface .mcell.today {
+  background-color: color-mix(in oklab, var(--act-subtle) 30%, transparent);
+}
+.calendar-surface .mday { font-size: 11px; color: var(--n-900); font-variant-numeric: tabular-nums; }
+.calendar-surface .mcell.today .mday { color: var(--act); font-weight: 600; }
+.calendar-surface .mcell .mark { max-width: 100%; min-width: 0; overflow: hidden; }
+
+.calendar-surface .agenda-when { width: 96px; flex: none; }
+.calendar-surface .agenda-lead { font-size: 13px; font-weight: 600; }
