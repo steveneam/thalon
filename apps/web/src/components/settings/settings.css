@@ -1,0 +1,35 @@
+/*
+ * Settings → Integrations — the surface's own atomics, PORTED 1:1 from the
+ * helmet <style> of docs/research/mock-sheets/Integrations.dc.html
+ * (DOCTRINE 0: the sheet is the blueprint, never a re-expression). Shared
+ * classes (.card, .card-head, .row, .pill, .btn, .card-link, the type roles)
+ * come from app/app/workspace.css — the shell contract, which lanes read but
+ * never edit.
+ *
+ * EVERY RULE IS SCOPED UNDER `.settings-surface` (mock-sheets README rule 6,
+ * executable as lib/__tests__/surface-css-scope.test.ts): the sheets reuse
+ * short class names across surfaces with different values, so an unscoped
+ * file silently restyles its neighbours the moment both land.
+ *
+ * The sheet's helmet also declares `.avatar`; that is topbar chrome the
+ * shell already ports (workspace.css), so it is deliberately not restated —
+ * one class, one home.
+ */
+
+.settings-surface .int-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.settings-surface .int-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; }
+.settings-surface .int-head { display: flex; align-items: center; gap: 9px; }
+.settings-surface .int-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+.settings-surface .int-sub { font-size: 12px; color: var(--n-900); }
+.settings-surface .int-actions { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+.settings-surface .plat-ico { width: 26px; height: 26px; border-radius: 7px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex: none; }
+.settings-surface .seat-row { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-top: 1px solid var(--n-400); font-size: 13px; }
+.settings-surface .seat-row:first-child { border-top: none; }
+
+/*
+ * App adaptations (the NAMED kind): the sheet draws its doors as static
+ * anchors; here the published-ledger door is a real control, so it sheds the
+ * UA button chrome and keeps the sheet's `.card-link` look exactly.
+ */
+.settings-surface button.card-link { background: none; border: none; padding: 0; font-family: inherit; color: var(--act); cursor: pointer; }
+.settings-surface button.card-link:hover { color: var(--act-hover); }
