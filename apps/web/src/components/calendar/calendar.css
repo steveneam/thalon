@@ -1,0 +1,202 @@
+/*
+ * Calendar — the surface's own atomics, PORTED 1:1 from the helmet <style> of
+ * docs/research/mock-sheets/Calendar.dc.html (DOCTRINE 0: the sheet is the
+ * blueprint). Shared classes (.card, .row, .pill, .seg, .btn, .excerpt,
+ * .card-link, type roles) come from workspace.css — that file is the shell
+ * contract and is not edited from here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.calendar-surface` — the cross-lane contract
+ * (mock-sheets README rule 6, executable as lib/__tests__/surface-css-scope).
+ * The sheets reuse class names with DIFFERENT values across surfaces, and this
+ * one collides directly: `.today` is `.cal-dh.today`/`.dcol.today` here and
+ * `.week-day.today` on the Dashboard; `.quiet`, `.detail` and `.flag` are this
+ * sheet's alone. Unscoped, the two would fight silently, decided by emit order.
+ *
+ * The sheet's helmet also declares `.avatar`; it is already shared in
+ * workspace.css (identical in 15 of the 16 sheets), so it is deliberately NOT
+ * duplicated here.
+ *
+ * The time grid's ONE mapping: 06:00 sits at y=0 and every hour is 44px, so a
+ * 15-hour day (06:00–21:00) is the sheet's 660px column. Labels, events, the
+ * now-line and the drop ghost all go through it (calendar-model.ts `yOf`) —
+ * a label may never drift from the slot it names.
+ */
+
+.calendar-surface .cal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-card);
+  background: var(--n-100);
+  overflow: hidden;
+}
+.calendar-surface .cal-days {
+  display: grid;
+  grid-template-columns: 64px repeat(7, 1fr);
+  border-bottom: 1px solid var(--n-400);
+}
+.calendar-surface .cal-dh {
+  padding: 9px 10px;
+  border-left: 1px solid var(--n-400);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.calendar-surface .cal-dh b { font-size: 13px; font-weight: 600; }
+.calendar-surface .cal-dh span { font-size: 11px; color: var(--n-900); }
+.calendar-surface .cal-dh.today b { color: var(--act); }
+.calendar-surface .allday {
+  display: grid;
+  grid-template-columns: 64px repeat(7, 1fr);
+  border-bottom: 1px solid var(--n-400);
+  background: var(--n-bg);
+}
+.calendar-surface .allday-gut {
+  font-size: 10.5px;
+  color: var(--n-800);
+  padding: 7px 8px;
+  text-align: right;
+}
+.calendar-surface .allday-cell {
+  border-left: 1px solid var(--n-400);
+  padding: 5px 6px;
+  min-height: 30px;
+}
+.calendar-surface .quiet {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  border-bottom: 1px solid var(--n-400);
+  background: var(--n-bg);
+}
+.calendar-surface .quiet-band {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  font-size: 10.5px;
+  color: var(--n-800);
+  border-left: 1px solid var(--n-400);
+}
+.calendar-surface .grid-wrap {
+  display: grid;
+  grid-template-columns: 64px repeat(7, 1fr);
+  position: relative;
+}
+.calendar-surface .gut { position: relative; height: 660px; }
+.calendar-surface .gut span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-6px);
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--n-800);
+}
+.calendar-surface .dcol {
+  position: relative;
+  height: 660px;
+  border-left: 1px solid var(--n-400);
+  background-image: repeating-linear-gradient(to bottom, var(--n-300) 0 1px, transparent 1px 44px);
+}
+.calendar-surface .dcol.today {
+  background-color: color-mix(in oklab, var(--act-subtle) 30%, transparent);
+}
+.calendar-surface .ev {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--n-500);
+  background: var(--n-200);
+  padding: 4px 7px;
+  font-size: 11px;
+  color: var(--n-900);
+  overflow: hidden;
+  cursor: grab;
+}
+.calendar-surface .ev b {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--n-1000);
+  line-height: 1.3;
+}
+.calendar-surface .ev .grip {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  color: var(--n-700);
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.calendar-surface .ev.done { opacity: 0.6; }
+.calendar-surface .ev-ok {
+  background: var(--ok-subtle);
+  border-color: color-mix(in oklab, var(--ok) 35%, var(--n-500));
+}
+.calendar-surface .ev-ok b { color: var(--ok); }
+.calendar-surface .ev-plan { background: var(--n-100); border-style: dashed; }
+.calendar-surface .ev-plan.sel {
+  border-color: var(--act);
+  border-style: solid;
+  box-shadow: 0 0 0 1px var(--act);
+  cursor: grabbing;
+}
+.calendar-surface .flag { color: var(--warn); font-size: 10px; }
+.calendar-surface .nowline {
+  position: absolute;
+  left: 64px;
+  right: 0;
+  height: 2px;
+  background: var(--err);
+  z-index: 3;
+}
+.calendar-surface .nowline::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--err);
+}
+.calendar-surface .ghost {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 40px;
+  border: 1.5px dashed var(--act);
+  border-radius: 6px;
+  background: var(--act-subtle);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  color: var(--act);
+}
+.calendar-surface .detail {
+  position: absolute;
+  background: var(--n-100);
+  border: 1px solid var(--n-500);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px oklch(0 0 0 / 0.45);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.calendar-surface .amber-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  background: var(--warn-subtle);
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  cursor: pointer;
+}

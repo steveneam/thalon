@@ -1,166 +1,138 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { server } from "@/lib/testing/server";
-import type { PipelineAsset, PlanPayload } from "@/lib/workspace/types";
-import { CalendarSurface } from "../calendar-surface";
+import { CalendarSurface } from "@/components/calendar/calendar-surface";
 
-function todayAt(hour: number, minute = 0): string {
-  const d = new Date();
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-}
-
-function asset(overrides: Partial<PipelineAsset> & { draftId: string }): PipelineAsset {
-  return {
-    runId: "run-1",
-    platform: "linkedin",
-    format: "post",
-    status: "queued",
-    sourceKind: "url",
-    capturedAt: null,
-    generatedAt: todayAt(9),
-    judgedAt: null,
-    decidedAt: null,
-    publishedAt: null,
-    gates: [],
-    reasons: [],
-    deployRef: null,
-    excerpt: "fixture excerpt",
-    ...overrides,
-  };
-}
-
-function seedPlan(assets: PipelineAsset[]) {
-  server.use(
-    http.get("/api/app/plan", () =>
-      HttpResponse.json({ sweep: null, areas: 0, cadence: [], assets, plannedSlots: [] } satisfies PlanPayload),
-    ),
-  );
-}
-
-describe("fan-out calendar surface (Phase I)", () => {
-  it("renders the header honestly: zone chip, density tabs, disabled Plan slot with the reason, gated count", async () => {
-    seedPlan([
-      asset({ draftId: "q1" }),
-      asset({
-        draftId: "b1",
-        platform: "x",
-        status: "blocked",
-        generatedAt: todayAt(11),
-        reasons: ["Grounding — one claim has no provided source."],
-      }),
-    ]);
-    render(<CalendarSurface />);
-    await screen.findByTestId("slot-chip-q1");
-
-    expect(screen.getByRole("heading", { name: "Fan-out" })).toBeInTheDocument();
-    expect(screen.getByText(/operator-local/)).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "month" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "week" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "agenda" })).toBeInTheDocument();
-    // The publish door is unarmed and no slot store exists — the surface says so.
-    const planSlot = screen.getByRole("button", { name: "Plan slot" });
-    expect(planSlot).toBeDisabled();
-    expect(planSlot.title).toMatch(/publish bucket/);
-    expect(screen.getByText(/2 drafts this month · 1 gated · publish door unarmed/)).toBeInTheDocument();
-    // Chip anatomy: one status word; gated wears the signal dress, words carry state.
-    expect(within(screen.getByTestId("slot-chip-b1")).getByText("gated")).toBeInTheDocument();
-    expect(within(screen.getByTestId("slot-chip-q1")).getByText("queued")).toBeInTheDocument();
-  });
-
-  it("caps a day cell at 3 chips with +N more opening the bounded day panel — same route, no navigation", async () => {
-    seedPlan([
-      asset({ draftId: "a", generatedAt: todayAt(9) }),
-      asset({ draftId: "b", generatedAt: todayAt(10) }),
-      asset({ draftId: "c", generatedAt: todayAt(11) }),
-      asset({ draftId: "d", generatedAt: todayAt(12) }),
-    ]);
-    render(<CalendarSurface />);
-    await screen.findByTestId("slot-chip-a");
-
-    const more = screen.getByRole("button", { name: "+1 more" });
-    await userEvent.click(more);
-    const panel = screen.getByTestId("day-panel");
-    expect(within(panel).getByText("4 items")).toBeInTheDocument();
-    expect(within(panel).getByText(/day list is bounded — scrolls internally past 8/)).toBeInTheDocument();
-    // The panel's Plan slot is honest too.
-    expect(within(panel).getByRole("button", { name: "Plan slot on this day" })).toBeDisabled();
-  });
-
-  it("moves the selected day with j/k (live region announces) and Enter toggles the panel", async () => {
-    const user = userEvent.setup();
-    seedPlan([asset({ draftId: "a" })]);
+/**
+ * STEP 1 of the two-step rebuild: this pins the PURE PORT of
+ * docs/research/mock-sheets/Calendar.dc.html — the sheet's bands, in the
+ * sheet's own classes, with the sheet's placeholder content. It is
+ * deliberately structural: there is no data wiring to assert yet.
+ *
+ * Step 2 restores the behaviour coverage the old-design suite carried
+ * (recoverable from git history at the commit before this one): the density
+ * switch (month/week/agenda), the day panel, the channel/status filters, the
+ * j/k keyboard grammar, and the honest read-failure state — plus the keeper
+ * rows this surface owns (the calendar engine, the tenant-wide saved view).
+ */
+describe("Calendar (exact-mock rebuild step 1 — pure port of Calendar.dc.html)", () => {
+  it("renders the sheet's header band: title, week nav, both segmented controls", () => {
     const { container } = render(<CalendarSurface />);
-    await screen.findByTestId("slot-chip-a");
 
-    const live = container.querySelector("p[aria-live]");
-    const before = live?.textContent;
-    expect(before).toMatch(/Selected/);
-    await user.keyboard("j");
-    expect(live?.textContent).not.toBe(before);
-    await user.keyboard("k");
-    expect(live?.textContent).toBe(before);
+    expect(screen.getByRole("heading", { name: "Calendar" })).toBeInTheDocument();
+    expect(screen.getByText("21 – 27 July")).toHaveClass("t-title");
 
-    expect(screen.queryByTestId("day-panel")).not.toBeInTheDocument();
-    await user.keyboard("{Enter}");
-    expect(screen.getByTestId("day-panel")).toBeInTheDocument();
-    await user.keyboard("{Enter}");
-    expect(screen.queryByTestId("day-panel")).not.toBeInTheDocument();
-  });
-
-  it("filters with first-class exclusion: only → not → off, counts stated, no silent truncation", async () => {
-    const user = userEvent.setup();
-    seedPlan([
-      asset({ draftId: "q1" }),
-      asset({ draftId: "b1", status: "blocked", generatedAt: todayAt(11) }),
+    const segs = container.querySelectorAll(".seg");
+    expect(segs).toHaveLength(2);
+    // Density first, then the scope filter — the sheet's order.
+    expect(Array.from(segs[0].children).map((el) => el.textContent)).toEqual([
+      "Week",
+      "Month",
+      "Agenda",
     ]);
-    render(<CalendarSurface />);
-    await screen.findByTestId("slot-chip-q1");
-
-    const gatedChip = screen.getByRole("button", { name: "gated" });
-    await user.click(gatedChip);
-    expect(screen.getByText(/1 of 2 drafts this month/)).toBeInTheDocument();
-    expect(screen.queryByTestId("slot-chip-q1")).not.toBeInTheDocument();
-    expect(screen.getByTestId("slot-chip-b1")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "gated" }));
-    expect(screen.getByRole("button", { name: "not: gated ×" })).toBeInTheDocument();
-    expect(screen.getByTestId("slot-chip-q1")).toBeInTheDocument();
-    expect(screen.queryByTestId("slot-chip-b1")).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "not: gated ×" }));
-    expect(screen.getByText(/2 drafts this month/)).toBeInTheDocument();
-  });
-
-  it("week density collapses quiet hours with an honest count and expands to the full window", async () => {
-    const user = userEvent.setup();
-    seedPlan([
-      asset({ draftId: "day1", generatedAt: todayAt(9) }),
-      asset({ draftId: "night1", generatedAt: todayAt(21, 30) }),
+    expect(segs[0].querySelector(".seg-opt.on")?.textContent).toBe("Week");
+    expect(Array.from(segs[1].children).map((el) => el.textContent)).toEqual([
+      "All",
+      "Plans",
+      "Needs you",
+      "⚑ Flagged",
     ]);
-    render(<CalendarSurface />);
-    await screen.findByTestId("slot-chip-day1");
+    expect(segs[1].querySelector(".seg-opt.on")?.textContent).toBe("All");
 
-    await user.click(screen.getByRole("tab", { name: "week" }));
-    expect(screen.getByText(/quiet hours \(20:00–06:00\) collapsed · 1 draft inside/)).toBeInTheDocument();
-    expect(screen.getByTestId("week-slot-day1")).toBeInTheDocument();
-    expect(screen.queryByTestId("week-slot-night1")).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "expand" }));
-    expect(screen.getByText("full 24h window shown")).toBeInTheDocument();
-    expect(screen.getByTestId("week-slot-night1")).toBeInTheDocument();
+    expect(screen.getByText("3 planned")).toHaveClass("pill", "pill-idle");
+    expect(
+      screen.getByText("drag to reschedule — snaps to cadence-legal slots"),
+    ).toBeInTheDocument();
   });
 
-  it("agenda density is the bounded chronological list with its count stated", async () => {
-    const user = userEvent.setup();
-    seedPlan([asset({ draftId: "a" }), asset({ draftId: "b", generatedAt: todayAt(15) })]);
-    render(<CalendarSurface />);
-    await screen.findByTestId("slot-chip-a");
+  it("renders the time grid: day header, waiting row, both quiet bands, seven columns", () => {
+    const { container } = render(<CalendarSurface />);
 
-    await user.click(screen.getByRole("tab", { name: "agenda" }));
-    expect(screen.getByText(/2 drafts in .+ · chronological — list scrolls internally/)).toBeInTheDocument();
+    // Day header — a gutter cell plus seven days, Friday marked today.
+    const days = container.querySelectorAll(".cal-days .cal-dh");
+    expect(Array.from(days).map((el) => el.querySelector("b")?.textContent)).toEqual([
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun",
+    ]);
+    expect(container.querySelector(".cal-dh.today b")?.textContent).toBe("Fri");
+
+    // The all-day "waiting" lane carries the amber needs-you chip.
+    expect(screen.getByText("waiting")).toHaveClass("allday-gut");
+    expect(container.querySelectorAll(".allday .allday-cell")).toHaveLength(7);
+    expect(screen.getByText("LinkedIn · your review · 26h →")).toHaveClass("amber-chip");
+
+    // Quiet hours collapse at both ends of the day, each with its expand door.
+    expect(container.querySelectorAll(".quiet")).toHaveLength(2);
+    expect(screen.getByText("00–06")).toBeInTheDocument();
+    expect(screen.getByText("21–24")).toBeInTheDocument();
+    expect(screen.getAllByText("expand")).toHaveLength(2);
+
+    // The grid itself: hour gutter 06:00–20:00, seven day columns, now-line.
+    expect(Array.from(container.querySelectorAll(".gut span")).map((el) => el.textContent)).toEqual([
+      "06:00",
+      "08:00",
+      "10:00",
+      "12:00",
+      "14:00",
+      "16:00",
+      "18:00",
+      "20:00",
+    ]);
+    expect(container.querySelectorAll(".grid-wrap .dcol")).toHaveLength(7);
+    expect(container.querySelector(".dcol.today")).not.toBeNull();
+    expect(container.querySelector(".nowline")).not.toBeNull();
+  });
+
+  it("renders the sheet's event grammar: done, engine, planned, the drop ghost", () => {
+    const { container } = render(<CalendarSurface />);
+
+    // Two completed events (green, dimmed), one engine event, three plans.
+    expect(container.querySelectorAll(".ev.done.ev-ok")).toHaveLength(2);
+    expect(container.querySelectorAll(".ev-plan")).toHaveLength(3);
+    expect(container.querySelectorAll(".ev-plan .grip")).toHaveLength(3);
+    expect(screen.getByText("Sweep · engine").parentElement).toHaveClass("ev");
+    expect(screen.getByText("Sweep · ran ✓").parentElement).toHaveClass("done", "ev-ok");
+
+    // Exactly one plan is selected, and the flagged plan wears the warn mark.
+    expect(container.querySelectorAll(".ev-plan.sel")).toHaveLength(1);
+    expect(container.querySelector(".ev-plan .flag")).not.toBeNull();
+
+    // The drag target reads its legality in place.
+    expect(screen.getByText("drop · 15:00 ✓ cadence-legal")).toHaveClass("ghost");
+  });
+
+  it("renders the detail popover and the footer's two honesty lines", () => {
+    const { container } = render(<CalendarSurface />);
+
+    const detail = container.querySelector(".detail");
+    expect(detail).not.toBeNull();
+    expect(detail?.textContent).toContain("Planned · LinkedIn");
+    expect(detail?.textContent).toContain("door unarmed — a plan");
+    expect(detail?.querySelector(".excerpt")).not.toBeNull();
+    expect(screen.getByText("Open draft →")).toHaveClass("card-link");
+    expect(screen.getByText("Reschedule")).toBeInTheDocument();
+    expect(screen.getByText("Remove")).toHaveClass("btn-danger");
+    expect(screen.getByText("illegal slots refuse the drop")).toBeInTheDocument();
+
+    expect(screen.getByText("Cadence — LinkedIn ≤ 2/day · X ≤ 4/day · 90m gap")).toBeInTheDocument();
+    expect(
+      screen.getByText("Plans, not uploads — each platform’s door arms on your GO."),
+    ).toBeInTheDocument();
+  });
+
+  it("carries no legacy bridge styling — the port is the sheet's classes only", () => {
+    const { container } = render(<CalendarSurface />);
+    // The old implementation was Tailwind semantic-token markup; a rebuilt
+    // surface enters the burn-down at zero (the bridge pin enforces this
+    // repo-wide, this keeps the failure local and legible).
+    expect(container.querySelector('[class*="text-muted-foreground"]')).toBeNull();
+    expect(container.querySelector('[class*="bg-card"]')).toBeNull();
+    // Rule 6: the surface root carries its scope class beside .content.
+    expect(container.querySelector(".content.calendar-surface")).not.toBeNull();
   });
 });

@@ -35,8 +35,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/brand/page.tsx", 3],
   ["app/page.tsx", 5],
   ["components/board/leads-board.tsx", 5],
+  // calendar-surface.tsx burned to zero at its step-1 exact-mock rebuild; the
+  // sub-components below are the old implementation, deleted at step 2.
   ["components/calendar/agenda-list.tsx", 2],
-  ["components/calendar/calendar-surface.tsx", 4],
   ["components/calendar/day-panel.tsx", 2],
   ["components/calendar/month-grid.tsx", 3],
   ["components/calendar/slot-chip.tsx", 1],
