@@ -57,6 +57,14 @@
  * through the frozen B-ve.1 repos; render/mint spend structurally
  * impossible on the path (pure render-seam lint only — no RenderTarget,
  * no executePlan, no vendor client).
+ * B-int.1 landed (ADR 0011): src/integrations/ — the vault core over the
+ * frozen B-int.0 window: envelope crypto (AES-256-GCM data key per row,
+ * master-key-wrapped; KMS = swap seam), the connect/open/list/disconnect
+ * doors (paste validated against the DESTINATIONS shape BEFORE crypto;
+ * surfaces get redacted cards, never envelopes), the read-only
+ * validate-ping seam (auth-shaped refusals flip needs_reauth; unreachable
+ * never does), and vault-first social arming (env pairs = emergency
+ * override; the per-platform ARMED founder GO stays env until B-int.3).
  *
  * Layout rule (SPINE §1): each module is deterministic core orchestration
  * with a shell/ subfolder for its LLM calls. shell/ code returns candidate
@@ -81,3 +89,4 @@ export * from "./search";
 export * from "./leads";
 export * from "./outreach";
 export * from "./social";
+export * from "./integrations";
