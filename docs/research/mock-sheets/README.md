@@ -12,6 +12,14 @@ bridge-repaint approach:
 
 ## The contract (binding until the founder revokes it)
 
+0. **"Exact" means the sheet's own HTML and CSS, ported.** These sheets ARE
+   code — implement each surface by porting its markup and `theme.css`
+   classes 1:1 (React-ized, data-wired), NOT by re-expressing the design
+   through a component library. That re-expression is precisely how s72
+   failed: the kickoff narrowed "exact" to "token values verbatim" and the
+   layout was lost. Never narrow "exact" again — when in doubt, the sheet's
+   bytes win. Component-library primitives are allowed only where the
+   rendered result is indistinguishable from the sheet.
 1. **A surface ships when it matches its sheet** — layout, bands, density,
    copy grammar, type roles, and the sheet's own CSS classes. Same-looking
    is not exact; diff the screenshot against the sheet.

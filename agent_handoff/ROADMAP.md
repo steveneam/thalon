@@ -219,7 +219,7 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   **THE LANDING itself** (built last; the skill-compound target; also gates B-int.4's
   mode-1 filings, so it sequences before OAuth-Connect).
 
-### B-learn — THE METRIC-DRIVEN SELF-IMPROVEMENT LOOP **[CHARTER CANDIDATE, founder-demanded s70c — absorbs the exemplar section below]**
+### B-learn — THE METRIC-DRIVEN SELF-IMPROVEMENT LOOP **[CHARTERED s72 ("approve b-learn charter") + PARALLEL EXECUTION APPROVED for s73; wave 1 = lane `blearn` (KICKOFF-blearn.md): L0 knobs-as-area-data + durable cap + L2 slice 1 (honest multi-platform trends read); launch after the lead freezes the L0 window at boot]**
 The founder's bar: the engine learns from 10,000+ viral posts + 100+/day
 across topics, metric-driven, so founder edits stop being the teacher.
 **Founder framing (s70c, ratified into the shape): THE SCHEMA IS THE
@@ -278,8 +278,7 @@ bandit hook-pattern selection (Vowpal Wabbit BSD if we want real contextual
 bandits), (L5) founder edits remain the TASTE ANCHOR + golden rows while
 metrics accumulate. Capacity check done: 10k posts ≈ 15MB vectors, <$1
 embeds — acquisition is the constraint, never storage. This loop is the
-moat (AGENTS.md rule 5). **Founder charters scope + the X-API spend at the
-next checkpoint.**
+moat (AGENTS.md rule 5). **CHARTERED s72; the X-API spend gate stands unchanged ("only pay if our learning engine is ready") — do not re-ask until the admission→generation loop demonstrably improves drafts.**
 
 ### Exemplar acquisition — LEARN FROM THE CROWD (founder intent, s68 close)
 - **The founder's stated goal (verbatim intent): the engine exists because "there
