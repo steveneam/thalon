@@ -248,6 +248,9 @@ export function CalendarSurface() {
         moveCursor(-1);
       },
       Enter: (event) => {
+        // A focused control activates itself — the list grammar only owns ↵
+        // when nothing on the surface has the keyboard.
+        if (event.target instanceof HTMLElement && event.target.closest("button, a")) return;
         if (!selected?.href) return;
         event.preventDefault();
         router.push(selected.href);
