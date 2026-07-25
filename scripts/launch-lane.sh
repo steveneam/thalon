@@ -40,8 +40,10 @@ ABS_WT="$(cd "$WORKTREE" && pwd)"
 KICKOFF_REL="${KICKOFF#"$WORKTREE"/}"
 
 # Detached: the founder's (and lead's) current view stays put.
+# LANE_CLAUDE_ARGS: extra claude flags, e.g. the strongest-tier model pin
+# design lanes REQUIRE (design-on-Fable-5 rule): --model claude-fable-5.
 tmux new-window -d -t "$SESSION" -n "$WINDOW" -c "$ABS_WT"
-tmux send-keys -t "$SESSION:$WINDOW" 'claude' Enter
+tmux send-keys -t "$SESSION:$WINDOW" "claude${LANE_CLAUDE_ARGS:+ $LANE_CLAUDE_ARGS}" Enter
 
 # Wait for the claude prompt before typing the kickoff (max ~60s).
 for _ in $(seq 1 30); do
