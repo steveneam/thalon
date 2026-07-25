@@ -71,7 +71,14 @@ out (mint doors, code-drawn text, setMediaRoot ratchet `53456b8`, real render
 door); what failed was the abstract-motion-graphic CONCEPT as flagship
 material. Craft lessons stay banked (prov.json + memory).
 
-### Phase 2c — SOCIAL DISCOVERABILITY (SEO/AEO/GEO) — **[lead-serial, founder-directed s70c: "the engine has a problem and needs serious work"]**
+### Phase 2c — SOCIAL DISCOVERABILITY (SEO/AEO/GEO) — **CORE SHIPPED s70c (`ec07443`); generation side = s71 [lead-serial]**
+**The lens is LIVE:** deterministic `discoverability` advisory gate beside the
+judge (primary-entity-in-PROSE · term coverage floor · per-platform subject
+hashtags), opt-in by `meta.targetTerms`, and **the founder's golden pair runs
+in the suite** (engine body = fail, founder edit = pass — his catch is an
+executable test). Remaining s71+: generation DECLARES targetTerms (intel
+keywords + brand topics + subject entities into the fan-out prompt + meta)
+and the blog-mirror pairing below. Original charter follows:
 The founder's catch on the live LinkedIn post: a post ABOUT AI never says
 "AI" (zero occurrences — it says Claude/models/Anthropic and no answer
 engine would index it for the queries that matter), and it explains the
