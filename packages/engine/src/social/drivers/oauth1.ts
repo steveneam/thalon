@@ -53,7 +53,7 @@ export function oauth1Header(
   const baseString = [method, pct(url), pct(paramString)].join("&");
   const signingKey = `${pct(keys.consumerSecret)}&${pct(keys.tokenSecret)}`;
   const signature = createHmac("sha1", signingKey).update(baseString).digest("base64");
-  const header = { ...params, oauth_signature: signature };
+  const header: Record<string, string> = { ...params, oauth_signature: signature };
   return `OAuth ${Object.keys(header)
     .sort()
     .map((k) => `${pct(k)}="${pct(header[k])}"`)
