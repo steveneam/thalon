@@ -408,7 +408,10 @@ export function Integrations() {
         <div className="card-head">
           <span className="t-title">Your AI</span>
           <span className="pill pill-idle">
-            {statusRead === "success" && status ? `${seatRows(status).length} model seats` : "model seats"}
+            {/* An unresolved read reads "–", never a confident zero. */}
+            {statusRead === "success" && status
+              ? `${seatRows(status).length} model seats`
+              : "– model seats"}
           </span>
           <div style={{ flex: 1 }} />
           <span className="t-label">bring-your-own connect arrives with the BYO-AI bucket</span>
