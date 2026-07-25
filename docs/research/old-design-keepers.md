@@ -55,11 +55,20 @@ stale-id degrade, the prompt seeding from angle + hook (never re-asked),
 the profile-fed run settings (Create never re-asks company context), the
 →Email compose door and the one-prompt video run.
 
-**Retired deliberately with it:** the twelve typed removable chips and the
-five-step goal gradient — the sheet replaces both with ONE pick chip that
-names what actually rode in, and its × drops the whole context. Pruning a
-single field is no longer possible; if the founder wants it back it
-re-enters as a behaviour behind that chip, never as a second band.
+**Retired deliberately with it:** the five-step goal gradient — the sheet
+has no such band and the journey reads from the surfaces themselves.
+
+**Per-field context pruning — FOUNDER RULING s74: restore it, lead's call
+on how** ("i'll defer to your recommendation and design taste, to ensure
+that the new design is retained but still able to incorporate the old
+design functions and features"). The decision: the sheet's ONE pick chip
+stays the resting chrome exactly as drawn — its × still drops the whole
+context — and the twelve typed fields return as a BEHAVIOUR behind it: the
+chip itself opens a panel listing what rode in, each field individually
+removable, generation using only what survives. Resting state is
+byte-true; the capability is whole; no second band. This is the
+general form of the re-entry rule — **a keeper comes back as a state
+behind the sheet's chrome, never as extra chrome.**
 
 **Three honest deviations from Create's fixture** (flagged, awaiting the
 founder's verdict — each is a backend gap, not a design choice):
