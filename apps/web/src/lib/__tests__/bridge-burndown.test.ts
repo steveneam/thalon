@@ -42,8 +42,10 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/calendar/month-grid.tsx", 12],
   ["components/calendar/slot-chip.tsx", 12],
   ["components/calendar/week-grid.tsx", 22],
+  // create-surface.tsx left the map at s74 — rebuilt from Create.dc.html,
+  // zero bridged tokens. The loader beside it re-trues in the same surface's
+  // step 2 (its one token is the pre-resolve line).
   ["components/create/create-context-loader.tsx", 1],
-  ["components/create/create-surface.tsx", 84],
   ["components/intel/cadence-stamp.tsx", 4],
   ["components/intel/demo-banner.tsx", 5],
   ["components/intel/heat-grade.tsx", 1],

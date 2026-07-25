@@ -1,0 +1,91 @@
+/*
+ * Create — the surface's own atomics, PORTED 1:1 from the helmet <style> of
+ * docs/research/mock-sheets/Create.dc.html (DOCTRINE 0: the sheet is the
+ * blueprint). Shared classes (.card, .row, .pill, .seg, .btn, .thumb-sm,
+ * .excerpt, type roles) come from workspace.css — that file is the shell
+ * contract and is not edited from here.
+ *
+ * The sheet's helmet also declares `.avatar`; it is already shared in
+ * workspace.css (the Dashboard sheet declared the identical rule), so it is
+ * deliberately NOT duplicated here.
+ */
+
+.prompt-hero {
+  border: 1px solid var(--n-500);
+  background: var(--n-100);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.prompt-box {
+  background: var(--n-bg);
+  border: 1px solid var(--n-400);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 15px;
+  color: var(--n-1000);
+  min-height: 84px;
+  line-height: 1.6;
+}
+.prompt-box .ph { color: var(--n-800); }
+.pick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--n-500);
+  border-radius: 8px;
+  background: var(--n-200);
+  font-size: 12.5px;
+}
+.cr-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 14px;
+  align-items: start;
+}
+.dl-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--n-400);
+  font-size: 13px;
+}
+.dl-row:first-child { border-top: none; }
+.dl-row dt { color: var(--n-900); width: 110px; flex: none; font-size: 12.5px; }
+.dl-row dd { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.term-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid var(--n-500);
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  color: var(--n-1000);
+  background: var(--n-200);
+}
+.term-chip.primary { border-color: var(--act); background: var(--act-subtle); }
+
+/*
+ * App adaptations (the NAMED kind — real data is wider/longer than the
+ * canvas fixture; each keeps the 1440×940 render indistinguishable):
+ *  - grid children must be shrinkable or a nowrap excerpt blows out the 1fr
+ *    column (the same adaptation .home-grid carries);
+ *  - the sheet draws three run rows; a real feed is BOUNDED and scrolls
+ *    inside its card rather than growing the page (the Bounded-List Rule).
+ *  - the prompt box is a real <textarea> in step 2: it inherits the box's
+ *    type and sheds the UA chrome, nothing more.
+ */
+.cr-grid > * { min-width: 0; }
+textarea.prompt-box {
+  width: 100%;
+  display: block;
+  font-family: inherit;
+  resize: vertical;
+}
+textarea.prompt-box::placeholder { color: var(--n-800); }
+textarea.prompt-box:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }

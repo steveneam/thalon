@@ -1,283 +1,79 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { CreateContextLoader } from "@/components/create/create-context-loader";
 import { CreateSurface } from "@/components/create/create-surface";
-import { fixtureTrendCards } from "@/lib/intel/fixtures";
-import { promoteTrendCard } from "@/lib/intel/store";
-import type { CreateContext } from "@/lib/intel/types";
-import { server } from "@/lib/testing/server";
 
-const CONTEXT: CreateContext = {
-  captureId: "intel-capture-1",
-  kind: "trend_promote",
-  family: "video",
-  title: "Video as a build step: rendering launch clips from HTML",
-  angle: "Show your own render pipeline end to end — prompt to playable file",
-  hook: "Our launch video has no editor file. It has a build step.",
-  sourceUrl: "https://example.com/demo/3kx3",
-  areaName: "Short-form video tooling",
-  score: 0.9,
-  text: "Rendered our whole launch video from HTML.",
-};
+/**
+ * STEP 1 of the two-step rebuild: this pins the PURE PORT of
+ * docs/research/mock-sheets/Create.dc.html — the sheet's bands, in the
+ * sheet's own classes, with the sheet's placeholder content. It is
+ * deliberately structural: there is no data wiring to assert yet.
+ *
+ * Step 2 restores the behaviour coverage the old-design suite carried
+ * (recoverable from git history at the commit before this one): the family
+ * pre-pick from an intel/lead capture, the →Email compose door and its
+ * blocked-verdict honesty, the one-prompt video door and its staged-brief
+ * exit, the post/page seam statement, and the capture-id loader's
+ * stale-id degrade.
+ */
+describe("Create (exact-mock rebuild step 1 — pure port of Create.dc.html)", () => {
+  const props = { initialPrompt: "", initialKeyword: "" };
 
-describe("CreateSurface — the handoff that never re-asks (Phase I design #5)", () => {
-  it("renders the six typed chips, seeds the working title AND the prompt, and pre-picks the family", () => {
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
+  it("renders the sheet's bands: header, prompt hero, and the two-card run grid", () => {
+    const { container } = render(<CreateSurface {...props} />);
 
-    // Pre-fill, never re-ask: title into the working-title field, angle +
-    // hook pre-written into the prompt — scan-and-adjust, not author-from-scratch.
-    expect(screen.getByLabelText(/working title/i)).toHaveValue(CONTEXT.title);
-    const prompt = screen.getByLabelText(/the prompt/i);
-    expect(prompt).toHaveValue(
-      `Open on the hook: “${CONTEXT.hook}” Angle: ${CONTEXT.angle}.`,
-    );
-    // The exit door's family arrives pre-picked (still changeable).
-    expect(screen.getByRole("button", { name: /^video$/i, pressed: true })).toBeInTheDocument();
+    // Header band — headline + the advanced door.
+    expect(screen.getByRole("heading", { name: "Create" })).toBeInTheDocument();
+    expect(screen.getByText("Advanced · staged flow →")).toBeInTheDocument();
 
-    const chips = screen.getByLabelText("Intel context");
-    for (const value of [CONTEXT.title!, CONTEXT.angle!, CONTEXT.hook!, CONTEXT.areaName!]) {
-      expect(within(chips).getByText(value)).toBeInTheDocument();
-    }
-    // Heat is a typed chip: band word carried in text (never colour alone),
-    // exact score in the tooltip.
-    expect(within(chips).getByText("hot · 90")).toBeInTheDocument();
-    // Source is a typed chip whose value links to the original item.
-    expect(within(chips).getByRole("link", { name: /example\.com/i })).toHaveAttribute(
-      "href",
-      CONTEXT.sourceUrl,
-    );
+    // Prompt hero — the family segmented control (Video on), the flow label,
+    // the prompt box with its placeholder tail, the pick chip, both buttons.
+    expect(container.querySelector(".prompt-hero")).not.toBeNull();
+    // Scoped to the control: "Video" is also a settings-row term below.
+    const seg = container.querySelector(".seg");
+    expect(Array.from(seg?.children ?? []).map((el) => el.textContent)).toEqual([
+      "Post",
+      "Video",
+      "Page",
+      "Email",
+    ]);
+    expect(seg?.querySelector(".seg-opt.on")?.textContent).toBe("Video");
+    expect(screen.getByText("one prompt → drafts → the judge → your click")).toBeInTheDocument();
+    expect(container.querySelector(".prompt-box")).not.toBeNull();
+    expect(screen.getByText(/say it in your words; the profile carries the voice/)).toHaveClass("ph");
+    expect(container.querySelector(".pick-chip")).not.toBeNull();
+    expect(screen.getByText("Preview plan")).toBeInTheDocument();
+    expect(screen.getByText("Generate")).toBeInTheDocument();
+
+    // The grid: the run-settings card's six rows, in the sheet's order.
+    expect(screen.getByText("This run, before it starts")).toBeInTheDocument();
+    const terms = Array.from(container.querySelectorAll(".dl-row dt")).map((el) => el.textContent);
+    expect(terms).toEqual([
+      "Platforms",
+      "Voice",
+      "Grounding",
+      "Discoverability",
+      "Judge",
+      "Video",
+    ]);
+
+    // The discoverability band marks its primary entity — the founder's
+    // visible-provenance doctrine, structurally present from step 1.
+    expect(container.querySelector(".term-chip.primary")).not.toBeNull();
+    expect(screen.getByText(/it gates — it never rewrites/)).toBeInTheDocument();
+
+    // Latest runs card + its door.
+    expect(screen.getByText("Latest runs")).toBeInTheDocument();
+    expect(screen.getByText("All runs →")).toBeInTheDocument();
+    expect(container.querySelectorAll(".cr-grid > .card")).toHaveLength(2);
   });
 
-  it("chips are removable — the operator prunes what rides into generation", async () => {
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-
-    const chips = screen.getByLabelText("Intel context");
-    await user.click(within(chips).getByRole("button", { name: /remove angle/i }));
-    expect(within(chips).queryByText(CONTEXT.angle!)).not.toBeInTheDocument();
-    // The rest of the context survives the prune.
-    expect(within(chips).getByText(CONTEXT.title!)).toBeInTheDocument();
-  });
-
-  it("the goal gradient is honest: context ✓ only when context genuinely arrived, profile unticked without one", async () => {
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    const journey = screen.getByRole("list", { name: /where this brief sits/i });
-    expect(within(journey).getByText("context ✓")).toBeInTheDocument();
-    // The test world has no active profile — the step must NOT wear a fake tick.
-    expect(within(journey).queryByText("profile ✓")).not.toBeInTheDocument();
-    // Settings say so honestly too, pointing at the profile door.
-    expect(await screen.findByText(/no profile yet/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /create one in profiles/i })).toHaveAttribute(
-      "href",
-      "/app/profiles",
-    );
-  });
-
-  it("intel's suggestion stays visible when the operator picks a different family", async () => {
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /^post$/i }));
-    expect(screen.getByText(/intel suggested Video — you chose Post/i)).toBeInTheDocument();
-  });
-
-  it("a search target-this context pre-picks Page and carries the keyword", () => {
-    render(
-      <CreateSurface
-        initialPrompt=""
-        initialKeyword=""
-        context={{
-          captureId: "intel-capture-2",
-          kind: "search_target_this",
-          family: "page",
-          keyword: "what is content automation",
-        }}
-      />,
-    );
-    expect(screen.getByRole("button", { name: /^page$/i, pressed: true })).toBeInTheDocument();
-    expect(
-      within(screen.getByLabelText("Intel context")).getByText("what is content automation"),
-    ).toBeInTheDocument();
-  });
-
-  it("without context the surface behaves as before — legacy prompt/keyword doors intact", () => {
-    render(<CreateSurface initialPrompt="hello" initialKeyword="" context={null} />);
-    expect(screen.getByLabelText(/the prompt/i)).toHaveValue("hello");
-    expect(screen.queryByLabelText("Intel context")).not.toBeInTheDocument();
-  });
-});
-
-const LEAD_CONTEXT: CreateContext = {
-  captureId: "intel-capture-9",
-  kind: "lead_promote",
-  family: "email",
-  leadId: "lead-1",
-  company: "Riverbend Plumbing",
-  contact: "Sam Reyes",
-  painPoint: "website never brings in local work",
-  text: "met at the trade expo",
-};
-
-describe("CreateSurface — the →Email compose door (B-crm.4 front half)", () => {
-  it("a lead email context pre-picks Email and composes from the SURVIVING chips only", async () => {
-    let sent: unknown;
-    server.use(
-      http.post("/api/create/email", async ({ request }) => {
-        sent = await request.json();
-        return HttpResponse.json({
-          draftId: "d1",
-          runId: "r1",
-          status: "queued",
-          alreadyComposed: false,
-        });
-      }),
-    );
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={LEAD_CONTEXT} />);
-
-    expect(screen.getByRole("button", { name: /^email$/i, pressed: true })).toBeInTheDocument();
-    // Never sent automatically — the surface says so before composing.
-    expect(screen.getByText(/It is never sent/)).toBeInTheDocument();
-
-    // Prune the company chip: it must NOT reach the brief.
-    const chips = screen.getByLabelText("Lead context");
-    await user.click(within(chips).getByRole("button", { name: /remove company/i }));
-
-    await user.click(screen.getByRole("button", { name: /compose email draft/i }));
-    expect(await screen.findByText(/waiting for your approval/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /review it in the approve queue/i })).toHaveAttribute(
-      "href",
-      "/app/approve",
-    );
-    expect(sent).toMatchObject({
-      leadId: "lead-1",
-      context: {
-        contact: "Sam Reyes",
-        painPoint: "website never brings in local work",
-        notes: "met at the trade expo",
-      },
-    });
-    expect((sent as { context: Record<string, unknown> }).context.company).toBeUndefined();
-  });
-
-  it("a blocked verdict surfaces honestly with the gate reason", async () => {
-    server.use(
-      http.post("/api/create/email", () =>
-        HttpResponse.json({
-          draftId: "d1",
-          runId: "r1",
-          status: "blocked",
-          alreadyComposed: false,
-          blockedReason: "g1 denylist fail",
-        }),
-      ),
-    );
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={LEAD_CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /compose email draft/i }));
-    expect(await screen.findByText(/blocked this draft \(g1 denylist fail\)/i)).toBeInTheDocument();
-  });
-
-  it("the Email family without a lead context is an honest pointer to the lead-card exit, not a dead button", async () => {
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /^email$/i }));
-    expect(screen.getByText(/use the → Email exit on a lead card/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /compose email draft/i })).not.toBeInTheDocument();
-  });
-});
-
-describe("CreateSurface — honest doors per family", () => {
-  it("one-prompt video is a REAL door: brief + surviving source chip ride in, queued lands with the project trail", async () => {
-    let sent: unknown;
-    server.use(
-      http.post("/api/create/video", async ({ request }) => {
-        sent = await request.json();
-        return HttpResponse.json({
-          status: "queued",
-          draftId: "d-video-1",
-          stageKeys: ["structure", "scenes_effects", "polish"],
-          projectId: "vp-1",
-          projectName: "Video: launch clips",
-          cutId: "cut-1",
-          takeCount: 3,
-        });
-      }),
-    );
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    // The door states its gate AND its spend honesty before running.
-    expect(screen.getByText(/Nothing renders or spends until you approve/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /generate video draft/i }));
-    expect(await screen.findByText(/waiting for your approval/i)).toBeInTheDocument();
-    expect(screen.getByText(/3 planned takes and a draft cut/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /review it in the approve queue/i })).toHaveAttribute(
-      "href",
-      "/app/approve",
-    );
-    expect(screen.getByRole("link", { name: /open the video project/i })).toHaveAttribute(
-      "href",
-      "/app/videos",
-    );
-    // The brief = the seeded prompt; the source chip survived, so it rides in.
-    expect(sent).toMatchObject({
-      prompt: `Open on the hook: “${CONTEXT.hook}” Angle: ${CONTEXT.angle}.`,
-      sourceUrl: CONTEXT.sourceUrl,
-    });
-  });
-
-  it("a blocked stage surfaces honestly with the stage named", async () => {
-    server.use(
-      http.post("/api/create/video", () =>
-        HttpResponse.json({
-          status: "blocked",
-          draftId: "d-video-1",
-          stageKeys: ["structure"],
-          blockedStageKey: "structure",
-        }),
-      ),
-    );
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /generate video draft/i }));
-    expect(await screen.findByText(/blocked the structure stage/i)).toBeInTheDocument();
-  });
-
-  it("the Advanced staged brief stays reachable — the stage-by-stage walk, outcome named", async () => {
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /open the advanced staged brief/i }));
-    expect(screen.getByRole("link", { name: /walk the staged brief/i })).toHaveAttribute(
-      "href",
-      "/app/approve",
-    );
-  });
-
-  it("post states the B6.6 seam honestly — no dead primary button", async () => {
-    const user = userEvent.setup();
-    render(<CreateSurface initialPrompt="" initialKeyword="" context={CONTEXT} />);
-    await user.click(screen.getByRole("button", { name: /^post$/i }));
-    expect(screen.getByText(/Live post generation isn.t connected on this surface yet/i)).toBeInTheDocument();
-  });
-});
-
-describe("CreateContextLoader — the capture-id door", () => {
-  it("resolves a capture id through the context route and renders the chips", async () => {
-    const card = fixtureTrendCards[0];
-    const { capture } = promoteTrendCard(card.id, { family: "post", titleIndex: 1 });
-    render(<CreateContextLoader contextId={capture.id} initialPrompt="" initialKeyword="" />);
-
-    expect(await screen.findByLabelText("Intel context")).toBeInTheDocument();
-    expect(screen.getByLabelText(/working title/i)).toHaveValue(card.dossier!.titles[1]);
-    expect(screen.getByRole("button", { name: /^post$/i, pressed: true })).toBeInTheDocument();
-  });
-
-  it("a stale capture id degrades to a plain Create, never an error page", async () => {
-    render(<CreateContextLoader contextId="intel-capture-nope" initialPrompt="" initialKeyword="" />);
-    expect(await screen.findByLabelText(/the prompt/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText("Intel context")).not.toBeInTheDocument();
+  it("carries no legacy bridge styling — the port is the sheet's classes only", () => {
+    const { container } = render(<CreateSurface {...props} />);
+    // The old implementation was Tailwind semantic-token markup; a rebuilt
+    // surface enters the burn-down at zero (the bridge pin enforces this
+    // repo-wide, this keeps the failure local and legible).
+    expect(container.querySelector('[class*="text-muted-foreground"]')).toBeNull();
+    expect(container.querySelector('[class*="bg-card"]')).toBeNull();
   });
 });

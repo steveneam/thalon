@@ -45,7 +45,8 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/calendar/month-grid.tsx", 3],
   ["components/calendar/slot-chip.tsx", 1],
   ["components/calendar/week-grid.tsx", 4],
-  ["components/create/create-surface.tsx", 18],
+  // components/create/create-surface.tsx — left the map at s74 (exact-mock
+  // rebuild; the sheet's own type roles carry the mono, not utilities).
   // dashboard pins burned to zero at the s73 exact-mock rebuild (DOCTRINE 0).
   ["components/intel/cadence-stamp.tsx", 1],
   ["components/intel/heat-grade.tsx", 1],
