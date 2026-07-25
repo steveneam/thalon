@@ -1,0 +1,231 @@
+/*
+ * The Intel surface's OWN atomics — ported 1:1 from the sheet's helmet
+ * (docs/research/mock-sheets/Intel.dc.html, `<helmet data-dc-atomics>`) per
+ * DOCTRINE 0 (ui-overhaul-plan §5): the sheet is the blueprint, these are its
+ * declarations. Shared classes (.card, .row, .pill*, .btn*, .bar-trough,
+ * .bar-fill, .thumb-sm/.thumb-md, the type roles) come from
+ * src/app/app/workspace.css READ-ONLY and are never restated here.
+ *
+ * Deliberate adaptations, each named (s73-close lane rule (ii)):
+ *
+ *  1. SURFACE SCOPING. Every rule is nested under the surface root
+ *     `.intel-surface`. The mock's helmets are per-sheet artboards, so short
+ *     names repeat ACROSS sheets with DIFFERENT values — `.reason` and
+ *     `.sec-label` are in Leads.dc.html too (its `.reason` grid is
+ *     120px/54px/1fr, not this one's 96px/60px/1fr), `.prov` is in
+ *     Videos Overview.dc.html as a 10px mono line. One unscoped stylesheet
+ *     per surface would let those collide as each lane lands. Declarations
+ *     are the sheet's bytes; only the selector is prefixed, so the rendered
+ *     result is identical.
+ *  2. BUTTON RESETS on the atomics that are real controls in the app
+ *     (`.tab`, `.copy-ico`, `.watch-chip .x`, `.watch-add`, `.pick-hit`).
+ *     The sheet draws them as <span>/<div>; the app needs <button> for
+ *     keyboard and screen-reader reach. The reset (transparent background,
+ *     no UA border, inherited font) exists only so a <button> renders
+ *     exactly as the sheet's span did — the precedent is `.seg-opt` in
+ *     workspace.css.
+ *  3. `.pick-hit` is new: the sheet's pick row is [radio][text][copy] where
+ *     only `copy` is a control. A radio must be operable, so the radio+text
+ *     pair becomes one zero-chrome button carrying the sheet's own gap.
+ *  4. The sheet's `.thumb` atomic is byte-identical to workspace.css's
+ *     `.thumb-md` (148×96 striped placeholder) — the shared class is used
+ *     and the duplicate is NOT restated here.
+ *  5. Bounded regions where real data overflows the canvas fixture are
+ *     marked `/* app adaptation *​/` below (the Bounded-List Rule): the
+ *     canvas draws a fixed 4-card fixture; a live sweep returns as many
+ *     cards as it found.
+ */
+
+/* ── Tabs (Trends · Search) ── */
+.intel-surface .tab {
+  padding: 6px 2px;
+  margin-right: 18px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: inherit;
+  color: var(--n-900);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.intel-surface .tab.on {
+  color: var(--n-1000);
+  border-bottom-color: var(--act);
+}
+
+/* ── Watchlist chips ── */
+.intel-surface .watch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 11px;
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-pill);
+  font-size: 12.5px;
+  background: var(--n-100);
+}
+.intel-surface .watch-chip .x {
+  color: var(--n-800);
+  font-size: 13px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  line-height: inherit;
+  font-family: inherit;
+}
+.intel-surface .watch-add {
+  border-style: dashed;
+  color: var(--n-900);
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: inherit;
+}
+/* App adaptation: an area PAUSES, never deletes (Four-Verbs "Remove" dress —
+   history is kept). A paused chip stays visible, quieted, and its × becomes
+   the resume door; the sheet's resting geometry is untouched. */
+.intel-surface .watch-chip.paused {
+  color: var(--n-800);
+  border-style: dashed;
+}
+
+/* ── Heat magnitude bar (beside the thermal word-in-pill) ── */
+.intel-surface .heat-bar {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--n-300);
+  overflow: hidden;
+}
+
+/* ── The dossier card ── */
+.intel-surface .dossier-h {
+  font-size: 16.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  max-width: 72ch;
+}
+.intel-surface .prov {
+  font-size: 12px;
+  color: var(--n-900);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.intel-surface .sec-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--n-900);
+}
+.intel-surface .reason {
+  display: grid;
+  grid-template-columns: 96px 60px 1fr;
+  gap: 12px;
+  align-items: center;
+  font-size: 12.5px;
+}
+.intel-surface .reason .rname {
+  color: var(--n-900);
+}
+.intel-surface .reason .rtext {
+  color: var(--n-1000);
+}
+
+/* ── Ready-to-create picks ── */
+.intel-surface .radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--n-600);
+  flex: none;
+}
+.intel-surface .radio.on {
+  border-color: var(--act);
+  box-shadow: inset 0 0 0 3px var(--n-100);
+  background: var(--act);
+}
+.intel-surface .pick-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 5px 0;
+}
+/* App adaptation (3): the operable radio+label pair. */
+.intel-surface .pick-hit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.intel-surface .copy-ico {
+  color: var(--n-800);
+  font-size: 11px;
+  border: 1px solid var(--n-400);
+  border-radius: 5px;
+  padding: 2px 6px;
+  cursor: pointer;
+  background: none;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+/* App adaptation (2/3): the rising row's title is the row's open door. The
+   declarations are the sheet's own title-span styles, plus the button reset. */
+.intel-surface .row-open {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* The mock's OWN field grammar (Profiles.dc.html helmet) — the Intel sheet
+   draws no form because its resting state has none, and the area doors that
+   live behind the chips need one. Scoped like everything else here, so the
+   Profiles lane stays free to own the shared/unscoped version. */
+.intel-surface .input {
+  background: var(--n-bg);
+  border: 1px solid var(--n-400);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--n-1000);
+}
+
+/* ── App adaptations: real data is longer than the canvas fixture ── */
+/* The dossier's two columns must be shrinkable — a long reason line or a
+   nowrap stamp otherwise blows out the 1fr column. */
+.intel-surface .dossier-cols > * {
+  min-width: 0;
+}
+/* The pick list is BOUNDED: the sheet draws three picks; a real dossier
+   carries up to four titles plus three angles. It scrolls inside the card
+   instead of growing the band (the Bounded-List Rule). */
+.intel-surface .pick-rows {
+  max-height: 176px;
+  overflow-y: auto;
+}

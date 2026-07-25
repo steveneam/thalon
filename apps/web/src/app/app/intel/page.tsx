@@ -1,12 +1,11 @@
-import { IntelSurface, type IntelTab } from "@/components/intel/intel-surface";
+import { Intel } from "@/components/intel/intel";
+import "@/components/intel/intel.css";
 
-/** Reads ?tab= server-side once (deep links like /app/intel?tab=search) — the client tabs take over from there. */
-export default async function IntelPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const tab = (await searchParams).tab;
-  const initialTab: IntelTab = tab === "search" ? "search" : "trends";
-  return <IntelSurface initialTab={initialTab} />;
+/**
+ * The Intel surface. STEP 1 of the exact-mock rebuild renders the pure port
+ * of Intel.dc.html — the structural verdict point; step 2 wires the real
+ * reads, the capture doors and the ?tab= deep link back on.
+ */
+export default function IntelPage() {
+  return <Intel />;
 }
