@@ -39,24 +39,52 @@ describe("SearchTab", () => {
     await waitFor(() => expect(screen.queryByText("dismissed")).not.toBeInTheDocument());
   });
 
-  it("renders horizon cards: the opportunity badge only when all three rules fired, reasons verbatim", async () => {
+  it("leads with the end-point significance, scored by the engine's own fired-rule count", async () => {
     render(<SearchTab />);
     await screen.findByText(/peering over the horizon/i);
 
+    // All three rules fired: act on it now, in the operator's words.
     const opportunity = screen.getByTestId("horizon-what is content automation");
-    expect(within(opportunity).getByText("horizon opportunity")).toBeInTheDocument();
+    expect(within(opportunity).getByText("Worth targeting now")).toBeInTheDocument();
+    expect(within(opportunity).getByText("3 of 3 signals")).toBeInTheDocument();
+    expect(within(opportunity).getByText("page 1 is in reach")).toBeInTheDocument();
+    expect(within(opportunity).getByText(/under-clicked for where you rank/)).toBeInTheDocument();
+
+    // One rule ≠ act now.
+    const partial = screen.getByTestId("horizon-ai video from prompt");
+    expect(within(partial).getByText("Worth watching")).toBeInTheDocument();
+    expect(within(partial).getByText("1 of 3 signals")).toBeInTheDocument();
+
+    // No rules fired AND already on page 1 — that is a different sentence
+    // from "too far back", and neither is a bare "no signal".
+    const ranking = screen.getByTestId("horizon-acme motion studio");
+    expect(within(ranking).getByText("Already ranking well")).toBeInTheDocument();
+    expect(within(ranking).getByText("0 of 3 signals")).toBeInTheDocument();
+  });
+
+  it("the technical read survives one level down — numbers and the ranker's own sentences", async () => {
+    const user = userEvent.setup();
+    render(<SearchTab />);
+    await screen.findByText(/peering over the horizon/i);
+    const opportunity = screen.getByTestId("horizon-what is content automation");
+
+    // Hidden until asked for — the founder's call (s74).
+    expect(
+      within(opportunity).queryByText(
+        "position 9 is inside the horizon window 8–20 — page 1 is within reach",
+      ),
+    ).not.toBeInTheDocument();
+
+    await user.click(within(opportunity).getByRole("button", { name: /the numbers/i }));
+
+    // The plain metric line AND the verbatim reason are both reachable.
+    expect(within(opportunity).getByText("Ranks #9.0")).toBeInTheDocument();
+    expect(within(opportunity).getByText(/180 impressions, up 1.64×/)).toBeInTheDocument();
     expect(
       within(opportunity).getByText(
         "position 9 is inside the horizon window 8–20 — page 1 is within reach",
       ),
     ).toBeInTheDocument();
-
-    // One rule ≠ opportunity — partial signal reads differently.
-    const partial = screen.getByTestId("horizon-ai video from prompt");
-    expect(within(partial).getByText("partial signal")).toBeInTheDocument();
-    // Already ranking: no signal at all.
-    const ranking = screen.getByTestId("horizon-acme motion studio");
-    expect(within(ranking).getByText("no signal")).toBeInTheDocument();
   });
 
   it("target-this routes to Create with a capture id carrying the keyword context", async () => {
