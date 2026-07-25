@@ -22,3 +22,19 @@ CLAUDE.md → this file → `agent_handoff/ROADMAP.md` → `docs/research/ui-ove
 Boot: three lanes launched from the s70c prep (kickoffs verified submitted), token-budget drop DEFERRED on the same-UTC-day catch (the handoff assumed a fresh day; the box clock is UTC and s71 booted 30min after s70c). Lanes: all three wrapped clean and merged sequentially, each behind a full post-merge verify — one real catch (bpub4-img's `/assets` route BodyInit type break; fixed forward, one line). The founder drove FIVE live mock rounds mid-session: amber brand mark · calendar Today/This-week toggle + Open-calendar door + explicit link affordances · YouTube-in-intel question (answer: driver already live; made visible + thumbnails) · media-first everywhere with Approve heaviest (thumbs + excerpts + verbatim block reasons in rows) · full-feature multi-track video editor (EDL lanes video/music/captions per `docs/research/video-editor-tools.md` — magnetic snap, crescendo markers, .otio seam) · Runs + pipeline-board (kanban lens, restored from dashboard-v3 plans) + Profiles wizard ("what this profile powers" panel) after his what's-missing sweep. His storage question answered honestly (object store + Postgres server-side; S3 driver = flagged unwired gap; tenant takeout recommended). Round 6 (post-merge): discoverability + judge visibility — doctrine #4 VISIBLE PROVENANCE ratified into plan §5 (term chips at Create · coverage entry in Approve's checks with amber miss-warning · attributed version strip v1-engine→v2-you + diff · "the judge gates — it never rewrites" stated in copy) and applied to the Approve/Create mocks. Ratchets banked same-session per his directive: plan §5 doctrines (now FOUR) + ROADMAP L1-shipped/L2-directive + memory. Stale NEEDS-STEVEN paste-ask closed (the edit was ingested s70c); exarm unlock choice added.
 
 ## Next action — s72: founder verdict on the 11-surface mock → wave-0 Astryx build; alternates: B-learn L0 window prep · S3 driver · takeout.
+
+## Addendum — final mock consistency sweep (s71 close, founder-directed)
+
+Swept all 11 surfaces for visual/functional/interlinking/reachability
+consistency; fixed what it found: Board's waiting column now carries all 4
+cards (was 3 vs its own count), the pipeline numbers reconcile EVERYWHERE
+(needs-you 4 = topbar chip = nav count = tile = list = board column;
+composing 2 = board composing 1 + at-the-judge 1; planned 3 = tile = week's
+Fri/Sat/Sun marks = board's 3 cards, matching platform+time on each), a
+past-dated "planned" slot was removed (dead honesty), and the dashboard
+gained the Overview|Board toggle so the kanban lens is reachable from where
+it lives. Full-canvas render: zero console errors (CSP lines = the preview
+host's report-only policy, nothing blocked). Known-unmocked nav targets, NOT
+defects: Calendar + Library (+ Settings root) — wave-2/3 surfaces whose
+doors exist and are labeled. One environmental caveat: if Geist ever fails
+to load in the founder's editor view, screens fall back to system-ui.
