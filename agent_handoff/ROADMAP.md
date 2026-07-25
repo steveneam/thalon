@@ -173,6 +173,20 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   metadata) must read neutral.
 - Public `/blog` unwire → wire — **[parked: the launch call]** — stays staging-side until
   the founder says go public (stealth: thalon.org unwired, CT-log risk).
+- **B-media — OPERATOR MEDIA IMPORT (bring-your-own) [CHARTER CANDIDATE,
+  founder-directed s72: "the option for us to bring/import our own video,
+  images, music etc to be edited/used, not just created by ai thalon"]** —
+  the upload door: workspace upload/URL → object store (the s72 S3 driver is
+  the durability home) → a `media`-kind source row with sha256 dedupe and
+  `meta.origin="operator-import"` provenance; ffprobe measurement (the
+  THALON_FFPROBE seam), thumbnail derivation, and a rights note field
+  (operator's assertion, honest provenance — not legal theater). Imported
+  media joins the SAME pool the editor/EDL and clip derivation read from —
+  an imported master is a first-class version-rail root (mocked: "Founder
+  cut — conference talk" card), an imported music bed is a first-class EDL
+  music cue. Publish gates apply unchanged. UI = wave-2 videos sheets
+  (overview import strip · dossier "Media used" door · editor media pool);
+  engine door = this bucket, built only when chartered.
 
 ### Integrations (ADR 0011 — the sprint's big build)
 - **B-int.0 contract window** — ✅ FROZEN (PR #66, migration 0018).

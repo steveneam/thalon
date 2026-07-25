@@ -329,6 +329,24 @@ pinned; `swizzle` is the escape hatch if any component fights the doctrine.
   default + agenda density (evaluate Astryx `Calendar` vs keeping ours);
   **videos is a re-conception** (frames-first: thumbnails in lists, filmstrip
   takes, stage identity) — it gets its own mini-spec inside the wave.
+  **Founder-directed s72 (mocked on the canvas, three sheets — the spec of
+  record for the videos mini-spec):** (a) **Videos overview** — the surface is
+  a grid of PROJECTS, media-first poster cards; each card folds its family
+  behind a count strip of doors ("2 versions · 4 clips · 3 platforms");
+  derivatives never appear at grid level — that is the anti-congestion rule.
+  Plus the **bring-your-own import strip** (video/images/music → the media
+  pool, provenance `imported by you`, publish gates unchanged). (b) **Video
+  dossier** — per-video organization on ONE DIMENSION PER BAND: an attributed
+  version rail across time (brief → cut v1 → re-brief v2, each naming what
+  changed it), a clips shelf per selected version (cut-downs + standalone,
+  each a recorded derivation), platform chips per clip carrying honest publish
+  state; right rail = "The record" facts-as-doors (prompt/grounding/judge/
+  runs/published/media-used). The family never flattens into a matrix.
+  (c) **Editor is agent-native, not a bare NLE** (founder: "modern AI
+  power/helper like") — a "Direct the edit" prompt bar with quick-action
+  chips, answered by PROPOSALS: an amber proposal banner over the timeline
+  with Review diff / Apply / Dismiss and the affected blocks marked;
+  nothing applies silently (the EDL propose→approve loop made visible).
 - **Wave 3 — the long tail (leads · library · runs · settings/integrations ·
   sites · profiles).** Mostly mechanical on the by-then-established kit;
   sites is already close.
