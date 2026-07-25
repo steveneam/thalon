@@ -111,6 +111,13 @@ wave map. **The founder re-charters on that plan before any rebuild wave.**
 interface connection between the landing page and the workspace") — a quiet
 header "Workspace" link shipped same-turn as the interim fix; the overhaul's
 wayfinding work owns the real answer (auth-aware entry, both directions).
+**s70c CHARTER COMPLETE — all 7 §4.6 answers on record:** dark default ·
+theme from scratch · keep Geist · semantic status colours (amber = needs-you
+only) · beta accepted · videos inside wave 2 · small mono allowlist kept.
+**Wave 0 = NEXT SESSION, and it OPENS WITH A CLAUDE-DESIGN MOCK** (founder
+standing rule: every redesign wave shows him a mock for verdict BEFORE any
+build; design authoring on Fable 5 per the s51 rule). Plan of record:
+`docs/research/ui-overhaul-plan.md` (merged).
 
 ### Phase 3 — ✅ EXECUTED s69/s69b (all three live; kept for the record)
 s68 (second half) built B-pub.3 end-to-end: **image legs on all three text drivers**
