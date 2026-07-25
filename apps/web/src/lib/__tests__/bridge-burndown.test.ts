@@ -50,7 +50,8 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // surface speaks Leads.dc.html's own classes, and step 2 deleted the old
   // implementation (lead-card.tsx, weights-provenance.tsx) outright.
   // library/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
-  ["components/profiles/profile-editor.tsx", 13],
+  // profiles/ burned to zero at the s75 exact-mock rebuild (DOCTRINE 0): the
+  // wizard speaks Profiles.dc.html's own classes and the old editor is gone.
   // runs/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
   ["components/settings/integrations-panel.tsx", 30],
   ["components/settings/settings-panel.tsx", 7],
