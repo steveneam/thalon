@@ -284,6 +284,14 @@ export function Integrations() {
             </button>
           </div>
         </div>
+      ) : cards.length === 0 ? (
+        <div className="card">
+          <div className="row">
+            <span className="t-label">
+              The registry answered with no destinations — nothing to connect from here.
+            </span>
+          </div>
+        </div>
       ) : (
         <div className="int-grid">
           {cards.map((card) => {

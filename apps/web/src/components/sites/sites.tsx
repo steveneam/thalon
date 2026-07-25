@@ -79,6 +79,9 @@ export function Sites({ source }: { source: SitesSource }) {
       k: move(-1),
       Enter: (event) => {
         if (!selected) return;
+        // A focused control owns its own Enter — the chips and the clear
+        // button must still act after the operator has moved with j/k.
+        if ((event.target as HTMLElement | null)?.closest("button, a")) return;
         event.preventDefault();
         router.push(`/app/sites/${selected}`);
       },

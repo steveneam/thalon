@@ -156,6 +156,19 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
     expect(push).toHaveBeenCalledWith("/app/sites/sparkwright");
   });
 
+  it("a focused control keeps its own ↵ — the grammar never hijacks a chip", async () => {
+    push.mockClear();
+    const user = userEvent.setup();
+    render(<Sites source={LOCAL} />);
+
+    await user.keyboard("j");
+    screen.getByRole("button", { name: "More →" }).focus();
+    await user.keyboard("{Enter}");
+
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Wave 2" })).toBeInTheDocument();
+  });
+
   it("an unconfigured origin is a missing setting that names its fix, never an empty portfolio", () => {
     const { container } = render(<Sites source={{ kind: "unconfigured" }} />);
 
