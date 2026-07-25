@@ -42,7 +42,7 @@ async function pass(repos: Awaited<ReturnType<typeof openDb>>["repos"]): Promise
 }> {
   const result = await runDueSweeps({ repos }, new Date());
   const sweptNote = result.swept
-    .map((s) => `${s.tenantId} (${s.cards} cards / ${s.polled} polled)`)
+    .map((s) => `${s.tenantId} (${s.cards} cards / ${s.polled} polled / ${s.admitted} admitted)`)
     .join(", ");
   console.log(
     `[${stamp()}] pass: ${result.checked} schedule(s) checked, ${result.due.length} due, ` +
