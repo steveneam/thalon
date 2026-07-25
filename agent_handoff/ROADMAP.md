@@ -308,6 +308,13 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   gives the workspace Sites surface a live origin (dev reads local meanwhile).
 
 ### Parked (charter-level, explicit triggers)
+- **HEADLESS AI / BYO-AI (founder s70c, "a discussion for another time")** — tenants
+  bring their own AI subscription/keys instead of Thalon metering shared budgets;
+  natural fit: AI-provider credentials as a vault destination class + model seats
+  as tenant data (the B-int.3 pattern). Trigger: the next charter checkpoint.
+  Related standing rule (s70c, EXECUTED): build phase runs the strongest tier on
+  every model seat (`claude-cli/claude-opus-5`); cheap tiers return only on a
+  proven-comparable eval at launch.
 - AWS/S3 object-store migration — trigger: real traffic/customers.
 - B6.7 domains launch · B-visual style-lock candidate (open-weight self-host + per-tenant
   LoRAs, cloud-GPU only) · film refine (revisit after the landing) · month-end credit call.
