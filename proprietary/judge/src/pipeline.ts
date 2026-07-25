@@ -9,7 +9,9 @@ import {
 } from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
+import { z } from "zod";
 import { CADENCE_GATE, cadenceFetchHorizonMs, hasCadenceConstraint, runCadenceGate } from "./cadence";
+import { DISCOVERABILITY_GATE, runDiscoverabilityLens } from "./discoverability";
 import { runG1Denylist } from "./g1-denylist";
 import { collectGroundingChunks } from "./grounding";
 import { runSeoAeoLens, SEO_LENS_GATE } from "./seo-lens";
@@ -169,6 +171,36 @@ export async function runJudgePipeline(
     await repos.judgeResults.append(input.ctx, {
       draftId: judging.id,
       gate: SEO_LENS_GATE,
+      verdict: lens.verdict,
+      evidence: lens.evidence,
+    });
+  }
+
+  // Phase 2c (founder catch, s70c): the ADVISORY discoverability lens — the
+  // social path's SEO/AEO/GEO dimension. Same discipline as the seo lens:
+  // deterministic, zero model calls, opt-in BY DATA (runs only when the
+  // draft's meta declares `targetTerms` — generation starts declaring them
+  // with this phase), appended for operator triage; the queued/blocked
+  // outcome never reads it (I1 stays g3_final-only).
+  const targetTermsRaw = (judging.meta as Record<string, unknown> | null)?.targetTerms;
+  const parsedTargets = z.array(z.string()).nonempty().safeParse(targetTermsRaw);
+  if (targetTermsRaw !== undefined) {
+    const lens = parsedTargets.success
+      ? runDiscoverabilityLens({
+          platform: judging.platform,
+          targetTerms: parsedTargets.data,
+          body: judging.body,
+        })
+      : {
+          verdict: "fail" as const,
+          evidence: {
+            claims: [],
+            notes: "advisory discoverability lens: meta.targetTerms is not a non-empty string array",
+          },
+        };
+    await repos.judgeResults.append(input.ctx, {
+      draftId: judging.id,
+      gate: DISCOVERABILITY_GATE,
       verdict: lens.verdict,
       evidence: lens.evidence,
     });

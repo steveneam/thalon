@@ -5,6 +5,17 @@
  * `@thalon/db`'s transition function's I1 check — this package can never
  * bypass it (see `pipeline.ts`).
  */
+export {
+  checkDiscoverability,
+  DISCOVERABILITY_GATE,
+  discoverabilityConfigSchema,
+  runDiscoverabilityLens,
+  type DiscoverabilityConfig,
+  type DiscoverabilityConfigInput,
+  type DiscoverabilityFinding,
+  type DiscoverabilityInput,
+  type DiscoverabilityResult,
+} from "./discoverability";
 export { runG1Denylist, type G1Result, type RunG1Input } from "./g1-denylist";
 export {
   CUT_CAPTION_GATE,
