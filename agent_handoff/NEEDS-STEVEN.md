@@ -3,6 +3,7 @@
 > One open founder action per line, `- [YYYY-MM-DD] text`. Ingested by the
 > founder dashboard (swordfish note 2026-07-16). Remove lines as they close.
 
+- [2026-07-25] **WAVE-0 MOCK READY FOR YOUR VERDICT — the ui-overhaul gate.** The triage spine (dashboard · approve · intel) in the new language, all 7 charter answers applied: https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30?file=Wave+0+-+Triage+spine.dc.html (pan/zoom canvas: the theme system + all three screens side by side; you can comment directly on it). Verdict options: GO wave 0 build · fix rounds first (cheap, same file) · redirect. Nothing builds until you call it.
 - [2026-07-18] **Wave 3 checkpoint is ripe** (A+ animation candidates: bloom-transition video · Orchard seasons-tree scroll · Wagtail scroll-dog). [⑯ Ridge & Valley VERDICTED OK by the founder s63 — closed.]
 - [2026-07-18] **W-audit results glance** — `docs/research/workspace-audit-s62.md`: 18/20 after same-session fixes. Your three s60 complaints all closed: source-links everywhere (+ thumbnails plumbed), full impeccable pass done, film registered (dev). Plus: board saved views now save for the whole workspace (they were per-browser), calendar phone bug fixed, two more lists bounded.
 - [2026-07-19] **⑲ Tsukimi fix round APPROVED by the founder s64 ("its pass and its ok") — CLOSED, no further re-glance.** Visual arc HOLDS at 20 sites (founder: "leave the landing pages at this for now"); the checkpoint tail (A+ family · B-sitegen · THE LANDING) awaits his sequencing whenever.
