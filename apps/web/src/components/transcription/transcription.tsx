@@ -9,7 +9,7 @@ import {
   topRelevance,
   transcriptStamp,
   webOrigin,
-} from "@/components/library/library-model";
+} from "@/components/transcription/transcription-model";
 import { deleteSource, fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
 import {
   EXPORT_BUILDERS,
@@ -25,7 +25,7 @@ import type { LibraryPayload, LibrarySourceRow, TranscriptPayload } from "@/lib/
 type ReadStatus = "loading" | "error" | "success";
 
 /**
- * Library, rebuilt exactly from Library.dc.html (DOCTRINE 0 — the sheet is
+ * Transcription, rebuilt exactly from Library.dc.html (DOCTRINE 0 — the sheet is
  * the blueprint): the headline + source count, the ingest band, one card of
  * source rows (thumb → lead/facts → copy/export doors → day stamp), and the
  * per-tenant grounding footer.
@@ -40,7 +40,7 @@ type ReadStatus = "loading" | "error" | "success";
  * list keyboard grammar rides the sheet's `.row.sel` (j/k move · ↵ open ·
  * d delete, still behind the named confirm).
  */
-export function Library() {
+export function Transcription() {
   const [status, setStatus] = useState<ReadStatus>("loading");
   const [payload, setPayload] = useState<LibraryPayload | null>(null);
   const [url, setUrl] = useState("");
@@ -191,9 +191,9 @@ export function Library() {
   });
 
   return (
-    <div className="content library-surface" style={{ gap: 16 }}>
+    <div className="content transcription-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <h1 className="t-headline">Library</h1>
+        <h1 className="t-headline">Transcription</h1>
         <span className="pill pill-idle">
           {status === "success" ? `${rows.length} sources` : "– sources"}
         </span>

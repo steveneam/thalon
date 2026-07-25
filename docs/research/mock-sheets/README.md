@@ -67,6 +67,27 @@ sheet beside it in a browser to see the target. The live canvas (fix
 rounds, comments) stays https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
 — re-export here after any founder-approved canvas change.
 
+## Founder amendments — the sheets are WRONG here on purpose
+
+The sheets are the spec, with these recorded exceptions. **A lane must not
+"correct" one back to what the sheet draws.**
+
+- **`Library` is now `Transcription`** (founder-directed s74: *"the libary
+  (we should really rename it to Transcription) also needs the media/
+  thumbnail treatment, since it's mostly youtube/video based"*; shipped
+  s75 as B-media.1). `Library.dc.html` and the rail in all 16 sheets still
+  say "Library" — that text is superseded. The surface serves
+  `video_transcript` sources only, which is why every one of its row verbs
+  was already "Copy transcript". Live: route `/app/transcription` (with
+  `/app/library` kept permanently as a redirect so deep links and the
+  command palette survive), `components/transcription/`, scope class
+  `.transcription-surface`. **Deliberate boundary:** the rename is
+  surface-level. The data layer (`lib/library/`, `/api/library`,
+  `LibrarySourceRow`) keeps its name because it serves the generic
+  `sources` shelf, not this one surface. Revisit the name only if the
+  surface's source kinds widen beyond transcripts, at which point
+  "Transcription" becomes the wrong word.
+
 ## Proposals — NOT yet verdicted (do not port)
 
 Sheets in this section are the lead's proposals against a founder-directed

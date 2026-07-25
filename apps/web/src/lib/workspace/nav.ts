@@ -5,7 +5,7 @@ import {
   IconIntel,
   IconJourney,
   IconLeads,
-  IconLibrary,
+  IconTranscription,
   IconProfiles,
   IconRuns,
   IconSettings,
@@ -19,7 +19,7 @@ import {
  * palette, and the topbar title all route from this list so a surface can
  * never exist in one and be missing from another. Order and labels are the
  * founder-verdicted wave-0 mock's, verbatim (kickoff step 3):
- * Home · Intel · Create · Approve(count) · Calendar ┃ Leads · Library ·
+ * Home · Intel · Create · Approve(count) · Calendar ┃ Leads · Transcription ·
  * Videos · Sites · Runs ┃ Profiles · Settings.
  * Icons come from the canonical set (components/ui/icons.tsx) — one
  * metaphor per feature, everywhere.
@@ -93,9 +93,9 @@ export const NAV_SURFACES: NavSurface[] = [
     section: "outputs",
   },
   {
-    label: "Library",
-    href: "/app/library",
-    icon: IconLibrary,
+    label: "Transcription",
+    href: "/app/transcription",
+    icon: IconTranscription,
     hint: "Paste a video URL — transcript in, ready to copy, export, and ground on",
     keywords: ["transcript", "video", "url", "youtube", "ingest", "captions", "srt", "csv", "sources"],
     section: "outputs",

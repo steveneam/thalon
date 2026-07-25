@@ -71,8 +71,8 @@ export function IconCreate(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-/** Library: book spines on the shelf. */
-export function IconLibrary(props: SVGProps<SVGSVGElement>) {
+/** Transcription: book spines on the shelf. */
+export function IconTranscription(props: SVGProps<SVGSVGElement>) {
   return (
     <Glyph {...props}>
       <path d="M4 5h4v14H4zM10 5h4v14h-4zM16.5 5.5l3.5 1-3 13-3.5-1z" />

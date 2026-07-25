@@ -32,7 +32,7 @@ export function heatBand(score: number): HeatBand {
 /**
  * The glanceable read: thermal pill + magnitude bar; exact score in the
  * tooltip. `detail` lets other surfaces reusing the grammar (e.g. the
- * Library's relevance badge) carry their reason string into the tooltip
+ * Transcription's relevance badge) carry their reason string into the tooltip
  * and accessible label alongside the score.
  */
 export function HeatGrade({

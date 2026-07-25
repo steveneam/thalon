@@ -4,7 +4,7 @@ import { loadSites } from "@/lib/sites/provider";
 export const dynamic = "force-dynamic";
 
 /**
- * Sites (W-sites, s61): the third outputs surface — Library is inputs,
+ * Sites (W-sites, s61): the third outputs surface — Transcription is inputs,
  * Videos is video outputs, Sites is page outputs. Honest states: an
  * unconfigured origin says so plainly (never a fake empty gallery); a
  * failing origin shows the error it got.

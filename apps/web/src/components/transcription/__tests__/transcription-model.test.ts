@@ -7,7 +7,7 @@ import {
   topRelevance,
   transcriptStamp,
   webOrigin,
-} from "@/components/library/library-model";
+} from "@/components/transcription/transcription-model";
 import type { LibrarySourceRow } from "@/lib/library/types";
 
 function row(overrides: Partial<LibrarySourceRow> = {}): LibrarySourceRow {

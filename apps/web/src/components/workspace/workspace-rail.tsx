@@ -47,7 +47,7 @@ export function WorkspaceRail() {
       </Link>
       {["Home", "Intel", "Create", "Approve", "Calendar"].map(item)}
       <div className="nav-sep" />
-      {["Leads", "Library", "Videos", "Sites", "Runs"].map(item)}
+      {["Leads", "Transcription", "Videos", "Sites", "Runs"].map(item)}
       <div style={{ marginTop: "auto" }} />
       <div className="nav-sep" />
       {["Profiles", "Settings"].map(item)}

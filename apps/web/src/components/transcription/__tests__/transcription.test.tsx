@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { Library } from "@/components/library/library";
+import { Transcription } from "@/components/transcription/transcription";
 import { seedLibraryRow } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 
@@ -22,9 +22,9 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         { areaId: "a1", areaName: "ai tooling", score: 0.82, reason: "close to the area description" },
       ],
     }, SEGMENTS);
-    render(<Library />);
+    render(<Transcription />);
 
-    expect(screen.getByRole("heading", { name: "Library" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Transcription" })).toBeInTheDocument();
     expect(await screen.findByText("1 sources")).toBeInTheDocument();
     expect(
       screen.getByText(/everything here is grounding — the judge cites these verbatim/),
@@ -65,7 +65,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         );
       }),
     );
-    render(<Library />);
+    render(<Transcription />);
     await screen.findByText("0 sources");
 
     // At rest the sheet's band carries no tag field — it unfolds on engage.
@@ -85,7 +85,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
   it("opening a row reveals the transcript doors — read, copy the brief, export, delete", async () => {
     const user = userEvent.setup();
     seedLibraryRow({ uri: "https://example.com/v2", title: "Shelf opened" }, SEGMENTS);
-    render(<Library />);
+    render(<Transcription />);
 
     // Resting chrome: no panel until a row is opened.
     expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
@@ -115,7 +115,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         HttpResponse.json({ error: "this source still grounds 2 drafts" }, { status: 409 }),
       ),
     );
-    render(<Library />);
+    render(<Transcription />);
 
     await user.click(await screen.findByRole("button", { name: "Grounds a draft" }));
     await user.click(await screen.findByRole("button", { name: "Delete" }));
@@ -134,7 +134,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
     seedLibraryRow({ uri: "https://x.example/2", title: "Second video" }, SEGMENTS);
     seedLibraryRow({ uri: "https://x.example/1", title: "First video" }, SEGMENTS);
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(<Library />);
+    render(<Transcription />);
 
     const first = await screen.findByRole("button", { name: "First video" });
     expect(first.className).toContain("row sel");
@@ -155,7 +155,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
 
   it("a failed read is an alert with retry, never an empty shelf", async () => {
     server.use(http.get("/api/library", () => HttpResponse.error()));
-    render(<Library />);
+    render(<Transcription />);
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(/Couldn’t read the library/);
@@ -166,7 +166,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
   });
 
   it("an empty shelf says so plainly", async () => {
-    render(<Library />);
+    render(<Transcription />);
     expect(await screen.findByText(/Nothing ingested yet/)).toBeInTheDocument();
   });
 
@@ -184,7 +184,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         }),
       ),
     );
-    render(<Library />);
+    render(<Transcription />);
     await screen.findByText("0 sources");
 
     await user.click(screen.getByLabelText("Video URL"));

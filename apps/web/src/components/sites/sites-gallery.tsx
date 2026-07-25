@@ -12,7 +12,7 @@ import { applyFilters, countLine, facetValues, verdictStatus, VERDICT_WORDS, typ
 
 /**
  * The Sites gallery (W-sites, s61): the portfolio as a card grid — the
- * third outputs surface (Library = inputs · Videos = video outputs · Sites
+ * third outputs surface (Transcription = inputs · Videos = video outputs · Sites
  * = page outputs). Card image = the site's own hero asset served from the
  * preview origin; the bronze "awaiting verdict" chip is the surface's ONE
  * signal-channel element (Two-Channel: amber signals, blue acts). Uniform

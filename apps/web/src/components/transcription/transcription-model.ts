@@ -2,7 +2,8 @@ import type { LibrarySourceRow, WireSegment } from "@/lib/library/types";
 import { formatTimecode } from "@/lib/library/export";
 
 /**
- * Pure derivations behind the Library sheet's bands (DOCTRINE 0 rebuild,
+ * Pure derivations behind the Transcription surface's bands, whose sheet is
+ * still Library.dc.html (DOCTRINE 0 rebuild,
  * step 2). Every fact a shelf row states comes from here, so the honesty
  * rules stay unit-testable: a row says only what the ingest actually
  * recorded — no invented chunk counts, no invented "grounds N drafts", and
