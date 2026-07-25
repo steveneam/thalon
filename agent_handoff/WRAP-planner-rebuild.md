@@ -1,6 +1,6 @@
 # WRAP — lane `planner-rebuild` (Calendar, then Board — two-step each)
 
-Branch `agent/planner-rebuild`, four commits, worktree clean. Both surfaces
+Branch `agent/planner-rebuild`, eight commits, worktree clean. Both surfaces
 shipped two-step off their sheets. Nothing outside the lane's file set was
 touched except the two lines named under **Cross-lane notes** below.
 
@@ -8,6 +8,16 @@ touched except the two lines named under **Cross-lane notes** below.
 |---|---|---|
 | **Calendar** | `8343dfd` | `d8223ba` |
 | **Board** | `d3e3ac0` | `a8b20bd` |
+
+Four fixes followed from re-reading the wired surfaces before wrap — each its
+own commit, each with a test: `098fa9e` (a calendar visit no longer PUTs its
+view back; intel placeholders name their real source) · `5ecd8b3` (the keeper's
+`↵` had been dropped in the step-2 rewrite while its comment still claimed it) ·
+`160ccfd` (`↵` yields to a focused control — clicking a plan then pressing it
+both deselected and navigated) · `e4f23ff` (the month density derived sweeps and
+the waiting carry over the anchor WEEK, rendering its other three weeks quieter
+than they are; and its bounded cells now rank marks so a 4-hourly sweep cannot
+bury the work).
 
 ---
 
@@ -163,25 +173,42 @@ density rather than implying a full month.
 
 ## Test deltas
 
+`components/calendar` 38 tests · `components/board` 29 tests, all green.
+
 - `calendar/__tests__/calendar-surface.test.tsx` — old-design suite replaced;
-  step 1 structural pin → step 2 behaviour + honesty (14 tests: band structure,
-  plan placement at its own pixel, done-vs-closed dress, the waiting lane, the ⚑
-  and its scope, the popover's disabled write doors, no-drag, sweep projection
-  incl. the overdue case, read failure + retry, the two other densities, the
-  empty week, the saved view round-trip, the quiet bands, j/k).
-- `calendar/__tests__/calendar-model.test.ts` — NEW, 21 tests over the time
-  mapping, event derivation, sweep honesty, the waiting carry rule, cadence
-  breaches, scope/layout/labels.
+  step 1 structural pin → step 2 behaviour + honesty (band structure, plan
+  placement at its own pixel, done-vs-closed dress, the waiting lane, the ⚑ and
+  its scope, the popover's disabled write doors, no-drag, sweep projection incl.
+  the overdue case, read failure + retry, the two other densities, the empty
+  week, the saved view round-trip and the no-write-on-visit rule, the quiet
+  bands, j/k and ↵).
+- `calendar/__tests__/calendar-model.test.ts` — NEW, over the time mapping,
+  event derivation, sweep honesty, the waiting carry rule, cadence breaches,
+  scope/layout/labels/mark-ranking.
 - `board/__tests__/board-surface.test.tsx` — NEW, 8 tests.
 - `board/__tests__/board-model.test.ts` — NEW, 7 tests.
 - `dashboard/__tests__/dashboard.test.tsx` — 1 assertion changed (the Board door).
+- deleted with the old implementation: `calendar/__tests__/model.test.ts`.
 
-## Verify
+## Verify — GREEN
 
-`npm run verify` at the repo root, unfiltered, redirected to a file (never
-piped through `tail` — the pinned main-RED #3 root cause). Result and the box's
-load average at the time are recorded at the bottom of this file.
+`npm run verify` at the repo root, unfiltered, redirected to a file and read
+back (never piped through `tail` — the pinned main-RED #3 root cause).
 
-Cheap gates ran continuously during the build: full `npm run typecheck` (exit 0)
-and full `npm run lint` (exit 0, 12 pre-existing warnings, none in this lane's
-files) after each step, plus targeted vitest on every touched suite.
+```
+guard    PASS: no forbidden brand tokens in tracked files.
+tests    279 files passed | 4 skipped (283) · 1985 passed | 9 skipped (1994)
+lint     12 problems (0 errors, 12 warnings — all pre-existing, none in this lane)
+VERIFY_EXIT: 0
+```
+
+**Ran 19:10:40 → 19:15:49 UTC (suite 261.7s).** Box at start: load **4.14**;
+at end: **5.42**. It was deliberately queued rather than run on demand — the
+two sibling lanes held the box at 10–14 for ~20 minutes, and a fourth
+concurrent suite is exactly the s74 pathology (load 34, a 4-minute suite
+stretched to 14). A watcher fired the run the moment load fell below 5, after
+waiting 390s.
+
+Cheap gates ran continuously during the build instead: full `npm run typecheck`
+(exit 0) and full `npm run lint` (exit 0) after each step, plus targeted vitest
+on every touched suite.
