@@ -1,4 +1,8 @@
-import type { TenantCtx } from "@thalon/contracts";
+import {
+  admissionKnobOverridesSchema,
+  type AdmissionKnobOverrides,
+  type TenantCtx,
+} from "@thalon/contracts";
 import { BudgetExceededError, sha256Hex, type Repos } from "@thalon/db";
 import { runG1Denylist } from "@thalon/judge";
 import { z } from "zod";
@@ -20,14 +24,14 @@ import type { TrendItem } from "./trend-source";
  * sweep already produced, governed by knobs that are CONFIG-DATA, and writes
  * through the ONE existing ingest door (../exemplar/ingest-exemplar.ts).
  *
- * The knob home is deliberately transitional: `monitoredAreaConfigSchema`
- * (packages/contracts) is FROZEN this sprint and its single write door
- * strips unknown keys, so per-area knobs cannot persist on the area row yet.
- * They ride the sweep request instead (`admissionConfig`: tenant defaults +
- * per-area overrides keyed by area id) — the same engine-runtime-config
- * channel as outlierConfig/rankerConfig. `admissionKnobsSchema` is shaped so
- * the next contract window can adopt it verbatim as
- * `monitoredAreaConfigSchema.admission` and the override map deprecates.
+ * The knob home (B-learn L0 window, s73): per-area knobs are AREA DATA —
+ * `monitoredAreaConfigSchema.admission` (packages/contracts, the window's
+ * verbatim adoption of the transitional engine shape) persists on the
+ * monitored-area row through the one write door, and the sweep reads each
+ * area's overrides from the ROW config. Tenant DEFAULTS still ride the
+ * runtime-config channel (`admissionConfig.defaults`, the outlierConfig/
+ * rankerConfig pattern; `TREND_ADMISSION_CONFIG` env in the scheduler) —
+ * the transitional request-level per-area override map is REMOVED.
  *
  * Why the gates are shaped this way (coverage honesty, s68 finding):
  *
@@ -45,7 +49,7 @@ import type { TrendItem } from "./trend-source";
  *    text an exemplar exists to teach is the hook + body, not a headline.
  */
 
-/** The per-area knob set — the shape the next contract window adopts as `monitoredAreaConfigSchema.admission`. */
+/** The full knob set — tenant defaults; contracts' `admission` override block mirrors it field-for-field. */
 const KNOB_DEFAULTS = {
   enabled: true,
   floors: { views: 10_000 },
@@ -83,39 +87,41 @@ export type AdmissionKnobsInput = z.input<typeof admissionKnobsSchema>;
 export type AdmissionKnobs = z.infer<typeof admissionKnobsSchema>;
 
 /**
- * The per-area OVERRIDE shape — deliberately NOT `admissionKnobsSchema.
+ * The per-area OVERRIDE shape lives in contracts now (the L0 window adopted
+ * the transitional engine schema verbatim as `monitoredAreaConfigSchema.
+ * admission`) — re-exported here so the admission module stays the one
+ * import for admission shapes. Deliberately NOT `admissionKnobsSchema.
  * partial()`: a defaulted field still fills on parse, which would silently
  * clobber the tenant default with the schema default (the exact trap
  * contracts' rankerWeightOverridesSchema exists to avoid).
  */
-export const admissionKnobOverridesSchema = z.object({
-  enabled: z.boolean().optional(),
-  floors: z.record(z.string(), z.number().nonnegative()).optional(),
-  velocityMultiple: z.number().positive().optional(),
-  minBodyLength: z.number().int().nonnegative().optional(),
-  maxAdmissionsPerDay: z.number().int().nonnegative().optional(),
-});
-export type AdmissionKnobOverrides = z.infer<typeof admissionKnobOverridesSchema>;
+export { admissionKnobOverridesSchema, type AdmissionKnobOverrides };
 
-export const admissionConfigSchema = z.object({
+/**
+ * Tenant-wide admission config — DEFAULTS ONLY since the L0 window: per-
+ * area overrides are area data (`config.admission` on the monitored-area
+ * row), so a leftover request/env `areas` map is rejected LOUD (strict)
+ * rather than silently dropped.
+ */
+export const admissionConfigSchema = z.strictObject({
   /** Tenant-wide knob defaults (Zod 4 `.default` short-circuits the inner parse — the default is the full output shape). */
   defaults: admissionKnobsSchema.default(KNOB_DEFAULTS),
-  /** Per-area overrides keyed by monitored-area id — unset fields keep the tenant default (the ranker-weights two-layer pattern). */
-  areas: z.record(z.string(), admissionKnobOverridesSchema).default({}),
 });
 export type AdmissionConfigInput = z.input<typeof admissionConfigSchema>;
 export type AdmissionConfig = z.infer<typeof admissionConfigSchema>;
 
-/** Two-layer resolution: tenant defaults ← area override, field-by-field; an unset override field never clobbers. */
-export function resolveAdmissionKnobs(config: AdmissionConfig, areaId: string): AdmissionKnobs {
-  const override = config.areas[areaId];
-  if (!override) return config.defaults;
+/** Two-layer resolution: tenant defaults ← the area ROW's override, field-by-field; an unset override field never clobbers. */
+export function resolveAdmissionKnobs(
+  defaults: AdmissionKnobs,
+  override: AdmissionKnobOverrides | undefined,
+): AdmissionKnobs {
+  if (!override) return defaults;
   return {
-    enabled: override.enabled ?? config.defaults.enabled,
-    floors: override.floors ?? config.defaults.floors,
-    velocityMultiple: override.velocityMultiple ?? config.defaults.velocityMultiple,
-    minBodyLength: override.minBodyLength ?? config.defaults.minBodyLength,
-    maxAdmissionsPerDay: override.maxAdmissionsPerDay ?? config.defaults.maxAdmissionsPerDay,
+    enabled: override.enabled ?? defaults.enabled,
+    floors: override.floors ?? defaults.floors,
+    velocityMultiple: override.velocityMultiple ?? defaults.velocityMultiple,
+    minBodyLength: override.minBodyLength ?? defaults.minBodyLength,
+    maxAdmissionsPerDay: override.maxAdmissionsPerDay ?? defaults.maxAdmissionsPerDay,
   };
 }
 
@@ -278,8 +284,13 @@ export interface RunAdmissionsArgs {
   nowMs: number;
   /** The tenant's G1 denylist terms — denylisted content never enters the exemplar library. */
   denylist: string[];
-  /** Every ACTIVE area this sweep, so areas with zero candidates still report a summary row. */
-  areas: ReadonlyArray<{ id: string; name: string }>;
+  /**
+   * Every ACTIVE area this sweep, so areas with zero candidates still report
+   * a summary row. `admission` is the area ROW's knob-override block
+   * (`config.admission`, the L0 window) — the per-area layer of the
+   * two-layer resolution.
+   */
+  areas: ReadonlyArray<{ id: string; name: string; admission?: AdmissionKnobOverrides }>;
   /** The sweep's ranked feed, score-descending — cap slots go to the best-ranked qualifiers. */
   ranked: readonly RankedCandidate[];
   /** Best-relevance area per item (the intake's existing attribution) — the area whose knobs govern. */
@@ -328,8 +339,10 @@ export async function runAdmissions(
   const todayCounts = await countTodayAdmissions(ctx, repos, args.nowMs);
 
   const summaries = new Map<string, AreaAdmissionSummary>();
+  const knobsByArea = new Map<string, AdmissionKnobs>();
   for (const area of args.areas) {
-    const knobs = resolveAdmissionKnobs(config, area.id);
+    const knobs = resolveAdmissionKnobs(config.defaults, area.admission);
+    knobsByArea.set(area.id, knobs);
     summaries.set(area.id, {
       areaId: area.id,
       areaName: area.name,
@@ -361,9 +374,9 @@ export async function runAdmissions(
     consulted.add(item.externalId);
 
     const summary = summaries.get(row.areaId);
-    if (!summary) continue; // unreachable: attribution only names active areas
+    const knobs = knobsByArea.get(row.areaId);
+    if (!summary || !knobs) continue; // unreachable: attribution only names active areas
     summary.considered++;
-    const knobs = resolveAdmissionKnobs(config, row.areaId);
     if (!knobs.enabled) continue;
 
     const decision = decideAdmission(item, args.longitudinal.get(item.externalId), knobs);

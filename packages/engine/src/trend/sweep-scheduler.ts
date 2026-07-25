@@ -77,12 +77,14 @@ export async function tenantTrendSources(
 
 /**
  * The soak's admission-knob channel (s72, the founder's "both" unlock):
- * `TREND_ADMISSION_CONFIG` carries the transitional request-level
- * `admissionConfig` as env JSON until the B-learn L0 window homes the knobs
- * on the monitored-area row. Validated HERE, once per pass — a malformed
- * value throws with the env var named (the driver logs PASS FAILED loudly
- * every tick until the operator fixes it; fail loud beats sweeping with
- * silently-dropped floors).
+ * `TREND_ADMISSION_CONFIG` carries the tenant-DEFAULT `admissionConfig` as
+ * env JSON — since the B-learn L0 window homed per-area knobs on the
+ * monitored-area row (`config.admission`), this channel carries defaults
+ * ONLY. Validated HERE, once per pass — a malformed value throws with the
+ * env var named, and a leftover per-area `areas` map (the removed
+ * transitional shape) gets the targeted migration message (the driver logs
+ * PASS FAILED loudly every tick until the operator fixes it; fail loud
+ * beats sweeping with silently-dropped floors).
  */
 export function envAdmissionConfig(env: ThalonEnv): AdmissionConfigInput | undefined {
   const raw = env.TREND_ADMISSION_CONFIG;
@@ -94,6 +96,11 @@ export function envAdmissionConfig(env: ThalonEnv): AdmissionConfigInput | undef
     throw new Error(
       `TREND_ADMISSION_CONFIG is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
       { cause: err },
+    );
+  }
+  if (parsed !== null && typeof parsed === "object" && "areas" in parsed) {
+    throw new Error(
+      'TREND_ADMISSION_CONFIG carries tenant DEFAULTS only — the per-area "areas" override map moved to each monitored-area row\'s config.admission (B-learn L0); update the row config and remove the key',
     );
   }
   const result = admissionConfigSchema.safeParse(parsed);

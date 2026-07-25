@@ -30,7 +30,7 @@ function delta(deltaVelocity: number | null, baselineDeltaVelocity: number | nul
 const DEFAULTS = admissionConfigSchema.parse({}).defaults;
 
 describe("admission config (B-learn L1 knobs as data)", () => {
-  it("parses {} to the conservative armed defaults — the shape the contract window adopts", () => {
+  it("parses {} to the conservative armed defaults — tenant defaults only since the L0 window", () => {
     expect(admissionConfigSchema.parse({})).toEqual({
       defaults: {
         enabled: true,
@@ -39,29 +39,31 @@ describe("admission config (B-learn L1 knobs as data)", () => {
         minBodyLength: 140,
         maxAdmissionsPerDay: 20,
       },
-      areas: {},
     });
   });
 
-  it("resolves per-area overrides field-by-field — an unset field keeps the tenant default", () => {
-    const config = admissionConfigSchema.parse({
-      defaults: { floors: { likes: 500 } },
-      areas: { "area-1": { maxAdmissionsPerDay: 3 } },
-    });
-    expect(resolveAdmissionKnobs(config, "area-1")).toEqual({
+  it("resolves the area ROW's override field-by-field — an unset field keeps the tenant default", () => {
+    const { defaults } = admissionConfigSchema.parse({ defaults: { floors: { likes: 500 } } });
+    expect(resolveAdmissionKnobs(defaults, { maxAdmissionsPerDay: 3 })).toEqual({
       enabled: true,
       floors: { likes: 500 }, // tenant default kept
       velocityMultiple: 4,
       minBodyLength: 140,
       maxAdmissionsPerDay: 3, // area override applied
     });
-    // An area with no override row resolves to the tenant defaults verbatim.
-    expect(resolveAdmissionKnobs(config, "area-2")).toEqual(config.defaults);
+    // An area with no admission block resolves to the tenant defaults verbatim.
+    expect(resolveAdmissionKnobs(defaults, undefined)).toEqual(defaults);
   });
 
   it("rejects malformed knobs loud (negative floor, zero multiple)", () => {
     expect(admissionConfigSchema.safeParse({ defaults: { floors: { views: -1 } } }).success).toBe(false);
     expect(admissionConfigSchema.safeParse({ defaults: { velocityMultiple: 0 } }).success).toBe(false);
+  });
+
+  it("rejects the removed request-level areas map LOUD — per-area knobs are area data now, never silently dropped", () => {
+    expect(
+      admissionConfigSchema.safeParse({ areas: { "area-1": { maxAdmissionsPerDay: 3 } } }).success,
+    ).toBe(false);
   });
 });
 

@@ -176,7 +176,8 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const top = fixture("top", { text: AREA.description });
     const second = fixture("second");
     const third = fixture("third");
-    const config = { areas: { [AREA.id]: { maxAdmissionsPerDay: 1 } } };
+    // L0: the cap override is AREA DATA — it rides the row's config.admission.
+    const cappedArea = { ...AREA, config: { admission: { maxAdmissionsPerDay: 1 } } };
     const deps = (items: TrendItem[]) => ({
       source: createFakeTrendSource(items),
       embedder,
@@ -187,7 +188,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep1 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], admissionConfig: config, nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [cappedArea], nowMs: NOW },
       deps([top, second]),
     );
     expect(sweep1.admissions.admitted).toEqual([
@@ -201,7 +202,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep2 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], admissionConfig: config, nowMs: NOW + 2 * HOUR },
+      { watchlist: { source: "fake" }, areas: [cappedArea], nowMs: NOW + 2 * HOUR },
       deps([top, third]),
     );
     expect(sweep2.admissions.admitted).toEqual([]);
@@ -212,7 +213,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep3 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], admissionConfig: config, nowMs: NOW + DAY },
+      { watchlist: { source: "fake" }, areas: [cappedArea], nowMs: NOW + DAY },
       deps([third]),
     );
     expect(sweep3.admissions.admitted.map((a) => a.externalId)).toEqual(["third"]);
@@ -320,15 +321,14 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     expect(await repos.sources.listByKind(ctx, ["exemplar"])).toEqual([]);
   });
 
-  it("a per-area enabled:false override watches without admitting", async () => {
+  it("a per-area enabled:false override ON THE AREA ROW watches without admitting", async () => {
     const { ctx, repos, objectStore, embedder } = await setup();
     const result = await runTrendIntake(
       ctx,
       repos,
       {
         watchlist: { source: "fake" },
-        areas: [AREA],
-        admissionConfig: { areas: { [AREA.id]: { enabled: false } } },
+        areas: [{ ...AREA, config: { admission: { enabled: false } } }],
         nowMs: NOW,
       },
       { source: createFakeTrendSource([fixture("win")]), embedder, objectStore, capTokens: 1_000_000 },

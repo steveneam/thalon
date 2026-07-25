@@ -92,7 +92,7 @@ export interface TrendSweepRequest {
   expansionConfig?: AreaExpansionConfigInput;
   rankerConfig?: RankerConfigInput;
   outlierConfig?: OutlierConfigInput;
-  /** B-learn L1: exemplar-admission knobs (tenant defaults + per-area overrides) — armed with conservative defaults when omitted. */
+  /** B-learn L1: tenant-DEFAULT exemplar-admission knobs (per-area overrides are area data — `config.admission` on the row) — armed with conservative defaults when omitted. */
   admissionConfig?: AdmissionConfigInput;
   /** Advisory cadence for the stamp (default 4h). */
   intervalMs?: number;
