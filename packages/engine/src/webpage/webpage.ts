@@ -5,6 +5,7 @@ import {
 } from "@thalon/contracts";
 import { sha256Hex, type Draft, type Repos } from "@thalon/db";
 import { getObjectStore, modelTiers, objectKey, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
+import { groundingRunParams, resolveGroundingSet } from "../pipeline/grounding-set";
 import { runSingleDraftPipeline } from "../pipeline/single-draft";
 import { extractVisibleText } from "./html";
 import { webPageDraftMetaSchema } from "./schemas";
@@ -23,7 +24,7 @@ const WEB_PLATFORM_PROFILE_VERSION = "web.v1";
 export interface WebPageRequest {
   /** `sources.id` of the ingested operator prompt (kind "prompt") — the brief. */
   promptSourceId: string;
-  /** Extra pre-ingested grounding sources the page may draw claims from (site crawl, repo readme, docs). */
+  /** Extra pre-ingested grounding sources the page may draw claims from (site crawl, repo readme, docs). Prompt-kind ids (a prior brief carried forward on re-brief) are REPLACED by the current brief, never appended — the 491089d0 ratchet (pipeline/grounding-set.ts). */
   groundingSourceIds?: string[];
   /** Overrides the draft's platform label (default "web") — data, not code. */
   platform?: string;
@@ -77,11 +78,10 @@ export async function runWebPageGeneration(
     );
   }
 
-  const groundingIds = [...new Set(request.groundingSourceIds ?? [])].sort();
-  for (const id of groundingIds) {
-    const source = await repos.sources.get(ctx, id);
-    if (!source) throw new Error(`grounding source "${id}" not found for this tenant`);
-  }
+  // 491089d0 ratchet: the one resolver owns the merge — a prompt-kind id in
+  // the request is a prior brief, and THIS brief replaces it (never appends).
+  const resolved = await resolveGroundingSet(ctx, repos, request.groundingSourceIds);
+  const groundingIds = resolved.groundingIds;
 
   const profile = await repos.brandProfiles.getActive(ctx);
   if (!profile) {
@@ -92,6 +92,7 @@ export async function runWebPageGeneration(
   const model = modelTiers().draft;
   const promptVersion = webPagePromptVersion();
   const objectStore = deps.objectStore ?? getObjectStore();
+  const runParams = groundingRunParams(resolved);
 
   return runSingleDraftPipeline(ctx, repos, {
     format: "web_page",
@@ -112,7 +113,7 @@ export async function runWebPageGeneration(
       platforms: [platform],
       promptVersion,
       model,
-      params: groundingIds.length > 0 ? { groundingSourceIds: groundingIds } : undefined,
+      params: Object.keys(runParams).length > 0 ? runParams : undefined,
     },
     irrecoverableLabel: "web-page generation",
     generate: async () => {

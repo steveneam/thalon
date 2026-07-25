@@ -5,6 +5,7 @@ import {
 } from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
+import { groundingRunParams, resolveGroundingSet } from "../pipeline/grounding-set";
 import { runSingleDraftPipeline } from "../pipeline/single-draft";
 import { pillarScriptDraftMetaSchema } from "./schemas";
 import {
@@ -22,7 +23,7 @@ const PILLAR_PLATFORM_PROFILE_VERSION = "pillar.v1";
 export interface OriginationRequest {
   /** `sources.id` of the ingested operator prompt (kind "prompt") — the brief. */
   promptSourceId: string;
-  /** Extra pre-ingested grounding sources the script may draw claims from (site crawl, repo readme, docs). */
+  /** Extra pre-ingested grounding sources the script may draw claims from (site crawl, repo readme, docs). Prompt-kind ids (a prior brief carried forward on re-brief) are REPLACED by the current brief, never appended — the 491089d0 ratchet (pipeline/grounding-set.ts). */
   groundingSourceIds?: string[];
   /** Overrides the draft's platform label (default "video") — data, not code. */
   platform?: string;
@@ -71,11 +72,10 @@ export async function runOrigination(
     );
   }
 
-  const groundingIds = [...new Set(request.groundingSourceIds ?? [])].sort();
-  for (const id of groundingIds) {
-    const source = await repos.sources.get(ctx, id);
-    if (!source) throw new Error(`grounding source "${id}" not found for this tenant`);
-  }
+  // 491089d0 ratchet: the one resolver owns the merge — a prompt-kind id in
+  // the request is a prior brief, and THIS brief replaces it (never appends).
+  const resolved = await resolveGroundingSet(ctx, repos, request.groundingSourceIds);
+  const groundingIds = resolved.groundingIds;
 
   const profile = await repos.brandProfiles.getActive(ctx);
   if (!profile) {
@@ -85,6 +85,7 @@ export async function runOrigination(
   const platform = request.platform?.trim() || PILLAR_PLATFORM;
   const model = modelTiers().draft;
   const promptVersion = pillarScriptPromptVersion();
+  const runParams = groundingRunParams(resolved);
 
   return runSingleDraftPipeline(ctx, repos, {
     format: "pillar_script",
@@ -105,7 +106,7 @@ export async function runOrigination(
       platforms: [platform],
       promptVersion,
       model,
-      params: groundingIds.length > 0 ? { groundingSourceIds: groundingIds } : undefined,
+      params: Object.keys(runParams).length > 0 ? runParams : undefined,
     },
     irrecoverableLabel: "pillar-script generation",
     generate: async () => {

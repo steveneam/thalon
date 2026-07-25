@@ -34,6 +34,7 @@ import {
   generateValidatedScenesStage,
   generateValidatedStoryboardStage,
 } from "../direction/validate-shell-output";
+import { groundingRunParams, resolveGroundingSet } from "./grounding-set";
 import { runSingleDraftPipeline } from "./single-draft";
 
 /**
@@ -73,7 +74,7 @@ const STAGED_PLATFORM_PROFILE_VERSION = "staged-video.v1";
 export interface StartVideoStagesRequest {
   /** `sources.id` of the ingested operator prompt (kind "prompt") — the brief. */
   promptSourceId: string;
-  /** Extra pre-ingested grounding sources (site crawl, repo readme, docs). */
+  /** Extra pre-ingested grounding sources (site crawl, repo readme, docs). Prompt-kind ids (a prior brief carried forward on re-brief) are REPLACED by the current brief, never appended — the 491089d0 ratchet (./grounding-set.ts). */
   groundingSourceIds?: string[];
   /** Overrides the draft platform label AND the platformProfiles key prefill reads (default "video"). */
   platform?: string;
@@ -118,11 +119,12 @@ export async function startVideoStages(
       `source "${request.promptSourceId}" is kind "${promptSource.kind}", expected "prompt" — the operator brief must be a prompt source (ingest it first)`,
     );
   }
-  const groundingIds = [...new Set(request.groundingSourceIds ?? [])].sort();
-  for (const id of groundingIds) {
-    const source = await repos.sources.get(ctx, id);
-    if (!source) throw new Error(`grounding source "${id}" not found for this tenant`);
-  }
+  // 491089d0 ratchet: the one resolver owns the merge — a prompt-kind id in
+  // the request is a prior brief, and THIS brief replaces it (never appends).
+  // Later stages carry this stage-0 set forward verbatim, so the whole chain
+  // inherits the replacement.
+  const resolved = await resolveGroundingSet(ctx, repos, request.groundingSourceIds);
+  const groundingIds = resolved.groundingIds;
   const profile = await repos.brandProfiles.getActive(ctx);
   if (!profile) {
     throw new Error(`tenant ${ctx.tenantId} has no active brand profile — create one first`);
@@ -159,7 +161,7 @@ export async function startVideoStages(
         params: {
           family: plan.family,
           stageKey: stage.key,
-          ...(groundingIds.length > 0 ? { groundingSourceIds: groundingIds } : {}),
+          ...groundingRunParams(resolved),
         },
       },
       irrecoverableLabel: `staged-video "${stage.key}" generation`,
