@@ -1,5 +1,6 @@
 import { BudgetExceededError, InvariantViolationError } from "@thalon/db";
 import { afterEach, describe, expect, it } from "vitest";
+import { DISCOVERABILITY_GATE } from "../discoverability";
 import { runJudgePipeline } from "../pipeline";
 import { FAKE_TOKENS_IN, FAKE_TOKENS_OUT, fixedDriver, withCallCount } from "./fake-drivers";
 import { judgeFixture, type JudgeFixture } from "./fixtures";
@@ -220,5 +221,76 @@ describe("runJudgePipeline — two-tier orchestration (SPINE §1.1, §2.3)", () 
       await blocked.close();
       await clear.close();
     }
+  });
+});
+
+describe("runJudgePipeline — advisory discoverability lens (Phase 2c, opt-in by meta.targetTerms)", () => {
+  it("a judged draft with declared terms gains the discoverability row (pass when the body carries them)", async () => {
+    fx = await judgeFixture({
+      body: "We shipped an AI feature today — an AI harness for the whole pipeline.",
+      meta: { targetTerms: ["AI", "AI harness"] },
+    });
+    const outcome = await runJudgePipeline(fx.handle.repos, {
+      ctx: fx.ctx,
+      draftId: fx.draft.id,
+      chunks: [{ ref: "c1", text: "We shipped an AI feature today." }],
+      screenDriver: fixedDriver(PASS),
+      finalDriver: fixedDriver(PASS),
+    });
+    expect(outcome.status).toBe("queued");
+    const rows = await fx.handle.repos.judgeResults.listForDraft(fx.ctx, fx.draft.id);
+    expect(rows.map((r) => r.gate).sort()).toEqual([DISCOVERABILITY_GATE, "g1", "g3_final", "g3_screen"]);
+    const disc = rows.find((r) => r.gate === DISCOVERABILITY_GATE);
+    expect(disc?.verdict).toBe("pass");
+    expect(JSON.stringify(disc?.evidence)).toMatch(/advisory/);
+  });
+
+  it("advisory means advisory: a body missing its own subject warns in the row but NEVER blocks the queue", async () => {
+    // The founder's live catch, in miniature: a post about AI saying "AI" zero times.
+    fx = await judgeFixture({
+      body: "We shipped a thing today.",
+      meta: { targetTerms: ["AI"] },
+    });
+    const outcome = await runJudgePipeline(fx.handle.repos, {
+      ctx: fx.ctx,
+      draftId: fx.draft.id,
+      chunks: [],
+      screenDriver: fixedDriver(PASS),
+      finalDriver: fixedDriver(PASS),
+    });
+    expect(outcome.status).toBe("queued"); // I1 stays g3_final-only
+    const rows = await fx.handle.repos.judgeResults.listForDraft(fx.ctx, fx.draft.id);
+    const disc = rows.find((r) => r.gate === DISCOVERABILITY_GATE);
+    expect(disc?.verdict).toBe("fail");
+    expect(JSON.stringify(disc?.evidence)).toMatch(/NEVER says the subject's canonical entity/);
+  });
+
+  it("no meta.targetTerms ⇒ no discoverability row — an older draft judges byte-identically", async () => {
+    fx = await judgeFixture();
+    await runJudgePipeline(fx.handle.repos, {
+      ctx: fx.ctx,
+      draftId: fx.draft.id,
+      chunks: [],
+      screenDriver: fixedDriver(PASS),
+      finalDriver: fixedDriver(PASS),
+    });
+    const rows = await fx.handle.repos.judgeResults.listForDraft(fx.ctx, fx.draft.id);
+    expect(rows.map((r) => r.gate).sort()).toEqual(["g1", "g3_final", "g3_screen"]);
+  });
+
+  it("malformed targetTerms (not a non-empty string array) ⇒ honest fail row, never a silent skip", async () => {
+    fx = await judgeFixture({ meta: { targetTerms: "AI" } });
+    const outcome = await runJudgePipeline(fx.handle.repos, {
+      ctx: fx.ctx,
+      draftId: fx.draft.id,
+      chunks: [],
+      screenDriver: fixedDriver(PASS),
+      finalDriver: fixedDriver(PASS),
+    });
+    expect(outcome.status).toBe("queued");
+    const rows = await fx.handle.repos.judgeResults.listForDraft(fx.ctx, fx.draft.id);
+    const disc = rows.find((r) => r.gate === DISCOVERABILITY_GATE);
+    expect(disc?.verdict).toBe("fail");
+    expect(JSON.stringify(disc?.evidence)).toMatch(/not a non-empty string array/);
   });
 });

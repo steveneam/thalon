@@ -17,6 +17,7 @@ import { retrieveExemplarContext, runExemplarOverlapGate, type ExemplarContext }
 import type { EmbeddingDriver } from "../ingest";
 import { loadPlatformProfile } from "./profiles";
 import { resolveRoutedPlatforms } from "./routing";
+import { deriveTargetTerms, normalizeTermList } from "./target-terms";
 import {
   exemplarPromptVersion,
   fanoutPromptVersion,
@@ -52,6 +53,16 @@ export interface FanoutRequest {
    * default top-k retrieved into context.
    */
   exemplar?: { k?: number };
+  /**
+   * Phase 2c: caller-supplied discoverability term candidates — the
+   * monitored area's intel keywords when this fan-out came from an intel
+   * handoff. Shown to the shell (to weave naturally) and folded into each
+   * draft's declared `meta.targetTerms` AFTER the brief's canonical entities
+   * (the shell declares those) and BEFORE the profile's identity topics
+   * (fanout/target-terms.ts owns the derivation). Folds into the generation
+   * key: runs differing only in candidates are different runs.
+   */
+  targetTerms?: string[];
 }
 
 export interface FanoutDeps {
@@ -124,6 +135,10 @@ export async function runFanout(
   const routing = resolveRoutedPlatforms(profile.routing, request.bucket, request.platforms);
   const platforms = [...new Set(routing.platforms)].sort();
   const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+  // Phase 2c: normalized ONCE — the same list feeds the generation key, the
+  // run's provenance params, the shell prompt, and the per-draft derivation.
+  // Order is semantic (derivation priority), so it is never sorted.
+  const targetTermCandidates = normalizeTermList(request.targetTerms ?? []);
 
   // B2.4: exemplar retrieval runs BEFORE the generation key is computed —
   // exemplar ids fold into the key below so an exemplar-aware run can never
@@ -158,6 +173,10 @@ export async function runFanout(
             ids: [...exemplarContext.exemplarIds].map((e) => `${e.sourceId}:${e.chunkId}`).sort(),
           }
         : undefined,
+      // Phase 2c: candidates change the prompt, so they change the run —
+      // absent, the key material's shape stays exactly pre-Phase-2c
+      // (stableStringify drops undefined).
+      targetTerms: targetTermCandidates.length > 0 ? targetTermCandidates : undefined,
     }),
   );
 
@@ -195,6 +214,8 @@ export async function runFanout(
       // B7.e provenance: which bucket asked for this run and whether the
       // routing table actually decided the platform list.
       ...(request.bucket ? { bucket: request.bucket, routed: routing.routed } : {}),
+      // Phase 2c provenance: the caller's candidate terms as this run saw them.
+      ...(targetTermCandidates.length > 0 ? { targetTerms: targetTermCandidates } : {}),
     };
     const run = await repos.fanoutRuns.create(ctx, {
       sourceId: source.id,
@@ -226,8 +247,8 @@ export async function runFanout(
   // undefined ⇒ the prompt stays byte-identical to pre-B3.8. No generation-key
   // input: identity lives inside the profile, so brandProfileVersion (already
   // in the key) fully determines it.
-  const identityBlock =
-    renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {})) || undefined;
+  const identity = brandIdentitySchema.parse(profile.identity ?? {});
+  const identityBlock = renderBrandIdentity(identity) || undefined;
   const rawDriver = deps.driver ?? gatewayDraftGenerator();
 
   const generated: Draft[] = [];
@@ -246,6 +267,8 @@ export async function runFanout(
         promptVersion,
         platform,
         exemplarContext,
+        targetTermCandidates,
+        profileTopics: identity.topics,
       },
     );
     generated.push(draft);
@@ -283,6 +306,10 @@ interface DraftSpec {
   platform: string;
   /** B2.4: present only for an exemplar-aware run — threaded into the prompt, recorded as draft provenance, and checked by the overlap gate immediately after generation. */
   exemplarContext?: ExemplarContext;
+  /** Phase 2c: the caller's normalized candidate terms (intel keywords) — shown to the shell, then folded into meta.targetTerms after the shell's declared entities. */
+  targetTermCandidates: string[];
+  /** Phase 2c: the active profile's identity topics — the derivation's last-priority fill. */
+  profileTopics: string[];
 }
 
 /** One platform's generation + validation + persistence — shared by the fresh-run loop and the backfill-replay loop above. */
@@ -319,6 +346,9 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     platformProfile,
     exemplarContext: spec.exemplarContext?.contextBlock,
     identityBlock: spec.identityBlock,
+    ...(spec.targetTermCandidates.length > 0
+      ? { targetTermCandidates: spec.targetTermCandidates }
+      : {}),
   });
   if (!result.output) {
     const error = new IrrecoverableGenerationError(
@@ -335,6 +365,17 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     throw error;
   }
 
+  // Phase 2c: the draft DECLARES its discoverability targets — shell-declared
+  // canonical entities first, then the caller's intel keywords, then profile
+  // topics (fanout/target-terms.ts). An all-empty derivation omits the key
+  // entirely, so the judge's opt-in-by-data discoverability lens stays off
+  // and the draft judges byte-identically to a pre-Phase-2c one.
+  const targetTerms = deriveTargetTerms({
+    shellTerms: result.output.targetTerms,
+    candidateTerms: spec.targetTermCandidates,
+    profileTopics: spec.profileTopics,
+  });
+
   const draft = await guard.repos.drafts.create(guard.ctx, {
     fanoutRunId: spec.runId,
     sourceId: spec.sourceId,
@@ -348,6 +389,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
       platformProfileVersion: profileVersion,
       ...(spec.identityBlock ? { identityPromptVersion: identityPromptVersion() } : {}),
       ...(spec.exemplarContext ? { exemplarIds: spec.exemplarContext.exemplarIds } : {}),
+      ...(targetTerms.length > 0 ? { targetTerms } : {}),
     },
   });
 

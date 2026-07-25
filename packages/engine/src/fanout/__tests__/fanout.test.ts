@@ -83,14 +83,14 @@ describe("runFanout (B1.2 end-to-end, keyless + networkless)", () => {
       expect(draft.tenantId).toBe(ctx.tenantId);
       expect(draft.fanoutRunId).toBe(result.runId);
       const meta = draft.meta as Record<string, unknown>;
-      expect(meta.promptVersion).toBe("fanout-generate.v1");
+      expect(meta.promptVersion).toBe("fanout-generate.v2");
       expect(meta.brandProfileVersion).toBe(1);
       expect(meta.platformProfileVersion).toBe(`${draft.platform}.v1`);
     }
 
     const run = await repos.fanoutRuns.get(ctx, result.runId);
     expect(run?.tenantId).toBe(ctx.tenantId);
-    expect(run?.promptVersion).toBe("fanout-generate.v1");
+    expect(run?.promptVersion).toBe("fanout-generate.v2");
     expect(run?.brandProfileVersion).toBe(1);
     // s63: the lifecycle word is real now — a finished run says so.
     expect(run?.status).toBe("complete");

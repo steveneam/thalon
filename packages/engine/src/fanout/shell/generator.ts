@@ -10,7 +10,12 @@ import {
 import { fanoutShellOutputSchema } from "../schemas";
 import { readPromptFile } from "./prompt-file";
 
-const PROMPT_FILE = "fanout-generate.v1.md";
+// v2 (Phase 2c): the discoverability instructions — natural inclusion of the
+// subject's primary entity, purpose framing, cross-entity breadth, subject
+// hashtag — plus the `targetTerms` declaration in the output object. The
+// founder's live edit of the engine's own LinkedIn post is the model
+// (eval/golden/discoverability-seed.jsonl, disc-002).
+const PROMPT_FILE = "fanout-generate.v2.md";
 const EXEMPLAR_PROMPT_FILE = "fanout-exemplar-context.v1.md";
 const IDENTITY_PROMPT_FILE = "fanout-identity-context.v1.md";
 
@@ -38,6 +43,8 @@ export interface GenerateDraftRequest {
   exemplarContext?: string;
   /** B3.8: the profile's rendered brand-identity block (contracts `renderBrandIdentity` — the same text the judge grounds against). Absent when the active profile carries no identity content — identity-less prompts stay byte-identical to pre-B3.8. */
   identityBlock?: string;
+  /** Phase 2c: prioritized discoverability candidates (intel keywords, then profile topics) for the shell to weave naturally and draw `targetTerms` from. Absent when the caller has none — candidate-less prompts carry no candidates line. */
+  targetTermCandidates?: string[];
 }
 
 /** One driver invocation = one gateway call: the raw candidate plus its token spend. */
@@ -80,6 +87,9 @@ export function gatewayDraftGenerator(): DraftGeneratorDriver {
       ...(req.exemplarContext
         ? [`EXEMPLAR CONTEXT (grounding only — never reproduce verbatim):\n${req.exemplarContext}`]
         : []),
+      ...(req.targetTermCandidates && req.targetTermCandidates.length > 0
+        ? [`TARGET TERM CANDIDATES (weave the fitting ones naturally — never force):\n${req.targetTermCandidates.join(", ")}`]
+        : []),
       `SOURCE CONTENT:\n${req.sourceText}`,
     ].join("\n\n");
 
@@ -92,7 +102,7 @@ export function gatewayDraftGenerator(): DraftGeneratorDriver {
       const out = await runClaudeCliJson({
         model: modelId,
         system,
-        prompt: `${prompt}\n\nReturn JSON: {"body": string (the complete draft), "format"?: string}`,
+        prompt: `${prompt}\n\nReturn JSON: {"body": string (the complete draft), "format"?: string, "targetTerms"?: string[] (3-6 discoverability terms, first = the subject's primary canonical entity)}`,
       });
       return {
         candidate: parseCandidateJson(out.text),
