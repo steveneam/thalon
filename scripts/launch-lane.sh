@@ -48,6 +48,18 @@ for _ in $(seq 1 30); do
   sleep 2
   if tmux capture-pane -t "$SESSION:$WINDOW" -p | grep -q '❯'; then
     tmux send-keys -t "$SESSION:$WINDOW" "Read $KICKOFF_REL and execute it." Enter
+    # Ratchet (s72): the editor can swallow that Enter if it is still
+    # initializing when ❯ first paints — the kickoff then sits unsubmitted in
+    # the input box. Submitted vs not: the bottom-most ❯ line is the input box;
+    # if it still carries the kickoff text, re-send Enter until it clears.
+    for _ in $(seq 1 5); do
+      sleep 4
+      last_prompt="$(tmux capture-pane -t "$SESSION:$WINDOW" -p | grep '❯' | tail -1)"
+      case "$last_prompt" in
+        *"Read $KICKOFF_REL"*) tmux send-keys -t "$SESSION:$WINDOW" Enter ;;
+        *) break ;;
+      esac
+    done
     echo "lane '$WINDOW' launched in $ABS_WT (kickoff: $KICKOFF_REL)"
     echo "monitor:  tmux capture-pane -t $SESSION:$WINDOW -p | tail -20"
     echo "kill:     tmux kill-window -t $SESSION:$WINDOW   (after merge + worktree GC)"
