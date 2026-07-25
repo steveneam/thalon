@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   assetEvents,
+  byMarkPriority,
   cadenceBreaches,
   cadenceLine,
   clockLabel,
@@ -189,20 +190,36 @@ export function CalendarSurface() {
     [plan],
   );
 
+  // The derived events (sweep projections, the waiting carry) are computed for
+  // the RANGE ON SCREEN — a month view that only projected the anchor week
+  // would show its other three weeks as quieter than they are.
+  const monthDays = useMemo(
+    () =>
+      anchor && now
+        ? monthCells(anchor, now).map((cell) => ({
+            date: cell.date,
+            key: cell.key,
+            isToday: cell.isToday,
+          }))
+        : [],
+    [anchor, now],
+  );
+  const rangeDays = density === "month" ? monthDays : days;
+
   const allEvents = useMemo(() => {
-    if (!plan || !now || days.length === 0) return [];
+    if (!plan || !now || rangeDays.length === 0) return [];
     return [
       ...planEvents(plan.plannedSlots, plan.assets, breaches),
       ...assetEvents(plan.assets),
-      ...sweepEvents(plan.sweep, now, days),
-      ...waitingEvents(plan.assets, days, now),
+      ...sweepEvents(plan.sweep, now, rangeDays),
+      ...waitingEvents(plan.assets, rangeDays, now),
     ];
-  }, [plan, now, days, breaches]);
+  }, [plan, now, rangeDays, breaches]);
 
-  const weekKeys = useMemo(() => new Set(days.map((d) => d.key)), [days]);
+  const rangeKeys = useMemo(() => new Set(rangeDays.map((d) => d.key)), [rangeDays]);
   const visible = useMemo(
-    () => eventsInScope(allEvents, scope).filter((e) => weekKeys.has(e.day)),
-    [allEvents, scope, weekKeys],
+    () => eventsInScope(allEvents, scope).filter((e) => rangeKeys.has(e.day)),
+    [allEvents, scope, rangeKeys],
   );
   /** The time grid holds everything except waiting work — that has its own lane. */
   const gridByDay = useMemo(
@@ -210,7 +227,7 @@ export function CalendarSurface() {
     [visible],
   );
   const laneByDay = useMemo(() => groupByKey(visible.filter((e) => e.kind === "you")), [visible]);
-  const monthByDay = useMemo(() => groupByKey(eventsInScope(allEvents, scope)), [allEvents, scope]);
+  const monthByDay = useMemo(() => groupByKey(visible), [visible]);
 
   const plannedInView = visible.filter((e) => e.kind === "plan").length;
   const hidden = outsideWindow(
@@ -520,7 +537,7 @@ export function CalendarSurface() {
           </div>
           <div className="cal-month">
             {monthCells(anchor, now).map((cell) => {
-              const marks = monthByDay.get(cell.key) ?? [];
+              const marks = [...(monthByDay.get(cell.key) ?? [])].sort(byMarkPriority);
               const shown = marks.slice(0, MONTH_MARK_BOUND);
               return (
                 <div

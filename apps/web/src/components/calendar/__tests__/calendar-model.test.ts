@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assetEvents,
+  byMarkPriority,
   cadenceBreaches,
   cadenceLine,
   eventsInScope,
@@ -285,6 +286,12 @@ describe("scope, layout and labels", () => {
   it("labels the week the way the sheet does, and names both months when it must", () => {
     expect(weekRangeLabel(weekDays(at(24, 12)))).toBe("20 – 26 July");
     expect(weekRangeLabel(weekDays(new Date(2026, 6, 30)))).toBe("27 July – 2 August");
+  });
+
+  it("ranks a bounded month cell's marks: you, then plans, then done, engine last", () => {
+    const engine = { ...events[1], id: "sweep", kind: "engine" as const };
+    const ranked = [engine, events[1], events[0], events[2]].sort(byMarkPriority);
+    expect(ranked.map((e) => e.kind)).toEqual(["you", "plan", "done", "engine"]);
   });
 
   it("covers a month in whole Monday-start weeks", () => {

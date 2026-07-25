@@ -475,6 +475,24 @@ export function monthCells(anchor: Date, now: Date): MonthCell[] {
   return cells;
 }
 
+/**
+ * A month cell shows three marks and counts the rest, so WHICH three matters:
+ * what waits on you first, then your plans, then what completed, and the
+ * engine's own ticks last — a 4-hourly sweep would otherwise fill every
+ * future cell and bury the work. Nothing is hidden: the count is the total.
+ */
+const MARK_RANK: Record<EventKind, number> = {
+  you: 0,
+  plan: 1,
+  done: 2,
+  closed: 3,
+  engine: 4,
+};
+
+export function byMarkPriority(a: CalEvent, b: CalEvent): number {
+  return MARK_RANK[a.kind] - MARK_RANK[b.kind] || a.at.getTime() - b.at.getTime();
+}
+
 export function groupByKey<T extends { day: string }>(items: T[]): Map<string, T[]> {
   const grouped = new Map<string, T[]>();
   for (const item of items) {
