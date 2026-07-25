@@ -66,3 +66,22 @@ bridge-repaint approach:
 sheet beside it in a browser to see the target. The live canvas (fix
 rounds, comments) stays https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
 — re-export here after any founder-approved canvas change.
+
+## Proposals — NOT yet verdicted (do not port)
+
+Sheets in this section are the lead's proposals against a founder-directed
+question. They are drawn in the sheets' language and live on the same
+canvas, but **no lane may port one until the founder has ruled on it** —
+they carry open questions on purpose.
+
+- **`Source Media.dc.html`** (s75, B-media.0, founder-directed s74: *"the
+  media thumbnails … needs a proper and clever UI/UX with the source
+  thumbnails … see how others do it"*) — the source-thumbnail component
+  spec: five states of one reserved box (resolved · resolved-portrait ·
+  empty · **broken** · **loading**, the last two new), three sizes at a
+  single 1.6 ratio, the portrait crop decision, and the ruling that
+  scrub-on-hover is out. Reasoning, the per-surface join map and the open
+  founder question live in `../source-media-plan.md`. Note it interacts
+  with rule 6 above: `.thumb-sm` is already a proven collision AND already
+  carries a per-surface override on Approve, so the shared component this
+  sheet proposes must not flatten those.

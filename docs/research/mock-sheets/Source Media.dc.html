@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet data-dc-atomics>
+        <meta name="design_doc_mode" content="canvas" />
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .frame { position: absolute; background: var(--n-bg); border: 1px solid var(--n-500); border-radius: 16px; padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 14px; }
+          .frame-label { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--n-700); cursor: grab; }
+          .frame-title { font-size: 16px; font-weight: 600; color: var(--n-1000); }
+          .frame-note { font-size: 12.5px; color: var(--n-800); max-width: 62ch; line-height: 1.5; }
+          .verdict { font-size: 12.5px; color: var(--n-900); line-height: 1.5; border-left: 2px solid var(--act); padding-left: 10px; }
+          .verdict b { color: var(--n-1000); font-weight: 600; }
+
+          /* ── The states matrix ── */
+          .states { display: flex; gap: 26px; flex-wrap: wrap; }
+          .state { display: flex; flex-direction: column; gap: 8px; width: 132px; }
+          .state-name { font-family: var(--font-data); font-size: 10.5px; color: var(--n-1000); }
+          .state-desc { font-size: 11.5px; color: var(--n-700); line-height: 1.45; }
+
+          /* ── Resolved media stand-ins (mock only — real media replaces these) ── */
+          .m-land { background: linear-gradient(148deg, oklch(0.46 0.075 232), oklch(0.31 0.055 268) 58%, oklch(0.24 0.035 286)); }
+          .m-port { background: linear-gradient(160deg, oklch(0.52 0.088 62), oklch(0.34 0.062 34) 62%, oklch(0.25 0.04 22)); }
+
+          /* the reserved box — every state shares it, nothing reflows */
+          .tb { border-radius: 6px; flex: none; border: 1px solid var(--n-400); overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+          .tb-sm { width: 64px; height: 40px; }
+          .tb-md { width: 148px; height: 96px; border-radius: 8px; }
+          .tb-lg { width: 232px; height: 145px; border-radius: 10px; }
+          .tb-fill { position: absolute; inset: 0; }
+          .tb-striped { background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 7px, var(--n-100) 7px, var(--n-100) 14px); }
+          .tb-legend { font-family: var(--font-data); font-size: 9px; color: var(--n-800); position: relative; }
+          .tb-md .tb-legend, .tb-lg .tb-legend { font-size: 10px; }
+
+          /* portrait: the media contained, its own blurred crop behind it */
+          .tb-backdrop { position: absolute; inset: -12%; filter: blur(9px) saturate(0.55); opacity: 0.42; }
+          .tb-contain { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); aspect-ratio: 9 / 16; }
+          .tb-cover-port { position: absolute; left: 0; width: 100%; top: 50%; transform: translateY(-50%); aspect-ratio: 9 / 16; }
+
+          /* broken: had a URL, it died */
+          .tb-broken { background: var(--n-100); }
+          .tb-broken .tb-legend { color: var(--n-700); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+          .tb-slash { width: 15px; height: 15px; border: 1px solid var(--n-600); border-radius: 3px; position: relative; }
+          .tb-slash::after { content: ""; position: absolute; left: -2px; top: 6px; width: 19px; height: 1px; background: var(--n-600); transform: rotate(-38deg); }
+
+          /* loading: the reserved box, quietly breathing */
+          .tb-load { background: var(--n-100); }
+          .tb-shimmer { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, var(--n-200) 50%, transparent 80%); animation: sweep 1.4s linear infinite; }
+          @keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+          @media (prefers-reduced-motion: reduce) { .tb-shimmer { animation: none; opacity: 0.5; } }
+
+          /* ── side-by-side option compare ── */
+          .opts { display: flex; gap: 20px; }
+          .opt { flex: 1; display: flex; flex-direction: column; gap: 9px; border: 1px solid var(--n-400); border-radius: 12px; padding: 14px; background: var(--n-100); }
+          .opt.win { border-color: var(--act); background: var(--act-subtle); }
+          .opt-name { font-size: 12.5px; font-weight: 600; color: var(--n-1000); display: flex; align-items: center; gap: 7px; }
+          .opt-tag { font-family: var(--font-data); font-size: 9.5px; padding: 1px 6px; border-radius: 4px; background: var(--act); color: var(--act-text); }
+          .opt-tag-no { background: var(--n-300); color: var(--n-800); }
+          .opt-body { font-size: 11.5px; color: var(--n-800); line-height: 1.5; }
+          .opt-stage { display: flex; align-items: center; justify-content: center; padding: 12px 0; background: var(--n-bg); border-radius: 8px; }
+
+          /* hover peek */
+          .peek-wrap { position: relative; display: flex; align-items: center; justify-content: center; height: 132px; width: 100%; overflow: hidden; }
+          .peek-row { display: flex; align-items: center; gap: 10px; max-width: 100%; min-width: 0; }
+          .peek-row .src-lead, .peek-row .excerpt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .peek-pop { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); box-shadow: 0 10px 26px oklch(0 0 0 / 0.55); border-color: var(--n-600); }
+
+          /* ── in-context list ── */
+          .src-lead { font-size: 13.5px; font-weight: 600; }
+          .ctx-note { font-family: var(--font-data); font-size: 10px; color: var(--n-700); }
+        </style>
+      </helmet>
+
+      <!-- ═══ 1 · the five states ═══ -->
+      <div class="frame" style="left:0px;top:0px;width:1040px">
+        <div class="frame-label" data-drags-parent="1">states</div>
+        <div class="frame-title">One box, five states, and the box never moves</div>
+        <div class="frame-note">Every state renders inside the same reserved <span class="t-data">64×40</span> box, so a list of forty rows never reflows as media resolves. Two of these already ship (Transcription, Intel); two are new; one is the bug we have today.</div>
+        <div class="states">
+          <div class="state">
+            <div class="tb tb-sm"><div class="tb-fill m-land"></div></div>
+            <div class="state-name">resolved</div>
+            <div class="state-desc">Landscape media, cover-cropped. Ships today on Transcription + Intel.</div>
+          </div>
+          <div class="state">
+            <div class="tb tb-sm">
+              <div class="tb-backdrop m-port"></div>
+              <div class="tb-contain m-port"></div>
+            </div>
+            <div class="state-name">resolved · portrait</div>
+            <div class="state-desc">A 9:16 Short. Contained, never cropped. See the portrait-fill frame.</div>
+          </div>
+          <div class="state">
+            <div class="tb tb-sm tb-striped"><span class="tb-legend">video</span></div>
+            <div class="state-name">empty</div>
+            <div class="state-desc">No media exists yet. The truth, not a degradation. Keep it.</div>
+          </div>
+          <div class="state">
+            <div class="tb tb-sm tb-broken"><span class="tb-legend"><span class="tb-slash"></span>gone</span></div>
+            <div class="state-name">broken <span style="color:var(--act)">· new</span></div>
+            <div class="state-desc">We had a poster URL and it died. Today this paints a browser broken-image glyph.</div>
+          </div>
+          <div class="state">
+            <div class="tb tb-sm tb-load"><div class="tb-shimmer"></div></div>
+            <div class="state-name">loading <span style="color:var(--act)">· new</span></div>
+            <div class="state-desc">Box reserved, bytes in flight. Settles without a jump.</div>
+          </div>
+        </div>
+        <div class="verdict"><b>The call:</b> “empty” and “broken” must not look alike. An empty row is honest and permanent; a broken row is a fact about the source that the operator may want to act on.</div>
+      </div>
+
+      <!-- ═══ 2 · sizes ═══ -->
+      <div class="frame" style="left:1076px;top:0px;width:480px">
+        <div class="frame-label" data-drags-parent="1">sizes</div>
+        <div class="frame-title">Three sizes, one ratio</div>
+        <div class="frame-note">All three hold <span class="t-data">1.6</span>, the same ratio Mux cuts storyboard tiles at (256×160). The sheets already chose it.</div>
+        <div style="display:flex;align-items:flex-end;gap:18px">
+          <div style="display:flex;flex-direction:column;gap:7px;align-items:center">
+            <div class="tb tb-sm"><div class="tb-fill m-land"></div></div>
+            <div class="t-data" style="font-size:10px">sm · 64×40</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;align-items:center">
+            <div class="tb tb-md"><div class="tb-fill m-land"></div></div>
+            <div class="t-data" style="font-size:10px">md · 148×96</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;align-items:flex-start">
+          <div class="tb tb-lg"><div class="tb-fill m-land"></div></div>
+          <div class="t-data" style="font-size:10px">lg · 232×145 · proposed</div>
+        </div>
+        <div class="verdict"><b>Open:</b> two sheets draw <span class="t-data">.thumb-lg</span> but no shipped surface uses one. Either it earns a home (Dossier hero) or it is cut. An unused size is a size that drifts.</div>
+      </div>
+
+      <!-- ═══ 3 · portrait fill ═══ -->
+      <div class="frame" style="left:0px;top:573px;width:660px">
+        <div class="frame-label" data-drags-parent="1">portrait fill</div>
+        <div class="frame-title">The one case cover-crop gets badly wrong</div>
+        <div class="frame-note">Cover-cropping a 9:16 Short into a 1.6 box discards <b>~65% of the frame height</b> and reliably cuts the subject's head off. A 16:9 poster only loses ~10% of its width — inside the central-80% safe area creators already design for, so landscape stays cropped.</div>
+        <div class="opts">
+          <div class="opt">
+            <div class="opt-name">Cover-crop <span class="opt-tag opt-tag-no">today</span></div>
+            <div class="opt-stage">
+              <div class="tb tb-md">
+                <div class="tb-cover-port m-port"></div>
+              </div>
+            </div>
+            <div class="opt-body">The middle band of a tall frame. Subject gone.</div>
+          </div>
+          <div class="opt win">
+            <div class="opt-name">Contain + own backdrop <span class="opt-tag">proposed</span></div>
+            <div class="opt-stage">
+              <div class="tb tb-md">
+                <div class="tb-backdrop m-port"></div>
+                <div class="tb-contain m-port"></div>
+              </div>
+            </div>
+            <div class="opt-body">Whole frame kept, centred, against a blurred dim of itself. Row height unchanged.</div>
+          </div>
+        </div>
+        <div class="verdict"><b>Needs one cheap plumbing line:</b> YouTube's oEmbed reply already carries <span class="t-data">thumbnail_width/height</span> and we currently throw them away. Capturing them costs no extra call and no quota. It is the only thing standing between us and this.</div>
+      </div>
+
+      <!-- ═══ 4 · hover ═══ -->
+      <div class="frame" style="left:696px;top:573px;width:860px">
+        <div class="frame-label" data-drags-parent="1">hover</div>
+        <div class="frame-title">Scrub-on-hover is out. So what does hover do?</div>
+        <div class="frame-note">The storyboard pattern (sprite sheet + WebVTT index) needs us to <i>own the transcode</i>. We don't. Our densest surface holds a YouTube URL and one poster. Not a taste call; the artifact doesn't exist.</div>
+        <div class="opts">
+          <div class="opt win">
+            <div class="opt-name">Nothing <span class="opt-tag">proposed</span></div>
+            <div class="opt-stage">
+              <div class="peek-wrap">
+                <div class="peek-row">
+                  <div class="tb tb-sm"><div class="tb-fill m-land"></div></div>
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <div class="src-lead">Build-step pipeline walkthrough</div>
+                    <div class="excerpt">Video · 12:40 · 84 chunks</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="opt-body">The row already has a hover state and Enter already opens the source. A thumb that does nothing on hover is not a gap.</div>
+          </div>
+          <div class="opt">
+            <div class="opt-name">2× peek <span class="opt-tag opt-tag-no">costs</span></div>
+            <div class="opt-stage">
+              <div class="peek-wrap">
+                <div class="peek-row" style="opacity:0.45">
+                  <div class="tb tb-sm"><div class="tb-fill m-land"></div></div>
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <div class="src-lead">Build-step pipeline walkthrough</div>
+                    <div class="excerpt">Video · 12:40 · 84 chunks</div>
+                  </div>
+                </div>
+                <div class="tb tb-md peek-pop"><div class="tb-fill m-land"></div></div>
+              </div>
+            </div>
+            <div class="opt-body">Bigger poster on dwell. Same frame, no new information, and it occludes the two rows under the cursor in a list built for j/k scanning.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ 5 · in context ═══ -->
+      <div class="frame" style="left:0px;top:1087px;width:1556px">
+        <div class="frame-label" data-drags-parent="1">in context</div>
+        <div class="frame-title">A Transcription list with the states mixed: the honest render</div>
+        <div class="frame-note">This is what the surface actually looks like when the join is truthful: some rows have media, some never will, one is broken. The rhythm holds because the box is reserved either way.</div>
+        <div class="card">
+          <div class="row">
+            <div class="tb tb-sm"><div class="tb-fill m-land"></div></div>
+            <div style="flex:1;min-width:0">
+              <div class="src-lead">Build-step pipeline walkthrough</div>
+              <div class="excerpt">Video · 12:40 · 84 chunks · grounds <a href="#">3 drafts</a></div>
+            </div>
+            <span class="ctx-note">resolved · oEmbed</span>
+            <div class="btn btn-ghost btn-sm">Copy transcript</div>
+            <span class="t-data">Tue</span>
+          </div>
+          <div class="row">
+            <div class="tb tb-sm">
+              <div class="tb-backdrop m-port"></div>
+              <div class="tb-contain m-port"></div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="src-lead">Cold-open hook · vertical cut</div>
+              <div class="excerpt">Short · 0:38 · 9 chunks · grounds <a href="#">1 draft</a></div>
+            </div>
+            <span class="ctx-note">resolved · portrait</span>
+            <div class="btn btn-ghost btn-sm">Copy transcript</div>
+            <span class="t-data">Mon</span>
+          </div>
+          <div class="row">
+            <div class="tb tb-sm tb-broken"><span class="tb-legend"><span class="tb-slash"></span>gone</span></div>
+            <div style="flex:1;min-width:0">
+              <div class="src-lead">Conference keynote · Q2 archive</div>
+              <div class="excerpt">Video · 41:20 · 260 chunks · grounds <a href="#">2 drafts</a> · <a href="#">source unreachable ↗</a></div>
+            </div>
+            <span class="ctx-note">poster 404</span>
+            <div class="btn btn-ghost btn-sm">Copy transcript</div>
+            <span class="t-data">18 Jul</span>
+          </div>
+          <div class="row">
+            <div class="tb tb-sm tb-striped"><span class="tb-legend">article</span></div>
+            <div style="flex:1;min-width:0">
+              <div class="src-lead">Deterministic rendering docs</div>
+              <div class="excerpt">Article · 2,100 words · 31 chunks · grounds <a href="#">2 drafts</a></div>
+            </div>
+            <span class="ctx-note">no media · correct</span>
+            <div class="btn btn-ghost btn-sm">Copy text</div>
+            <span class="t-data">18 Jul</span>
+          </div>
+          <div class="row">
+            <div class="tb tb-sm tb-load"><div class="tb-shimmer"></div></div>
+            <div style="flex:1;min-width:0">
+              <div class="src-lead">Studio walkthrough · just ingested</div>
+              <div class="excerpt">Video · 8:04 · chunking…</div>
+            </div>
+            <span class="ctx-note">loading</span>
+            <div class="btn btn-quiet btn-sm">Copy transcript</div>
+            <span class="t-data">now</span>
+          </div>
+        </div>
+        <div class="verdict"><b>What this frame deliberately does not show:</b> an Approve row with a picture on it. A draft is text and owns no media until the import door ships — borrowing a thumbnail from its run or its grounding source would invent a provenance on the one surface where the operator is deciding whether to publish.</div>
+      </div>
+    </x-dc>
+    <script
+      type="text/x-dc"
+      data-dc-script
+      data-props='{}'
+    >
+      class Component extends DCLogic {
+        renderVals() { return {}; }
+      }
+    </script>
+  </body>
+</html>
