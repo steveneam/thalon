@@ -1,0 +1,67 @@
+/*
+ * Profiles — the surface's own atomics, PORTED 1:1 from the helmet <style> of
+ * docs/research/mock-sheets/Profiles.dc.html (DOCTRINE 0: the sheet is the
+ * blueprint). Shared classes (.card, .card-head, .pill, .btn, type roles)
+ * come from app/app/workspace.css — the shell contract, READ-ONLY from here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.profiles-surface` — the cross-lane contract
+ * (mock-sheets README rule 6, executable in lib/__tests__/surface-css-scope
+ * .test.ts). `.step`, `.field`, `.input` and `.on` are exactly the kind of
+ * generic names other sheets reuse with different values, so the anchor is
+ * what keeps this file from restyling its neighbours.
+ *
+ * `.avatar` is in this sheet's helmet too, but already lives in workspace.css
+ * (the shell's topbar wears it) — the shared class is used as-is.
+ */
+
+.profiles-surface .wiz-grid { flex: 1; display: grid; grid-template-columns: 220px 1fr 330px; gap: 14px; align-items: start; }
+.profiles-surface .step { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--r-ctl); font-size: 13px; color: var(--n-900); }
+.profiles-surface .step.done { color: var(--n-1000); }
+.profiles-surface .step.on { background: var(--n-300); color: var(--n-1000); font-weight: 500; }
+.profiles-surface .step-dot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--n-600); display: flex; align-items: center; justify-content: center; font-size: 10.5px; flex: none; }
+.profiles-surface .step.done .step-dot { border-color: var(--ok); color: var(--ok); }
+.profiles-surface .step.on .step-dot { border-color: var(--act); background: var(--act); color: var(--act-text); }
+.profiles-surface .field { display: flex; flex-direction: column; gap: 6px; }
+.profiles-surface .field-label { font-size: 12.5px; font-weight: 500; color: var(--n-900); }
+.profiles-surface .input { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; color: var(--n-1000); }
+.profiles-surface .input .ph { color: var(--n-800); }
+.profiles-surface .tone-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border: 1px solid var(--n-400); border-radius: var(--r-pill); font-size: 12.5px; color: var(--n-900); cursor: pointer; }
+.profiles-surface .tone-chip.on { border-color: var(--act); color: var(--n-1000); background: var(--act-subtle); }
+.profiles-surface .powers-row { display: flex; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--n-400); font-size: 12px; align-items: flex-start; }
+.profiles-surface .powers-row:first-child { border-top: none; }
+.profiles-surface .powers-row b { font-weight: 600; font-size: 12.5px; }
+
+/*
+ * ── App adaptations (each NAMED; the 1440×940 render stays indistinguishable
+ * from the sheet) ──
+ * The sheet draws the wizard's controls as static divs. Real ones are
+ * elements the keyboard and screen reader can reach: the `.input` boxes are
+ * real inputs/textareas, the tone chips and rail steps are buttons, and the
+ * header's version pill is the button its disclosure hangs off. Each keeps
+ * the sheet's exact box, type and colour — only the element changes.
+ */
+.profiles-surface input.input,
+.profiles-surface textarea.input { width: 100%; display: block; font-family: inherit; }
+.profiles-surface textarea.input { resize: vertical; line-height: 1.55; }
+.profiles-surface .input::placeholder { color: var(--n-800); }
+.profiles-surface .input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.profiles-surface .input:disabled { cursor: not-allowed; }
+.profiles-surface .input.mono { font-family: var(--font-data); font-size: 12px; }
+
+.profiles-surface button.tone-chip { background: transparent; font-family: inherit; }
+.profiles-surface button.tone-chip:disabled { cursor: not-allowed; opacity: 0.55; }
+.profiles-surface button.step { width: 100%; font-family: inherit; background: transparent; border: none; cursor: pointer; text-align: left; }
+.profiles-surface button.step:hover { background: var(--n-200); }
+.profiles-surface button.step.on { background: var(--n-300); }
+.profiles-surface button.step:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; }
+.profiles-surface .as-text-btn { background: none; border: none; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.profiles-surface button.pill { font-family: inherit; border: none; cursor: pointer; }
+
+/* The version history behind the header pill, and the review step's summary —
+   both in the sheet's own row grammar (the keeper re-entry rule: a keeper
+   comes back as a STATE behind resting chrome, never as extra chrome). */
+.profiles-surface .ver-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
+.profiles-surface .ver-row:first-child { border-top: none; }
+.profiles-surface .sum-grid { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; font-size: 12.5px; margin: 0; }
+.profiles-surface .sum-grid dt { color: var(--n-900); }
+.profiles-surface .sum-grid dd { color: var(--n-1000); margin: 0; }

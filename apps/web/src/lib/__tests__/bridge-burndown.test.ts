@@ -44,11 +44,12 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // rather than ported — horizon-card.tsx and demo-banner.tsx were folded
   // into it and deleted. heat-grade below still serves other surfaces.
   ["components/intel/heat-grade.tsx", 1],
-  ["components/leads/lead-card.tsx", 13],
-  ["components/leads/leads-surface.tsx", 13],
-  ["components/leads/weights-provenance.tsx", 7],
+  // leads/ burned to zero at the s75 exact-mock rebuild (DOCTRINE 0): the
+  // surface speaks Leads.dc.html's own classes, and step 2 deleted the old
+  // implementation (lead-card.tsx, weights-provenance.tsx) outright.
   // library/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
-  ["components/profiles/profile-editor.tsx", 13],
+  // profiles/ burned to zero at the s75 exact-mock rebuild (DOCTRINE 0): the
+  // wizard speaks Profiles.dc.html's own classes and the old editor is gone.
   // runs/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
   ["components/settings/integrations-panel.tsx", 30],
   ["components/settings/settings-panel.tsx", 7],

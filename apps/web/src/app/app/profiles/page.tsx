@@ -1,5 +1,5 @@
-import { ProfileEditor } from "@/components/profiles/profile-editor";
+import { ProfilesSurface } from "@/components/profiles/profiles-surface";
 
 export default function ProfilesPage() {
-  return <ProfileEditor />;
+  return <ProfilesSurface />;
 }
