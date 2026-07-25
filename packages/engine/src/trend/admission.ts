@@ -211,36 +211,6 @@ export function admissionOrigin(areaId: string): string {
   return `auto-admission:${areaId}`;
 }
 
-const DAY_MS = 24 * 3_600_000;
-
-/**
- * Created-admission counts per area for the UTC day containing `nowMs`,
- * read from the sources the door already wrote: `meta.origin` carries the
- * area stamp and `meta.trend.capturedAtMs` the ARGUMENT clock of the sweep
- * that admitted — so the count is replayable and never depends on the DB's
- * own row clock (SPINE §1). In-memory filter over the tenant's exemplar
- * rows: bounded by the cap itself (≤ areas × maxAdmissionsPerDay rows/day).
- */
-export async function countTodayAdmissions(
-  ctx: TenantCtx,
-  repos: Repos,
-  nowMs: number,
-): Promise<Map<string, number>> {
-  const dayStart = Math.floor(nowMs / DAY_MS) * DAY_MS;
-  const counts = new Map<string, number>();
-  for (const source of await repos.sources.listByKind(ctx, ["exemplar"])) {
-    const meta = source.meta as { origin?: unknown; trend?: { capturedAtMs?: unknown } } | null;
-    const origin = meta?.origin;
-    if (typeof origin !== "string" || !origin.startsWith("auto-admission:")) continue;
-    const capturedAtMs = meta?.trend?.capturedAtMs;
-    if (typeof capturedAtMs !== "number") continue;
-    if (capturedAtMs < dayStart || capturedAtMs >= dayStart + DAY_MS) continue;
-    const areaId = origin.slice("auto-admission:".length);
-    counts.set(areaId, (counts.get(areaId) ?? 0) + 1);
-  }
-  return counts;
-}
-
 export interface AdmissionRefusal {
   areaId: string;
   externalId: string;
@@ -260,7 +230,7 @@ export interface AreaAdmissionSummary {
   reEncountered: number;
   /** Why-counts for everything turned away — the operator sees the knob to turn. */
   rejected: { bodyLength: number; floors: number; velocity: number; denylist: number; cap: number };
-  /** Slots left in this area's UTC-day cap after this sweep. */
+  /** Slots left in this area's UTC-day cap after this sweep — read from the durable trend_admissions ledger (L0), races included. */
   capRemaining: number;
 }
 
@@ -324,10 +294,14 @@ export interface RunAdmissionsDeps {
  * on would only echo refusals — while the sweep itself continues unharmed.
  * Any other door error propagates (fail loud, the legacy door's contract).
  *
- * Cap honesty: the day-count is read once per pass and advanced in memory —
- * two sweeps racing the same tenant could overshoot the cap by a sweep's
- * worth; the scheduler is serial per tenant today, and the durable
- * constraint belongs to the B-learn contract window's admission tables.
+ * Cap honesty (durable since L0): every CREATED admission first claims one
+ * slot in the trend_admissions ledger — claims serialize on the unique
+ * (tenant, area, day, slot) index, so two sweeps racing one tenant can
+ * NEVER overshoot the cap (the s72 in-memory read-then-advance count is
+ * gone). Same-content re-claims replay idempotently on (area, day,
+ * content_hash): a claim whose ingest failed last sweep returns its
+ * existing slot instead of burning another, and a slot claimed for an
+ * ingest that never completes stays claimed — undershoot, never overshoot.
  */
 export async function runAdmissions(
   ctx: TenantCtx,
@@ -336,7 +310,7 @@ export async function runAdmissions(
   deps: RunAdmissionsDeps = {},
 ): Promise<AdmissionsResult> {
   const config = admissionConfigSchema.parse(args.config ?? {});
-  const todayCounts = await countTodayAdmissions(ctx, repos, args.nowMs);
+  const todayCounts = await repos.trendAdmissions.countsForDay(ctx, args.nowMs);
 
   const summaries = new Map<string, AreaAdmissionSummary>();
   const knobsByArea = new Map<string, AdmissionKnobs>();
@@ -394,12 +368,28 @@ export async function runAdmissions(
     }
 
     // The door hashes the PII-STRIPPED text — the pre-check must match it
-    // byte-for-byte or the dedup lies.
+    // byte-for-byte or the dedup lies (and the ledger keys on the same hash).
     const contentHash = sha256Hex(stripPii(item.text).text);
     const existing = await repos.sources.getByContentHash(ctx, contentHash);
-    if (!existing && summary.capRemaining <= 0) {
-      summary.rejected.cap++;
-      continue;
+    if (!existing) {
+      // NEW content takes a durable cap slot BEFORE the door; a known
+      // source re-encounter never claims (fresh snapshots, no slot).
+      const claim = await repos.trendAdmissions.claim(ctx, {
+        areaId: row.areaId,
+        nowMs: args.nowMs,
+        cap: knobs.maxAdmissionsPerDay,
+        contentHash,
+        source: args.source,
+        externalId: item.externalId,
+      });
+      if (!claim.claimed) {
+        summary.rejected.cap++;
+        summary.capRemaining = Math.max(0, knobs.maxAdmissionsPerDay - claim.capUsed);
+        continue;
+      }
+      // Slots are monotonic within the day, so the claimed slot IS the
+      // committed count at claim time — remaining stays honest under races.
+      summary.capRemaining = Math.max(0, knobs.maxAdmissionsPerDay - claim.claim.slot);
     }
 
     try {
@@ -429,7 +419,6 @@ export async function runAdmissions(
       );
       if (ingest.created) {
         summary.admitted++;
-        summary.capRemaining--;
         result.admitted.push({ externalId: item.externalId, sourceId: ingest.sourceId, areaId: row.areaId });
       } else {
         summary.reEncountered++;

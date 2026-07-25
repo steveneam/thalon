@@ -67,7 +67,6 @@ export {
   admissionKnobOverridesSchema,
   admissionKnobsSchema,
   admissionOrigin,
-  countTodayAdmissions,
   decideAdmission,
   emptyAdmissions,
   resolveAdmissionKnobs,
