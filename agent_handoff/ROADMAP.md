@@ -19,27 +19,35 @@
 Ordered by what I'd actually do. Phase 1 is buildable with zero founder input, so
 `gogogo` always has productive work; Phases 2–3 are his GOs, surfaced at the opener.
 
-### Phase 0 — FINISH THE TUNING LAP, THEN POST ALL THREE **[lead-serial + the recorded founder GO]**
-s68 close state: the judge tuning pass CORE LANDED (final v2 + screen v3, goldens
-8→16, **30/30 tier-verdicts** on rows 1-15, final tier perfect twice consecutively;
-commit `7b81e6f`). ONE residual, golden-pinned red: g3-016 — the demonstrative
-"This is the result" passes isolated but fails in full-post context. The day's
-token rail fired twice (2M, then the documented 3.5M raise in .env.local — revisit
-at month-end); the lap rides the fresh daily budget. **s69 sequence: (1) fix the
-context-dependence lap → golden 32/32 → (2) re-judge LinkedIn `491089d0` (punchy
-body WITH the founder's line is the stored state, currently blocked) → (3) attach
-the meme image to all three drafts (store content-addressed → meta.mediaRefs;
-image `.context/social/horse-meme-2026-07-25.png`) → (4) pre-post checks (version
-pins · X app display name neutral · Little-Format call = authored-side, done) →
-(5) set the three ARMED flags → approve → publish LinkedIn + X + Facebook in one
-pass — the founder's GO is RECORDED (s68: "post all 3 together next session").**
-Queued drafts: x `a40e9c48` · facebook `74d77abb` · linkedin `491089d0` (pending).
+### Phase 0 — ✅ EXECUTED s69 (2 of 3 LIVE; the X tail is platform-side)
+**THE ENGINE'S FIRST LIVE SOCIAL POSTS (2026-07-25): LinkedIn
+`urn:li:share:7486713895370256384` (image + @Anthropic org mention, posted as
+the founder) · Facebook `197903966922661_122232823196050754` (image attached).
+X refused PLATFORM-SIDE: HTTP 402 "credits depleted" on the dev app — a founder
+console action (add/renew the X API credit allocation); the draft `a40e9c48`
+stays approved + armed + image-attached, ONE publish call posts it when credits
+exist. Then do the display-name check (first tweet's `source` field must read
+neutral).** Lap details: tuning close (s69 commit `a5fdca3`) — g3-016 red-pin
+LIFTED (3/3 + 4-sweeps green; s68 noise, final v2 unchanged) · two REAL screen
+finds fixed in v4 (mechanism-vs-paraphrase collision g3-008 · topics-as-support
+g3-006) · majority-retry runner (2-of-3, logged) → **32/32** · `491089d0`
+unblocked by GROUNDING DEDUP not prompt churn (root cause of the s68 12-lap
+record: the re-brief APPENDED a near-duplicate brief source; two ~same
+instruction docs destabilize the final tier — ratchet candidate below) ·
+LinkedIn pin was DEAD on first real use (202512 nonexistent; active set swept
+live, pinned 202607, `isReshareDisabledByViewer` removed; commit `2b258f3`) ·
+main-RED #4 fixed (`1420bc8`, oauth1 typecheck).
 
-### Phase 1 — B-int.2: the Integrations surface **[lead-serial — after Phase 0]**
+### Phase 1 — B-int.2: the Integrations surface **[lead-serial — NEXT]**
 The vault core (B-int.1) SHIPPED s68 — its seam is live, so the surface unblocked.
 See the Phase-4-shaped spec below (cards + guided flows + published-view); doors to
 build against: `connectDestination` / `listCredentialCards` / `validateDestination`
-/ `disconnectDestination` in `packages/engine/src/integrations/`.
+/ `disconnectDestination` in `packages/engine/src/integrations/`. **s69 addition to
+the spec: the LinkedIn validate ping only exercises unversioned userinfo, so a dead
+LinkedIn-Version pin stays invisible until a real post (bit us live). The surface's
+validate should ALSO probe one versioned endpoint (the 426-vs-400 malformed-body
+trick in `.context/social/linkedin-version-probe.mts` costs nothing and proves the
+pin).** X standing tail rides NEEDS-STEVEN (credits + display-name check).
 
 ### Phase 2 — Pillar #1 MINT GO **[founder GO — cost plan PRESENTED s68]**
 The chain is GREEN end-to-end (s68 re-brief fixed the s67 judge fails): project
@@ -82,7 +90,9 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 
 ### Content origination (the loops)
 - Pillar #1 mint + render — **[founder GO]** — Phase 2 above.
-- Post loop live per platform — **[founder GO, per platform]** — Phase 3 above.
+- Post loop live per platform — **✅ LIVE s69 on LinkedIn + Facebook (the meme
+  post, engine-authored end-to-end); X = platform credits (NEEDS-STEVEN). Post
+  #2 = the queued Thalon intro [founder GO per post, unchanged].**
 - **B-pub.4 blog images** — **[lead-serial, founder-directed s68]** — the own-site
   door learns to serve object-store images publicly (route + page references), so
   blog posts carry the same visuals as social. The founder's destination framing:
@@ -132,7 +142,29 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   (the s68 CLI pattern; his curation, the crowd's craft). Retrieval side is done
   (CREATE_EXEMPLAR_K).
 
-### Judge quality (observed s67, not blocking)
+### Judge quality (s69: the tuning pass LANDED — remaining items below)
+- **✅ s69 CLOSED the tuning arc (`a5fdca3`): screen v4 + majority-retry golden
+  runner, 32/32.** What the lap proved: the cheap tier carries a few percent
+  per-call verdict noise even on a settled prompt (three sweeps each flipped one
+  DIFFERENT row; isolated re-runs green) — the runner now retries a first-attempt
+  mismatch to a logged 2-of-3 majority, so golden:g3 pins doctrine, not coin
+  flips. Two REAL screen defects fixed in v4: the mechanism rule now owns its
+  collision with the paraphrase rule (part-by-part comparison; g3-008) and
+  topics/tags/labels are explicitly never support (g3-006). g3-016's s68 red
+  never reproduced — final v2 unchanged, 48/48 on the day.
+- **NEW RATCHET CANDIDATE (s69, load-bearing find): re-brief must REPLACE the
+  grounding pointer, not append.** Root cause of the s68 twelve-lap 491089d0
+  record: `meta.groundingSourceIds` carried BOTH the original brief and the s68
+  re-brief (near-identical texts, delta = one attestation block). Two ~same
+  instruction documents destabilize the final tier — objections drift lap to
+  lap, each contradicting the prompt's own rules (one lap discounted "the
+  instruction portion" of a chunk that stated the claim VERBATIM; the next
+  rejected "two months" against the prompt's own worked example). Deduped to
+  the superset brief → both tiers pass, first lap. Executable home: the
+  re-brief/edit path replaces the source id; belt-and-braces = judge-time dedup
+  of near-identical chunks. The "operator brief as grounding" doctrine question
+  (s68) stays open but got evidence: the tier invents an instruction-vs-fact
+  distinction under duplicate pressure.
 - Judge-prompt tuning candidate: the FINAL tier is over-strict on truism claims
   (golden g3-004/005 fail though expected pass) AND lenient on the invented-mechanism/
   topics class (g3-006/008 pass though expected fail) — a real tension worth a
@@ -150,10 +182,13 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   Also decided s68: exemplar+voice fixed generation punch in ONE lap (the
   voice_sample of the founder's own rework was the unlock) — the drafting side
   needs no tuning.**
-- **Platform charLimit is UNENFORCED (found s68):** x.v1.json declares 280 but
-  neither generation nor any gate checks it — a 600-char X draft sailed to queued;
-  the platform API would reject it at publish. Ratchet candidate: a deterministic
-  length gate reading the platform profile (belongs beside the judge, not in it).
+- **Platform charLimit is UNENFORCED (found s68; s69 sharpened it):** x.v1.json
+  declares 280 but neither generation nor any gate checks it — a 600-char X draft
+  once sailed to queued, and the LIVE X draft `a40e9c48` sits at EXACTLY 280
+  (zero margin; one em-dash is weight-1 under X's counting so it fits, but
+  nothing in the engine knew that). Ratchet candidate: a deterministic length
+  gate reading the platform profile (belongs beside the judge, not in it), using
+  X's weighted counting for the x platform.
 - **s68 evidence — the tiers SPLIT on operator-brief-sourced quantity claims:** the
   claim "one prompt becomes a week of platform-ready content" (verbatim in the
   operator's PROMPT source chunk) passed g3_screen citing that chunk in all three
@@ -226,7 +261,18 @@ founder · blanket workspace grant · **Mode B lanes on fresh founder approval**
 guard/typecheck/lint foreground) · ≥40cr mint ping · no AI attribution · wrap =
 guard + commit + push + stamped resume prompt + this file re-ranked.
 
-## Recently shipped (last session — s68)
+## Recently shipped (last session — s69)
+**THE FIRST LIVE POSTS: LinkedIn + Facebook published by the engine** (meme
+post, image-attached, through draft→judge→approve→publishApprovedSocial; X
+waits on platform credits) · **judge tuning arc closed** (screen v4 two real
+fixes · majority-retry runner · 32/32) · **the 491089d0 mystery SOLVED**
+(duplicate near-identical grounding briefs destabilize the final tier —
+dedup unblocked it in one lap) · LinkedIn pin 202512→202607 live-swept +
+field fix (first real versioned call found it dead) · main-RED #4 fixed
+(oauth1 typecheck) · token day closed ≈7.1M (s68 3.5M + s69 lap ~3.6M;
+cap raises documented in .env.local; month-end reset queued).
+
+## Previously shipped (s68)
 **B-int.1 vault core** (envelope crypto AES-256-GCM w/ AAD row-binding · connect/
 open/cards/disconnect doors · read-only validate-ping seam, all 11 destinations ·
 redaction ratchets incl. the log-free/env-indirect boundary scan · vault-first
