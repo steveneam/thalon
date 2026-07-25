@@ -1,91 +1,256 @@
+"use client";
+
 import "@/components/sites/sites.css";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  PRIMARY_CHIPS,
+  VERDICT_PILL,
+  VERDICT_WORDS,
+  applyFilters,
+  chipActive,
+  headerPills,
+  siteChips,
+  toggleChip,
+  verdictStatus,
+  type SiteFilters,
+} from "@/components/sites/sites-model";
+import type { SitesSource } from "@/lib/sites/provider";
+import { useListKeys } from "@/lib/workspace/keyboard";
 
 /**
- * Sites — STEP 1 of the two-step rebuild (s73 execution rules): the pure
- * port of docs/research/mock-sheets/Sites.dc.html. The sheet's own markup,
- * its own classes, its own placeholder content — zero wiring. This is the
- * founder's structural verdict point; step 2 puts the real catalog behind
- * these bands and deletes the old gallery.
+ * Sites — STEP 2 of the two-step rebuild: the byte-true port of
+ * Sites.dc.html with the real catalog behind it. The sheet owns every band,
+ * class and copy grammar; this layer only decides what is TRUE to render:
  *
- * The sheet's bands, top to bottom: the headline row with its two count
- * pills · the build card (prompt box + primary button + the portfolio
- * category chips) · the three-column site grid, each card a striped preview
- * shot over a meta row (name · state pill · dossier door) · the closing
- * record line.
+ *  - the grid is the portfolio the sites origin actually serves, each card
+ *    wearing its own hero as the preview shot (media-first) and the sheet's
+ *    striped placeholder where a record has no card image;
+ *  - the state pill says what the catalog RECORDS — the founder's verdict —
+ *    because no deploy state exists to call a site "live";
+ *  - the category chips are the catalog's own vocabulary (vertical, design
+ *    register, build wave) and filter the grid, with the old gallery's facet
+ *    behaviour intact behind the sheet's own "More →" chip;
+ *  - the build door is not pretended: generation from a prompt isn't wired
+ *    to this surface, so the box and button state the seam instead of
+ *    offering a dead primary button;
+ *  - an unconfigured or unreachable origin is a READ state, never an empty
+ *    portfolio, and it names the fix.
+ *
+ * Keeper woven back in (old-design-keepers, s73): the one list keyboard
+ * grammar — j/k move · ↵ open — marking the selected card with the sheet's
+ * own `.row.sel` accent. Nothing is selected at rest, so the resting chrome
+ * stays exactly the sheet's.
  */
+export function Sites({ source }: { source: SitesSource }) {
+  const router = useRouter();
+  const records = useMemo(
+    () => (source.kind === "local" || source.kind === "remote" ? source.records : []),
+    [source],
+  );
+  const previewOrigin =
+    source.kind === "local" || source.kind === "remote" ? source.previewOrigin : "";
 
-/** The sheet's own chip vocabulary — placeholder content until step 2. */
-const CATEGORIES = [
-  "Café · warm",
-  "Trades · competence",
-  "Restaurant · cinematic",
-  "Distributor · editorial",
-  "Studio · kinetic",
-  "More →",
-];
+  const [filters, setFilters] = useState<SiteFilters>({});
+  const [expanded, setExpanded] = useState(false);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const selectedRef = useRef<HTMLAnchorElement | null>(null);
 
-/** The sheet's own six fixture cards — placeholder content until step 2. */
-const SITES: { name: string; state: "Live" | "Draft" }[] = [
-  { name: "Sparkwright", state: "Live" },
-  { name: "Ridge & Valley", state: "Draft" },
-  { name: "First Crack", state: "Draft" },
-  { name: "Stem & Vow", state: "Draft" },
-  { name: "Sprig & Barrow", state: "Live" },
-  { name: "Hartline", state: "Draft" },
-];
+  const chips = useMemo(() => siteChips(records), [records]);
+  const shown = useMemo(() => applyFilters(records, filters), [records, filters]);
+  const pills = headerPills(records, shown);
 
-export function Sites() {
+  // Derived, not effect-synced: filtering away the selected card simply
+  // leaves nothing selected until the operator moves again.
+  const selected = selectedSlug && shown.some((r) => r.slug === selectedSlug) ? selectedSlug : null;
+
+  const move = (delta: 1 | -1) => (event: KeyboardEvent) => {
+    if (shown.length === 0) return;
+    event.preventDefault();
+    const current = shown.findIndex((r) => r.slug === selected);
+    const next = current === -1 ? 0 : Math.min(Math.max(current + delta, 0), shown.length - 1);
+    setSelectedSlug(shown[next].slug);
+  };
+  useListKeys({
+    enabled: true,
+    bindings: {
+      j: move(1),
+      k: move(-1),
+      Enter: (event) => {
+        if (!selected) return;
+        event.preventDefault();
+        router.push(`/app/sites/${selected}`);
+      },
+    },
+  });
+  useEffect(() => {
+    selectedRef.current?.scrollIntoView?.({ block: "nearest" });
+  }, [selected]);
+
+  const visibleChips = expanded ? chips : chips.slice(0, PRIMARY_CHIPS);
+
   return (
     <div className="content sites-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 className="t-headline">Sites</h1>
-        <span className="pill pill-idle">17 built</span>
-        <span className="pill pill-ok">2 live</span>
+        {source.kind === "unconfigured" ? (
+          <span className="pill pill-idle">no origin configured</span>
+        ) : source.kind === "error" ? (
+          <span className="pill pill-err">origin unreachable</span>
+        ) : (
+          <>
+            <span className="pill pill-idle">{pills.built}</span>
+            <span className="pill pill-ok">{pills.approved}</span>
+          </>
+        )}
         <div style={{ flex: 1 }} />
       </div>
 
       <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div className="prompt-box">
-            A landing page for… describe the business in one line; the engine picks the register.
-          </div>
-          <button type="button" className="btn btn-primary">
+          <input
+            className="prompt-box"
+            aria-label="Describe the site to build"
+            disabled
+            placeholder="A landing page for… describe the business in one line; the engine picks the register."
+          />
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled
+            title="Building a site from a prompt isn’t wired to this surface yet"
+          >
             Build site
           </button>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <span className="t-label" style={{ marginRight: 2 }}>
-            Or start from the portfolio —
-          </span>
-          {CATEGORIES.map((category) => (
-            <span key={category} className="cat-chip">
-              {category}
+        <span className="t-label">
+          Building from a prompt isn’t wired to this surface yet — the portfolio below is what has
+          actually been built, and the chips filter it.
+        </span>
+        {chips.length > 0 && (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <span className="t-label" style={{ marginRight: 2 }}>
+              Or start from the portfolio —
             </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="site-grid">
-        {SITES.map((site) => (
-          <div key={site.name} className="site-card">
-            <div className="site-shot">
-              <span>site preview · hero</span>
-            </div>
-            <div className="site-meta">
-              <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{site.name}</span>
-              <span className={site.state === "Live" ? "pill pill-ok" : "pill pill-idle"}>
-                {site.state}
-              </span>
-              <span className="card-link">Dossier →</span>
-            </div>
+            {visibleChips.map((chip) => {
+              const on = chipActive(chip, filters);
+              return (
+                <button
+                  key={`${chip.kind}:${chip.value}`}
+                  type="button"
+                  className={on ? "cat-chip on" : "cat-chip"}
+                  aria-pressed={on}
+                  onClick={() => setFilters((f) => toggleChip(chip, f))}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+            {chips.length > PRIMARY_CHIPS && (
+              <button
+                type="button"
+                className="cat-chip"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((v) => !v)}
+              >
+                {expanded ? "Fewer ←" : "More →"}
+              </button>
+            )}
           </div>
-        ))}
+        )}
       </div>
 
-      <div style={{ display: "flex" }}>
+      {source.kind === "unconfigured" ? (
+        <div className="card">
+          <div className="row" role="alert">
+            <span className="t-label">
+              No sites origin is configured — a missing setting, not an empty portfolio. Point{" "}
+              <span className="t-data">SITES_BASE_URL</span> at the templates preview service (it
+              serves <span className="t-data">/catalog.json</span> beside the sites), or run the
+              workspace beside the repo for the local read.
+            </span>
+          </div>
+        </div>
+      ) : source.kind === "error" ? (
+        <div className="card">
+          <div className="row" role="alert">
+            <span className="t-label">
+              The sites origin did not answer: {source.message} — a read failure, not an empty
+              portfolio.
+            </span>
+          </div>
+        </div>
+      ) : records.length === 0 ? (
+        <div className="card">
+          <div className="row">
+            <span className="t-label">
+              The origin answered with an empty catalog — nothing has been built here yet.
+            </span>
+          </div>
+        </div>
+      ) : shown.length === 0 ? (
+        <div className="card">
+          <div className="row">
+            <span className="t-label" style={{ flex: 1 }}>
+              No sites match these chips — {records.length} are built, none in this slice.
+            </span>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFilters({})}>
+              Clear filters
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="site-grid">
+          {shown.map((site) => {
+            const status = verdictStatus(site);
+            const isSelected = site.slug === selected;
+            return (
+              <Link
+                key={site.slug}
+                ref={isSelected ? selectedRef : undefined}
+                href={`/app/sites/${site.slug}`}
+                className={isSelected ? "site-card sel" : "site-card"}
+                onFocus={() => setSelectedSlug(site.slug)}
+              >
+                <div className="site-shot">
+                  {site.cardImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- preview-origin images are external to the Next image pipeline on purpose
+                    <img
+                      src={`${previewOrigin}/${site.cardImage}`}
+                      alt=""
+                      width={640}
+                      height={360}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span>site preview · hero</span>
+                  )}
+                </div>
+                <div className="site-meta">
+                  <span className="site-name" title={site.name}>
+                    {site.name}
+                  </span>
+                  <span className={VERDICT_PILL[status]}>{VERDICT_WORDS[status]}</span>
+                  <span className="card-link">Dossier →</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <span className="t-label">
           Every site carries its record — prompt, plan, mint ledger, verdicts — in its dossier.
         </span>
+        <div style={{ flex: 1 }} />
+        {(source.kind === "local" || source.kind === "remote") && (
+          <span className="t-data">
+            {source.kind === "local" ? "local template dir" : "catalog.json"} · previews from{" "}
+            {previewOrigin}
+          </span>
+        )}
       </div>
     </div>
   );

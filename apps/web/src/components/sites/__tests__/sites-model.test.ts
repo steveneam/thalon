@@ -5,7 +5,16 @@ import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 import { assembleSiteRecord, parseCatalog } from "@/lib/sites/catalog";
-import { applyFilters, countLine, facetValues, verdictStatus } from "../model";
+import {
+  applyFilters,
+  chipActive,
+  facetValues,
+  headerPills,
+  siteChips,
+  toggleChip,
+  verdictStatus,
+  verticalLabel,
+} from "../sites-model";
 
 const repoRoot = path.resolve(fileURLToPath(new URL(".", import.meta.url)), "../../../../../..");
 const sitesDir = path.join(repoRoot, "proprietary", "templates", "sites");
@@ -26,7 +35,7 @@ function localRecords() {
     .filter((r): r is NonNullable<typeof r> => r !== null);
 }
 
-describe("sites catalog + gallery model (W-sites, s61)", () => {
+describe("sites catalog + surface model (W-sites s61, re-homed at the exact-mock rebuild)", () => {
   it("assembles every real site with a card image and a verdict, and the model math holds", () => {
     const records = localRecords();
     expect(records.length).toBeGreaterThanOrEqual(15);
@@ -44,7 +53,11 @@ describe("sites catalog + gallery model (W-sites, s61)", () => {
     const filtered = applyFilters(records, { axis: "high-quality-3d" });
     expect(filtered.map((r) => r.slug)).toContain("sparkwright");
     expect(filtered.map((r) => r.slug)).toContain("hartline");
-    expect(countLine(records, filtered)).toMatch(/shown · \d+ sites · \d+ approved/);
+    // The headline pills never hide the total behind a filter.
+    expect(headerPills(records, filtered).built).toBe(
+      `${filtered.length} of ${records.length} built`,
+    );
+    expect(headerPills(records, records).built).toBe(`${records.length} built`);
     // Verdicts are DATA — founder calls flip them between commits, so the
     // logic is tested against synthetic records, never a real site's current
     // status (that pin went red the moment ⑭'s fix round was accepted, s62).
@@ -53,6 +66,39 @@ describe("sites catalog + gallery model (W-sites, s61)", () => {
     }
     const unverdicted = { ...records[0], verdict: undefined };
     expect(verdictStatus(unverdicted)).toBe("awaiting");
+  });
+
+  it("the chip row is the catalog's OWN vocabulary — verticals by weight, then registers, then waves", () => {
+    const records = localRecords();
+    const chips = siteChips(records);
+
+    expect(chips.filter((c) => c.kind === "vertical")).toHaveLength(
+      facetValues(records).verticals.length,
+    );
+    // Kinds keep one reading order: what it is, how it looks, when it shipped.
+    expect([...new Set(chips.map((c) => c.kind))]).toEqual(["vertical", "axis", "wave"]);
+    expect(verticalLabel("trade-electrician")).toBe("Trade · electrician");
+    // Every chip filters something — a chip that matched nothing is a dead label.
+    for (const chip of chips) {
+      expect(applyFilters(records, toggleChip(chip, {})).length).toBeGreaterThan(0);
+    }
+  });
+
+  it("a chip toggles only its own kind — the other picks survive (the old facet rows' behaviour)", () => {
+    const records = localRecords();
+    const chips = siteChips(records);
+    const vertical = chips.find((c) => c.kind === "vertical")!;
+    const axis = chips.find((c) => c.kind === "axis")!;
+
+    const one = toggleChip(vertical, {});
+    const two = toggleChip(axis, one);
+    expect(two.vertical).toBe(vertical.value);
+    expect(two.axis).toBe(axis.value);
+    expect(chipActive(vertical, two)).toBe(true);
+
+    const cleared = toggleChip(vertical, two);
+    expect(cleared.vertical).toBeUndefined();
+    expect(cleared.axis).toBe(axis.value);
   });
 
   it("the image-side assembler (build-sites-catalog.mjs) emits a catalog the workspace parser accepts — the drift guard", () => {

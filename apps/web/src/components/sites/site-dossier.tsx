@@ -6,7 +6,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { SiteRecord } from "@/lib/sites/catalog";
-import { verdictStatus, VERDICT_WORDS } from "./model";
+import { verdictStatus, VERDICT_WORDS } from "./sites-model";
 
 /**
  * One site's dossier (W-sites, s61): live preview beside the record — the

@@ -23,7 +23,9 @@ const SELECTION_SURFACES = [
   // selection with the sheet's own `.row.sel` (DOCTRINE 0).
   "board/leads-board.tsx",
   "leads/lead-card.tsx",
-  "sites/sites-gallery.tsx",
+  // sites left this list at its exact-mock rebuild — the ported grid marks
+  // the keyboard grammar's pick with the sheet's own `.row.sel` accent worn
+  // by a card (components/sites/sites.css), not the legacy recipe.
 ];
 
 describe("the ONE selected-row recipe (s40 ratchet)", () => {
