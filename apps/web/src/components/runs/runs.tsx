@@ -167,7 +167,7 @@ export function Runs() {
   };
 
   return (
-    <div className="content" style={{ gap: 14 }}>
+    <div className="content runs-surface" style={{ gap: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <h1 className="t-headline">Runs</h1>
         <span className="pill pill-idle">

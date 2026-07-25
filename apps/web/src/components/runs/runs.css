@@ -8,7 +8,12 @@
  * The sheet's helmet also declares `.avatar`; that is topbar chrome the
  * shell already ports (workspace.css), so it is deliberately not restated
  * here — one class, one home.
+ *
+ * SCOPED under `.runs-surface` by the lead at the s74 merge gate
+ * (mock-sheets README rule 6, enforced by lib/__tests__/surface-css-scope):
+ * the sheets reuse short class names across surfaces with different values,
+ * so an unscoped file silently restyles its neighbours.
  */
 
-.day-hd { font-size: 12.5px; font-weight: 600; color: var(--n-900); padding: 4px 2px; }
-.run-lead { font-size: 13.5px; font-weight: 600; }
+.runs-surface .day-hd { font-size: 12.5px; font-weight: 600; color: var(--n-900); padding: 4px 2px; }
+.runs-surface .run-lead { font-size: 13.5px; font-weight: 600; }

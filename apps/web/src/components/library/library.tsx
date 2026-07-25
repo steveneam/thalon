@@ -191,7 +191,7 @@ export function Library() {
   });
 
   return (
-    <div className="content" style={{ gap: 16 }}>
+    <div className="content library-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 className="t-headline">Library</h1>
         <span className="pill pill-idle">
