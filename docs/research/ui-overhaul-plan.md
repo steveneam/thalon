@@ -475,6 +475,32 @@ bounces at the gate, and the founder verdict stays the ship gate. This is
 how "i want you responsible" survives delegation: responsibility moves
 from authorship to the gate.
 
+**s74 additions (the first parallel wave, proven in practice).** The wave
+merged four surfaces in one session and taught three things now binding:
+
+ (vi) **SURFACE-CSS SCOPING IS A CORRECTNESS RULE, NOT HYGIENE** — mock-sheets
+ README rule 6, executable as `apps/web/src/lib/__tests__/surface-css-scope.test.ts`.
+ A per-surface stylesheet is still GLOBALLY scoped, and the sheets deliberately
+ reuse class names with different values (`.prompt-box` Create≠Sites, `.split`
+ Approve≠Leads, `.reason` Intel≠Leads, `.today` Calendar≠Dashboard, `.on` across
+ four sheets, plus outright overrides of shared classes). Unscoped files fight
+ silently, decided by emit order, with nothing failing. Every rule is anchored
+ under a `.<surface>-surface` root class.
+
+ (vii) **KEEPERS RE-ENTER AS STATE, NEVER AS CHROME** — the general form of the
+ s73 re-entry rule, from the founder's s74 ruling on Create's context chips:
+ the sheet's resting chrome stays byte-true and the old capability comes back
+ as a behaviour behind it (a panel, a disclosure, a keystroke). "The new design
+ is retained but still able to incorporate the old design functions."
+
+ (viii) **THE LEAD GATE PAYS THE PARALLELISM TAX.** File-disjoint lanes still
+ converge on the same ideas: three lanes independently grew their own
+ `platformLabel`, and pin-file rows collide every merge. Both are trivial for
+ the lead to resolve and invisible to the lanes — but they are why the gate
+ exists, alongside the screenshot diff. Also mechanical: stagger the lanes'
+ full verifies (four concurrent suites on this 6-vCPU box drove load to 34 and
+ turned a 4-minute suite into 14), and never pipe a verify through `tail`.
+
 Three earlier doctrines from the s71 live rounds remain in force below.
 
 The wave-0 claude-design mock (project `f5d304cb`, all 8 surfaces + the theme
