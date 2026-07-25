@@ -1,9 +1,19 @@
 # WRAP — lane `intel-rebuild` (exact-mock rebuild: the Intel surface)
 
 Branch `agent/intel-rebuild`, based on `861ae2f`. TWO commits, one per
-kickoff step. Full `npm run verify` at the repo root before this wrap —
-unfiltered, never piped through tail. Zero spend, zero contracts/db/engine
-edits, no npm install.
+kickoff step. Zero spend, zero contracts/db/engine edits, no npm install.
+
+**Full `npm run verify` at the repo root, GREEN (exit 0)** — unfiltered,
+never piped through tail: grep guard PASS · **1930 passed | 9 skipped, 0
+failed** (282 files) · all seven workspace typechecks clean · lint 0 errors
+(13 pre-existing warnings, none in a file this lane touched).
+
+Ops note for the lead, since it hits every lane: the test phase alone took
+**1038s wall** because four full verifies ran concurrently on the 6-vCPU
+box (load hit 34, swap fully consumed, and the kernel logged a global OOM
+kill — it took a Chrome process, not a test run). Nothing here was
+affected, but staggering the post-merge verifies will be faster AND safer
+than letting the lanes collide.
 
 **The port was screenshot-diffed in-lane, not assumed.** `next dev` can't
 run in a worktree, so the surface was rendered to static HTML against the
