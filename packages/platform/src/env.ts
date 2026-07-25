@@ -14,6 +14,19 @@ export type AuthDriver = "dev" | "clerk";
 const envSchema = z.object({
   DATABASE_URL: z.string().optional(),
   OBJECT_STORE: z.enum(["local", "s3"]).default("local"),
+  /**
+   * S3 object-store driver config (OBJECT_STORE=s3). Bucket + region are both
+   * REQUIRED once the seam selects s3 — `getObjectStore` fails loud on a
+   * missing one, never quietly falls back to local. Credentials ride the
+   * STANDARD AWS chain (env / shared profile / instance role) and are never
+   * read here, never logged.
+   */
+  S3_BUCKET: z.string().optional(),
+  S3_REGION: z.string().optional(),
+  /** Optional key prefix inside the bucket — lets one bucket host several environments; keys stay engine-relative (the prefix never leaks to callers). */
+  S3_PREFIX: z.string().optional(),
+  /** Optional S3-compatible endpoint (MinIO / R2 escape hatch); set, it also switches the client to path-style addressing. */
+  S3_ENDPOINT: z.string().optional(),
   QUEUE_DRIVER: z.enum(["inline", "sqs"]).default("inline"),
   AI_GATEWAY_API_KEY: z.string().optional(),
   AI_GATEWAY_BASE_URL: z.string().optional(),

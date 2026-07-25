@@ -7,7 +7,14 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import { resolveSeams } from "./env";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { readEnv, type EnvSource } from "./env";
 
 export interface ObjectStore {
   put(key: string, data: Buffer | string): Promise<void>;
@@ -63,16 +70,176 @@ export class LocalObjectStore implements ObjectStore {
   }
 }
 
+/** The one S3 surface the driver touches — tests substitute a command-level fake here (zero network). */
+export type S3ClientHandle = Pick<S3Client, "send">;
+
+export interface S3ObjectStoreOptions {
+  bucket: string;
+  /** Key prefix inside the bucket (slashes trimmed; empty = bucket root). Callers never see it — keys in and out stay engine-relative. */
+  prefix?: string;
+  client: S3ClientHandle;
+}
+
+/** The SDK's not-found shapes: GetObject throws NoSuchKey (NotFound on Head); either way the interface answer is `null`, exactly like the local driver's missing file. */
+function isNotFound(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  if (err.name === "NoSuchKey" || err.name === "NotFound") return true;
+  const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata
+    ?.httpStatusCode;
+  return status === 404;
+}
+
 /**
- * Object-store seam: local (dev) → s3 (prod). The S3 driver lands with its
- * bucket (Sprint 3+); until then OBJECT_STORE=s3 fails loud.
+ * S3-backed store (OBJECT_STORE=s3) — byte-identical semantics to the local
+ * driver: put/get round-trip raw bytes, missing keys read as `null`, delete
+ * is idempotent, list returns sorted engine-relative keys. Verified reads
+ * (B4.6) sit ABOVE this seam in object-keys.ts and are untouched — S3-side
+ * tampering surfaces there as ContentAddressMismatchError.
  */
-export function getObjectStore(): ObjectStore {
-  const seams = resolveSeams();
-  if (seams.objectStore === "s3") {
-    throw new Error(
-      "OBJECT_STORE=s3 but the S3 driver is not wired yet (lands Sprint 3+). Set OBJECT_STORE=local.",
+export class S3ObjectStore implements ObjectStore {
+  private readonly bucket: string;
+  private readonly prefix: string;
+  private readonly client: S3ClientHandle;
+
+  constructor(opts: S3ObjectStoreOptions) {
+    this.bucket = opts.bucket;
+    this.prefix = (opts.prefix ?? "").replace(/^\/+|\/+$/g, "");
+    this.client = opts.client;
+  }
+
+  /** Same contract as the local driver's root check: relative, no empty/dot/dotdot segments — an S3 key never escapes the store prefix. */
+  private resolveKey(key: string): string {
+    const segments = key.split("/");
+    if (
+      key.length === 0 ||
+      segments.some((s) => s === "" || s === "." || s === "..")
+    ) {
+      throw new Error(`invalid object key (escapes store root): "${key}"`);
+    }
+    return this.prefix ? `${this.prefix}/${key}` : key;
+  }
+
+  /** Honest failures, the seam's style: name the operation, key, and bucket; keep the SDK error as cause. Never a quiet fallback, never credential material. */
+  private describe(op: string, key: string, err: unknown): Error {
+    const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    return new Error(
+      `S3 object store: ${op} "${key}" failed against bucket "${this.bucket}" — ${detail}. ` +
+        `Check S3_BUCKET / S3_REGION / S3_ENDPOINT and the standard AWS credential chain (env, shared profile, or role); the store never falls back to local.`,
+      { cause: err },
     );
   }
-  return new LocalObjectStore(path.resolve(seams.dataDir, "objects"));
+
+  async put(key: string, data: Buffer | string): Promise<void> {
+    const Key = this.resolveKey(key);
+    // Strings become utf8 bytes exactly as the local driver's writeFileSync does.
+    const body = typeof data === "string" ? Buffer.from(data) : data;
+    try {
+      await this.client.send(
+        new PutObjectCommand({ Bucket: this.bucket, Key, Body: body }),
+      );
+    } catch (err) {
+      throw this.describe("put", key, err);
+    }
+  }
+
+  async get(key: string): Promise<Buffer | null> {
+    const Key = this.resolveKey(key);
+    try {
+      const res = await this.client.send(
+        new GetObjectCommand({ Bucket: this.bucket, Key }),
+      );
+      if (!res.Body) return Buffer.alloc(0);
+      return Buffer.from(await res.Body.transformToByteArray());
+    } catch (err) {
+      if (isNotFound(err)) return null;
+      throw this.describe("get", key, err);
+    }
+  }
+
+  async delete(key: string): Promise<void> {
+    const Key = this.resolveKey(key);
+    try {
+      // S3 DeleteObject succeeds on a missing key — parity with rmSync force:true.
+      await this.client.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key }),
+      );
+    } catch (err) {
+      throw this.describe("delete", key, err);
+    }
+  }
+
+  async list(prefix = ""): Promise<string[]> {
+    const fullPrefix = this.prefix ? `${this.prefix}/${prefix}` : prefix;
+    const strip = this.prefix ? `${this.prefix}/` : "";
+    const keys: string[] = [];
+    let ContinuationToken: string | undefined;
+    try {
+      do {
+        const res = await this.client.send(
+          new ListObjectsV2Command({
+            Bucket: this.bucket,
+            Prefix: fullPrefix,
+            ContinuationToken,
+          }),
+        );
+        for (const obj of res.Contents ?? []) {
+          if (obj.Key && obj.Key.startsWith(strip)) {
+            keys.push(obj.Key.slice(strip.length));
+          }
+        }
+        ContinuationToken = res.IsTruncated ? res.NextContinuationToken : undefined;
+      } while (ContinuationToken);
+    } catch (err) {
+      throw this.describe("list", `${prefix}*`, err);
+    }
+    return keys.sort();
+  }
+}
+
+/** One socket pool per config — getObjectStore is called per operation across the engine; reconnecting each call would be pure waste. */
+let cachedClient: { key: string; client: S3Client } | undefined;
+
+function s3Client(region: string, endpoint?: string): S3Client {
+  const key = `${region}\x00${endpoint ?? ""}`;
+  if (cachedClient?.key !== key) {
+    cachedClient = {
+      key,
+      client: new S3Client({
+        region,
+        // MinIO/R2 escape hatch: a custom endpoint implies path-style addressing.
+        ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
+      }),
+    };
+  }
+  return cachedClient.client;
+}
+
+/**
+ * Object-store seam: local (dev) → s3 (staging/prod durability). Selection is
+ * env-only; s3 with incomplete config fails LOUD here, at first use — never a
+ * quiet fallback to local.
+ */
+export function getObjectStore(env?: EnvSource): ObjectStore {
+  // No env given = the process environment via readEnv's own default — the
+  // boundary ratchet keeps every read of it inside env.ts.
+  const e = readEnv(env);
+  if (e.OBJECT_STORE === "s3") {
+    const missing = [
+      e.S3_BUCKET ? null : "S3_BUCKET",
+      e.S3_REGION ? null : "S3_REGION",
+    ].filter((v): v is string => v !== null);
+    if (missing.length > 0) {
+      throw new Error(
+        `OBJECT_STORE=s3 but ${missing.join(" and ")} ${missing.length === 1 ? "is" : "are"} not set — ` +
+          `the S3 driver refuses to guess and never falls back to local. Set S3_BUCKET + S3_REGION ` +
+          `(optional: S3_PREFIX, S3_ENDPOINT); credentials ride the standard AWS chain, never env vars here.`,
+      );
+    }
+    return new S3ObjectStore({
+      bucket: e.S3_BUCKET as string,
+      prefix: e.S3_PREFIX,
+      client: s3Client(e.S3_REGION as string, e.S3_ENDPOINT),
+    });
+  }
+  return new LocalObjectStore(path.resolve(e.THALON_DATA_DIR, "objects"));
 }
