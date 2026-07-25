@@ -232,7 +232,14 @@ export const handlers = [
     return HttpResponse.json({ area });
   }),
   http.get("/api/intel/trends", () =>
-    HttpResponse.json({ areas: testAreas, cards: listTrendCards(), demo: true, sweep: fixtureSweep }),
+    HttpResponse.json({
+      areas: testAreas,
+      cards: listTrendCards(),
+      demo: true,
+      sweep: fixtureSweep,
+      // The demo era has no per-source sweep stamps — the route sends [] too.
+      sources: [],
+    }),
   ),
   // B6.5 Sweep-now: component tests get the summary shape; the real route's engine path is route-tested.
   http.post("/api/intel/sweep", () =>

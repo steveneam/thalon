@@ -24,16 +24,19 @@ export function suggestedExit(card: TrendCard): { family: CreateFamily; reason: 
   return { family: "post", reason: "pre-picked: thread-shaped topics compose best as posts" };
 }
 
-/** Compact count for provenance/meta rows ("27.7k", "28k", "1.2M") — tabular surfaces keep exact numbers. */
+/**
+ * Compact count for provenance/meta rows — the mock sheet's own number
+ * grammar ("24.6k views", "12.1k", "1.2M"): ONE decimal at every magnitude,
+ * dropped when it is zero. (It used to round whole above 10k, which wrote
+ * "25k" where the sheet writes "24.6k".) Tabular surfaces keep exact numbers.
+ */
 export function compactCount(n: number): string {
   for (const { value, suffix } of [
     { value: 1_000_000, suffix: "M" },
     { value: 1_000, suffix: "k" },
   ]) {
     if (n >= value) {
-      const scaled = n / value;
-      const rounded = scaled >= 10 ? Math.round(scaled) : Math.round(scaled * 10) / 10;
-      return `${rounded}${suffix}`;
+      return `${Math.round((n / value) * 10) / 10}${suffix}`;
     }
   }
   return String(n);
