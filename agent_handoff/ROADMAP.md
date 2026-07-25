@@ -205,6 +205,25 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   **THE LANDING itself** (built last; the skill-compound target; also gates B-int.4's
   mode-1 filings, so it sequences before OAuth-Connect).
 
+### B-learn — THE METRIC-DRIVEN SELF-IMPROVEMENT LOOP **[CHARTER CANDIDATE, founder-demanded s70c — absorbs the exemplar section below]**
+The founder's bar: the engine learns from 10,000+ viral posts + 100+/day
+across topics, metric-driven, so founder edits stop being the teacher.
+Honest inventory says half exists (sweeps poll 100s/day · exemplar retrieval
+at generation · the B-crm.5 learn-weights pattern is the in-repo precedent)
+and half is missing: (L1) arm outlier→exemplar AUTO-ADMISSION (the s68 knobs:
+engagement metric names, floors, velocity multiples — area config), (L2)
+acquisition breadth legally (X paid search = the firehose, rides the
+month-end credit call; Reddit official API; YouTube have; LinkedIn has NO
+trending API — barred from scraping, learned obliquely), (L3) OWN-POST
+engagement pull-back on a schedule (official APIs; the ledger's
+external_post_id is the join key), (L4) attribution → retrieval weighting +
+bandit hook-pattern selection (Vowpal Wabbit BSD if we want real contextual
+bandits), (L5) founder edits remain the TASTE ANCHOR + golden rows while
+metrics accumulate. Capacity check done: 10k posts ≈ 15MB vectors, <$1
+embeds — acquisition is the constraint, never storage. This loop is the
+moat (AGENTS.md rule 5). **Founder charters scope + the X-API spend at the
+next checkpoint.**
+
 ### Exemplar acquisition — LEARN FROM THE CROWD (founder intent, s68 close)
 - **The founder's stated goal (verbatim intent): the engine exists because "there
   might be people out there that would write a more clever/viral/hook/trending
