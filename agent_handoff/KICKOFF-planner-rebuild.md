@@ -79,6 +79,13 @@ doors). DELETE the old implementation of that surface in the same step.
   **never piped through `tail`** (that pattern is the pinned main-RED #3
   root cause: it hides the test result behind the lint tail). Redirect to a
   file and read it. Grep guard before every commit.
+- **Sequence your verify against the other lanes.** This box is 6 vCPU and
+  the wave runs three lanes plus the lead. Four concurrent suites drove the
+  load average to 34 at s74 and turned a ~4-minute suite into ~14. Before
+  starting yours, check (`uptime`, or ask the lead) — if another lane is
+  mid-suite, do the cheap gates first (targeted tests, typecheck, lint) and
+  take the full run when the box is quieter. Say in your wrap when you ran
+  it and what the box looked like.
 
 ## Wrap
 
