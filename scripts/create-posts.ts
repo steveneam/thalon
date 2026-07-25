@@ -47,7 +47,12 @@ async function main(): Promise<void> {
     });
     console.log(`source: ${source.id}`);
 
-    const result = await runFanout(ctx, repos, { sourceId: source.id, platforms });
+    const exemplarK = process.env.CREATE_EXEMPLAR_K ? Number(process.env.CREATE_EXEMPLAR_K) : undefined;
+    const result = await runFanout(ctx, repos, {
+      sourceId: source.id,
+      platforms,
+      ...(exemplarK ? { exemplar: { k: exemplarK } } : {}),
+    });
     console.log(`run: ${result.runId} (created: ${result.created})`);
 
     const capTokens = readEnv().TENANT_DAILY_TOKEN_BUDGET;

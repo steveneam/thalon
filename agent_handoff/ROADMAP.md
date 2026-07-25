@@ -109,6 +109,16 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   the meme-post dogfood added ~6 live data points in one day, including an apparent
   final-tier MISREAD (draft `74d77abb` round-4: "inverts the horse labeling" against
   a draft whose order matched the source verbatim)]** · `golden:g3` stays non-CI.
+  **s68 TERMINAL EVIDENCE (draft `491089d0`, 12 laps): the final tier's objection
+  set is UNSTABLE — "The architecture stays put" passed unflagged in one lap and
+  failed a later lap on verbatim-absence; and the tier REJECTED an operator-attested
+  lived-experience claim WHILE CITING the attestation chunk that grounds it. No
+  fixed point is reachable by minimal edits. The tuning pass is now LOAD-BEARING:
+  it blocks the founder-directed punchy LinkedIn post. Golden-row set for the pass:
+  55108b92 · 3ebd7de1 · 14e05fa3 · 74d77abb · 491089d0 (each lap = one row).
+  Also decided s68: exemplar+voice fixed generation punch in ONE lap (the
+  voice_sample of the founder's own rework was the unlock) — the drafting side
+  needs no tuning.**
 - **Platform charLimit is UNENFORCED (found s68):** x.v1.json declares 280 but
   neither generation nor any gate checks it — a 600-char X draft sailed to queued;
   the platform API would reject it at publish. Ratchet candidate: a deterministic
