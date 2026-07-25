@@ -71,6 +71,7 @@ flowchart LR
 | Integrations (destination cards, honest states, guided connect, validate/disconnect) | Settings → "Manage integrations" → /app/settings/integrations | reachable (B-int.2, s70 — vault-backed; env-override badge names the emergency-override posture) |
 | ⌘K command palette | topbar button; Ctrl/⌘-K | reachable |
 | Own-site blog (published pages land here) | `/blog` — public; workspace path = Settings → Integrations → Published (the ledger view joins social publications + blog posts, every row with its way back) | reachable (B-int.2 published view, s70 — partial closed) |
+| Public blog images (the IG/Threads `image_url` unlock) | `/assets/<sha256>.<ext>` — public, allowlist-gated: serves ONLY pinned assets a currently-published artifact references (engine `public-assets.ts`); immutable cache; svg/doc types never served | reachable (B-pub.4, s71) |
 | Sites gallery (the portfolio in the workspace) | rail → Sites | reachable (W-sites, s61 — facet chips, j/k/enter, verdict chips) |
 | Sites dossier (live preview + record + /guide) | Sites → a card → dossier (iframe w/ desktop/390 toggles) | reachable (dev reads the local dir; staging origin arms with the founder's Dokploy service + `TEMPLATES_PREVIEW_ARMED`) |
 | Template `/guide` pages | each site → footer "how this page was made" | reachable (within each site) |

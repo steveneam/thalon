@@ -1,8 +1,9 @@
 import type { TenantCtx } from "@thalon/contracts";
 import { InvalidStateError, type Draft, type Repos } from "@thalon/db";
-import { getObjectStore, type ObjectStore } from "@thalon/platform";
+import { getContentAddressed, getObjectStore, type ObjectStore } from "@thalon/platform";
 import { deployWebPage } from "./deploy";
 import { createOwnSiteDeployTarget } from "./own-site-target";
+import { extractPublicAssetRefs, recordPublicAssets } from "./public-assets";
 import {
   POSTS_BUNDLE_VERSION,
   postsBundleKey,
@@ -24,10 +25,13 @@ import { webPageDraftMetaSchema } from "./schemas";
  *      caller (approved-only gate, content-address-verified artifact read,
  *      optimistic-concurrency meta patch — all B4.1/B3.15 machinery,
  *      reused not forked) against the own-site target;
- *   2. upsert the tenant's posts bundle (./posts.ts) — the blog's wire
+ *   2. record the artifact's public-asset refs (./public-assets.ts,
+ *      B-pub.4) — the image door's allowlist, written before the bundle so
+ *      a live page never renders gated images;
+ *   3. upsert the tenant's posts bundle (./posts.ts) — the blog's wire
  *      read model.
  *
- * A crash between the two leaves a deployed draft missing from the bundle;
+ * A crash between the last two leaves a deployed draft missing from the bundle;
  * `rebuildPostsBundle` re-derives it from the drafts table (the bundle is
  * declared derived state, so the door heals rather than double-writes).
  * A target failure is recorded on the draft by step 1 and the bundle is
@@ -82,6 +86,26 @@ export async function publishWebPageToSite(
   }
 
   const deployedMeta = webPageDraftMetaSchema.parse(outcome.draft.meta);
+
+  // B-pub.4: record which pinned assets this artifact takes public — BEFORE
+  // the bundle write, so a live page never renders gated (404) images. A
+  // crash between the two writes leaks nothing: it only admits refs an
+  // approved, deployed artifact references, and the next publish or rebuild
+  // reconverges both pointers. The artifact was verified by the deploy read
+  // a moment ago; a null here means it vanished mid-flight — record no
+  // assets (fail-closed) and let the bundle carry the post honestly.
+  const htmlBytes = await getContentAddressed(objectStore, deployedMeta.htmlRef);
+  await recordPublicAssets(
+    ctx.tenantId,
+    {
+      draftId: draft.id,
+      slug,
+      assets: extractPublicAssetRefs(htmlBytes ? htmlBytes.toString("utf8") : ""),
+      nowMs: request.nowMs,
+    },
+    objectStore,
+  );
+
   const prior = posts.find((post) => post.draftId === draft.id);
   const entry: PublishedPost = {
     slug,

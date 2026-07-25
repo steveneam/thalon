@@ -35,6 +35,24 @@ export {
   type RebuildPostsBundleRequest,
 } from "./posts";
 export {
+  extractPublicAssetRefs,
+  parsePublicAssetName,
+  PUBLIC_ASSET_CONTENT_TYPES,
+  PUBLIC_ASSETS_VERSION,
+  publicAssetPath,
+  publicAssetRefSchema,
+  publicAssetsBundleSchema,
+  publicAssetsKey,
+  readPublicAssetBytes,
+  readPublicAssets,
+  rebuildPublicAssets,
+  recordPublicAssets,
+  type PublicAssetReadResult,
+  type PublicAssetRef,
+  type PublicAssetsBundle,
+  type RecordPublicAssetsRequest,
+} from "./public-assets";
+export {
   publishWebPageToSite,
   type PublishWebPageDeps,
   type PublishWebPageRequest,

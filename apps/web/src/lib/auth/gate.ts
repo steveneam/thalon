@@ -30,6 +30,12 @@ const SELF_GATED = new Set<string>([]);
 
 export function isPublicPath(pathname: string): boolean {
   if (PUBLIC_EXACT.has(pathname) || SELF_GATED.has(pathname)) return true;
+  // The public image door (B-pub.4): /assets/<sha256>.<ext> — the route
+  // carries its own stronger gate (a published-artifact allowlist; anything
+  // unlisted 404s), and its consumers are anonymous by nature: blog readers'
+  // browsers and, later, IG/Threads fetching a public image_url. Basic auth
+  // here would break every published image.
+  if (pathname.startsWith("/assets/")) return true;
   // The whole blog surface incl. /blog/rss.xml and engine-published slugs.
   return pathname === "/blog" || pathname.startsWith("/blog/");
 }

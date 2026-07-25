@@ -2,6 +2,7 @@ import { seoMetaSchema, type TenantCtx } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
 import { getContentAddressed, getObjectStore, objectKey, type ObjectStore } from "@thalon/platform";
 import { z } from "zod";
+import { rebuildPublicAssets } from "./public-assets";
 import { webPageDraftMetaSchema } from "./schemas";
 
 /**
@@ -137,7 +138,9 @@ export interface RebuildPostsBundleRequest {
  * data: `publishedAtMs` falls back to the draft's `updatedAt` (the deploy
  * patch set it — close, not exact), and publish-time operator `tags` are
  * gone (they were bundle data by design); `seo` survives via the draft
- * meta. The rebuilt bundle is written back latest-wins.
+ * meta. The rebuilt bundle is written back latest-wins. The public-asset
+ * allowlist (./public-assets.ts) is derived state over the same published
+ * set, so this ONE heal command rebuilds both pointers.
  */
 export async function rebuildPostsBundle(
   ctx: TenantCtx,
@@ -169,5 +172,6 @@ export async function rebuildPostsBundle(
     posts: sortPosts(posts),
   });
   await objectStore.put(postsBundleKey(ctx.tenantId), JSON.stringify(bundle));
+  await rebuildPublicAssets(ctx.tenantId, bundle.posts, request.nowMs, objectStore);
   return bundle;
 }
