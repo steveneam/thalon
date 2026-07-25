@@ -26,3 +26,25 @@ CLAUDE.md → this file → COORDINATION.md → `docs/research/ui-overhaul-plan.
 Lanes: three launched at boot from s70c prep, all merged sequentially behind full post-merge verifies; one real catch (bpub4-img BodyInit type break — in-worktree verify missed it, main's gate didn't; fixed forward one line). Mock: delivered as the triage spine, then SIX founder live rounds grew it to 13 surfaces (amber mark · calendar toggle+doors · YouTube visibility+thumbnails · media-first with Approve heaviest · multi-track EDL editor per video-editor-tools.md · Runs+Board+Profiles · discoverability/judge visible provenance · Calendar+Library to complete the nav) and ratified FOUR binding doctrines (plan §5). Final consistency sweep: cross-surface numbers reconcile (needs-you 4 / composing 2 / planned 3 / rising 4 everywhere), Board's waiting column completed, past-dated slot removed, Board lens reachable via the dashboard toggle, full canvas console-clean. Founder decisions recorded: ML stays backend-only; X spend gated on learning readiness (and X moved to pay-per-use — flat tiers closed Feb 2026, verified). Storage answered honestly (object store + Postgres server-side; S3 driver gap → now a prepped lane; takeout recommended). s72 wave prepped: kickoffs `wave0-astryx` (verdict-gated, token spec embedded) + `s3-store` + `rebrief-grounding`, worktrees + board rows. Stale LinkedIn-paste ask closed; exarm unlock choice queued.
 
 ## Next action — s72: launch s3-store + rebrief at boot · founder mock verdict → launch wave0-astryx · then wave-1 surface lanes per plan §4.2.
+
+## Addendum — late founder rounds 7–9 (s71 close, all applied to the mock)
+
+Round 7: Calendar re-cut as a TRUE TIME-GRID week (cal.com/Google-class) —
+hours on the vertical axis (44px/h, 06–21 with quiet-hours collapse bands),
+events positioned+sized by time, red now-line, all-day "waiting" strip
+(amber review chip), drag grips + a drop-ghost showing "15:00 ✓
+cadence-legal" (drags snap to cadence-LEGAL slots — the Thalon twist),
+flags + a Flagged filter, selected event opens its detail card (excerpt ·
+Open draft · Reschedule · Remove · "illegal slots refuse the drop").
+Round 8: ASYNC-WORK TRAY added to the shell spec + mocked open on the
+Dashboard — topbar "N working" chip (spinner, neutral) + green completion
+dot + dropdown tray (per-job row: progress bar/stage word · honest ETA ·
+View→ when done), reading run states off the events spine; the
+wave0-astryx kickoff step 3 now carries it (stage WORDS where % would lie).
+Round 9 (dashboard adds, lead-recommended + built): 7-day sparkline on the
+Rising-trends tile (the one honest series today; more sparks as series
+accrue, the s39 rule) + a "Latest published" media-first strip closing the
+loop on the home surface. X-cost question answered with verified 2026
+pricing (pay-per-use, no minimum — ROADMAP L2); founder gate recorded.
+ML/learning: BACKEND-ONLY per founder (asked from a backend perspective —
+never propose a Learning surface).

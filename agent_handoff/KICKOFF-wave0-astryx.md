@@ -72,6 +72,14 @@ DARK IS DEFAULT; light mode ships as the toggle (Theme provider mode).
    Calendar ┃ Leads · Library · Videos · Sites · Runs ┃ Profiles · Settings.
    Needs-you count chip (amber) + ⌘K + `+ Create` + tenant switcher carry
    over into the new topbar. Existing pages mount inside unchanged.
+   **The topbar also carries the ASYNC-WORK TRAY (founder round 7, mocked on
+   the Dashboard frame):** a neutral "N working" chip with spinner while any
+   render/mint/fan-out runs, a green completion dot, and a dropdown tray
+   (per-job row: label · progress · honest ETA · View→ when done) — read
+   from the events spine + run states, honest by construction; completion
+   raises the dot, never a modal. Wave 0 ships the chip+tray shell reading
+   real run states; per-job progress % can land per-pipeline later — show
+   stage words (rendering · judging) where % would be a lie.
 4. Re-pin `apps/web/src/lib/__tests__/tokens-contrast.test.ts` to the NEW
    token source (same AA pairs discipline; values change, the ratchet
    survives). Extend it with the §5 pairs: warn-on-100, err-on-100,
