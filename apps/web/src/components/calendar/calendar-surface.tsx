@@ -2,6 +2,7 @@
 
 import "@/components/calendar/calendar.css";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   assetEvents,
@@ -92,6 +93,7 @@ function coerceView(config: Record<string, unknown>): SavedConfig {
  *    instead of pretending to move a plan.
  */
 export function CalendarSurface() {
+  const router = useRouter();
   const [status, setStatus] = useState<ReadState>("loading");
   const [plan, setPlan] = useState<PlanPayload | null>(null);
   const [now, setNow] = useState<Date | null>(null);
@@ -244,6 +246,11 @@ export function CalendarSurface() {
       k: (event) => {
         event.preventDefault();
         moveCursor(-1);
+      },
+      Enter: (event) => {
+        if (!selected?.href) return;
+        event.preventDefault();
+        router.push(selected.href);
       },
       Escape: () => setSelectedId(null),
     },

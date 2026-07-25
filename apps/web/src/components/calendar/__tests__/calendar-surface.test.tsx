@@ -2,8 +2,14 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { CalendarSurface } from "@/components/calendar/calendar-surface";
+
+const push = vi.fn();
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/app/calendar",
+  useRouter: () => ({ push: (href: string) => push(href) }),
+}));
 import { listSavedViewsTestState, seedSavedView } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 import type { PipelineAsset, PlanPayload, PlannedSlotWire } from "@/lib/workspace/types";
@@ -402,5 +408,17 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     expect(container.querySelector(".ev.sel")?.textContent).toContain("Planned · LinkedIn");
     await user.keyboard("{Escape}");
     expect(container.querySelector(".ev.sel")).toBeNull();
+  });
+
+  it("↵ opens the selected event's own draft — the keeper's other half", async () => {
+    push.mockClear();
+    seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
+    const user = userEvent.setup();
+    render(<CalendarSurface />);
+    await screen.findByText("1 planned");
+
+    await user.keyboard("j");
+    await user.keyboard("{Enter}");
+    expect(push).toHaveBeenCalledWith("/app/approve?run=run-1&draft=d-plan");
   });
 });
