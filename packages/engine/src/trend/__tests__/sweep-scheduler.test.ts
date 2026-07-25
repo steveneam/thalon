@@ -7,7 +7,7 @@ import { LocalObjectStore, readEnv } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeEmbeddingDriver } from "../../ingest/shell/embedder";
 import { connectDestination } from "../../integrations/vault";
-import { readSweepBundle } from "../sweep";
+import { readSweepBundle, readSweepBundles } from "../sweep";
 import {
   envAdmissionConfig,
   findDueTenants,
@@ -332,7 +332,7 @@ const LONG_BODY =
   "Deterministic render pipelines for faceless channels: how a template-driven engine turns one prompt into a full publish-ready video, with judge gating and grounded captions at every step of the chain.";
 
 describe("runDueSweeps × multi-source + admission config (s72, the exemplar-admission 'both' unlock)", () => {
-  it("sweeps EVERY listed source in order, sums the totals, marks the clock ONCE, and the last source owns the bundle", async () => {
+  it("sweeps EVERY listed source in order, sums the totals, marks the clock ONCE, and every source keeps its own bundle home", async () => {
     handle = await openTestDb();
     const { repos } = handle;
     storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
@@ -358,7 +358,11 @@ describe("runDueSweeps × multi-source + admission config (s72, the exemplar-adm
     const events = await repos.events.list(ctx, { entityType: "sweep_schedule" });
     expect(events.filter((e) => e.event === "sweep.schedule_swept")).toHaveLength(1);
 
-    // The interim contract: the LAST listed source's bundle owns the trends surface.
+    // L2 slice 1: BOTH sources persisted their own bundle — the trends read
+    // merges them (the s72 "last source owns the surface" interim is closed).
+    const bundles = await readSweepBundles(ctx.tenantId, objectStore);
+    expect(bundles.map((b) => b.source).sort()).toEqual(["first-src", "last-src"]);
+    // The legacy pointer stays the last-swept-wins stamp (rollback + plan).
     const bundle = await readSweepBundle(ctx.tenantId, objectStore);
     expect(bundle?.source).toBe("last-src");
   });

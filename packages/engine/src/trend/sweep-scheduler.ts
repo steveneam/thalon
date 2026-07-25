@@ -66,7 +66,7 @@ export function findDueTenants(schedules: readonly SweepScheduleLike[], now: Dat
  * env-selected registry sources. Exported so the manual Sweep-now caller
  * wires the identical resolution — one precedence table, one wiring.
  * Plural since s72: `TREND_SOURCE` accepts a comma-list; each resolved
- * driver sweeps in listed order (see `getTrendSources` on bundle ownership).
+ * driver sweeps in listed order (see `getTrendSources`).
  */
 export async function tenantTrendSources(
   deps: VaultDeps,
@@ -178,11 +178,11 @@ export async function runDueSweeps(
         deps.sources ??
         (sweepDeps.source ? [sweepDeps.source] : await tenantTrendSources({ repos, ctx, env }));
       // Each listed driver runs the FULL sweep path in order (intake +
-      // admissions all persist per source; the last source's bundle owns the
-      // trends surface — getTrendSources documents the interim). Any driver's
-      // failure fails the tenant verbatim and skips markSwept, so the whole
-      // list retries next tick — sweeps are idempotent against re-polling
-      // (content-hash dedup, append-only snapshots).
+      // admissions persist per source; each bundle lands in its source's own
+      // home and the trends read merges them all — B-learn L2 slice 1). Any
+      // driver's failure fails the tenant verbatim and skips markSwept, so
+      // the whole list retries next tick — sweeps are idempotent against
+      // re-polling (content-hash dedup, append-only snapshots).
       const totals = { cards: 0, polled: 0, admitted: 0 };
       for (const source of sources) {
         try {

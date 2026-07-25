@@ -21,9 +21,10 @@ export async function POST() {
     const { results, primary } = await runIntelSweep(repos, ctx);
     const { bundle, cardsCut } = primary;
     return NextResponse.json({
-      // Bundle fields describe the trends surface's bundle = the LAST swept
-      // source (the s72 multi-source interim); `sources` lists every driver
-      // this pass actually swept, and the admission counts span all of them.
+      // Bundle fields summarize the LAST swept source's bundle (the
+      // freshest — the trends surface merges ALL sources since B-learn L2
+      // slice 1); `sources` lists every driver this pass actually swept,
+      // and the admission counts span all of them.
       source: bundle.source,
       sources: results.map((r) => r.bundle.source),
       polled: results.reduce((n, r) => n + r.bundle.polled, 0),
