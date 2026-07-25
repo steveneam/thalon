@@ -9,9 +9,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "theme:build": "astryx theme build src/theme/thalon.theme.ts -o src/theme/thalon-theme.css",
     "videos:import": "tsx scripts/import-video-project.ts"
   },
   "dependencies": {
+    "@astryxdesign/core": "0.1.8",
     "@clerk/nextjs": "^7.5.12",
     "@thalon/contracts": "*",
     "@thalon/db": "*",
@@ -32,6 +34,7 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@astryxdesign/cli": "0.1.8",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

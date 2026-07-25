@@ -5,7 +5,7 @@ describe("palette", () => {
   it("covers every nav surface plus the cross-surface actions", () => {
     const items = buildPaletteItems();
     const labels = items.map((i) => i.label);
-    for (const surface of ["Dashboard", "Intel", "Create", "Approve", "Profiles", "Runs", "Settings"]) {
+    for (const surface of ["Home", "Intel", "Create", "Approve", "Profiles", "Runs", "Settings"]) {
       expect(labels).toContain(surface);
     }
     expect(items.some((i) => i.group === "actions")).toBe(true);
