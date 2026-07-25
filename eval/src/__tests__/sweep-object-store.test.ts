@@ -71,9 +71,12 @@ describe("object-store orphan sweep (B4.6)", () => {
       },
     });
 
-    // Unreferenced orphan + a protected cache key.
+    // Unreferenced orphan + protected keys: an embeddings cache entry and
+    // the B-pub.4 public-asset allowlist pointer (no db row references
+    // either by design — orphan math must never see them).
     await store.put("web-pages/0000.html", "<html>orphan</html>");
     await store.put("embeddings/somekey.json", "[]");
+    await store.put(`public-assets/${ctx.tenantId}.json`, "{}");
 
     const dryRun = await sweepObjectStore(repos, store);
     expect(dryRun.orphans).toEqual(["web-pages/0000.html"]);
@@ -86,5 +89,6 @@ describe("object-store orphan sweep (B4.6)", () => {
     expect(await store.get(htmlRef)).not.toBeNull();
     expect(await store.get(rawRef)).not.toBeNull();
     expect(await store.get("embeddings/somekey.json")).not.toBeNull();
+    expect(await store.get(`public-assets/${ctx.tenantId}.json`)).not.toBeNull();
   });
 });

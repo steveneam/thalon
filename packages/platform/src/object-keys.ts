@@ -30,6 +30,14 @@ import type { ObjectStore } from "./object-store";
  *                                            derived state, rebuildable
  *                                            from web_page drafts; orphan-
  *                                            sweep-protected like sweeps/
+ *   public-assets/<tenantId>.json            MUTABLE POINTER (B-pub.4): the
+ *                                            tenant's public-asset allowlist
+ *                                            — which pinned assets currently-
+ *                                            published artifacts reference
+ *                                            (the public image door's gate);
+ *                                            derived state, rebuilt beside
+ *                                            the posts bundle; orphan-sweep-
+ *                                            protected like posts/
  *   assets/<sha256(asset)>/…                 content-addressed prefix (B7.1):
  *                                            asset.<ext> is the hashed
  *                                            content (VERIFIABLE); sibling

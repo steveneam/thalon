@@ -23,6 +23,12 @@ describe("isPublicPath (a CLOSED allowlist — new routes are gated by default)"
     expect(isPublicPath("/api/admin/db-dump")).toBe(false);
     expect(isPublicPath("/api/admin")).toBe(false);
   });
+
+  it("the public image door is open (B-pub.4 — IG/Threads fetch anonymously; the route's own allowlist gates content)", () => {
+    expect(isPublicPath(`/assets/${"a".repeat(64)}.png`)).toBe(true);
+    expect(isPublicPath("/assets/anything")).toBe(true); // basic auth never challenges; the route 404s garbage itself
+    expect(isPublicPath("/assets")).toBe(false); // no bare-prefix surface — there is nothing to list
+  });
 });
 
 describe("gateRequest", () => {

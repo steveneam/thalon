@@ -14,6 +14,7 @@ import {
   slugifyTitle,
   type PublishedPost,
 } from "../posts";
+import { publicAssetsKey, readPublicAssets } from "../public-assets";
 import { publishWebPageToSite } from "../publish";
 import { webPageDraftMetaSchema } from "../schemas";
 
@@ -46,11 +47,13 @@ async function approvedWebPageDraft(
   ctx: TenantCtx,
   repos: Repos,
   objectStore: LocalObjectStore,
-  opts: { title?: string; approve?: boolean; seo?: Record<string, unknown> } = {},
+  opts: { title?: string; approve?: boolean; seo?: Record<string, unknown>; html?: string } = {},
 ): Promise<Draft> {
   const n = ++draftSeq;
   const title = opts.title ?? `Post ${n}`;
-  const html = `<html lang="en"><head><title>${title}</title></head><body><h1>${title}</h1></body></html>`;
+  const html =
+    opts.html ??
+    `<html lang="en"><head><title>${title}</title></head><body><h1>${title}</h1></body></html>`;
   const htmlRef = `web-pages/${sha256Hex(html)}.html`;
   await objectStore.put(htmlRef, html);
   const profile =
@@ -234,6 +237,64 @@ describe("publishWebPageToSite (B6.6 own-site publish door, keyless)", () => {
 
   it("pins the bundle key scheme", () => {
     expect(postsBundleKey("tenant-1")).toBe("posts/tenant-1.json");
+  });
+});
+
+describe("public-asset recording at the publish door (B-pub.4)", () => {
+  const IMG_HASH = "f".repeat(64);
+
+  function htmlWithImage(title: string): string {
+    return `<html lang="en"><head><title>${title}</title></head><body><h1>${title}</h1><img src="/assets/${IMG_HASH}.png" alt="${title} hero" /></body></html>`;
+  }
+
+  it("publish records exactly the artifact's asset refs; an image-less publish records no row", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const withImage = await approvedWebPageDraft(ctx, repos, objectStore, {
+      title: "Illustrated",
+      html: htmlWithImage("Illustrated"),
+    });
+    const plain = await approvedWebPageDraft(ctx, repos, objectStore, { title: "Plain" });
+
+    await publishWebPageToSite(ctx, repos, { draftId: withImage.id, nowMs: NOW }, { objectStore });
+    await publishWebPageToSite(ctx, repos, { draftId: plain.id, nowMs: NOW + 1 }, { objectStore });
+
+    const allowlist = await readPublicAssets(ctx.tenantId, objectStore);
+    expect(allowlist?.posts).toEqual([
+      {
+        draftId: withImage.id,
+        slug: "illustrated",
+        assets: [{ contentHash: IMG_HASH, ext: "png" }],
+      },
+    ]);
+  });
+
+  it("rebuildPostsBundle heals BOTH pointers from the drafts + artifacts (the one disaster command)", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const draft = await approvedWebPageDraft(ctx, repos, objectStore, {
+      title: "Rebuild Assets",
+      html: htmlWithImage("Rebuild Assets"),
+    });
+    await publishWebPageToSite(ctx, repos, { draftId: draft.id, nowMs: NOW }, { objectStore });
+
+    // The disaster: both mutable pointers lost.
+    await objectStore.delete(postsBundleKey(ctx.tenantId));
+    await objectStore.delete(publicAssetsKey(ctx.tenantId));
+
+    await rebuildPostsBundle(ctx, repos, { nowMs: NOW + 9000 }, { objectStore });
+
+    const allowlist = await readPublicAssets(ctx.tenantId, objectStore);
+    expect(allowlist?.generatedAtMs).toBe(NOW + 9000);
+    expect(allowlist?.posts).toEqual([
+      {
+        draftId: draft.id,
+        slug: "rebuild-assets",
+        assets: [{ contentHash: IMG_HASH, ext: "png" }],
+      },
+    ]);
+  });
+
+  it("pins the allowlist key scheme", () => {
+    expect(publicAssetsKey("tenant-1")).toBe("public-assets/tenant-1.json");
   });
 });
 

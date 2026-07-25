@@ -104,9 +104,14 @@ export interface PinnedAsset {
   alreadyPinned: boolean;
 }
 
+/** The pin's byte key: `assets/<hash>/asset.<ext>` — composed here and nowhere else (B-pub.4's public door reuses it). */
+export function pinnedAssetKey(contentHash: string, ext: string): string {
+  return `${objectPrefix("assets", contentHash)}/asset.${ext}`;
+}
+
 function assetKeys(contentHash: string, ext: string): { key: string; provenanceKey: string } {
   const prefix = objectPrefix("assets", contentHash);
-  return { key: `${prefix}/asset.${ext}`, provenanceKey: `${prefix}/provenance.json` };
+  return { key: pinnedAssetKey(contentHash, ext), provenanceKey: `${prefix}/provenance.json` };
 }
 
 /**
