@@ -188,10 +188,26 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   (overview import strip · dossier "Media used" door · editor media pool);
   engine door = this bucket, built only when chartered.
 
-- **B-media.0 — SOURCE MEDIA ON EVERY SURFACE (thumbnails) [FOUNDER-DIRECTED
-  s74: "the media thumbnails will need to be done eventually, so that needs a
-  proper and clever UI/UX with the source thumbnails … wrap that planning in
-  next session when you have time (see how others do it)"]** — the s74 rebuild
+- **B-media.0 — SOURCE MEDIA ON EVERY SURFACE (thumbnails) — ✅ PLANNED s75,
+  AWAITING THE FOUNDER'S VERDICT (no code shipped, by design)**. The plan is
+  `docs/research/source-media-plan.md`; the proposal sheet is
+  `mock-sheets/Source Media.dc.html`, filed under the README's new
+  "Proposals — NOT yet verdicted (do not port)" section. **The correction it
+  opens with:** two surfaces already resolve real media end-to-end
+  (Transcription via the keyless YouTube oEmbed captured at ingest, Intel via
+  its driver), so this generalises something that works rather than building
+  from nothing — and the resolved `<img>` is already copy-pasted twice, so a
+  shared `<SourceThumb>` is owed regardless. **The join splits three ways:**
+  solved (Transcription + Intel) · ref-exists-poster-missing (`video_takes.ref`
+  + the live `/assets/<sha256>` door need one ffprobe-derived `meta.posterRef`)
+  · genuinely-nothing-to-join (a draft is text; Approve/Runs/Create/Dashboard
+  stay striped until B-media's import door ships, because borrowing a thumb
+  from the run or the grounding source would invent a provenance on the
+  publish-decision surface). **Contract-window candidates:** `meta.posterRef`,
+  and capturing `thumbnail_width/height` — already in the oEmbed reply we
+  parse and currently discarded — as a derived `orientation`, which is what
+  the portrait-vs-crop decision needs. Open founder question in NEEDS-STEVEN.
+  Original framing follows. — the s74 rebuild
   wave shipped Approve, Runs, Create and Library/Transcription rows WITHOUT
   thumbs, because nothing on the wire carries a media reference to join; three
   lanes hit it independently and it is the single place the rebuilt surfaces
@@ -216,7 +232,18 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
       a sheet).
   **Sequencing:** plan next session in the lead's own time beside the wave-2
   lanes; the join half is a contract-window candidate.
-- **B-media.1 — RENAME `Library` → `Transcription` [FOUNDER-DIRECTED s74: "the
+- **B-media.1 — RENAME `Library` → `Transcription` — ✅ SHIPPED s75** (`1ba43bd`).
+  Route `/app/transcription` with `/app/library` kept permanently as a
+  redirect; `components/transcription/` with its files, tests and the
+  `.transcription-surface` scope class; rail label + the `RAIL_ICONS` key
+  (the rail looks its icon up BY LABEL); the two hrefs that pointed at the old
+  route. `git mv` throughout, so history follows. **Deliberate boundary:** the
+  rename is surface-level — `lib/library/`, `/api/library` and
+  `LibrarySourceRow` keep their names because they serve the generic `sources`
+  shelf, not this one surface. **Recorded as a founder amendment** in the
+  mock-sheets README's new "Founder amendments — the sheets are WRONG here on
+  purpose" section, so a future lane cannot correct it back to what the 16
+  sheets still draw. Original framing follows. [FOUNDER-DIRECTED s74: "the
   libary (we should really rename it to Transcription) also needs the media/
   thumbnail treatment, since it's mostly youtube/video based"]** — the surface
   serves `video_transcript` sources only (its own row verbs are already
