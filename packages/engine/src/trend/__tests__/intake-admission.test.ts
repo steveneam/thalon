@@ -404,7 +404,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
   });
 
   it("without active areas the admission pass reports empty — the pre-B6.4 sweep shape is untouched", async () => {
-    const { ctx, repos, objectStore, embedder, area } = await setup();
+    const { ctx, repos, objectStore, embedder } = await setup();
     const result = await runTrendIntake(
       ctx,
       repos,
