@@ -143,7 +143,7 @@ describe("runDueSweeps", () => {
     expect(result.checked).toBe(3);
     expect(result.due).toEqual([ctxA.tenantId]);
     expect(result.failures).toEqual([]);
-    expect(result.swept).toEqual([{ tenantId: ctxA.tenantId, cards: 1, polled: 1 }]);
+    expect(result.swept).toEqual([{ tenantId: ctxA.tenantId, cards: 1, polled: 1, admitted: 0 }]);
     expect(result.minEnabledCadenceMinutes).toBe(60);
 
     // The honest clock: last_sweep_at is EXACTLY the passed `now`.
@@ -190,7 +190,7 @@ describe("runDueSweeps", () => {
     expect(result.failures).toEqual([
       { tenantId: ctxBad.tenantId, reason: "driver refused: boom credentials missing" },
     ]);
-    expect(result.swept).toEqual([{ tenantId: ctxGood.tenantId, cards: 1, polled: 1 }]);
+    expect(result.swept).toEqual([{ tenantId: ctxGood.tenantId, cards: 1, polled: 1, admitted: 0 }]);
 
     // The failed tenant's clock is untouched — it stays due and retries next tick.
     expect((await repos.sweepSchedules.get(ctxBad))?.lastSweepAt).toBeNull();
@@ -286,7 +286,7 @@ describe("runDueSweeps × vault-first resolution", () => {
       NOW,
     );
     expect(result.failures).toEqual([]);
-    expect(result.swept).toEqual([{ tenantId: ctx.tenantId, cards: 0, polled: 0 }]);
+    expect(result.swept).toEqual([{ tenantId: ctx.tenantId, cards: 0, polled: 0, admitted: 0 }]);
   });
 
   it("one tenant's vault misconfiguration (rows without a master key) reports verbatim and never blocks the others", async () => {
@@ -317,6 +317,6 @@ describe("runDueSweeps × vault-first resolution", () => {
     expect(result.failures).toHaveLength(1);
     expect(result.failures[0].tenantId).toBe(ctxBad.tenantId);
     expect(result.failures[0].reason).toContain("THALON_VAULT_MASTER_KEY");
-    expect(result.swept).toEqual([{ tenantId: ctxGood.tenantId, cards: 0, polled: 0 }]);
+    expect(result.swept).toEqual([{ tenantId: ctxGood.tenantId, cards: 0, polled: 0, admitted: 0 }]);
   });
 });

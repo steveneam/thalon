@@ -6,6 +6,12 @@ import { embedChunks } from "../ingest";
 import { createGatewayEmbeddingDriver, type EmbeddingDriver } from "../ingest/shell/embedder";
 import { ingestExemplar } from "../exemplar/ingest-exemplar";
 import {
+  emptyAdmissions,
+  runAdmissions,
+  type AdmissionConfigInput,
+  type AdmissionsResult,
+} from "./admission";
+import {
   expandAreas,
   mergeQueries,
   sweepAreaSchema,
@@ -14,7 +20,7 @@ import {
   type SweepArea,
   type SweepAreaInput,
 } from "./area-expansion";
-import { detectLongitudinalOutlier, type SnapshotPoint } from "./longitudinal";
+import { detectLongitudinalOutlier, type LongitudinalScore, type SnapshotPoint } from "./longitudinal";
 import { detectOutliers, outlierConfigSchema, type OutlierConfig, type OutlierConfigInput, type ScoredItem } from "./outliers";
 import { rankCandidates, type RankableCandidate, type RankedCandidate, type RankerConfigInput } from "./ranker";
 import type { TrendSource } from "./trend-source";
@@ -36,6 +42,14 @@ export interface TrendIntakeRequest {
   rankerConfig?: RankerConfigInput;
   /** Outlier thresholds + metric-name mapping — runtime config; defaults apply when omitted. */
   outlierConfig?: OutlierConfigInput;
+  /**
+   * B-learn L1: exemplar-admission knobs (tenant defaults + per-area
+   * overrides keyed by area id) — runtime config like the others; the loop
+   * ships ARMED with conservative defaults when omitted. Persisting the
+   * knobs on the area row itself waits on the contract window (see
+   * ./admission.ts).
+   */
+  admissionConfig?: AdmissionConfigInput;
   /** The sweep's "now", ms epoch — the velocity clock is an argument, never read in core (SPINE §1). */
   nowMs: number;
 }
@@ -63,6 +77,8 @@ export interface TrendIntakeResult {
   ingested: Array<{ externalId: string; sourceId: string; created: boolean }>;
   /** Outliers the tenant's G1 denylist blocked from ever entering the exemplar library. */
   screened: Array<{ externalId: string; matchedTerms: string[] }>;
+  /** B-learn L1: the armed per-area admission pass over the ranked feed (./admission.ts) — empty when the request carried no active areas. */
+  admissions: AdmissionsResult;
 }
 
 /**
@@ -157,9 +173,12 @@ export async function runTrendIntake(
   // B6.4 ranking stage — after the snapshot append, so this sweep is the
   // latest stored point and Δ-velocity reads previous-sweep → now.
   let ranked: RankedCandidate[] = [];
+  let longitudinalByItem = new Map<string, LongitudinalScore>();
   const areaTagByItem = new Map<string, { areaId: string; areaName: string; relevance: number }>();
   if (activeAreas.length > 0 && items.length > 0) {
-    ranked = await rankSweep(ctx, repos, { activeAreas, scored, config, request }, deps);
+    const ranking = await rankSweep(ctx, repos, { activeAreas, scored, config, request }, deps);
+    ranked = ranking.ranked;
+    longitudinalByItem = ranking.longitudinalByItem;
     for (const row of ranked) {
       const current = areaTagByItem.get(row.item.externalId);
       // Best RELEVANCE wins; ties keep the first row in ranked order (which
@@ -227,6 +246,33 @@ export async function runTrendIntake(
     });
   }
 
+  // B-learn L1: the armed admission pass — the ranked, area-attributed feed
+  // against the per-area knobs (./admission.ts). Runs AFTER the legacy
+  // B3.12 door so its pinned behavior is untouched; items that door already
+  // ingested or screened are never double-processed.
+  let admissions = emptyAdmissions();
+  if (activeAreas.length > 0 && ranked.length > 0) {
+    admissions = await runAdmissions(
+      ctx,
+      repos,
+      {
+        source: deps.source.name,
+        nowMs: request.nowMs,
+        denylist,
+        areas: activeAreas.map((a) => ({ id: a.id, name: a.name })),
+        ranked,
+        attribution: areaTagByItem,
+        longitudinal: longitudinalByItem,
+        alreadyProcessed: new Set([
+          ...ingested.map((i) => i.externalId),
+          ...screened.map((s) => s.externalId),
+        ]),
+        config: request.admissionConfig,
+      },
+      { embedder: deps.embedder, objectStore: deps.objectStore, capTokens: deps.capTokens },
+    );
+  }
+
   return {
     polled: items.length,
     snapshotsAppended,
@@ -235,6 +281,7 @@ export async function runTrendIntake(
     ranked,
     ingested,
     screened,
+    admissions,
   };
 }
 
@@ -243,7 +290,10 @@ export async function runTrendIntake(
  * embedding call for [area descriptions..., item texts...], then the pure
  * ranker. Longitudinal thresholds derive from the sweep's outlier config —
  * one config source per sweep (views metric name, velocity multiple, peer
- * floor); the snapshot-interval floor keeps its own default.
+ * floor); the snapshot-interval floor keeps its own default. The per-item
+ * longitudinal scores are returned alongside the ranked feed so the
+ * admission pass consumes the SAME velocity math — never a second history
+ * read.
  */
 async function rankSweep(
   ctx: TenantCtx,
@@ -255,7 +305,7 @@ async function rankSweep(
     request: TrendIntakeRequest;
   },
   deps: TrendIntakeDeps,
-): Promise<RankedCandidate[]> {
+): Promise<{ ranked: RankedCandidate[]; longitudinalByItem: Map<string, LongitudinalScore> }> {
   const { activeAreas, scored, config, request } = args;
   const longitudinalConfig = {
     viewsMetric: config.metricNames.views,
@@ -323,24 +373,30 @@ async function rankSweep(
   embeddableItemIdx.forEach((itemIdx, batchPos) => {
     vectorByItemIdx.set(itemIdx, embedded[activeAreas.length + batchPos].embedding);
   });
+  const longitudinalByItem = new Map<string, LongitudinalScore>();
   const rankableCandidates: RankableCandidate[] = scored.map((s, i) => {
     const accountPoints = historyByAccount.get(s.item.account) ?? [];
+    const longitudinal = detectLongitudinalOutlier(
+      accountPoints.filter((p) => p.externalId === s.item.externalId),
+      accountPoints,
+      longitudinalConfig,
+    );
+    longitudinalByItem.set(s.item.externalId, longitudinal);
     return {
       scored: s,
       vector: vectorByItemIdx.get(i) ?? null,
-      longitudinal: detectLongitudinalOutlier(
-        accountPoints.filter((p) => p.externalId === s.item.externalId),
-        accountPoints,
-        longitudinalConfig,
-      ),
+      longitudinal,
     };
   });
 
-  return rankCandidates(
-    rankableCandidates,
-    rankableAreas,
-    request.rankerConfig ?? {},
-    config,
-    request.nowMs,
-  );
+  return {
+    ranked: rankCandidates(
+      rankableCandidates,
+      rankableAreas,
+      request.rankerConfig ?? {},
+      config,
+      request.nowMs,
+    ),
+    longitudinalByItem,
+  };
 }

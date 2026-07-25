@@ -1,0 +1,439 @@
+import type { TenantCtx } from "@thalon/contracts";
+import { BudgetExceededError, sha256Hex, type Repos } from "@thalon/db";
+import { runG1Denylist } from "@thalon/judge";
+import { z } from "zod";
+import type { ObjectStore } from "@thalon/platform";
+import type { EmbeddingDriver } from "../ingest/shell/embedder";
+import { ingestExemplar } from "../exemplar/ingest-exemplar";
+import { stripPii } from "../exemplar/pii-strip";
+import type { LongitudinalScore } from "./longitudinal";
+import type { RankedCandidate } from "./ranker";
+import type { TrendItem } from "./trend-source";
+
+/**
+ * B-learn L1 (s68 founder item (a), launched s71): the armed outlier→
+ * exemplar ADMISSION loop. The sweeps already capture engagement and score
+ * Δ-velocity, but the only ingest gate was the single-sweep account-baseline
+ * outlier rule — which almost never arms for query-sourced area feeds (one
+ * item per account ⇒ no peers ⇒ no baseline), so the exemplar pool sat at 4
+ * entries. This module admits the area-attributed, RANKED candidates the
+ * sweep already produced, governed by knobs that are CONFIG-DATA, and writes
+ * through the ONE existing ingest door (../exemplar/ingest-exemplar.ts).
+ *
+ * The knob home is deliberately transitional: `monitoredAreaConfigSchema`
+ * (packages/contracts) is FROZEN this sprint and its single write door
+ * strips unknown keys, so per-area knobs cannot persist on the area row yet.
+ * They ride the sweep request instead (`admissionConfig`: tenant defaults +
+ * per-area overrides keyed by area id) — the same engine-runtime-config
+ * channel as outlierConfig/rankerConfig. `admissionKnobsSchema` is shaped so
+ * the next contract window can adopt it verbatim as
+ * `monitoredAreaConfigSchema.admission` and the override map deprecates.
+ *
+ * Why the gates are shaped this way (coverage honesty, s68 finding):
+ *
+ *  - ABSOLUTE FLOORS fail closed — a metric the platform doesn't report
+ *    fails its floor. The default `views` floor therefore admits nothing
+ *    from Bluesky area feeds (likes/reposts/replies only), which is the
+ *    point: those feeds are news-bot-heavy; an operator opts a Bluesky area
+ *    in by setting likes-based floors deliberately.
+ *  - The Δ-VELOCITY multiple binds only when the stored account baseline
+ *    arms — which it does precisely for high-volume accounts (news bots
+ *    give their own baseline peers), so a steady headline firehose is
+ *    rejected as the non-outlier it is, while a one-off viral poster with
+ *    no history falls through to the floors.
+ *  - MIN BODY LENGTH kills bare headlines and title-only entries — the
+ *    text an exemplar exists to teach is the hook + body, not a headline.
+ */
+
+/** The per-area knob set — the shape the next contract window adopts as `monitoredAreaConfigSchema.admission`. */
+const KNOB_DEFAULTS = {
+  enabled: true,
+  floors: { views: 10_000 },
+  velocityMultiple: 4,
+  minBodyLength: 140,
+  maxAdmissionsPerDay: 20,
+};
+
+export const admissionKnobsSchema = z.object({
+  /** Arming is per area; the loop itself ships armed (the mission) with conservative thresholds. */
+  enabled: z.boolean().default(KNOB_DEFAULTS.enabled),
+  /**
+   * Platform-native metric name → absolute floor. EVERY named floor must be
+   * met and a missing metric FAILS CLOSED — the conservative reading of
+   * "engagement metric names to read" (SPINE §4.1: names are data).
+   */
+  floors: z.record(z.string(), z.number().nonnegative()).default(KNOB_DEFAULTS.floors),
+  /**
+   * Stored-history Δ-velocity must be ≥ this multiple of the account's
+   * baseline WHEN the baseline arms (≥2 peers with measurable Δs). Stricter
+   * than the discovery lens's 3× on purpose: discovery shows the operator a
+   * card; admission writes the generation pool.
+   */
+  velocityMultiple: z.number().positive().default(KNOB_DEFAULTS.velocityMultiple),
+  /** Bodies (trimmed) shorter than this never admit — the headline-spam screen. */
+  minBodyLength: z.number().int().nonnegative().default(KNOB_DEFAULTS.minBodyLength),
+  /**
+   * CREATED admissions per area per UTC day — the embedding-budget rail
+   * (every admission embeds through the metered ledger). Re-encounters of
+   * known content never consume a slot. 0 = watch but never admit.
+   */
+  maxAdmissionsPerDay: z.number().int().nonnegative().default(KNOB_DEFAULTS.maxAdmissionsPerDay),
+});
+export type AdmissionKnobsInput = z.input<typeof admissionKnobsSchema>;
+export type AdmissionKnobs = z.infer<typeof admissionKnobsSchema>;
+
+/**
+ * The per-area OVERRIDE shape — deliberately NOT `admissionKnobsSchema.
+ * partial()`: a defaulted field still fills on parse, which would silently
+ * clobber the tenant default with the schema default (the exact trap
+ * contracts' rankerWeightOverridesSchema exists to avoid).
+ */
+export const admissionKnobOverridesSchema = z.object({
+  enabled: z.boolean().optional(),
+  floors: z.record(z.string(), z.number().nonnegative()).optional(),
+  velocityMultiple: z.number().positive().optional(),
+  minBodyLength: z.number().int().nonnegative().optional(),
+  maxAdmissionsPerDay: z.number().int().nonnegative().optional(),
+});
+export type AdmissionKnobOverrides = z.infer<typeof admissionKnobOverridesSchema>;
+
+export const admissionConfigSchema = z.object({
+  /** Tenant-wide knob defaults (Zod 4 `.default` short-circuits the inner parse — the default is the full output shape). */
+  defaults: admissionKnobsSchema.default(KNOB_DEFAULTS),
+  /** Per-area overrides keyed by monitored-area id — unset fields keep the tenant default (the ranker-weights two-layer pattern). */
+  areas: z.record(z.string(), admissionKnobOverridesSchema).default({}),
+});
+export type AdmissionConfigInput = z.input<typeof admissionConfigSchema>;
+export type AdmissionConfig = z.infer<typeof admissionConfigSchema>;
+
+/** Two-layer resolution: tenant defaults ← area override, field-by-field; an unset override field never clobbers. */
+export function resolveAdmissionKnobs(config: AdmissionConfig, areaId: string): AdmissionKnobs {
+  const override = config.areas[areaId];
+  if (!override) return config.defaults;
+  return {
+    enabled: override.enabled ?? config.defaults.enabled,
+    floors: override.floors ?? config.defaults.floors,
+    velocityMultiple: override.velocityMultiple ?? config.defaults.velocityMultiple,
+    minBodyLength: override.minBodyLength ?? config.defaults.minBodyLength,
+    maxAdmissionsPerDay: override.maxAdmissionsPerDay ?? config.defaults.maxAdmissionsPerDay,
+  };
+}
+
+export interface AdmissionDecision {
+  admit: boolean;
+  /** One human-readable line per rule consulted — the operator sees WHY (lands in `sources.meta.trend.reasons` on admit). */
+  reasons: string[];
+  /** The first rule that rejected, when `admit` is false. */
+  rejectedBy?: "disabled" | "bodyLength" | "floors" | "velocity";
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * Pure per-item admission math — no clock, no db, no driver (SPINE §1).
+ * ALL rules must pass (a conservative AND-gate): body length, every named
+ * floor, and the Δ-velocity multiple when the stored baseline arms. An
+ * unarmed baseline passes the velocity rule by design (see the module
+ * header) — the floors carry the decision alone, and the reason line says
+ * so honestly.
+ */
+export function decideAdmission(
+  item: TrendItem,
+  longitudinal: LongitudinalScore | undefined,
+  knobs: AdmissionKnobs,
+): AdmissionDecision {
+  if (!knobs.enabled) {
+    return { admit: false, reasons: ["admission disabled for this area"], rejectedBy: "disabled" };
+  }
+  const reasons: string[] = [];
+
+  const bodyLength = item.text.trim().length;
+  if (bodyLength < knobs.minBodyLength) {
+    return {
+      admit: false,
+      reasons: [`body length ${bodyLength} is under the ${knobs.minBodyLength}-char floor`],
+      rejectedBy: "bodyLength",
+    };
+  }
+  reasons.push(`body length ${bodyLength} ≥ ${knobs.minBodyLength}`);
+
+  for (const [name, floor] of Object.entries(knobs.floors)) {
+    const value = item.metrics[name];
+    if (value === undefined) {
+      return {
+        admit: false,
+        reasons: [`metric "${name}" is not reported by this platform — the ${floor} floor fails closed`],
+        rejectedBy: "floors",
+      };
+    }
+    if (value < floor) {
+      return {
+        admit: false,
+        reasons: [`${name} ${value} is under the ${floor} floor`],
+        rejectedBy: "floors",
+      };
+    }
+    reasons.push(`${name} ${value} ≥ floor ${floor}`);
+  }
+
+  const delta = longitudinal?.deltaVelocity ?? null;
+  const baseline = longitudinal?.baselineDeltaVelocity ?? null;
+  if (delta !== null && baseline !== null && baseline > 0) {
+    if (delta < knobs.velocityMultiple * baseline) {
+      return {
+        admit: false,
+        reasons: [
+          `Δ-velocity ${round2(delta)}/h is under ${knobs.velocityMultiple}× the account's stored baseline ${round2(baseline)}/h`,
+        ],
+        rejectedBy: "velocity",
+      };
+    }
+    reasons.push(
+      `Δ-velocity ${round2(delta)}/h is ≥ ${knobs.velocityMultiple}× the account's stored baseline ${round2(baseline)}/h`,
+    );
+  } else {
+    reasons.push("Δ-velocity baseline unarmed (insufficient stored history/peers) — floors carried the decision");
+  }
+
+  return { admit: true, reasons };
+}
+
+/** The provenance stamp every auto-admitted source carries in `meta.origin`. */
+export function admissionOrigin(areaId: string): string {
+  return `auto-admission:${areaId}`;
+}
+
+const DAY_MS = 24 * 3_600_000;
+
+/**
+ * Created-admission counts per area for the UTC day containing `nowMs`,
+ * read from the sources the door already wrote: `meta.origin` carries the
+ * area stamp and `meta.trend.capturedAtMs` the ARGUMENT clock of the sweep
+ * that admitted — so the count is replayable and never depends on the DB's
+ * own row clock (SPINE §1). In-memory filter over the tenant's exemplar
+ * rows: bounded by the cap itself (≤ areas × maxAdmissionsPerDay rows/day).
+ */
+export async function countTodayAdmissions(
+  ctx: TenantCtx,
+  repos: Repos,
+  nowMs: number,
+): Promise<Map<string, number>> {
+  const dayStart = Math.floor(nowMs / DAY_MS) * DAY_MS;
+  const counts = new Map<string, number>();
+  for (const source of await repos.sources.listByKind(ctx, ["exemplar"])) {
+    const meta = source.meta as { origin?: unknown; trend?: { capturedAtMs?: unknown } } | null;
+    const origin = meta?.origin;
+    if (typeof origin !== "string" || !origin.startsWith("auto-admission:")) continue;
+    const capturedAtMs = meta?.trend?.capturedAtMs;
+    if (typeof capturedAtMs !== "number") continue;
+    if (capturedAtMs < dayStart || capturedAtMs >= dayStart + DAY_MS) continue;
+    const areaId = origin.slice("auto-admission:".length);
+    counts.set(areaId, (counts.get(areaId) ?? 0) + 1);
+  }
+  return counts;
+}
+
+export interface AdmissionRefusal {
+  areaId: string;
+  externalId: string;
+  /** The budget rail's message, verbatim — reported, never silent, never fatal to the sweep. */
+  reason: string;
+}
+
+export interface AreaAdmissionSummary {
+  areaId: string;
+  areaName: string;
+  enabled: boolean;
+  /** Candidates attributed to this area this sweep (best-relevance attribution — each item consulted exactly once). */
+  considered: number;
+  /** NEW sources created through the door this sweep. */
+  admitted: number;
+  /** Known content re-encountered (content-hash match) — fresh metric snapshots appended, no cap slot, no embed spend. */
+  reEncountered: number;
+  /** Why-counts for everything turned away — the operator sees the knob to turn. */
+  rejected: { bodyLength: number; floors: number; velocity: number; denylist: number; cap: number };
+  /** Slots left in this area's UTC-day cap after this sweep. */
+  capRemaining: number;
+}
+
+export interface AdmissionsResult {
+  admitted: Array<{ externalId: string; sourceId: string; areaId: string }>;
+  reEncountered: Array<{ externalId: string; sourceId: string; areaId: string }>;
+  byArea: AreaAdmissionSummary[];
+  /** Budget-rail refusals, verbatim. The loop halts on the first one (the daily budget is tenant-wide — further embeds would refuse too) and retries next sweep. */
+  budgetRefusals: AdmissionRefusal[];
+}
+
+/** A fresh empty result — what an area-less sweep reports (never a shared constant; callers own their arrays). */
+export function emptyAdmissions(): AdmissionsResult {
+  return { admitted: [], reEncountered: [], byArea: [], budgetRefusals: [] };
+}
+
+export interface RunAdmissionsArgs {
+  /** Driver name — provenance on the admitted source's `meta.trend.source`. */
+  source: string;
+  /** The sweep's "now", ms epoch — clock stays an argument (SPINE §1). */
+  nowMs: number;
+  /** The tenant's G1 denylist terms — denylisted content never enters the exemplar library. */
+  denylist: string[];
+  /** Every ACTIVE area this sweep, so areas with zero candidates still report a summary row. */
+  areas: ReadonlyArray<{ id: string; name: string }>;
+  /** The sweep's ranked feed, score-descending — cap slots go to the best-ranked qualifiers. */
+  ranked: readonly RankedCandidate[];
+  /** Best-relevance area per item (the intake's existing attribution) — the area whose knobs govern. */
+  attribution: ReadonlyMap<string, { areaId: string; areaName: string }>;
+  /** Stored-history Δ-velocity per item, from the ranking stage — never re-fetched here. */
+  longitudinal: ReadonlyMap<string, LongitudinalScore>;
+  /** Items the legacy B3.12 door already ingested or screened this sweep — never double-processed. */
+  alreadyProcessed: ReadonlySet<string>;
+  config?: AdmissionConfigInput;
+}
+
+export interface RunAdmissionsDeps {
+  embedder?: EmbeddingDriver;
+  objectStore?: ObjectStore;
+  capTokens?: number;
+}
+
+/**
+ * One sweep's admission pass. Candidates are consulted in RANKED order
+ * (deterministic, best first — cap slots are scarce), each item exactly
+ * once under its best-relevance area's knobs. Per candidate, in order:
+ * knobs gate (pure math above) → G1 denylist → content-hash pre-check
+ * (the kickoff's belt over the door's own idempotency: known text never
+ * takes a cap slot, and "never admit the same text twice" holds by
+ * construction) → UTC-day cap → the one ingest door. A re-encounter still
+ * rides the door so fresh engagement metrics append (source_metrics is
+ * append-only) without spending budget or slots.
+ *
+ * Budget honesty: a BudgetExceededError from the metered embed is recorded
+ * verbatim and HALTS the pass — the cap is tenant-wide-daily, so pressing
+ * on would only echo refusals — while the sweep itself continues unharmed.
+ * Any other door error propagates (fail loud, the legacy door's contract).
+ *
+ * Cap honesty: the day-count is read once per pass and advanced in memory —
+ * two sweeps racing the same tenant could overshoot the cap by a sweep's
+ * worth; the scheduler is serial per tenant today, and the durable
+ * constraint belongs to the B-learn contract window's admission tables.
+ */
+export async function runAdmissions(
+  ctx: TenantCtx,
+  repos: Repos,
+  args: RunAdmissionsArgs,
+  deps: RunAdmissionsDeps = {},
+): Promise<AdmissionsResult> {
+  const config = admissionConfigSchema.parse(args.config ?? {});
+  const todayCounts = await countTodayAdmissions(ctx, repos, args.nowMs);
+
+  const summaries = new Map<string, AreaAdmissionSummary>();
+  for (const area of args.areas) {
+    const knobs = resolveAdmissionKnobs(config, area.id);
+    summaries.set(area.id, {
+      areaId: area.id,
+      areaName: area.name,
+      enabled: knobs.enabled,
+      considered: 0,
+      admitted: 0,
+      reEncountered: 0,
+      rejected: { bodyLength: 0, floors: 0, velocity: 0, denylist: 0, cap: 0 },
+      capRemaining: Math.max(0, knobs.maxAdmissionsPerDay - (todayCounts.get(area.id) ?? 0)),
+    });
+  }
+
+  const result: AdmissionsResult = {
+    admitted: [],
+    reEncountered: [],
+    byArea: [...summaries.values()],
+    budgetRefusals: [],
+  };
+  const consulted = new Set<string>(args.alreadyProcessed);
+
+  for (const row of args.ranked) {
+    const { item } = row;
+    if (consulted.has(item.externalId)) continue;
+    const attributed = args.attribution.get(item.externalId);
+    // Only the best-relevance area's row governs; other area rows for the
+    // same item are skipped WITHOUT consuming the item (its governing row
+    // may rank later in the feed).
+    if (!attributed || attributed.areaId !== row.areaId) continue;
+    consulted.add(item.externalId);
+
+    const summary = summaries.get(row.areaId);
+    if (!summary) continue; // unreachable: attribution only names active areas
+    summary.considered++;
+    const knobs = resolveAdmissionKnobs(config, row.areaId);
+    if (!knobs.enabled) continue;
+
+    const decision = decideAdmission(item, args.longitudinal.get(item.externalId), knobs);
+    if (!decision.admit) {
+      if (decision.rejectedBy === "bodyLength") summary.rejected.bodyLength++;
+      else if (decision.rejectedBy === "floors") summary.rejected.floors++;
+      else if (decision.rejectedBy === "velocity") summary.rejected.velocity++;
+      continue;
+    }
+
+    const g1 = runG1Denylist({ body: item.text, denylist: args.denylist });
+    if (g1.verdict === "fail") {
+      summary.rejected.denylist++;
+      continue;
+    }
+
+    // The door hashes the PII-STRIPPED text — the pre-check must match it
+    // byte-for-byte or the dedup lies.
+    const contentHash = sha256Hex(stripPii(item.text).text);
+    const existing = await repos.sources.getByContentHash(ctx, contentHash);
+    if (!existing && summary.capRemaining <= 0) {
+      summary.rejected.cap++;
+      continue;
+    }
+
+    try {
+      const ingest = await ingestExemplar(
+        ctx,
+        repos,
+        {
+          kind: "exemplar",
+          text: item.text,
+          uri: item.url,
+          meta: {
+            origin: admissionOrigin(row.areaId),
+            trend: {
+              source: args.source,
+              externalId: item.externalId,
+              account: item.account,
+              publishedAt: item.publishedAt,
+              capturedAtMs: args.nowMs,
+              reasons: decision.reasons,
+              areaId: row.areaId,
+              areaName: row.areaName,
+            },
+          },
+          metrics: Object.entries(item.metrics).map(([name, value]) => ({ name, value })),
+        },
+        { embedder: deps.embedder, objectStore: deps.objectStore, capTokens: deps.capTokens },
+      );
+      if (ingest.created) {
+        summary.admitted++;
+        summary.capRemaining--;
+        result.admitted.push({ externalId: item.externalId, sourceId: ingest.sourceId, areaId: row.areaId });
+      } else {
+        summary.reEncountered++;
+        result.reEncountered.push({ externalId: item.externalId, sourceId: ingest.sourceId, areaId: row.areaId });
+      }
+    } catch (err) {
+      if (err instanceof BudgetExceededError) {
+        result.budgetRefusals.push({
+          areaId: row.areaId,
+          externalId: item.externalId,
+          reason: err.message,
+        });
+        break;
+      }
+      throw err;
+    }
+  }
+
+  return result;
+}

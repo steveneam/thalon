@@ -62,6 +62,28 @@ export {
   type RankerConfigInput,
 } from "./ranker";
 export {
+  admissionConfigSchema,
+  admissionKnobOverridesSchema,
+  admissionKnobsSchema,
+  admissionOrigin,
+  countTodayAdmissions,
+  decideAdmission,
+  emptyAdmissions,
+  resolveAdmissionKnobs,
+  runAdmissions,
+  type AdmissionConfig,
+  type AdmissionConfigInput,
+  type AdmissionDecision,
+  type AdmissionKnobOverrides,
+  type AdmissionKnobs,
+  type AdmissionKnobsInput,
+  type AdmissionRefusal,
+  type AdmissionsResult,
+  type AreaAdmissionSummary,
+  type RunAdmissionsArgs,
+  type RunAdmissionsDeps,
+} from "./admission";
+export {
   runTrendIntake,
   type TrendIntakeDeps,
   type TrendIntakeRequest,
