@@ -22,7 +22,8 @@ const SELECTION_SURFACES = [
   // approve left this list at its exact-mock rebuild — its rows mark
   // selection with the sheet's own `.row.sel` (DOCTRINE 0).
   "board/leads-board.tsx",
-  "leads/lead-card.tsx",
+  // leads/ left this list at its s75 exact-mock rebuild — the rebuilt rows
+  // mark selection with the sheet's own `.row.sel` (DOCTRINE 0).
   "sites/sites-gallery.tsx",
 ];
 
