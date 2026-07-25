@@ -8,6 +8,7 @@
  *   CREATE_TENANT_ID=<uuid> \
  *   CREATE_PROMPT_FILE=path/to/brief.md \
  *   CREATE_PLATFORMS=linkedin,x,facebook \
+ *   CREATE_TARGET_TERMS="AI,AI harness" \   # optional discoverability candidates (Phase 2c)
  *   npx tsx scripts/create-posts.ts
  *
  * Requires DATABASE_URL + gateway env (source apps/web/.env.local).
@@ -48,10 +49,18 @@ async function main(): Promise<void> {
     console.log(`source: ${source.id}`);
 
     const exemplarK = process.env.CREATE_EXEMPLAR_K ? Number(process.env.CREATE_EXEMPLAR_K) : undefined;
+    // Phase 2c: optional comma-separated discoverability candidates (e.g. the
+    // monitored area's intel keywords) — folded into each draft's declared
+    // meta.targetTerms after the brief's canonical entities.
+    const targetTerms = (process.env.CREATE_TARGET_TERMS ?? "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     const result = await runFanout(ctx, repos, {
       sourceId: source.id,
       platforms,
       ...(exemplarK ? { exemplar: { k: exemplarK } } : {}),
+      ...(targetTerms.length > 0 ? { targetTerms } : {}),
     });
     console.log(`run: ${result.runId} (created: ${result.created})`);
 

@@ -2,6 +2,12 @@ export { runFanout, type FanoutDeps, type FanoutRequest, type FanoutResult } fro
 export { loadPlatformProfile, type LoadedPlatformProfile } from "./profiles";
 export { resolveRoutedPlatforms, type RoutedPlatforms } from "./routing";
 export { fanoutShellOutputSchema, type FanoutShellOutput } from "./schemas";
+export {
+  deriveTargetTerms,
+  normalizeTermList,
+  MAX_TARGET_TERMS,
+  type DeriveTargetTermsInput,
+} from "./target-terms";
 export { generateValidatedDraft, type GenerateCallResult } from "./validate-shell-output";
 export {
   createFakeDraftGeneratorDriver,

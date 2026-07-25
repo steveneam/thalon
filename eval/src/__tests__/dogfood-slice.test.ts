@@ -59,7 +59,10 @@ describe("runDogfoodSlice (B1.5: the whole Sprint-1 vertical in one call, keyles
     for (const outcome of result.outcomes) {
       const verdicts = await repos.judgeResults.listForDraft(ctx, outcome.draftId);
       const gates = verdicts.map((v) => v.gate).sort();
-      expect(gates).toEqual(["g1", "g3_final", "g3_screen"]);
+      // Phase 2c: tenant #0's identity topics make every self-tenant draft
+      // declare meta.targetTerms, so the advisory discoverability row now
+      // rides beside the blocking gates (queued/blocked stays g3_final-only).
+      expect(gates).toEqual(["discoverability", "g1", "g3_final", "g3_screen"]);
     }
   });
 
