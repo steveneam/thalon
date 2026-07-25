@@ -215,7 +215,7 @@ describe("Pipeline board (exact-mock rebuild — Board.dc.html)", () => {
       "src",
       "https://cdn.test/thumb.jpg",
     );
-    expect(container.querySelector(".k-thumb span")?.textContent).toBe("source");
+    expect(container.querySelector(".k-thumb span")?.textContent).toBe("bluesky");
   });
 
   it("every card is a door to the surface that owns it", async () => {

@@ -72,7 +72,9 @@ export function intelCards(cards: TrendCard[], limit: number): BoardCard[] {
     // otherwise the source text itself — never an invented headline.
     title: card.dossier?.titles[0] ?? card.text,
     meta: card.areaName,
-    thumb: card.thumbnailUrl ? null : "source",
+    // No thumbnail from this driver: the striped placeholder names the source
+    // it came from rather than a generic word (never a synthesized image).
+    thumb: card.thumbnailUrl ? null : card.source,
     thumbUrl: card.thumbnailUrl,
     href: "/app/intel",
     score: card.score,

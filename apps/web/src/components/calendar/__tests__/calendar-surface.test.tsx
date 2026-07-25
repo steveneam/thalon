@@ -354,6 +354,17 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     );
   });
 
+  it("simply opening the calendar writes nothing back to the views store", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT] });
+    render(<CalendarSurface />);
+    await screen.findByText("1 planned");
+
+    // A visit is not a change: the tenant's view record is created by the
+    // operator choosing something, never by the surface rendering.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(listSavedViewsTestState()).toEqual([]);
+  });
+
   it("the quiet bands count what they hide, and expanding shows the whole day", async () => {
     seedPlan({
       plannedSlots: [

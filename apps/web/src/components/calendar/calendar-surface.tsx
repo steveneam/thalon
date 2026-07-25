@@ -2,7 +2,7 @@
 
 import "@/components/calendar/calendar.css";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   assetEvents,
   cadenceBreaches,
@@ -51,6 +51,10 @@ interface SavedConfig {
 
 const DEFAULT_VIEW: SavedConfig = { density: "week", scope: "all", expanded: false };
 
+function sameView(a: SavedConfig, b: SavedConfig): boolean {
+  return a.density === b.density && a.scope === b.scope && a.expanded === b.expanded;
+}
+
 function coerceView(config: Record<string, unknown>): SavedConfig {
   const { density, scope } = config;
   return {
@@ -98,6 +102,8 @@ export function CalendarSurface() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   /** The saved view is loaded before it is written back — never clobber it with defaults. */
   const [viewLoaded, setViewLoaded] = useState(false);
+  /** What the views store already holds — a write only follows a real change. */
+  const persistedRef = useRef<SavedConfig>(DEFAULT_VIEW);
 
   const load = useCallback(
     () =>
@@ -139,6 +145,7 @@ export function CalendarSurface() {
         const stored = views.find((v) => v.name === VIEW_NAME);
         if (stored && !cancelled) {
           const config = coerceView(stored.config);
+          persistedRef.current = config;
           setDensity(config.density);
           setScope(config.scope);
           setExpanded(config.expanded);
@@ -156,9 +163,18 @@ export function CalendarSurface() {
 
   useEffect(() => {
     if (!viewLoaded) return;
+    const config: SavedConfig = { density, scope, expanded };
+    // Only an actual CHANGE is worth a write — opening the calendar must not
+    // PUT the view back at the server on every visit.
+    if (sameView(config, persistedRef.current)) return;
     const timer = setTimeout(() => {
-      // Best-effort: a view preference must never surface an error over the plan.
-      void putView(VIEW_SURFACE, VIEW_NAME, { density, scope, expanded }).catch(() => {});
+      const before = persistedRef.current;
+      persistedRef.current = config;
+      // Best-effort: a view preference must never surface an error over the
+      // plan — a failed write just leaves the store's own value in place.
+      void putView(VIEW_SURFACE, VIEW_NAME, { ...config }).catch(() => {
+        persistedRef.current = before;
+      });
     }, 400);
     return () => clearTimeout(timer);
   }, [viewLoaded, density, scope, expanded]);
