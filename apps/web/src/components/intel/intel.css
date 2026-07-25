@@ -239,3 +239,17 @@
   max-height: 176px;
   overflow-y: auto;
 }
+
+/* ── Search tab (DESIGNED, not ported: Intel.dc.html draws the tab but no
+   Search panel — founder s74 asked for a consistent redesign, so these two
+   rules are the only additions, and both are the established grammar:
+   the horizon grid mirrors the Dashboard's `.pub-grid` card grid, and a
+   dismissed target dims exactly as the sheet's paused watch chip does). ── */
+.intel-surface .horizon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.intel-surface .horizon-grid > * { min-width: 0; }
+.intel-surface .row.target-off { opacity: 0.6; }

@@ -2,32 +2,50 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, RotateCcw, X } from "lucide-react";
-import { DemoBanner } from "@/components/intel/demo-banner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ErrorNotice } from "@/components/workspace/error-notice";
-import { HorizonCard } from "@/components/intel/horizon-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyArt } from "@/components/ui/empty-art";
-import { addTarget, fetchHorizon, fetchTargets, setTargetStatus, targetThis } from "@/lib/intel/client";
-import type { HorizonPayload, TargetRow } from "@/lib/intel/types";
-import { cn } from "@/lib/utils";
+import {
+  addTarget,
+  fetchHorizon,
+  fetchTargets,
+  setTargetStatus,
+  targetThis,
+} from "@/lib/intel/client";
+import type { HorizonCard, HorizonPayload, TargetRow } from "@/lib/intel/types";
 
 type TabStatus = "loading" | "error" | "success";
 
-/** Provenance labels for the origin badge — first origin wins, so the label is durable. */
+/** Provenance labels for the origin pill — first origin wins, so the label is durable. */
 const ORIGIN_LABEL: Record<TargetRow["origin"], string> = {
   profile_seed: "profile seed",
   ai_expansion: "ai expansion",
   operator: "operator",
 };
 
+function fmt(value: number | null, digits = 2): string {
+  return value === null ? "–" : value.toFixed(digits);
+}
+
 /**
- * Search (Intel's second half, A13): keyword targets (real repo rows,
- * origin-tagged) + horizon-opportunity cards. Demand the tenant almost
- * ranks for — position × rising impressions × below-expected CTR.
+ * Search (Intel's second half, A13): keyword targets + horizon opportunities.
+ *
+ * `Intel.dc.html` draws this TAB but no Search panel, so there is no sheet to
+ * port (the intel lane flagged it, founder s74: "the search tab also needs a
+ * consistent redesign"). This is therefore the one Intel surface DESIGNED
+ * rather than ported — and it is built strictly out of the language the
+ * sheets already established, so it reads as the same product:
+ *
+ *  - the shared shell classes (.card, .card-head, .row, .pill, .btn, the
+ *    type roles) exactly as every ported surface uses them;
+ *  - Intel's OWN ported atomics beside it — `.sec-label` for a band label,
+ *    `.prov` for a provenance/metrics strip, `.input` for the add field —
+ *    so Search wears the Trends tab's grammar, not a second dialect;
+ *  - the horizon card is the dossier's shape applied to search demand: what
+ *    it is, the numbers behind it, why the math flagged it, and one exit.
+ *
+ * Honesty rules carried from the ported surfaces: the metrics strip states
+ * real numbers or "–", never a fabricated zero; every reason is VERBATIM
+ * from the horizon math (never model vibes); the demo era is named in the
+ * band itself rather than implied live; and no magnitude bar appears
+ * anywhere, because position/CTR have no honest 0–1 scale to draw one from.
  */
 export function SearchTab() {
   const router = useRouter();
@@ -56,11 +74,6 @@ export function SearchTab() {
     void load();
   }, [load]);
 
-  function retry() {
-    setStatus("loading");
-    void load();
-  }
-
   async function withBusy(action: () => Promise<unknown>) {
     setBusy(true);
     setActionError(null);
@@ -82,127 +95,251 @@ export function SearchTab() {
     });
   }
 
+  if (status === "loading") {
+    return (
+      <div className="card">
+        <div className="row">
+          <span className="t-label">Reading your targets and the horizon…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="card" role="alert">
+        <div className="row">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="t-title">Couldn’t read search intel</div>
+            <div className="t-label">
+              This is a read failure, not an empty horizon — nothing has been dismissed.
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              setStatus("loading");
+              void load();
+            }}
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const active = targets.filter((t) => t.status === "active");
+  const cards = horizon?.cards ?? [];
+
   return (
-    <div className="flex flex-col gap-4">
-      {status === "loading" && (
-        <div className="flex flex-col gap-3" aria-label="Loading search intel">
-          <Skeleton className="h-4 w-72" />
-          <div className="grid gap-3 xl:grid-cols-2">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+    <>
+      <div className="card">
+        <div className="card-head">
+          <span className="t-title">Keyword targets</span>
+          <span className="pill pill-idle">{active.length} active</span>
+          <div style={{ flex: 1 }} />
+          <span className="t-label">
+            the searches you deliberately target · a dismissal survives recompiles
+          </span>
+        </div>
+
+        {targets.length === 0 ? (
+          <div className="row">
+            <span className="t-label">
+              No targets yet — add the searches you want to win, e.g. “ai content automation for
+              startups”.
+            </span>
+          </div>
+        ) : (
+          <div className="card-rows">
+            {targets.map((target) => {
+              const dismissed = target.status === "dismissed";
+              return (
+                <div key={target.id} className={dismissed ? "row target-off" : "row"}>
+                  <span className="t-data" style={{ fontSize: 12.5, color: "var(--n-1000)" }}>
+                    {target.keyword}
+                  </span>
+                  <span className="pill pill-idle">{ORIGIN_LABEL[target.origin]}</span>
+                  {dismissed && <span className="pill pill-idle">dismissed</span>}
+                  <div style={{ flex: 1 }} />
+                  <button
+                    type="button"
+                    className="btn btn-quiet btn-sm"
+                    disabled={busy}
+                    // The visible word is short; the accessible name keeps the
+                    // keyword so rows stay distinguishable when there are many.
+                    aria-label={
+                      dismissed
+                        ? `Reactivate target ${target.keyword}`
+                        : `Dismiss target ${target.keyword}`
+                    }
+                    onClick={() =>
+                      withBusy(async () => {
+                        await setTargetStatus(target.id, dismissed ? "active" : "dismissed");
+                        setTargets(await fetchTargets());
+                      })
+                    }
+                  >
+                    {dismissed ? "Restore" : "Dismiss"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <form className="row" onSubmit={submitAdd}>
+          <input
+            className="input"
+            style={{ flex: 1 }}
+            aria-label="New keyword target"
+            placeholder="Add a keyword to target"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <button type="submit" className="btn btn-primary btn-sm" disabled={busy || !keyword.trim()}>
+            Add target
+          </button>
+        </form>
+        {actionError && (
+          <div className="row" role="alert">
+            <span className="t-label" style={{ color: "var(--err)" }}>
+              {actionError}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span className="t-title">Peering over the horizon</span>
+        <div style={{ flex: 1 }} />
+        <span className="t-label">
+          {horizon?.demo
+            ? "demo dataset — Search Console polling arms once the site is deployed and verified"
+            : "position 8–20 · impressions rising · CTR below what the position should earn"}
+        </span>
+      </div>
+
+      {cards.length === 0 ? (
+        <div className="card">
+          <div className="row">
+            <span className="t-label">
+              Nothing on the horizon yet — queries appear here once there are enough snapshots to
+              compare.
+            </span>
           </div>
         </div>
+      ) : (
+        <div className="horizon-grid">
+          {cards.map((card) => (
+            <HorizonOpportunity
+              key={`${card.query}:${card.page}`}
+              card={card}
+              busy={busy}
+              onTarget={(query) =>
+                withBusy(async () => {
+                  const { createHref } = await targetThis(query);
+                  router.push(createHref);
+                })
+              }
+            />
+          ))}
+        </div>
       )}
-      {status === "error" && <ErrorNotice message="Couldn’t load search intel." onRetry={retry} />}
-      {status === "success" && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Keyword targets</CardTitle>
-              <CardDescription>
-                The queries this tenant deliberately targets. Compiles from your profile (topics ×
-                offers × audience × question forms) when the B6.5/B6.6 wiring arms — add targets by
-                hand any time; a dismissal survives recompiles.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {targets.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border p-3">
-                  <EmptyArt asset="emptySearch" />
-                  <p className="text-center text-sm text-muted-foreground">
-                    No targets yet. Add the searches you want to win — e.g.{" "}
-                    <em>&ldquo;ai content automation for startups&rdquo;</em>.
-                  </p>
-                </div>
-              ) : (
-                <ul className="flex flex-col gap-1.5">
-                  {targets.map((target) => (
-                    <li
-                      key={target.id}
-                      className={cn(
-                        "flex items-center gap-2 rounded-lg border border-border px-3 py-2",
-                        target.status === "dismissed" && "opacity-60",
-                      )}
-                    >
-                      <span className="font-mono text-sm">{target.keyword}</span>
-                      <Badge variant="outline">{ORIGIN_LABEL[target.origin]}</Badge>
-                      {target.status === "dismissed" && <Badge variant="ghost">dismissed</Badge>}
-                      <span className="ml-auto">
-                        <Button
-                          size="icon-xs"
-                          variant="ghost"
-                          disabled={busy}
-                          aria-label={
-                            target.status === "active"
-                              ? `Dismiss target ${target.keyword}`
-                              : `Reactivate target ${target.keyword}`
-                          }
-                          onClick={() =>
-                            withBusy(async () => {
-                              await setTargetStatus(
-                                target.id,
-                                target.status === "active" ? "dismissed" : "active",
-                              );
-                              setTargets(await fetchTargets());
-                            })
-                          }
-                        >
-                          {target.status === "active" ? <X aria-hidden /> : <RotateCcw aria-hidden />}
-                        </Button>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <form onSubmit={submitAdd} className="flex gap-2 border-t border-border pt-3">
-                <input
-                  aria-label="New keyword target"
-                  placeholder="Add a keyword to target"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  className="h-8 flex-1 rounded-lg border border-input bg-background px-2.5 text-sm focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                />
-                <Button type="submit" size="sm" disabled={busy || !keyword.trim()}>
-                  <Plus aria-hidden data-icon="inline-start" /> Add target
-                </Button>
-              </form>
-              {actionError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {actionError}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+    </>
+  );
+}
 
-          <section aria-label="Horizon opportunities" className="flex flex-col gap-3">
-            <div>
-              <h2 className="text-sm font-semibold">Peering over the horizon</h2>
-              <p className="text-xs text-muted-foreground">
-                Queries you almost rank for: position 8–20, impressions rising, CTR below what the
-                position should earn — demand worth targeting before it&rsquo;s competitive.
-              </p>
-            </div>
-            {horizon?.demo && (
-              <DemoBanner arming="Search Console polling arms once the site is deployed and verified (B6.7) — until then these cards demo the horizon math on the built-in dataset." />
-            )}
-            <div className="grid gap-3 xl:grid-cols-2">
-              {(horizon?.cards ?? []).map((card) => (
-                <HorizonCard
-                  key={`${card.query}:${card.page}`}
-                  card={card}
-                  busy={busy}
-                  onTarget={(query) =>
-                    withBusy(async () => {
-                      const { createHref } = await targetThis(query);
-                      router.push(createHref);
-                    })
-                  }
+/**
+ * One (query × page) series in the dossier's shape: the query, the numbers,
+ * the math's own reasons, one exit. Every number is real or "–".
+ */
+function HorizonOpportunity({
+  card,
+  busy,
+  onTarget,
+}: {
+  card: HorizonCard;
+  busy: boolean;
+  onTarget: (query: string) => void;
+}) {
+  return (
+    <div className="card" data-testid={`horizon-${card.query}`}>
+      <div className="card-head">
+        <span className="t-data" style={{ fontSize: 13, color: "var(--n-1000)" }}>
+          “{card.query}”
+        </span>
+        <div style={{ flex: 1 }} />
+        <span className={card.isOpportunity ? "pill pill-ok" : "pill pill-idle"}>
+          {card.isOpportunity
+            ? "horizon opportunity"
+            : card.reasons.length > 0
+              ? "partial signal"
+              : "no signal"}
+        </span>
+      </div>
+
+      <div style={{ padding: "10px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="prov">
+          <span>position {fmt(card.position, 1)}</span>
+          <span>·</span>
+          <span>
+            {card.latestImpressions ?? "–"} impressions
+            {card.impressionsGrowth !== null && ` (${fmt(card.impressionsGrowth)}×)`}
+          </span>
+          <span>·</span>
+          <span>
+            CTR {fmt(card.ctr, 4)}
+            {card.expectedCtr !== null && ` vs ${fmt(card.expectedCtr, 4)} expected`}
+          </span>
+          <span>·</span>
+          <span>
+            {card.snapshots} snapshot{card.snapshots === 1 ? "" : "s"}
+          </span>
+          {card.page && (
+            <>
+              <span>·</span>
+              <span className="excerpt" style={{ maxWidth: 220 }}>
+                {card.page}
+              </span>
+            </>
+          )}
+        </div>
+
+        {card.reasons.length > 0 && (
+          <>
+            <span className="sec-label">Why it&rsquo;s on the horizon</span>
+            {card.reasons.map((reason) => (
+              <div
+                key={reason}
+                style={{ display: "flex", alignItems: "baseline", gap: 8, fontSize: 12.5 }}
+              >
+                <span
+                  aria-hidden
+                  className="dot"
+                  style={{ background: "var(--act)", alignSelf: "center" }}
                 />
-              ))}
-            </div>
-          </section>
-        </>
-      )}
+                <span style={{ color: "var(--n-1000)" }}>{reason}</span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+
+      <div className="row">
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          disabled={busy}
+          onClick={() => onTarget(card.query)}
+        >
+          Target this
+        </button>
+        <div style={{ flex: 1 }} />
+        <span className="t-label">the query rides along — no retyping at Create</span>
+      </div>
     </div>
   );
 }

@@ -45,13 +45,12 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // components/create/* left the map at s74 — the surface was rebuilt from
   // Create.dc.html and the loader beside it re-trued to the sheet's chrome
   // in the same change; both sit at ZERO bridged tokens.
-  // Intel's own rows burned to zero at the s74 exact-mock rebuild; what is
-  // left here is Search's, which the mock draws as a TAB but not a panel —
-  // it burns down at its own sheet's rebuild.
-  ["components/intel/demo-banner.tsx", 5],
+  // Intel's own rows burned to zero at the s74 exact-mock rebuild, and
+  // Search's followed the same session: the mock draws that TAB but no
+  // panel, so Search was DESIGNED in the sheets' language (founder s74)
+  // rather than ported — horizon-card.tsx and demo-banner.tsx were folded
+  // into it and deleted. heat-grade below still serves other surfaces.
   ["components/intel/heat-grade.tsx", 1],
-  ["components/intel/horizon-card.tsx", 9],
-  ["components/intel/search-tab.tsx", 10],
   ["components/leads/lead-card.tsx", 13],
   ["components/leads/leads-surface.tsx", 13],
   ["components/leads/weights-provenance.tsx", 7],
