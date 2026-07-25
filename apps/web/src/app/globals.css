@@ -1,6 +1,22 @@
-@import "tailwindcss";
+/*
+ * Layer cascade (wave 0, Astryx foundation — ui-overhaul-plan §1.3, the
+ * documented coexistence recipe proven on this exact stack): Tailwind's
+ * three imports are split so the Astryx layers slot between base and
+ * utilities. Hand-rolled surfaces keep being written in Tailwind ON Astryx
+ * tokens via the tailwind-theme bridge; Tailwind utilities stay the
+ * highest-priority layer so existing surface code wins where it speaks.
+ */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "../theme/thalon-theme.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
 
 @custom-variant dark (&:is(.dark *));
 
@@ -184,6 +200,59 @@
   --sidebar-accent-foreground: oklch(0.95 0.015 250);
   --sidebar-border: oklch(1 0 0 / 9%);
   --sidebar-ring: oklch(0.72 0.12 76);
+}
+
+/*
+ * Wave-0 Astryx bridge — while the workspace's <Theme> is mounted it stamps
+ * `data-astryx-theme="thalon"` on <html> (removed again on unmount, so the
+ * landing and /brand never see this block). Every legacy token the existing
+ * surfaces consume re-points at the Thalon theme's Astryx tokens, so the
+ * whole workspace — portals included — renders on the new palette in both
+ * modes without touching a single surface file. Same-specificity override
+ * of :root relies on source order: keep this block below :root and .dark.
+ */
+[data-astryx-theme="thalon"] {
+  --background: var(--color-background-body);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-background-card);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-background-popover);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-accent);
+  --primary-foreground: var(--color-on-accent);
+  --secondary: var(--color-neutral-200);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-background-muted);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-neutral-200);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-error);
+  --ok: var(--color-success);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-accent);
+  --signal: var(--color-warning);
+  --signal-foreground: var(--color-on-warning);
+  --heat-1: var(--color-thermal-cool);
+  --heat-2: var(--color-thermal-warm);
+  --heat-3: var(--color-thermal-rising);
+  --heat-4: var(--color-thermal-hot);
+  --heat-ink: var(--color-thermal-ink);
+  --heat-paper: var(--color-thermal-paper);
+  --chart-1: var(--color-accent);
+  --chart-2: var(--color-warning);
+  --chart-3: var(--color-text-secondary);
+  --chart-4: var(--color-neutral-600);
+  --chart-5: var(--color-neutral-800);
+  --radius: var(--radius-container);
+  --sidebar: var(--color-background-rail);
+  --sidebar-foreground: var(--color-text-primary);
+  --sidebar-primary: var(--color-accent);
+  --sidebar-primary-foreground: var(--color-on-accent);
+  --sidebar-accent: var(--color-neutral-200);
+  --sidebar-accent-foreground: var(--color-text-primary);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--color-accent);
 }
 
 @layer base {

@@ -15,9 +15,12 @@ import {
 } from "@/components/ui/icons";
 
 /**
- * The ONE registry of workspace surfaces (docs/FRONTEND.md §3 shell) — the
- * icon rail, the Cmd-K palette, and the journey spine all route from this
- * list so a surface can never exist in one and be missing from another.
+ * The ONE registry of workspace surfaces — the labeled side nav, the Cmd-K
+ * palette, and the topbar title all route from this list so a surface can
+ * never exist in one and be missing from another. Order and labels are the
+ * founder-verdicted wave-0 mock's, verbatim (kickoff step 3):
+ * Home · Intel · Create · Approve(count) · Calendar ┃ Leads · Library ·
+ * Videos · Sites · Runs ┃ Profiles · Settings.
  * Icons come from the canonical set (components/ui/icons.tsx) — one
  * metaphor per feature, everywhere.
  */
@@ -30,22 +33,23 @@ export interface NavSurface {
   /** Omnibox/palette match terms beyond the label. */
   keywords: string[];
   /**
-   * Where the surface lives in the shell (Phase D spine design): journey
-   * surfaces are stations ON the spine and leave the rail entirely; "main"
-   * rail entries are the extras strip; "foot" pins to the rail's foot.
+   * Which nav group the surface sits in (the mock's three clusters):
+   * "work" = the operating spine · "outputs" = what the engine made ·
+   * "account" = whose workspace and how it's wired.
    */
-  rail?: "main" | "foot";
+  section: "work" | "outputs" | "account";
   /** The Approve entry renders the needs-you count next to its label. */
   showsNeedsYou?: boolean;
 }
 
 export const NAV_SURFACES: NavSurface[] = [
   {
-    label: "Dashboard",
+    label: "Home",
     href: "/app",
     icon: IconJourney,
-    hint: "The journey spine — every asset walks the line",
-    keywords: ["home", "pulse", "overview", "journey", "spine", "pipeline"],
+    hint: "What needs you, what's running, the week ahead",
+    keywords: ["home", "dashboard", "pulse", "overview", "journey", "spine", "pipeline"],
+    section: "work",
   },
   {
     label: "Intel",
@@ -53,14 +57,7 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconIntel,
     hint: "Trends rising on social · demand rising on search",
     keywords: ["trends", "search", "areas", "keywords", "horizon", "seo", "monitor"],
-  },
-  {
-    label: "Leads",
-    href: "/app/leads",
-    icon: IconLeads,
-    hint: "Contacts scored against your ICP — with the reasons spelled out",
-    keywords: ["crm", "leads", "contacts", "prospects", "icp", "waitlist", "import", "csv"],
-    rail: "main",
+    section: "work",
   },
   {
     label: "Create",
@@ -68,30 +65,7 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconCreate,
     hint: "Post, video, or page from one prompt",
     keywords: ["generate", "draft", "prompt", "video", "post", "page", "new"],
-  },
-  {
-    label: "Library",
-    href: "/app/library",
-    icon: IconLibrary,
-    hint: "Paste a video URL — transcript in, ready to copy, export, and ground on",
-    keywords: ["transcript", "video", "url", "youtube", "ingest", "captions", "srt", "csv", "sources"],
-    rail: "main",
-  },
-  {
-    label: "Videos",
-    href: "/app/videos",
-    icon: IconVideos,
-    hint: "Video projects — takes, versioned cuts, and the reasons on record",
-    keywords: ["projects", "takes", "cuts", "rejects", "edl", "film", "editor", "provenance"],
-    rail: "main",
-  },
-  {
-    label: "Sites",
-    href: "/app/sites",
-    icon: IconSites,
-    hint: "The page outputs — every built site, its record, and its preview",
-    keywords: ["sites", "pages", "landing", "portfolio", "templates", "gallery"],
-    rail: "main",
+    section: "work",
   },
   {
     label: "Approve",
@@ -99,6 +73,7 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconApprove,
     hint: "Review queued drafts — nothing ships without your click",
     keywords: ["queue", "review", "drafts", "judge", "publish"],
+    section: "work",
     showsNeedsYou: true,
   },
   {
@@ -107,6 +82,39 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconCalendar,
     hint: "The fan-out plan — what will go out, when, where",
     keywords: ["schedule", "fanout", "slots", "month", "week", "agenda", "reschedule"],
+    section: "work",
+  },
+  {
+    label: "Leads",
+    href: "/app/leads",
+    icon: IconLeads,
+    hint: "Contacts scored against your ICP — with the reasons spelled out",
+    keywords: ["crm", "leads", "contacts", "prospects", "icp", "waitlist", "import", "csv"],
+    section: "outputs",
+  },
+  {
+    label: "Library",
+    href: "/app/library",
+    icon: IconLibrary,
+    hint: "Paste a video URL — transcript in, ready to copy, export, and ground on",
+    keywords: ["transcript", "video", "url", "youtube", "ingest", "captions", "srt", "csv", "sources"],
+    section: "outputs",
+  },
+  {
+    label: "Videos",
+    href: "/app/videos",
+    icon: IconVideos,
+    hint: "Video projects — takes, versioned cuts, and the reasons on record",
+    keywords: ["projects", "takes", "cuts", "rejects", "edl", "film", "editor", "provenance"],
+    section: "outputs",
+  },
+  {
+    label: "Sites",
+    href: "/app/sites",
+    icon: IconSites,
+    hint: "The page outputs — every built site, its record, and its preview",
+    keywords: ["sites", "pages", "landing", "portfolio", "templates", "gallery"],
+    section: "outputs",
   },
   {
     label: "Runs",
@@ -114,7 +122,7 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconRuns,
     hint: "Run history, status, and failure triage",
     keywords: ["history", "fanout", "errors", "lastError", "triage"],
-    rail: "main",
+    section: "outputs",
   },
   {
     label: "Profiles",
@@ -122,7 +130,7 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconProfiles,
     hint: "Brand identity, voice, platforms, denylist, topics",
     keywords: ["brand", "identity", "voice", "denylist", "topics", "tenant"],
-    rail: "foot",
+    section: "account",
   },
   {
     label: "Settings",
@@ -142,16 +150,18 @@ export const NAV_SURFACES: NavSurface[] = [
       "accounts",
       "credentials",
     ],
-    rail: "foot",
+    section: "account",
   },
 ];
 
-/** The journey surfaces — stations on the spine, deliberately absent from the rail. */
-export const JOURNEY_HREFS = new Set(
-  NAV_SURFACES.filter((s) => s.rail === undefined).map((s) => s.href),
-);
+/** The nav's three clusters, in render order, with a11y-only group names. */
+export const NAV_SECTIONS: Array<{ id: NavSurface["section"]; title: string }> = [
+  { id: "work", title: "Work" },
+  { id: "outputs", title: "Outputs" },
+  { id: "account", title: "Account" },
+];
 
-/** Longest-prefix match so /app/intel highlights Intel, not Dashboard. */
+/** Longest-prefix match so /app/intel highlights Intel, not Home. */
 export function activeSurface(pathname: string): NavSurface | undefined {
   return NAV_SURFACES.filter(
     (s) => pathname === s.href || pathname.startsWith(`${s.href}/`),

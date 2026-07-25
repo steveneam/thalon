@@ -45,6 +45,11 @@ export default function RootLayout({
       // Globals set scroll-behavior:smooth; Next 16 wants the opt-in stated
       // or it warns on every route transition.
       data-scroll-behavior="smooth"
+      // The workspace layout's pre-paint script stamps data-theme +
+      // data-astryx-theme on <html> before hydration (wave-0 Astryx shell;
+      // the Theme provider owns them after). Scoped to this one element,
+      // exactly the theme-stamping pattern this flag exists for.
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

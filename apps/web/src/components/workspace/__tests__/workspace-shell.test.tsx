@@ -2,55 +2,66 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
+import { NAV_SURFACES } from "@/lib/workspace/nav";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/app/leads",
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-describe("WorkspaceShell", () => {
-  it("renders the icon rail (extras only), the topbar chrome, and the needs-you chip", async () => {
+describe("WorkspaceShell (wave-0 Astryx chrome)", () => {
+  it("renders the labeled nav — every surface wears its word, mock order", async () => {
     render(
       <WorkspaceShell>
         <p>surface body</p>
       </WorkspaceShell>,
     );
 
-    // The rail carries the extras + the foot — one icon metaphor each.
-    // Scoped to the rail's landmarks: "Settings" also links from the tenant
-    // menu's footer (founder s66 discoverability), so a page-wide role query
-    // would double-match.
-    const extras = within(screen.getByRole("navigation", { name: "Workspace extras" }));
-    for (const label of ["Leads", "Library", "Videos", "Runs"]) {
-      expect(extras.getByRole("link", { name: label })).toBeInTheDocument();
+    // The labeled side nav: all twelve surfaces render icon + word — the
+    // icon-only rail is retired (kickoff step 3; ui-overhaul-plan §2 ③).
+    const nav = within(screen.getByRole("navigation", { name: /side/i }));
+    for (const surface of NAV_SURFACES) {
+      expect(nav.getAllByRole("link", { name: new RegExp(`^${surface.label}`) }).length)
+        .toBeGreaterThanOrEqual(1);
     }
-    const account = within(screen.getByRole("navigation", { name: "Workspace account" }));
-    for (const label of ["Profiles", "Settings"]) {
-      expect(account.getByRole("link", { name: label })).toBeInTheDocument();
-    }
-    // Journey surfaces leave the rail entirely (Phase D): no Intel/Create/
-    // Approve/Calendar links render in the chrome — they live ON the spine.
-    for (const label of ["Intel", "Create", "Approve", "Calendar"]) {
-      expect(screen.queryByRole("link", { name: label })).not.toBeInTheDocument();
-    }
-    expect(screen.getByRole("link", { name: "Journey — the spine" })).toHaveAttribute(
-      "href",
-      "/app",
-    );
 
-    // Active surface: /app/leads → the Leads rail icon wears aria-current.
-    expect(screen.getByRole("link", { name: "Leads" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Journey — the spine" })).not.toHaveAttribute(
-      "aria-current",
-    );
+    // Order and labels exactly as the mock: Home leads (Dashboard is
+    // retired as a label), Settings closes.
+    const labels = NAV_SURFACES.map((s) => s.label);
+    expect(labels).toEqual([
+      "Home",
+      "Intel",
+      "Create",
+      "Approve",
+      "Calendar",
+      "Leads",
+      "Library",
+      "Videos",
+      "Sites",
+      "Runs",
+      "Profiles",
+      "Settings",
+    ]);
+    expect(screen.queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument();
+
+    // Active surface: /app/leads → the Leads item is marked current.
+    const leadsLinks = nav.getAllByRole("link", { name: /^Leads/ });
+    expect(leadsLinks.some((el) => el.getAttribute("aria-current") === "page")).toBe(true);
 
     // The topbar h1 names the surface (surfaces carry no chrome h1 of their own).
     expect(screen.getByRole("heading", { level: 1, name: "Leads" })).toBeInTheDocument();
 
-    // Needs-you chip from the pulse fixture (3 = 2 queued + 1 blocked), once, in the topbar.
+    // Needs-you chip from the pulse fixture (3 = 2 queued + 1 blocked) in
+    // the topbar — the amber signal channel carries over.
     expect(
       await screen.findByRole("link", { name: /3 items need you — open the approve queue/i }),
     ).toHaveAttribute("href", "/app/approve");
+
+    // + Create carries over into the new topbar.
+    expect(screen.getByRole("link", { name: "+ Create" })).toHaveAttribute("href", "/app/create");
+
+    // Dark is the default; light mode ships as the toggle.
+    expect(screen.getByRole("button", { name: /switch to light mode/i })).toBeInTheDocument();
 
     // Tenant + active profile in the switcher.
     expect((await screen.findAllByText("v3")).length).toBeGreaterThanOrEqual(1);
