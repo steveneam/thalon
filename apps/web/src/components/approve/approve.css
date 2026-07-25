@@ -1,0 +1,108 @@
+/*
+ * The Approve surface's own atomics — PORTED 1:1 from the sheet's helmet
+ * <style> block (docs/research/mock-sheets/Approve.dc.html), per DOCTRINE 0
+ * (ui-overhaul-plan §5): the mock is the blueprint. Shared classes (.card,
+ * .row, .pill, .btn, .thumb-sm/.thumb-md, .excerpt, type roles…) come from
+ * src/app/app/workspace.css — READ-ONLY for this surface. Do not restyle a
+ * band here without a founder-approved canvas change re-exported to the
+ * mock-sheets dir.
+ *
+ * SCOPING (structural, not cosmetic): every rule is nested under the
+ * surface root `.approve-surface`, because a "surface-scoped stylesheet" is
+ * still a GLOBAL stylesheet once imported. The sheets deliberately reuse
+ * helmet class names with DIFFERENT values across surfaces — `.split` is
+ * 600px here and 480px in Leads.dc.html; `.ver-strip` is a one-line strip
+ * here and a stretch row in Video Dossier.dc.html — so two rebuilt surfaces
+ * would silently fight over them, resolved by CSS import order. The markup
+ * still carries the sheet's own class names byte-for-byte; only the
+ * selectors are anchored. Every rebuilt surface should anchor the same way.
+ *
+ * `.avatar` is in the sheet's helmet too but already lives in workspace.css
+ * (the shell's topbar wears it) — the shared class is used as-is, not
+ * restated here.
+ */
+
+/* ── Sheet helmet atomics (Approve.dc.html, verbatim) ── */
+.approve-surface .split { flex: 1; display: grid; grid-template-columns: 600px 1fr; gap: 14px; min-height: 0; }
+.approve-surface .q-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.approve-surface .sel-ctl { display: inline-flex; align-items: center; gap: 7px; }
+.approve-surface .chev { width: 8px; height: 8px; border-right: 1.5px solid var(--n-800); border-bottom: 1.5px solid var(--n-800); transform: rotate(45deg) translateY(-2px); }
+.approve-surface .draft-body { font-size: 14px; line-height: 1.65; max-width: 62ch; display: flex; flex-direction: column; gap: 12px; }
+.approve-surface .check { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ok); }
+.approve-surface .check .ck { font-weight: 600; }
+.approve-surface .check-warn { color: var(--warn); }
+/* The sheet draws pass (--ok) and advisory-warn (--warn) only; a BLOCKING
+   failure is the third state its fixture never had to show. */
+.approve-surface .check-err { color: var(--err); }
+.approve-surface .src-line { font-size: 12px; color: var(--n-900); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.approve-surface .q-row { align-items: flex-start; }
+.approve-surface .q-row .thumb-sm { margin-top: 1px; }
+.approve-surface .ver-strip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--n-900); padding: 8px 12px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+.approve-surface .ver-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--n-700); flex: none; }
+
+/*
+ * ── App adaptations (each NAMED; the rendered result at 1440×940 stays
+ * indistinguishable from the sheet) ──
+ * Real data is longer and wider than the canvas fixture. The sheet draws
+ * five queue rows and one short draft in regions it can leave
+ * `overflow: hidden`; a real queue and a real body must SCROLL INSIDE
+ * their card rather than clip or grow the page (the Bounded-List Rule),
+ * and grid/flex children must be shrinkable or the nowrap titles and
+ * excerpts blow their column out.
+ */
+.approve-surface .split > * { min-width: 0; }
+/* The sheet's `flex:1;overflow:hidden` row region — bounded scroll instead.
+   NOT workspace.css's `.card-rows`: that adaptation is a 260px-max box for
+   the dashboard's needs-you card, and these cards fill the split's height. */
+.approve-surface .q-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+/* The sheet's `flex:1;overflow:hidden;padding:18px 24px` detail column. */
+.approve-surface .draft-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 24px; display: flex; flex-direction: column; gap: 14px; }
+.approve-surface .q-row .q-title, .approve-surface .q-row .excerpt { min-width: 0; }
+
+/*
+ * The sheet's two `.sel-ctl` chips are pickers. The visible chrome stays the
+ * sheet's markup byte-for-byte; a native <select> rides transparently on top
+ * of it, so the control is genuinely keyboard- and screen-reader-operable
+ * (and renders the platform's own menu) without a re-drawn popover.
+ */
+.approve-surface .sel-ctl { position: relative; }
+.approve-surface .sel-native { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; appearance: none; font: inherit; }
+
+/* Sheet spans that had to become buttons keep the sheet's type role exactly. */
+.approve-surface .as-text-btn { background: none; border: none; padding: 0; font-family: inherit; cursor: pointer; }
+
+/* The sheet's queue rows are <div class="row">; a real queue row is a
+   BUTTON (click + keyboard + aria-pressed). The compound selectors win over
+   .row/.row:first-child regardless of stylesheet order, so the rendered row
+   keeps the sheet's exact border/padding/hover/selected treatment. */
+.approve-surface .q-row.q-btn { width: 100%; font: inherit; color: inherit; text-align: left; background: transparent; border: none; border-top: 1px solid var(--n-400); }
+.approve-surface .q-row.q-btn:first-child { border-top: none; }
+.approve-surface .q-row.q-btn:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; }
+
+/* The `e`-key editor takes the draft body's own slot and its own type — the
+   operator edits the text exactly where they were reading it. */
+.approve-surface .draft-editor { min-height: 180px; font: 400 14px/1.65 var(--font-ui); color: var(--n-1000); background: var(--n-bg); border: 1px solid var(--n-500); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+.approve-surface .draft-editor:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+
+/* The verbatim-reasons panel behind the checks band's "reasons on record →"
+   door (the judge-verdict provenance keeper — reasons NEVER paraphrased). */
+.approve-surface .reasons-panel { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+.approve-surface .reason-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--n-900); }
+.approve-surface .reason-gate { width: 132px; flex: none; font-size: 12px; font-weight: 600; color: var(--n-1000); }
+.approve-surface .reason-mark { width: 12px; flex: none; text-align: center; font-weight: 600; }
+.approve-surface .reason-lines { min-width: 0; flex: 1; }
+
+/* Format-specific structured context (clip plan / demo plan / web page /
+   outreach email / exemplar provenance) — the same quiet inset block, in
+   the sheet's own type roles. Absent entirely for a plain post, so the
+   sheet's resting detail column stays byte-true. */
+.approve-surface .fmt-panel { display: flex; flex-direction: column; gap: 12px; padding: 12px 14px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+.approve-surface .fmt-block { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.approve-surface .fmt-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12.5px; margin: 0; }
+.approve-surface .fmt-grid dt { color: var(--n-900); font-weight: 500; }
+.approve-surface .fmt-grid dd { color: var(--n-1000); white-space: pre-wrap; min-width: 0; margin: 0; }
+.approve-surface .fmt-table { width: 100%; font-size: 12px; text-align: left; border-collapse: collapse; }
+.approve-surface .fmt-table th { color: var(--n-900); font-weight: 500; padding: 0 10px 4px 0; }
+.approve-surface .fmt-table td { padding: 0 10px 4px 0; vertical-align: top; overflow-wrap: anywhere; }
+.approve-surface .fmt-ref { font-family: var(--font-data); font-size: 11.5px; color: var(--n-900); overflow-wrap: anywhere; }
+.approve-surface .fmt-stale { font-size: 12px; font-style: italic; color: var(--n-900); }

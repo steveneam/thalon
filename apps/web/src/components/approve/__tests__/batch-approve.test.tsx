@@ -13,7 +13,7 @@ import {
   run,
 } from "@/lib/approve-queue/fixtures";
 import { server } from "@/lib/testing/server";
-import { ApproveQueue } from "../approve-queue";
+import { ApproveSurface } from "../approve-surface";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -47,7 +47,7 @@ describe("ApproveQueue — batch approve", () => {
       }),
     );
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
 
     // The classic fixtures hold ONE waiting draft (A queued; B blocked; the
     // staged storyboard is queued but advances through its own staged flow,
@@ -73,7 +73,7 @@ describe("ApproveQueue — batch approve", () => {
       }),
     );
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     await user.click(await screen.findByRole("button", { name: "Approve all waiting (1)" }));
     expect(approved).toHaveLength(0);
   });
@@ -85,7 +85,7 @@ describe("ApproveQueue — batch approve", () => {
       ),
       http.get(`/api/runs/${FIXTURE_RUN_1_ID}/drafts`, () => HttpResponse.json({ drafts: [draftC] })),
     );
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const batchButton = await screen.findByRole("button", { name: "Approve all waiting (0)" });
     expect(batchButton).toBeDisabled();
   });

@@ -1,9 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   expectedClipPlanBody,
-  formatMsAsClock,
   parseClipPlanMeta,
   type ClipPlanDraftMeta,
 } from "@/lib/approve-queue/formats/clip-plan";
@@ -20,25 +17,26 @@ import {
   type OutreachEmailDraftMeta,
 } from "@/lib/approve-queue/formats/outreach-email";
 import { parseWebPageMeta, type WebPageDraftMeta } from "@/lib/approve-queue/formats/web-page";
-import { cn } from "@/lib/utils";
 import type { GridDraft } from "@/lib/approve-queue/types";
 
 interface FormatDetailProps {
   draft: GridDraft;
 }
 
-const CAPTURE_STATUS_VARIANT: Record<DemoPlanDraftMeta["captureStatus"], "outline" | "default" | "destructive"> = {
-  planned: "outline",
-  captured: "default",
-  failed: "destructive",
+const CAPTURE_STATUS_PILL: Record<DemoPlanDraftMeta["captureStatus"], string> = {
+  planned: "pill-idle",
+  captured: "pill-ok",
+  failed: "pill-err",
 };
 
 /**
- * Format-specific structured detail for the approve panel (B2.6). Read-only:
- * editing always operates on `draft.body` unchanged regardless of format —
- * this is supplementary context alongside the judged body text, never a
- * substitute for it. Renders nothing for a plain "post" draft with no
- * exemplar provenance.
+ * Format-specific structured detail for the draft card (B2.6), rebuilt in
+ * the mock sheets' own classes (DOCTRINE 0 — no bridged legacy tokens).
+ * Read-only: editing always operates on `draft.body` unchanged regardless
+ * of format — this is supplementary context alongside the judged body text,
+ * never a substitute for it. Renders nothing for a plain "post" draft with
+ * no exemplar provenance, so the sheet's resting detail stays byte-true;
+ * a clip plan's window/thumb live in the card head and media slot, not here.
  */
 export function FormatDetail({ draft }: FormatDetailProps) {
   const clipPlan = draft.format === "clip_plan" ? parseClipPlanMeta(draft.meta) : null;
@@ -50,7 +48,7 @@ export function FormatDetail({ draft }: FormatDetailProps) {
   if (!clipPlan && !demoPlan && !webPage && !outreachEmail && !exemplarIds) return null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border p-2 text-sm">
+    <div className="fmt-panel">
       {clipPlan && <ClipPlanDetail meta={clipPlan} stale={expectedClipPlanBody(clipPlan) !== draft.body} />}
       {demoPlan && <DemoPlanDetail meta={demoPlan} stale={expectedDemoPlanBody(demoPlan) !== draft.body} />}
       {webPage && <WebPageDetail meta={webPage} />}
@@ -70,7 +68,7 @@ export function FormatDetail({ draft }: FormatDetailProps) {
 /** Shown when an operator edit changed `draft.body` without touching the generation `meta` — the structured fields below no longer match the judged text. */
 function StaleNotice({ children }: { children: ReactNode }) {
   return (
-    <p className="text-xs text-muted-foreground italic" role="status">
+    <p className="fmt-stale" role="status">
       {children}
     </p>
   );
@@ -78,99 +76,95 @@ function StaleNotice({ children }: { children: ReactNode }) {
 
 function ClipPlanDetail({ meta, stale }: { meta: ClipPlanDraftMeta; stale: boolean }) {
   return (
-    <div className="flex flex-col gap-2" aria-label="Clip plan detail">
-      <div className="flex flex-wrap items-center gap-1.5">
-        {/* Timing/window/chunk provenance stays true regardless of copy edits — never de-emphasized. */}
-        <Badge variant="outline">
-          {formatMsAsClock(meta.startMs)}–{formatMsAsClock(meta.endMs)} ({formatMsAsClock(meta.durationMs)})
-        </Badge>
-      </div>
+    <div className="fmt-block" aria-label="Clip plan detail">
       {stale && (
-        <StaleNotice>Edited since generation — hook/captions/copy below reflect the original text, not the current body.</StaleNotice>
+        <StaleNotice>
+          Edited since generation — hook/captions/copy below reflect the original text, not the current body.
+        </StaleNotice>
       )}
-      <dl className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs", stale && "opacity-50")}>
-        <dt className="font-medium text-muted-foreground">Hook</dt>
-        <dd className="whitespace-pre-wrap text-foreground">{meta.hook}</dd>
-        <dt className="font-medium text-muted-foreground">Captions</dt>
-        <dd className="whitespace-pre-wrap text-foreground">{meta.captions}</dd>
-        <dt className="font-medium text-muted-foreground">Platform copy</dt>
-        <dd className="whitespace-pre-wrap text-foreground">{meta.platformCopy}</dd>
+      <dl className="fmt-grid" style={stale ? { opacity: 0.5 } : undefined}>
+        <dt>Hook</dt>
+        <dd>{meta.hook}</dd>
+        <dt>Captions</dt>
+        <dd>{meta.captions}</dd>
+        <dt>Platform copy</dt>
+        <dd>{meta.platformCopy}</dd>
       </dl>
-      <p className="text-xs text-muted-foreground">
+      {/* Timing/window/chunk provenance stays true regardless of copy edits — never de-emphasized. */}
+      <span className="t-label">
         window {meta.windowIndex} · chunks {meta.chunkSeqs.join(", ")}
-      </p>
+      </span>
     </div>
   );
 }
 
 function DemoPlanDetail({ meta, stale }: { meta: DemoPlanDraftMeta; stale: boolean }) {
   return (
-    <div className="flex flex-col gap-2" aria-label="Demo plan detail">
-      <div className="flex flex-wrap items-center gap-1.5">
+    <div className="fmt-block" aria-label="Demo plan detail">
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
         {/* captureStatus/captureRef aren't narration-derived — stay true regardless of copy edits, never de-emphasized. */}
-        <Badge variant={CAPTURE_STATUS_VARIANT[meta.captureStatus]}>capture: {meta.captureStatus}</Badge>
-        {meta.captureRef && <span className="font-mono text-2xs text-muted-foreground">{meta.captureRef}</span>}
+        <span className={`pill ${CAPTURE_STATUS_PILL[meta.captureStatus]}`}>capture: {meta.captureStatus}</span>
+        {meta.captureRef && <span className="fmt-ref">{meta.captureRef}</span>}
       </div>
       {stale && (
-        <StaleNotice>Edited since generation — the step narrations below reflect the original text, not the current body.</StaleNotice>
+        <StaleNotice>
+          Edited since generation — the step narrations below reflect the original text, not the current body.
+        </StaleNotice>
       )}
-      <table className={cn("w-full text-left text-xs", stale && "opacity-50")}>
+      <table className="fmt-table" style={stale ? { opacity: 0.5 } : undefined}>
         <thead>
-          <tr className="text-muted-foreground">
-            <th className="pr-2 font-medium">#</th>
-            <th className="pr-2 font-medium">Action</th>
-            <th className="pr-2 font-medium">Target</th>
-            <th className="pr-2 font-medium">Value</th>
-            <th className="font-medium">Narration</th>
+          <tr>
+            <th>#</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Value</th>
+            <th>Narration</th>
           </tr>
         </thead>
         <tbody>
           {meta.steps.map((step) => (
-            <tr key={step.stepIndex} className="align-top">
-              <td className="pr-2">{step.stepIndex}</td>
-              <td className="pr-2">{step.action}</td>
-              <td className="pr-2 break-all">{step.target}</td>
-              <td className="pr-2 break-all">{step.value}</td>
-              <td className="whitespace-pre-wrap">{step.narration}</td>
+            <tr key={step.stepIndex}>
+              <td>{step.stepIndex}</td>
+              <td>{step.action}</td>
+              <td>{step.target}</td>
+              <td>{step.value}</td>
+              <td style={{ whiteSpace: "pre-wrap" }}>{step.narration}</td>
             </tr>
           ))}
         </tbody>
       </table>
       {/* pageUrls are the crawl's own provenance, not narration-derived — stay true regardless of copy edits. */}
-      <p className="text-xs text-muted-foreground">pages: {meta.pageUrls.join(", ")}</p>
+      <span className="t-label">pages: {meta.pageUrls.join(", ")}</span>
     </div>
   );
 }
 
-const DEPLOY_STATUS_VARIANT: Record<WebPageDraftMeta["deployStatus"], "outline" | "default" | "destructive"> = {
-  drafted: "outline",
-  deployed: "default",
-  failed: "destructive",
+const DEPLOY_STATUS_PILL: Record<WebPageDraftMeta["deployStatus"], string> = {
+  drafted: "pill-idle",
+  deployed: "pill-ok",
+  failed: "pill-err",
 };
 
-/** B6.7: the web_page panel context — page identity + the LATEST deploy's truth (deployStatus/deployRef ride the meta, not the draft status). */
+/** B6.7: the web_page context — page identity + the LATEST deploy's truth (deployStatus/deployRef ride the meta, not the draft status). */
 function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
   return (
-    <div className="flex flex-col gap-2" aria-label="Web page detail">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Badge variant={DEPLOY_STATUS_VARIANT[meta.deployStatus]}>deploy: {meta.deployStatus}</Badge>
+    <div className="fmt-block" aria-label="Web page detail">
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+        <span className={`pill ${DEPLOY_STATUS_PILL[meta.deployStatus]}`}>deploy: {meta.deployStatus}</span>
         {meta.deployRef && (
-          <a
-            href={meta.deployRef}
-            className="font-mono text-2xs text-primary underline-offset-2 hover:underline"
-          >
+          <a className="card-link" href={meta.deployRef}>
             {meta.deployRef}
           </a>
         )}
       </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
-        <dt className="font-medium text-muted-foreground">Title</dt>
-        <dd className="text-foreground">{meta.title}</dd>
-        <dt className="font-medium text-muted-foreground">Description</dt>
-        <dd className="text-foreground">{meta.description}</dd>
+      <dl className="fmt-grid">
+        <dt>Title</dt>
+        <dd>{meta.title}</dd>
+        <dt>Description</dt>
+        <dd>{meta.description}</dd>
       </dl>
-      {/* Object-store keys are unbroken tokens — without break-all this row overflows its panel (detector-caught, s39). */}
-      <p className="break-all font-mono text-2xs text-muted-foreground">{meta.htmlRef}</p>
+      {/* Object-store keys are unbroken tokens — without the break they overflow the card (detector-caught, s39). */}
+      <span className="fmt-ref">{meta.htmlRef}</span>
     </div>
   );
 }
@@ -179,20 +173,20 @@ function WebPageDetail({ meta }: { meta: WebPageDraftMeta }) {
 function CopyButton({ label, text }: { label: string; text: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <Button
-      size="sm"
-      variant="outline"
+    <button
+      type="button"
+      className="btn btn-ghost btn-sm"
       onClick={() => {
         void navigator.clipboard.writeText(text).then(() => setCopied(true));
       }}
     >
       {copied ? "Copied" : label}
-    </Button>
+    </button>
   );
 }
 
 /**
- * B-crm.4 front half: the outreach-email panel context. The recipient is
+ * B-crm.4 front half: the outreach-email context. The recipient is
  * generation provenance (true regardless of edits); subject/body reflect
  * generation meta with the standard stale notice. The manual copy-out
  * affordance appears ONLY on an APPROVED draft and copies the CURRENT
@@ -215,36 +209,40 @@ function OutreachEmailDetail({
     ? `${meta.recipient.name} <${meta.recipient.email}>`
     : meta.recipient.email;
   return (
-    <div className="flex flex-col gap-2" aria-label="Outreach email detail">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Badge variant="outline">draft-only — never auto-sent</Badge>
-        <span className="text-xs text-muted-foreground">To: {to}</span>
+    <div className="fmt-block" aria-label="Outreach email detail">
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+        <span className="pill pill-idle">draft-only — never auto-sent</span>
+        <span className="t-label">To: {to}</span>
       </div>
       {stale && (
-        <StaleNotice>Edited since generation — subject/body below reflect the original text, not the current body.</StaleNotice>
+        <StaleNotice>
+          Edited since generation — subject/body below reflect the original text, not the current body.
+        </StaleNotice>
       )}
-      <dl className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs", stale && "opacity-50")}>
-        <dt className="font-medium text-muted-foreground">Subject</dt>
-        <dd className="whitespace-pre-wrap text-foreground">{meta.subject}</dd>
-        <dt className="font-medium text-muted-foreground">Body</dt>
-        <dd className="whitespace-pre-wrap text-foreground">{meta.emailBody}</dd>
+      <dl className="fmt-grid" style={stale ? { opacity: 0.5 } : undefined}>
+        <dt>Subject</dt>
+        <dd>{meta.subject}</dd>
+        <dt>Body</dt>
+        <dd>{meta.emailBody}</dd>
       </dl>
       {approved ? (
-        <div className="flex flex-wrap items-center gap-1.5" aria-label="Copy into your mail client">
+        <div
+          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}
+          aria-label="Copy into your mail client"
+        >
           <CopyButton label="Copy subject" text={current.subject} />
           <CopyButton label="Copy body" text={current.emailBody} />
-          <Button size="sm" variant="outline" asChild>
-            <a
-              href={`mailto:${encodeURIComponent(meta.recipient.email)}?subject=${encodeURIComponent(current.subject)}&body=${encodeURIComponent(current.emailBody)}`}
-            >
-              Open in your mail client
-            </a>
-          </Button>
+          <a
+            className="btn btn-ghost btn-sm"
+            href={`mailto:${encodeURIComponent(meta.recipient.email)}?subject=${encodeURIComponent(current.subject)}&body=${encodeURIComponent(current.emailBody)}`}
+          >
+            Open in your mail client
+          </a>
         </div>
       ) : (
-        <p className="text-xs text-muted-foreground">
+        <span className="t-label">
           Approve to unlock copy-out — you send it yourself, from your own mail client.
-        </p>
+        </span>
       )}
     </div>
   );
@@ -252,11 +250,11 @@ function OutreachEmailDetail({
 
 function ExemplarProvenance({ ids }: { ids: ExemplarId[] }) {
   return (
-    <div className="flex flex-col gap-1" aria-label="Exemplar provenance">
-      <Badge variant="secondary">Exemplar-grounded</Badge>
-      <ul className="flex flex-col gap-0.5 font-mono text-2xs text-muted-foreground">
+    <div className="fmt-block" aria-label="Exemplar provenance">
+      <span className="pill pill-idle">Exemplar-grounded</span>
+      <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
         {ids.map((id) => (
-          <li key={`${id.sourceId}:${id.chunkId}`}>
+          <li key={`${id.sourceId}:${id.chunkId}`} className="fmt-ref">
             {id.sourceId.slice(0, 8)} / {id.chunkId.slice(0, 8)}
           </li>
         ))}

@@ -30,11 +30,6 @@ const LEGACY_TOKEN_RE =
 /** file → pinned bridged-token usage count (the s73 seed). */
 const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/app/sites/page.tsx", 5],
-  ["components/approve/approve-panel.tsx", 36],
-  ["components/approve/approve-queue.tsx", 11],
-  ["components/approve/format-detail.tsx", 25],
-  ["components/approve/judge-verdicts.tsx", 11],
-  ["components/approve/queue-list.tsx", 16],
   ["components/board/leads-board.tsx", 22],
   ["components/calendar/agenda-list.tsx", 9],
   ["components/calendar/calendar-surface.tsx", 25],

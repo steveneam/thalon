@@ -2,7 +2,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { ApproveQueue } from "@/components/approve/approve-queue";
+import { ApproveSurface } from "@/components/approve/approve-surface";
 import { FIXTURE_STORYBOARD_DRAFT_ID } from "@/lib/staged-flow/fixtures";
 
 /**
@@ -12,7 +12,7 @@ import { FIXTURE_STORYBOARD_DRAFT_ID } from "@/lib/staged-flow/fixtures";
  * every step, and every interaction lands in the capture log.
  */
 async function openStagedSurface(user: ReturnType<typeof userEvent.setup>) {
-  render(<ApproveQueue />);
+  render(<ApproveSurface />);
   await user.click(
     await screen.findByRole("button", { name: `Select video draft ${FIXTURE_STORYBOARD_DRAFT_ID}` }),
   );
@@ -91,7 +91,7 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
 
   it("classic drafts keep the plain list + detail flow untouched", async () => {
     const user = userEvent.setup();
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     const detail = screen.getByRole("region", { name: "Draft detail" });
     // Newest-first view (s66) auto-selects the blocked draft — walk to the classic queued one.

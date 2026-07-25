@@ -1,10 +1,10 @@
-import { ApproveQueue } from "@/components/approve/approve-queue";
+import { ApproveSurface } from "@/components/approve/approve-surface";
 
 /**
- * The approve queue inside the workspace shell (B6.2 restyle — the classic
- * 3-zone flow, test-pinned). ?run=/?draft= deep links are consumed by the
- * queue from the mount-time URL.
+ * The Approve surface inside the workspace shell — rebuilt exactly from
+ * `docs/research/mock-sheets/Approve.dc.html` (DOCTRINE 0). ?run=/?draft=
+ * deep links are consumed by the surface from the mount-time URL.
  */
 export default function WorkspaceApprovePage() {
-  return <ApproveQueue />;
+  return <ApproveSurface />;
 }

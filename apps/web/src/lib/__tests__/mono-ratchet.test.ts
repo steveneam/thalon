@@ -34,10 +34,6 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/blog/page.tsx", 3],
   ["app/brand/page.tsx", 3],
   ["app/page.tsx", 5],
-  ["components/approve/approve-panel.tsx", 6],
-  ["components/approve/approve-queue.tsx", 1],
-  ["components/approve/judge-verdicts.tsx", 1],
-  ["components/approve/queue-list.tsx", 4],
   ["components/board/leads-board.tsx", 5],
   ["components/calendar/agenda-list.tsx", 2],
   ["components/calendar/calendar-surface.tsx", 4],
@@ -45,11 +41,11 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/calendar/month-grid.tsx", 3],
   ["components/calendar/slot-chip.tsx", 1],
   ["components/calendar/week-grid.tsx", 4],
-  // components/create/create-surface.tsx — left the map at s74 (exact-mock
-  // rebuild; the sheet's own type roles carry the mono, not utilities).
-  // dashboard pins burned to zero at the s73 exact-mock rebuild (DOCTRINE 0).
-  // Intel's own pins burned to zero at the s74 exact-mock rebuild; heat-grade
-  // still serves leads/board/library until each of those rebuilds.
+  // approve + create + dashboard + intel pins all burned to zero at their
+  // exact-mock rebuilds (DOCTRINE 0, s73–s74): the rebuilt surfaces speak the
+  // sheets' own type roles, and their DATA labels ride the theme's mono style
+  // (no uppercase). heat-grade below still serves leads/board/library until
+  // each of those rebuilds.
   ["components/intel/heat-grade.tsx", 1],
   ["components/landing/feature-showcase.tsx", 3],
   ["components/landing/hero-vignette.tsx", 4],
