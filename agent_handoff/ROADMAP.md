@@ -117,6 +117,21 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   **THE LANDING itself** (built last; the skill-compound target; also gates B-int.4's
   mode-1 filings, so it sequences before OAuth-Connect).
 
+### Exemplar acquisition — LEARN FROM THE CROWD (founder intent, s68 close)
+- **The founder's stated goal (verbatim intent): the engine exists because "there
+  might be people out there that would write a more clever/viral/hook/trending
+  post than me" — exemplars should come from THE BEST EXTERNAL POSTERS, not from
+  the founder's voice** (his voice_sample was the s68 quick unlock, seasoning not
+  base). Work items, lead-serial: (a) ARM automatic outlier→exemplar admission
+  (area config needs outlier knobs — engagement metric names, floors, velocity
+  multiples; today's sweep: 221 polled, 0 ingested, tenant had zero exemplars
+  ever); (b) COVERAGE honesty: Bluesky's area feed = news-bot headlines, not
+  viral posts — the hook-pattern pool needs YouTube titles/hooks (already
+  polled), possibly X search (PAID API gate — month-end credit call), and (c) a
+  zero-cost operator drop door: the founder pastes posts he admires → ingestExemplar
+  (the s68 CLI pattern; his curation, the crowd's craft). Retrieval side is done
+  (CREATE_EXEMPLAR_K).
+
 ### Judge quality (observed s67, not blocking)
 - Judge-prompt tuning candidate: the FINAL tier is over-strict on truism claims
   (golden g3-004/005 fail though expected pass) AND lenient on the invented-mechanism/
