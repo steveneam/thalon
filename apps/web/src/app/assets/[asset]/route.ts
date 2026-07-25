@@ -42,7 +42,9 @@ export async function GET(
   }
 
   const { bytes, contentType } = result;
-  return new Response(new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength), {
+  // Copying constructor on purpose: BodyInit wants an ArrayBuffer-backed view,
+  // and a view over bytes.buffer stays ArrayBufferLike-typed.
+  return new Response(new Uint8Array(bytes), {
     headers: {
       "content-type": contentType,
       "content-length": String(bytes.byteLength),
