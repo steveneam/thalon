@@ -19,43 +19,36 @@
 Ordered by what I'd actually do. Phase 1 is buildable with zero founder input, so
 `gogogo` always has productive work; Phases 2–3 are his GOs, surfaced at the opener.
 
-### Phase 1 — B-int.1: the vault core **[lead-serial — START HERE]**
-The natural continuation of the frozen B-int.0 window (PR #66). Build envelope
-crypto behind the already-frozen `tenantCredentials` doors:
-- AES-256-GCM per-row data key, wrapped by `THALON_VAULT_MASTER_KEY` (env, already
-  in the schema); Node built-in `crypto`, $0/self-hostable; cloud KMS is the
-  recorded swap path behind the wrap/unwrap seam.
-- The vault's `seal`/`open` functions the repo doors call (repo validates shape,
-  crypto layer seals/opens — the split is already designed in the B-int.0 comments).
-- A read-only **validate-ping** seam (per-destination probes that flip a card to
-  `connected`/`needs_reauth`) and **redaction ratchets** (a secret must never reach
-  an event, log, error, or API response — extend the b-int0 redaction pin).
-- Move the self/dogfood tenant onto the vault (env arming stays as emergency
-  override) so Thalon's own launch runs the exact path a client will.
-- Detail: `docs/adr/0011-integrations-surface-charter.md` · `docs/proposals/2026-07-19-integrations-surface.md` (B-int.1 row).
+### Phase 1 — B-int.2: the Integrations surface **[lead-serial — START HERE]**
+The vault core (B-int.1) SHIPPED s68 — its seam is live, so the surface unblocked.
+See the Phase-4-shaped spec below (cards + guided flows + published-view); doors to
+build against: `connectDestination` / `listCredentialCards` / `validateDestination`
+/ `disconnectDestination` in `packages/engine/src/integrations/`.
 
-### Phase 2 — Pillar #1 mint + render **[founder GO — present at opener]**
-Deferred by founder call until the loops proved end-to-end; they now have (blog live,
-post caller wired). The video chain (project / planned takes / EDL / cut) sits
-planned + judged in the DB.
-- Present the per-take **cost plan first** (`get_cost` each; ≥40cr = ping the founder).
-- On his GO: mint the takes → box-local `$0` render.
-- Standing mint rules live in memory (`higgsfield-kompozy-assignment` + the standing
-  mint-discipline notes): text-in-scene = text-precise seat, soul-2 letters, hero =
-  best roster model, reference-guided minting doctrine.
+### Phase 2 — Pillar #1 MINT GO **[founder GO — cost plan PRESENTED s68]**
+The chain is GREEN end-to-end (s68 re-brief fixed the s67 judge fails): project
+"Pillar: the honest content engine", 9 planned takes (8 motion beats + $0
+code-drawn CTA card), EDL + draft cut in the DB. Cost plan presented at the s68
+close (recommended lane: kling3_0_turbo 1080p ≈ 94cr; hero-bump + retake buffer
+≈ 110–150cr; every take <40cr so no standing ping triggers). **On his GO: mint
+the takes → box-local $0 render.** Standing mint rules in memory apply; all
+on-screen text is code-drawn at render (s62 doctrine), never minted.
 
 ### Phase 3 — Post loop goes live, per platform **[founder GO — LinkedIn first]**
-The production caller is wired (`POST /api/drafts/[id]/publish-social`, disarmed).
-Arming each platform is the founder's:
-- his `SOCIAL_<P>_ACCESS_TOKEN` + `SOCIAL_<P>_ARMED="true"` + the platform in the
+The production caller is wired (`POST /api/drafts/[id]/publish-social`) and since
+s68 resolves credentials VAULT-FIRST (env pair = emergency override). Arming each
+platform is the founder's:
+- his LinkedIn member token (scopes `openid profile w_member_social`) — into the
+  vault via the connect door (the exact client flow; B-int.2 gives it UI) or the
+  env pair as override — plus `SOCIAL_LINKEDIN_ARMED="true"` + the platform in the
   tenant's social block;
 - **before the first real post** (checklist `WRAP-pub2-drivers.md` §Before-a-first-live-post):
   re-verify the two API version pins (LinkedIn `202512`, Graph `v23.0` — both checked
   live-good s67) + make the LinkedIn Little-Format escaping call.
 - One reviewed test post each; his call every time. Stealth holds otherwise.
 
-### Phase 4 — B-int.2: the Integrations surface **[lead-serial — after Phase 1's seam lands]**
-Settings → Integrations, once the vault core exists:
+### Phase 4 — (spec for Phase 1 above) B-int.2 detail
+Settings → Integrations, now that the vault core exists:
 - A card per destination grouped by what it powers (Intel · Social · **Your website** ·
   Outreach/Newsletter), honest states (not-connected / connected-as-@handle /
   needs-reauth / expiring / plan-gated / review-pending — the frozen card-state vocab).
@@ -78,8 +71,9 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 
 ### Integrations (ADR 0011 — the sprint's big build)
 - **B-int.0 contract window** — ✅ FROZEN (PR #66, migration 0018).
-- **B-int.1 vault core** — **[lead-serial]** — Phase 1 above.
-- **B-int.2 the surface** — **[lead-serial after B-int.1]** — Phase 4 above.
+- **B-int.1 vault core** — ✅ SHIPPED s68 (envelope crypto + doors + validate-ping
+  seam + redaction ratchets + vault-first social arming; dev pg has 0018 applied).
+- **B-int.2 the surface** — **[lead-serial — NEXT]** — Phase 1/4 above.
 - **B-int.3 driver rewire** — **[lane after B-int.2]** — publisher/intel/outreach seams
   resolve credentials from the vault by tenant; per-platform arming becomes tenant DATA
   (connected + tenant-armed) instead of env; refusal ladder keeps its shape, only the
@@ -123,9 +117,14 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 - Preview basicauth rotation + `DB_DUMP_TOKEN` retirement — founder-gated console pass,
   queued swordfish-side; lead swaps CI `STAGING_EDGE_AUTH` when the pair lands.
 - db-dump route code removal — checkpoint cleanup candidate.
-- GitHub Actions billing — DOWN until the monthly renewal (~Jul 24, founder decision);
-  every push locally verified meanwhile; staging won't auto-redeploy until then.
-- Concept film staging import — swordfish queued (transfer + import against tenant-pg).
+- GitHub Actions billing — ✅ RESTORED (founder, 2026-07-25): ci-guard re-ran GREEN on
+  head; web-image re-run dispatched (staging auto-redeploy resumes with it). Local
+  verify stays the merge gate; CI is the second net again.
+- Concept film staging import — swordfish-side; fell out of their queue after the
+  07-19 ACK, re-queued 2026-07-25 (their honest-ledger note), still unranked.
+- ~~syd4 systemd units for 8899 + sweeper~~ — ✅ DONE swordfish-side 2026-07-25:
+  `thalon-preview.service` + `thalon-sweeper.service`, linger on, reboot-safe;
+  never hand-start either again (a second sweeper double-fires schedules).
 - Dokploy templates-preview service + `TEMPLATES_PREVIEW_ARMED=true` — founder console,
   gives the workspace Sites surface a live origin (dev reads local meanwhile).
 
@@ -147,8 +146,13 @@ founder · blanket workspace grant · **Mode B lanes on fresh founder approval**
 guard/typecheck/lint foreground) · ≥40cr mint ping · no AI attribution · wrap =
 guard + commit + push + stamped resume prompt + this file re-ranked.
 
-## Recently shipped (last session — s67)
-Blog loop LIVE on dev (the ADR-0011 proof-of-product moment) · post-loop production
-caller wired (disarmed) · **B-int.0 vault window FROZEN** (PR #66) · staged-flow live
-projection · Settings discoverability · 3 judge eval rows. Zero credit spend. Full
-per-session record: `COORDINATION.md` s67 close message.
+## Recently shipped (last session — s68)
+**B-int.1 vault core** (envelope crypto AES-256-GCM w/ AAD row-binding · connect/
+open/cards/disconnect doors · read-only validate-ping seam, all 11 destinations ·
+redaction ratchets incl. the log-free/env-indirect boundary scan · vault-first
+social arming, env = emergency override; production caller now resolves vault-first)
+· **pillar #1 chain GREEN** (re-brief fixed the s67 judge fails; 9-take plan + EDL
++ draft cut; cost plan priced via get_cost, zero mint spend) · **Actions billing
+restored + verified** (ci-guard + web-image green; staging auto-deploy back) ·
+systemd units for 8899/sweeper landed swordfish-side. Zero credit spend. Prior
+sessions: `COORDINATION.md` close messages.
