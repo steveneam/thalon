@@ -57,7 +57,7 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/leads/lead-card.tsx", 13],
   ["components/leads/leads-surface.tsx", 13],
   ["components/leads/weights-provenance.tsx", 7],
-  ["components/library/library-surface.tsx", 39],
+  // library/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
   ["components/profiles/profile-editor.tsx", 13],
   // runs/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
   ["components/settings/integrations-panel.tsx", 30],
