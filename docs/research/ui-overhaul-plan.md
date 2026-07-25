@@ -447,6 +447,32 @@ hierarchy, the shadcn primitive layer — is what's being replaced.
 > the mock's values), the light-mode mapping, the contrast + mono ratchets.
 > The visible chrome (rail/topbar) gets re-trued to the sheets too.
 
+**s73 execution rules (founder-ratified):** every surface rebuild is a
+TWO-STEP — pure sheet port (verdict point) → wire data + keepers — and
+old-design salvage re-enters ONLY after structure, per the inventory +
+re-entry rule in `docs/research/old-design-keepers.md`. Progress is
+measured by the bridge burn-down pin
+(`apps/web/src/lib/__tests__/bridge-burndown.test.ts`, seeded 938 at s73's
+shell+Dashboard ship — reaches zero when the last surface rebuilds).
+
+**s73 close — PARALLEL REBUILD LANES OPENED (founder: "if that rule and
+logic is followed exact, then parallel workflows should be safe now"),
+amending consequence (b) above.** The s73-shipped foundation (workspace.css
+shared classes + shell chrome + the rules) is the frozen contract lanes
+build against. Conditions, binding per lane: (i) the kickoff cites the
+surface's sheet + its keepers-inventory rows — no design judgment in the
+lane, port the bytes; (ii) shared classes come from `workspace.css`
+READ-ONLY — a sheet's own helmet atomics go in a surface-scoped css file
+(file-disjoint lanes; only the lead edits workspace.css/shell); (iii) the
+bridge-burndown + mono pins stay green (new files enter at ZERO bridged
+tokens — contamination fails the suite, not a review); (iv) design lanes
+run the strongest tier (the design-on-Fable-5 rule) and each launch still
+needs the founder's named GO; (v) the LEAD is the merge gate: every lane
+merge is preceded by the lead's own screenshot-vs-sheet diff — renovation
+bounces at the gate, and the founder verdict stays the ship gate. This is
+how "i want you responsible" survives delegation: responsibility moves
+from authorship to the gate.
+
 Three earlier doctrines from the s71 live rounds remain in force below.
 
 The wave-0 claude-design mock (project `f5d304cb`, all 8 surfaces + the theme
