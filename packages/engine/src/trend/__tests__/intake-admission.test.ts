@@ -6,9 +6,10 @@ import { openTestDb, type DbHandle, type Repos } from "@thalon/db";
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeEmbeddingDriver, type EmbeddingDriver } from "../../ingest/shell/embedder";
-import { admissionOrigin } from "../admission";
+import { admissionOrigin, runAdmissions } from "../admission";
 import { createFakeTrendSource } from "../fake-source";
 import { runTrendIntake } from "../intake";
+import type { RankedCandidate } from "../ranker";
 import type { TrendItem } from "../trend-source";
 
 let handle: DbHandle | undefined;
@@ -28,7 +29,6 @@ const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 
 const AREA = {
-  id: "11111111-1111-1111-1111-111111111111",
   name: "Hook craft",
   description:
     "Hook patterns that carry a post: the promise up front, proof in the middle, a pivot before the payoff — long-form craft notes on openings that actually hold attention.",
@@ -57,6 +57,8 @@ async function setup(denylist: string[] = []): Promise<{
   repos: Repos;
   objectStore: LocalObjectStore;
   embedder: EmbeddingDriver;
+  /** The monitored area as a ROW through the repo door — the durable cap ledger references real area rows (FK), exactly like production. */
+  area: { id: string; name: string; description: string };
 }> {
   handle = await openTestDb();
   const { repos } = handle;
@@ -66,18 +68,20 @@ async function setup(denylist: string[] = []): Promise<{
     config: { voice: {}, denylist, platformProfiles: {} },
     activate: true,
   });
+  const row = await repos.monitoredAreas.create(ctx, AREA);
   storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-trend-admission-"));
   return {
     ctx,
     repos,
     objectStore: new LocalObjectStore(storeRoot),
     embedder: createFakeEmbeddingDriver(1536),
+    area: { id: row.id, name: AREA.name, description: AREA.description },
   };
 }
 
 describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", () => {
   it("ships ARMED: a floors-qualified item admits under the default knobs with full provenance; headlines, under-floor and missing-metric items are rejected with why-counts", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup();
+    const { ctx, repos, objectStore, embedder, area } = await setup();
     const items = [
       fixture("win"),
       fixture("headline", { text: "Breaking: markets move on a rumor", metrics: { views: 90_000 } }),
@@ -88,7 +92,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const result = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW },
       { source: createFakeTrendSource(items), embedder, objectStore, capTokens: 1_000_000 },
     );
 
@@ -98,12 +102,12 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     expect(result.screened).toEqual([]);
 
     expect(result.admissions.admitted).toEqual([
-      { externalId: "win", sourceId: expect.any(String), areaId: AREA.id },
+      { externalId: "win", sourceId: expect.any(String), areaId: area.id },
     ]);
     expect(result.admissions.byArea).toEqual([
       {
-        areaId: AREA.id,
-        areaName: AREA.name,
+        areaId: area.id,
+        areaName: area.name,
         enabled: true,
         considered: 4,
         admitted: 1,
@@ -118,14 +122,14 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     expect(source!.kind).toBe("exemplar");
     expect(source!.uri).toBe("https://platform.test/win");
     const meta = source!.meta as { origin: string; trend: Record<string, unknown> };
-    expect(meta.origin).toBe(admissionOrigin(AREA.id));
+    expect(meta.origin).toBe(admissionOrigin(area.id));
     expect(meta.trend).toMatchObject({
       source: "fake",
       externalId: "win",
       account: "acct-win",
       capturedAtMs: NOW,
-      areaId: AREA.id,
-      areaName: AREA.name,
+      areaId: area.id,
+      areaName: area.name,
     });
     expect(meta.trend.reasons).toEqual([
       expect.stringContaining("body length"),
@@ -139,14 +143,14 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
   });
 
   it("never admits the same text twice: a re-sweep re-encounters the source (no cap slot) while fresh metrics append", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup();
+    const { ctx, repos, objectStore, embedder, area } = await setup();
     const items = [fixture("win")];
     const deps = { source: createFakeTrendSource(items), embedder, objectStore, capTokens: 1_000_000 };
 
     const first = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW },
       deps,
     );
     expect(first.admissions.admitted).toHaveLength(1);
@@ -155,12 +159,12 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const second = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW + 2 * HOUR },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW + 2 * HOUR },
       deps,
     );
     expect(second.admissions.admitted).toEqual([]);
     expect(second.admissions.reEncountered).toEqual([
-      { externalId: "win", sourceId, areaId: AREA.id },
+      { externalId: "win", sourceId, areaId: area.id },
     ]);
     // Same UTC day: the one created admission still counts; the re-encounter took no slot.
     expect(second.admissions.byArea[0].capRemaining).toBe(19);
@@ -170,13 +174,14 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
   });
 
   it("enforces the per-area UTC-day cap in RANKED order, persists it across sweeps, and resets next day", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup();
+    const { ctx, repos, objectStore, embedder, area } = await setup();
     // "top" is byte-identical to the area description — relevance 1 under the
     // hash-embedding fake, so it deterministically outranks "second".
-    const top = fixture("top", { text: AREA.description });
+    const top = fixture("top", { text: area.description });
     const second = fixture("second");
     const third = fixture("third");
-    const config = { areas: { [AREA.id]: { maxAdmissionsPerDay: 1 } } };
+    // L0: the cap override is AREA DATA — it rides the row's config.admission.
+    const cappedArea = { ...area, config: { admission: { maxAdmissionsPerDay: 1 } } };
     const deps = (items: TrendItem[]) => ({
       source: createFakeTrendSource(items),
       embedder,
@@ -187,21 +192,22 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep1 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], admissionConfig: config, nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [cappedArea], nowMs: NOW },
       deps([top, second]),
     );
     expect(sweep1.admissions.admitted).toEqual([
-      { externalId: "top", sourceId: expect.any(String), areaId: AREA.id },
+      { externalId: "top", sourceId: expect.any(String), areaId: area.id },
     ]);
     expect(sweep1.admissions.byArea[0].rejected.cap).toBe(1);
     expect(sweep1.admissions.byArea[0].capRemaining).toBe(0);
 
-    // Later the same UTC day: the created admission is durably counted (via
-    // meta.trend.capturedAtMs, the argument clock) — a NEW qualifier is refused.
+    // Later the same UTC day: the created admission holds its slot in the
+    // durable trend_admissions ledger (day from the argument clock) — a NEW
+    // qualifier is refused.
     const sweep2 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], admissionConfig: config, nowMs: NOW + 2 * HOUR },
+      { watchlist: { source: "fake" }, areas: [cappedArea], nowMs: NOW + 2 * HOUR },
       deps([top, third]),
     );
     expect(sweep2.admissions.admitted).toEqual([]);
@@ -212,14 +218,14 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep3 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], admissionConfig: config, nowMs: NOW + DAY },
+      { watchlist: { source: "fake" }, areas: [cappedArea], nowMs: NOW + DAY },
       deps([third]),
     );
     expect(sweep3.admissions.admitted.map((a) => a.externalId)).toEqual(["third"]);
   });
 
   it("an ARMED stored baseline binds the Δ-velocity multiple: the uniform firehose is rejected, the genuine spiker admits with the Δ reason", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup();
+    const { ctx, repos, objectStore, embedder, area } = await setup();
     const bot = (externalId: string, views: number): TrendItem =>
       fixture(externalId, { account: "bot", metrics: { views } });
     const deps = (items: TrendItem[]) => ({
@@ -234,7 +240,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep1 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW },
       deps([bot("a", 30_000), bot("b", 30_000), bot("c", 30_000), bot("d", 5_000)]),
     );
     expect(sweep1.admissions.admitted.map((r) => r.externalId).sort()).toEqual(["a", "b", "c"]);
@@ -245,7 +251,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const sweep2 = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW + 2 * HOUR },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW + 2 * HOUR },
       deps([bot("a", 40_000), bot("b", 40_000), bot("c", 40_000), bot("d", 45_000)]),
     );
     expect(sweep2.admissions.admitted.map((r) => r.externalId)).toEqual(["d"]);
@@ -260,11 +266,11 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
   });
 
   it("the tenant's G1 denylist screens admission candidates — denylisted craft never enters the pool", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup(["miracle cure"]);
+    const { ctx, repos, objectStore, embedder, area } = await setup(["miracle cure"]);
     const result = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW },
       {
         source: createFakeTrendSource([
           fixture("spam", { text: `${longBody("spam")} This miracle cure sells itself.` }),
@@ -281,14 +287,14 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
   });
 
   it("a budget-rail refusal at the door is logged VERBATIM and never fatal — the sweep completes", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup();
+    const { ctx, repos, objectStore, embedder, area } = await setup();
     const filler = [fixture("f1", { metrics: { views: 2_000 } }), fixture("f2", { metrics: { views: 2_000 } })];
 
     // Sweep 1: nothing qualifies; the ranking embed records the only usage.
     await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW },
       { source: createFakeTrendSource(filler), embedder, objectStore, capTokens: 1_000_000 },
     );
     const spent = await repos.usageLedger.totalForDay(ctx);
@@ -304,7 +310,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     const result = await runTrendIntake(
       ctx,
       repos,
-      { watchlist: { source: "fake" }, areas: [AREA], nowMs: NOW + 2 * HOUR },
+      { watchlist: { source: "fake" }, areas: [area], nowMs: NOW + 2 * HOUR },
       { source: createFakeTrendSource([...filler, bigwin]), embedder, objectStore, capTokens },
     );
 
@@ -312,7 +318,7 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     expect(result.admissions.admitted).toEqual([]);
     expect(result.admissions.budgetRefusals).toEqual([
       {
-        areaId: AREA.id,
+        areaId: area.id,
         externalId: "bigwin",
         reason: expect.stringContaining("over its daily token budget"),
       },
@@ -320,21 +326,81 @@ describe("runTrendIntake admission pass (B-learn L1, keyless + networkless)", ()
     expect(await repos.sources.listByKind(ctx, ["exemplar"])).toEqual([]);
   });
 
-  it("a per-area enabled:false override watches without admitting", async () => {
-    const { ctx, repos, objectStore, embedder } = await setup();
+  it("a per-area enabled:false override ON THE AREA ROW watches without admitting", async () => {
+    const { ctx, repos, objectStore, embedder, area } = await setup();
     const result = await runTrendIntake(
       ctx,
       repos,
       {
         watchlist: { source: "fake" },
-        areas: [AREA],
-        admissionConfig: { areas: { [AREA.id]: { enabled: false } } },
+        areas: [{ ...area, config: { admission: { enabled: false } } }],
         nowMs: NOW,
       },
       { source: createFakeTrendSource([fixture("win")]), embedder, objectStore, capTokens: 1_000_000 },
     );
     expect(result.admissions.admitted).toEqual([]);
     expect(result.admissions.byArea[0]).toMatchObject({ enabled: false, considered: 1, admitted: 0 });
+  });
+
+  it("the UTC-day cap holds under RACING sweeps — the durable-ledger pin the in-memory count could not pass", async () => {
+    const { ctx, repos, objectStore, embedder, area } = await setup();
+
+    // Barrier: BOTH passes must finish their day-count read and reach the
+    // content-hash pre-check before either claims. The retired in-memory
+    // count read 0 twice here and admitted twice past a cap of 1; the
+    // durable claim serializes on the ledger's unique slot index instead.
+    let arrived = 0;
+    let release: () => void = () => {};
+    const barrier = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const gatedRepos = {
+      ...repos,
+      sources: {
+        ...repos.sources,
+        getByContentHash: async (c: typeof ctx, hash: string) => {
+          arrived++;
+          if (arrived >= 2) release();
+          await barrier;
+          return repos.sources.getByContentHash(c, hash);
+        },
+      },
+    };
+
+    const rankedRow = (item: TrendItem): RankedCandidate => ({
+      item,
+      areaId: area.id,
+      areaName: area.name,
+      score: 0.9,
+      components: { relevance: 1, engagement: null, velocity: null, freshness: 0.5 },
+      weights: { relevance: 1, engagement: 1, velocity: 1, freshness: 1 },
+      reasons: [],
+    });
+    const pass = (externalId: string) => {
+      const item = fixture(externalId);
+      return runAdmissions(
+        ctx,
+        gatedRepos,
+        {
+          source: "fake",
+          nowMs: NOW,
+          denylist: [],
+          areas: [{ id: area.id, name: area.name, admission: { maxAdmissionsPerDay: 1 } }],
+          ranked: [rankedRow(item)],
+          attribution: new Map([[externalId, { areaId: area.id, areaName: area.name }]]),
+          longitudinal: new Map(),
+          alreadyProcessed: new Set(),
+        },
+        { embedder, objectStore, capTokens: 1_000_000 },
+      );
+    };
+
+    const [a, b] = await Promise.all([pass("race-a"), pass("race-b")]);
+    expect([...a.admitted, ...b.admitted]).toHaveLength(1);
+    expect(a.byArea[0].rejected.cap + b.byArea[0].rejected.cap).toBe(1);
+    // The pool and the ledger agree: exactly one slot, exactly one exemplar.
+    expect(await repos.sources.listByKind(ctx, ["exemplar"])).toHaveLength(1);
+    expect((await repos.trendAdmissions.countsForDay(ctx, NOW)).get(area.id)).toBe(1);
   });
 
   it("without active areas the admission pass reports empty — the pre-B6.4 sweep shape is untouched", async () => {

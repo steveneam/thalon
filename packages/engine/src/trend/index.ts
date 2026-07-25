@@ -67,7 +67,6 @@ export {
   admissionKnobOverridesSchema,
   admissionKnobsSchema,
   admissionOrigin,
-  countTodayAdmissions,
   decideAdmission,
   emptyAdmissions,
   resolveAdmissionKnobs,
@@ -91,11 +90,14 @@ export {
   type TrendIntakeResult,
 } from "./intake";
 export {
+  mergeSweepCards,
   readSweepBundle,
+  readSweepBundles,
   runTrendSweep,
   SWEEP_BUNDLE_VERSION,
   sweepBundleKey,
   sweepBundleSchema,
+  sweepSourceBundleKey,
   type SweepBundle,
   type SweepCard,
   type TrendSweepDeps,

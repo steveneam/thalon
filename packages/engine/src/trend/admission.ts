@@ -1,4 +1,8 @@
-import type { TenantCtx } from "@thalon/contracts";
+import {
+  admissionKnobOverridesSchema,
+  type AdmissionKnobOverrides,
+  type TenantCtx,
+} from "@thalon/contracts";
 import { BudgetExceededError, sha256Hex, type Repos } from "@thalon/db";
 import { runG1Denylist } from "@thalon/judge";
 import { z } from "zod";
@@ -20,14 +24,14 @@ import type { TrendItem } from "./trend-source";
  * sweep already produced, governed by knobs that are CONFIG-DATA, and writes
  * through the ONE existing ingest door (../exemplar/ingest-exemplar.ts).
  *
- * The knob home is deliberately transitional: `monitoredAreaConfigSchema`
- * (packages/contracts) is FROZEN this sprint and its single write door
- * strips unknown keys, so per-area knobs cannot persist on the area row yet.
- * They ride the sweep request instead (`admissionConfig`: tenant defaults +
- * per-area overrides keyed by area id) — the same engine-runtime-config
- * channel as outlierConfig/rankerConfig. `admissionKnobsSchema` is shaped so
- * the next contract window can adopt it verbatim as
- * `monitoredAreaConfigSchema.admission` and the override map deprecates.
+ * The knob home (B-learn L0 window, s73): per-area knobs are AREA DATA —
+ * `monitoredAreaConfigSchema.admission` (packages/contracts, the window's
+ * verbatim adoption of the transitional engine shape) persists on the
+ * monitored-area row through the one write door, and the sweep reads each
+ * area's overrides from the ROW config. Tenant DEFAULTS still ride the
+ * runtime-config channel (`admissionConfig.defaults`, the outlierConfig/
+ * rankerConfig pattern; `TREND_ADMISSION_CONFIG` env in the scheduler) —
+ * the transitional request-level per-area override map is REMOVED.
  *
  * Why the gates are shaped this way (coverage honesty, s68 finding):
  *
@@ -45,7 +49,7 @@ import type { TrendItem } from "./trend-source";
  *    text an exemplar exists to teach is the hook + body, not a headline.
  */
 
-/** The per-area knob set — the shape the next contract window adopts as `monitoredAreaConfigSchema.admission`. */
+/** The full knob set — tenant defaults; contracts' `admission` override block mirrors it field-for-field. */
 const KNOB_DEFAULTS = {
   enabled: true,
   floors: { views: 10_000 },
@@ -83,39 +87,41 @@ export type AdmissionKnobsInput = z.input<typeof admissionKnobsSchema>;
 export type AdmissionKnobs = z.infer<typeof admissionKnobsSchema>;
 
 /**
- * The per-area OVERRIDE shape — deliberately NOT `admissionKnobsSchema.
+ * The per-area OVERRIDE shape lives in contracts now (the L0 window adopted
+ * the transitional engine schema verbatim as `monitoredAreaConfigSchema.
+ * admission`) — re-exported here so the admission module stays the one
+ * import for admission shapes. Deliberately NOT `admissionKnobsSchema.
  * partial()`: a defaulted field still fills on parse, which would silently
  * clobber the tenant default with the schema default (the exact trap
  * contracts' rankerWeightOverridesSchema exists to avoid).
  */
-export const admissionKnobOverridesSchema = z.object({
-  enabled: z.boolean().optional(),
-  floors: z.record(z.string(), z.number().nonnegative()).optional(),
-  velocityMultiple: z.number().positive().optional(),
-  minBodyLength: z.number().int().nonnegative().optional(),
-  maxAdmissionsPerDay: z.number().int().nonnegative().optional(),
-});
-export type AdmissionKnobOverrides = z.infer<typeof admissionKnobOverridesSchema>;
+export { admissionKnobOverridesSchema, type AdmissionKnobOverrides };
 
-export const admissionConfigSchema = z.object({
+/**
+ * Tenant-wide admission config — DEFAULTS ONLY since the L0 window: per-
+ * area overrides are area data (`config.admission` on the monitored-area
+ * row), so a leftover request/env `areas` map is rejected LOUD (strict)
+ * rather than silently dropped.
+ */
+export const admissionConfigSchema = z.strictObject({
   /** Tenant-wide knob defaults (Zod 4 `.default` short-circuits the inner parse — the default is the full output shape). */
   defaults: admissionKnobsSchema.default(KNOB_DEFAULTS),
-  /** Per-area overrides keyed by monitored-area id — unset fields keep the tenant default (the ranker-weights two-layer pattern). */
-  areas: z.record(z.string(), admissionKnobOverridesSchema).default({}),
 });
 export type AdmissionConfigInput = z.input<typeof admissionConfigSchema>;
 export type AdmissionConfig = z.infer<typeof admissionConfigSchema>;
 
-/** Two-layer resolution: tenant defaults ← area override, field-by-field; an unset override field never clobbers. */
-export function resolveAdmissionKnobs(config: AdmissionConfig, areaId: string): AdmissionKnobs {
-  const override = config.areas[areaId];
-  if (!override) return config.defaults;
+/** Two-layer resolution: tenant defaults ← the area ROW's override, field-by-field; an unset override field never clobbers. */
+export function resolveAdmissionKnobs(
+  defaults: AdmissionKnobs,
+  override: AdmissionKnobOverrides | undefined,
+): AdmissionKnobs {
+  if (!override) return defaults;
   return {
-    enabled: override.enabled ?? config.defaults.enabled,
-    floors: override.floors ?? config.defaults.floors,
-    velocityMultiple: override.velocityMultiple ?? config.defaults.velocityMultiple,
-    minBodyLength: override.minBodyLength ?? config.defaults.minBodyLength,
-    maxAdmissionsPerDay: override.maxAdmissionsPerDay ?? config.defaults.maxAdmissionsPerDay,
+    enabled: override.enabled ?? defaults.enabled,
+    floors: override.floors ?? defaults.floors,
+    velocityMultiple: override.velocityMultiple ?? defaults.velocityMultiple,
+    minBodyLength: override.minBodyLength ?? defaults.minBodyLength,
+    maxAdmissionsPerDay: override.maxAdmissionsPerDay ?? defaults.maxAdmissionsPerDay,
   };
 }
 
@@ -205,36 +211,6 @@ export function admissionOrigin(areaId: string): string {
   return `auto-admission:${areaId}`;
 }
 
-const DAY_MS = 24 * 3_600_000;
-
-/**
- * Created-admission counts per area for the UTC day containing `nowMs`,
- * read from the sources the door already wrote: `meta.origin` carries the
- * area stamp and `meta.trend.capturedAtMs` the ARGUMENT clock of the sweep
- * that admitted — so the count is replayable and never depends on the DB's
- * own row clock (SPINE §1). In-memory filter over the tenant's exemplar
- * rows: bounded by the cap itself (≤ areas × maxAdmissionsPerDay rows/day).
- */
-export async function countTodayAdmissions(
-  ctx: TenantCtx,
-  repos: Repos,
-  nowMs: number,
-): Promise<Map<string, number>> {
-  const dayStart = Math.floor(nowMs / DAY_MS) * DAY_MS;
-  const counts = new Map<string, number>();
-  for (const source of await repos.sources.listByKind(ctx, ["exemplar"])) {
-    const meta = source.meta as { origin?: unknown; trend?: { capturedAtMs?: unknown } } | null;
-    const origin = meta?.origin;
-    if (typeof origin !== "string" || !origin.startsWith("auto-admission:")) continue;
-    const capturedAtMs = meta?.trend?.capturedAtMs;
-    if (typeof capturedAtMs !== "number") continue;
-    if (capturedAtMs < dayStart || capturedAtMs >= dayStart + DAY_MS) continue;
-    const areaId = origin.slice("auto-admission:".length);
-    counts.set(areaId, (counts.get(areaId) ?? 0) + 1);
-  }
-  return counts;
-}
-
 export interface AdmissionRefusal {
   areaId: string;
   externalId: string;
@@ -254,7 +230,7 @@ export interface AreaAdmissionSummary {
   reEncountered: number;
   /** Why-counts for everything turned away — the operator sees the knob to turn. */
   rejected: { bodyLength: number; floors: number; velocity: number; denylist: number; cap: number };
-  /** Slots left in this area's UTC-day cap after this sweep. */
+  /** Slots left in this area's UTC-day cap after this sweep — read from the durable trend_admissions ledger (L0), races included. */
   capRemaining: number;
 }
 
@@ -278,8 +254,13 @@ export interface RunAdmissionsArgs {
   nowMs: number;
   /** The tenant's G1 denylist terms — denylisted content never enters the exemplar library. */
   denylist: string[];
-  /** Every ACTIVE area this sweep, so areas with zero candidates still report a summary row. */
-  areas: ReadonlyArray<{ id: string; name: string }>;
+  /**
+   * Every ACTIVE area this sweep, so areas with zero candidates still report
+   * a summary row. `admission` is the area ROW's knob-override block
+   * (`config.admission`, the L0 window) — the per-area layer of the
+   * two-layer resolution.
+   */
+  areas: ReadonlyArray<{ id: string; name: string; admission?: AdmissionKnobOverrides }>;
   /** The sweep's ranked feed, score-descending — cap slots go to the best-ranked qualifiers. */
   ranked: readonly RankedCandidate[];
   /** Best-relevance area per item (the intake's existing attribution) — the area whose knobs govern. */
@@ -313,10 +294,14 @@ export interface RunAdmissionsDeps {
  * on would only echo refusals — while the sweep itself continues unharmed.
  * Any other door error propagates (fail loud, the legacy door's contract).
  *
- * Cap honesty: the day-count is read once per pass and advanced in memory —
- * two sweeps racing the same tenant could overshoot the cap by a sweep's
- * worth; the scheduler is serial per tenant today, and the durable
- * constraint belongs to the B-learn contract window's admission tables.
+ * Cap honesty (durable since L0): every CREATED admission first claims one
+ * slot in the trend_admissions ledger — claims serialize on the unique
+ * (tenant, area, day, slot) index, so two sweeps racing one tenant can
+ * NEVER overshoot the cap (the s72 in-memory read-then-advance count is
+ * gone). Same-content re-claims replay idempotently on (area, day,
+ * content_hash): a claim whose ingest failed last sweep returns its
+ * existing slot instead of burning another, and a slot claimed for an
+ * ingest that never completes stays claimed — undershoot, never overshoot.
  */
 export async function runAdmissions(
   ctx: TenantCtx,
@@ -325,11 +310,13 @@ export async function runAdmissions(
   deps: RunAdmissionsDeps = {},
 ): Promise<AdmissionsResult> {
   const config = admissionConfigSchema.parse(args.config ?? {});
-  const todayCounts = await countTodayAdmissions(ctx, repos, args.nowMs);
+  const todayCounts = await repos.trendAdmissions.countsForDay(ctx, args.nowMs);
 
   const summaries = new Map<string, AreaAdmissionSummary>();
+  const knobsByArea = new Map<string, AdmissionKnobs>();
   for (const area of args.areas) {
-    const knobs = resolveAdmissionKnobs(config, area.id);
+    const knobs = resolveAdmissionKnobs(config.defaults, area.admission);
+    knobsByArea.set(area.id, knobs);
     summaries.set(area.id, {
       areaId: area.id,
       areaName: area.name,
@@ -361,9 +348,9 @@ export async function runAdmissions(
     consulted.add(item.externalId);
 
     const summary = summaries.get(row.areaId);
-    if (!summary) continue; // unreachable: attribution only names active areas
+    const knobs = knobsByArea.get(row.areaId);
+    if (!summary || !knobs) continue; // unreachable: attribution only names active areas
     summary.considered++;
-    const knobs = resolveAdmissionKnobs(config, row.areaId);
     if (!knobs.enabled) continue;
 
     const decision = decideAdmission(item, args.longitudinal.get(item.externalId), knobs);
@@ -381,12 +368,28 @@ export async function runAdmissions(
     }
 
     // The door hashes the PII-STRIPPED text — the pre-check must match it
-    // byte-for-byte or the dedup lies.
+    // byte-for-byte or the dedup lies (and the ledger keys on the same hash).
     const contentHash = sha256Hex(stripPii(item.text).text);
     const existing = await repos.sources.getByContentHash(ctx, contentHash);
-    if (!existing && summary.capRemaining <= 0) {
-      summary.rejected.cap++;
-      continue;
+    if (!existing) {
+      // NEW content takes a durable cap slot BEFORE the door; a known
+      // source re-encounter never claims (fresh snapshots, no slot).
+      const claim = await repos.trendAdmissions.claim(ctx, {
+        areaId: row.areaId,
+        nowMs: args.nowMs,
+        cap: knobs.maxAdmissionsPerDay,
+        contentHash,
+        source: args.source,
+        externalId: item.externalId,
+      });
+      if (!claim.claimed) {
+        summary.rejected.cap++;
+        summary.capRemaining = Math.max(0, knobs.maxAdmissionsPerDay - claim.capUsed);
+        continue;
+      }
+      // Slots are monotonic within the day, so the claimed slot IS the
+      // committed count at claim time — remaining stays honest under races.
+      summary.capRemaining = Math.max(0, knobs.maxAdmissionsPerDay - claim.claim.slot);
     }
 
     try {
@@ -416,7 +419,6 @@ export async function runAdmissions(
       );
       if (ingest.created) {
         summary.admitted++;
-        summary.capRemaining--;
         result.admitted.push({ externalId: item.externalId, sourceId: ingest.sourceId, areaId: row.areaId });
       } else {
         summary.reEncountered++;

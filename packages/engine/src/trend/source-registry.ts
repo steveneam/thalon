@@ -77,11 +77,11 @@ export function getTrendSource(
  * Comma-list selection (s72, the exemplar-admission "both" unlock):
  * `TREND_SOURCE=youtube,bluesky` sweeps EACH listed driver in order — every
  * sweep runs the full intake (snapshots, ingest, B-learn L1 admissions), so
- * exemplar admissions flow from every listed platform. Interim honesty: the
- * per-tenant trends bundle is one object, so the LAST listed source owns
- * what the trends surface shows until the B-learn L2 multi-platform merge —
- * list the surface-owning driver last. Order preserved, duplicates
- * collapsed, every member must be registered.
+ * exemplar admissions flow from every listed platform. Since B-learn L2
+ * slice 1 each source's bundle persists in its own home and the trends
+ * read merges ALL of them (sweep.ts `readSweepBundles`/`mergeSweepCards`)
+ * — list order no longer decides what the surface shows. Order preserved,
+ * duplicates collapsed, every member must be registered.
  */
 export function getTrendSources(
   selection?: string,

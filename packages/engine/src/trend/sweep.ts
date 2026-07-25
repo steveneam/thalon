@@ -29,6 +29,13 @@ import type { TrendSource } from "./trend-source";
  * regardless). It is protected from the B4.6 orphan sweep because no db
  * row references it by design.
  *
+ * B-learn L2 slice 1: each SOURCE also gets its own latest-wins home
+ * (`sweeps/<tenantId>.<source>.json`) so the trends read can union every
+ * swept platform honestly — the s72 interim let the LAST listed source's
+ * bundle own the read. `readSweepBundles` + `mergeSweepCards` are that
+ * honest read; the legacy per-tenant key stays fresh as the last-swept
+ * pointer (rollback + single-bundle readers).
+ *
  * Cards are per (item × area) — no areas configured = an empty card list
  * (honest: monitored areas ARE the trends tab), while snapshots/outlier
  * ingest still ran for the base watchlist. `nextSweepAtMs` is advisory
@@ -38,9 +45,14 @@ import type { TrendSource } from "./trend-source";
 
 export const SWEEP_BUNDLE_VERSION = 1;
 
-/** Where a tenant's latest sweep bundle lives. */
+/** Where a tenant's latest sweep bundle lives — the legacy last-swept-wins pointer, still written every run. */
 export function sweepBundleKey(tenantId: string): string {
   return objectKey("sweeps", tenantId, "json");
+}
+
+/** B-learn L2: one latest-wins bundle home PER SOURCE — the honest multi-source read unions these. */
+export function sweepSourceBundleKey(tenantId: string, source: string): string {
+  return objectKey("sweeps", `${tenantId}.${source}`, "json");
 }
 
 const sweepCardSchema = z.object({
@@ -92,7 +104,7 @@ export interface TrendSweepRequest {
   expansionConfig?: AreaExpansionConfigInput;
   rankerConfig?: RankerConfigInput;
   outlierConfig?: OutlierConfigInput;
-  /** B-learn L1: exemplar-admission knobs (tenant defaults + per-area overrides) — armed with conservative defaults when omitted. */
+  /** B-learn L1: tenant-DEFAULT exemplar-admission knobs (per-area overrides are area data — `config.admission` on the row) — armed with conservative defaults when omitted. */
   admissionConfig?: AdmissionConfigInput;
   /** Advisory cadence for the stamp (default 4h). */
   intervalMs?: number;
@@ -245,12 +257,17 @@ export async function runTrendSweep(
     areasSwept: areas.length,
     cards,
   };
-  await objectStore.put(sweepBundleKey(ctx.tenantId), JSON.stringify(bundle));
+  // B-learn L2 slice 1: the bundle lands in its SOURCE's own home (the
+  // honest read unions these) AND the legacy per-tenant pointer (last-
+  // swept-wins, kept fresh for rollback and single-bundle readers).
+  const payload = JSON.stringify(bundle);
+  await objectStore.put(sweepSourceBundleKey(ctx.tenantId, source.name), payload);
+  await objectStore.put(sweepBundleKey(ctx.tenantId), payload);
 
   return { bundle, cardsCut: Math.max(0, rankedDesc.length - cards.length), dossiersFailed, intake };
 }
 
-/** The route-side read: the tenant's latest bundle, schema-validated, or null before the first sweep. */
+/** The single-bundle read: the tenant's latest bundle (legacy pointer), schema-validated, or null before the first sweep. */
 export async function readSweepBundle(
   tenantId: string,
   objectStore: ObjectStore = getObjectStore(),
@@ -258,4 +275,47 @@ export async function readSweepBundle(
   const raw = await objectStore.get(sweepBundleKey(tenantId));
   if (!raw) return null;
   return sweepBundleSchema.parse(JSON.parse(raw.toString("utf8")));
+}
+
+/**
+ * B-learn L2 slice 1 — the HONEST multi-source read: every source's latest
+ * bundle for this tenant, schema-validated, freshest first (sweptAtMs
+ * desc, then source asc — deterministic). Falls back to the legacy single
+ * pointer when no per-source home exists yet (a store last written before
+ * this landed), and [] before any sweep at all — the route's
+ * fixture-fallback signal.
+ */
+export async function readSweepBundles(
+  tenantId: string,
+  objectStore: ObjectStore = getObjectStore(),
+): Promise<SweepBundle[]> {
+  const legacyKey = sweepBundleKey(tenantId);
+  const keys = (await objectStore.list(`sweeps/${tenantId}.`)).filter((key) => key !== legacyKey);
+  const bundles: SweepBundle[] = [];
+  for (const key of keys) {
+    const raw = await objectStore.get(key);
+    if (!raw) continue; // deleted between list and get — never fatal
+    bundles.push(sweepBundleSchema.parse(JSON.parse(raw.toString("utf8"))));
+  }
+  if (bundles.length === 0) {
+    const legacy = await readSweepBundle(tenantId, objectStore);
+    return legacy ? [legacy] : [];
+  }
+  return bundles.sort((a, b) => b.sweptAtMs - a.sweptAtMs || a.source.localeCompare(b.source));
+}
+
+/**
+ * Score-ordered UNION of every bundle's cards — the merged trends read.
+ * Deterministic order: score desc, then source asc, then id asc. A card id
+ * duplicated across sources (same area × external id) keeps its
+ * best-scored row, so the read never shows one card twice.
+ */
+export function mergeSweepCards(bundles: readonly SweepBundle[]): SweepCard[] {
+  const all = bundles
+    .flatMap((bundle) => bundle.cards)
+    .sort(
+      (a, b) => b.score - a.score || a.source.localeCompare(b.source) || a.id.localeCompare(b.id),
+    );
+  const seen = new Set<string>();
+  return all.filter((card) => (seen.has(card.id) ? false : (seen.add(card.id), true)));
 }

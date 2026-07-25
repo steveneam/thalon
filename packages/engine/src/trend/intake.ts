@@ -43,11 +43,10 @@ export interface TrendIntakeRequest {
   /** Outlier thresholds + metric-name mapping — runtime config; defaults apply when omitted. */
   outlierConfig?: OutlierConfigInput;
   /**
-   * B-learn L1: exemplar-admission knobs (tenant defaults + per-area
-   * overrides keyed by area id) — runtime config like the others; the loop
-   * ships ARMED with conservative defaults when omitted. Persisting the
-   * knobs on the area row itself waits on the contract window (see
-   * ./admission.ts).
+   * B-learn L1: tenant-DEFAULT exemplar-admission knobs — runtime config
+   * like the others; the loop ships ARMED with conservative defaults when
+   * omitted. Per-area overrides are AREA DATA since the L0 window: each
+   * area row's `config.admission` block (see ./admission.ts).
    */
   admissionConfig?: AdmissionConfigInput;
   /** The sweep's "now", ms epoch — the velocity clock is an argument, never read in core (SPINE §1). */
@@ -259,7 +258,9 @@ export async function runTrendIntake(
         source: deps.source.name,
         nowMs: request.nowMs,
         denylist,
-        areas: activeAreas.map((a) => ({ id: a.id, name: a.name })),
+        // The area ROW's admission block rides along — the per-area layer of
+        // the two-layer knob resolution (L0: knobs are area data).
+        areas: activeAreas.map((a) => ({ id: a.id, name: a.name, admission: a.config.admission })),
         ranked,
         attribution: areaTagByItem,
         longitudinal: longitudinalByItem,

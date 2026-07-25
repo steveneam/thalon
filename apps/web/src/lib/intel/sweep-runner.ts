@@ -13,7 +13,7 @@ import { readEnv } from "@thalon/platform";
 export interface IntelSweepRun {
   /** One full sweep result per resolved driver, in swept order. */
   results: TrendSweepResult[];
-  /** The LAST swept source's result — its bundle owns the trends surface (the s72 multi-source interim; see `getTrendSources`). */
+  /** The LAST swept source's result — the freshest bundle, the route's summary line (the trends surface itself merges ALL sources since B-learn L2 slice 1). */
   primary: TrendSweepResult;
 }
 

@@ -1,15 +1,29 @@
-import { readSweepBundle, type SweepBundle, type SweepCard } from "@thalon/engine";
+import {
+  mergeSweepCards,
+  readSweepBundle,
+  readSweepBundles,
+  type SweepBundle,
+  type SweepCard,
+} from "@thalon/engine";
 import type { SweepStamp, TrendCard } from "./types";
 
 /**
- * The live half of the Trends read (B6.5): the poller (`runTrendSweep`)
- * persists a wire-ready bundle at `sweeps/<tenantId>.json`; this module
- * reads it back (schema-validated in the engine) and maps its cards onto
- * the SAME TrendCard wire shape the fixture dataset uses — the components
- * don't know which era they're rendering. Null before the first sweep, and
- * the route falls back to the demo dataset with its visible banner.
+ * The live half of the Trends read (B6.5; honest multi-source since
+ * B-learn L2 slice 1): the poller (`runTrendSweep`) persists one
+ * wire-ready bundle PER SOURCE (`sweeps/<tenantId>.<source>.json`); this
+ * module reads them ALL back (schema-validated in the engine, legacy
+ * single-pointer fallback for pre-slice stores) and maps the merged
+ * score-ordered union onto the SAME TrendCard wire shape the fixture
+ * dataset uses — the components don't know which era they're rendering.
+ * Empty before the first sweep, and the route falls back to the demo
+ * dataset with its visible banner.
  */
 
+export async function readLiveSweeps(tenantId: string): Promise<SweepBundle[]> {
+  return readSweepBundles(tenantId);
+}
+
+/** The single freshest bundle (legacy last-swept pointer) — the workspace plan's cadence stamp; the trends read uses the merged plural above. */
 export async function readLiveSweep(tenantId: string): Promise<SweepBundle | null> {
   return readSweepBundle(tenantId);
 }
@@ -35,10 +49,14 @@ export function toTrendCard(card: SweepCard): TrendCard {
   };
 }
 
-/** Card lookup for the action routes (dismiss/promote): live bundle first; null falls back to the fixture path. */
+/** The merged live cards, wire-shaped — score-ordered union across every swept source. */
+export function mergedTrendCards(bundles: readonly SweepBundle[]): TrendCard[] {
+  return mergeSweepCards(bundles).map(toTrendCard);
+}
+
+/** Card lookup for the action routes (dismiss/promote): EVERY source's live bundle; null falls back to the fixture path. */
 export async function findLiveTrendCard(tenantId: string, cardId: string): Promise<TrendCard | null> {
-  const bundle = await readSweepBundle(tenantId);
-  const card = bundle?.cards.find((c) => c.id === cardId);
+  const card = mergeSweepCards(await readSweepBundles(tenantId)).find((c) => c.id === cardId);
   return card ? toTrendCard(card) : null;
 }
 
@@ -48,4 +66,15 @@ export function liveSweepStamp(bundle: SweepBundle): SweepStamp {
     intervalHours: Math.round(bundle.intervalMs / 3_600_000),
     nextSweepAt: new Date(bundle.nextSweepAtMs).toISOString(),
   };
+}
+
+/** Per-source sweep stamps for the trends read — each swept platform's own honesty line (additive wire field). */
+export function sourceSweepStamps(
+  bundles: readonly SweepBundle[],
+): Array<{ source: string; lastSweptAt: string; cards: number }> {
+  return bundles.map((bundle) => ({
+    source: bundle.source,
+    lastSweptAt: new Date(bundle.sweptAtMs).toISOString(),
+    cards: bundle.cards.length,
+  }));
 }

@@ -7,7 +7,7 @@ import { LocalObjectStore, readEnv } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeEmbeddingDriver } from "../../ingest/shell/embedder";
 import { connectDestination } from "../../integrations/vault";
-import { readSweepBundle } from "../sweep";
+import { readSweepBundle, readSweepBundles } from "../sweep";
 import {
   envAdmissionConfig,
   findDueTenants,
@@ -332,7 +332,7 @@ const LONG_BODY =
   "Deterministic render pipelines for faceless channels: how a template-driven engine turns one prompt into a full publish-ready video, with judge gating and grounded captions at every step of the chain.";
 
 describe("runDueSweeps × multi-source + admission config (s72, the exemplar-admission 'both' unlock)", () => {
-  it("sweeps EVERY listed source in order, sums the totals, marks the clock ONCE, and the last source owns the bundle", async () => {
+  it("sweeps EVERY listed source in order, sums the totals, marks the clock ONCE, and every source keeps its own bundle home", async () => {
     handle = await openTestDb();
     const { repos } = handle;
     storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
@@ -358,7 +358,11 @@ describe("runDueSweeps × multi-source + admission config (s72, the exemplar-adm
     const events = await repos.events.list(ctx, { entityType: "sweep_schedule" });
     expect(events.filter((e) => e.event === "sweep.schedule_swept")).toHaveLength(1);
 
-    // The interim contract: the LAST listed source's bundle owns the trends surface.
+    // L2 slice 1: BOTH sources persisted their own bundle — the trends read
+    // merges them (the s72 "last source owns the surface" interim is closed).
+    const bundles = await readSweepBundles(ctx.tenantId, objectStore);
+    expect(bundles.map((b) => b.source).sort()).toEqual(["first-src", "last-src"]);
+    // The legacy pointer stays the last-swept-wins stamp (rollback + plan).
     const bundle = await readSweepBundle(ctx.tenantId, objectStore);
     expect(bundle?.source).toBe("last-src");
   });
@@ -467,5 +471,57 @@ describe("runDueSweeps × multi-source + admission config (s72, the exemplar-adm
     expect(() =>
       envAdmissionConfig(readEnv({ TREND_ADMISSION_CONFIG: '{"defaults":{"floors":{"likes":-1}}}' })),
     ).toThrow(/TREND_ADMISSION_CONFIG/);
+  });
+
+  it("a leftover per-area areas map fails LOUD with the migration message — knobs are area data since L0", () => {
+    expect(() =>
+      envAdmissionConfig(
+        readEnv({ TREND_ADMISSION_CONFIG: '{"defaults":{},"areas":{"a":{"enabled":false}}}' }),
+      ),
+    ).toThrow(/config\.admission/);
+  });
+
+  it("an admission block persisted ON the area row through the repo door governs the sweep (L0: knobs are area data)", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+    const embedder = createFakeEmbeddingDriver(1536);
+
+    // Same likes-floor unlock as above, but the AREA ROW disarms admission —
+    // the row's config.admission wins over the env tenant default.
+    const tenant = await repos.tenants.create({ slug: "row-knobs", name: "row-knobs" });
+    const ctx = tenantCtx(tenant.id);
+    await repos.brandProfiles.create(ctx, {
+      config: { voice: {}, denylist: [], platformProfiles: {} },
+      activate: true,
+    });
+    await repos.monitoredAreas.create(ctx, {
+      ...AREA,
+      config: { admission: { enabled: false } },
+    });
+    await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+
+    const hot: TrendItem = {
+      externalId: "bsky-hot-row",
+      text: LONG_BODY,
+      account: "one-off-viral",
+      publishedAt: NOW.getTime() - 24 * 3_600_000,
+      metrics: { likes: 600, reposts: 40, replies: 12 },
+    };
+    const env = readEnv({ TREND_ADMISSION_CONFIG: '{"defaults":{"floors":{"likes":500}}}' });
+    const result = await runDueSweeps(
+      {
+        repos,
+        env,
+        sources: [namedSource("bluesky-shaped", [hot])],
+        sweepDeps: { embedder, objectStore, capTokens: 1_000_000 },
+      },
+      NOW,
+    );
+    expect(result.failures).toEqual([]);
+    // Watched (card ranked), never admitted — the row-level disarm held.
+    expect(result.swept).toEqual([{ tenantId: ctx.tenantId, cards: 1, polled: 1, admitted: 0 }]);
+    expect(await repos.sources.listByKind(ctx, ["exemplar"])).toEqual([]);
   });
 });
