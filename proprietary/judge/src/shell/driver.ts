@@ -47,8 +47,23 @@ const PROMPT_FILE_FOR_TIER: Record<JudgeTier, string> = {
   // reproducibly disagreeing with the final tier on doctrine rather than
   // judgment; golden rows g3-004/g3-005 pin the taxonomy. I3 is untouched:
   // tier disagreement still blocks.
-  screen: "judge-g3-screen.v2.md",
-  final: "judge-g3-final.v1.md",
+  // screen v3 (s68 tuning pass): + the internal-mechanism rule — the one
+  // leniency class left (golden g3-008: an invented threshold-refinement
+  // mechanism passed screen while final caught it; I3 blocked the draft
+  // either way, but the tier should agree on doctrine).
+  screen: "judge-g3-screen.v3.md",
+  // final v2 (s68 tuning pass, founder GO): explicit decision rules replace
+  // v1's "inference fine / specifics not" collision, which the model
+  // resolved toward refusing ENTAILED specifics (a date's month, arithmetic
+  // over stated dates), rejecting operator attestations while citing them,
+  // and drifting objections between laps on identical text (the 491089d0
+  // twelve-lap record). v2 names admissible entailment exactly (calendar
+  // containment · simple arithmetic · stated category membership · operator
+  // attestation), excludes rhetorical/restatement lines from the claim set,
+  // and keeps every real catch (wrong ordering, uncited specifics,
+  // contradicted counts, ungrounded volume promises) — golden rows
+  // g3-009..g3-015 pin both directions.
+  final: "judge-g3-final.v2.md",
 };
 
 /** `prompt_version` recorded on the judge_results row (SPINE §3.2). */
