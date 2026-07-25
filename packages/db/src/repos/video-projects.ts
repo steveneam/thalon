@@ -63,6 +63,43 @@ export function videoProjectsRepo(db: Db) {
       });
     },
 
+    /**
+     * The meta-update door the import path never needed: a one-prompt
+     * project is CREATED without a box-local media root (the plan carries no
+     * media), so the first real mint (s70, pillar #1) had no sanctioned way
+     * to point the render door at its keepers. This sets ONLY `mediaRoot`
+     * (absolute path, operator/box data — never committed), merging the rest
+     * of meta untouched.
+     */
+    async setMediaRoot(ctx: TenantCtx, id: string, mediaRoot: string): Promise<VideoProject> {
+      if (!mediaRoot.startsWith("/") || mediaRoot === "/") {
+        throw new Error(`mediaRoot must be an absolute path — got "${mediaRoot}"`);
+      }
+      return db.transaction(async (tx) => {
+        const [existing] = await tx
+          .select()
+          .from(videoProjects)
+          .where(and(eq(videoProjects.id, id), eq(videoProjects.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!existing) {
+          throw new Error(`video project ${id} not found for this tenant`);
+        }
+        const meta = { ...(existing.meta as Record<string, unknown>), mediaRoot };
+        const [row] = await tx
+          .update(videoProjects)
+          .set({ meta })
+          .where(and(eq(videoProjects.id, id), eq(videoProjects.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_project",
+          entityId: id,
+          event: "video_project.media_root_set",
+          payload: { mediaRoot },
+        });
+        return row;
+      });
+    },
+
     async get(ctx: TenantCtx, id: string): Promise<VideoProject | null> {
       const [row] = await db
         .select()

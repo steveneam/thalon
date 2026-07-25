@@ -73,6 +73,34 @@ describe("video projects repo (B-ve.1)", () => {
     });
     expect(events.map((e) => e.event)).toEqual(["video_project.created"]);
   });
+
+  it("setMediaRoot (s70 mint door): merges ONLY mediaRoot into meta with its event; relative paths and foreign tenants refuse", async () => {
+    const { ctx, other, repos } = await setup();
+    const { project } = await repos.videoProjects.create(ctx, {
+      name: "pillar",
+      meta: { onePrompt: { directionDraftId: "d1" } },
+    });
+
+    const updated = await repos.videoProjects.setMediaRoot(ctx, project.id, "/box/pillar-one");
+    expect((updated.meta as { mediaRoot?: string }).mediaRoot).toBe("/box/pillar-one");
+    // The rest of meta survives the merge untouched.
+    expect((updated.meta as { onePrompt?: unknown }).onePrompt).toEqual({
+      directionDraftId: "d1",
+    });
+
+    await expect(repos.videoProjects.setMediaRoot(ctx, project.id, "relative/path")).rejects.toThrow(
+      /absolute/,
+    );
+    await expect(
+      repos.videoProjects.setMediaRoot(other, project.id, "/box/steal"),
+    ).rejects.toThrow(/not found/);
+
+    const events = await repos.events.list(ctx, {
+      entityType: "video_project",
+      entityId: project.id,
+    });
+    expect(events.map((e) => e.event)).toContain("video_project.media_root_set");
+  });
 });
 
 describe("video takes repo (B-ve.1)", () => {
