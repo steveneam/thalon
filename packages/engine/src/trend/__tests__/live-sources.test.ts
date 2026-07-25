@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { blueskyTrendSource } from "../bluesky-source";
-import { getTrendSource, registeredTrendSources } from "../source-registry";
+import { getTrendSource, getTrendSources, registeredTrendSources } from "../source-registry";
 import { youtubeTrendSource } from "../youtube-source";
 
 /** B6.5 live TrendSource drivers — fixture-fetched, keyless, zero network (ground rule). */
@@ -212,5 +212,15 @@ describe("trend source registry", () => {
     expect(getTrendSource().name).toBe("fake");
     expect(getTrendSource("bluesky").name).toBe("bluesky");
     expect(() => getTrendSource("x-twitter")).toThrow(/registered: fake, bluesky, youtube/);
+  });
+
+  it("comma-list selection resolves every listed driver in order (s72 multi-source soak)", () => {
+    expect(getTrendSources("youtube,bluesky").map((s) => s.name)).toEqual(["youtube", "bluesky"]);
+    // Whitespace tolerated, duplicates collapsed — the selection is config typed by hand.
+    expect(getTrendSources(" bluesky , bluesky ").map((s) => s.name)).toEqual(["bluesky"]);
+    // A single name behaves exactly as before.
+    expect(getTrendSources("fake").map((s) => s.name)).toEqual(["fake"]);
+    // One unknown member fails the WHOLE selection loudly — never a silent partial soak.
+    expect(() => getTrendSources("bluesky,x-twitter")).toThrow(/unknown trend source "x-twitter"/);
   });
 });

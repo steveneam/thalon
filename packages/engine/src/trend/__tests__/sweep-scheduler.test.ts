@@ -9,9 +9,10 @@ import { createFakeEmbeddingDriver } from "../../ingest/shell/embedder";
 import { connectDestination } from "../../integrations/vault";
 import { readSweepBundle } from "../sweep";
 import {
+  envAdmissionConfig,
   findDueTenants,
   runDueSweeps,
-  tenantTrendSource,
+  tenantTrendSources,
   type SweepScheduleLike,
 } from "../sweep-scheduler";
 import type { TrendItem, TrendSource } from "../trend-source";
@@ -223,7 +224,7 @@ function recordingFetch(calls: string[]): typeof fetch {
   }) as typeof fetch;
 }
 
-describe("tenantTrendSource (B-int.3: per-tenant vault-first driver resolution)", () => {
+describe("tenantTrendSources (B-int.3: per-tenant vault-first driver resolution)", () => {
   it("a connected intel_youtube credential reaches the driver where env is silent", async () => {
     handle = await openTestDb();
     const { repos } = handle;
@@ -237,7 +238,7 @@ describe("tenantTrendSource (B-int.3: per-tenant vault-first driver resolution)"
 
     const env = readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64, TREND_SOURCE: "youtube" });
     const calls: string[] = [];
-    const source = await tenantTrendSource({ repos, ctx, env }, { fetchImpl: recordingFetch(calls) });
+    const [source] = await tenantTrendSources({ repos, ctx, env }, { fetchImpl: recordingFetch(calls) });
     expect(source.name).toBe("youtube");
     await source.poll({ source: "youtube", accounts: [], queries: ["ai video"] });
     expect(calls[0]).toContain("key=vault-yt-key");
@@ -260,7 +261,7 @@ describe("tenantTrendSource (B-int.3: per-tenant vault-first driver resolution)"
       YOUTUBE_API_KEY: "env-yt-key",
     });
     const calls: string[] = [];
-    const source = await tenantTrendSource({ repos, ctx, env }, { fetchImpl: recordingFetch(calls) });
+    const [source] = await tenantTrendSources({ repos, ctx, env }, { fetchImpl: recordingFetch(calls) });
     await source.poll({ source: "youtube", accounts: [], queries: ["ai video"] });
     expect(calls[0]).toContain("key=env-yt-key");
   });
@@ -318,5 +319,153 @@ describe("runDueSweeps × vault-first resolution", () => {
     expect(result.failures[0].tenantId).toBe(ctxBad.tenantId);
     expect(result.failures[0].reason).toContain("THALON_VAULT_MASTER_KEY");
     expect(result.swept).toEqual([{ tenantId: ctxGood.tenantId, cards: 0, polled: 0, admitted: 0 }]);
+  });
+});
+
+/** A source that returns its items to ANY poll — multi-source tests need no watchlist coupling. */
+function namedSource(name: string, all: TrendItem[]): TrendSource {
+  return { name, async poll() { return all; } };
+}
+
+/** ≥140 chars on purpose — clears the admission minBodyLength floor so the metric floors carry the decision. */
+const LONG_BODY =
+  "Deterministic render pipelines for faceless channels: how a template-driven engine turns one prompt into a full publish-ready video, with judge gating and grounded captions at every step of the chain.";
+
+describe("runDueSweeps × multi-source + admission config (s72, the exemplar-admission 'both' unlock)", () => {
+  it("sweeps EVERY listed source in order, sums the totals, marks the clock ONCE, and the last source owns the bundle", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+    const embedder = createFakeEmbeddingDriver(1536);
+
+    const ctx = await setupTenant(repos, "multi", "multi");
+    await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+
+    const sources = [
+      namedSource("first-src", items("multi")),
+      namedSource("last-src", items("other")),
+    ];
+    const result = await runDueSweeps(
+      { repos, sources, sweepDeps: { embedder, objectStore, capTokens: 1_000_000 } },
+      NOW,
+    );
+    expect(result.failures).toEqual([]);
+    expect(result.swept).toEqual([{ tenantId: ctx.tenantId, cards: 2, polled: 2, admitted: 0 }]);
+
+    // ONE honest clock stamp for the whole pass — not one per source.
+    expect((await repos.sweepSchedules.get(ctx))?.lastSweepAt?.getTime()).toBe(NOW.getTime());
+    const events = await repos.events.list(ctx, { entityType: "sweep_schedule" });
+    expect(events.filter((e) => e.event === "sweep.schedule_swept")).toHaveLength(1);
+
+    // The interim contract: the LAST listed source's bundle owns the trends surface.
+    const bundle = await readSweepBundle(ctx.tenantId, objectStore);
+    expect(bundle?.source).toBe("last-src");
+  });
+
+  it("a failing driver fails the tenant with the driver NAMED, skips markSwept, and the whole list retries", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+    const embedder = createFakeEmbeddingDriver(1536);
+
+    const ctx = await setupTenant(repos, "partial", "partial");
+    await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+
+    const sources = [
+      namedSource("steady-src", items("partial")),
+      {
+        name: "quota-src",
+        async poll(): Promise<TrendItem[]> {
+          throw new Error("quota exceeded for today");
+        },
+      },
+    ];
+    const result = await runDueSweeps(
+      { repos, sources, sweepDeps: { embedder, objectStore, capTokens: 1_000_000 } },
+      NOW,
+    );
+    expect(result.swept).toEqual([]);
+    expect(result.failures).toEqual([
+      { tenantId: ctx.tenantId, reason: "[quota-src] quota exceeded for today" },
+    ]);
+    // Clock untouched — the tenant stays due; re-polling the succeeded source
+    // is safe (content-hash dedup, append-only snapshots).
+    expect((await repos.sweepSchedules.get(ctx))?.lastSweepAt).toBeNull();
+    const retry = await runDueSweeps(
+      { repos, sources: [sources[0]], sweepDeps: { embedder, objectStore, capTokens: 1_000_000 } },
+      new Date(NOW.getTime() + MINUTE),
+    );
+    expect(retry.swept).toHaveLength(1);
+  });
+
+  it("TREND_ADMISSION_CONFIG reaches the admission gate: a likes floor admits likes-only platform items", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+    const embedder = createFakeEmbeddingDriver(1536);
+
+    const ctx = await setupTenant(repos, "floors", "floors");
+    await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+
+    // Bluesky-shaped items: likes/reposts/replies only — the default views
+    // floor fails these CLOSED; the env likes floor is the deliberate opt-in.
+    const hot: TrendItem = {
+      externalId: "bsky-hot",
+      text: LONG_BODY,
+      account: "one-off-viral",
+      publishedAt: NOW.getTime() - 24 * 3_600_000,
+      metrics: { likes: 600, reposts: 40, replies: 12 },
+    };
+    const cold: TrendItem = {
+      externalId: "bsky-cold",
+      text: LONG_BODY,
+      account: "quiet-account",
+      publishedAt: NOW.getTime() - 24 * 3_600_000,
+      metrics: { likes: 99, reposts: 1, replies: 0 },
+    };
+
+    const env = readEnv({ TREND_ADMISSION_CONFIG: '{"defaults":{"floors":{"likes":500}}}' });
+    const result = await runDueSweeps(
+      {
+        repos,
+        env,
+        sources: [namedSource("bluesky-shaped", [hot, cold])],
+        sweepDeps: { embedder, objectStore, capTokens: 1_000_000 },
+      },
+      NOW,
+    );
+    expect(result.failures).toEqual([]);
+    expect(result.swept).toEqual([{ tenantId: ctx.tenantId, cards: 2, polled: 2, admitted: 1 }]);
+
+    // The admitted exemplar is the one over the likes floor, with provenance.
+    const exemplars = await repos.sources.listByKind(ctx, ["exemplar"]);
+    const admitted = exemplars.filter((s) =>
+      String((s.meta as { origin?: unknown })?.origin ?? "").startsWith("auto-admission:"),
+    );
+    expect(admitted).toHaveLength(1);
+    const meta = admitted[0].meta as { trend?: { externalId?: string; reasons?: string[] } };
+    expect(meta.trend?.externalId).toBe("bsky-hot");
+    expect(meta.trend?.reasons?.join(" ")).toContain("likes 600 ≥ floor 500");
+  });
+
+  it("a malformed TREND_ADMISSION_CONFIG fails the pass loudly, naming the env var", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    const env = readEnv({ TREND_ADMISSION_CONFIG: "not-json" });
+    await expect(runDueSweeps({ repos, env }, NOW)).rejects.toThrow(/TREND_ADMISSION_CONFIG/);
+  });
+
+  it("envAdmissionConfig: unset = undefined, valid JSON = the parsed config, schema mismatch = loud", () => {
+    expect(envAdmissionConfig(readEnv())).toBeUndefined();
+    const parsed = envAdmissionConfig(
+      readEnv({ TREND_ADMISSION_CONFIG: '{"defaults":{"floors":{"likes":500}}}' }),
+    );
+    expect(parsed?.defaults?.floors).toEqual({ likes: 500 });
+    expect(() =>
+      envAdmissionConfig(readEnv({ TREND_ADMISSION_CONFIG: '{"defaults":{"floors":{"likes":-1}}}' })),
+    ).toThrow(/TREND_ADMISSION_CONFIG/);
   });
 });

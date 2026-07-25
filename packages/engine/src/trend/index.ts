@@ -17,6 +17,7 @@ export {
 } from "./youtube-source";
 export {
   getTrendSource,
+  getTrendSources,
   registeredTrendSources,
   type TrendSourceDeps,
 } from "./source-registry";
@@ -102,9 +103,10 @@ export {
   type TrendSweepResult,
 } from "./sweep";
 export {
+  envAdmissionConfig,
   findDueTenants,
   runDueSweeps,
-  tenantTrendSource,
+  tenantTrendSources,
   type DueSweepFailure,
   type RunDueSweepsDeps,
   type RunDueSweepsResult,

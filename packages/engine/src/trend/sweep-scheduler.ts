@@ -3,7 +3,8 @@ import type { Repos } from "@thalon/db";
 import { readEnv, type ThalonEnv } from "@thalon/platform";
 import { vaultIntelEnvView } from "../integrations/env-view";
 import type { VaultDeps } from "../integrations/vault";
-import { getTrendSource, type TrendSourceDeps } from "./source-registry";
+import { admissionConfigSchema, type AdmissionConfigInput } from "./admission";
+import { getTrendSources, type TrendSourceDeps } from "./source-registry";
 import { runTrendSweep, type TrendSweepDeps } from "./sweep";
 import type { TrendSource } from "./trend-source";
 
@@ -62,20 +63,52 @@ export function findDueTenants(schedules: readonly SweepScheduleLike[], now: Dat
  * seam resolves vault-first by tenant. ONE tenant's merged intel view
  * (`vaultIntelEnvView`: connected `intel_youtube`/`intel_bluesky` rows fill
  * the credential seats env left silent, env wins where set) feeds the
- * env-selected registry source. Exported so the manual Sweep-now caller
+ * env-selected registry sources. Exported so the manual Sweep-now caller
  * wires the identical resolution — one precedence table, one wiring.
+ * Plural since s72: `TREND_SOURCE` accepts a comma-list; each resolved
+ * driver sweeps in listed order (see `getTrendSources` on bundle ownership).
  */
-export async function tenantTrendSource(
+export async function tenantTrendSources(
   deps: VaultDeps,
   sourceDeps?: TrendSourceDeps,
-): Promise<TrendSource> {
-  return getTrendSource(undefined, await vaultIntelEnvView(deps), sourceDeps);
+): Promise<TrendSource[]> {
+  return getTrendSources(undefined, await vaultIntelEnvView(deps), sourceDeps);
+}
+
+/**
+ * The soak's admission-knob channel (s72, the founder's "both" unlock):
+ * `TREND_ADMISSION_CONFIG` carries the transitional request-level
+ * `admissionConfig` as env JSON until the B-learn L0 window homes the knobs
+ * on the monitored-area row. Validated HERE, once per pass — a malformed
+ * value throws with the env var named (the driver logs PASS FAILED loudly
+ * every tick until the operator fixes it; fail loud beats sweeping with
+ * silently-dropped floors).
+ */
+export function envAdmissionConfig(env: ThalonEnv): AdmissionConfigInput | undefined {
+  const raw = env.TREND_ADMISSION_CONFIG;
+  if (!raw || raw.trim() === "") return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(
+      `TREND_ADMISSION_CONFIG is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
+  const result = admissionConfigSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error(`TREND_ADMISSION_CONFIG does not match admissionConfigSchema: ${result.error.message}`);
+  }
+  return result.data;
 }
 
 export interface RunDueSweepsDeps {
   repos: Repos;
   /** Sweep-path overrides (tests: fake source/embedder/object store) — production defaults per `runTrendSweep`. An injected `source` skips the per-tenant vault resolution entirely. */
   sweepDeps?: TrendSweepDeps;
+  /** Multi-source override (tests) — the full resolved driver LIST; wins over `sweepDeps.source`. Production resolves per tenant via `tenantTrendSources`. */
+  sources?: TrendSource[];
   /** The validated env the vault-first driver resolution merges over — defaults to the process env choke point. */
   env?: ThalonEnv;
 }
@@ -122,6 +155,9 @@ export async function runDueSweeps(
 
   const sweepDeps = deps.sweepDeps ?? {};
   const env = deps.env ?? readEnv();
+  // Validated once per pass — malformed config fails the WHOLE pass loudly
+  // (a box-level knob, not a tenant's), before any tenant sweeps half-armed.
+  const admissionConfig = envAdmissionConfig(env);
 
   for (const tenantId of due) {
     const schedule = byTenant.get(tenantId);
@@ -131,20 +167,39 @@ export async function runDueSweeps(
       // B-int.3: driver resolution is per-tenant and vault-first — inside
       // the try, so a vault misconfiguration (rows without a master key)
       // reports verbatim for THIS tenant and never blocks the others.
-      const source = sweepDeps.source ?? (await tenantTrendSource({ repos, ctx, env }));
-      const result = await runTrendSweep(
-        ctx,
-        repos,
-        { nowMs: now.getTime(), intervalMs: schedule.cadenceMinutes * 60_000 },
-        { ...sweepDeps, source },
-      );
+      const sources =
+        deps.sources ??
+        (sweepDeps.source ? [sweepDeps.source] : await tenantTrendSources({ repos, ctx, env }));
+      // Each listed driver runs the FULL sweep path in order (intake +
+      // admissions all persist per source; the last source's bundle owns the
+      // trends surface — getTrendSources documents the interim). Any driver's
+      // failure fails the tenant verbatim and skips markSwept, so the whole
+      // list retries next tick — sweeps are idempotent against re-polling
+      // (content-hash dedup, append-only snapshots).
+      const totals = { cards: 0, polled: 0, admitted: 0 };
+      for (const source of sources) {
+        try {
+          const result = await runTrendSweep(
+            ctx,
+            repos,
+            { nowMs: now.getTime(), intervalMs: schedule.cadenceMinutes * 60_000, admissionConfig },
+            { ...sweepDeps, source },
+          );
+          totals.cards += result.bundle.cards.length;
+          totals.polled += result.bundle.polled;
+          totals.admitted += result.intake.admissions.admitted.length;
+        } catch (err) {
+          // Name the failing driver only when there IS a list to disambiguate
+          // — the single-source reason stays verbatim (the pinned contract).
+          if (sources.length > 1) {
+            const reason = err instanceof Error ? err.message : String(err);
+            throw new Error(`[${source.name}] ${reason}`, { cause: err });
+          }
+          throw err;
+        }
+      }
       await repos.sweepSchedules.markSwept(ctx, now);
-      swept.push({
-        tenantId,
-        cards: result.bundle.cards.length,
-        polled: result.bundle.polled,
-        admitted: result.intake.admissions.admitted.length,
-      });
+      swept.push({ tenantId, ...totals });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
       failures.push({ tenantId, reason });

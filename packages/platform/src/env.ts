@@ -36,8 +36,10 @@ const envSchema = z.object({
   RENDER_DRIVER: z.string().default("hyperframes"),
   /** B6.8 search-intel seam: which SearchIntelSource the registry selects (fake | gsc; paid-vendor = the recorded swap path, ADR 0006). GSC goes live at B6.7 deploy — fake is the honest default until a site exists. */
   SEARCH_INTEL_SOURCE: z.string().default("fake"),
-  /** B6.5 trend seam: which TrendSource the registry selects (fake | bluesky | youtube). bluesky is keyless — the honest first live selection; fake stays the zero-network default. */
+  /** B6.5 trend seam: which TrendSource the registry selects (fake | bluesky | youtube). bluesky is keyless — the honest first live selection; fake stays the zero-network default. s72: a comma-list sweeps each in order; the LAST listed owns the trends bundle until the B-learn L2 merge. */
   TREND_SOURCE: z.string().default("fake"),
+  /** B-learn L1 (s72): request-level `admissionConfig` as env JSON — the transitional knob channel until the L0 window homes admission knobs on the monitored-area row. Validated at the sweep callers (engine `envAdmissionConfig`); malformed values fail the pass loudly. */
+  TREND_ADMISSION_CONFIG: z.string().optional(),
   /** B6.5 dossier half-step: how many top-ranked cards per sweep get a generated dossier (gateway spend — arming is an operator decision; 0 = disarmed, cards honestly carry no dossier). */
   TREND_DOSSIER_CARDS: z.coerce.number().int().min(0).default(0),
   /** B6.5 YouTube Data API v3 key (free tier; per-driver quota budgets stay config in the driver, never here). */

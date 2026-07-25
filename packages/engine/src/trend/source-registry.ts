@@ -67,3 +67,24 @@ export function getTrendSource(
   }
   return factory(env, deps);
 }
+
+/**
+ * Comma-list selection (s72, the exemplar-admission "both" unlock):
+ * `TREND_SOURCE=youtube,bluesky` sweeps EACH listed driver in order — every
+ * sweep runs the full intake (snapshots, ingest, B-learn L1 admissions), so
+ * exemplar admissions flow from every listed platform. Interim honesty: the
+ * per-tenant trends bundle is one object, so the LAST listed source owns
+ * what the trends surface shows until the B-learn L2 multi-platform merge —
+ * list the surface-owning driver last. Order preserved, duplicates
+ * collapsed, every member must be registered.
+ */
+export function getTrendSources(
+  selection?: string,
+  env?: ThalonEnv,
+  deps?: TrendSourceDeps,
+): TrendSource[] {
+  const selected = selection?.trim() || (env ?? readEnv()).TREND_SOURCE;
+  const names = [...new Set(selected.split(",").map((n) => n.trim()).filter(Boolean))];
+  if (names.length === 0) return [getTrendSource(undefined, env, deps)];
+  return names.map((name) => getTrendSource(name, env, deps));
+}

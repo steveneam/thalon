@@ -234,7 +234,14 @@ body min, 20/day/area cap, budget-honest embeds; the contract-window ask
 (persist `admission` knobs on the monitored-area row) = the L0 window's first
 line item; founder unlocks calibrated on real data in WRAP-exemplar-arm.md
 (YouTube key in the soak env → admissions start free; or Bluesky
-`floors:{likes:500}` ≈ 16/day). (L2)
+`floors:{likes:500}` ≈ 16/day). ✅ FOUNDER SAID "BOTH", DONE s72: soak =
+`TREND_SOURCE=youtube,bluesky` (comma-list sweeps each driver in order —
+full intake + admissions per source) + `TREND_ADMISSION_CONFIG`
+`{defaults:{floors:{likes:500}}}` riding scheduler AND Sweep-now; youtube
+watchlist row mirrored through the repo door. **L2 carries the flagged
+remainder: the per-tenant trends bundle is ONE object, so the LAST listed
+source owns the trends surface until the L2 multi-platform bundle merge;
+per-PLATFORM floors (vs per-area) are the same window's refinement.** (L2)
 acquisition breadth legally — **FOUNDER DIRECTIVE s71: intel eventually reads
 EVERY platform we post to (YouTube · TikTok · IG · Facebook · LinkedIn · X ·
 Bluesky …), the way competing SaaS/creators already do; wire each via its
