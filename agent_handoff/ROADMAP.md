@@ -34,18 +34,19 @@ close (recommended lane: kling3_0_turbo 1080p ≈ 94cr; hero-bump + retake buffe
 the takes → box-local $0 render.** Standing mint rules in memory apply; all
 on-screen text is code-drawn at render (s62 doctrine), never minted.
 
-### Phase 3 — Post loop goes live, per platform **[founder GO — LinkedIn first]**
-The production caller is wired (`POST /api/drafts/[id]/publish-social`) and since
-s68 resolves credentials VAULT-FIRST (env pair = emergency override). Arming each
-platform is the founder's:
-- his LinkedIn member token (scopes `openid profile w_member_social`) — into the
-  vault via the connect door (the exact client flow; B-int.2 gives it UI) or the
-  env pair as override — plus `SOCIAL_LINKEDIN_ARMED="true"` + the platform in the
-  tenant's social block;
-- **before the first real post** (checklist `WRAP-pub2-drivers.md` §Before-a-first-live-post):
-  re-verify the two API version pins (LinkedIn `202512`, Graph `v23.0` — both checked
-  live-good s67) + make the LinkedIn Little-Format escaping call.
-- One reviewed test post each; his call every time. Stealth holds otherwise.
+### Phase 3 — THE MEME POST to all three platforms **[founder: caption sign-off + GO]**
+s68 (second half) built B-pub.3 end-to-end: **image legs on all three text drivers**
+(LinkedIn Images API · X v2 media upload · FB Page /photos), X OAuth 1.0a
+standing-arm mode (OAuth2 X user tokens die in ~2h), and the pre-surface connect
+CLI (`scripts/connect-destination.ts`). Credential state: **linkedin + facebook
+LIVE IN THE VAULT** (first real vault credentials; both validate-pings green) ·
+X 1.0a seats in env (signed probe live) · master key set · tenant social blocks
+already carry all three (1/day). The meme image is built
+(`.context/social/horse-meme-2026-07-25.png`, 6cr) + caption draft beside it.
+**Remaining = founder only:** caption/image sign-off → the GO word → lead sets the
+three ARMED flags, runs the post through draft→judge→approve, engine posts to all
+three at once. Before the real post: re-verify version pins + the Little-Format
+escaping call (standing checklist). Post #2 = the queued Thalon intro.
 
 ### Phase 4 — (spec for Phase 1 above) B-int.2 detail
 Settings → Integrations, now that the vault core exists:
@@ -95,6 +96,20 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   (golden g3-004/005 fail though expected pass) AND lenient on the invented-mechanism/
   topics class (g3-006/008 pass though expected fail) — a real tension worth a
   golden-guided prompt pass. **[lead-serial, low priority]** · `golden:g3` stays non-CI.
+- **s68 evidence — the tiers SPLIT on operator-brief-sourced quantity claims:** the
+  claim "one prompt becomes a week of platform-ready content" (verbatim in the
+  operator's PROMPT source chunk) passed g3_screen citing that chunk in all three
+  runs, but g3_final failed it twice consecutively (drafts `55108b92`, `3ebd7de1`;
+  the one 05:12 pass was the outlier). Two open questions for the tuning pass:
+  (a) final-tier consistency, (b) DOCTRINE: does the operator's own brief text
+  count as grounding for product claims, or only identity/profile sources? The s68
+  call: treat the final tier as right — quantity/time promises need real grounding,
+  so the brief dropped "a week". Candidate golden rows both ways. Run 4 (draft
+  `14e05fa3`) adds a LIVE truism case: g3_final killed the rhetorical address "You
+  know your business" as ungrounded (the g3-004/005 over-strict class) — plus a
+  correct catch of the draft re-introducing "three formats every week", enforced via
+  the operator constraint text itself (constraints-in-the-prompt ARE enforceable
+  grounding — worth keeping as doctrine).
 
 ### Checkpoint decisions (COORDINATION row 4) **[founder, next checkpoint]**
 - **B-sitegen charter candidate** — the meta-prompt behind Create's page family; input
