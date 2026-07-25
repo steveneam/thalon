@@ -50,8 +50,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/landing/feature-showcase.tsx", 3],
   ["components/landing/hero-vignette.tsx", 4],
   ["components/landing/site-footer.tsx", 1],
+  // leads-surface left the map at its s75 exact-mock rebuild (step 1) — the
+  // ported surface speaks the sheet's own type roles.
   ["components/leads/lead-card.tsx", 1],
-  ["components/leads/leads-surface.tsx", 2],
   ["components/leads/weights-provenance.tsx", 1],
   // library + runs pins burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
   ["components/videos/cut-editor.tsx", 2],

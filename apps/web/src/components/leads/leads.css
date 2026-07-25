@@ -1,0 +1,29 @@
+/*
+ * Leads — the surface's own atomics, PORTED 1:1 from the helmet <style> of
+ * docs/research/mock-sheets/Leads.dc.html (DOCTRINE 0: the sheet is the
+ * blueprint). Shared classes (.card, .row, .pill, .seg, .btn, .excerpt,
+ * .bar-trough/.bar-fill, .card-head, .kbd, type roles) come from
+ * app/app/workspace.css — the shell contract, READ-ONLY from here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.leads-surface` — the cross-lane contract
+ * (mock-sheets README rule 6, executable in lib/__tests__/surface-css-scope
+ * .test.ts). The sheets deliberately reuse class names with DIFFERENT values:
+ * `.split` is 480px here and 600px in Approve.dc.html, and `.reason` is this
+ * three-column grid here but a plain flex line in Intel.dc.html. An unscoped
+ * file silently restyles its neighbour the moment both surfaces land.
+ *
+ * `.avatar` is in this sheet's helmet too, but it already lives in
+ * workspace.css (the shell's topbar wears it), so it is deliberately not
+ * restated here.
+ */
+
+.leads-surface .split { flex: 1; display: grid; grid-template-columns: 480px 1fr; gap: 14px; min-height: 0; }
+.leads-surface .lead-name { font-size: 13.5px; font-weight: 600; }
+.leads-surface .lead-sub { font-size: 12.5px; color: var(--n-900); }
+.leads-surface .score-chip { display: flex; align-items: center; gap: 7px; flex: none; }
+.leads-surface .sec-label { font-size: 12.5px; font-weight: 600; color: var(--n-900); }
+.leads-surface .reason { display: grid; grid-template-columns: 120px 54px 1fr; gap: 10px; align-items: center; font-size: 12.5px; }
+.leads-surface .reason .rname { color: var(--n-900); }
+.leads-surface .mail { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.leads-surface .act-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; padding: 6px 0; }
+.leads-surface .mono-badge { width: 34px; height: 34px; border-radius: 8px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex: none; }

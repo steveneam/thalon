@@ -1,451 +1,232 @@
-"use client";
-
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Flame, RefreshCw, Upload, Users, X } from "lucide-react";
-import { LeadsBoard } from "@/components/board/leads-board";
-import { LeadCard } from "@/components/leads/lead-card";
-import { WeightsProvenance } from "@/components/leads/weights-provenance";
-import { Badge } from "@/components/ui/badge";
-import { EmptyArt } from "@/components/ui/empty-art";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ActionToast, type ToastState } from "@/components/workspace/action-toast";
-import { BulkBar } from "@/components/workspace/bulk-bar";
-import type { CreateFamily } from "@/lib/intel/types";
-import {
-  fetchLeads,
-  importLeadsCsv,
-  learnWeightsNow,
-  promoteLeadTo,
-  scoreLeadsNow,
-  syncWaitlist,
-  triageLeads,
-} from "@/lib/leads/client";
-import { compareLeadCards } from "@/lib/leads/serialize";
-import type { ImportReport, LeadsPayload, TriageAction } from "@/lib/leads/types";
-import { cn } from "@/lib/utils";
-import { useListKeys } from "@/lib/workspace/keyboard";
-
-/** Saved-view tabs (Phase I): the Pipeline board mounts beside the existing lists. */
-type QueueTab = "queue" | "board" | "dismissed";
+import "@/components/leads/leads.css";
 
 /**
- * The Leads queue (B-crm.2): ranked lead cards with thermal grades and
- * verbatim reasons — the CRM as a doorway into the same Create surfaces
- * every other feature feeds. Bulk actions per FRONTEND §0 (multi-select +
- * mass dismiss, one confirm with a count). Empty state is a tutorial: CSV
- * import (standard CRM headers), waitlist sync, and the ICP pointer.
+ * Leads — STEP 1 OF THE TWO-STEP REBUILD (founder-ratified s73): the PURE
+ * PORT of docs/research/mock-sheets/Leads.dc.html. Every band, class, style
+ * and string below is the sheet's own, and the content is the sheet's
+ * placeholder content, deliberately — this commit is the structural verdict
+ * point, with zero old-design contamination and zero data wiring.
+ *
+ * Step 2 wires the real reads (the leads queue, its scores and reasons, the
+ * outreach compose door) behind this byte-true resting chrome, weaves the
+ * lead-score provenance keeper back in as state behind it, and deletes the
+ * old implementation (lead-card.tsx, weights-provenance.tsx).
+ *
+ * `.leads-surface` beside `.content` is the anchor every rule in ./leads.css
+ * hangs off — a per-surface stylesheet is still a global stylesheet, and this
+ * sheet's `.split`/`.reason` values differ from Approve's and Intel's.
  */
 export function LeadsSurface() {
-  const router = useRouter();
-  const [payload, setPayload] = useState<LeadsPayload | null>(null);
-  const [tab, setTab] = useState<QueueTab>("queue");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  // The keyboard cursor (s40 grammar parity): the card j/k moved to — what
-  // x/d/h act on. Distinct from `selected`, the checkbox set bulk acts on.
-  const [cursorId, setCursorId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [toast, setToast] = useState<ToastState | null>(null);
-  const [importOpen, setImportOpen] = useState(false);
-  const [lastImport, setLastImport] = useState<ImportReport | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const reload = useCallback(async () => {
-    setPayload(await fetchLeads());
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchLeads()
-      .then((data) => {
-        if (!cancelled) setPayload(data);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setNotice(err instanceof Error ? err.message : "failed to load leads");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const visible = useMemo(() => {
-    const leads = payload?.leads ?? [];
-    // The board tab renders through LeadsBoard (its own grouping + cursor);
-    // the flat list stays empty so the list grammar below is inert there.
-    if (tab === "board") return [];
-    const filtered =
-      tab === "queue"
-        ? leads.filter((l) => l.status !== "dismissed")
-        : leads.filter((l) => l.status === "dismissed");
-    return [...filtered].sort(compareLeadCards);
-  }, [payload, tab]);
-
-  // The board's multi-select spans columns — the ONE named confirm says so.
-  const selectedSpan = useMemo(
-    () =>
-      new Set((payload?.leads ?? []).filter((l) => selected.has(l.id)).map((l) => l.status)).size,
-    [payload, selected],
-  );
-
-  // Terminal outcomes (dismiss) confirm via the toast with a way back to the
-  // Dismissed tab; informational results return a string for the notice line.
-  async function run(work: () => Promise<string | null>) {
-    setBusy(true);
-    setNotice(null);
-    try {
-      const message = await work();
-      if (message !== null) setNotice(message);
-      await reload();
-    } catch (err) {
-      // Engine/gateway refusals surface verbatim — an honest error beats a fake spinner.
-      setNotice(err instanceof Error ? err.message : "something went wrong");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const viewDismissed = { label: "View dismissed", onClick: () => setTab("dismissed") };
-
-  function onTriage(action: TriageAction, id: string) {
-    void run(async () => {
-      const result = await triageLeads(action, [id]);
-      if (result.failed.length > 0) return result.failed[0].error;
-      if (action !== "dismiss") return "Saved.";
-      setToast({
-        message: "Lead dismissed — that signal tunes the ranking.",
-        action: viewDismissed,
-      });
-      return null;
-    });
-  }
-
-  function onBulkDismiss() {
-    // The ONE named confirm lives in BulkBar (FRONTEND §0), never per item.
-    const ids = [...selected];
-    void run(async () => {
-      const result = await triageLeads("dismiss", ids);
-      setSelected(new Set());
-      if (result.failed.length > 0) {
-        return `Dismissed ${result.done}; ${result.failed.length} failed (${result.failed[0].error}).`;
-      }
-      setToast({
-        message: `Dismissed ${result.done} lead${result.done === 1 ? "" : "s"}.`,
-        action: viewDismissed,
-      });
-      return null;
-    });
-  }
-
-  function onPromote(id: string, family: CreateFamily) {
-    void run(async () => {
-      const { createHref } = await promoteLeadTo(id, family);
-      router.push(createHref);
-      return "Opening Create with the lead's context…";
-    });
-  }
-
-  function onLearnWeights() {
-    void run(async () => {
-      const report = await learnWeightsNow();
-      if (!report.armed) return report.reason ?? "Learning is not armed.";
-      if (report.verdicts === 0) {
-        return "Nothing to learn from yet — dismiss or hot-pick a few scored leads; every verdict teaches the ranking.";
-      }
-      if (!report.created) return "No change — the learned weights already reflect every verdict.";
-      return `Learned new weights from ${report.verdicts} verdict${report.verdicts === 1 ? "" : "s"} — Score now applies them.`;
-    });
-  }
-
-  function onImportText(csv: string) {
-    void run(async () => {
-      const { report, scoring } = await importLeadsCsv(csv);
-      setLastImport(report);
-      setImportOpen(false);
-      const scored = scoring.armed ? ` · ${scoring.scored} scored` : " · scoring not armed (add an ICP)";
-      return `Imported ${report.added} of ${report.rows} rows (${report.duplicates} duplicates, ${report.invalid} invalid)${scored}.`;
-    });
-  }
-
-  function onSelect(id: string, isSelected: boolean) {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (isSelected) next.add(id);
-      else next.delete(id);
-      return next;
-    });
-  }
-
-  // Keyboard grammar parity (s40, the approve queue's j/k + act keys): j/k
-  // move the cursor, x picks it for bulk, d is this surface's Four-Verbs
-  // word — Dismiss — and h toggles the hot pick.
-  const cursorIndex = visible.findIndex((lead) => lead.id === cursorId);
-  const cursorLead = cursorIndex === -1 ? null : visible[cursorIndex];
-  const moveCursor = (delta: 1 | -1) => (event: KeyboardEvent) => {
-    if (visible.length === 0) return;
-    event.preventDefault();
-    const next =
-      cursorIndex === -1 ? 0 : Math.min(Math.max(cursorIndex + delta, 0), visible.length - 1);
-    setCursorId(visible[next].id);
-  };
-  useListKeys({
-    // The board tab owns the keys there (the 2D grammar lives in LeadsBoard).
-    enabled: !busy && payload !== null && tab !== "board",
-    bindings: {
-      j: moveCursor(1),
-      k: moveCursor(-1),
-      x: (event) => {
-        if (!cursorLead) return;
-        event.preventDefault();
-        onSelect(cursorLead.id, !selected.has(cursorLead.id));
-      },
-      d: (event) => {
-        if (!cursorLead || cursorLead.status === "dismissed") return;
-        event.preventDefault();
-        // Triage keeps flowing: the cursor lands on the neighbour before the
-        // dismissed card leaves the list.
-        const neighbour = visible[cursorIndex + 1] ?? visible[cursorIndex - 1] ?? null;
-        setCursorId(neighbour?.id ?? null);
-        onTriage("dismiss", cursorLead.id);
-      },
-      h: (event) => {
-        if (!cursorLead) return;
-        event.preventDefault();
-        onTriage(cursorLead.pinned ? "unpin" : "pin", cursorLead.id);
-      },
-    },
-  });
-
-  // Keep the cursor card in view while j/k cruises (jsdom-safe call).
-  useEffect(() => {
-    if (!cursorId) return;
-    document
-      .querySelector(`[data-testid="lead-card-${cursorId}"]`)
-      ?.scrollIntoView?.({ block: "nearest" });
-  }, [cursorId]);
-
-  const counts = payload?.counts ?? { new: 0, scored: 0, dismissed: 0 };
-
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6">
-      {/* j/k is a silent context change for screen readers without this
-          (the approve queue's live-region precedent). */}
-      <p aria-live="polite" className="sr-only">
-        {cursorLead
-          ? `Selected lead ${cursorLead.name || cursorLead.company || cursorLead.email}`
-          : ""}
-      </p>
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-lg font-semibold">Leads</h2>
-        <Badge variant="outline">{counts.new + counts.scored} in queue</Badge>
-        <span className="ml-auto flex flex-wrap gap-1.5">
-          <Button size="sm" variant="outline" disabled={busy} onClick={() => setImportOpen((v) => !v)}>
-            <Upload aria-hidden className="size-3.5" /> Import CSV
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            onClick={() =>
-              void run(async () => {
-                const { sync, scoring } = await syncWaitlist();
-                const scored = scoring.armed ? ` · ${scoring.scored} scored` : "";
-                return `Waitlist synced: ${sync.added} new lead${sync.added === 1 ? "" : "s"} (${sync.existing} already bridged)${scored}.`;
-              })
-            }
-          >
-            <Users aria-hidden className="size-3.5" /> Sync waitlist
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy || !payload?.scoringArmed}
-            title={payload?.scoringArmed ? undefined : "Add an ICP block to your profile first"}
-            onClick={() =>
-              void run(async () => {
-                const scoring = await scoreLeadsNow();
-                if (!scoring.armed) return scoring.reason ?? "Scoring is not armed.";
-                return scoring.candidates === 0
-                  ? "Nothing to score — every lead is current."
-                  : `Scored ${scoring.scored} lead${scoring.scored === 1 ? "" : "s"} (${scoring.rescored} re-scored after the ICP change).`;
-              })
-            }
-          >
-            <RefreshCw aria-hidden className="size-3.5" /> Score now
-          </Button>
-        </span>
+    <div className="content leads-surface">
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <h1 className="t-headline">Leads</h1>
+        <span className="pill pill-idle">12 scored</span>
+        <span className="pill pill-warn">2 hot · follow up</span>
+        <div style={{ flex: 1 }} />
+        <div className="seg">
+          <span className="seg-opt on">List</span>
+          <span className="seg-opt">Board</span>
+        </div>
+        <div className="btn btn-ghost btn-sm">Import contacts</div>
       </div>
 
-      {payload && !payload.scoringArmed && (
-        <p className="rounded-lg border border-border bg-muted/40 p-2.5 text-xs text-muted-foreground">
-          Lead scoring isn&rsquo;t armed yet: add an <strong>ICP block</strong> (who your ideal
-          customer is) to the active profile and every lead gets a deterministic score with
-          readable reasons.
-        </p>
-      )}
-
-      {payload?.scoringArmed &&
-        (payload.leads.length > 0 ||
-          payload.learnedWeights.state !== null ||
-          payload.learnedWeights.staleForProfile) && (
-          <WeightsProvenance
-            info={payload.learnedWeights}
-            leads={payload.leads}
-            busy={busy}
-            onLearn={onLearnWeights}
-          />
-        )}
-
-      {importOpen && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Import contacts (CSV)</CardTitle>
-            <CardDescription>
-              Standard CRM headers work out of the box — HubSpot, Salesforce, Pipedrive exports, or{" "}
-              <a href="/leads-template.csv" download className="text-primary hover:underline">
-                our minimal template
-              </a>
-              . Email is required; unknown columns are kept on the lead. The file is parsed and
-              discarded — never stored.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".csv,text/csv"
-              aria-label="CSV file"
-              className="text-sm"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                void file.text().then(onImportText);
-              }}
-            />
-            {lastImport && lastImport.reasons.length > 0 && (
-              <details>
-                <summary className="cursor-pointer text-xs text-muted-foreground">
-                  {lastImport.invalid} invalid row{lastImport.invalid === 1 ? "" : "s"} from the last
-                  import
-                </summary>
-                <ul className="mt-1 flex flex-col gap-0.5 text-xs text-muted-foreground">
-                  {lastImport.reasons.map((r) => (
-                    <li key={`${r.row}-${r.reason}`}>
-                      row {r.row}: {r.reason}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {notice && (
-        <p role="status" className="text-xs text-muted-foreground">
-          {notice}
-        </p>
-      )}
-
-      {tab === "board" ? (
-        <p className="u-eyebrow text-muted-foreground">
-          keys · j/k card · h/l column · x pick · d dismiss
-        </p>
-      ) : (
-        visible.length > 0 && (
-          <p className="u-eyebrow text-muted-foreground">
-            keys · j/k select · x pick · d dismiss · h hot
-          </p>
-        )
-      )}
-
-      <div role="tablist" aria-label="Lead views" className="flex gap-1.5">
-        {(
-          [
-            { id: "queue", label: `All leads (${counts.new + counts.scored})` },
-            { id: "board", label: "Pipeline" },
-            { id: "dismissed", label: `Dismissed (${counts.dismissed})` },
-          ] as const
-        ).map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs transition-colors",
-              tab === t.id ? "border-primary/50 bg-primary/10" : "border-border hover:bg-muted",
-            )}
+      <div className="split">
+        <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            <div className="row sel">
+              <div className="mono-badge">MK</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="lead-name">Mara Kessler · Fieldline Robotics</div>
+                <div className="excerpt">
+                  Ops lead · asked about content automation on the webinar
+                </div>
+              </div>
+              <div className="score-chip">
+                <div className="bar-trough" style={{ width: 44 }}>
+                  <div className="bar-fill" style={{ width: "88%", background: "var(--heat-hot)" }} />
+                </div>
+                <span className="t-data">0.88</span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="mono-badge">JT</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="lead-name">Jonah Tran · Brightpath Clinics</div>
+                <div className="excerpt">Marketing manager · downloaded the pipeline article</div>
+              </div>
+              <div className="score-chip">
+                <div className="bar-trough" style={{ width: 44 }}>
+                  <div className="bar-fill" style={{ width: "81%", background: "var(--heat-hot)" }} />
+                </div>
+                <span className="t-data">0.81</span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="mono-badge">RS</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="lead-name">Rhea Solano · Copperline Cafés</div>
+                <div className="excerpt">Owner · replied to the LinkedIn launch post</div>
+              </div>
+              <div className="score-chip">
+                <div className="bar-trough" style={{ width: 44 }}>
+                  <div
+                    className="bar-fill"
+                    style={{ width: "64%", background: "var(--heat-rising)" }}
+                  />
+                </div>
+                <span className="t-data">0.64</span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="mono-badge">DA</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="lead-name">Dev Anand · Northgate Legal</div>
+                <div className="excerpt">Partner · site visit from the horizon keyword</div>
+              </div>
+              <div className="score-chip">
+                <div className="bar-trough" style={{ width: 44 }}>
+                  <div
+                    className="bar-fill"
+                    style={{ width: "52%", background: "var(--heat-warm)" }}
+                  />
+                </div>
+                <span className="t-data">0.52</span>
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 16px",
+              borderTop: "1px solid var(--n-400)",
+            }}
           >
-            {t.label}
-          </button>
-        ))}
+            <span className="t-label">best fit first · reasons on every score</span>
+            <div style={{ flex: 1 }} />
+            <span className="kbd">j</span>
+            <span className="kbd">k</span>
+            <span className="t-label">move</span>
+          </div>
+        </div>
+
+        <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <div className="card-head">
+            <span className="t-title">Mara Kessler · Fieldline Robotics</span>
+            <span className="pill pill-warn">follow up</span>
+            <div style={{ flex: 1 }} />
+            <span className="t-data" title="lead 8c31f2aa">
+              #8c31f2aa
+            </span>
+          </div>
+          <div
+            style={{
+              flex: 1,
+              overflow: "hidden",
+              padding: "16px 20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <span className="sec-label">Why this score</span>
+                <div className="reason">
+                  <span className="rname">ICP fit 0.92</span>
+                  <div className="bar-trough">
+                    <div
+                      className="bar-fill"
+                      style={{ width: "92%", background: "var(--heat-hot)" }}
+                    />
+                  </div>
+                  <span>ops lead at a 40-person robotics firm</span>
+                </div>
+                <div className="reason">
+                  <span className="rname">Intent 0.86</span>
+                  <div className="bar-trough">
+                    <div
+                      className="bar-fill"
+                      style={{ width: "86%", background: "var(--heat-hot)" }}
+                    />
+                  </div>
+                  <span>asked about automation · webinar Q&amp;A</span>
+                </div>
+                <div className="reason">
+                  <span className="rname">Recency 0.78</span>
+                  <div className="bar-trough">
+                    <div
+                      className="bar-fill"
+                      style={{ width: "78%", background: "var(--heat-rising)" }}
+                    />
+                  </div>
+                  <span>last touch 3 days ago</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span className="sec-label">Activity</span>
+                <div className="act-row">
+                  <span className="dot" style={{ background: "var(--n-700)", marginTop: 5 }} />
+                  <span style={{ flex: 1 }}>
+                    Webinar question on content automation
+                    <br />
+                    <span className="t-data">Tue · 22 Jul</span>
+                  </span>
+                </div>
+                <div className="act-row">
+                  <span className="dot" style={{ background: "var(--n-700)", marginTop: 5 }} />
+                  <span style={{ flex: 1 }}>
+                    Opened the launch email · clicked the film
+                    <br />
+                    <span className="t-data">Mon · 21 Jul</span>
+                  </span>
+                </div>
+                <div className="act-row">
+                  <span className="dot" style={{ background: "var(--n-700)", marginTop: 5 }} />
+                  <span style={{ flex: 1 }}>
+                    First seen — pipeline article visit
+                    <br />
+                    <span className="t-data">Fri · 18 Jul</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="sec-label">Drafted outreach — draft-only, never auto-sent</span>
+                <div style={{ flex: 1 }} />
+                <span className="pill pill-ok">judge passed</span>
+              </div>
+              <div className="mail">
+                <div>
+                  <span style={{ color: "var(--n-900)" }}>To</span>&nbsp; Mara Kessler
+                  &lt;mara@fieldline.example&gt;
+                </div>
+                <div>
+                  <span style={{ color: "var(--n-900)" }}>Subject</span>&nbsp; Your webinar question
+                  — the build-step answer
+                </div>
+                <div style={{ color: "var(--n-900)", lineHeight: 1.6 }}>
+                  You asked whether launch content can run as a pipeline instead of a project. We
+                  just shipped ours that way — the film in this link was rendered from HTML by the
+                  same system that drafts our posts…
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div className="btn btn-primary btn-sm">Copy body</div>
+                <div className="btn btn-ghost btn-sm">Copy subject</div>
+                <div className="btn btn-ghost btn-sm">Open in your mail client</div>
+                <div className="btn btn-quiet btn-sm">Log a call</div>
+                <div style={{ flex: 1 }} />
+                <span className="t-label">you send it — from your own mailbox</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <BulkBar
-        count={selected.size}
-        busy={busy}
-        actionLabel={
-          <>
-            <X aria-hidden className="size-3.5" /> Dismiss selected
-          </>
-        }
-        confirmMessage={`Dismiss ${selected.size} selected lead${selected.size === 1 ? "" : "s"}${
-          tab === "board" && selectedSpan > 1 ? ` across ${selectedSpan} columns` : ""
-        }?`}
-        onAction={onBulkDismiss}
-        onClear={() => setSelected(new Set())}
-      />
-
-      {tab === "board" && payload && (
-        <LeadsBoard
-          leads={payload.leads}
-          selected={selected}
-          busy={busy}
-          keysEnabled
-          onSelect={onSelect}
-          onTriage={onTriage}
-        />
-      )}
-
-      {tab !== "board" && payload && visible.length === 0 && (
-        <Card>
-          <CardHeader>
-            {tab === "queue" && <EmptyArt asset="emptyLeads" />}
-            <CardTitle>
-              {tab === "queue" ? "No leads yet — three ways in" : "Nothing dismissed"}
-            </CardTitle>
-            {tab === "queue" && (
-              <CardDescription>
-                <strong>Import a CSV</strong> (any CRM export works) · <strong>Sync waitlist</strong>{" "}
-                (every signup becomes a lead) · or leads arrive via the API. With an ICP on your
-                profile, each one gets scored against who you actually sell to — with the reasons
-                spelled out, and one-click exits into a post, video, or page briefed by the
-                lead&rsquo;s own context. <Flame aria-hidden className="inline size-3.5" /> The
-                →Email exit drafts judge-gated outreach you send yourself; DM drafts come later.
-              </CardDescription>
-            )}
-          </CardHeader>
-        </Card>
-      )}
-
-      <div className="flex flex-col gap-3">
-        {visible.map((lead) => (
-          <LeadCard
-            key={lead.id}
-            lead={lead}
-            selected={selected.has(lead.id)}
-            cursor={lead.id === cursorId}
-            busy={busy}
-            currentProfileHash={payload?.currentProfileHash ?? null}
-            onSelect={onSelect}
-            onTriage={onTriage}
-            onPromote={onPromote}
-          />
-        ))}
-      </div>
-      <ActionToast toast={toast} onClear={() => setToast(null)} />
     </div>
   );
 }

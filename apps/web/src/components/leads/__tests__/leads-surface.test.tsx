@@ -1,145 +1,96 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
-import { server } from "@/lib/testing/server";
-import type { LeadCard, LeadsPayload, TriageResult } from "@/lib/leads/types";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { LeadsSurface } from "../leads-surface";
 
-const routerPush = vi.fn();
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: routerPush }),
-}));
+/**
+ * STEP 1 of the two-step rebuild: a STRUCTURAL pin of the sheet's own bands
+ * (docs/research/mock-sheets/Leads.dc.html). No data is wired yet, so what is
+ * pinned here is the geometry and copy grammar the founder verdicts —
+ * step 2's suite re-pins the same bands carrying real reads.
+ */
+describe("Leads (exact-mock rebuild — Leads.dc.html, step 1 port)", () => {
+  it("renders the sheet's header band: title, count pills, the List/Board seg and the import door", () => {
+    const { container } = render(<LeadsSurface />);
 
-function card(partial: Partial<LeadCard>): LeadCard {
-  return {
-    id: "lead-1",
-    source: "csv",
-    email: "jane@acme.example",
-    name: "Jane Doe",
-    company: "Acme Plumbing",
-    role: "Owner",
-    website: "https://acme.example",
-    notes: null,
-    painPoint: null,
-    status: "scored",
-    pinned: false,
-    createdAt: "2026-07-13T00:00:00.000Z",
-    score: 0.82,
-    reasons: ["fit 1 (role \"Owner\" matches \"owner\")", "completeness 0.8 (4/5 contact fields present)"],
-    scoredAt: "2026-07-13T01:00:00.000Z",
-    profileHash: "icp-v1",
-    weightStateId: null,
-    extras: [],
-    ...partial,
-  };
-}
+    expect(screen.getByRole("heading", { name: "Leads" })).toHaveClass("t-headline");
+    expect(screen.getByText("12 scored")).toHaveClass("pill", "pill-idle");
+    expect(screen.getByText("2 hot · follow up")).toHaveClass("pill", "pill-warn");
 
-function seedLeads(payload: Partial<LeadsPayload>) {
-  server.use(
-    http.get("/api/leads", () =>
-      HttpResponse.json({
-        leads: [],
-        scoringArmed: true,
-        currentProfileHash: "icp-v1",
-        learnedWeights: { state: null, staleForProfile: false },
-        counts: { new: 0, scored: 0, dismissed: 0 },
-        ...payload,
-      } satisfies LeadsPayload),
-    ),
-  );
-}
-
-describe("leads surface (B-crm.2)", () => {
-  it("renders ranked cards with the thermal grade, verbatim reasons, pain point, and per-family exits", async () => {
-    seedLeads({
-      leads: [
-        card({ painPoint: "no online booking; loses after-hours calls" }),
-        card({ id: "lead-2", email: "bare@x.example", name: null, company: null, role: null, website: null, score: null, status: "new", reasons: [], profileHash: null }),
-      ],
-      counts: { new: 1, scored: 1, dismissed: 0 },
-    });
-    render(<LeadsSurface />);
-
-    const row = within(await screen.findByTestId("lead-card-lead-1"));
-    expect(row.getByText("Jane Doe")).toBeInTheDocument();
-    // 0.82 lands in the hot band; the first reason rides the accessible label.
-    expect(row.getByRole("img", { name: /heat hot/i })).toHaveAccessibleName(/role "Owner" matches/i);
-    expect(row.getByText(/no online booking/)).toBeInTheDocument();
-    for (const exit of ["Post", "Video", "Page", "Email"]) {
-      expect(row.getByRole("button", { name: exit })).toBeInTheDocument();
-    }
-    // An unscored lead is honest about it — no invented grade.
-    const bare = within(screen.getByTestId("lead-card-lead-2"));
-    expect(bare.getByText("not scored yet")).toBeInTheDocument();
-    expect(bare.queryByRole("img", { name: /heat/i })).not.toBeInTheDocument();
+    const seg = container.querySelector(".seg");
+    expect(Array.from(seg?.children ?? []).map((el) => el.textContent)).toEqual(["List", "Board"]);
+    expect(seg?.querySelector(".seg-opt.on")?.textContent).toBe("List");
+    expect(screen.getByText("Import contacts")).toHaveClass("btn", "btn-ghost", "btn-sm");
   });
 
-  it("the s29 riders: contact email reads as a mailto link and unmapped import columns surface as extras", async () => {
-    seedLeads({
-      leads: [card({ extras: [{ key: "Phone 1", value: "+61 400 000 000" }] })],
-      counts: { new: 0, scored: 1, dismissed: 0 },
-    });
-    render(<LeadsSurface />);
+  it("renders the sheet's split: the ranked list card over the lead detail card", () => {
+    const { container } = render(<LeadsSurface />);
 
-    const row = within(await screen.findByTestId("lead-card-lead-1"));
-    expect(row.getByRole("link", { name: "jane@acme.example" })).toHaveAttribute(
-      "href",
-      "mailto:jane@acme.example",
+    expect(container.querySelectorAll(".split > .card")).toHaveLength(2);
+
+    // Four ranked rows, the first selected, each with badge + name + excerpt + score chip.
+    const rows = container.querySelectorAll(".split .row");
+    expect(rows).toHaveLength(4);
+    expect(rows[0]).toHaveClass("sel");
+    expect(rows[0].querySelector(".mono-badge")?.textContent).toBe("MK");
+    expect(rows[0].querySelector(".lead-name")?.textContent).toBe(
+      "Mara Kessler · Fieldline Robotics",
     );
-    expect(row.getByText("everything else from the import (1)")).toBeInTheDocument();
-    expect(row.getByText("+61 400 000 000")).toBeInTheDocument();
-  });
-
-  it("bulk dismiss: multi-select → ONE confirm with the count → one triage call (FRONTEND §0)", async () => {
-    seedLeads({
-      leads: [card({}), card({ id: "lead-2", email: "b@x.example", name: "Bob Roe" })],
-      counts: { new: 0, scored: 2, dismissed: 0 },
-    });
-    const triageCalls: Array<{ action: string; ids: string[] }> = [];
-    server.use(
-      http.post("/api/leads/triage", async ({ request }) => {
-        const body = (await request.json()) as { action: string; ids: string[] };
-        triageCalls.push(body);
-        return HttpResponse.json({ done: body.ids.length, failed: [] } satisfies TriageResult);
-      }),
+    expect(rows[0].querySelector(".excerpt")?.textContent).toBe(
+      "Ops lead · asked about content automation on the webinar",
     );
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
-    const user = userEvent.setup();
-    render(<LeadsSurface />);
+    expect(rows[0].querySelector(".score-chip .t-data")?.textContent).toBe("0.88");
+    expect(rows[0].querySelector<HTMLElement>(".score-chip .bar-fill")?.style.width).toBe("88%");
 
-    await user.click(await screen.findByRole("checkbox", { name: /select jane doe/i }));
-    await user.click(screen.getByRole("checkbox", { name: /select bob roe/i }));
-    await user.click(screen.getByRole("button", { name: /dismiss selected/i }));
-
-    expect(confirmSpy).toHaveBeenCalledExactlyOnceWith("Dismiss 2 selected leads?");
-    expect(triageCalls).toEqual([{ action: "dismiss", ids: ["lead-1", "lead-2"] }]);
-    expect(await screen.findByRole("status")).toHaveTextContent(/dismissed 2 leads/i);
-    confirmSpy.mockRestore();
+    // The list card's footer states the ordering rule and the keyboard grammar.
+    expect(screen.getByText("best fit first · reasons on every score")).toHaveClass("t-label");
+    expect(Array.from(container.querySelectorAll(".kbd")).map((el) => el.textContent)).toEqual([
+      "j",
+      "k",
+    ]);
+    expect(screen.getByText("move")).toHaveClass("t-label");
   });
 
-  it("a per-family exit promotes and routes to Create with the capture id", async () => {
-    seedLeads({
-      leads: [card({})],
-      counts: { new: 0, scored: 1, dismissed: 0 },
-    });
-    server.use(
-      http.post("/api/leads/promote", () =>
-        HttpResponse.json({ createHref: "/app/create?ctx=intel-capture-9" }),
-      ),
+  it("renders the detail card's three bands: why this score, activity, drafted outreach", () => {
+    const { container } = render(<LeadsSurface />);
+
+    const head = container.querySelector(".card-head");
+    expect(head?.querySelector(".t-title")?.textContent).toBe("Mara Kessler · Fieldline Robotics");
+    expect(head?.querySelector(".pill-warn")?.textContent).toBe("follow up");
+    expect(head?.querySelector(".t-data")?.textContent).toBe("#8c31f2aa");
+
+    expect(
+      Array.from(container.querySelectorAll(".sec-label")).map((el) => el.textContent),
+    ).toEqual([
+      "Why this score",
+      "Activity",
+      "Drafted outreach — draft-only, never auto-sent",
+    ]);
+
+    // Every score reason is a named signal + its magnitude bar + the reason itself.
+    const reasons = container.querySelectorAll(".reason");
+    expect(reasons).toHaveLength(3);
+    expect(reasons[0].querySelector(".rname")?.textContent).toBe("ICP fit 0.92");
+    expect(reasons[0].querySelector<HTMLElement>(".bar-fill")?.style.width).toBe("92%");
+    expect(container.querySelectorAll(".act-row")).toHaveLength(3);
+
+    // The outreach band is draft-only, and the send is the operator's own act.
+    expect(screen.getByText("judge passed")).toHaveClass("pill", "pill-ok");
+    expect(container.querySelector(".mail")?.textContent).toContain(
+      "mara@fieldline.example",
     );
-    const user = userEvent.setup();
-    render(<LeadsSurface />);
-    await user.click(await screen.findByRole("button", { name: "Post" }));
-    expect(routerPush).toHaveBeenCalledWith("/app/create?ctx=intel-capture-9");
+    expect(
+      Array.from(container.querySelectorAll(".mail ~ div .btn")).map((el) => el.textContent),
+    ).toEqual(["Copy body", "Copy subject", "Open in your mail client", "Log a call"]);
+    expect(screen.getByText("you send it — from your own mailbox")).toHaveClass("t-label");
   });
 
-  it("empty queue is a tutorial; unarmed scoring says how to arm it", async () => {
-    seedLeads({ scoringArmed: false, currentProfileHash: null });
-    render(<LeadsSurface />);
-    expect(await screen.findByText(/no leads yet — three ways in/i)).toBeInTheDocument();
-    expect(screen.getByText(/isn.t armed yet/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /score now/i })).toBeDisabled();
+  it("carries no legacy bridge styling — the rebuilt surface speaks the sheet's classes", () => {
+    const { container } = render(<LeadsSurface />);
+
+    expect(container.querySelector('[class*="text-muted-foreground"]')).toBeNull();
+    expect(container.querySelector('[class*="bg-card"]')).toBeNull();
+    expect(container.querySelector('[class*="border-border"]')).toBeNull();
+    expect(container.firstElementChild).toHaveClass("content", "leads-surface");
   });
 });
