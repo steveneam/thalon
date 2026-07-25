@@ -186,9 +186,24 @@ pinned structurally, the doors, the honest states, the keyboard grammar, and a
 
 ## Verify
 
-`npm run verify` at the repo root, unfiltered, redirected to a file (never
-piped through `tail`) — see the run note at the bottom of this file for the
-box's state when it ran.
+**`npm run verify` at the repo root — GREEN (exit 0).** Guard + full suite +
+typecheck + lint, unfiltered, redirected to a file and read (never piped
+through `tail` — the pinned main-RED #3 pattern).
+
+- Suite: **279 files passed / 4 skipped · 1977 tests passed / 9 skipped**,
+  300.6s.
+- Typecheck: clean across every workspace.
+- Lint: 0 errors, 12 warnings — all pre-existing (`app/page.tsx`,
+  `api/health`, `ui/empty-art`, four `components/videos/*`); **zero from this
+  lane's files.**
+- Grep guard: PASS, and it ran on every commit (the box's pre-commit hook).
+
+**Box discipline (kickoff constraint).** I ran the cheap gates
+(targeted suites, repo typecheck, repo lint) while the wave was busy, then
+STAGGERED the full run: it was armed behind a watcher and started at 19:04:32Z
+the moment the `crm-rebuild` lane's suite exited, finishing 19:10:22Z. Load
+average was 9.2 at the start and 5.7 at the end — one suite at a time, never
+four.
 
 ## For the lead's merge gate
 
