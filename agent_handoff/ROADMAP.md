@@ -83,9 +83,22 @@ The fix shape: (a) generation-side TARGET TERMS on the brief (intel
 keywords + brand topics + the subject's canonical entities — "AI" when the
 post is about AI), (b) a DETERMINISTIC discoverability gate beside the
 judge (entity/keyword coverage + AEO answerability shape; the charLimit-
-gate pattern — beside the judge, never inside it), (c) the founder's
-LinkedIn edit (once pasted) becomes golden eval rows: engine-body vs
-founder-edit. Companion to the platform-charLimit ratchet candidate below.
+gate pattern — beside the judge, never inside it), (c) ✅ the founder's
+LinkedIn edit LANDED s70c: ingested as a voice_sample exemplar (`362d2fdb`)
+and seeded as the golden pair `eval/golden/discoverability-seed.jsonl`
+(disc-001 engine-body=fail · disc-002 founder-edit=pass; no runner consumes
+it yet — this gate wires it first), (d) **the BLOG-MIRROR doctrine (founder
+s70c): a social post mirrors the article you'd put on the blog, and the
+blog's whole purpose is the SEO/AEO/GEO farm** — the meme post bypassed
+that (social-direct, no article twin); the fan-out shape should pair
+social posts with their article and share the discoverability treatment,
+(e) fact found s70c: `proprietary/judge/src/seo-lens.ts` ALREADY exists
+(B6.8) but is advisory-only, web_page-gated, and checks meta hygiene — the
+new gate covers BODY keyword/entity coverage for social formats and can
+graduate from advisory where the founder wants teeth. Structural lesson
+from his edit note: leave room for cross-vendor breadth (he wanted an
+OpenAI release named but "your structure made it hard to fit").
+Companion to the platform-charLimit ratchet candidate below.
 
 ### Phase 2b — WORKSPACE UI/UX OVERHAUL **[founder-directed s70b — phase 0 lane RUNNING]**
 The founder's verdict: current look/flow "not working" — benchmark =
@@ -94,6 +107,10 @@ CLI + MCP server, StyleX under) as the shadcn replacement. Phase 0 (lane
 `ui-p0`, report-only) delivers `docs/research/ui-overhaul-plan.md`: Astryx
 license/stack-fit verdict + benchmark teardown + surface-by-surface audit +
 wave map. **The founder re-charters on that plan before any rebuild wave.**
+**s70c input:** the founder found the site ↔ workspace seam MISSING ("zero ui
+interface connection between the landing page and the workspace") — a quiet
+header "Workspace" link shipped same-turn as the interim fix; the overhaul's
+wayfinding work owns the real answer (auth-aware entry, both directions).
 
 ### Phase 3 — ✅ EXECUTED s69/s69b (all three live; kept for the record)
 s68 (second half) built B-pub.3 end-to-end: **image legs on all three text drivers**

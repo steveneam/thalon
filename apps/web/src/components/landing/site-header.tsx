@@ -26,6 +26,12 @@ export function SiteHeader() {
           <Link href="/blog" className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline">
             Blog
           </Link>
+          {/* The site ↔ workspace seam the founder found missing (s70c): the
+              operator's way in, quiet next to the visitor CTA. Real auth
+              replaces the bare link when the auth bucket lands. */}
+          <Link href="/app" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Workspace
+          </Link>
           <Link
             href="/#waitlist"
             className="rounded-lg border border-primary/40 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
