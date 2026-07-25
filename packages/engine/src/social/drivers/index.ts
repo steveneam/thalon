@@ -31,8 +31,24 @@ export function productionSocialDrivers(
 ): Partial<Record<SocialPlatform, SocialDriverFactory>> {
   const drivers: Partial<Record<SocialPlatform, SocialDriverFactory>> = {
     linkedin: ({ accessToken }) => createLinkedInDriver({ accessToken }),
-    x: ({ accessToken }) => createXDriver({ accessToken }),
   };
+  // X auth mode from the env seats (B-pub.3): all three 1.0a extras set →
+  // signed user-context requests with the NON-EXPIRING token pair
+  // (SOCIAL_X_ACCESS_TOKEN = the account's oauth token); anything less →
+  // OAuth 2.0 Bearer, exactly the B-pub.2 behavior. All-or-nothing: a
+  // partial 1.0a set never half-signs.
+  const xApiKey = env.SOCIAL_X_API_KEY;
+  const xApiKeySecret = env.SOCIAL_X_API_KEY_SECRET;
+  const xTokenSecret = env.SOCIAL_X_ACCESS_TOKEN_SECRET;
+  if (xApiKey && xApiKeySecret && xTokenSecret) {
+    drivers.x = ({ accessToken }) =>
+      createXDriver({
+        accessToken,
+        oauth1: { apiKey: xApiKey, apiKeySecret: xApiKeySecret, accessTokenSecret: xTokenSecret },
+      });
+  } else {
+    drivers.x = ({ accessToken }) => createXDriver({ accessToken });
+  }
   const pageId = env.SOCIAL_FACEBOOK_PAGE_ID;
   if (pageId) {
     drivers.facebook = ({ accessToken }) => createFacebookDriver({ accessToken, pageId });

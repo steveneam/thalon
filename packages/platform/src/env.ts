@@ -106,6 +106,17 @@ const envSchema = z.object({
   SOCIAL_INSTAGRAM_USER_ID: z.string().optional(),
 
   /**
+   * B-pub.3: the X OAuth 1.0a seats — the app consumer pair + the
+   * account's token SECRET (the token itself rides SOCIAL_X_ACCESS_TOKEN).
+   * All three set → the driver signs non-expiring user-context requests
+   * (the standing-arm mode; OAuth 2.0 user tokens die in ~2h and refresh
+   * is B-int.4). Any missing → Bearer mode, the B-pub.2 behavior.
+   */
+  SOCIAL_X_API_KEY: z.string().optional(),
+  SOCIAL_X_API_KEY_SECRET: z.string().optional(),
+  SOCIAL_X_ACCESS_TOKEN_SECRET: z.string().optional(),
+
+  /**
    * B-int.0 (ADR 0011): the box-level master key that wraps every vault
    * row's per-credential data key (envelope crypto, B-int.1 vault core).
    * Absent = the vault's write door refuses — credentials can never store

@@ -1,17 +1,23 @@
 import { z } from "zod";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
 import { responseDetail, responseJson, SocialDriverApiError } from "./errors";
+import { oauth1Header, type OAuth1Keys } from "./oauth1";
 
 /**
  * B-pub.2 (s65): the X driver — the official v2 create-post endpoint
- * (ADR 0002: official platform APIs only), posting as the user the OAuth
- * 2.0 user-context token belongs to. BUILT in this lane but never executed
- * against the network: nothing constructs it except
- * `productionSocialDrivers` behind the arming ratchet, and tests always
- * inject `fetchImpl`.
+ * (ADR 0002: official platform APIs only), posting as the user the token
+ * belongs to. BUILT in this lane but never executed against the network:
+ * nothing constructs it except `productionSocialDrivers` behind the arming
+ * ratchet, and tests always inject `fetchImpl`.
  *
- * Token requirements (operator-side, never code): an OAuth 2.0
- * user-context access token carrying `tweet.write` + `users.read`.
+ * Auth (operator-side, never code) — two official modes, picked at
+ * assembly from which env seats are set:
+ *  - OAuth 1.0a user context (B-pub.3, the STANDING-ARM mode): the app's
+ *    consumer pair + the account's non-expiring token pair sign every
+ *    request. This is the only mode that can stay armed — OAuth 2.0 user
+ *    tokens expire in ~2 hours and refresh machinery is B-int.4.
+ *  - OAuth 2.0 user-context Bearer (`tweet.write users.read media.write`):
+ *    works while fresh; fine for a supervised one-off.
  */
 
 /** The one field a post NEEDS from the platform — the accepted-post id the ledger requires. */
@@ -25,7 +31,14 @@ const mediaUploadResponseSchema = z
   .loose();
 
 export interface XDriverConfig {
+  /** OAuth 2.0 user Bearer — or, in 1.0a mode, the account's oauth token (`oauth1.token`). */
   accessToken: string;
+  /**
+   * OAuth 1.0a mode (B-pub.3): the app consumer pair + the account token
+   * secret; `accessToken` is the account's oauth token. All-or-nothing at
+   * assembly — a partial set never half-signs.
+   */
+  oauth1?: { apiKey: string; apiKeySecret: string; accessTokenSecret: string };
   /** API base — swappable for a test double. */
   baseUrl?: string;
   /** Injectable fetch (tests) — defaults to global fetch. */
@@ -35,6 +48,16 @@ export interface XDriverConfig {
 export function createXDriver(config: XDriverConfig): SocialPublisher {
   const baseUrl = (config.baseUrl ?? "https://api.x.com").replace(/\/$/, "");
   const fetchImpl = config.fetchImpl ?? fetch;
+  const oauth1Keys: OAuth1Keys | undefined = config.oauth1
+    ? {
+        consumerKey: config.oauth1.apiKey,
+        consumerSecret: config.oauth1.apiKeySecret,
+        token: config.accessToken,
+        tokenSecret: config.oauth1.accessTokenSecret,
+      }
+    : undefined;
+  const authFor = (url: string): string =>
+    oauth1Keys ? oauth1Header("POST", url, oauth1Keys) : `Bearer ${config.accessToken}`;
   return {
     platform: "x",
     name: "x-v2-create-post",
@@ -52,7 +75,7 @@ export function createXDriver(config: XDriverConfig): SocialPublisher {
         form.set("media_category", "tweet_image");
         const uploaded = await fetchImpl(`${baseUrl}/2/media/upload`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${config.accessToken}` },
+          headers: { Authorization: authFor(`${baseUrl}/2/media/upload`) },
           body: form,
         });
         if (!uploaded.ok) {
@@ -78,7 +101,7 @@ export function createXDriver(config: XDriverConfig): SocialPublisher {
       const response = await fetchImpl(`${baseUrl}/2/tweets`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${config.accessToken}`,
+          Authorization: authFor(`${baseUrl}/2/tweets`),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
