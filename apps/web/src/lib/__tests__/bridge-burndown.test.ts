@@ -29,7 +29,8 @@ const LEGACY_TOKEN_RE =
 
 /** file → pinned bridged-token usage count (the s73 seed). */
 const PINNED: ReadonlyMap<string, number> = new Map([
-  ["app/app/sites/page.tsx", 5],
+  // app/app/sites/page.tsx left the map at the s75 exact-mock rebuild — the
+  // route now renders the ported surface and holds no styling of its own.
   ["components/board/leads-board.tsx", 22],
   ["components/calendar/agenda-list.tsx", 9],
   ["components/calendar/calendar-surface.tsx", 25],
