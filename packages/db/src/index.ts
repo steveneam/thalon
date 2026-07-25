@@ -21,6 +21,8 @@ export { DuplicatePublicationError } from "./repos/social-publications";
 export type { SocialPublication as SocialPublicationRow } from "./repos/social-publications";
 export type { TenantEntitlement as TenantEntitlementRow, EffectiveEntitlements } from "./repos/entitlements";
 export type { SweepSchedule as SweepScheduleRow } from "./repos/sweep-schedules";
+export type { TrendAdmission as TrendAdmissionRow } from "./repos/trend-admissions";
+export { admissionDay } from "./repos/trend-admissions";
 export { DuplicateSendError } from "./repos/outreach-sends";
 export type { OutreachSend as OutreachSendRow } from "./repos/outreach-sends";
 export type { SearchSnapshot } from "./repos/search-snapshots";

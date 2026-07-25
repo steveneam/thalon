@@ -46,6 +46,34 @@ export const rankerWeightOverridesSchema = z.object({
 });
 export type RankerWeightOverrides = z.infer<typeof rankerWeightOverridesSchema>;
 
+/**
+ * B-learn L0 window (s73): the per-area admission-knob OVERRIDE shape for
+ * the outlier→exemplar admission loop, adopted VERBATIM from the engine's
+ * transitional `admissionKnobOverridesSchema` (trend/admission.ts was
+ * shaped for exactly this adoption; the engine migrates to import this one
+ * and its request-level `areas` override map deprecates). Deliberately NOT
+ * a `.partial()` of the defaulted knob schema: a defaulted field still
+ * fills on parse, which would silently clobber the tenant default — the
+ * rankerWeightOverridesSchema trap above, test-pinned.
+ */
+export const admissionKnobOverridesSchema = z.object({
+  /** Arming is per area — false = watch but never admit. */
+  enabled: z.boolean().optional(),
+  /**
+   * Platform-native metric name → absolute floor. EVERY named floor must be
+   * met and a missing metric FAILS CLOSED (invariant, s68 — a platform that
+   * doesn't report the metric never admits through it).
+   */
+  floors: z.record(z.string(), z.number().nonnegative()).optional(),
+  /** Stored-history Δ-velocity must be ≥ this multiple of the account baseline when the baseline arms. */
+  velocityMultiple: z.number().positive().optional(),
+  /** Bodies (trimmed) shorter than this never admit — the headline-spam screen. */
+  minBodyLength: z.number().int().nonnegative().optional(),
+  /** CREATED admissions per area per UTC day — the embedding-budget rail; 0 = watch but never admit. */
+  maxAdmissionsPerDay: z.number().int().nonnegative().optional(),
+});
+export type AdmissionKnobOverrides = z.infer<typeof admissionKnobOverridesSchema>;
+
 /** Per-area tuning knobs; everything optional — tenant defaults apply when omitted. */
 export const monitoredAreaConfigSchema = z.object({
   /** Ranker weight overrides for this area — unset signals keep the tenant default. */
@@ -56,6 +84,12 @@ export const monitoredAreaConfigSchema = z.object({
    * bucket since June 2026; per-driver budgets are config, not code).
    */
   maxQueriesPerSweep: z.number().int().positive().optional(),
+  /**
+   * B-learn L0: admission-knob overrides for this area — unset fields keep
+   * the tenant default (two-layer resolution, field-by-field, in the
+   * engine's resolveAdmissionKnobs).
+   */
+  admission: admissionKnobOverridesSchema.optional(),
 });
 export type MonitoredAreaConfig = z.infer<typeof monitoredAreaConfigSchema>;
 

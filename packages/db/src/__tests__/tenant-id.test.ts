@@ -45,6 +45,7 @@ describe("tenancy ratchet", () => {
         "tenant_credentials",
         "tenant_entitlements",
         "tenants",
+        "trend_admissions",
         "trend_snapshots",
         "usage_ledger",
         "video_cuts",

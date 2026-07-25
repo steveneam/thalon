@@ -182,6 +182,62 @@ export const intelCaptures = pgTable(
 );
 
 /**
+ * B-learn L0 window (s73): the durable admission-cap ledger. One row = one
+ * CLAIMED slot in an area's UTC-day admission cap (`maxAdmissionsPerDay`).
+ * The engine's in-memory day-count (trend/admission.ts "Cap honesty"
+ * header) can overshoot when two sweeps race one tenant; here a claim is
+ * serialized by the unique (tenant, area, day, slot) index — racing
+ * claimers collide loudly, re-read the committed count, and the cap can
+ * never overshoot. `day` derives from the sweep's ARGUMENT clock (SPINE
+ * §1), never the DB's row clock, so counts replay deterministically. The
+ * second unique key (tenant, area, day, content_hash) makes re-claiming
+ * the same content the same day an idempotent replay: a claim-then-failed-
+ * ingest retried next sweep returns its EXISTING slot instead of burning
+ * another. A slot claimed for an ingest that never completes stays claimed
+ * — the conservative direction (undershoot, never overshoot).
+ */
+export const trendAdmissions = pgTable(
+  "trend_admissions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    areaId: uuid("area_id")
+      .notNull()
+      .references(() => monitoredAreas.id),
+    /** UTC day of the sweep's argument clock, YYYY-MM-DD — the cap-ledger key. */
+    day: text("day").notNull(),
+    /** 1-based slot in the area's day cap — assigned monotonically; the unique index serializes racing claims. */
+    slot: integer("slot").notNull(),
+    /** sha256 of the PII-stripped text — the ingest door's own dedup identity; same-content re-claims replay. */
+    contentHash: text("content_hash").notNull(),
+    /** TrendSource driver name that claimed (provenance). */
+    source: text("source").notNull(),
+    /** Stable platform-native id of the claiming item (provenance). */
+    externalId: text("external_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("trend_admissions_tenant_area_day_slot_idx").on(
+      t.tenantId,
+      t.areaId,
+      t.day,
+      t.slot,
+    ),
+    uniqueIndex("trend_admissions_tenant_area_day_content_idx").on(
+      t.tenantId,
+      t.areaId,
+      t.day,
+      t.contentHash,
+    ),
+    tenantIsolation(),
+  ],
+);
+
+/**
  * Sprint-8 window (B-arm.1): the per-tenant sweep-schedule config row —
  * ONE row per tenant (unique on tenant_id), the timer contract between
  * "Sweep now" and live pollers. Cadence bounds live in contracts

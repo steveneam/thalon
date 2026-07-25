@@ -25,6 +25,7 @@ import { sourceMetricsRepo, type SourceMetricsRepo } from "./source-metrics";
 import { sourcesRepo, type SourcesRepo } from "./sources";
 import { tenantCredentialsRepo, type TenantCredentialsRepo } from "./tenant-credentials";
 import { tenantsRepo, type TenantsRepo } from "./tenants";
+import { trendAdmissionsRepo, type TrendAdmissionsRepo } from "./trend-admissions";
 import { trendSnapshotsRepo, type TrendSnapshotsRepo } from "./trend-snapshots";
 import { usageLedgerRepo, type UsageLedgerRepo } from "./usage-ledger";
 import { videoCutsRepo, type VideoCutsRepo } from "./video-cuts";
@@ -50,6 +51,7 @@ export interface Repos {
   events: EventsRepo;
   watchlists: WatchlistsRepo;
   trendSnapshots: TrendSnapshotsRepo;
+  trendAdmissions: TrendAdmissionsRepo;
   monitoredAreas: MonitoredAreasRepo;
   searchTargets: SearchTargetsRepo;
   searchSnapshots: SearchSnapshotsRepo;
@@ -89,6 +91,7 @@ export function createRepos(db: Db): Repos {
     events: eventsRepo(db),
     watchlists: watchlistsRepo(db),
     trendSnapshots: trendSnapshotsRepo(db),
+    trendAdmissions: trendAdmissionsRepo(db),
     monitoredAreas: monitoredAreasRepo(db),
     searchTargets: searchTargetsRepo(db),
     searchSnapshots: searchSnapshotsRepo(db),

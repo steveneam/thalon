@@ -134,6 +134,13 @@
       "when": 1784465178302,
       "tag": "0018_bint0_integrations_window",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1784994727269,
+      "tag": "0019_blearn_l0_window",
+      "breakpoints": true
     }
   ]
 }

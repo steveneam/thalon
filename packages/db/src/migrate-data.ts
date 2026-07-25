@@ -77,6 +77,8 @@ const COPY_ORDER: PgTable[] = [
   schema.socialPublications,
   // B-int.0 window (0018): the credential vault references only tenants.
   schema.tenantCredentials,
+  // B-learn L0 window (0019): the admission-cap ledger references monitored_areas.
+  schema.trendAdmissions,
 ];
 
 const INSERT_BATCH = 200;
