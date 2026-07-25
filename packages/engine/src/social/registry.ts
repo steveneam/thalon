@@ -124,12 +124,17 @@ function refusingSocialPublisher(
 
 /**
  * The per-platform arming ratchet: a driver publisher is returned ONLY when
- * the platform's credential key AND its `*_ARMED="true"` founder GO are set
- * — two distinct keys, because the founder GO is the flag and a credential
- * landing in the environment must never arm by itself — AND a driver is
- * installed for the platform. Anything less returns a refusing publisher
- * whose error names every missing arm. Each platform arms INDEPENDENTLY:
- * one dead credential never blocks another platform.
+ * the platform's credential key AND its `*_ARMED="true"` seat are set — two
+ * distinct keys, because arming is a decision and a credential landing in
+ * the environment must never arm by itself — AND a driver is installed for
+ * the platform. Anything less returns a refusing publisher whose error
+ * names every missing arm. Each platform arms INDEPENDENTLY: one dead
+ * credential never blocks another platform. Since B-int.3 the production
+ * env source is the vault-first merged VIEW (integrations/social-arming):
+ * tenant data — platform in the social config block + connected vault
+ * credential — fills both seats where the process env is silent, and a
+ * literally-set env pair is the emergency override. This ratchet stays the
+ * one arming decision either way.
  */
 export function resolveSocialPublisher(
   platform: SocialPlatform,
@@ -141,7 +146,9 @@ export function resolveSocialPublisher(
   const missing: string[] = [];
   if (!token) missing.push(keys.credential);
   if (readArm(env, keys.armed) !== "true") {
-    missing.push(`${keys.armed} (exactly "true" — the per-platform founder GO)`);
+    missing.push(
+      `${keys.armed} (exactly "true") — arming is tenant data since B-int.3: the platform present in the tenant's social config block with its vault credential connected; the env pair is the emergency override`,
+    );
   }
   const factory = drivers[platform];
   if (!factory) {

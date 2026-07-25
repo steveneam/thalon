@@ -4,14 +4,16 @@ import { readEnv, type EnvSource } from "@thalon/platform";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isRefusingSocialPublisher } from "../../social/registry";
 import { VaultKeyMissingError } from "../errors";
-import { vaultSocialEnvView, vaultSocialPublisherResolver } from "../social-arming";
-import { connectDestination, type VaultDeps } from "../vault";
+import { vaultSocialEnvView, vaultSocialPublisherResolver, type SocialArmingDeps } from "../social-arming";
+import { connectDestination } from "../vault";
 
 /**
- * B-int.1 pins (ADR 0011 decision 3): the dogfood tenant runs vault-first —
- * vault token material fills seats env left silent, env stays the
- * emergency override when set, needs_reauth never arms, and the untouched
- * per-platform ratchet still demands the env-side ARMED founder GO.
+ * B-int.1 + B-int.3 pins (ADR 0011): the tenant runs vault-first — vault
+ * token material fills seats env left silent, env stays the emergency
+ * override when set, needs_reauth never arms — and ARMING IS TENANT DATA:
+ * the platform present in the social config block + its vault credential
+ * connected arms the untouched per-platform ratchet, with the env
+ * `SOCIAL_<P>_ARMED` pair winning wherever it is literally set.
  */
 
 const MASTER_B64 = Buffer.alloc(32, 5).toString("base64");
@@ -19,7 +21,7 @@ const MASTER_B64 = Buffer.alloc(32, 5).toString("base64");
 let handle: DbHandle;
 let ctx: TenantCtx;
 
-function deps(envSource: EnvSource = {}): VaultDeps {
+function deps(envSource: EnvSource = {}): SocialArmingDeps {
   return {
     repos: handle.repos,
     ctx,
@@ -31,6 +33,14 @@ async function connectLinkedIn(token = "vault-token") {
   await connectDestination(deps(), {
     destination: "linkedin",
     credentials: { accessToken: token },
+  });
+}
+
+/** The tenant's social config block — the arming rung's tenant-data half. */
+async function configureSocial(social: Record<string, { maxPostsPerDay: number }>) {
+  await handle.repos.brandProfiles.create(ctx, {
+    config: { voice: {}, denylist: [], platformProfiles: {}, social },
+    activate: true,
   });
 }
 
@@ -82,21 +92,80 @@ describe("vaultSocialEnvView (the precedence table)", () => {
 
   it("rows exist but the master key vanished → loud VaultKeyMissingError, never silent disarming", async () => {
     await connectLinkedIn();
-    const broken: VaultDeps = { repos: handle.repos, ctx, env: readEnv({}) };
+    const broken: SocialArmingDeps = { repos: handle.repos, ctx, env: readEnv({}) };
     await expect(vaultSocialEnvView(broken)).rejects.toBeInstanceOf(VaultKeyMissingError);
+  });
+
+  it("B-int.3 arming rung: config block + connected credential fills the ARMED seat where env is silent", async () => {
+    await connectLinkedIn();
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 } });
+    const view = await vaultSocialEnvView(deps());
+    expect(view.SOCIAL_LINKEDIN_ARMED).toBe("true");
+  });
+
+  it("the ARMED env seat, when literally set, wins over tenant data — both directions stay the operator's", async () => {
+    await connectLinkedIn();
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 } });
+    const view = await vaultSocialEnvView(deps({ SOCIAL_LINKEDIN_ARMED: "false" }));
+    expect(view.SOCIAL_LINKEDIN_ARMED).toBe("false");
   });
 });
 
 describe("vaultSocialPublisherResolver (the untouched ratchet over the merged view)", () => {
-  it("vault credential + env ARMED GO → the real driver arms", async () => {
+  it("TENANT DATA ARMS: platform in the social block + connected vault credential → the real driver, no env pair at all", async () => {
     await connectLinkedIn();
-    const resolve = await vaultSocialPublisherResolver(deps({ SOCIAL_LINKEDIN_ARMED: "true" }));
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 } });
+    const resolve = await vaultSocialPublisherResolver(deps());
     const publisher = resolve("linkedin");
     expect(isRefusingSocialPublisher(publisher)).toBe(false);
     expect(publisher.name).toBe("linkedin-rest-posts");
   });
 
-  it("vault credential WITHOUT the founder GO still refuses, naming the ARMED flag — a connected account is not an armed one", async () => {
+  it("a connected credential WITHOUT the platform in the social block stays unarmed — config presence is the arming rung", async () => {
+    await connectLinkedIn();
+    await configureSocial({ x: { maxPostsPerDay: 1 } });
+    const publisher = (await vaultSocialPublisherResolver(deps()))("linkedin");
+    expect(isRefusingSocialPublisher(publisher)).toBe(true);
+    expect(
+      isRefusingSocialPublisher(publisher) ? publisher.refusal.message : "",
+    ).toContain("SOCIAL_LINKEDIN_ARMED");
+  });
+
+  it("a configured platform WITHOUT a connected vault credential stays unarmed — even when env carries a token", async () => {
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 } });
+    const publisher = (
+      await vaultSocialPublisherResolver(deps({ SOCIAL_LINKEDIN_ACCESS_TOKEN: "env-token" }))
+    )("linkedin");
+    expect(isRefusingSocialPublisher(publisher)).toBe(true);
+  });
+
+  it("needs_reauth disarms the tenant-data rung: config present, credential stale → refusal", async () => {
+    await connectLinkedIn();
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 } });
+    await handle.repos.tenantCredentials.markStatus(ctx, "linkedin", "needs_reauth");
+    const publisher = (await vaultSocialPublisherResolver(deps()))("linkedin");
+    expect(isRefusingSocialPublisher(publisher)).toBe(true);
+  });
+
+  it("env force-DISARM: the ARMED pair set to anything but \"true\" beats tenant data — the emergency kill switch", async () => {
+    await connectLinkedIn();
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 } });
+    const publisher = (
+      await vaultSocialPublisherResolver(deps({ SOCIAL_LINKEDIN_ARMED: "false" }))
+    )("linkedin");
+    expect(isRefusingSocialPublisher(publisher)).toBe(true);
+  });
+
+  it("env force-ARM: the dogfood posture keeps posting mid-transition — env pair + env token, zero tenant data", async () => {
+    const resolve = await vaultSocialPublisherResolver(
+      deps({ SOCIAL_LINKEDIN_ACCESS_TOKEN: "env-token", SOCIAL_LINKEDIN_ARMED: "true" }),
+    );
+    const publisher = resolve("linkedin");
+    expect(isRefusingSocialPublisher(publisher)).toBe(false);
+    expect(publisher.name).toBe("linkedin-rest-posts");
+  });
+
+  it("vault credential alone (no config block, no env GO) still refuses — a connected account is not an armed one", async () => {
     await connectLinkedIn();
     const resolve = await vaultSocialPublisherResolver(deps());
     const publisher = resolve("linkedin");
@@ -106,11 +175,10 @@ describe("vaultSocialPublisherResolver (the untouched ratchet over the merged vi
     ).toContain("SOCIAL_LINKEDIN_ARMED");
   });
 
-  it("platforms stay independent: a vault linkedin credential never arms x", async () => {
+  it("platforms stay independent: linkedin's tenant-data arming never arms x", async () => {
     await connectLinkedIn();
-    const resolve = await vaultSocialPublisherResolver(
-      deps({ SOCIAL_LINKEDIN_ARMED: "true", SOCIAL_X_ARMED: "true" }),
-    );
+    await configureSocial({ linkedin: { maxPostsPerDay: 1 }, x: { maxPostsPerDay: 1 } });
+    const resolve = await vaultSocialPublisherResolver(deps());
     expect(isRefusingSocialPublisher(resolve("x"))).toBe(true);
     expect(isRefusingSocialPublisher(resolve("linkedin"))).toBe(false);
   });

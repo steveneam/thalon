@@ -65,7 +65,9 @@ const envSchema = z.object({
    * B-crm.4 send door (s54): the Resend credential — the KEY half of the
    * two-key arming ratchet (engine `resolveSendTransport`). The key alone
    * must never arm live sending; without OUTREACH_SEND_ARMED the resolved
-   * transport refuses every call naming the missing arm.
+   * transport refuses every call naming the missing arm. Since B-int.3 the
+   * tenant's `newsletter_resend` vault credential fills this seat where env
+   * is silent (engine `vaultOutreachEnvView`) — set here, it overrides.
    */
   RESEND_API_KEY: z.string().optional(),
   /**
@@ -80,9 +82,12 @@ const envSchema = z.object({
    * B-pub (Sprint-8 window 2): the per-platform social arming pairs — the
    * RESEND_API_KEY + OUTREACH_SEND_ARMED two-key convention, platform-scoped
    * (engine `socialArmKeys`/`resolveSocialPublisher`). The credential alone
-   * never arms; the `*_ARMED` founder GO must be exactly the string "true",
-   * per platform, per decision. Driver-specific extras (page ids etc.) land
-   * with their driver at B-pub.2+ as their own reviewed additions.
+   * never arms. Since B-int.3 these pairs are the EMERGENCY OVERRIDE only:
+   * arming is tenant data (the platform present in the tenant's social
+   * config block + its vault credential connected), and an env value, when
+   * set, wins in both directions — `*_ARMED` exactly "true" force-arms,
+   * anything else set force-disarms. Driver-specific extras (page ids etc.)
+   * land with their driver at B-pub.2+ as their own reviewed additions.
    */
   SOCIAL_LINKEDIN_ACCESS_TOKEN: z.string().optional(),
   SOCIAL_LINKEDIN_ARMED: z.string().optional(),

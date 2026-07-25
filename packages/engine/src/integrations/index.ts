@@ -18,6 +18,15 @@ export {
   VaultShapeError,
 } from "./errors";
 export {
+  VAULT_ENV_SEATS,
+  vaultEnvView,
+  vaultIntelEnvView,
+  vaultOutreachEnvView,
+  vaultSendTransportResolver,
+  type VaultEnvViewResult,
+  type VaultSeatDestination,
+} from "./env-view";
+export {
   readPublishedView,
   socialPermalink,
   type PublishedItem,
@@ -28,6 +37,8 @@ export {
 export {
   vaultSocialEnvView,
   vaultSocialPublisherResolver,
+  type SocialArmingDeps,
+  type SocialArmingRepos,
 } from "./social-arming";
 export {
   validateDestination,

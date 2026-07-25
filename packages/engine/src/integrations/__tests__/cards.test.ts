@@ -107,13 +107,23 @@ describe("listIntegrationCards", () => {
     }
   });
 
-  it("names the env override honestly: a destination whose token seat is env-filled says so", async () => {
-    env = readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64, SOCIAL_X_ACCESS_TOKEN: "env-tok" });
+  it("names the env override honestly: a destination whose credential seat is env-filled says so", async () => {
+    env = readEnv({
+      THALON_VAULT_MASTER_KEY: MASTER_B64,
+      SOCIAL_X_ACCESS_TOKEN: "env-tok",
+      YOUTUBE_API_KEY: "env-yt",
+      RESEND_API_KEY: "env-resend",
+    });
     const cards = await listIntegrationCards(deps(), { features: ALL_ON, now: NOW });
     expect(cards.find((c) => c.destination === "x")?.envOverride).toBe(true);
     expect(cards.find((c) => c.destination === "linkedin")?.envOverride).toBe(false);
-    // Non-social destinations have no env seat to override.
-    expect(cards.find((c) => c.destination === "intel_youtube")?.envOverride).toBe(false);
+    // B-int.3: every vault-first family reports its override off the ONE
+    // seat table — intel and newsletter included, never hand-listed.
+    expect(cards.find((c) => c.destination === "intel_youtube")?.envOverride).toBe(true);
+    expect(cards.find((c) => c.destination === "newsletter_resend")?.envOverride).toBe(true);
+    expect(cards.find((c) => c.destination === "intel_bluesky")?.envOverride).toBe(false);
+    // Website destinations carry no env seats — never an override.
+    expect(cards.find((c) => c.destination === "website_wordpress")?.envOverride).toBe(false);
   });
 
   it("never leaks an envelope field onto a card", async () => {

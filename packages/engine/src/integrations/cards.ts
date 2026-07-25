@@ -7,6 +7,7 @@ import {
   type EntitlementFeature,
 } from "@thalon/contracts";
 import { z } from "zod";
+import { VAULT_ENV_SEATS } from "./env-view";
 import { listCredentialCards, type CredentialCard, type VaultDeps } from "./vault";
 
 /**
@@ -62,20 +63,20 @@ export interface IntegrationCardField {
 }
 
 /**
- * The env token seats that OVERRIDE the vault (B-int.1 precedence: an env
- * value, when set, wins — that is what an emergency override means). A card
- * for a destination whose seat is env-filled must say so, or the surface
- * lies about the arming story (the dogfood tenant's X rides env 1.0a seats
- * while its vault row may not even exist).
+ * A card for a destination whose credential seat is env-filled must say so,
+ * or the surface lies about the arming story (the dogfood tenant's X rides
+ * env 1.0a seats while its vault row may not even exist). Which seats exist
+ * is read off the ONE precedence table (env-view VAULT_ENV_SEATS — B-int.3:
+ * an env value, when set, wins over the vault), never hand-listed here —
+ * so intel and newsletter destinations report their overrides too.
  */
-const ENV_TOKEN_SEATS: Partial<
-  Record<DestinationKey, "SOCIAL_LINKEDIN_ACCESS_TOKEN" | "SOCIAL_X_ACCESS_TOKEN" | "SOCIAL_FACEBOOK_ACCESS_TOKEN" | "SOCIAL_INSTAGRAM_ACCESS_TOKEN">
-> = {
-  linkedin: "SOCIAL_LINKEDIN_ACCESS_TOKEN",
-  x: "SOCIAL_X_ACCESS_TOKEN",
-  facebook: "SOCIAL_FACEBOOK_ACCESS_TOKEN",
-  instagram: "SOCIAL_INSTAGRAM_ACCESS_TOKEN",
-};
+function envOverridesDestination(env: VaultDeps["env"], destination: DestinationKey): boolean {
+  const seats = (VAULT_ENV_SEATS as Partial<Record<DestinationKey, Record<string, string>>>)[
+    destination
+  ];
+  if (!seats) return false;
+  return Object.values(seats).some((envKey) => Boolean(env[envKey as keyof typeof env]));
+}
 
 /** The wire-ready card: everything the surface renders, nothing an envelope ever rode. */
 export interface IntegrationCard {
@@ -87,7 +88,7 @@ export interface IntegrationCard {
   connectedAs: string | null;
   validatedAt: Date | null;
   expiresAt: Date | null;
-  /** True when the box env fills this destination's token seat — the env credential takes precedence over the vault row (emergency-override honesty). */
+  /** True when the box env fills any of this destination's credential seats — env takes precedence over the vault row (emergency-override honesty, read off the one precedence table). */
   envOverride: boolean;
   fields: IntegrationCardField[];
 }
@@ -144,7 +145,6 @@ export async function listIntegrationCards(
     const row = byDestination.get(destination) ?? null;
     const feature = CLASS_ENTITLEMENT[def.class];
     const entitled = feature === null ? true : opts.features[feature];
-    const seat = ENV_TOKEN_SEATS[destination];
     return {
       destination,
       class: def.class,
@@ -154,7 +154,7 @@ export async function listIntegrationCards(
       connectedAs: row?.connectedAs ?? null,
       validatedAt: row?.validatedAt ?? null,
       expiresAt: row?.expiresAt ?? null,
-      envOverride: seat !== undefined && Boolean(deps.env[seat]),
+      envOverride: envOverridesDestination(deps.env, destination),
       fields: pasteFields(destination),
     };
   });

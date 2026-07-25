@@ -160,7 +160,7 @@ export function blueskyTrendSource(deps: BlueskySourceDeps = {}): TrendSource {
       }
       if (watchlist.queries.length > 0 && (!identifier || !appPassword)) {
         throw new Error(
-          "bluesky query search needs a free app-password session (searchPosts is 403 unauthenticated on the public AppView) — set BLUESKY_IDENTIFIER + BLUESKY_APP_PASSWORD, or watch accounts only (keyless)",
+          'bluesky query search needs a free app-password session (searchPosts is 403 unauthenticated on the public AppView) — connect "Bluesky intel" in Settings → Integrations (tenant vault, B-int.3), set BLUESKY_IDENTIFIER + BLUESKY_APP_PASSWORD (the env override), or watch accounts only (keyless)',
         );
       }
 

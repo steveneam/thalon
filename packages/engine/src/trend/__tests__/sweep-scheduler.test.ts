@@ -3,11 +3,17 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { tenantCtx, type TenantCtx } from "@thalon/contracts";
 import { openTestDb, type DbHandle, type Repos } from "@thalon/db";
-import { LocalObjectStore } from "@thalon/platform";
+import { LocalObjectStore, readEnv } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeEmbeddingDriver } from "../../ingest/shell/embedder";
+import { connectDestination } from "../../integrations/vault";
 import { readSweepBundle } from "../sweep";
-import { findDueTenants, runDueSweeps, type SweepScheduleLike } from "../sweep-scheduler";
+import {
+  findDueTenants,
+  runDueSweeps,
+  tenantTrendSource,
+  type SweepScheduleLike,
+} from "../sweep-scheduler";
 import type { TrendItem, TrendSource } from "../trend-source";
 
 let handle: DbHandle | undefined;
@@ -200,5 +206,117 @@ describe("runDueSweeps", () => {
 
     const retry = await runDueSweeps({ repos, sweepDeps }, new Date(NOW.getTime() + MINUTE));
     expect(retry.due).toEqual([ctxBad.tenantId]);
+  });
+});
+
+const MASTER_B64 = Buffer.alloc(32, 3).toString("base64");
+
+/** Minimal fetch fake: records every URL, answers an empty youtube search result. */
+function recordingFetch(calls: string[]): typeof fetch {
+  return (async (url: unknown) => {
+    calls.push(String(url));
+    return {
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ items: [] }),
+    } as Response;
+  }) as typeof fetch;
+}
+
+describe("tenantTrendSource (B-int.3: per-tenant vault-first driver resolution)", () => {
+  it("a connected intel_youtube credential reaches the driver where env is silent", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    const tenant = await repos.tenants.create({ slug: "self", name: "Self" });
+    const ctx = tenantCtx(tenant.id);
+    const connectEnv = readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64 });
+    await connectDestination(
+      { repos, ctx, env: connectEnv },
+      { destination: "intel_youtube", credentials: { apiKey: "vault-yt-key" } },
+    );
+
+    const env = readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64, TREND_SOURCE: "youtube" });
+    const calls: string[] = [];
+    const source = await tenantTrendSource({ repos, ctx, env }, { fetchImpl: recordingFetch(calls) });
+    expect(source.name).toBe("youtube");
+    await source.poll({ source: "youtube", accounts: [], queries: ["ai video"] });
+    expect(calls[0]).toContain("key=vault-yt-key");
+  });
+
+  it("env set = the emergency override wins over the vault credential", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    const tenant = await repos.tenants.create({ slug: "self", name: "Self" });
+    const ctx = tenantCtx(tenant.id);
+    const connectEnv = readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64 });
+    await connectDestination(
+      { repos, ctx, env: connectEnv },
+      { destination: "intel_youtube", credentials: { apiKey: "vault-yt-key" } },
+    );
+
+    const env = readEnv({
+      THALON_VAULT_MASTER_KEY: MASTER_B64,
+      TREND_SOURCE: "youtube",
+      YOUTUBE_API_KEY: "env-yt-key",
+    });
+    const calls: string[] = [];
+    const source = await tenantTrendSource({ repos, ctx, env }, { fetchImpl: recordingFetch(calls) });
+    await source.poll({ source: "youtube", accounts: [], queries: ["ai video"] });
+    expect(calls[0]).toContain("key=env-yt-key");
+  });
+});
+
+describe("runDueSweeps × vault-first resolution", () => {
+  it("resolves the source per tenant when none is injected (TREND_SOURCE selection intact)", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+    const embedder = createFakeEmbeddingDriver(1536);
+
+    const ctx = await setupTenant(repos, "self", "self-account");
+    await repos.sweepSchedules.upsert(ctx, { enabled: true, cadenceMinutes: 60 });
+
+    const result = await runDueSweeps(
+      {
+        repos,
+        sweepDeps: { embedder, objectStore, capTokens: 1_000_000 },
+        env: readEnv({ TREND_SOURCE: "fake" }),
+      },
+      NOW,
+    );
+    expect(result.failures).toEqual([]);
+    expect(result.swept).toEqual([{ tenantId: ctx.tenantId, cards: 0, polled: 0 }]);
+  });
+
+  it("one tenant's vault misconfiguration (rows without a master key) reports verbatim and never blocks the others", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    storeRoot = mkdtempSync(path.join(tmpdir(), "thalon-sched-"));
+    const objectStore = new LocalObjectStore(storeRoot);
+    const embedder = createFakeEmbeddingDriver(1536);
+
+    const ctxBad = await setupTenant(repos, "bad", "bad-account");
+    const ctxGood = await setupTenant(repos, "good", "good-account");
+    await repos.sweepSchedules.upsert(ctxBad, { enabled: true, cadenceMinutes: 60 });
+    await repos.sweepSchedules.upsert(ctxGood, { enabled: true, cadenceMinutes: 60 });
+    await connectDestination(
+      { repos, ctx: ctxBad, env: readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64 }) },
+      { destination: "intel_youtube", credentials: { apiKey: "vault-yt-key" } },
+    );
+
+    // The scheduler's env has NO master key — bad's row cannot open; loud, per-tenant.
+    const result = await runDueSweeps(
+      {
+        repos,
+        sweepDeps: { embedder, objectStore, capTokens: 1_000_000 },
+        env: readEnv({ TREND_SOURCE: "fake" }),
+      },
+      NOW,
+    );
+    expect(result.failures).toHaveLength(1);
+    expect(result.failures[0].tenantId).toBe(ctxBad.tenantId);
+    expect(result.failures[0].reason).toContain("THALON_VAULT_MASTER_KEY");
+    expect(result.swept).toEqual([{ tenantId: ctxGood.tenantId, cards: 0, polled: 0 }]);
   });
 });

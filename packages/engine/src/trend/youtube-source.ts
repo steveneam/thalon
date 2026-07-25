@@ -104,7 +104,7 @@ export function youtubeTrendSource(deps: YoutubeSourceDeps = {}): TrendSource {
     async poll(watchlist: Watchlist): Promise<TrendItem[]> {
       if (!apiKey) {
         throw new Error(
-          'trend source "youtube" is not configured — set YOUTUBE_API_KEY (a free Data API v3 key; quota budgets stay config)',
+          'trend source "youtube" is not configured — connect "YouTube intel" in Settings → Integrations (tenant vault, B-int.3), or set YOUTUBE_API_KEY (the env override; a free Data API v3 key — quota budgets stay config)',
         );
       }
       if (watchlist.accounts.length > 0) {

@@ -1,6 +1,11 @@
 import { tenantCtx } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
+import { readEnv, type ThalonEnv } from "@thalon/platform";
+import { vaultIntelEnvView } from "../integrations/env-view";
+import type { VaultDeps } from "../integrations/vault";
+import { getTrendSource, type TrendSourceDeps } from "./source-registry";
 import { runTrendSweep, type TrendSweepDeps } from "./sweep";
+import type { TrendSource } from "./trend-source";
 
 /**
  * B-arm.1: the sweep scheduler's deterministic core — the plumbing between
@@ -52,10 +57,27 @@ export function findDueTenants(schedules: readonly SweepScheduleLike[], now: Dat
     .map((s) => s.tenantId);
 }
 
+/**
+ * B-int.3: the scheduler's per-tenant driver resolution — every credentialed
+ * seam resolves vault-first by tenant. ONE tenant's merged intel view
+ * (`vaultIntelEnvView`: connected `intel_youtube`/`intel_bluesky` rows fill
+ * the credential seats env left silent, env wins where set) feeds the
+ * env-selected registry source. Exported so the manual Sweep-now caller
+ * wires the identical resolution — one precedence table, one wiring.
+ */
+export async function tenantTrendSource(
+  deps: VaultDeps,
+  sourceDeps?: TrendSourceDeps,
+): Promise<TrendSource> {
+  return getTrendSource(undefined, await vaultIntelEnvView(deps), sourceDeps);
+}
+
 export interface RunDueSweepsDeps {
   repos: Repos;
-  /** Sweep-path overrides (tests: fake source/embedder/object store) — production defaults per `runTrendSweep`. */
+  /** Sweep-path overrides (tests: fake source/embedder/object store) — production defaults per `runTrendSweep`. An injected `source` skips the per-tenant vault resolution entirely. */
   sweepDeps?: TrendSweepDeps;
+  /** The validated env the vault-first driver resolution merges over — defaults to the process env choke point. */
+  env?: ThalonEnv;
 }
 
 export interface DueSweepFailure {
@@ -98,16 +120,23 @@ export async function runDueSweeps(
   const swept: RunDueSweepsResult["swept"] = [];
   const failures: DueSweepFailure[] = [];
 
+  const sweepDeps = deps.sweepDeps ?? {};
+  const env = deps.env ?? readEnv();
+
   for (const tenantId of due) {
     const schedule = byTenant.get(tenantId);
     if (!schedule) continue; // unreachable: due ids come from `schedules`
     const ctx = tenantCtx(tenantId);
     try {
+      // B-int.3: driver resolution is per-tenant and vault-first — inside
+      // the try, so a vault misconfiguration (rows without a master key)
+      // reports verbatim for THIS tenant and never blocks the others.
+      const source = sweepDeps.source ?? (await tenantTrendSource({ repos, ctx, env }));
       const result = await runTrendSweep(
         ctx,
         repos,
         { nowMs: now.getTime(), intervalMs: schedule.cadenceMinutes * 60_000 },
-        deps.sweepDeps ?? {},
+        { ...sweepDeps, source },
       );
       await repos.sweepSchedules.markSwept(ctx, now);
       swept.push({

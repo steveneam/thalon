@@ -119,12 +119,13 @@ export async function publishApprovedPage(
  * publish door. Every rung stays engine-side and typed (B-pub.1 ladder:
  * approved-only draft, armed publisher, tenant social block, ≤cap/day,
  * platform-scoped duplicate refusal); this seam adds NOTHING to it. The
- * default resolver is VAULT-FIRST since B-int.1 (ADR 0011 decision 3):
- * token material comes from the tenant's connected vault rows, the env
- * pair (`SOCIAL_<P>_ACCESS_TOKEN`) stays the emergency override when set,
- * and the per-platform `SOCIAL_<P>_ARMED="true"` founder GO remains
- * env-side until B-int.3 moves arming onto tenant data. Tests inject a
- * fake resolver and stay keyless/offline.
+ * default resolver is VAULT-FIRST and, since B-int.3, ARMED BY TENANT
+ * DATA (ADR 0011 decision 3): token material comes from the tenant's
+ * connected vault rows, arming reads the platform's presence in the social
+ * config block plus that connected credential, and the env pairs
+ * (`SOCIAL_<P>_ACCESS_TOKEN` / `SOCIAL_<P>_ARMED`) are the emergency
+ * override — set, they win. Tests inject a fake resolver and stay
+ * keyless/offline.
  */
 export async function publishApprovedSocial(
   repos: Repos,

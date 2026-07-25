@@ -15,7 +15,11 @@ export {
   type YoutubeConfigInput,
   type YoutubeSourceDeps,
 } from "./youtube-source";
-export { getTrendSource, registeredTrendSources } from "./source-registry";
+export {
+  getTrendSource,
+  registeredTrendSources,
+  type TrendSourceDeps,
+} from "./source-registry";
 export {
   detectOutliers,
   outlierConfigSchema,
@@ -78,6 +82,7 @@ export {
 export {
   findDueTenants,
   runDueSweeps,
+  tenantTrendSource,
   type DueSweepFailure,
   type RunDueSweepsDeps,
   type RunDueSweepsResult,
