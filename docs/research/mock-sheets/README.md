@@ -29,8 +29,19 @@ bridge-repaint approach:
 3. **Demolish, don't renovate.** The old surface implementation is DELETED
    in the same change that ships its rebuild. The wave-0 legacy-token
    bridge exists only for not-yet-rebuilt surfaces and burns down to zero.
-4. **Lead-direct.** The founder assigned the exact-mock implementation to
-   the lead personally (s72) — surface rebuilds are not delegated to lanes.
+4. **Lead-direct — AMENDED s73 close: parallel lanes are open, the lead is
+   the GATE.** The founder assigned exactness to the lead personally (s72),
+   and at the s73 close opened parallel rebuild lanes on top of the shipped
+   foundation ("if that rule and logic is followed exact, then parallel
+   workflows should be safe now"). So: a lane MAY port a surface, under the
+   conditions pinned in `../ui-overhaul-plan.md` §5 "s73 close" — the
+   kickoff cites the sheet + keeper rows (no design judgment in the lane —
+   port the bytes), `workspace.css` is READ-ONLY to lanes (helmet atomics go
+   in a surface-scoped css file), the bridge-burndown + mono pins stay
+   green, and **every lane merge is preceded by the LEAD's own
+   screenshot-vs-sheet diff — renovation bounces at the gate.**
+   Responsibility moved from authorship to the gate; it did not move off
+   the lead.
 5. **Keep from wave 0:** the token/theme infrastructure (the tokens ARE
    these sheets' values), the light-mode mapping (the founder's one keeper),
    and the executable ratchets (contrast pins, mono burn-down). Everything
