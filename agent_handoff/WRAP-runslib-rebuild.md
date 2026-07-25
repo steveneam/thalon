@@ -1,8 +1,9 @@
 # WRAP — lane `runslib-rebuild` (exact-mock rebuild: Runs + Library, two-step each)
 
-Branch `agent/runslib-rebuild`, based on `861ae2f`. **Four commits — the two
-steps of each surface, in series (Runs, then Library)**, so each surface has
-its own structural verdict point before any data touched it. Zero spend, zero
+Branch `agent/runslib-rebuild`, based on `861ae2f`. **Five commits — the two
+steps of each surface, in series (Runs, then Library), plus one self-caught
+fidelity fix**, so each surface has its own structural verdict point before
+any data touched it. Zero spend, zero
 contracts/db/engine edits, no npm install, no API changes: every read and
 write goes through an EXISTING lib client.
 
@@ -12,6 +13,7 @@ write goes through an EXISTING lib client.
 | 2 | `5ea9355` | Runs **step 2** — real data + keepers; `runs-list.tsx` DELETED |
 | 3 | `72110f4` | Library **step 1** — pure port of `Library.dc.html` |
 | 4 | `683364b` | Library **step 2** — real data + keepers; `library-surface.tsx` DELETED |
+| 5 | `f7a67ca` | fidelity fix — both footers back to the sheet's bytes (ambiguity 10) |
 
 Files touched are inside the lane's fence: `components/runs/`,
 `components/library/`, `app/app/runs/`, `app/app/library/`, their tests, and
@@ -64,7 +66,8 @@ says "reading the drafts…"; a failed plan read falls back, never invents.
 - The `?run=` deep link still lands **selected** on its row (and scrolls to
   it) — the dashboard-provenance keeper.
 - The one list keyboard grammar (j/k move · ↵ open) drives the sheet's own
-  `.row.sel`; the footer states it beside the receipts line.
+  `.row.sel` — invisibly, because this sheet's footer is a single label
+  (ambiguity 10).
 - ONE triage predicate feeds both the header's "N failed" pill and the Failed
   filter, so the count and the view can never disagree.
 
@@ -106,7 +109,8 @@ line, the top-scored area + reason, the sheet's day stamp (today · Tue ·
 - Source-Link way-back on every web-origin row; media-first thumbnails fill
   the sheet's `.thumb-sm` when the ingest captured one, the striped
   placeholder when it didn't.
-- j/k move · ↵ open · d delete, on the sheet's `.row.sel`.
+- j/k move · ↵ open · d delete, on the sheet's `.row.sel` — invisible here
+  too, for the same reason (ambiguity 10).
 
 **Honest states**: failed read → alert + Try again ("a read failure, not an
 empty shelf"); `– sources` until resolved; empty shelf says so plainly.
@@ -194,7 +198,21 @@ Retrieval is a checkout, not archaeology: they live intact at `861ae2f`
    rows are the sheet's fiction for source kinds this surface does not serve.
 9. **Step-1 dates are the mock's own fiction** ("Today · Friday 25 July"; 25
    July 2026 is a Saturday). Step 2 renders real local dates in that grammar.
-10. **No in-lane screenshot.** `next dev` cannot run inside a worktree
+10. **The keyboard grammar is invisible on these two surfaces** (`f7a67ca`).
+    Step 2 first rendered the Dashboard exemplar's "j k move ↵ open" chips in
+    both footers; the port review caught that as MY drift — the Dashboard
+    sheet draws those chips itself (`Dashboard.dc.html:181`), while Runs and
+    Library use `kbd` only for the topbar's ⌘K and give each footer a single
+    label. The chips came out and the behaviour stayed. If the lead wants the
+    grammar discoverable on every list surface, that is a canvas change
+    (a founder-approved sheet edit re-exported), not a lane call.
+11. **Where the surface stylesheets are imported.** Each is imported by its
+    route's `page.tsx` (`import "@/components/runs/runs.css"`), which App
+    Router allows for any route segment and which keeps the sheet's atomics
+    loading only on the route that owns them. The alternative single import
+    site is `app/app/layout.tsx` beside `workspace.css` — a shell file, so
+    that move is the lead's call, not the lane's.
+12. **No in-lane screenshot.** `next dev` cannot run inside a worktree
     (Turbopack rejects the out-of-root `node_modules` symlink, per the machine
     memo), so screenshot-vs-sheet at 1440×940 is the LEAD's merge gate — both
     surfaces are ready for it, dark and light (the ports carry no colour
@@ -202,6 +220,28 @@ Retrieval is a checkout, not archaeology: they live intact at `861ae2f`
 
 ## Verification
 
-- `npm run verify` at the repo root, unfiltered — see the run note below.
-- Grep guard run before every commit: PASS each time (4/4).
-- Worktree clean at wrap; nothing staged, nothing stashed.
+**`npm run verify` at the repo root, GREEN (`EXIT=0`)** — unfiltered, redirected
+to a file and read whole, never piped through `tail`:
+
+- guard `PASS` · **1944 passed / 0 failed / 9 skipped across 280 files** ·
+  typecheck clean in every workspace · lint **0 errors** (15 warnings, all
+  pre-existing in files this lane never touched).
+- Ran 17:53–17:59 UTC on a **quiet box** (load average 8 falling from 21,
+  no other lane mid-suite) — the sequencing rule the lead pinned in
+  `e072ee5`. Suite wall time **297s**.
+
+**The earlier run is worth recording, because it is the rule's evidence.** At
+17:27 the same tree verified while all three rebuild lanes ran suites at once
+(load average **34** on 6 vCPU): 1940 passed, **4 failed**, wall time
+**1098s** — every failure in `packages/engine/src/integrations/` (files no UI
+lane touches) with `Error: PGlite is closed`, i.e. WASM boot/teardown races
+under CPU starvation. Re-running those three files alone: **40/40 pass in
+67s** against 280s starved. Not a defect, and not this lane's code — but a
+lane reading only the summary would have chased it.
+
+Cheap gates were run continuously during the build (targeted tests, web
+typecheck, web lint after each step) and the grep guard before every commit:
+**PASS 5/5**.
+
+Worktree clean at wrap; nothing staged, nothing stashed. The branch is local
+(as the other lanes' are) — the lead's merge drives it from here.
