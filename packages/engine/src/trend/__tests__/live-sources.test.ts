@@ -1,3 +1,4 @@
+import { readEnv } from "@thalon/platform";
 import { describe, expect, it } from "vitest";
 import { blueskyTrendSource } from "../bluesky-source";
 import { getTrendSource, getTrendSources, registeredTrendSources } from "../source-registry";
@@ -212,6 +213,23 @@ describe("trend source registry", () => {
     expect(getTrendSource().name).toBe("fake");
     expect(getTrendSource("bluesky").name).toBe("bluesky");
     expect(() => getTrendSource("x-twitter")).toThrow(/registered: fake, bluesky, youtube/);
+  });
+
+  it("YOUTUBE_MAX_SEARCHES_PER_SWEEP reaches the driver's ration (s72 env seat)", async () => {
+    const calls: string[] = [];
+    const fetchImpl = (async (url: unknown) => {
+      calls.push(String(url));
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ items: [] }),
+      } as Response;
+    }) as typeof fetch;
+    const env = readEnv({ YOUTUBE_API_KEY: "k", YOUTUBE_MAX_SEARCHES_PER_SWEEP: "2" });
+    const source = getTrendSource("youtube", env, { fetchImpl });
+    // Two queries fit the raised ration — the default 1 would refuse this poll.
+    await source.poll({ source: "youtube", accounts: [], queries: ["a", "b"] });
+    expect(calls.filter((u) => u.includes("/search")).length).toBe(2);
   });
 
   it("comma-list selection resolves every listed driver in order (s72 multi-source soak)", () => {

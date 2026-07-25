@@ -45,7 +45,12 @@ const SOURCE_REGISTRY: Record<string, (env?: ThalonEnv, deps?: TrendSourceDeps) 
   youtube: (env, deps) =>
     youtubeTrendSource({
       fetchImpl: deps?.fetchImpl,
-      config: env ? { apiKey: env.YOUTUBE_API_KEY } : undefined,
+      config: env
+        ? {
+            apiKey: env.YOUTUBE_API_KEY,
+            maxSearchesPerSweep: env.YOUTUBE_MAX_SEARCHES_PER_SWEEP,
+          }
+        : undefined,
     }),
 };
 

@@ -57,6 +57,8 @@ const envSchema = z.object({
   TREND_DOSSIER_CARDS: z.coerce.number().int().min(0).default(0),
   /** B6.5 YouTube Data API v3 key (free tier; per-driver quota budgets stay config in the driver, never here). */
   YOUTUBE_API_KEY: z.string().optional(),
+  /** s72 (the "both" unlock): the driver's search.list ration per sweep — its expensive quota bucket (~100 units/call of the 10k/day free tier), raised DELIBERATELY from the conservative default 1. The driver still refuses loudly (never truncates) when a sweep needs more. */
+  YOUTUBE_MAX_SEARCHES_PER_SWEEP: z.coerce.number().int().positive().optional(),
   /** B6.5 Bluesky app-password session (free account; searchPosts is 403 unauthenticated — probed 2026-07-07). Account-feed polling stays keyless without these. */
   BLUESKY_IDENTIFIER: z.string().optional(),
   BLUESKY_APP_PASSWORD: z.string().optional(),
