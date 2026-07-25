@@ -22,3 +22,19 @@ CLAUDE.md → this file → `agent_handoff/ROADMAP.md` → `docs/research/ui-ove
 s70: B-int.2 shipped + verified live; Nango answered (swordfish: self-hosted proven, zero-SDK REST, own-instance offer for B-int.4). s70b: founder's parallel directive — pillar minted+rendered (94cr plan exact + 2 retakes; mint doctrine: UI-semantic beats code-drawn, kling fabricates UI text), two lanes launched, X-card honesty fix. s70c: founder verdicts — pillar cut = mid-quality exemplar (pillar re-scoped to post-overhaul screen recording); his LinkedIn edit ingested + made the executable golden pair; SEO/AEO/GEO gap confirmed → discoverability lens SHIPPED same session; blog-mirror doctrine recorded (social posts mirror the blog article; the blog IS the farm); landing→workspace link shipped; model seats → opus-5 (build-phase strongest-tier rule; BYO-AI parked); both lanes merged on green; wave-0 charter completed (7/7 answers) with the mock-first standing rule.
 
 ## Next action — s71: wave-0 claude-design MOCK → founder verdict → build; alternate: Phase 2c generation side + exemplar arming.
+
+## Addendum (s70c final — B-learn shaped by the founder's data-first framing)
+
+**B-learn charter candidate is fully shaped** (ROADMAP §B-learn): the founder
+ratified the schema-IS-the-framework framing — the chartered build opens with
+a B-learn CONTRACT WINDOW (admission config · own-post engagement snapshots ·
+attribution tables). Verified in-repo: sweeps ALREADY capture likes/comments/
+reposts/views per item, trend_snapshots is append-only longitudinal, and
+longitudinal.ts runs Δ-velocity outlier math — admission + synthesis are the
+missing half. Storage = our own Postgres (Supabase is NOT in Thalon's stack —
+told the founder honestly; capacity a non-issue). Instagram: official API =
+own-insights + limited hashtag surface only (no viral firehose; posting
+waits on B-pub.4 image URLs) — entered at B-learn L3, never scraping.
+**Founder decisions parked for the checkpoint: B-learn charter scope + the
+X-paid-search spend + where it sequences against overhaul waves** (lead
+read: L1+L3 lead-serial beside the wave-0 mock cycle).

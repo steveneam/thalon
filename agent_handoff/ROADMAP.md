@@ -208,6 +208,22 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 ### B-learn — THE METRIC-DRIVEN SELF-IMPROVEMENT LOOP **[CHARTER CANDIDATE, founder-demanded s70c — absorbs the exemplar section below]**
 The founder's bar: the engine learns from 10,000+ viral posts + 100+/day
 across topics, metric-driven, so founder edits stop being the teacher.
+**Founder framing (s70c, ratified into the shape): THE SCHEMA IS THE
+FRAMEWORK** — learning is a data pipeline (place → filter → clean → analyse
+→ synthesise), so the chartered build OPENS with a B-learn CONTRACT WINDOW
+(L0): exemplar-admission config (the outlier knobs as area-config data),
+own-post engagement snapshot tables (the trend_snapshots pattern applied to
+OUR published posts), attribution/pattern-stat tables. Half the spine
+already exists and is engagement-based: sweeps capture likes/comments/
+reposts/views per item, trend_snapshots holds them append-only
+longitudinally, and trend/longitudinal.ts runs Δ-velocity outlier math
+against baselines — admission + synthesis are the missing half. Storage
+runs on OUR Postgres (dev pg on syd4 · tenant-pg on the staging VPS —
+Supabase is not in Thalon's stack; capacity is a non-issue either way).
+**Instagram (founder: "needed soon"):** honest read — the official Graph
+API gives own-account insights + limited hashtag top-media, NO public viral
+firehose; IG posting waits on B-pub.4's public image URLs; IG intel enters
+at L3 (own-post outcomes) + the modest hashtag surface, never scraping.
 Honest inventory says half exists (sweeps poll 100s/day · exemplar retrieval
 at generation · the B-crm.5 learn-weights pattern is the in-repo precedent)
 and half is missing: (L1) arm outlier→exemplar AUTO-ADMISSION (the s68 knobs:
