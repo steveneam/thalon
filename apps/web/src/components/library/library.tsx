@@ -459,23 +459,14 @@ export function Library() {
         </div>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {/* The sheet's footer is ONE label — unlike the Dashboard sheet, this
+          one draws no j/k chips, so the keyboard grammar stays invisible
+          chrome here rather than growing the band. */}
+      <div style={{ display: "flex" }}>
         <span className="t-label">
           Sources are per-tenant, chunked and embedded once — drafts cite them; nothing generates
           ungrounded.
         </span>
-        {rows.length > 0 && (
-          <>
-            <div style={{ flex: 1 }} />
-            <span className="kbd">j</span>
-            <span className="kbd">k</span>
-            <span className="t-label">move</span>
-            <span className="kbd">↵</span>
-            <span className="t-label">open</span>
-            <span className="kbd">d</span>
-            <span className="t-label">delete</span>
-          </>
-        )}
       </div>
     </div>
   );
