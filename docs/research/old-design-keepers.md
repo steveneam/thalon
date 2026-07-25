@@ -47,6 +47,34 @@ rebuilt against the untouched `lib/` layer:
 - **First-run tutorial** — 3-step card (simplified; the illustrated
   `EmptyArt` version is a keeper below).
 
+## Carried through Create (s74)
+
+The one-prompt surface rebuilt against the untouched `lib/` layer, so its
+plumbing survived intact: the capture-id door (`?ctx=`) and its
+stale-id degrade, the prompt seeding from angle + hook (never re-asked),
+the profile-fed run settings (Create never re-asks company context), the
+→Email compose door and the one-prompt video run.
+
+**Retired deliberately with it:** the twelve typed removable chips and the
+five-step goal gradient — the sheet replaces both with ONE pick chip that
+names what actually rode in, and its × drops the whole context. Pruning a
+single field is no longer possible; if the founder wants it back it
+re-enters as a behaviour behind that chip, never as a second band.
+
+**Three honest deviations from Create's fixture** (flagged, awaiting the
+founder's verdict — each is a backend gap, not a design choice):
+1. no discoverability chip is marked `primary` — the subject entity is
+   derived at generation (`fanout/target-terms.ts` puts the shell's
+   canonical entity first), so it does not exist while the operator is
+   still writing the brief. A live preview would need a thin route over
+   the real `deriveTargetTerms` — the ~40-line follow-up;
+2. run rows carry no thumbnail — `FeedRun` has no media reference to join
+   (the sheet's fixture shows two). Needs a draft-media join to satisfy
+   the media-first doctrine here;
+3. the Video row states what is true (screen text code-drawn · nothing
+   renders or spends until you approve) instead of the fixture's
+   "~40s · 8 beats" — length/aspect/captions are not in the profile yet.
+
 ## Keepers awaiting their surface's step 2
 
 | Keeper | Home today (all still tracked) | Re-enters at |
@@ -57,7 +85,7 @@ rebuilt against the untouched `lib/` layer:
 | Demo-banner + cadence-stamp honesty (fake-driver era named, never implied live) | `components/intel/demo-banner.tsx`, `cadence-stamp.tsx` | Intel step 2 |
 | Saved-view tabs (tenant-wide named views, `/api/views`) | `components/board/`, `components/calendar/`, `lib` views client | Board + Calendar step 2 |
 | Calendar engine (month/week/agenda grids, slot chips, reschedule doors) | `components/calendar/*` | Calendar step 2 |
-| Staged-flow multi-stage video UX (candidate picker, direction editor, storyboard) | `components/staged/*` | Videos/Create step 2 (per plan §4.2 wave-2 mini-spec) |
+| Staged-flow multi-stage video UX (candidate picker, direction editor, storyboard) | `components/staged/*` | **Videos step 2** (per plan §4.2 wave-2 mini-spec). Create shipped s74 without it: the sheet's header carries one `Advanced · staged flow →` door, exactly as the sheet draws it — the stage-by-stage walk belongs to the Videos re-conception, not to the one-prompt surface |
 | **The Thalon logo** (BrandMark, landing-amber DNA) — the rail currently wears the SHEET's gradient square; the real mark re-enters once the whole shell structure is verdicted (founder named this one s73) | `components/brand/marks.tsx` | shell polish pass, after all-surfaces structural |
 | EmptyArt illustrations + demo media | `components/ui/empty-art.tsx`, `lib/brand-assets.ts`, `public/` | each surface's empty states; NEVER deleted |
 | Command palette (⌘K, one nav registry) | `workspace/command-palette.tsx` (still live) | its own restyle pass, last |
