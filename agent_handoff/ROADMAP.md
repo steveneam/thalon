@@ -105,7 +105,14 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 - Judge-prompt tuning candidate: the FINAL tier is over-strict on truism claims
   (golden g3-004/005 fail though expected pass) AND lenient on the invented-mechanism/
   topics class (g3-006/008 pass though expected fail) — a real tension worth a
-  golden-guided prompt pass. **[lead-serial, low priority]** · `golden:g3` stays non-CI.
+  golden-guided prompt pass. **[lead-serial — PROMOTED s68: no longer low priority;
+  the meme-post dogfood added ~6 live data points in one day, including an apparent
+  final-tier MISREAD (draft `74d77abb` round-4: "inverts the horse labeling" against
+  a draft whose order matched the source verbatim)]** · `golden:g3` stays non-CI.
+- **Platform charLimit is UNENFORCED (found s68):** x.v1.json declares 280 but
+  neither generation nor any gate checks it — a 600-char X draft sailed to queued;
+  the platform API would reject it at publish. Ratchet candidate: a deterministic
+  length gate reading the platform profile (belongs beside the judge, not in it).
 - **s68 evidence — the tiers SPLIT on operator-brief-sourced quantity claims:** the
   claim "one prompt becomes a week of platform-ready content" (verbatim in the
   operator's PROMPT source chunk) passed g3_screen citing that chunk in all three
@@ -119,7 +126,14 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   know your business" as ungrounded (the g3-004/005 over-strict class) — plus a
   correct catch of the draft re-introducing "three formats every week", enforced via
   the operator constraint text itself (constraints-in-the-prompt ARE enforceable
-  grounding — worth keeping as doctrine).
+  grounding — worth keeping as doctrine). Runs 6-7 (the meme-post fan-out) add the
+  clearest characterization yet — the ENTAILMENT class: g3_final refused "launched
+  in May" against a grounded "2026-05-28" (month paraphrase) and "three releases
+  in eight weeks" against three grounded dates (derived arithmetic). The final
+  tier demands near-verbatim grounding; correct entailments fail. Fix-side
+  doctrine: enrich the fact base with the entailed forms. Tuning-side: the golden
+  pass should decide whether simple entailment (calendar containment, date
+  arithmetic) is admissible grounding.
 
 ### Checkpoint decisions (COORDINATION row 4) **[founder, next checkpoint]**
 - **B-sitegen charter candidate** — the meta-prompt behind Create's page family; input

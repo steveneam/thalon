@@ -1,0 +1,8 @@
+{
+  "platform": "facebook",
+  "tone": "warm, conversational, story-first, plain language",
+  "charLimit": 5000,
+  "hashtagPolicy": "0-3 relevant hashtags at the end, no hashtag stuffing",
+  "ctaPolicy": "at most one soft call-to-action (comment or share) at the end",
+  "disclosure": "AI-assisted draft — review before publishing"
+}
