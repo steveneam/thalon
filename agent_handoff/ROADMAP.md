@@ -60,14 +60,25 @@ production caller already does for social); per-platform arming becomes tenant D
 (connected + tenant-armed) instead of env; refusal ladder keeps its shape. Meanwhile
 the standing [lead-serial] alternative: **B-pub.4 blog images** (backlog below).
 
-### Phase 2 — Pillar #1 MINT GO **[founder GO — cost plan PRESENTED s68]**
-The chain is GREEN end-to-end (s68 re-brief fixed the s67 judge fails): project
-"Pillar: the honest content engine", 9 planned takes (8 motion beats + $0
-code-drawn CTA card), EDL + draft cut in the DB. Cost plan presented at the s68
-close (recommended lane: kling3_0_turbo 1080p ≈ 94cr; hero-bump + retake buffer
-≈ 110–150cr; every take <40cr so no standing ping triggers). **On his GO: mint
-the takes → box-local $0 render.** Standing mint rules in memory apply; all
-on-screen text is code-drawn at render (s62 doctrine), never minted.
+### Phase 2 — ✅ PILLAR #1 MINTED + RENDERED s70b (founder GO: kling3_0_turbo 1080p)
+**`one-prompt-v1.mp4` is REAL: 42.3s @1080p, engine-rendered end-to-end**
+(8 mints at exact-cue durations = the 94cr plan + two 10cr retakes = 114cr,
+inside the 110–150 band; balance 584.12). The render went through the real
+doors — with one gap found + ratcheted: one-prompt projects had NO sanctioned
+media-root setter (`videoProjects.setMediaRoot` shipped, `53456b8`). Craft
+lessons banked (prov.json + memory): kling reliably fabricates gibberish on
+UI-semantic surfaces (buttons/checkboxes) — such beats are better FULLY
+code-drawn (beat-06 was, $0); cornered pseudo-text on static regions takes a
+deterministic patch (beat-07). **Founder verdict on the cut = the open tail**
+(approve door ready; fix rounds ~10cr/beat).
+
+### Phase 2b — WORKSPACE UI/UX OVERHAUL **[founder-directed s70b — phase 0 lane RUNNING]**
+The founder's verdict: current look/flow "not working" — benchmark =
+Supabase/Vercel-class; evaluate **Meta Astryx** (150+ components, theming,
+CLI + MCP server, StyleX under) as the shadcn replacement. Phase 0 (lane
+`ui-p0`, report-only) delivers `docs/research/ui-overhaul-plan.md`: Astryx
+license/stack-fit verdict + benchmark teardown + surface-by-surface audit +
+wave map. **The founder re-charters on that plan before any rebuild wave.**
 
 ### Phase 3 — ✅ EXECUTED s69/s69b (all three live; kept for the record)
 s68 (second half) built B-pub.3 end-to-end: **image legs on all three text drivers**

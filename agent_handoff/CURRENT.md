@@ -22,3 +22,22 @@ CLAUDE.md → this file → `agent_handoff/ROADMAP.md` (Phase 1-next) → COORDI
 **The Integrations surface went from spec to shipped in one lap:** engine read models (`cards.ts` state derivation + schema-derived paste fields · `published.ts` two-ledger join with permalink fallbacks) → repo `listRecent` → five thin routes (vault errors mapped: shape→400+fields · not-connected→404 · key/open→503) → the panel (guided flows, honest badges, published ledger) → verified in the real workspace: LinkedIn "as Steven Eamegdool", Facebook "as MacTechDish", X "env override", and the Published view listing the three live s69 posts + the s67 blog article with working way-back links. The s69 LinkedIn validate blind spot closed at the seam (the malformed-body 426-vs-400 pin proof; only a dead pin degrades, flakiness never blocks). Validate now records the probe's discovered identity. **Mid-session founder question ("can't connect be automatic? check Nango") answered honestly:** the blocker is platform posting-scope review, not OAuth plumbing; Nango verified real + self-hostable but ELv2 (licensing-hygiene: isolate + swap path); the actual unlock = pulling B-int.4's callback+refresh forward for the self tenant's own already-scoped apps — homed in the plan doc, ROADMAP B-int.4, and a swordfish ask — which swordfish ANSWERED same-day (self-hosted Nango is their proven P2 pattern; zero-SDK REST keeps ELv2 out of our repo; own-instance offer standing). Boot chores: budget 7.25M→2M with the raise history compacted; the agent had booted inside the `dev` window — renamed to `agent`, dev window recreated on 3111.
 
 ## Next action — s71: B-int.3 lane approval at the opener (else B-pub.4 lead-serial); founder-side: pillar mint GO · NEEDS-STEVEN glance.
+
+## Addendum (s70b — the parallel turn, same day)
+
+The founder's mid-session directives all executed: **(1) PILLAR #1 RENDERED** —
+his GO on kling3_0_turbo 1080p → 8 exact-duration mints + code-drawn text
+everywhere + the real render door → `.context/renders/pillar-one/cuts/
+one-prompt-v1.mp4` (42.3s; 114cr, balance 584.12; `setMediaRoot` door shipped
+`53456b8` — the gap the first real mint exposed). **His verdict on the cut is
+the open tail** (approve door ready; fix rounds ~10cr/beat). Craft doctrine
+banked: UI-semantic beats = code-draw, never mint; cornered static pseudo-text
+= deterministic patch. **(2) TWO LANES LIVE on his parallel-work directive:**
+`bint3-rewire` (he steered the window himself; branch push expected — REVIEW +
+MERGE at the s71 opener) and `ui-p0` (UI-overhaul phase 0 — his s70b verdict:
+current workspace look/flow REJECTED, benchmark Supabase/Vercel-class,
+evaluate Meta Astryx; plan doc lands on its branch; HIS RE-CHARTER before any
+rebuild). **(3) X card honesty fixed** (`ce4e0c1`: "Connected via env"; IG
+honestly unconnected pending B-pub.4). s71 boot: check both lane branches
+FIRST (rebase → verify → merge on green), then his three verdicts: pillar cut ·
+ui-overhaul plan · B-int.3 merge.
