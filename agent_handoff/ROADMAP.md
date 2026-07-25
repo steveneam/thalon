@@ -226,11 +226,23 @@ firehose; IG posting waits on B-pub.4's public image URLs; IG intel enters
 at L3 (own-post outcomes) + the modest hashtag surface, never scraping.
 Honest inventory says half exists (sweeps poll 100s/day · exemplar retrieval
 at generation · the B-crm.5 learn-weights pattern is the in-repo precedent)
-and half is missing: (L1) arm outlier→exemplar AUTO-ADMISSION (the s68 knobs:
-engagement metric names, floors, velocity multiples — area config), (L2)
-acquisition breadth legally (X paid search = the firehose, rides the
-month-end credit call; Reddit official API; YouTube have; LinkedIn has NO
-trending API — barred from scraping, learned obliquely), (L3) OWN-POST
+and half is missing: (L1) ✅ SHIPPED s71 (lane exarm, merged): outlier→exemplar
+AUTO-ADMISSION armed — per-area knobs as config data, fail-closed floors
+(views=10k default: Bluesky admits nothing until deliberately opted in via a
+likes floor; YouTube qualifies at a real bar), 4× velocity multiple, 140-char
+body min, 20/day/area cap, budget-honest embeds; the contract-window ask
+(persist `admission` knobs on the monitored-area row) = the L0 window's first
+line item; founder unlocks calibrated on real data in WRAP-exemplar-arm.md
+(YouTube key in the soak env → admissions start free; or Bluesky
+`floors:{likes:500}` ≈ 16/day). (L2)
+acquisition breadth legally — **FOUNDER DIRECTIVE s71: intel eventually reads
+EVERY platform we post to (YouTube · TikTok · IG · Facebook · LinkedIn · X ·
+Bluesky …), the way competing SaaS/creators already do; wire each via its
+official surface and be honest per platform**: X paid search = the firehose,
+rides the month-end credit call; Reddit official API; YouTube LIVE already;
+TikTok = official research/display APIs (limited, app-review-gated); IG =
+own-insights + hashtag top-media only; Facebook = page insights; LinkedIn has
+NO trending API — barred from scraping, learned obliquely, (L3) OWN-POST
 engagement pull-back on a schedule (official APIs; the ledger's
 external_post_id is the join key), (L4) attribution → retrieval weighting +
 bandit hook-pattern selection (Vowpal Wabbit BSD if we want real contextual

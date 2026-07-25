@@ -393,6 +393,50 @@ hierarchy, the shadcn primitive layer — is what's being replaced.
 
 ---
 
+## 5. Founder mock-round doctrines (s71 — binding on every wave build)
+
+The wave-0 claude-design mock (project `f5d304cb`, all 8 surfaces + the theme
+system) went through live founder rounds on 2026-07-25. Three doctrines came
+out of them, RATIFIED by direction and now requirements on the build, not
+suggestions. Executable ratchet candidates land with wave 1 (conformance
+tests beside `tokens-contrast`), documentary form lives here until then:
+
+1. **MEDIA-FIRST.** Every row that references real media shows it — clip
+   frames, post images, page heroes, YouTube thumbnails — and text drafts
+   show their excerpt (the actual first line, not a type label). The founder's
+   words: without this "the workspace just becomes a wall of text." Approve
+   is the surface where this matters MOST (scan-and-decide); needs-you rows
+   carry excerpt + thumb; intel rising rows carry source thumbnails.
+   Wave-1 ratchet candidate: a conformance test that fails any approve/needs-
+   you row rendering a media-bearing draft without its media slot.
+2. **EVERY FACT IS A DOOR.** Tiles, rows, stamps, and cards all deep-link to
+   the surface that owns them (dashboard week card → Calendar; needs-you →
+   the exact draft in Approve; intel exits carry the pick). Views offer scope
+   toggles where density varies (the week card's Today/This-week segmented
+   control). Nothing is a dead label.
+3. **BRAND-MARK SCOPING.** The mark wears the landing amber
+   (`--brand-hi/lo` token pair) on the dark workspace — one DNA with the
+   landing — while STATUS amber stays needs-you-only. Brand is never status;
+   an amber interactive element or amber decoration remains a defect.
+4. **VISIBLE PROVENANCE (founder round 6).** Nothing important works
+   invisibly: (a) discoverability targets show as chips at Create (editable,
+   primary entity marked) AND as a named entry in Approve's checks band with
+   term-coverage state — a missing target warns in amber right on the draft
+   (the LinkedIn miss rendered impossible to repeat); (b) every draft carries
+   an attributed version strip — engine draft v1 → your edit v2 → (future)
+   agent-proposed-you-approved — with a diff view, and re-judges stamp the
+   version they ran on; (c) the invariant is stated in operator copy: **the
+   judge gates — it never rewrites**. Wave-1 ratchet candidates: a
+   conformance test that any surfaced judge row set includes discoverability
+   when targetTerms exist, and a pin that body-version attribution renders on
+   every draft detail.
+
+Also founder-directed in the same rounds: intel reads all posting platforms
+eventually (homed in ROADMAP §B-learn L2), and YouTube thumbnails ride the
+existing `thumbnailUrl` capture — no new plumbing needed.
+
+---
+
 *Phase-0 lane, branch `agent/ui-overhaul-phase0`. Evidence trail: cloned
 Astryx source + scratch build at `~/lane-scratch/` (outside the repo), live
 surface walk on the dev preview, Geist/Supabase public docs, the cockpit on
