@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -40,6 +40,16 @@ const CARDS: WireIntegrationCard[] = [
   }),
   card({ envOverride: true }),
   card({
+    destination: "website_webhook",
+    class: "website",
+    label: "Webhook",
+    driver: "generic-webhook",
+    fields: [
+      { key: "url", optional: false },
+      { key: "secret", optional: true },
+    ],
+  }),
+  card({
     destination: "intel_youtube",
     class: "intel",
     label: "YouTube intel",
@@ -48,6 +58,12 @@ const CARDS: WireIntegrationCard[] = [
     fields: [{ key: "apiKey", optional: false }],
   }),
 ];
+
+/** The X destination's card container (two cards carry a "Set up" button — scope to one). */
+async function xCard(): Promise<HTMLElement> {
+  const label = await screen.findByText("X", { selector: "span" });
+  return label.closest("div.rounded-lg") as HTMLElement;
+}
 
 const PUBLISHED = {
   items: [
@@ -92,8 +108,11 @@ describe("IntegrationsPanel", () => {
     expect(screen.getByText("Needs re-auth")).toBeInTheDocument();
     expect(screen.getByText(/as Steven/)).toBeInTheDocument();
     expect(screen.getByText("linkedin-rest-posts")).toBeInTheDocument();
-    // The env-override honesty badge: the box env fills X's seat in this fixture.
-    expect(screen.getByText("env override")).toBeInTheDocument();
+    // The env-connected honesty: X posts via the box env, so its card must
+    // NOT read "Not connected" (s70 founder catch) — the webhook card, with
+    // no env seat, is the one honestly not connected.
+    expect(screen.getByText("Connected via env")).toBeInTheDocument();
+    expect(screen.getByText("Not connected")).toBeInTheDocument();
   });
 
   it("walks the guided flow: steps, paste, connect — the probe verdict lands on the card", async () => {
@@ -111,7 +130,7 @@ describe("IntegrationsPanel", () => {
     const user = userEvent.setup();
     render(<IntegrationsPanel />);
 
-    await user.click(await screen.findByRole("button", { name: "Set up" }));
+    await user.click(within(await xCard()).getByRole("button", { name: "Set up" }));
     expect(screen.getByText(/developer portal with write access/)).toBeInTheDocument();
     // Mode 1 is named honestly, not pretended.
     expect(screen.getByText(/One-click connect arrives/)).toBeInTheDocument();
@@ -139,7 +158,7 @@ describe("IntegrationsPanel", () => {
     const user = userEvent.setup();
     render(<IntegrationsPanel />);
 
-    await user.click(await screen.findByRole("button", { name: "Set up" }));
+    await user.click(within(await xCard()).getByRole("button", { name: "Set up" }));
     await user.type(screen.getByLabelText(/Access token/), "dead");
     await user.click(screen.getByRole("button", { name: "Connect" }));
 

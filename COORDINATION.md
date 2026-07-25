@@ -15,6 +15,8 @@
 | vid7-autorun | B-vid.7 one-prompt video auto-run | engine video pipeline orchestration + Create one-prompt door | merged (PR #63) |
 | pub2-drivers | B-pub.2 publisher drivers (LinkedIn → X → Meta; DISARMED, official APIs, zero live calls) | packages/engine/src/social/drivers (new) + platform env extras + driver tests | merged (PR #65) |
 | bint0-window | B-int.0 Integrations contract window (vault table + repos + DESTINATIONS registry + card-state vocab + envelope shape) | packages/contracts/integrations + packages/db credential vault + migration 0018 | merged (PR #66) — FROZEN |
+| bint3-rewire | B-int.3 driver rewire (arming → tenant data; vault-first across publisher/intel/outreach; env = override) — **s70b founder-approved parallel wave** | packages/engine/src/{social,trend,outreach,integrations} + tests (contracts FROZEN — no window needed: absent-platform-is-unarmed already in socialPublishConfigSchema) | in_progress (launched s70b, `agent/b-int3-rewire`) |
+| ui-overhaul-p0 | Workspace UI/UX overhaul PHASE 0 (founder verdict s70b: current look/flow "not working", benchmark Supabase/Vercel-class, evaluate Meta Astryx) — REPORT-ONLY: teardown + plan; founder re-charters before any rebuild wave | docs/research/ui-overhaul-plan.md + wrap only (no UI code, no repo deps) | in_progress (launched s70b, `agent/ui-overhaul-phase0`) |
 
 ## Work queue (open items + their gates)
 

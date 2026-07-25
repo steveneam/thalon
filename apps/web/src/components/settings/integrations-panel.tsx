@@ -258,6 +258,10 @@ function DestinationCard({
   const badge = STATE_BADGE[card.state];
   const connected =
     card.state === "connected" || card.state === "needs_reauth" || card.state === "expiring";
+  // s70 founder catch: a destination that POSTS via the box env (X's 1.0a
+  // seats) must not read "Not connected" — the vault row is absent but the
+  // engine is live. Env-connected is its own honest presentation.
+  const envConnected = card.envOverride && card.state === "not_connected";
 
   async function runValidate() {
     setBusy(true);
@@ -295,11 +299,25 @@ function DestinationCard({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{card.label}</span>
-          <Badge variant={badge.variant}>{badge.label}</Badge>
-          {card.envOverride && (
-            <Badge variant="signal" title="The box environment fills this seat — it takes precedence over the vault row.">
-              env override
+          {envConnected ? (
+            <Badge
+              variant="signal"
+              title="Live via the box environment's credential — no vault row yet; connecting here moves it onto the per-tenant vault."
+            >
+              Connected via env
             </Badge>
+          ) : (
+            <>
+              <Badge variant={badge.variant}>{badge.label}</Badge>
+              {card.envOverride && (
+                <Badge
+                  variant="signal"
+                  title="The box environment fills this seat — it takes precedence over the vault row."
+                >
+                  env override
+                </Badge>
+              )}
+            </>
           )}
         </div>
         {card.state !== "plan_gated" && (
