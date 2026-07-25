@@ -23,6 +23,11 @@ const CONTEXT: CreateContext = {
 
 const BASE = { initialPrompt: "", initialKeyword: "" };
 
+/** The discoverability terms actually riding into generation. */
+function termChips(container: HTMLElement): string[] {
+  return Array.from(container.querySelectorAll(".term-chip")).map((el) => el.textContent ?? "");
+}
+
 /**
  * STEP 2 of the two-step rebuild: the sheet's bands (pinned structurally
  * below) now carry real reads. These pin the honesty rules — a fabricated
@@ -88,6 +93,57 @@ describe("Create (exact-mock rebuild — Create.dc.html)", () => {
     expect(container.querySelector(".pick-chip")).toBeNull();
     expect(screen.getByText("Your prompt only")).toBeInTheDocument();
     expect(screen.queryByText("Short-form video tooling")).not.toBeInTheDocument();
+  });
+
+  it("the chip opens per-field pruning, and dropping ONE field removes only that field from generation", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CreateSurface {...BASE} context={CONTEXT} />);
+
+    // The capture's area is a live generation input before we prune anything.
+    expect(await screen.findByText("Short-form video tooling")).toBeInTheDocument();
+
+    // At rest there is no second band — the panel lives behind the chip itself.
+    expect(container.querySelector(".pick-panel")).toBeNull();
+    const disclosure = screen.getByRole("button", { name: /From intel/ });
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(disclosure);
+    const panel = container.querySelector(".pick-panel");
+    expect(panel).not.toBeNull();
+    expect(within(panel as HTMLElement).getByText("area")).toBeInTheDocument();
+
+    // Drop the area alone.
+    await user.click(screen.getByRole("button", { name: /^Drop area —/ }));
+
+    // It left GENERATION — the term chip is gone. (The value itself stays
+    // visible in the panel, struck through, because dropping is reversible.)
+    expect(termChips(container)).not.toContain("Short-form video tooling");
+    expect(screen.getByRole("button", { name: /From intel/ }).textContent).toContain(
+      "title + angle + hook + source + source text attached",
+    );
+    // The chip itself never disappears: pruning is reversible, dropping is not.
+    expect(container.querySelector(".pick-chip")).not.toBeNull();
+
+    // And it comes back.
+    await user.click(screen.getByRole("button", { name: /Put area back/ }));
+    expect(termChips(container)).toContain("Short-form video tooling");
+  });
+
+  it("pruning every field is the same as no context — honestly stated, still restorable", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<CreateSurface {...BASE} context={CONTEXT} />);
+
+    await user.click(screen.getByRole("button", { name: /From intel/ }));
+    for (const label of ["title", "angle", "hook", "source", "area", "source text"]) {
+      await user.click(screen.getByRole("button", { name: new RegExp(`^Drop ${label} —`) }));
+    }
+
+    expect(screen.getByRole("button", { name: /From intel/ }).textContent).toContain(
+      "nothing attached — your prompt alone",
+    );
+    expect(termChips(container)).not.toContain("Short-form video tooling");
+    // The chip and its panel survive, so the operator can undo.
+    expect(container.querySelector(".pick-panel")).not.toBeNull();
   });
 
   it("discoverability shows the inputs that exist and marks nothing primary before generation", async () => {

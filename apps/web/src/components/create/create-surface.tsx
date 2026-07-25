@@ -4,13 +4,16 @@ import "@/components/create/create.css";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  CONTEXT_FIELDS,
   FAMILIES,
   attachedFields,
   discoverabilityInputs,
   platformLabel,
+  pruneContext,
   runRows,
   seedPrompt,
   voiceSummary,
+  type PrunableField,
   type RunRow,
 } from "@/components/create/create-model";
 import { heatBand } from "@/components/intel/heat-grade";
@@ -76,6 +79,11 @@ export function CreateSurface({
   );
   const [prompt, setPrompt] = useState(() => seedPrompt(context, initialPrompt));
   const [pickDropped, setPickDropped] = useState(false);
+  // Per-field pruning (founder ruling s74): the chip is the only chrome; the
+  // twelve typed fields live behind it as state. Reversible on purpose —
+  // removing a field must not destroy what rode in.
+  const [pruned, setPruned] = useState<ReadonlySet<PrunableField>>(() => new Set());
+  const [pickOpen, setPickOpen] = useState(false);
   const [profileState, setProfileState] = useState<ProfileState>({ resolved: false });
   const [runsStatus, setRunsStatus] = useState<RunsState>("loading");
   const [runs, setRuns] = useState<RunRow[]>([]);
@@ -117,7 +125,11 @@ export function CreateSurface({
   }, [loadRuns]);
 
   const profile = profileState.resolved ? profileState.profile : null;
-  const pick = pickDropped ? null : (context ?? null);
+  const rawPick = pickDropped ? null : (context ?? null);
+  // Everything downstream — the brief fallback, the discoverability terms, the
+  // email compose payload, the video source URL — reads the PRUNED context, so
+  // generation uses only what survived.
+  const pick = pruneContext(rawPick, pruned);
   const platforms = profile ? Object.keys(profile.config.platformProfiles) : [];
   const voice = profile ? voiceSummary(profile.config.voice) : null;
   const terms = discoverabilityInputs(pick, profile);
@@ -211,25 +223,39 @@ export function CreateSurface({
         />
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {pick && (
+          {rawPick && (
             <span className="pick-chip">
-              {typeof pick.score === "number" && (
+              {typeof rawPick.score === "number" && (
                 <span
-                  className={`pill pill-heat-${heatBand(pick.score)}`}
+                  className={`pill pill-heat-${heatBand(rawPick.score)}`}
                   style={{ height: 18, fontSize: 10.5 }}
-                  title={`rank score ${pick.score.toFixed(2)} of 1`}
+                  title={`rank score ${rawPick.score.toFixed(2)} of 1`}
                 >
-                  {heatBand(pick.score) === "hot"
+                  {heatBand(rawPick.score) === "hot"
                     ? "Hot"
-                    : heatBand(pick.score) === "rising"
+                    : heatBand(rawPick.score) === "rising"
                       ? "Rising"
-                      : heatBand(pick.score) === "warm"
+                      : heatBand(rawPick.score) === "warm"
                         ? "Warm"
                         : "Cool"}
                 </span>
               )}
-              {pick.kind === "lead_promote" ? "From a lead" : "From intel"} ·{" "}
-              {attachedFields(pick).join(" + ")} attached
+              {/* The chip's own text is the disclosure — at rest it reads and
+                  sits exactly as the sheet draws it; the panel is the state
+                  behind it (founder ruling s74). */}
+              <button
+                type="button"
+                className="pick-open"
+                aria-expanded={pickOpen}
+                aria-controls="pick-context-panel"
+                title="What rode in — open to keep or drop each field"
+                onClick={() => setPickOpen((open) => !open)}
+              >
+                {rawPick.kind === "lead_promote" ? "From a lead" : "From intel"} ·{" "}
+                {pick
+                  ? `${attachedFields(pick).join(" + ")} attached`
+                  : "nothing attached — your prompt alone"}
+              </button>
               <button
                 type="button"
                 className="btn-quiet"
@@ -250,7 +276,7 @@ export function CreateSurface({
               </button>
             </span>
           )}
-          {initialKeyword && !pick && (
+          {initialKeyword && !rawPick && (
             <span className="pick-chip">
               Search context · <span className="t-data">{initialKeyword}</span>
             </span>
@@ -280,6 +306,57 @@ export function CreateSurface({
             {door.state === "running" ? "Generating + judging…" : "Generate"}
           </button>
         </div>
+
+        {/* Per-field context pruning — the keeper restored as a STATE behind the
+            sheet's own chip rather than a second band (founder ruling s74).
+            Each field is individually droppable and restorable; generation reads
+            only what survives. */}
+        {rawPick && pickOpen && (
+          <div id="pick-context-panel" className="pick-panel">
+            <div className="pick-panel-head">
+              What rode in from this capture — drop anything you don’t want generated on.
+            </div>
+            {CONTEXT_FIELDS.filter(({ key }) => {
+              const v = rawPick[key];
+              return typeof v === "string" && v.length > 0;
+            }).map(({ key, label }) => {
+              const dropped = pruned.has(key);
+              return (
+                <div key={key} className={dropped ? "pick-field off" : "pick-field"}>
+                  <span className="pick-field-label t-data">{label}</span>
+                  <span className="pick-field-value">{String(rawPick[key])}</span>
+                  <button
+                    type="button"
+                    className="btn btn-quiet btn-sm"
+                    aria-pressed={dropped}
+                    // The visible word is the same on every row, so the
+                    // accessible name has to carry the field it acts on.
+                    aria-label={
+                      dropped
+                        ? `Put ${label} back into the context`
+                        : `Drop ${label} — generation stops seeing it`
+                    }
+                    title={
+                      dropped
+                        ? `Put ${label} back into the context`
+                        : `Drop ${label} — generation stops seeing it`
+                    }
+                    onClick={() =>
+                      setPruned((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(key)) next.delete(key);
+                        else next.add(key);
+                        return next;
+                      })
+                    }
+                  >
+                    {dropped ? "Restore" : "Drop"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {door.state === "error" && (
           <p className="t-label" role="alert" style={{ color: "var(--err)" }}>

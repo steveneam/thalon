@@ -48,6 +48,60 @@
   background: var(--n-200);
   font-size: 12.5px;
 }
+/* The chip's text doubles as the pruning disclosure — at rest it must be
+   indistinguishable from the sheet's plain chip text (founder ruling s74:
+   a keeper returns as a state behind the chrome, never as extra chrome). */
+.create-surface .pick-open {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.create-surface .pick-panel {
+  margin-top: 10px;
+  border: 1px solid var(--n-500);
+  border-radius: 10px;
+  background: var(--n-100);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.create-surface .pick-panel-head {
+  font-size: 12px;
+  color: var(--n-800);
+}
+.create-surface .pick-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--n-300);
+  font-size: 12.5px;
+}
+.create-surface .pick-field.off {
+  opacity: 0.45;
+}
+.create-surface .pick-field.off .pick-field-value {
+  text-decoration: line-through;
+}
+.create-surface .pick-field-label {
+  flex: none;
+  width: 84px;
+  color: var(--n-800);
+}
+.create-surface .pick-field-value {
+  flex: 1;
+  min-width: 0;
+  color: var(--n-1000);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .create-surface .cr-grid {
   display: grid;
   grid-template-columns: 1fr 400px;
