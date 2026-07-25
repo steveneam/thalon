@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { SocialMediaUnsupportedError } from "../errors";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
 import { responseDetail, responseJson, SocialDriverApiError } from "./errors";
 
@@ -20,6 +19,11 @@ const createPostResponseSchema = z
   .object({ data: z.object({ id: z.string().min(1) }).loose() })
   .loose();
 
+/** The media upload's essential: the media id the tweet body attaches. */
+const mediaUploadResponseSchema = z
+  .object({ data: z.object({ id: z.string().min(1) }).loose() })
+  .loose();
+
 export interface XDriverConfig {
   accessToken: string;
   /** API base — swappable for a test double. */
@@ -35,9 +39,38 @@ export function createXDriver(config: XDriverConfig): SocialPublisher {
     platform: "x",
     name: "x-v2-create-post",
     async publish(input: SocialPostInput): Promise<SocialPublishReceipt> {
-      // B-pub.3: no media path here yet — refuse before any call.
+      // B-pub.3 media leg: the official v2 media upload (one image; the
+      // door ceilings at one) — multipart bytes in, media id out, attached
+      // to the tweet body. Requires the `media.write` scope on the user
+      // token (operator-side; verify with the version pins before the
+      // first live media post).
+      let mediaIds: string[] | undefined;
       if (input.media && input.media.length > 0) {
-        throw new SocialMediaUnsupportedError("x", input.draftId);
+        const [image] = input.media;
+        const form = new FormData();
+        form.set("media", new Blob([new Uint8Array(image.bytes)], { type: image.contentType }));
+        form.set("media_category", "tweet_image");
+        const uploaded = await fetchImpl(`${baseUrl}/2/media/upload`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${config.accessToken}` },
+          body: form,
+        });
+        if (!uploaded.ok) {
+          throw new SocialDriverApiError(
+            "x",
+            uploaded.status,
+            `media upload failed: ${await responseDetail(uploaded)}`,
+          );
+        }
+        const parsed = mediaUploadResponseSchema.safeParse(await responseJson(uploaded));
+        if (!parsed.success) {
+          throw new SocialDriverApiError(
+            "x",
+            uploaded.status,
+            "media upload response carries no media id — cannot attach the image",
+          );
+        }
+        mediaIds = [parsed.data.data.id];
       }
       // `text` is the judged body VERBATIM — length policy is the
       // platform's to enforce: an over-limit body comes back as the
@@ -48,7 +81,10 @@ export function createXDriver(config: XDriverConfig): SocialPublisher {
           Authorization: `Bearer ${config.accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: input.text }),
+        body: JSON.stringify({
+          text: input.text,
+          ...(mediaIds ? { media: { media_ids: mediaIds } } : {}),
+        }),
       });
       if (!response.ok) {
         throw new SocialDriverApiError("x", response.status, await responseDetail(response));

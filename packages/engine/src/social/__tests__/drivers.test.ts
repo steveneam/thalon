@@ -1,6 +1,6 @@
 import { readEnv } from "@thalon/platform";
 import { describe, expect, it } from "vitest";
-import { PublishRefusedError, SocialMediaUnsupportedError } from "../errors";
+import { PublishRefusedError } from "../errors";
 import {
   createFacebookDriver,
   createInstagramDriver,
@@ -26,6 +26,16 @@ const TOKEN = "tok_secret_never_logged";
 const INPUT: SocialPostInput = {
   draftId: "draft-1",
   text: "Three ways trades businesses turn their site into local work. A thread.",
+};
+const MEDIA_INPUT: SocialPostInput = {
+  ...INPUT,
+  media: [
+    {
+      bytes: Buffer.from("fake-png-bytes"),
+      contentType: "image/png",
+      altText: "Three-panel horse drawing",
+    },
+  ],
 };
 
 interface SeenRequest {
@@ -363,16 +373,6 @@ describe("productionSocialPublisherResolver (s67 — the production caller's one
 describe("LinkedIn media leg (B-pub.3): initializeUpload → PUT bytes → post carries the image URN", () => {
   const IMAGE_URN = "urn:li:image:IMG1";
   const UPLOAD_URL = "https://upload.linkedin.example/img-1";
-  const MEDIA_INPUT: SocialPostInput = {
-    ...INPUT,
-    media: [
-      {
-        bytes: Buffer.from("fake-png-bytes"),
-        contentType: "image/png",
-        altText: "Three-panel horse drawing",
-      },
-    ],
-  };
 
   const mediaRoutes = (
     opts: { init?: () => Response; upload?: () => Response; post?: () => Response } = {},
@@ -463,17 +463,116 @@ describe("LinkedIn media leg (B-pub.3): initializeUpload → PUT bytes → post 
     ]);
   });
 
-  it("x and facebook refuse a media input with SocialMediaUnsupportedError BEFORE any network call", async () => {
-    const neverFetch: typeof fetch = async () => {
-      throw new Error("the media guard must refuse before any call");
-    };
-    for (const driver of [
-      createXDriver({ accessToken: TOKEN, fetchImpl: neverFetch }),
-      createFacebookDriver({ accessToken: TOKEN, pageId: "42", fetchImpl: neverFetch }),
-    ]) {
-      const rejection = await driver.publish(MEDIA_INPUT).catch((err: Error) => err);
-      expect(rejection).toBeInstanceOf(SocialMediaUnsupportedError);
-      expect((rejection as SocialMediaUnsupportedError).platform).toBe(driver.platform);
-    }
+});
+
+describe("X media leg (B-pub.3): v2 media upload → tweet carries media_ids", () => {
+  const xRoutes = (opts: { upload?: () => Response; tweet?: () => Response } = {}) =>
+    capture((url) => {
+      if (url.endsWith("/2/media/upload")) {
+        return (
+          opts.upload?.() ??
+          new Response(JSON.stringify({ data: { id: "media-777" } }), { status: 200 })
+        );
+      }
+      return (
+        opts.tweet?.() ??
+        new Response(JSON.stringify({ data: { id: "tweet-1" } }), { status: 201 })
+      );
+    });
+
+  it("accepted → upload multipart pinned (bytes + tweet_image category), tweet body attaches the media id", async () => {
+    const { seen, fetchImpl } = xRoutes();
+    const driver = createXDriver({ accessToken: TOKEN, fetchImpl });
+
+    const receipt = await driver.publish(MEDIA_INPUT);
+    expect(receipt.externalPostId).toBe("tweet-1");
+
+    expect(seen.map((r) => r.url)).toEqual([
+      "https://api.x.com/2/media/upload",
+      "https://api.x.com/2/tweets",
+    ]);
+    const upload = seen[0];
+    expect(upload.init.method).toBe("POST");
+    expect(headersOf(upload).Authorization).toBe(`Bearer ${TOKEN}`);
+    const form = upload.init.body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get("media_category")).toBe("tweet_image");
+    const blob = form.get("media") as Blob;
+    expect(Buffer.from(await blob.arrayBuffer()).equals(MEDIA_INPUT.media![0].bytes)).toBe(true);
+
+    const tweet = JSON.parse(String(seen[1].init.body)) as Record<string, unknown>;
+    expect(tweet.text).toBe(INPUT.text);
+    expect(tweet.media).toEqual({ media_ids: ["media-777"] });
+  });
+
+  it("a failed upload surfaces as SocialDriverApiError — the tweet request is never made", async () => {
+    const { seen, fetchImpl } = xRoutes({
+      upload: () => new Response(JSON.stringify({ title: "Unauthorized" }), { status: 401 }),
+    });
+    const driver = createXDriver({ accessToken: TOKEN, fetchImpl });
+    const error = await apiError(driver.publish(MEDIA_INPUT));
+    expect(error.status).toBe(401);
+    expect(seen.some((r) => r.url.endsWith("/2/tweets"))).toBe(false);
+  });
+
+  it("a text-only input never touches the upload endpoint", async () => {
+    const { seen, fetchImpl } = xRoutes();
+    const driver = createXDriver({ accessToken: TOKEN, fetchImpl });
+    await driver.publish(INPUT);
+    expect(seen.map((r) => r.url)).toEqual(["https://api.x.com/2/tweets"]);
+  });
+});
+
+describe("Facebook media leg (B-pub.3): Page /photos publish, caption = the judged body", () => {
+  const fbRoutes = (opts: { photo?: () => Response } = {}) =>
+    capture((url) => {
+      if (url.includes("/photos")) {
+        return (
+          opts.photo?.() ??
+          new Response(JSON.stringify({ id: "photo-9", post_id: "42_314" }), { status: 200 })
+        );
+      }
+      return new Response(JSON.stringify({ id: "42_1" }), { status: 200 });
+    });
+
+  it("accepted → one multipart /photos request (bytes + verbatim caption, token in the header only); post_id is the receipt", async () => {
+    const { seen, fetchImpl } = fbRoutes();
+    const driver = createFacebookDriver({ accessToken: TOKEN, pageId: "42", fetchImpl });
+
+    const receipt = await driver.publish(MEDIA_INPUT);
+    expect(receipt.externalPostId).toBe("42_314");
+    expect(receipt.meta).toEqual({
+      pageId: "42",
+      photoId: "photo-9",
+      apiVersion: FACEBOOK_GRAPH_VERSION,
+    });
+
+    expect(seen).toHaveLength(1);
+    expect(seen[0].url).toBe(`https://graph.facebook.com/${FACEBOOK_GRAPH_VERSION}/42/photos`);
+    expect(headersOf(seen[0]).Authorization).toBe(`Bearer ${TOKEN}`);
+    const form = seen[0].init.body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get("caption")).toBe(INPUT.text);
+    const blob = form.get("source") as Blob;
+    expect(Buffer.from(await blob.arrayBuffer()).equals(MEDIA_INPUT.media![0].bytes)).toBe(true);
+    expect(String(seen[0].init.body)).not.toContain(TOKEN);
+  });
+
+  it("a photo response without post_id falls back to the photo node id", async () => {
+    const { fetchImpl } = fbRoutes({
+      photo: () => new Response(JSON.stringify({ id: "photo-only" }), { status: 200 }),
+    });
+    const driver = createFacebookDriver({ accessToken: TOKEN, pageId: "42", fetchImpl });
+    const receipt = await driver.publish(MEDIA_INPUT);
+    expect(receipt.externalPostId).toBe("photo-only");
+  });
+
+  it("a refused photo publish surfaces as SocialDriverApiError with no id invented", async () => {
+    const { fetchImpl } = fbRoutes({
+      photo: () => new Response(JSON.stringify({ error: { message: "denied" } }), { status: 403 }),
+    });
+    const driver = createFacebookDriver({ accessToken: TOKEN, pageId: "42", fetchImpl });
+    const error = await apiError(driver.publish(MEDIA_INPUT));
+    expect(error.status).toBe(403);
   });
 });

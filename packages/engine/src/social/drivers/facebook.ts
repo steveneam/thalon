@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { SocialMediaUnsupportedError } from "../errors";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
 import { responseDetail, responseJson, SocialDriverApiError } from "./errors";
 
@@ -29,6 +28,15 @@ export const FACEBOOK_GRAPH_VERSION = "v23.0";
 /** The one field a post NEEDS from the platform — the accepted `{page-id}_{post-id}` composite id. */
 const feedPostResponseSchema = z.object({ id: z.string().min(1) }).loose();
 
+/**
+ * The photo publish's essentials: `post_id` is the FEED post the photo
+ * created (the ledger id the permalink hangs off); `id` (the photo node)
+ * is the fallback when the API omits post_id.
+ */
+const photoPostResponseSchema = z
+  .object({ id: z.string().min(1), post_id: z.string().min(1).optional() })
+  .loose();
+
 export interface FacebookDriverConfig {
   accessToken: string;
   /** The target Page id (SOCIAL_FACEBOOK_PAGE_ID) — assembly-time config, not a credential. */
@@ -46,9 +54,43 @@ export function createFacebookDriver(config: FacebookDriverConfig): SocialPublis
     platform: "facebook",
     name: "facebook-page-feed",
     async publish(input: SocialPostInput): Promise<SocialPublishReceipt> {
-      // B-pub.3: no media path here yet — refuse before any call.
+      // B-pub.3 media leg: a Page photo post — the official Graph
+      // `/{page-id}/photos` publish (one image; the door ceilings at one).
+      // `caption` carries the judged body VERBATIM; the token stays in the
+      // Authorization header, never the form body or URL.
       if (input.media && input.media.length > 0) {
-        throw new SocialMediaUnsupportedError("facebook", input.draftId);
+        const [image] = input.media;
+        const form = new FormData();
+        form.set("source", new Blob([new Uint8Array(image.bytes)], { type: image.contentType }));
+        form.set("caption", input.text);
+        const response = await fetchImpl(
+          `${baseUrl}/${FACEBOOK_GRAPH_VERSION}/${config.pageId}/photos`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${config.accessToken}` },
+            body: form,
+          },
+        );
+        if (!response.ok) {
+          throw new SocialDriverApiError(
+            "facebook",
+            response.status,
+            `photo publish failed: ${await responseDetail(response)}`,
+          );
+        }
+        const parsed = photoPostResponseSchema.safeParse(await responseJson(response));
+        if (!parsed.success) {
+          throw new SocialDriverApiError(
+            "facebook",
+            response.status,
+            "2xx photo response without a photo/post id — refusing to treat as posted",
+          );
+        }
+        const externalPostId = parsed.data.post_id ?? parsed.data.id;
+        return {
+          externalPostId,
+          meta: { pageId: config.pageId, photoId: parsed.data.id, apiVersion: FACEBOOK_GRAPH_VERSION },
+        };
       }
       // `message` is the judged body VERBATIM. Form encoding is the Graph
       // API's canonical POST body shape.

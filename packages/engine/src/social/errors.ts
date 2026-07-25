@@ -90,26 +90,6 @@ export class SocialCredentialInvalidError extends PublishRefusedError {
 }
 
 /**
- * B-pub.3: the draft carries media but this platform's driver has no media
- * path — refusing is the only honest move (silently dropping the image
- * would publish a DIFFERENT post than the operator approved). Additive per
- * driver: LinkedIn ships the first image leg; each other platform's media
- * support is its own reviewed change.
- */
-export class SocialMediaUnsupportedError extends PublishRefusedError {
-  readonly refusal = "media_unsupported";
-  constructor(
-    public readonly platform: SocialPlatform,
-    public readonly draftId: string,
-  ) {
-    super(
-      `draft "${draftId}" carries media but the "${platform}" driver has no media path yet — the image would be silently dropped; publish text-only from a media-free draft, or wait for the platform's media leg`,
-    );
-    this.name = "SocialMediaUnsupportedError";
-  }
-}
-
-/**
  * Rung c: the tenant's social config refuses — no active brand profile, no
  * `social` block, or no entry for the target platform. Absence disarms
  * (the outreach OutreachDisarmedError convention): an unconfigured

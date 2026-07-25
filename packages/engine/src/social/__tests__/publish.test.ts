@@ -20,7 +20,6 @@ import {
   SocialDailyCapReachedError,
   SocialDraftNotApprovedError,
   SocialFormatNotPublishableError,
-  SocialMediaUnsupportedError,
   SocialPublishDisarmedError,
   SocialPublisherDisarmedError,
 } from "../errors";
@@ -504,7 +503,7 @@ describe("rung f media (B-pub.3): mediaRefs load verified and travel to the driv
     expect(publisher.calls).toEqual([]);
   });
 
-  it("a media draft to a media-less driver surfaces SocialMediaUnsupportedError — refuses, never a silent text-only post", async () => {
+  it("a media draft through a real driver end-to-end: door-loaded bytes reach X's upload wire", async () => {
     const f = await setup({ social: { x: { maxPostsPerDay: 2 } } });
     const { store, root } = await mediaStore();
     try {
@@ -520,20 +519,29 @@ describe("rung f media (B-pub.3): mediaRefs load verified and travel to the driv
         meta: { mediaRefs: [{ ref, contentType: "image/png" }] },
       });
       await approve(f.ctx, f.repos, draft);
-      const neverFetch: typeof fetch = async () => {
-        throw new Error("the guard must refuse before any platform call");
+      const uploads: FormData[] = [];
+      const fakeFetch: typeof fetch = async (url) => {
+        if (String(url).endsWith("/2/media/upload")) {
+          return new Response(JSON.stringify({ data: { id: "media-1" } }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ data: { id: "tweet-1" } }), { status: 201 });
       };
-      const driver = createXDriver({ accessToken: "tok", fetchImpl: neverFetch });
+      const capturing: typeof fetch = async (url, init) => {
+        if (String(url).endsWith("/2/media/upload")) uploads.push(init?.body as FormData);
+        return fakeFetch(url, init);
+      };
+      const driver = createXDriver({ accessToken: "tok", fetchImpl: capturing });
 
-      const rejection = await publishApprovedDraft(
+      const { publication } = await publishApprovedDraft(
         { ctx: f.ctx, repos: f.repos, resolvePublisher: () => driver, objectStore: store },
         { draftId: draft.id, platform: "x" },
         NOW,
-      ).catch((err: Error) => err);
+      );
 
-      expect(rejection).toBeInstanceOf(SocialMediaUnsupportedError);
-      expect((rejection as SocialMediaUnsupportedError).platform).toBe("x");
-      expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+      expect(publication.externalPostId).toBe("tweet-1");
+      expect(uploads).toHaveLength(1);
+      const blob = uploads[0].get("media") as Blob;
+      expect(Buffer.from(await blob.arrayBuffer()).equals(bytes)).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

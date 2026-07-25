@@ -5,7 +5,6 @@ export {
   SocialDailyCapReachedError,
   SocialDraftNotApprovedError,
   SocialFormatNotPublishableError,
-  SocialMediaUnsupportedError,
   SocialPublishDisarmedError,
   SocialPublisherDisarmedError,
 } from "./errors";
