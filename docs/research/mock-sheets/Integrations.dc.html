@@ -1,0 +1,122 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Integrations' — exported s72 from the founder-verdicted
+     claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
+     beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
+     as EXACT' — placeholders where the backend lacks data, never layout drift).
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .int-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+          .int-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; }
+          .int-head { display: flex; align-items: center; gap: 9px; }
+          .int-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+          .int-sub { font-size: 12px; color: var(--n-900); }
+          .int-actions { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+          .plat-ico { width: 26px; height: 26px; border-radius: 7px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex: none; }
+          .seat-row { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-top: 1px solid var(--n-400); font-size: 13px; }
+          .seat-row:first-child { border-top: none; }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Integrations">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Calendar</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content" style="gap:16px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="t-label">Settings ›</span>
+              <h1 class="t-headline">Integrations</h1>
+              <div style="flex:1"></div>
+              <a class="card-link" href="#">Published · 4 items →</a>
+            </div>
+            <div class="int-grid">
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">in</div><span class="int-name">LinkedIn</span><span class="pill pill-ok">Connected</span></div>
+                <span class="int-sub">Posting as Steven · validated against the live API version</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Validate</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">f</div><span class="int-name">Facebook</span><span class="pill pill-ok">Connected</span></div>
+                <span class="int-sub">Posting to the MacTechDish page</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Validate</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">𝕏</div><span class="int-name">X</span><span class="pill pill-idle">Connected via env</span></div>
+                <span class="int-sub">OAuth 1.0a keys from the environment — vault connect available</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Move into vault</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">ig</div><span class="int-name">Instagram</span><span class="pill pill-idle">Almost ready</span></div>
+                <span class="int-sub">Needs public image URLs — shipping — then the Graph connect</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Set up</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">yt</div><span class="int-name">YouTube</span><span class="pill pill-ok">Intel connected</span></div>
+                <span class="int-sub">Feeding trend sweeps · posting arrives with the video door</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Validate</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">tk</div><span class="int-name">TikTok</span><span class="pill pill-idle">Not connected</span></div>
+                <span class="int-sub">Official API only — connect when the app review clears</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Set up</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">bl</div><span class="int-name">Blog · your site</span><span class="pill pill-ok">Live</span></div>
+                <span class="int-sub">First-class destination — 4 published, RSS on</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Open /blog ↗</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">bs</div><span class="int-name">Bluesky</span><span class="pill pill-ok">Intel connected</span></div>
+                <span class="int-sub">Feeding trend sweeps · posting driver ready to arm</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Validate</div></div>
+              </div>
+              <div class="int-card">
+                <div class="int-head"><div class="plat-ico">@</div><span class="int-name">Email · outreach</span><span class="pill pill-ok">Connected</span></div>
+                <span class="int-sub">Drafts only by doctrine — sending stays two-key armed</span>
+                <div class="int-actions"><div class="btn btn-ghost btn-sm">Validate</div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <span class="t-title">Your AI</span>
+                <span class="pill pill-idle">3 model seats</span>
+                <div style="flex:1"></div>
+                <span class="t-label">bring-your-own connect arrives with the BYO-AI bucket</span>
+              </div>
+              <div class="seat-row"><span style="width:110px;color:var(--n-900);font-size:12.5px">Draft seat</span><span style="flex:1">opus-5 · via your subscription</span><span class="pill pill-idle">env</span></div>
+              <div class="seat-row"><span style="width:110px;color:var(--n-900);font-size:12.5px">Judge seat</span><span style="flex:1">opus-5 · via your subscription</span><span class="pill pill-idle">env</span></div>
+              <div class="seat-row"><span style="width:110px;color:var(--n-900);font-size:12.5px">Embed seat</span><span style="flex:1">gateway · metered per tenant</span><span class="pill pill-idle">env</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

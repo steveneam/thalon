@@ -1,0 +1,174 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Calendar' — exported s72 from the founder-verdicted
+     claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
+     beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
+     as EXACT' — placeholders where the backend lacks data, never layout drift).
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          /* ── Time-grid week: hours on the vertical axis, 44px/hour, 06:00–21:00 ── */
+          .cal { flex: 1; display: flex; flex-direction: column; min-height: 0; border: 1px solid var(--n-400); border-radius: var(--r-card); background: var(--n-100); overflow: hidden; }
+          .cal-days { display: grid; grid-template-columns: 64px repeat(7, 1fr); border-bottom: 1px solid var(--n-400); }
+          .cal-dh { padding: 9px 10px; border-left: 1px solid var(--n-400); display: flex; align-items: baseline; gap: 6px; }
+          .cal-dh b { font-size: 13px; font-weight: 600; }
+          .cal-dh span { font-size: 11px; color: var(--n-900); }
+          .cal-dh.today b { color: var(--act); }
+          .allday { display: grid; grid-template-columns: 64px repeat(7, 1fr); border-bottom: 1px solid var(--n-400); background: var(--n-bg); }
+          .allday-gut { font-size: 10.5px; color: var(--n-800); padding: 7px 8px; text-align: right; }
+          .allday-cell { border-left: 1px solid var(--n-400); padding: 5px 6px; min-height: 30px; }
+          .quiet { display: grid; grid-template-columns: 64px 1fr; border-bottom: 1px solid var(--n-400); background: var(--n-bg); }
+          .quiet-band { display: flex; align-items: center; gap: 8px; padding: 4px 10px; font-size: 10.5px; color: var(--n-800); border-left: 1px solid var(--n-400); }
+          .grid-wrap { display: grid; grid-template-columns: 64px repeat(7, 1fr); position: relative; }
+          .gut { position: relative; height: 660px; }
+          .gut span { position: absolute; right: 8px; transform: translateY(-6px); font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
+          .dcol { position: relative; height: 660px; border-left: 1px solid var(--n-400); background-image: repeating-linear-gradient(to bottom, var(--n-300) 0 1px, transparent 1px 44px); }
+          .dcol.today { background-color: color-mix(in oklab, var(--act-subtle) 30%, transparent); }
+          .ev { position: absolute; left: 4px; right: 4px; border-radius: 6px; border: 1px solid var(--n-500); background: var(--n-200); padding: 4px 7px; font-size: 11px; color: var(--n-900); overflow: hidden; cursor: grab; }
+          .ev b { display: block; font-size: 11.5px; font-weight: 600; color: var(--n-1000); line-height: 1.3; }
+          .ev .grip { position: absolute; top: 3px; right: 5px; color: var(--n-700); font-size: 9px; letter-spacing: 1px; }
+          .ev.done { opacity: 0.6; }
+          .ev-ok { background: var(--ok-subtle); border-color: color-mix(in oklab, var(--ok) 35%, var(--n-500)); }
+          .ev-ok b { color: var(--ok); }
+          .ev-plan { background: var(--n-100); border-style: dashed; }
+          .ev-plan.sel { border-color: var(--act); border-style: solid; box-shadow: 0 0 0 1px var(--act); cursor: grabbing; }
+          .flag { color: var(--warn); font-size: 10px; }
+          .nowline { position: absolute; left: 64px; right: 0; height: 2px; background: var(--err); z-index: 3; }
+          .nowline::before { content: ""; position: absolute; left: -1px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--err); }
+          .ghost { position: absolute; left: 4px; right: 4px; height: 40px; border: 1.5px dashed var(--act); border-radius: 6px; background: var(--act-subtle); z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: var(--act); }
+          .detail { position: absolute; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 10px; box-shadow: 0 8px 28px oklch(0 0 0 / 0.45); z-index: 4; display: flex; flex-direction: column; gap: 8px; }
+          .amber-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; background: var(--warn-subtle); color: var(--warn); font-size: 11px; font-weight: 500; padding: 4px 8px; cursor: pointer; }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Calendar">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Calendar</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content" style="gap:12px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <h1 class="t-headline">Calendar</h1>
+              <div class="btn btn-ghost btn-sm" style="padding:0 8px">‹</div>
+              <span class="t-title">21 – 27 July</span>
+              <div class="btn btn-ghost btn-sm" style="padding:0 8px">›</div>
+              <div class="seg"><span class="seg-opt on">Week</span><span class="seg-opt">Month</span><span class="seg-opt">Agenda</span></div>
+              <div class="seg"><span class="seg-opt on">All</span><span class="seg-opt">Plans</span><span class="seg-opt">Needs you</span><span class="seg-opt">⚑ Flagged</span></div>
+              <div style="flex:1"></div>
+              <span class="pill pill-idle">3 planned</span>
+              <span class="t-label">drag to reschedule — snaps to cadence-legal slots</span>
+            </div>
+            <div class="cal">
+              <div class="cal-days">
+                <div></div>
+                <div class="cal-dh"><b>Mon</b><span>21</span></div>
+                <div class="cal-dh"><b>Tue</b><span>22</span></div>
+                <div class="cal-dh"><b>Wed</b><span>23</span></div>
+                <div class="cal-dh"><b>Thu</b><span>24</span></div>
+                <div class="cal-dh today"><b>Fri</b><span>25 · today</span></div>
+                <div class="cal-dh"><b>Sat</b><span>26</span></div>
+                <div class="cal-dh"><b>Sun</b><span>27</span></div>
+              </div>
+              <div class="allday">
+                <div class="allday-gut">waiting</div>
+                <div class="allday-cell"></div>
+                <div class="allday-cell"></div>
+                <div class="allday-cell"><span class="amber-chip">LinkedIn · your review · 26h →</span></div>
+                <div class="allday-cell"></div>
+                <div class="allday-cell"></div>
+                <div class="allday-cell"></div>
+                <div class="allday-cell"></div>
+              </div>
+              <div class="quiet">
+                <div class="allday-gut">00–06</div>
+                <div class="quiet-band">quiet hours · collapsed — nothing scheduled · <a class="card-link" href="#" style="font-size:10.5px">expand</a></div>
+              </div>
+              <div class="grid-wrap">
+                <div class="nowline" style="top:348px"></div>
+                <div class="gut">
+                  <span style="top:0">06:00</span>
+                  <span style="top:88px">08:00</span>
+                  <span style="top:176px">10:00</span>
+                  <span style="top:264px">12:00</span>
+                  <span style="top:352px">14:00</span>
+                  <span style="top:440px">16:00</span>
+                  <span style="top:528px">18:00</span>
+                  <span style="top:616px">20:00</span>
+                </div>
+                <div class="dcol">
+                  <div class="ev done ev-ok" style="top:22px;height:38px"><b>Sweep · ran ✓</b>06:30 · 4 cards in</div>
+                </div>
+                <div class="dcol"></div>
+                <div class="dcol"></div>
+                <div class="dcol">
+                  <div class="ev done ev-ok" style="top:455px;height:38px"><b>Blog · published ✓</b>16:20 · view live ↗</div>
+                </div>
+                <div class="dcol today">
+                  <div class="ev" style="top:374px;height:38px"><b>Sweep · engine</b>14:30 · YouTube + Bluesky</div>
+                  <div class="ev ev-plan" style="top:528px;height:42px"><span class="grip">⋮⋮</span><b>Planned · Facebook <span class="flag">⚑</span></b>18:00 · launch film post</div>
+                </div>
+                <div class="dcol">
+                  <div class="ev ev-plan" style="top:220px;height:42px"><span class="grip">⋮⋮</span><b>Planned · X</b>11:00 · export-queue post</div>
+                  <div class="ghost" style="top:396px">drop · 15:00 ✓ cadence-legal</div>
+                </div>
+                <div class="dcol">
+                  <div class="ev ev-plan sel" style="top:154px;height:42px"><span class="grip">⋮⋮</span><b>Planned · LinkedIn</b>09:30 · pipeline thread</div>
+                </div>
+                <div class="detail" style="top:208px;right:2px;width:184px;padding:11px 12px">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="t-title" style="font-size:12.5px">Planned · LinkedIn</span>
+                    <div style="flex:1"></div>
+                    <span class="flag" title="flag this slot">⚑</span>
+                    <span style="color:var(--n-800);cursor:pointer">×</span>
+                  </div>
+                  <span class="t-label" style="font-size:11px">Sun 27 · 09:30 · door unarmed — a plan</span>
+                  <div class="excerpt" style="white-space:normal;font-size:11.5px"><em>“The pipeline thread — what deterministic video changes…”</em></div>
+                  <a class="card-link" href="#" style="white-space:nowrap">Open draft →</a>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="btn btn-ghost btn-sm" style="flex:1;padding:0 6px">Reschedule</div>
+                    <div class="btn btn-danger btn-sm" style="padding:0 7px">Remove</div>
+                  </div>
+                  <span class="t-label" style="font-size:10.5px">illegal slots refuse the drop</span>
+                </div>
+              </div>
+              <div class="quiet" style="border-bottom:none;border-top:1px solid var(--n-400)">
+                <div class="allday-gut">21–24</div>
+                <div class="quiet-band">quiet hours · collapsed · <a class="card-link" href="#" style="font-size:10.5px">expand</a></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px">
+              <span class="t-label">Cadence — LinkedIn ≤ 2/day · X ≤ 4/day · 90m gap</span>
+              <div style="flex:1"></div>
+              <span class="t-label">Plans, not uploads — each platform's door arms on your GO.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

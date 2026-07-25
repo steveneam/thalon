@@ -1,0 +1,169 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Wave 0 - Triage spine' — exported s72 from the founder-verdicted
+     claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
+     beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
+     as EXACT' — placeholders where the backend lacks data, never layout drift).
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <meta name="design_doc_mode" content="canvas" />
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          html { background: oklch(0.11 0.008 262); }
+          body { background: oklch(0.11 0.008 262); }
+          .frame-label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-data); font-size: 11px; color: var(--n-900); background: var(--n-100); border: 1px solid var(--n-400); border-radius: 6px; padding: 4px 10px; margin-bottom: 10px; cursor: grab; }
+          .frame { border: 1px solid var(--n-500); border-radius: 12px; overflow: hidden; background: var(--n-bg); }
+          .leg-sec { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--n-400); }
+          .leg-sec:first-child { border-top: none; }
+          .swatch { display: flex; flex-direction: column; gap: 4px; align-items: center; flex: 1; min-width: 0; }
+          .sw-box { width: 100%; height: 30px; border-radius: 6px; border: 1px solid var(--n-500); }
+          .sw-cap { font-size: 9.5px; font-family: var(--font-data); color: var(--n-900); white-space: nowrap; }
+        </style>
+      </helmet>
+      <div style="position:absolute;left:40px;top:24px;display:flex;flex-direction:column;gap:4px" data-screen-label="Header">
+        <div style="font-size:20px;font-weight:600;color:var(--n-1000)">Thalon workspace — wave 0 mock · thirteen surfaces, the complete nav</div>
+        <div style="font-size:13px;color:var(--n-900)">Dark default · row 1 = the triage spine (wave 1 builds first) · row 2 = the making surfaces · row 3 = runs, board, profiles, calendar, library · your verdict gates the build. Media-first + visible-provenance throughout.</div>
+      </div>
+      <div style="position:absolute;left:40px;top:110px;width:660px" data-screen-label="System">
+        <div class="frame-label" data-drags-parent="1">system · the theme itself</div>
+        <div class="frame" style="border-radius:12px">
+          <div class="leg-sec">
+            <span class="t-title">Neutral ramp — usage-mapped: each step is a rule</span>
+            <div style="display:flex;gap:6px">
+              <div class="swatch"><div class="sw-box" style="background:var(--n-bg)"></div><span class="sw-cap">bg</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-rail)"></div><span class="sw-cap">rail</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-100)"></div><span class="sw-cap">card</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-200)"></div><span class="sw-cap">hover</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-300)"></div><span class="sw-cap">active</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-400)"></div><span class="sw-cap">border</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-500)"></div><span class="sw-cap">b-hover</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-600)"></div><span class="sw-cap">b-active</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-700)"></div><span class="sw-cap">fill</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-800)"></div><span class="sw-cap">fill-hi</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-900)"></div><span class="sw-cap">text-2</span></div>
+              <div class="swatch"><div class="sw-box" style="background:var(--n-1000)"></div><span class="sw-cap">text-1</span></div>
+            </div>
+            <span class="t-label">Warm charcoal, hue-shifted toward ink-navy — the landing's Night-Ink DNA, now the workspace default. Light mode = the toggle.</span>
+          </div>
+          <div class="leg-sec">
+            <span class="t-title">Type — three roles, one family</span>
+            <div style="display:flex;align-items:baseline;gap:18px;flex-wrap:wrap">
+              <span class="t-headline">Headline 17</span>
+              <span class="t-title">Title 14</span>
+              <span class="t-body">Body 14</span>
+              <span class="t-label">Label 12.5</span>
+              <span class="t-big" style="font-size:24px">248</span>
+              <span class="t-data">mono 11.5 · data only</span>
+            </div>
+            <span class="t-label">Geist everywhere; Geist Mono demoted to the allowlist — timestamps, ids in detail views, judge codes in tooltips. No uppercase scaffolding anywhere.</span>
+          </div>
+          <div class="leg-sec">
+            <span class="t-title">Brand · one accent · semantic status</span>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div class="rail-mark" title="the mark — landing amber"></div>
+              <div class="btn btn-primary btn-sm">Action — blue acts</div>
+              <span class="pill pill-ok">Passed</span>
+              <span class="pill pill-warn">Needs you</span>
+              <span class="pill pill-err">Blocked</span>
+              <span class="pill pill-idle">Neutral</span>
+            </div>
+            <span class="t-label">The mark wears the landing amber — brand identity, never status. Status amber appears ONLY where work waits on you. Green = passed, red = failed/blocked.</span>
+          </div>
+          <div class="leg-sec">
+            <span class="t-title">Thermal scale — survives as word-in-pill</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="pill pill-heat-cool">Cool</span>
+              <span class="pill pill-heat-warm">Warm</span>
+              <span class="pill pill-heat-rising">Rising</span>
+              <span class="pill pill-heat-hot">Hot</span>
+              <div class="bar-trough" style="width:60px"><div class="bar-fill" style="width:90%;background:var(--heat-hot)"></div></div>
+              <span class="t-label">magnitude bar · exact score in tooltip</span>
+            </div>
+          </div>
+          <div class="leg-sec">
+            <span class="t-title">Doctrines this mock carries</span>
+            <span class="t-label">MEDIA-FIRST — every row referencing media shows a frame or excerpt · EVERY FACT IS A DOOR — tiles, rows, and stamps all deep-link · VISIBLE PROVENANCE — term chips + coverage warnings + attributed version strips; the judge gates, it never rewrites · what died: mono scaffolding · self-narrating UI · hexes at eye level · dead numerals. The bones (Four Verbs, Source-Link, honest states, bounded lists, j/k + ⌘K) all survive.</span>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute;left:760px;top:110px" data-screen-label="Dashboard frame">
+        <div class="frame-label" data-drags-parent="1">1 · dashboard — stat tiles + needs-you with excerpts</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Dashboard" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:2260px;top:110px" data-screen-label="Approve frame">
+        <div class="frame-label" data-drags-parent="1">2 · approve — media-first queue · discoverability coverage · attributed versions</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Approve" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:3760px;top:110px" data-screen-label="Intel frame">
+        <div class="frame-label" data-drags-parent="1">3 · intel — the dossier, thumbnails, multi-source</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Intel" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:40px;top:1160px" data-screen-label="Videos frame">
+        <div class="frame-label" data-drags-parent="1">4 · video editor — multi-track EDL: video · music · captions, magnetic snap</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Videos" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:1540px;top:1160px" data-screen-label="Create frame">
+        <div class="frame-label" data-drags-parent="1">5 · create — one-prompt door · discoverability targets visible + editable</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Create" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:3040px;top:1160px" data-screen-label="Leads frame">
+        <div class="frame-label" data-drags-parent="1">6 · leads / crm — scored list + dossier + draft-only outreach</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Leads" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:4540px;top:1160px" data-screen-label="Sites frame">
+        <div class="frame-label" data-drags-parent="1">7 · sites — prompt-to-site door + the portfolio as templates</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Sites" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:6040px;top:1160px" data-screen-label="Integrations frame">
+        <div class="frame-label" data-drags-parent="1">8 · integrations — honest destination cards + your AI seats</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Integrations" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:40px;top:2210px" data-screen-label="Runs frame">
+        <div class="frame-label" data-drags-parent="1">9 · runs — day-grouped history with outcomes, failures loud</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Runs" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:1540px;top:2210px" data-screen-label="Board frame">
+        <div class="frame-label" data-drags-parent="1">10 · pipeline board — the kanban lens on the journey (dashboard toggle)</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Board" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:3040px;top:2210px" data-screen-label="Profiles frame">
+        <div class="frame-label" data-drags-parent="1">11 · profiles — the wizard: what you set here powers everything</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Profiles" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:4540px;top:2210px" data-screen-label="Calendar frame">
+        <div class="frame-label" data-drags-parent="1">12 · calendar — week default, honest event grammar, plans not uploads</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Calendar" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+      <div style="position:absolute;left:6040px;top:2210px" data-screen-label="Library frame">
+        <div class="frame-label" data-drags-parent="1">13 · library — the grounding shelf: ingest door + sources with uses</div>
+        <div class="frame" style="width:1440px;height:940px">
+          <dc-import name="Library" hint-size="1440px,940px"></dc-import>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

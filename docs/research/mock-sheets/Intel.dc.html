@@ -1,0 +1,185 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Intel' — exported s72 from the founder-verdicted
+     claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
+     beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
+     as EXACT' — placeholders where the backend lacks data, never layout drift).
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .tab { padding: 6px 2px; margin-right: 18px; font-size: 13.5px; font-weight: 500; color: var(--n-900); border-bottom: 2px solid transparent; cursor: pointer; }
+          .tab.on { color: var(--n-1000); border-bottom-color: var(--act); }
+          .watch-chip { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px; border: 1px solid var(--n-400); border-radius: var(--r-pill); font-size: 12.5px; background: var(--n-100); }
+          .watch-chip .x { color: var(--n-800); font-size: 13px; cursor: pointer; }
+          .watch-add { border-style: dashed; color: var(--n-900); background: transparent; cursor: pointer; }
+          .heat-bar { width: 44px; height: 5px; border-radius: 3px; background: var(--n-300); overflow: hidden; }
+          .dossier-h { font-size: 16.5px; font-weight: 600; line-height: 1.4; max-width: 72ch; }
+          .prov { font-size: 12px; color: var(--n-900); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+          .sec-label { font-size: 12.5px; font-weight: 600; color: var(--n-900); }
+          .reason { display: grid; grid-template-columns: 96px 60px 1fr; gap: 12px; align-items: center; font-size: 12.5px; }
+          .reason .rname { color: var(--n-900); }
+          .reason .rtext { color: var(--n-1000); }
+          .radio { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--n-600); flex: none; }
+          .radio.on { border-color: var(--act); box-shadow: inset 0 0 0 3px var(--n-100); background: var(--act); }
+          .pick-row { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 5px 0; }
+          .copy-ico { color: var(--n-800); font-size: 11px; border: 1px solid var(--n-400); border-radius: 5px; padding: 2px 6px; cursor: pointer; }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+          .thumb { width: 148px; height: 96px; border-radius: 8px; flex: none; border: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 8px, var(--n-100) 8px, var(--n-100) 16px); display: flex; align-items: center; justify-content: center; }
+          .thumb span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Intel">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Calendar</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content" style="gap:16px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <h1 class="t-headline">Intel</h1>
+              <span class="pill pill-idle"><span class="dot" style="background:var(--heat-rising)"></span>4 rising</span>
+              <div style="display:flex;margin-left:10px">
+                <span class="tab on">Trends</span>
+                <span class="tab">Search</span>
+              </div>
+              <div style="flex:1"></div>
+              <span class="t-label">Swept 2h ago · next in 4h · YouTube + Bluesky</span>
+              <div class="btn btn-ghost btn-sm">Sweep now</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="t-label" style="margin-right:2px">Watching</span>
+              <span class="watch-chip">AI content automation<span class="x">×</span></span>
+              <span class="watch-chip">Short-form video tooling<span class="x">×</span></span>
+              <span class="watch-chip watch-add">+ Add area or keyword</span>
+            </div>
+            <div class="card">
+              <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span class="pill pill-heat-hot">Hot</span>
+                  <div class="heat-bar" title="rank score 0.90 of 1 — Short-form video tooling"><div class="bar-fill" style="width:90%;background:var(--heat-hot)"></div></div>
+                  <span class="pill" style="border:1px solid var(--heat-rising);color:var(--heat-rising)">Outlier</span>
+                  <span class="t-label">rising 3h · catchable</span>
+                  <div style="flex:1"></div>
+                  <span class="btn btn-quiet btn-sm">Dismiss</span>
+                </div>
+                <div style="display:flex;gap:16px">
+                  <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                    <h2 class="dossier-h">Rendered our whole launch video from HTML. No timeline editor, no export queue — a build step. Thread with the pipeline.</h2>
+                    <div class="prov">
+                      <span style="font-weight:500;color:var(--n-1000)">@framecraft.example</span>
+                      <span>·</span><span>24.6k views</span>
+                      <span>·</span><span>3h ago</span>
+                      <span>·</span><span>Bluesky</span>
+                      <span>·</span><a href="#">Original post ↗</a>
+                      <span>·</span><span>Short-form video tooling</span>
+                    </div>
+                  </div>
+                  <div class="thumb"><span>post media</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+                  <div style="display:flex;flex-direction:column;gap:9px">
+                    <span class="sec-label">Why it's moving</span>
+                    <div class="reason" title="sweep 8210.5 views/h vs 3× account baseline 154.2 views/h">
+                      <span class="rname">Velocity 0.92</span>
+                      <div class="bar-trough"><div class="bar-fill" style="width:92%;background:var(--heat-hot)"></div></div>
+                      <span class="rtext">8,210 views/h — 53× the account's baseline</span>
+                    </div>
+                    <div class="reason" title="published 3h ago, half-life 24h">
+                      <span class="rname">Freshness 0.92</span>
+                      <div class="bar-trough"><div class="bar-fill" style="width:92%;background:var(--heat-rising)"></div></div>
+                      <span class="rtext">published 3h ago — well inside the window</span>
+                    </div>
+                    <div class="reason" title='relevance 0.84 to area "Short-form video tooling" (embedding cosine 0.68)'>
+                      <span class="rname">Relevance 0.84</span>
+                      <div class="bar-trough"><div class="bar-fill" style="width:84%;background:var(--heat-warm)"></div></div>
+                      <span class="rtext">close match to “Short-form video tooling”</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <span class="sec-label">Ready to create</span>
+                    <div class="pick-row">
+                      <span class="radio on"></span>
+                      <span style="flex:1">Video as a build step: rendering launch clips from HTML</span>
+                      <span class="copy-ico">copy</span>
+                    </div>
+                    <div class="pick-row">
+                      <span class="radio"></span>
+                      <span style="flex:1">No timeline, no export queue — what deterministic video changes</span>
+                      <span class="copy-ico">copy</span>
+                    </div>
+                    <div class="pick-row" style="color:var(--n-900)">
+                      <span class="radio"></span>
+                      <span style="flex:1">Angle · editor-vs-pipeline: when a timeline wins, when a build step does</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-style:italic;color:var(--n-900);padding-top:2px">
+                      <span style="flex:1">“Our launch video has no editor file. It has a build step.”</span>
+                      <span class="copy-ico" style="font-style:normal">copy</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;border-top:1px solid var(--n-400);margin-top:2px;padding-top:14px">
+                  <div class="btn btn-primary" title="pre-picked: video-native source — a clip meets it in kind">Create video · suggested</div>
+                  <div class="btn btn-ghost">Post</div>
+                  <div class="btn btn-ghost">Page</div>
+                  <span class="t-label" style="margin-left:6px">the pick rides along — title, angle, hook, source</span>
+                  <div style="flex:1"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <span class="t-title">More rising</span>
+                <span class="t-label">3 cards</span>
+              </div>
+              <div class="row">
+                <span class="pill pill-heat-rising">Rising</span>
+                <div class="thumb-sm"><span>yt thumb</span></div>
+                <span style="flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Agent-driven editing: the timeline learns to cut for you</span>
+                <span class="t-data">YouTube · 12.1k · 5h ago</span>
+                <a href="#" style="font-size:12px">↗</a>
+              </div>
+              <div class="row">
+                <span class="pill pill-heat-warm">Warm</span>
+                <div class="thumb-sm"><span>post img</span></div>
+                <span style="flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Server-side render presets land in the big motion frameworks</span>
+                <span class="t-data">Bluesky · 8.4k · 7h ago</span>
+                <a href="#" style="font-size:12px">↗</a>
+              </div>
+              <div class="row">
+                <span class="pill pill-heat-cool">Cool</span>
+                <div class="thumb-sm"><span>yt thumb</span></div>
+                <span style="flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Why we stopped exporting video from design tools</span>
+                <span class="t-data">YouTube · 3.2k · 9h ago</span>
+                <a href="#" style="font-size:12px">↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

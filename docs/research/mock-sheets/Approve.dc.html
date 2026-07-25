@@ -1,0 +1,178 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Approve' — exported s72 from the founder-verdicted
+     claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
+     beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
+     as EXACT' — placeholders where the backend lacks data, never layout drift).
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .split { flex: 1; display: grid; grid-template-columns: 600px 1fr; gap: 14px; min-height: 0; }
+          .q-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .sel-ctl { display: inline-flex; align-items: center; gap: 7px; }
+          .chev { width: 8px; height: 8px; border-right: 1.5px solid var(--n-800); border-bottom: 1.5px solid var(--n-800); transform: rotate(45deg) translateY(-2px); }
+          .draft-body { font-size: 14px; line-height: 1.65; max-width: 62ch; display: flex; flex-direction: column; gap: 12px; }
+          .check { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ok); }
+          .check .ck { font-weight: 600; }
+          .check-warn { color: var(--warn); }
+          .src-line { font-size: 12px; color: var(--n-900); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+          .q-row { align-items: flex-start; }
+          .q-row .thumb-sm { margin-top: 1px; }
+          .ver-strip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--n-900); padding: 8px 12px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+          .ver-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--n-700); flex: none; }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Approve">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Calendar</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content">
+            <div style="display:flex;align-items:center;gap:10px">
+              <h1 class="t-headline">Approve</h1>
+              <span class="pill pill-warn">3 waiting</span>
+              <span class="pill pill-err">1 blocked</span>
+              <div style="flex:1"></div>
+              <div class="btn btn-ghost btn-sm sel-ctl">Oldest first<span class="chev"></span></div>
+              <div class="btn btn-ghost btn-sm sel-ctl">All drafts<span class="chev"></span></div>
+              <div class="btn btn-primary btn-sm">Approve all waiting (3)</div>
+            </div>
+            <div class="split">
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div style="flex:1;overflow:hidden">
+                  <div class="row sel q-row">
+                    <div class="thumb-sm"><span>clip frame</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">Our launch video has no editor file. It has a build step.</div>
+                      <div class="excerpt">LinkedIn · clip 0:12–0:47 · <em>“We rendered the whole thing from HTML — every scene a component…”</em></div>
+                    </div>
+                    <span class="pill pill-warn">Waiting</span>
+                    <span class="t-data">4 Jul, 09:00</span>
+                  </div>
+                  <div class="row q-row">
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">The export queue disappeared the day video became a build artifact</div>
+                      <div class="excerpt">X · post · <em>“No timeline. No render farm. A rebuild.”</em></div>
+                    </div>
+                    <span class="pill pill-warn">Waiting</span>
+                    <span class="t-data">4 Jul, 08:41</span>
+                  </div>
+                  <div class="row q-row">
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">Works with every platform — one pipeline, every destination</div>
+                      <div class="excerpt">LinkedIn · post · <span style="color:var(--err)">grounding failed — no source supports the claim</span></div>
+                    </div>
+                    <span class="pill pill-err">Blocked</span>
+                    <span class="t-data">3 Jul, 17:22</span>
+                  </div>
+                  <div class="row q-row">
+                    <div class="thumb-sm"><span>post image</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">Render your launch film from HTML — the deterministic pipeline</div>
+                      <div class="excerpt">Facebook · post · <em>“The same system that drafts our posts renders the film…”</em></div>
+                    </div>
+                    <span class="pill pill-warn">Waiting</span>
+                    <span class="t-data">3 Jul, 16:05</span>
+                  </div>
+                  <div class="row q-row">
+                    <div class="thumb-sm"><span>page hero</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">From HTML to launch film: inside the build-step pipeline</div>
+                      <div class="excerpt">Blog · article · <em>2,100 words · 4 sections · hero image attached</em></div>
+                    </div>
+                    <span class="pill pill-ok">Approved</span>
+                    <span class="t-data">2 Jul, 11:14</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--n-400)">
+                  <span class="t-label">5 of 5</span>
+                  <div style="flex:1"></div>
+                  <span class="kbd">j</span><span class="kbd">k</span><span class="t-label">row</span>
+                  <span class="kbd">a</span><span class="t-label">approve</span>
+                  <span class="kbd">r</span><span class="t-label">reject</span>
+                  <span class="kbd">e</span><span class="t-label">edit</span>
+                </div>
+              </div>
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="card-head">
+                  <span class="pill pill-warn">Waiting</span>
+                  <span class="t-title">LinkedIn draft · clip plan</span>
+                  <span class="t-label">0:12–0:47 · 35s</span>
+                  <div style="flex:1"></div>
+                  <span class="t-data" title="Deep link · draft 3f9a2c1e">#3f9a2c1e</span>
+                </div>
+                <div style="flex:1;overflow:hidden;padding:18px 24px;display:flex;flex-direction:column;gap:14px">
+                  <div class="ver-strip">
+                    <span class="ver-dot"></span><span><b style="font-weight:600">v1</b> · engine draft</span>
+                    <span style="color:var(--n-700)">→</span>
+                    <span class="ver-dot" style="background:var(--act)"></span><span style="color:var(--n-1000)"><b style="font-weight:600">v2</b> · edited by you · 2h ago</span>
+                    <span style="color:var(--n-700)">→</span>
+                    <span>judge re-ran on v2</span>
+                    <div style="flex:1"></div>
+                    <a class="card-link" href="#">View diff →</a>
+                  </div>
+                  <div style="display:flex;gap:16px">
+                    <div class="thumb-md" style="width:200px;height:112px"><span>clip frame · 0:14</span></div>
+                    <div class="draft-body" style="flex:1">
+                      <p>Our launch video has no editor file. It has a build step.</p>
+                      <p>We rendered the whole thing from HTML — every scene is a component, every cut a commit. No timeline editor, no export queue: the same AI pipeline that drafts our posts renders the film, and a re-render is just a rebuild.</p>
+                      <p>Deterministic video means the launch clip gets code-reviewed like everything else that ships.</p>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--ok-subtle);border-radius:8px">
+                    <span class="check" title="g1"><span class="ck">✓</span>Denylist</span>
+                    <span class="check" title="g3_screen"><span class="ck">✓</span>Grounding — screen</span>
+                    <span class="check" title="g3_final"><span class="ck">✓</span>Grounding — final</span>
+                    <span class="check check-warn" title="discoverability · advisory — warns, never blocks · targets: AI · content automation · build-step video · deterministic video"><span class="ck">◐</span>Discoverability — 3 of 4 · “content automation” not in the body</span>
+                    <div style="flex:1"></div>
+                    <span class="t-label">reasons on record →</span>
+                  </div>
+                  <div class="src-line">
+                    <span>From</span><a href="#">@framecraft.example on Bluesky ↗</a>
+                    <span>·</span><span>run 4 Jul, 09:00</span>
+                    <span>·</span><span>profile v4</span>
+                    <span>·</span><span>drafted opus-5 · judged opus-5</span>
+                    <span>·</span><span style="color:var(--n-800)">the judge gates — it never rewrites</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--n-400)">
+                  <div class="btn btn-primary">Approve</div>
+                  <div class="btn btn-ghost">Edit</div>
+                  <span class="t-label" style="margin-left:6px">recorded — nothing publishes until the door arms</span>
+                  <div style="flex:1"></div>
+                  <div class="btn btn-danger">Reject…</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

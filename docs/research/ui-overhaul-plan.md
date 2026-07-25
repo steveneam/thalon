@@ -308,6 +308,19 @@ pinned; `swizzle` is the escape hatch if any component fights the doctrine.
 
 ### 4.2 Wave map
 
+> **RE-CUT s72 (founder verdict — read §5 DOCTRINE 0 first).** Wave 0 shipped
+> and merged (`2ace279`), but its "coexistence bridge" framing — and the
+> migration language in waves 1–3 below — is DEAD. From wave 1 on, each wave
+> means: the lead REBUILDS each surface exactly from its sheet in
+> `docs/research/mock-sheets/` (starting with the shell chrome re-true +
+> Home/Dashboard, then Approve → Intel, then the §4.2 order below), deletes
+> the old surface implementation in the same change, ships the sheet's
+> placeholder treatment wherever backend data is missing, and
+> screenshot-verifies against the sheet before calling it done. The bridge
+> shrinks every wave and a burn-down pin keeps it honest. The bullets below
+> stay for scope/order; read every "migrates"/"adopts" as "is rebuilt exactly
+> from its sheet."
+
 - **Wave 0 — foundation (1 lane, ~1–2 sessions).** Add `@astryxdesign/core` +
   CLI to `apps/web`; author the **Thalon theme** as `defineTheme` config (warm
   neutral ramp honoring §2's usage-mapped ladder, action-blue accent, bronze
@@ -412,6 +425,29 @@ hierarchy, the shadcn primitive layer — is what's being replaced.
 ---
 
 ## 5. Founder mock-round doctrines (s71 — binding on every wave build)
+
+> **DOCTRINE 0 — THE MOCK IS THE BLUEPRINT, NOT INSPIRATION (founder verdict
+> s72, supersedes every migration framing below and in §4).** Wave 0 shipped
+> the theme + a token bridge that repainted the OLD surfaces, and the founder
+> rejected the result on sight: "the redesign looks nothing like the claude
+> design mock … I wanted to demolish the house and build a new one, not
+> renovate. I want the claude design as EXACT, and put in any placeholders
+> (like the thumbnails) as needed if the backend is not ready yet." The only
+> keeper he named from the wave is LIGHT MODE. Consequences, binding:
+> (a) the 16 mock sheets + theme.css are checked in at
+> `docs/research/mock-sheets/` — the spec of record, with the contract in its
+> README (exact match · placeholders over drift · old surface code DELETED as
+> each rebuild ships · the bridge burns to zero);
+> (b) surface rebuilds are LEAD-DIRECT work — the founder assigned exactness
+> to the lead personally; no lane delegation for design implementation;
+> (c) every rebuilt surface is verified by SCREENSHOT-AGAINST-SHEET in a real
+> browser before it counts as done — same layout, bands, density, copy
+> grammar, type roles as the sheet;
+> (d) wave-0's KEEPERS are plumbing only: token/theme infra (the tokens ARE
+> the mock's values), the light-mode mapping, the contrast + mono ratchets.
+> The visible chrome (rail/topbar) gets re-trued to the sheets too.
+
+Three earlier doctrines from the s71 live rounds remain in force below.
 
 The wave-0 claude-design mock (project `f5d304cb`, all 8 surfaces + the theme
 system) went through live founder rounds on 2026-07-25. Three doctrines came

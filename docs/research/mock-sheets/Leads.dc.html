@@ -1,0 +1,154 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Leads' — exported s72 from the founder-verdicted
+     claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
+     beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
+     as EXACT' — placeholders where the backend lacks data, never layout drift).
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .split { flex: 1; display: grid; grid-template-columns: 480px 1fr; gap: 14px; min-height: 0; }
+          .lead-name { font-size: 13.5px; font-weight: 600; }
+          .lead-sub { font-size: 12.5px; color: var(--n-900); }
+          .score-chip { display: flex; align-items: center; gap: 7px; flex: none; }
+          .sec-label { font-size: 12.5px; font-weight: 600; color: var(--n-900); }
+          .reason { display: grid; grid-template-columns: 120px 54px 1fr; gap: 10px; align-items: center; font-size: 12.5px; }
+          .reason .rname { color: var(--n-900); }
+          .mail { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+          .act-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; padding: 6px 0; }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+          .mono-badge { width: 34px; height: 34px; border-radius: 8px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex: none; }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Leads">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Calendar</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content">
+            <div style="display:flex;align-items:center;gap:10px">
+              <h1 class="t-headline">Leads</h1>
+              <span class="pill pill-idle">12 scored</span>
+              <span class="pill pill-warn">2 hot · follow up</span>
+              <div style="flex:1"></div>
+              <div class="seg"><span class="seg-opt on">List</span><span class="seg-opt">Board</span></div>
+              <div class="btn btn-ghost btn-sm">Import contacts</div>
+            </div>
+            <div class="split">
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div style="flex:1;overflow:hidden">
+                  <div class="row sel">
+                    <div class="mono-badge">MK</div>
+                    <div style="flex:1;min-width:0">
+                      <div class="lead-name">Mara Kessler · Fieldline Robotics</div>
+                      <div class="excerpt">Ops lead · asked about content automation on the webinar</div>
+                    </div>
+                    <div class="score-chip"><div class="bar-trough" style="width:44px"><div class="bar-fill" style="width:88%;background:var(--heat-hot)"></div></div><span class="t-data">0.88</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="mono-badge">JT</div>
+                    <div style="flex:1;min-width:0">
+                      <div class="lead-name">Jonah Tran · Brightpath Clinics</div>
+                      <div class="excerpt">Marketing manager · downloaded the pipeline article</div>
+                    </div>
+                    <div class="score-chip"><div class="bar-trough" style="width:44px"><div class="bar-fill" style="width:81%;background:var(--heat-hot)"></div></div><span class="t-data">0.81</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="mono-badge">RS</div>
+                    <div style="flex:1;min-width:0">
+                      <div class="lead-name">Rhea Solano · Copperline Cafés</div>
+                      <div class="excerpt">Owner · replied to the LinkedIn launch post</div>
+                    </div>
+                    <div class="score-chip"><div class="bar-trough" style="width:44px"><div class="bar-fill" style="width:64%;background:var(--heat-rising)"></div></div><span class="t-data">0.64</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="mono-badge">DA</div>
+                    <div style="flex:1;min-width:0">
+                      <div class="lead-name">Dev Anand · Northgate Legal</div>
+                      <div class="excerpt">Partner · site visit from the horizon keyword</div>
+                    </div>
+                    <div class="score-chip"><div class="bar-trough" style="width:44px"><div class="bar-fill" style="width:52%;background:var(--heat-warm)"></div></div><span class="t-data">0.52</span></div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--n-400)">
+                  <span class="t-label">best fit first · reasons on every score</span>
+                  <div style="flex:1"></div>
+                  <span class="kbd">j</span><span class="kbd">k</span><span class="t-label">move</span>
+                </div>
+              </div>
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="card-head">
+                  <span class="t-title">Mara Kessler · Fieldline Robotics</span>
+                  <span class="pill pill-warn">follow up</span>
+                  <div style="flex:1"></div>
+                  <span class="t-data" title="lead 8c31f2aa">#8c31f2aa</span>
+                </div>
+                <div style="flex:1;overflow:hidden;padding:16px 20px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span class="sec-label">Why this score</span>
+                      <div class="reason"><span class="rname">ICP fit 0.92</span><div class="bar-trough"><div class="bar-fill" style="width:92%;background:var(--heat-hot)"></div></div><span>ops lead at a 40-person robotics firm</span></div>
+                      <div class="reason"><span class="rname">Intent 0.86</span><div class="bar-trough"><div class="bar-fill" style="width:86%;background:var(--heat-hot)"></div></div><span>asked about automation · webinar Q&amp;A</span></div>
+                      <div class="reason"><span class="rname">Recency 0.78</span><div class="bar-trough"><div class="bar-fill" style="width:78%;background:var(--heat-rising)"></div></div><span>last touch 3 days ago</span></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <span class="sec-label">Activity</span>
+                      <div class="act-row"><span class="dot" style="background:var(--n-700);margin-top:5px"></span><span style="flex:1">Webinar question on content automation<br /><span class="t-data">Tue · 22 Jul</span></span></div>
+                      <div class="act-row"><span class="dot" style="background:var(--n-700);margin-top:5px"></span><span style="flex:1">Opened the launch email · clicked the film<br /><span class="t-data">Mon · 21 Jul</span></span></div>
+                      <div class="act-row"><span class="dot" style="background:var(--n-700);margin-top:5px"></span><span style="flex:1">First seen — pipeline article visit<br /><span class="t-data">Fri · 18 Jul</span></span></div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span class="sec-label">Drafted outreach — draft-only, never auto-sent</span>
+                      <div style="flex:1"></div>
+                      <span class="pill pill-ok">judge passed</span>
+                    </div>
+                    <div class="mail">
+                      <div><span style="color:var(--n-900)">To</span>&nbsp; Mara Kessler &lt;mara@fieldline.example&gt;</div>
+                      <div><span style="color:var(--n-900)">Subject</span>&nbsp; Your webinar question — the build-step answer</div>
+                      <div style="color:var(--n-900);line-height:1.6">You asked whether launch content can run as a pipeline instead of a project. We just shipped ours that way — the film in this link was rendered from HTML by the same system that drafts our posts…</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div class="btn btn-primary btn-sm">Copy body</div>
+                      <div class="btn btn-ghost btn-sm">Copy subject</div>
+                      <div class="btn btn-ghost btn-sm">Open in your mail client</div>
+                      <div class="btn btn-quiet btn-sm">Log a call</div>
+                      <div style="flex:1"></div>
+                      <span class="t-label">you send it — from your own mailbox</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>
