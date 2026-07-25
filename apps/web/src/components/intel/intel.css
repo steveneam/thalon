@@ -124,13 +124,23 @@
 }
 .intel-surface .reason {
   display: grid;
-  grid-template-columns: 96px 60px 1fr;
+  /* App adaptation, measured: the sheet's 96px name track was authored
+     against its three-signal fixture (Velocity/Freshness/Relevance measure
+     75/88/89px at 12.5px Geist). The ranker's FOURTH signal, "Engagement
+     0.74", measures 100px and wrapped the row onto two lines — 104px keeps
+     every ranker signal on the sheet's single line. */
+  grid-template-columns: 104px 60px 1fr;
   gap: 12px;
   align-items: center;
   font-size: 12.5px;
 }
 .intel-surface .reason .rname {
   color: var(--n-900);
+  /* A longer signal name ellipsizes rather than re-breaking the band; the
+     reason string is verbatim in the row's hover title either way. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .intel-surface .reason .rtext {
   color: var(--n-1000);

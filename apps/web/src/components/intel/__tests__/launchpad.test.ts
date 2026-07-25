@@ -36,10 +36,14 @@ describe("suggestedExit (the honest pre-pick — a default, never a gate)", () =
 });
 
 describe("compactCount", () => {
-  it("rounds by magnitude the way the meta rows read", () => {
+  it("rounds by magnitude the way the mock sheet's meta rows read", () => {
     expect(compactCount(512)).toBe("512");
     expect(compactCount(9_410)).toBe("9.4k");
-    expect(compactCount(27_692)).toBe("28k");
+    // The Intel sheet writes "24.6k views" and "12.1k" — one decimal survives
+    // above 10k; a zero decimal still drops.
+    expect(compactCount(24_631)).toBe("24.6k");
+    expect(compactCount(12_100)).toBe("12.1k");
+    expect(compactCount(28_000)).toBe("28k");
     expect(compactCount(1_200_000)).toBe("1.2M");
   });
 });

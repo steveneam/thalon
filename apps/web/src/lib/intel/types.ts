@@ -76,12 +76,26 @@ export interface SweepStamp {
   dueNow?: boolean;
 }
 
+/**
+ * One swept platform's own stamp (B-learn L2 slice 1): the trends read is
+ * the merged union across sources, so each source states when IT was last
+ * swept and how many cards it contributed — the surface can name the
+ * platforms honestly instead of implying one sweep covered them all.
+ */
+export interface SourceSweepStamp {
+  source: string;
+  lastSweptAt: string;
+  cards: number;
+}
+
 export interface TrendsPayload {
   areas: AreaRow[];
   cards: TrendCard[];
   /** true while cards come from the built-in demo dataset (live pollers arm at B6.5). */
   demo: boolean;
   sweep: SweepStamp;
+  /** Per-source stamps behind the merged `cards` — empty in the demo era. */
+  sources: SourceSweepStamp[];
 }
 
 export interface TargetRow {
