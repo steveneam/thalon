@@ -1,0 +1,14 @@
+/*
+ * Runs surface atomics — the Runs.dc.html HELMET, ported verbatim
+ * (DOCTRINE 0, ui-overhaul-plan §5: the sheet's own CSS, never a
+ * re-expression). Everything else this surface wears — .card, .row,
+ * .pill, .seg, .thumb-sm, .excerpt, .btn, the type roles — comes from the
+ * shell's src/app/app/workspace.css, which lanes read but never edit.
+ *
+ * The sheet's helmet also declares `.avatar`; that is topbar chrome the
+ * shell already ports (workspace.css), so it is deliberately not restated
+ * here — one class, one home.
+ */
+
+.day-hd { font-size: 12.5px; font-weight: 600; color: var(--n-900); padding: 4px 2px; }
+.run-lead { font-size: 13.5px; font-weight: 600; }

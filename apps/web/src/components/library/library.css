@@ -1,0 +1,31 @@
+/*
+ * Library surface atomics — the Library.dc.html HELMET, ported verbatim
+ * (DOCTRINE 0, ui-overhaul-plan §5: the sheet's own CSS, never a
+ * re-expression). Everything else this surface wears — .card, .row, .pill,
+ * .thumb-sm, .excerpt, .btn, the type roles — comes from the shell's
+ * src/app/app/workspace.css, which lanes read but never edit.
+ *
+ * The sheet's helmet also declares `.avatar`; that is topbar chrome the
+ * shell already ports (workspace.css), so it is deliberately not restated
+ * here — one class, one home.
+ */
+
+.ingest { border: 1px solid var(--n-500); background: var(--n-100); border-radius: 14px; padding: 16px; display: flex; gap: 10px; align-items: center; }
+.ingest-box { flex: 1; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--n-800); }
+.src-lead { font-size: 13.5px; font-weight: 600; }
+
+/* NAMED app adaptations — each keeps the RESTING render indistinguishable
+   from the sheet (mock-sheets/README rule 0), and exists only because the
+   sheet's static box is a real door here:
+   - the sheet's box is a <div>; ours is the ingest <input>, which must
+     inherit the UI font, keep the sheet's colour for its PLACEHOLDER while
+     lifting TYPED text to reading contrast, and show a keyboard focus ring
+     the static mock never needed;
+   - `.ingest-field` neutralises the band's `flex: 1` for the fields that
+     unfold in the options card (a column — growing there would stretch a
+     one-line input to fill it). */
+input.ingest-box, textarea.ingest-box { font-family: inherit; color: var(--n-1000); }
+input.ingest-box::placeholder, textarea.ingest-box::placeholder { color: var(--n-800); }
+input.ingest-box:focus-visible, textarea.ingest-box:focus-visible { outline: none; border-color: var(--act); }
+textarea.ingest-box { resize: vertical; }
+.ingest-field { flex: none; width: 100%; }

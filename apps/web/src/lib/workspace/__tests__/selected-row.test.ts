@@ -21,9 +21,7 @@ const componentsDir = path.resolve(
 const SELECTION_SURFACES = [
   "approve/queue-list.tsx",
   "board/leads-board.tsx",
-  "library/library-surface.tsx",
   "leads/lead-card.tsx",
-  "runs/runs-list.tsx",
   "sites/sites-gallery.tsx",
 ];
 

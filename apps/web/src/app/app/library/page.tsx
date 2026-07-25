@@ -1,6 +1,7 @@
-import { LibrarySurface } from "@/components/library/library-surface";
+import { Library } from "@/components/library/library";
+import "@/components/library/library.css";
 
-/** Library: paste a video URL → transcript in, ready to copy/export and ground on (B6.5). */
+/** Library: the exact-mock rebuild of Library.dc.html (DOCTRINE 0) — the grounding shelf. */
 export default function LibraryPage() {
-  return <LibrarySurface />;
+  return <Library />;
 }
