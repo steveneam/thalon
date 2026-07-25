@@ -1,0 +1,273 @@
+// @vitest-environment jsdom
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { describe, expect, it, vi } from "vitest";
+import { ApproveSurface } from "@/components/approve/approve-surface";
+import { PulseProvider } from "@/components/workspace/pulse-context";
+import {
+  draftA,
+  draftC,
+  FIXTURE_DRAFT_A_ID,
+  FIXTURE_DRAFT_B_ID,
+  FIXTURE_DRAFT_C_ID,
+  FIXTURE_RUN_1_ID,
+  FIXTURE_RUN_2_ID,
+  run,
+} from "@/lib/approve-queue/fixtures";
+import { server } from "@/lib/testing/server";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/app/approve",
+}));
+
+const ZERO_PULSE = {
+  tenant: { slug: "self", name: "Thalon" },
+  profile: { version: 1, company: "Thalon" },
+  counts: { runs: 2, runsWithErrors: 0, drafts: 3, queued: 0, blocked: 0, approved: 3 },
+  needsYou: 0,
+};
+
+describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
+  it("renders the sheet's bands: header counts + view pickers + bulk approve, over queue × draft cards", async () => {
+    render(<ApproveSurface />);
+
+    // The header band: the headline, the two status pills on their own
+    // channels, and the sheet's two pickers beside the bulk action.
+    expect(screen.getByRole("heading", { name: "Approve" })).toBeInTheDocument();
+    // Draft-level truth: the classic fixtures' queued draft + the staged
+    // fixture's queued storyboard; one blocked.
+    expect(await screen.findByText("2 waiting")).toBeInTheDocument();
+    expect(screen.getByText("1 blocked")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Sort order" })).toHaveValue("newest");
+    expect(screen.getByRole("combobox", { name: "Status filter" })).toHaveValue("all");
+    // …but a stage artifact advances through its own staged walk, so the
+    // bulk action's count and the set it acts on agree at ONE.
+    expect(screen.getByRole("button", { name: "Approve all waiting (1)" })).toBeInTheDocument();
+
+    // The split: both cards, each labelled.
+    const queue = screen.getByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+
+    // Rows speak the sheet's grammar: platform brand name · format word,
+    // status as a pill WORD, and the exact creation stamp (never an age).
+    expect((await within(queue).findAllByText(/^LinkedIn · post/)).length).toBeGreaterThan(0);
+    expect(within(queue).getAllByText("Waiting").length).toBeGreaterThanOrEqual(1);
+    expect(within(queue).getByText("Blocked")).toBeInTheDocument();
+    expect(within(queue).getAllByText(/^\d{1,2} \w{3}.*, \d{2}:\d{2}$/).length).toBeGreaterThan(0);
+    // The footer rail states the count and the keyboard legend.
+    expect(within(queue).getByText("4 of 4")).toBeInTheDocument();
+    for (const key of ["j", "k", "a", "r", "e"]) {
+      expect(within(queue).getByText(key)).toBeInTheDocument();
+    }
+
+    // The draft card: version strip, checks band with its verbatim-reasons
+    // door, and the provenance line stating the invariant in operator copy.
+    await within(detail).findByText("Run2 X draft");
+    expect(within(detail).getByText(/engine draft/)).toBeInTheDocument();
+    // Named on the checks band, and again in the receipt this blocked draft
+    // opens for itself.
+    expect(within(detail).getAllByText("Denylist").length).toBeGreaterThan(0);
+    expect(within(detail).getAllByText("Grounding — screen").length).toBeGreaterThan(0);
+    expect(within(detail).getByText(/the judge gates — it never rewrites/)).toBeInTheDocument();
+  });
+
+  it("a blocked draft quotes its failing reason VERBATIM — in the row and in the receipt", async () => {
+    render(<ApproveSurface />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+
+    // The row's excerpt slot carries the judge's own words, not a paraphrase.
+    expect(
+      await within(queue).findByText(/no provided source supports this claim/),
+    ).toBeInTheDocument();
+
+    // A blocking failure opens the receipt without a click — a block must
+    // state its reason — and the claim + evidence are recorded verbatim.
+    const receipt = await within(detail).findByRole("group", { name: "Judge verdicts" });
+    expect(
+      within(receipt).getByText(/Works with every platform — no provided source supports this claim/),
+    ).toBeInTheDocument();
+  });
+
+  it("fail-closed: a blocked draft has NO approve/reject — absent, not greyed — and the rail states the rule", async () => {
+    render(<ApproveSurface />);
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+    await within(detail).findByText("Run2 X draft");
+
+    expect(within(detail).queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();
+    expect(within(detail).queryByRole("button", { name: "Reject…" })).not.toBeInTheDocument();
+    expect(within(detail).getByText(/approve is absent while any check fails/)).toBeInTheDocument();
+    // The ways forward stay: edit (the judge re-runs) and re-judge.
+    expect(within(detail).getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    expect(within(detail).getByRole("button", { name: "Re-judge" })).toBeInTheDocument();
+  });
+
+  it("a queued draft wears the sheet's action rail: Approve · Edit · the consequence · Reject…", async () => {
+    const user = userEvent.setup();
+    render(<ApproveSurface />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+
+    await user.click(
+      await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }),
+    );
+    await within(detail).findByText("Run2 LinkedIn draft");
+
+    expect(within(detail).getByRole("button", { name: "Approve" })).toBeInTheDocument();
+    expect(within(detail).getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    expect(within(detail).getByRole("button", { name: "Reject…" })).toBeInTheDocument();
+    expect(
+      within(detail).getByText("recorded — nothing publishes until the door arms"),
+    ).toBeInTheDocument();
+    // The seats: which profile version and which models shaped this draft.
+    expect(within(detail).getByText(/profile v1/)).toBeInTheDocument();
+    expect(within(detail).getByText(/drafted test\/model · judged test\/model/)).toBeInTheDocument();
+  });
+
+  it("selection drives the detail card, and the sort/filter pickers re-cut the view", async () => {
+    const user = userEvent.setup();
+    render(<ApproveSurface />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+
+    const names = () =>
+      within(queue)
+        .getAllByRole("button", { name: /^Select / })
+        .map((row) => row.getAttribute("aria-label") ?? "");
+    const indexOf = (id: string) => names().findIndex((n) => n.includes(id));
+
+    // Newest first by default (founder s66) — the stable flatten, reversed.
+    await waitFor(() => expect(names()[0]).toContain(FIXTURE_DRAFT_B_ID));
+    expect(indexOf(FIXTURE_DRAFT_C_ID)).toBeLessThan(indexOf(FIXTURE_DRAFT_A_ID));
+
+    // Flip to oldest-first: the walk inverts.
+    await user.selectOptions(screen.getByRole("combobox", { name: "Sort order" }), "oldest");
+    await waitFor(() => expect(indexOf(FIXTURE_DRAFT_A_ID)).toBeLessThan(indexOf(FIXTURE_DRAFT_C_ID)));
+
+    // Filter to waiting: the blocked and terminal rows leave, and the
+    // footer states the honest filtered-of-total count.
+    await user.selectOptions(screen.getByRole("combobox", { name: "Status filter" }), "waiting");
+    await waitFor(() => expect(indexOf(FIXTURE_DRAFT_B_ID)).toBe(-1));
+    expect(indexOf(FIXTURE_DRAFT_C_ID)).toBe(-1);
+    expect(within(queue).getByText(`${names().length} of 4`)).toBeInTheDocument();
+
+    // Selection followed the view rather than stranding on a hidden row.
+    await within(detail).findByText("Run2 LinkedIn draft");
+  });
+
+  it("consumes a ?run= deep link: selection lands on that run's own waiting work", async () => {
+    window.history.replaceState(null, "", `/app/approve?run=${FIXTURE_RUN_1_ID}`);
+    try {
+      render(<ApproveSurface />);
+      const detail = await screen.findByRole("region", { name: "Draft detail" });
+      await within(detail).findByText("Run1 LinkedIn draft");
+    } finally {
+      window.history.replaceState(null, "", "/app/approve");
+    }
+  });
+
+  it("defaults to WAITING work across runs (run-count scoped), never merely the newest run", async () => {
+    server.use(
+      http.get("/api/runs", () =>
+        HttpResponse.json({
+          runs: [
+            run(FIXTURE_RUN_2_ID, "2026-07-04T09:00:00.000Z", true, 0),
+            run(FIXTURE_RUN_1_ID, "2026-07-03T09:00:00.000Z", true, 1),
+          ],
+        }),
+      ),
+      http.get(`/api/runs/${FIXTURE_RUN_1_ID}/drafts`, () =>
+        HttpResponse.json({ drafts: [{ ...draftC, status: "queued" }] }),
+      ),
+    );
+    render(<ApproveSurface />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    const rowC = await within(queue).findByRole("button", {
+      name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}`,
+    });
+    await waitFor(() => expect(rowC).toHaveAttribute("aria-pressed", "true"));
+    // Draft-level truth in the header pill: run 2's queued + run 1's queued.
+    expect(screen.getByText("2 waiting")).toBeInTheDocument();
+  });
+
+  it("a failed queue read is an alert with retry — never a real-looking empty queue", async () => {
+    server.use(http.get("/api/runs", () => HttpResponse.error()));
+    render(<ApproveSurface />);
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/Couldn’t read the queue/);
+    expect(alert).toHaveTextContent(/read failure, not an empty queue/);
+    expect(within(alert).getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  });
+
+  it("a failed detail read says so in the card instead of showing a blank pane", async () => {
+    server.use(http.get(`/api/drafts/${FIXTURE_DRAFT_B_ID}`, () => HttpResponse.error()));
+    render(<ApproveSurface />);
+    const detail = screen.getByRole("region", { name: "Draft detail" });
+    expect(await within(detail).findByText(/Couldn’t read this draft/)).toBeInTheDocument();
+  });
+
+  it("the queue states inbox zero when the shell pulse says nothing waits anywhere", async () => {
+    server.use(
+      http.get("/api/app/pulse", () => HttpResponse.json(ZERO_PULSE)),
+      http.get("/api/runs", () => HttpResponse.json({ runs: [] })),
+    );
+    render(
+      <PulseProvider>
+        <ApproveSurface />
+      </PulseProvider>,
+    );
+    expect(await screen.findByText("Inbox zero.")).toBeInTheDocument();
+    expect(screen.getByText("Queue clear")).toBeInTheDocument();
+  });
+
+  it("an empty queue and a filtered-empty view say different, honest things", async () => {
+    const user = userEvent.setup();
+    server.use(http.get("/api/runs", () => HttpResponse.json({ runs: [] })));
+    const { unmount } = render(<ApproveSurface />);
+    expect(await screen.findByText("No drafts yet")).toBeInTheDocument();
+    unmount();
+
+    server.resetHandlers();
+    server.use(
+      http.get("/api/runs", () => HttpResponse.json({ runs: [run(FIXTURE_RUN_1_ID, "2026-07-03T09:00:00.000Z")] })),
+      http.get(`/api/runs/${FIXTURE_RUN_1_ID}/drafts`, () => HttpResponse.json({ drafts: [draftC] })),
+    );
+    render(<ApproveSurface />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}` });
+    await user.selectOptions(screen.getByRole("combobox", { name: "Status filter" }), "waiting");
+    expect(await screen.findByText("Nothing matches this view")).toBeInTheDocument();
+  });
+
+  it("media-first: a media-bearing draft carries its placeholder slot; a plain post does not", async () => {
+    const clip = {
+      ...draftA,
+      id: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+      format: "clip_plan",
+      meta: {
+        windowIndex: 0,
+        chunkSeqs: [1],
+        startMs: 12_000,
+        endMs: 47_000,
+        durationMs: 35_000,
+        hook: "Hook line",
+        captions: "Caption line",
+        platformCopy: "Platform copy",
+        promptVersion: "highlight-select.v1",
+        brandProfileVersion: 1,
+        platformProfileVersion: "brand-profile.v1",
+      },
+    };
+    server.use(
+      http.get(`/api/runs/${FIXTURE_RUN_2_ID}/drafts`, () => HttpResponse.json({ drafts: [clip] })),
+    );
+    render(<ApproveSurface />);
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    // The row's striped thumb names what belongs there (the backend carries
+    // no media ref — placeholders over drift), and the clip window rides
+    // the format word exactly as the sheet writes it.
+    expect(await within(queue).findByText("clip frame")).toBeInTheDocument();
+    expect(within(queue).getByText(/LinkedIn · clip 0:12–0:47/)).toBeInTheDocument();
+  });
+});

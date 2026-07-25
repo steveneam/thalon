@@ -30,7 +30,9 @@ describe("FormatDetail", () => {
     });
     render(<FormatDetail draft={clipPlan} />);
     expect(screen.getByLabelText("Clip plan detail")).toBeInTheDocument();
-    expect(screen.getByText(/0:12–0:45/)).toBeInTheDocument();
+    // The clip's WINDOW rides the sheet's card head and its thumb caption now
+    // (approve-model's headWindow/formatWord) — this block carries the
+    // structured copy and the window/chunk provenance only.
     expect(screen.getByText("hook")).toBeInTheDocument();
     expect(screen.getByText("captions")).toBeInTheDocument();
     expect(screen.getByText("copy")).toBeInTheDocument();
@@ -59,8 +61,7 @@ describe("FormatDetail", () => {
     });
     render(<FormatDetail draft={edited} />);
     expect(screen.getByRole("status")).toHaveTextContent(/edited since generation/i);
-    // Timing/window/chunk provenance stays true regardless of a copy edit.
-    expect(screen.getByText(/0:12–0:45/)).toBeInTheDocument();
+    // Window/chunk provenance stays true regardless of a copy edit.
     expect(screen.getByText(/window 2/)).toBeInTheDocument();
     expect(screen.getByText(/chunks 4, 5/)).toBeInTheDocument();
   });

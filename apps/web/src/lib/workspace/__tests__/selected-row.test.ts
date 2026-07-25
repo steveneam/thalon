@@ -19,7 +19,8 @@ const componentsDir = path.resolve(
  * surface rebuilds, this ratchet retires with the bridge.
  */
 const SELECTION_SURFACES = [
-  "approve/queue-list.tsx",
+  // approve left this list at its exact-mock rebuild — its rows mark
+  // selection with the sheet's own `.row.sel` (DOCTRINE 0).
   "board/leads-board.tsx",
   "library/library-surface.tsx",
   "leads/lead-card.tsx",

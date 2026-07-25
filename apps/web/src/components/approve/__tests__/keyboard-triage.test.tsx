@@ -10,7 +10,7 @@ import {
   FIXTURE_DRAFT_C_ID,
 } from "@/lib/approve-queue/fixtures";
 import { server } from "@/lib/testing/server";
-import { ApproveQueue } from "../approve-queue";
+import { ApproveSurface } from "../approve-surface";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -19,7 +19,7 @@ afterEach(() => {
 describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
   it("j/k move the selection through the queue (newest-first view, s66) and clamp at the ends", async () => {
     const user = userEvent.setup();
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
 
     // The first waiting draft in view order auto-selects (draft B — the view
@@ -56,7 +56,7 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
       }),
     );
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const detail = screen.getByRole("region", { name: "Draft detail" });
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     // Newest-first view (s66) auto-selects the blocked draft — select the queued one.
@@ -91,7 +91,7 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
     );
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const detail = screen.getByRole("region", { name: "Draft detail" });
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));

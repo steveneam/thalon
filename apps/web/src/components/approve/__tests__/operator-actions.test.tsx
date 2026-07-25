@@ -5,10 +5,10 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { draftB, FIXTURE_DRAFT_B_ID, fixtureDraftDetails } from "@/lib/approve-queue/fixtures";
 import { server } from "@/lib/testing/server";
-import { ApproveQueue } from "../approve-queue";
+import { ApproveSurface } from "../approve-surface";
 
-describe("ApproveQueue — operator actions", () => {
-  it("panel refreshes to the post-edit, post-re-judge state after save-edit", async () => {
+describe("Approve — operator actions", () => {
+  it("the card refreshes to the post-edit, post-re-judge state after save-edit", async () => {
     const user = userEvent.setup();
     const editedBody = "Run2 X draft, now with more detail.";
     let edited = false;
@@ -36,7 +36,11 @@ describe("ApproveQueue — operator actions", () => {
         if (!edited) return HttpResponse.json(fixtureDraftDetails[FIXTURE_DRAFT_B_ID]);
         return HttpResponse.json({
           draft: { ...draftB, body: editedBody, bodyHash: "hash-b-edited", status: "queued" },
+          // The real read returns EVERY judge row for the draft, old body
+          // hashes included (repos.judgeResults.listForDraft) — that history
+          // is what the version strip attributes.
           judgeResults: [
+            ...fixtureDraftDetails[FIXTURE_DRAFT_B_ID].judgeResults,
             { id: "g1", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g1", verdict: "pass", bodyHash: "hash-b-edited", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
             { id: "g3s", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g3_screen", verdict: "pass", bodyHash: "hash-b-edited", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
             { id: "g3f", tenantId: "t", draftId: FIXTURE_DRAFT_B_ID, gate: "g3_final", verdict: "pass", bodyHash: "hash-b-edited", evidence: { claims: [] }, model: null, promptVersion: null, latencyMs: null, createdAt: "2026-07-04T11:00:00.000Z" },
@@ -45,13 +49,15 @@ describe("ApproveQueue — operator actions", () => {
       }),
     );
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     const detail = screen.getByRole("region", { name: "Draft detail" });
 
     await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
     await within(detail).findByText("Run2 X draft");
-    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
+    // The composite block states its own rule — a tier DISAGREEMENT is not
+    // visible in any single gate row.
+    expect(within(detail).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
 
     await user.click(within(detail).getByRole("button", { name: "Edit" }));
     const textarea = within(detail).getByRole("textbox", { name: "Edit draft body" });
@@ -61,8 +67,16 @@ describe("ApproveQueue — operator actions", () => {
 
     await within(detail).findByText(editedBody);
     expect(edited).toBe(true);
-    expect(within(detail).queryByText("Blocked — disagreement")).not.toBeInTheDocument();
-    expect(within(detail).getByText("Pass")).toBeInTheDocument();
+    // The receipt now reflects the NEW body's verdicts: nothing blocks, so
+    // it closes itself and the failing reason is gone.
+    expect(within(detail).queryByText(/the gate blocks until they agree/)).not.toBeInTheDocument();
+    expect(
+      within(detail).queryByText(/no provided source supports this claim/),
+    ).not.toBeInTheDocument();
+    expect(within(detail).queryByRole("group", { name: "Judge verdicts" })).not.toBeInTheDocument();
+    // …and the version strip attributes the edit as v2, re-judged.
+    expect(within(detail).getByText(/edited by you/)).toBeInTheDocument();
+    expect(within(detail).getByText("judge re-ran on v2")).toBeInTheDocument();
   });
 
   it("re-judge retries a blocked draft unmodified through the dedicated action and reaches the fully-judged outcome (queued)", async () => {
@@ -87,23 +101,26 @@ describe("ApproveQueue — operator actions", () => {
       }),
     );
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     const detail = screen.getByRole("region", { name: "Draft detail" });
 
     await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
     await within(detail).findByText("Run2 X draft");
-    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
+    expect(within(detail).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
 
     const reJudgeButton = within(detail).getByRole("button", { name: "Re-judge" });
     expect(reJudgeButton).toBeEnabled();
     await user.click(reJudgeButton);
 
-    await within(detail).findByText("Pass");
+    // Every gate passes on the unmodified body: the receipt closes and the
+    // approve rail is back.
+    await within(detail).findByRole("button", { name: "Approve" });
+    expect(within(detail).queryByRole("group", { name: "Judge verdicts" })).not.toBeInTheDocument();
     expect(reJudged).toBe(true);
   });
 
-  it("a judge failure (e.g. a budget halt) surfaces loudly in the panel instead of vanishing silently", async () => {
+  it("a judge failure (e.g. a budget halt) surfaces loudly in the card instead of vanishing silently", async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -112,7 +129,7 @@ describe("ApproveQueue — operator actions", () => {
       ),
     );
 
-    render(<ApproveQueue />);
+    render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     const detail = screen.getByRole("region", { name: "Draft detail" });
 
@@ -125,6 +142,6 @@ describe("ApproveQueue — operator actions", () => {
     // No unhandled GET override was registered for this test — the refresh
     // that follows a failed action re-fetches the draft's real current
     // state rather than papering over the failure with stale "success" data.
-    expect(within(detail).getByText("Blocked — disagreement")).toBeInTheDocument();
+    expect(within(detail).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
   });
 });
