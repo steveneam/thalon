@@ -60,17 +60,32 @@ production caller already does for social); per-platform arming becomes tenant D
 (connected + tenant-armed) instead of env; refusal ladder keeps its shape. Meanwhile
 the standing [lead-serial] alternative: **B-pub.4 blog images** (backlog below).
 
-### Phase 2 — ✅ PILLAR #1 MINTED + RENDERED s70b (founder GO: kling3_0_turbo 1080p)
-**`one-prompt-v1.mp4` is REAL: 42.3s @1080p, engine-rendered end-to-end**
-(8 mints at exact-cue durations = the 94cr plan + two 10cr retakes = 114cr,
-inside the 110–150 band; balance 584.12). The render went through the real
-doors — with one gap found + ratcheted: one-prompt projects had NO sanctioned
-media-root setter (`videoProjects.setMediaRoot` shipped, `53456b8`). Craft
-lessons banked (prov.json + memory): kling reliably fabricates gibberish on
-UI-semantic surfaces (buttons/checkboxes) — such beats are better FULLY
-code-drawn (beat-06 was, $0); cornered pseudo-text on static regions takes a
-deterministic patch (beat-07). **Founder verdict on the cut = the open tail**
-(approve door ready; fix rounds ~10cr/beat).
+### Phase 2 — PILLAR #1: minted s70b, **VERDICTED s70c — kept as a MID-QUALITY EXEMPLAR, not the pillar**
+The founder's verdict on `one-prompt-v1.mp4` (42.3s, 114cr): "really bad and
+doesnt show the true capability of thalon" — **KEEP the video as an example
+of the bad/mid quality class** (learning material for the quality ladder,
+never approved, never published). **PILLAR #1 IS RE-SCOPED: a SCREEN
+RECORDING of the live workspace actually working — sequenced AFTER the UI
+overhaul ships** (Phase 2b below gates it). The engine mechanics all proved
+out (mint doors, code-drawn text, setMediaRoot ratchet `53456b8`, real render
+door); what failed was the abstract-motion-graphic CONCEPT as flagship
+material. Craft lessons stay banked (prov.json + memory).
+
+### Phase 2c — SOCIAL DISCOVERABILITY (SEO/AEO/GEO) — **[lead-serial, founder-directed s70c: "the engine has a problem and needs serious work"]**
+The founder's catch on the live LinkedIn post: a post ABOUT AI never says
+"AI" (zero occurrences — it says Claude/models/Anthropic and no answer
+engine would index it for the queries that matter), and it explains the
+mechanics of model-agnostic building without its PURPOSE. Root cause,
+confirmed honest: **the social path has NO discoverability dimension** —
+generation receives no keyword/entity targets and no gate checks coverage
+(screen = denylist, final = grounding; B6.8's seo meta is web_page-only).
+The fix shape: (a) generation-side TARGET TERMS on the brief (intel
+keywords + brand topics + the subject's canonical entities — "AI" when the
+post is about AI), (b) a DETERMINISTIC discoverability gate beside the
+judge (entity/keyword coverage + AEO answerability shape; the charLimit-
+gate pattern — beside the judge, never inside it), (c) the founder's
+LinkedIn edit (once pasted) becomes golden eval rows: engine-body vs
+founder-edit. Companion to the platform-charLimit ratchet candidate below.
 
 ### Phase 2b — WORKSPACE UI/UX OVERHAUL **[founder-directed s70b — phase 0 lane RUNNING]**
 The founder's verdict: current look/flow "not working" — benchmark =
