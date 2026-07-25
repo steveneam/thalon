@@ -67,6 +67,16 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 ### Content origination (the loops)
 - Pillar #1 mint + render — **[founder GO]** — Phase 2 above.
 - Post loop live per platform — **[founder GO, per platform]** — Phase 3 above.
+- **B-pub.4 blog images** — **[lead-serial, founder-directed s68]** — the own-site
+  door learns to serve object-store images publicly (route + page references), so
+  blog posts carry the same visuals as social. The founder's destination framing:
+  4 post/image surfaces (LinkedIn · X · Facebook · blog), Threads additive when
+  its Meta product activates. The public image URLs this produces are ALSO the
+  unlock for Threads + Instagram media later (both require image_url, not bytes).
+  Posts and the blog stay UNLINKED (no cross-references; stealth trace-path
+  confirmed clean s68 — the only post↔post/post↔blog connection is the internal
+  ledger). One check pre-first-tweet: the X app's display name (tweet `source`
+  metadata) must read neutral.
 - Public `/blog` unwire → wire — **[parked: the launch call]** — stays staging-side until
   the founder says go public (stealth: thalon.org unwired, CT-log risk).
 
