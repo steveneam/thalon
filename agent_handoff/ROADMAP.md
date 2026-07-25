@@ -38,16 +38,27 @@ LinkedIn pin was DEAD on first real use (202512 nonexistent; active set swept
 live, pinned 202607, `isReshareDisabledByViewer` removed; commit `2b258f3`) ·
 main-RED #4 fixed (`1420bc8`, oauth1 typecheck).
 
-### Phase 1 — B-int.2: the Integrations surface **[lead-serial — NEXT]**
-The vault core (B-int.1) SHIPPED s68 — its seam is live, so the surface unblocked.
-See the Phase-4-shaped spec below (cards + guided flows + published-view); doors to
-build against: `connectDestination` / `listCredentialCards` / `validateDestination`
-/ `disconnectDestination` in `packages/engine/src/integrations/`. **s69 addition to
-the spec: the LinkedIn validate ping only exercises unversioned userinfo, so a dead
-LinkedIn-Version pin stays invisible until a real post (bit us live). The surface's
-validate should ALSO probe one versioned endpoint (the 426-vs-400 malformed-body
-trick in `.context/social/linkedin-version-probe.mts` costs nothing and proves the
-pin).** X standing tail rides NEEDS-STEVEN (credits + display-name check).
+### Phase 1 — ✅ B-int.2 SHIPPED s70 (the Integrations surface, direct-to-main)
+**Settings → Integrations is LIVE** — a card per destination grouped by what it
+powers (Social · Your website · Outreach & newsletter · Intel), every card in a
+frozen honest state; mode-2 guided connect flows (generic step lists + schema-derived
+paste fields + validate-on-connect); on-demand Validate / Disconnect; **the s69
+versioned-probe spec line landed in the engine seam** (LinkedIn validate now ALSO
+fires the 426-vs-400 malformed-body pin proof — a dead LinkedIn-Version reads loud
+in the probe detail, card untouched); **the PUBLISHED VIEW closes FEATURE-MAP's
+`/blog` partial** (social ledger ⋈ web posts bundle, newest-first, way-back links
+on every row — verified live showing all three s69 posts + the s67 article);
+**env-override honesty badge** (X's env 1.0a posture reads "env override" instead
+of lying "not connected" plain); probe-discovered identity now lands on the card
+(validate stamps connectedAs). New doors: GET/POST `/api/integrations[...]`,
+engine `cards.ts` + `published.ts`, repo `listRecent`. B-int.3 moves arming onto
+tenant data next.
+
+### Phase 1-next — B-int.3: driver rewire **[lane; founder lane-approval at the opener]**
+Publisher/intel/outreach seams resolve credentials vault-first by tenant (the
+production caller already does for social); per-platform arming becomes tenant DATA
+(connected + tenant-armed) instead of env; refusal ladder keeps its shape. Meanwhile
+the standing [lead-serial] alternative: **B-pub.4 blog images** (backlog below).
 
 ### Phase 2 — Pillar #1 MINT GO **[founder GO — cost plan PRESENTED s68]**
 The chain is GREEN end-to-end (s68 re-brief fixed the s67 judge fails): project
@@ -58,7 +69,7 @@ close (recommended lane: kling3_0_turbo 1080p ≈ 94cr; hero-bump + retake buffe
 the takes → box-local $0 render.** Standing mint rules in memory apply; all
 on-screen text is code-drawn at render (s62 doctrine), never minted.
 
-### Phase 3 — THE MEME POST to all three platforms **[founder: caption sign-off + GO]**
+### Phase 3 — ✅ EXECUTED s69/s69b (all three live; kept for the record)
 s68 (second half) built B-pub.3 end-to-end: **image legs on all three text drivers**
 (LinkedIn Images API · X v2 media upload · FB Page /photos), X OAuth 1.0a
 standing-arm mode (OAuth2 X user tokens die in ~2h), and the pre-surface connect
@@ -72,7 +83,7 @@ three ARMED flags, runs the post through draft→judge→approve, engine posts t
 three at once. Before the real post: re-verify version pins + the Little-Format
 escaping call (standing checklist). Post #2 = the queued Thalon intro.
 
-### Phase 4 — (spec for Phase 1 above) B-int.2 detail
+### Phase 4 — (spec, ✅ absorbed into the shipped Phase 1 above) B-int.2 detail
 Settings → Integrations, now that the vault core exists:
 - A card per destination grouped by what it powers (Intel · Social · **Your website** ·
   Outreach/Newsletter), honest states (not-connected / connected-as-@handle /
@@ -110,15 +121,25 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
 - **B-int.0 contract window** — ✅ FROZEN (PR #66, migration 0018).
 - **B-int.1 vault core** — ✅ SHIPPED s68 (envelope crypto + doors + validate-ping
   seam + redaction ratchets + vault-first social arming; dev pg has 0018 applied).
-- **B-int.2 the surface** — **[lead-serial — NEXT]** — Phase 1/4 above.
-- **B-int.3 driver rewire** — **[lane after B-int.2]** — publisher/intel/outreach seams
-  resolve credentials from the vault by tenant; per-platform arming becomes tenant DATA
-  (connected + tenant-armed) instead of env; refusal ladder keeps its shape, only the
-  rung's source changes; dogfood tenant moves onto the vault.
+- **B-int.2 the surface** — ✅ SHIPPED s70 (Phase 1 above).
+- **B-int.3 driver rewire** — **[lane — NEXT; founder lane-approval]** — publisher/intel/
+  outreach seams resolve credentials from the vault by tenant; per-platform arming becomes
+  tenant DATA (connected + tenant-armed) instead of env; refusal ladder keeps its shape,
+  only the rung's source changes; dogfood tenant moves onto the vault (the surface's
+  env-override badge then retires for vault-armed platforms).
 - **B-int.4 OAuth-Connect (mode 1), per platform** — **[founder files partner-app reviews]** —
   callback routes + token exchange into the vault + auto-refresh, platform-by-platform
   as approvals land (LinkedIn → Meta → X). **Gated by THE LANDING** (needs hosted
-  Terms/Privacy pages); mode 2 never removed.
+  Terms/Privacy pages); mode 2 never removed. **s70 input (founder question): the Nango
+  evaluation + the self-tenant OAuth pull-forward** — the founder's own apps already hold
+  the scopes, so callback+refresh could work for the dogfood tenant BEFORE any partner
+  approval; Nango (ELv2 — isolate + swap path if adopted) would supply the per-provider
+  OAuth dances + refresh; it does NOT bypass platform review. **Swordfish ANSWERED
+  same-day (FROM-SWORDFISH): they run self-hosted Nango for P2's drive connects,
+  proven live; founder made them portfolio Nango owner; zero-SDK plain-REST shape
+  keeps ELv2 out of this repo; standing offer = a Thalon-own instance at the
+  B-int.4 kickoff, no new spend.** Full read:
+  `docs/research/integrations-surface-plan.md` §Mode-1 automation check.
 
 ### The landing + visual arc **[founder sequencing call]**
 - Visual arc HOLDS at 20 sites ("leave the landing pages at this for now").
@@ -261,7 +282,15 @@ founder · blanket workspace grant · **Mode B lanes on fresh founder approval**
 guard/typecheck/lint foreground) · ≥40cr mint ping · no AI attribution · wrap =
 guard + commit + push + stamped resume prompt + this file re-ranked.
 
-## Recently shipped (last session — s69)
+## Recently shipped (last session — s70)
+**B-int.2 THE INTEGRATIONS SURFACE** (Phase 1 above: cards + honest states +
+guided mode-2 connect + validate/disconnect doors + the published view closing
+the `/blog` partial + the s69 versioned LinkedIn probe + env-override honesty +
+probe-discovered connectedAs) · Nango/mode-1 question answered + homed (plan doc
+§Mode-1 automation check; swordfish asked) · token budget reset 7.25M→2M ·
+verified live in the workspace against the real vault + the s69 ledger.
+
+## Previously shipped (s69)
 **THE FIRST LIVE POSTS: LinkedIn + Facebook published by the engine** (meme
 post, image-attached, through draft→judge→approve→publishApprovedSocial; X
 waits on platform credits) · **judge tuning arc closed** (screen v4 two real
@@ -272,13 +301,4 @@ field fix (first real versioned call found it dead) · main-RED #4 fixed
 (oauth1 typecheck) · token day closed ≈7.1M (s68 3.5M + s69 lap ~3.6M;
 cap raises documented in .env.local; month-end reset queued).
 
-## Previously shipped (s68)
-**B-int.1 vault core** (envelope crypto AES-256-GCM w/ AAD row-binding · connect/
-open/cards/disconnect doors · read-only validate-ping seam, all 11 destinations ·
-redaction ratchets incl. the log-free/env-indirect boundary scan · vault-first
-social arming, env = emergency override; production caller now resolves vault-first)
-· **pillar #1 chain GREEN** (re-brief fixed the s67 judge fails; 9-take plan + EDL
-+ draft cut; cost plan priced via get_cost, zero mint spend) · **Actions billing
-restored + verified** (ci-guard + web-image green; staging auto-deploy back) ·
-systemd units for 8899/sweeper landed swordfish-side. Zero credit spend. Prior
-sessions: `COORDINATION.md` close messages.
+Prior sessions: `COORDINATION.md` close messages.
