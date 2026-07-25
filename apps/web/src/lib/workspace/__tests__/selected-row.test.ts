@@ -23,7 +23,6 @@ const SELECTION_SURFACES = [
   "board/leads-board.tsx",
   "library/library-surface.tsx",
   "leads/lead-card.tsx",
-  "runs/runs-list.tsx",
   "sites/sites-gallery.tsx",
 ];
 
