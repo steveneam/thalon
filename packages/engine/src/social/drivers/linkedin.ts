@@ -20,8 +20,14 @@ import { responseDetail, responseJson, SocialDriverApiError } from "./errors";
  * The pinned LinkedIn-Version month (versioned APIs require it; versions
  * are supported ~1 year from release). Bumping it is a deliberate, tested
  * change — verify against the live API before the first real post.
+ * s69 (2026-07-25, the first real versioned call): 202512 answered 426
+ * NONEXISTENT_VERSION on images initializeUpload — the validate ping only
+ * exercises unversioned userinfo, so a bad pin stays invisible until a
+ * real post. Live sweep of the active set (426 = nonexistent, 400 = version
+ * accepted/bad probe body): 202601-202607 + 202510 active; 202512, 202504
+ * and older all nonexistent. Pinned to the newest for maximum runway.
  */
-export const LINKEDIN_VERSION = "202512";
+export const LINKEDIN_VERSION = "202607";
 
 /** The `sub` claim IS the member id the author URN needs. */
 const userinfoSchema = z.object({ sub: z.string().min(1) }).loose();
@@ -151,8 +157,10 @@ export function createLinkedInDriver(config: LinkedInDriverConfig): SocialPublis
                 },
               }
             : {}),
+          // isReshareDisabledByViewer left OUT: 202607 rejects the field
+          // outright (422 unrecognized) — resharing stays enabled, which
+          // was the intent the explicit `false` used to state.
           lifecycleState: "PUBLISHED",
-          isReshareDisabledByViewer: false,
         }),
       });
       if (!created.ok) {

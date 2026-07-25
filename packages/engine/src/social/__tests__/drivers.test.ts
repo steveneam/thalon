@@ -111,7 +111,6 @@ describe("createLinkedInDriver (versioned REST Posts API, author from userinfo)"
         thirdPartyDistributionChannels: [],
       },
       lifecycleState: "PUBLISHED",
-      isReshareDisabledByViewer: false,
     });
   });
 
