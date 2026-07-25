@@ -51,6 +51,24 @@ export function SettingsPanel() {
     <div className="grid gap-4 p-4 lg:grid-cols-2 lg:p-6">
       <Card>
         <CardHeader>
+          <CardTitle>Integrations</CardTitle>
+          <CardDescription>
+            Connect destinations — social accounts, your website, newsletter, intel sources.
+            Credentials seal into the per-tenant vault; every card states its honest status.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href="/app/settings/integrations"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            Manage integrations <ArrowRight aria-hidden className="size-3.5" />
+          </Link>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Watchlists &amp; monitored areas</CardTitle>
           <CardDescription>
             What the intel pollers watch is per-tenant runtime config — managed on the Intel

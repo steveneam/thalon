@@ -119,7 +119,7 @@ export function tenantCredentialsRepo(db: Db) {
       ctx: TenantCtx,
       destination: DestinationKey,
       status: CredentialStoredState,
-      opts: { validatedAt?: Date } = {},
+      opts: { validatedAt?: Date; connectedAs?: string } = {},
     ): Promise<TenantCredential> {
       return db.transaction(async (tx) => {
         const [row] = await tx
@@ -127,6 +127,9 @@ export function tenantCredentialsRepo(db: Db) {
           .set({
             status,
             ...(opts.validatedAt ? { validatedAt: opts.validatedAt } : {}),
+            // A probe-discovered identity updates the card; absent one, the
+            // stored (possibly hand-set) identity is never erased.
+            ...(opts.connectedAs !== undefined ? { connectedAs: opts.connectedAs } : {}),
             updatedAt: new Date(),
           })
           .where(

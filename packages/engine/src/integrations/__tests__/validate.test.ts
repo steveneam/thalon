@@ -40,6 +40,22 @@ const neverFetch = (async () => {
   throw new Error("this probe must not touch the network");
 }) as typeof fetch;
 
+/** A sequenced fake fetch for multi-call probes: one scripted (status, body) per call, in order. */
+function fakeFetchSeq(responses: Array<{ status: number; body: unknown }>) {
+  const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+  const impl = (async (url: unknown, init?: RequestInit) => {
+    const scripted = responses[calls.length];
+    if (!scripted) throw new Error(`unscripted fetch call #${calls.length + 1} to ${String(url)}`);
+    calls.push({ url: String(url), init });
+    return {
+      ok: scripted.status >= 200 && scripted.status < 300,
+      status: scripted.status,
+      json: async () => scripted.body,
+    } as Response;
+  }) as typeof fetch;
+  return { impl, calls };
+}
+
 beforeEach(async () => {
   handle = await openTestDb();
   const tenant = await handle.repos.tenants.create({ slug: "self", name: "Self" });
@@ -80,6 +96,81 @@ describe("validateDestination", () => {
     const row = await handle.repos.tenantCredentials.get(ctx, "linkedin");
     expect(row?.status).toBe("connected");
     expect(row?.validatedAt?.toISOString()).toBe(at.toISOString());
+    // The probe's discovered identity lands on the card.
+    expect(row?.connectedAs).toBe("Steven");
+  });
+
+  it("a probe WITHOUT identity data never erases a hand-set connected-as", async () => {
+    await connectDestination(deps(), {
+      destination: "newsletter_resend",
+      credentials: { apiKey: "rk" },
+      connectedAs: "ops@example.com",
+    });
+    const { impl } = fakeFetch(200, {});
+    const result = await validateDestination(deps(), "newsletter_resend", { fetchImpl: impl });
+    expect(result.probe.outcome).toBe("validated");
+    expect((await handle.repos.tenantCredentials.get(ctx, "newsletter_resend"))?.connectedAs).toBe(
+      "ops@example.com",
+    );
+  });
+
+  it("linkedin ALSO probes one VERSIONED endpoint (s69: userinfo alone hid a dead pin) — an active pin answers 400 and validates", async () => {
+    await connectDestination(deps(), {
+      destination: "linkedin",
+      credentials: { accessToken: "tok" },
+    });
+    const { impl, calls } = fakeFetchSeq([
+      { status: 200, body: { sub: "abc123", name: "Steven" } },
+      { status: 400, body: { code: "MISSING_REQUIRED_FIELD" } },
+    ]);
+
+    const result = await validateDestination(deps(), "linkedin", { fetchImpl: impl });
+
+    expect(result.probe).toEqual({ outcome: "validated", connectedAs: "Steven" });
+    expect(result.flipped).toBe("connected");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].url).toBe("https://api.linkedin.com/rest/images?action=initializeUpload");
+    const headers = calls[1].init?.headers as Record<string, string>;
+    expect(headers["LinkedIn-Version"]).toMatch(/^\d{6}$/);
+    // The malformed body is the point — nothing can ever be initialized.
+    expect(calls[1].init?.body).toBe("{}");
+  });
+
+  it("linkedin: a DEAD version pin (426) degrades to unreachable — loud detail, but the credential card is NOT flipped", async () => {
+    await connectDestination(deps(), {
+      destination: "linkedin",
+      credentials: { accessToken: "tok" },
+    });
+    const { impl } = fakeFetchSeq([
+      { status: 200, body: { sub: "abc123" } },
+      { status: 426, body: { code: "NONEXISTENT_VERSION" } },
+    ]);
+
+    const result = await validateDestination(deps(), "linkedin", { fetchImpl: impl });
+
+    expect(result.probe.outcome).toBe("unreachable");
+    expect((result.probe as { detail: string }).detail).toContain("LinkedIn-Version");
+    expect((result.probe as { detail: string }).detail).toContain("426");
+    expect(result.flipped).toBeNull();
+    const row = await handle.repos.tenantCredentials.get(ctx, "linkedin");
+    expect(row?.status).toBe("connected");
+    expect(row?.validatedAt).toBeNull();
+  });
+
+  it("linkedin: versioned-endpoint flakiness (5xx) never blocks validation — userinfo already proved the token", async () => {
+    await connectDestination(deps(), {
+      destination: "linkedin",
+      credentials: { accessToken: "tok" },
+    });
+    const { impl } = fakeFetchSeq([
+      { status: 200, body: { name: "Steven" } },
+      { status: 503, body: {} },
+    ]);
+
+    const result = await validateDestination(deps(), "linkedin", { fetchImpl: impl });
+
+    expect(result.probe).toEqual({ outcome: "validated", connectedAs: "Steven" });
+    expect(result.flipped).toBe("connected");
   });
 
   it("an auth-shaped refusal (401) marks needs_reauth, detail carries status phrasing only", async () => {

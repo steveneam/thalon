@@ -68,8 +68,9 @@ flowchart LR
 | Runs history + failure triage | rail → Runs | reachable |
 | Profiles (brand voice, versions) | rail foot → Profiles; topbar switcher → "Manage profiles" | reachable |
 | Settings (seams, drivers, budget, watchlist) | rail foot → Settings | reachable |
+| Integrations (destination cards, honest states, guided connect, validate/disconnect) | Settings → "Manage integrations" → /app/settings/integrations | reachable (B-int.2, s70 — vault-backed; env-override badge names the emergency-override posture) |
 | ⌘K command palette | topbar button; Ctrl/⌘-K | reachable |
-| Own-site blog (published pages land here) | `/blog` — public site, not linked from the workspace | **partial — no workspace path to what got published** |
+| Own-site blog (published pages land here) | `/blog` — public; workspace path = Settings → Integrations → Published (the ledger view joins social publications + blog posts, every row with its way back) | reachable (B-int.2 published view, s70 — partial closed) |
 | Sites gallery (the portfolio in the workspace) | rail → Sites | reachable (W-sites, s61 — facet chips, j/k/enter, verdict chips) |
 | Sites dossier (live preview + record + /guide) | Sites → a card → dossier (iframe w/ desktop/390 toggles) | reachable (dev reads the local dir; staging origin arms with the founder's Dokploy service + `TEMPLATES_PREVIEW_ARMED`) |
 | Template `/guide` pages | each site → footer "how this page was made" | reachable (within each site) |

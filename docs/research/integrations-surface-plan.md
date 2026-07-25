@@ -108,6 +108,45 @@ question — the UI is easy; the vault is the feature.
    onto the vault too (dogfood the real path — likely yes).
 4. Entitlement granularity: per-platform, or one "social publishing" feature?
 
+## Mode-1 automation check (founder question, s70)
+
+Founder asked whether connect can be automatic NOW ("check Nango; swordfish
+followed a similar pattern for storage drives"). The honest read:
+
+- **The blocker for mode 1 was never the OAuth plumbing** — it is each
+  platform's app review for posting scopes. No OAuth toolkit bypasses that:
+  you bring your own client id/secret and the platform still reviews your app.
+  B-int.4's gate (the landing's Terms/Privacy + partner filings) stands.
+- **But the SELF tenant's apps already hold the scopes** (the live-post tokens
+  were minted from them), so an in-product OAuth callback + token exchange +
+  auto-refresh can replace the manual portal token dance for the dogfood
+  tenant TODAY — that pulls B-int.4's core forward without waiting on any
+  approval, and kills the needs_reauth churn (LinkedIn ~60d expiry; X OAuth2's
+  2h death is why X rides 1.0a).
+- **Nango** (verified 2026-07): self-hostable (Docker), OAuth flows + token
+  refresh + credential store + Connect UI for 900+ APIs — but licensed
+  **Elastic License 2.0**, not MIT/Apache. Licensing hygiene applies: if
+  adopted, isolate behind a clean interface with a recorded swap path
+  (hand-rolled callback routes = the swap), and our AAD-bound vault stays the
+  system of record (Nango's store would sync into it, never replace it).
+- **Swordfish answered same-day (FROM-SWORDFISH 2026-07-25, full detail there)
+  and de-risks the choice:** they run Nango ITSELF, self-hosted, for the P2
+  storage-drive connects — live and verified end-to-end; the founder made
+  swordfish the portfolio Nango owner (instances, security, backups, wiring).
+  Load-bearing facts: 3-container stack, ~300–400 MB idle; the community
+  image is single-account so it is ONE INSTANCE PER PROJECT, never shared;
+  `NANGO_ENCRYPTION_KEY` must never rotate. License verified ELv2 including
+  the client SDKs — so the clean shape is **zero SDK in our bundle: consume
+  the broker over plain REST** (session → hosted connect link → token read /
+  proxy), which keeps ELv2 code out of this repo entirely and leaves the
+  tiny API surface hand-rollable as the swap path. They confirm the broker
+  changes nothing about platform app review (your app, your creds; scope
+  hygiene is the real lever). **Standing offer: swordfish mints Thalon its
+  own instance (fresh never-rotate key + backup drill before the first real
+  connection) at the B-int.4 kickoff — no new spend.** Decision still belongs
+  to B-int.4 — the surface + guided-manual mode 2 is needed regardless
+  (mode 2 is never removed).
+
 ## Not in scope for the seed
 
 Vault implementation, OAuth partner-app registrations, the guided-flow copy,

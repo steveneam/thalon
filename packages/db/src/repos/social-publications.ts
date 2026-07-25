@@ -1,5 +1,5 @@
 import { socialPlatformSchema, type TenantCtx } from "@thalon/contracts";
-import { and, count, eq, gte } from "drizzle-orm";
+import { and, count, desc, eq, gte } from "drizzle-orm";
 import { socialPublications } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
@@ -93,6 +93,24 @@ export function socialPublicationsRepo(db: Db) {
           ),
         );
       return row?.n ?? 0;
+    },
+
+    /** The published-view read (B-int.2): newest platform-accepted publications first, plus the honest total behind the bound. */
+    async listRecent(
+      ctx: TenantCtx,
+      limit: number,
+    ): Promise<{ rows: SocialPublication[]; total: number }> {
+      const [totalRow] = await db
+        .select({ n: count() })
+        .from(socialPublications)
+        .where(eq(socialPublications.tenantId, ctx.tenantId));
+      const rows = await db
+        .select()
+        .from(socialPublications)
+        .where(eq(socialPublications.tenantId, ctx.tenantId))
+        .orderBy(desc(socialPublications.publishedAt))
+        .limit(limit);
+      return { rows, total: totalRow?.n ?? 0 };
     },
 
     /** Audit read: where has this draft already gone? (Also the door's pre-post duplicate check.) */

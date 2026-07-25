@@ -173,6 +173,42 @@ describe("social publications repo (Sprint-8 window — the B-pub ledger)", () =
     ).rejects.toThrow();
   });
 
+  it("listRecent (B-int.2 published-view) returns newest first, bounded, with the honest total — tenancy-walled", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    const stranger = await repos.tenants.create({ slug: "other", name: "Other" });
+    const other = tenantCtx(stranger.id);
+    await repos.socialPublications.record(fx.ctx, {
+      draftId: fx.draft.id,
+      platform: "linkedin",
+      externalPostId: "urn:li:share:1",
+      bodyHash: "abc",
+      publishedAt: new Date("2026-07-19T03:00:00Z"),
+    });
+    await repos.socialPublications.record(fx.ctx, {
+      draftId: fx.draft.id,
+      platform: "x",
+      externalPostId: "1234567890",
+      bodyHash: "abc",
+      publishedAt: new Date("2026-07-20T03:00:00Z"),
+    });
+    await repos.socialPublications.record(fx.ctx, {
+      draftId: fx.draft.id,
+      platform: "facebook",
+      externalPostId: "197_122",
+      bodyHash: "abc",
+      publishedAt: new Date("2026-07-21T03:00:00Z"),
+    });
+
+    const bounded = await repos.socialPublications.listRecent(fx.ctx, 2);
+    expect(bounded.total).toBe(3);
+    expect(bounded.rows.map((r) => r.platform)).toEqual(["facebook", "x"]);
+
+    const theirs = await repos.socialPublications.listRecent(other, 10);
+    expect(theirs.total).toBe(0);
+    expect(theirs.rows).toHaveLength(0);
+  });
+
   it("countSince serves the cap/day rung per platform, tenancy-walled", async () => {
     fx = await fixture();
     const { repos } = fx.handle;

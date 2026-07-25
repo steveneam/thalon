@@ -1,3 +1,13 @@
+export {
+  deriveCardState,
+  DESTINATION_CLASS_LABELS,
+  DESTINATION_CLASS_ORDER,
+  EXPIRING_HORIZON_DAYS,
+  listIntegrationCards,
+  pasteFields,
+  type IntegrationCard,
+  type IntegrationCardField,
+} from "./cards";
 export { decodeVaultMasterKey, openCredential, sealCredential, VAULT_KEY_VERSION } from "./crypto";
 export {
   VaultError,
@@ -7,6 +17,14 @@ export {
   VaultOpenError,
   VaultShapeError,
 } from "./errors";
+export {
+  readPublishedView,
+  socialPermalink,
+  type PublishedItem,
+  type PublishedSocialItem,
+  type PublishedView,
+  type PublishedWebItem,
+} from "./published";
 export {
   vaultSocialEnvView,
   vaultSocialPublisherResolver,

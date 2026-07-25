@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import type { DestinationKey } from "@thalon/contracts";
 import { FACEBOOK_GRAPH_VERSION } from "../social/drivers/facebook";
+import { LINKEDIN_VERSION } from "../social/drivers/linkedin";
 import { VaultNotConnectedError } from "./errors";
 import { openCredentialRow, type DestinationCredentials, type VaultDeps } from "./vault";
 
@@ -11,7 +12,9 @@ import { openCredentialRow, type DestinationCredentials, type VaultDeps } from "
  * `needs_reauth`. Probes never mutate remote state (the webhook destination
  * is therefore `unsupported`: firing a tenant's automation is not a probe;
  * Bluesky's createSession POST is the platform's own auth check and writes
- * nothing user-visible). Only an auth-shaped refusal flips a card to
+ * nothing user-visible; LinkedIn's second call is a malformed-body POST that
+ * can never initialize an upload — it exists to prove the version pin the
+ * unversioned userinfo ping cannot see). Only an auth-shaped refusal flips a card to
  * needs_reauth — an unreachable network is not a credential problem and
  * leaves the card alone.
  *
@@ -101,7 +104,33 @@ export const VALIDATE_PROBES: { [K in DestinationKey]: Probe<K> } = {
     );
     if (!res.ok) return refusal(res.status, [401, 403]);
     const body = await bodyOf(res);
-    return { outcome: "validated", connectedAs: str(body?.name) ?? str(body?.sub) };
+    const connectedAs = str(body?.name) ?? str(body?.sub);
+    // s69 blind spot: userinfo is UNVERSIONED — it stayed green while the
+    // pinned LinkedIn-Version was dead, and the first real post found out
+    // live. Prove the pin with a malformed-body POST against a versioned
+    // endpoint: an ACTIVE version answers 400 (bad body — nothing is ever
+    // initialized), a dead pin answers 426. Only 426 degrades the outcome;
+    // the token itself was just proven, so platform flakiness here never
+    // blocks validation.
+    const versioned = await fetchImpl(
+      "https://api.linkedin.com/rest/images?action=initializeUpload",
+      init(
+        {
+          Authorization: `Bearer ${creds.accessToken}`,
+          "Content-Type": "application/json",
+          "LinkedIn-Version": LINKEDIN_VERSION,
+          "X-Restli-Protocol-Version": "2.0.0",
+        },
+        { method: "POST", body: JSON.stringify({}) },
+      ),
+    );
+    if (versioned.status === 426) {
+      return {
+        outcome: "unreachable",
+        detail: `the token is valid but the pinned LinkedIn-Version ${LINKEDIN_VERSION} is no longer active (HTTP 426) — the engine's pin needs a bump, not the credential`,
+      };
+    }
+    return { outcome: "validated", connectedAs };
   },
 
   x: async (creds, { fetchImpl }) => {
@@ -253,6 +282,9 @@ export async function validateDestination(
   if (outcome.outcome === "validated") {
     await deps.repos.tenantCredentials.markStatus(deps.ctx, destination, "connected", {
       validatedAt: resolved.now(),
+      // The probe's discovered identity (name / @handle / page title) becomes
+      // the card's connected-as; a probe with none leaves the stored one be.
+      ...(outcome.connectedAs !== undefined ? { connectedAs: outcome.connectedAs } : {}),
     });
     flipped = "connected";
   } else if (outcome.outcome === "auth_failed") {

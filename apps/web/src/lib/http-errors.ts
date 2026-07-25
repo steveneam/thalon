@@ -1,12 +1,33 @@
 import { InvalidTransitionError, InvalidVideoCutTransitionError } from "@thalon/contracts";
 import { InvariantViolationError, NotFoundError } from "@thalon/db";
-import { PublishRefusedError } from "@thalon/engine";
+import {
+  PublishRefusedError,
+  VaultKeyInvalidError,
+  VaultKeyMissingError,
+  VaultNotConnectedError,
+  VaultOpenError,
+  VaultShapeError,
+} from "@thalon/engine";
 import { NextResponse } from "next/server";
 
 /** Thin routes map repo/domain errors to contract-typed JSON — no business logic, just status codes. */
 export function toErrorResponse(err: unknown): NextResponse {
-  if (err instanceof NotFoundError) {
+  if (err instanceof NotFoundError || err instanceof VaultNotConnectedError) {
     return NextResponse.json({ error: err.message }, { status: 404 });
+  }
+  // The vault's box-level refusals: a missing/invalid master key (or an
+  // envelope that will not open under it) is operator misconfiguration —
+  // service-unavailable, never a caller problem. Shape errors ARE caller
+  // problems (issue paths only; nothing pasted ever rides the message).
+  if (
+    err instanceof VaultKeyMissingError ||
+    err instanceof VaultKeyInvalidError ||
+    err instanceof VaultOpenError
+  ) {
+    return NextResponse.json({ error: err.message }, { status: 503 });
+  }
+  if (err instanceof VaultShapeError) {
+    return NextResponse.json({ error: err.message, fields: err.issuePaths }, { status: 400 });
   }
   if (
     err instanceof InvalidTransitionError ||

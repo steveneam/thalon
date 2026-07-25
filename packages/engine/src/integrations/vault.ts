@@ -42,7 +42,7 @@ export interface VaultRepos {
       ctx: TenantCtx,
       destination: DestinationKey,
       status: CredentialStoredState,
-      opts?: { validatedAt?: Date },
+      opts?: { validatedAt?: Date; connectedAs?: string },
     ): Promise<TenantCredential>;
     remove(ctx: TenantCtx, destination: DestinationKey): Promise<void>;
   };
