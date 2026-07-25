@@ -1,5 +1,6 @@
 import type { PipelineAsset, PlannedSlotWire } from "@/lib/workspace/types";
 import { waitingSince, type WeekDay } from "@/lib/workspace/week";
+import { platformLabel } from "@/lib/workspace/format";
 
 /**
  * Pure derivations behind the Dashboard sheet's bands (DOCTRINE 0 rebuild):
@@ -10,13 +11,11 @@ import { waitingSince, type WeekDay } from "@/lib/workspace/week";
 const WAITING = new Set(["queued", "blocked"]);
 const DECIDED = new Set(["approved", "rejected", "published"]);
 
-/** Display casing for platform names — wire values are lowercase driver names. */
-export function platformLabel(platform: string): string {
-  if (platform === "linkedin") return "LinkedIn";
-  if (platform === "x") return "X";
-  if (platform === "web") return "Blog";
-  return platform.charAt(0).toUpperCase() + platform.slice(1);
-}
+// platformLabel now has ONE home (lib/workspace/format.ts) — re-exported
+// here so the surfaces and tests that import it from the exemplar keep working.
+// One home for the label map (lib/workspace/format.ts); re-exported so the
+// surfaces and tests that import it from this model keep working.
+export { platformLabel };
 
 /** The striped-thumb mono label for a media-bearing format — null = no thumb (text posts render without one, per the sheet). */
 export function thumbLabel(asset: Pick<PipelineAsset, "format" | "platform">): string | null {

@@ -1,6 +1,7 @@
 import type { FeedRun } from "@/lib/approve-queue/types";
 import type { CreateContext, CreateFamily } from "@/lib/intel/types";
 import type { ProfileWire } from "@/lib/profiles/types";
+import { platformLabel } from "@/lib/workspace/format";
 
 /**
  * Create's read-model — the pure functions behind the rebuilt surface
@@ -54,26 +55,9 @@ export function attachedFields(context: CreateContext): string[] {
     .map(([, label]) => label);
 }
 
-/**
- * Platform keys are stored lowercase ids; the sheet's pills wear display
- * names. An unknown key renders VERBATIM — a missing label is never a
- * reason to hide or rename a platform the profile actually carries.
- */
-const PLATFORM_LABELS: Readonly<Record<string, string>> = {
-  linkedin: "LinkedIn",
-  x: "X",
-  facebook: "Facebook",
-  instagram: "Instagram",
-  threads: "Threads",
-  tiktok: "TikTok",
-  youtube: "YouTube",
-  bluesky: "Bluesky",
-  blog: "Blog",
-};
-
-export function platformLabel(key: string): string {
-  return PLATFORM_LABELS[key.toLowerCase()] ?? key;
-}
+// One home for the label map (lib/workspace/format.ts); re-exported so the
+// surfaces and tests that import it from this model keep working.
+export { platformLabel };
 
 /** A one-line reading of the profile's free-form voice record. */
 export function voiceSummary(voice: Record<string, unknown>): string | null {

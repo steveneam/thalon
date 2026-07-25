@@ -2,6 +2,7 @@ import { computeJudgeBadge, type JudgeGateStatus } from "@/lib/approve-queue/jud
 import { gateLabel, type JudgeResultWithEvidence } from "@/lib/approve-queue/judge-reasons";
 import { parseClipPlanMeta, formatMsAsClock } from "@/lib/approve-queue/formats/clip-plan";
 import type { FeedRun, GridDraft } from "@/lib/approve-queue/types";
+import { platformLabel } from "@/lib/workspace/format";
 
 /**
  * Pure derivations behind the Approve surface's exact-mock rebuild — every
@@ -58,23 +59,9 @@ export function statusPill(status: string): { word: string; cls: string } {
 }
 
 /** The sheet writes platforms as their brand names ("LinkedIn", "X", "Blog"), never the wire token. */
-const PLATFORM_LABELS: Record<string, string> = {
-  linkedin: "LinkedIn",
-  x: "X",
-  facebook: "Facebook",
-  instagram: "Instagram",
-  tiktok: "TikTok",
-  bluesky: "Bluesky",
-  youtube: "YouTube",
-  threads: "Threads",
-  reddit: "Reddit",
-  blog: "Blog",
-  web: "Blog",
-};
-
-export function platformLabel(platform: string): string {
-  return PLATFORM_LABELS[platform] ?? platform.charAt(0).toUpperCase() + platform.slice(1);
-}
+// One home for the label map (lib/workspace/format.ts); re-exported so the
+// surfaces and tests that import it from this model keep working.
+export { platformLabel };
 
 /** The sheet's format words. A plain draft (format null) is a "post". */
 const FORMAT_WORDS: Record<string, string> = {

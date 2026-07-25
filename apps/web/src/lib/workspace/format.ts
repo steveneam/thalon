@@ -27,3 +27,32 @@ export function timeAgo(iso: string, now: number = Date.now()): string {
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
 }
+
+/**
+ * Display casing for platform names — wire values are lowercase driver ids.
+ *
+ * ONE HOME (lead consolidation, s74): the three parallel rebuild lanes each
+ * grew their own copy of this (dashboard, approve, create) with subtly
+ * different maps and fallbacks — the predictable cost of file-disjoint lanes
+ * touching the same idea. They agreed on every key they shared; this is the
+ * union, with the Title-case fallback two of the three already used, so an
+ * unknown driver still renders rather than disappearing.
+ */
+const PLATFORM_LABELS: Readonly<Record<string, string>> = {
+  linkedin: "LinkedIn",
+  x: "X",
+  facebook: "Facebook",
+  instagram: "Instagram",
+  threads: "Threads",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  bluesky: "Bluesky",
+  reddit: "Reddit",
+  blog: "Blog",
+  web: "Blog",
+};
+
+export function platformLabel(platform: string): string {
+  const key = platform.toLowerCase();
+  return PLATFORM_LABELS[key] ?? platform.charAt(0).toUpperCase() + platform.slice(1);
+}
