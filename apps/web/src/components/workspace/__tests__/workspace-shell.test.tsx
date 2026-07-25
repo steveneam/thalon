@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
 
@@ -17,8 +17,16 @@ describe("WorkspaceShell", () => {
     );
 
     // The rail carries the extras + the foot — one icon metaphor each.
-    for (const label of ["Leads", "Library", "Videos", "Runs", "Profiles", "Settings"]) {
-      expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
+    // Scoped to the rail's landmarks: "Settings" also links from the tenant
+    // menu's footer (founder s66 discoverability), so a page-wide role query
+    // would double-match.
+    const extras = within(screen.getByRole("navigation", { name: "Workspace extras" }));
+    for (const label of ["Leads", "Library", "Videos", "Runs"]) {
+      expect(extras.getByRole("link", { name: label })).toBeInTheDocument();
+    }
+    const account = within(screen.getByRole("navigation", { name: "Workspace account" }));
+    for (const label of ["Profiles", "Settings"]) {
+      expect(account.getByRole("link", { name: label })).toBeInTheDocument();
     }
     // Journey surfaces leave the rail entirely (Phase D): no Intel/Create/
     // Approve/Calendar links render in the chrome — they live ON the spine.
