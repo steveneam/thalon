@@ -29,7 +29,8 @@ const LEGACY_TOKEN_RE =
 
 /** file → pinned bridged-token usage count (the s73 seed). */
 const PINNED: ReadonlyMap<string, number> = new Map([
-  ["app/app/sites/page.tsx", 5],
+  // app/app/sites/page.tsx left the map at the s75 exact-mock rebuild — the
+  // route now renders the ported surface and holds no styling of its own.
   ["components/board/leads-board.tsx", 22],
   // components/calendar/* left the map entirely at the s75 exact-mock rebuild:
   // the surface was rebuilt from Calendar.dc.html and the old implementation
@@ -51,10 +52,16 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // profiles/ burned to zero at the s75 exact-mock rebuild (DOCTRINE 0): the
   // wizard speaks Profiles.dc.html's own classes and the old editor is gone.
   // runs/ burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
-  ["components/settings/integrations-panel.tsx", 30],
+  // components/settings/integrations-panel.tsx was DELETED at the s75
+  // exact-mock rebuild (DOCTRINE 0 rule 3) — the ported surface replaced it.
+  // The Settings ROOT below has no sheet of its own in the mock, so it keeps
+  // its bridged styling until the founder calls that surface.
   ["components/settings/settings-panel.tsx", 7],
+  // components/sites/sites-gallery.tsx was DELETED at the s75 exact-mock
+  // rebuild (DOCTRINE 0 rule 3) — the ported surface replaced it. The
+  // dossier below is the one Sites file with no sheet of its own, so it
+  // keeps its bridged styling until the founder calls that sub-surface.
   ["components/sites/site-dossier.tsx", 19],
-  ["components/sites/sites-gallery.tsx", 21],
   ["components/staged/candidate-picker.tsx", 7],
   ["components/staged/capture-log.tsx", 3],
   ["components/staged/direction-editor.tsx", 25],

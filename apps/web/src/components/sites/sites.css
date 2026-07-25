@@ -1,0 +1,53 @@
+/*
+ * Sites — the surface's own atomics, PORTED 1:1 from the helmet <style> of
+ * docs/research/mock-sheets/Sites.dc.html (DOCTRINE 0: the sheet is the
+ * blueprint, never a re-expression). Shared classes (.card, .pill, .btn,
+ * .card-link, the type roles) come from app/app/workspace.css — the shell
+ * contract, which lanes read but never edit.
+ *
+ * EVERY RULE IS SCOPED UNDER `.sites-surface` (mock-sheets README rule 6,
+ * executable as lib/__tests__/surface-css-scope.test.ts). This surface is a
+ * named collision case: `.prompt-box` is 13px 16px / 14px / n-800 text HERE
+ * and 16px / 15px / n-1000 text in Create.dc.html. Same class name, two
+ * sheets, two rules — scoping is what keeps them from fighting.
+ *
+ * The sheet's helmet also declares `.avatar`; that is topbar chrome the
+ * shell already ports (workspace.css), so it is deliberately not restated —
+ * one class, one home.
+ */
+
+.sites-surface .site-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.sites-surface .site-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; cursor: pointer; transition: border-color var(--motion-fast); display: flex; flex-direction: column; }
+.sites-surface .site-card:hover { border-color: var(--n-500); }
+.sites-surface .site-shot { height: 150px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; }
+.sites-surface .site-shot span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
+.sites-surface .site-meta { padding: 11px 14px; display: flex; align-items: center; gap: 9px; }
+.sites-surface .prompt-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 13px 16px; font-size: 14px; color: var(--n-800); flex: 1; }
+.sites-surface .cat-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border: 1px solid var(--n-400); border-radius: var(--r-pill); font-size: 12.5px; color: var(--n-900); background: var(--n-100); cursor: pointer; }
+.sites-surface .cat-chip:hover { border-color: var(--n-500); color: var(--n-1000); }
+
+/*
+ * App adaptations (the NAMED kind — real records are wider, longer and
+ * media-bearing where the canvas fixture is a striped rectangle; each keeps
+ * the 1440×940 render indistinguishable from the sheet at rest):
+ *  - the preview shot carries the site's OWN hero when the catalog has one
+ *    (media-first, founder s71) and falls back to the sheet's stripes;
+ *  - real site names are longer than the fixture's, so the name cell is
+ *    shrinkable and clips rather than pushing the pill and door out;
+ *  - the card and the chips are real controls (a link, buttons), so they
+ *    inherit the surface type and shed the UA chrome, nothing more;
+ *  - selection: the sheet draws no selected card, so the keyboard grammar's
+ *    mark is the sheet's OWN `.row.sel` accent (workspace.css) worn by a
+ *    card — nothing is selected at rest.
+ */
+.sites-surface .site-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sites-surface .site-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sites-surface a.site-card { color: inherit; }
+.sites-surface .site-card .card-link { color: var(--act); }
+.sites-surface .site-card.sel { border-color: var(--act); box-shadow: inset 2px 0 0 var(--act); }
+.sites-surface .site-card:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.sites-surface button.cat-chip { font-family: inherit; }
+.sites-surface .cat-chip.on { background: var(--n-300); color: var(--n-1000); border-color: var(--n-500); }
+.sites-surface input.prompt-box { width: 100%; font-family: inherit; min-width: 0; }
+.sites-surface input.prompt-box::placeholder { color: var(--n-800); }
+.sites-surface input.prompt-box:disabled { cursor: not-allowed; }
