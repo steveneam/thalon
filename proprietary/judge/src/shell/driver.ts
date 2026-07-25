@@ -51,7 +51,13 @@ const PROMPT_FILE_FOR_TIER: Record<JudgeTier, string> = {
   // leniency class left (golden g3-008: an invented threshold-refinement
   // mechanism passed screen while final caught it; I3 blocked the draft
   // either way, but the tier should agree on doctrine).
-  screen: "judge-g3-screen.v3.md",
+  // screen v4 (s69): v3's mechanism rule collided with its paraphrase rule
+  // — the cheap tier bridged an invented mechanism to an adjacent stated
+  // one as "paraphrase" roughly every other lap (g3-008 flipped 2-of-5 on
+  // 2026-07-25). v4 makes the mechanism rule own the collision: part-by-part
+  // comparison (trigger · signal · component · effect) + an explicit
+  // never-bridges-mechanisms exception inside the paraphrase rule.
+  screen: "judge-g3-screen.v4.md",
   // final v2 (s68 tuning pass, founder GO): explicit decision rules replace
   // v1's "inference fine / specifics not" collision, which the model
   // resolved toward refusing ENTAILED specifics (a date's month, arithmetic
