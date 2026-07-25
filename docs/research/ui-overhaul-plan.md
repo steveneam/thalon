@@ -465,9 +465,11 @@ lane, port the bytes; (ii) shared classes come from `workspace.css`
 READ-ONLY — a sheet's own helmet atomics go in a surface-scoped css file
 (file-disjoint lanes; only the lead edits workspace.css/shell); (iii) the
 bridge-burndown + mono pins stay green (new files enter at ZERO bridged
-tokens — contamination fails the suite, not a review); (iv) design lanes
-run the strongest tier (the design-on-Fable-5 rule) and each launch still
-needs the founder's named GO; (v) the LEAD is the merge gate: every lane
+tokens — contamination fails the suite, not a review); (iv) model tier: the founder's s73-close
+economy override — the redesign EXECUTION (lanes AND the lead session)
+runs **Opus 5** until structural completion, Fable 5 reserved for
+planning; the design-on-Fable-5 rule reverts in full when the last
+surface merges. Each launch still needs the founder's named GO; (v) the LEAD is the merge gate: every lane
 merge is preceded by the lead's own screenshot-vs-sheet diff — renovation
 bounces at the gate, and the founder verdict stays the ship gate. This is
 how "i want you responsible" survives delegation: responsibility moves
