@@ -26,6 +26,13 @@ export const LINKEDIN_VERSION = "202512";
 /** The `sub` claim IS the member id the author URN needs. */
 const userinfoSchema = z.object({ sub: z.string().min(1) }).loose();
 
+/** initializeUpload's essentials: where the bytes go, and the image URN the post will carry. */
+const uploadInitSchema = z
+  .object({
+    value: z.object({ uploadUrl: z.string().min(1), image: z.string().min(1) }).loose(),
+  })
+  .loose();
+
 export interface LinkedInDriverConfig {
   accessToken: string;
   /** API base — swappable for a test double. */
@@ -63,7 +70,60 @@ export function createLinkedInDriver(config: LinkedInDriverConfig): SocialPublis
       }
       const authorUrn = `urn:li:person:${claims.data.sub}`;
 
-      // 2. The post itself. `commentary` is the judged body VERBATIM —
+      // 2. Media leg (B-pub.3, one image): the official versioned Images
+      // API — initializeUpload (owner = the author) → PUT the bytes to the
+      // returned uploadUrl → the post's `content.media` carries the image
+      // URN. Bytes arrive loaded from the door; this driver never touches
+      // the object store.
+      let imageUrn: string | undefined;
+      let imageAltText: string | undefined;
+      if (input.media && input.media.length > 0) {
+        const [image] = input.media;
+        const init = await fetchImpl(`${baseUrl}/rest/images?action=initializeUpload`, {
+          method: "POST",
+          headers: {
+            Authorization: authorization,
+            "Content-Type": "application/json",
+            "LinkedIn-Version": LINKEDIN_VERSION,
+            "X-Restli-Protocol-Version": "2.0.0",
+          },
+          body: JSON.stringify({ initializeUploadRequest: { owner: authorUrn } }),
+        });
+        if (!init.ok) {
+          throw new SocialDriverApiError(
+            "linkedin",
+            init.status,
+            `image initializeUpload failed: ${await responseDetail(init)}`,
+          );
+        }
+        const initBody = uploadInitSchema.safeParse(await responseJson(init));
+        if (!initBody.success) {
+          throw new SocialDriverApiError(
+            "linkedin",
+            init.status,
+            "initializeUpload response carries no uploadUrl/image URN — cannot attach the image",
+          );
+        }
+        const uploaded = await fetchImpl(initBody.data.value.uploadUrl, {
+          method: "PUT",
+          headers: {
+            Authorization: authorization,
+            "Content-Type": "application/octet-stream",
+          },
+          body: new Uint8Array(image.bytes),
+        });
+        if (!uploaded.ok) {
+          throw new SocialDriverApiError(
+            "linkedin",
+            uploaded.status,
+            `image byte upload failed: ${await responseDetail(uploaded)}`,
+          );
+        }
+        imageUrn = initBody.data.value.image;
+        imageAltText = image.altText;
+      }
+
+      // 3. The post itself. `commentary` is the judged body VERBATIM —
       // LinkedIn's "Little Format" treats some characters ((){}[]<>@|~_*)
       // as markup; escaping would alter the text, so it is deliberately
       // not done (flagged for the founder's first-live-post check).
@@ -84,6 +144,13 @@ export function createLinkedInDriver(config: LinkedInDriverConfig): SocialPublis
             targetEntities: [],
             thirdPartyDistributionChannels: [],
           },
+          ...(imageUrn
+            ? {
+                content: {
+                  media: { id: imageUrn, ...(imageAltText ? { altText: imageAltText } : {}) },
+                },
+              }
+            : {}),
           lifecycleState: "PUBLISHED",
           isReshareDisabledByViewer: false,
         }),

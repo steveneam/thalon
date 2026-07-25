@@ -27,11 +27,27 @@ import {
  * their driver at B-pub.2+ as their own reviewed additions.
  */
 
+/**
+ * One attached image (B-pub.3 media leg): bytes loaded by the publish door
+ * from the draft's content-addressed `meta.mediaRefs` at publish time —
+ * drivers never touch the object store. A driver that cannot attach media
+ * throws `SocialMediaUnsupportedError` (silently dropping an image would
+ * publish a different post than the operator approved).
+ */
+export interface SocialPostMedia {
+  bytes: Buffer;
+  /** image/* MIME type (validated at the door before bytes load). */
+  contentType: string;
+  altText?: string;
+}
+
 export interface SocialPostInput {
   /** The approved draft this post publishes — the ledger's audit key. */
   draftId: string;
   /** The judged body verbatim (post format: body IS the authored copy) — the publisher must not alter it. */
   text: string;
+  /** Attached media, when the draft carries `meta.mediaRefs` (B-pub.3: one image; absent = the text-only path, byte-identical to B-pub.2). */
+  media?: SocialPostMedia[];
 }
 
 /** A platform-ACCEPTED result — official-API semantics only (ADR 0002): the id is the platform's, never invented. */

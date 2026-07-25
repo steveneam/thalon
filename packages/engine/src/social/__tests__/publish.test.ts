@@ -1,5 +1,9 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { FINAL_JUDGE_GATE, tenantCtx, type SocialPlatform, type TenantCtx } from "@thalon/contracts";
 import {
+  ArtifactMissingError,
   DuplicatePublicationError,
   NotFoundError,
   openTestDb,
@@ -8,6 +12,7 @@ import {
   type Draft,
   type Repos,
 } from "@thalon/db";
+import { LocalObjectStore, objectKey } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   DraftAlreadyPublishedError,
@@ -15,6 +20,7 @@ import {
   SocialDailyCapReachedError,
   SocialDraftNotApprovedError,
   SocialFormatNotPublishableError,
+  SocialMediaUnsupportedError,
   SocialPublishDisarmedError,
   SocialPublisherDisarmedError,
 } from "../errors";
@@ -22,6 +28,7 @@ import { publishApprovedDraft } from "../publish";
 import {
   createInstagramDriver,
   createLinkedInDriver,
+  createXDriver,
   InstagramTextOnlyUnsupportedError,
   SocialDriverApiError,
 } from "../drivers";
@@ -390,5 +397,157 @@ describe("publishApprovedDraft — B-pub.2 REAL drivers through the door (inject
     expect(rejection).toBeInstanceOf(InstagramTextOnlyUnsupportedError);
     expect((rejection as InstagramTextOnlyUnsupportedError).draftId).toBe(draft.id);
     expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+  });
+});
+
+describe("rung f media (B-pub.3): mediaRefs load verified and travel to the driver as bytes", () => {
+  async function mediaStore(): Promise<{ store: LocalObjectStore; root: string }> {
+    const root = mkdtempSync(path.join(tmpdir(), "thalon-social-media-"));
+    return { store: new LocalObjectStore(root), root };
+  }
+
+  async function putImage(store: LocalObjectStore, bytes: Buffer): Promise<string> {
+    const ref = objectKey("social-media", sha256Hex(bytes), "png");
+    await store.put(ref, bytes);
+    return ref;
+  }
+
+  it("a media draft's bytes reach the publisher intact (contentType + altText ride along); the ledger records", async () => {
+    const f = await setup();
+    const { store, root } = await mediaStore();
+    try {
+      const bytes = Buffer.from("fake-png-bytes-1");
+      const ref = await putImage(store, bytes);
+      const draft = await f.repos.drafts.create(f.ctx, {
+        fanoutRunId: f.runId,
+        sourceId: f.sourceId,
+        platform: "linkedin",
+        body: POST_BODY,
+        format: "post",
+        generationKey: `${f.ctx.tenantId}:publish-media-1`,
+        meta: { mediaRefs: [{ ref, contentType: "image/png", altText: "Three-panel drawing" }] },
+      });
+      await approve(f.ctx, f.repos, draft);
+      const publisher = createFakeSocialPublisher();
+
+      const { publication } = await publishApprovedDraft(
+        { ctx: f.ctx, repos: f.repos, resolvePublisher: () => publisher, objectStore: store },
+        { draftId: draft.id, platform: "linkedin" },
+        NOW,
+      );
+
+      expect(publisher.calls).toHaveLength(1);
+      const media = publisher.calls[0].media;
+      expect(media).toHaveLength(1);
+      expect(media![0].bytes.equals(bytes)).toBe(true);
+      expect(media![0].contentType).toBe("image/png");
+      expect(media![0].altText).toBe("Three-panel drawing");
+      expect(publication.draftId).toBe(draft.id);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a missing media artifact throws ArtifactMissingError carrying the ref — BEFORE any platform call, nothing recorded", async () => {
+    const f = await setup();
+    const { store, root } = await mediaStore();
+    try {
+      const ref = objectKey("social-media", sha256Hex("never stored"), "png");
+      const draft = await f.repos.drafts.create(f.ctx, {
+        fanoutRunId: f.runId,
+        sourceId: f.sourceId,
+        platform: "linkedin",
+        body: POST_BODY,
+        format: "post",
+        generationKey: `${f.ctx.tenantId}:publish-media-2`,
+        meta: { mediaRefs: [{ ref, contentType: "image/png" }] },
+      });
+      await approve(f.ctx, f.repos, draft);
+      const publisher = createFakeSocialPublisher();
+
+      const rejection = await publishApprovedDraft(
+        { ctx: f.ctx, repos: f.repos, resolvePublisher: () => publisher, objectStore: store },
+        { draftId: draft.id, platform: "linkedin" },
+        NOW,
+      ).catch((err: Error) => err);
+
+      expect(rejection).toBeInstanceOf(ArtifactMissingError);
+      expect((rejection as ArtifactMissingError).ref).toBe(ref);
+      expect(publisher.calls).toEqual([]);
+      expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a stored mediaRefs block is never trusted shapeless: a non-image contentType refuses loudly, no call", async () => {
+    const f = await setup();
+    const draft = await f.repos.drafts.create(f.ctx, {
+      fanoutRunId: f.runId,
+      sourceId: f.sourceId,
+      platform: "linkedin",
+      body: POST_BODY,
+      format: "post",
+      generationKey: `${f.ctx.tenantId}:publish-media-3`,
+      meta: { mediaRefs: [{ ref: "social-media/deadbeef.mp4", contentType: "video/mp4" }] },
+    });
+    await approve(f.ctx, f.repos, draft);
+    const publisher = createFakeSocialPublisher();
+
+    await expect(
+      publishApprovedDraft(
+        { ctx: f.ctx, repos: f.repos, resolvePublisher: () => publisher },
+        { draftId: draft.id, platform: "linkedin" },
+        NOW,
+      ),
+    ).rejects.toThrow(/image/);
+    expect(publisher.calls).toEqual([]);
+  });
+
+  it("a media draft to a media-less driver surfaces SocialMediaUnsupportedError — refuses, never a silent text-only post", async () => {
+    const f = await setup({ social: { x: { maxPostsPerDay: 2 } } });
+    const { store, root } = await mediaStore();
+    try {
+      const bytes = Buffer.from("fake-png-bytes-4");
+      const ref = await putImage(store, bytes);
+      const draft = await f.repos.drafts.create(f.ctx, {
+        fanoutRunId: f.runId,
+        sourceId: f.sourceId,
+        platform: "x",
+        body: POST_BODY,
+        format: "post",
+        generationKey: `${f.ctx.tenantId}:publish-media-4`,
+        meta: { mediaRefs: [{ ref, contentType: "image/png" }] },
+      });
+      await approve(f.ctx, f.repos, draft);
+      const neverFetch: typeof fetch = async () => {
+        throw new Error("the guard must refuse before any platform call");
+      };
+      const driver = createXDriver({ accessToken: "tok", fetchImpl: neverFetch });
+
+      const rejection = await publishApprovedDraft(
+        { ctx: f.ctx, repos: f.repos, resolvePublisher: () => driver, objectStore: store },
+        { draftId: draft.id, platform: "x" },
+        NOW,
+      ).catch((err: Error) => err);
+
+      expect(rejection).toBeInstanceOf(SocialMediaUnsupportedError);
+      expect((rejection as SocialMediaUnsupportedError).platform).toBe("x");
+      expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a text-only draft is byte-identical to the B-pub.2 path: media stays undefined", async () => {
+    const f = await setup();
+    const draft = await createPostDraft(f);
+    const publisher = createFakeSocialPublisher();
+    await publishApprovedDraft(
+      { ctx: f.ctx, repos: f.repos, resolvePublisher: () => publisher },
+      { draftId: draft.id, platform: "linkedin" },
+      NOW,
+    );
+    expect(publisher.calls[0].media).toBeUndefined();
   });
 });

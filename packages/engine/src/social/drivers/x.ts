@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SocialMediaUnsupportedError } from "../errors";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
 import { responseDetail, responseJson, SocialDriverApiError } from "./errors";
 
@@ -34,6 +35,10 @@ export function createXDriver(config: XDriverConfig): SocialPublisher {
     platform: "x",
     name: "x-v2-create-post",
     async publish(input: SocialPostInput): Promise<SocialPublishReceipt> {
+      // B-pub.3: no media path here yet — refuse before any call.
+      if (input.media && input.media.length > 0) {
+        throw new SocialMediaUnsupportedError("x", input.draftId);
+      }
       // `text` is the judged body VERBATIM — length policy is the
       // platform's to enforce: an over-limit body comes back as the
       // platform's own non-2xx, never a driver-side trim.

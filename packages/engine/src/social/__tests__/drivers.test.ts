@@ -1,6 +1,6 @@
 import { readEnv } from "@thalon/platform";
 import { describe, expect, it } from "vitest";
-import { PublishRefusedError } from "../errors";
+import { PublishRefusedError, SocialMediaUnsupportedError } from "../errors";
 import {
   createFacebookDriver,
   createInstagramDriver,
@@ -357,5 +357,123 @@ describe("productionSocialPublisherResolver (s67 — the production caller's one
       readEnv({ ...armed, SOCIAL_FACEBOOK_PAGE_ID: "1029384756" }),
     )("facebook");
     expect(withExtra.name).toBe("facebook-page-feed");
+  });
+});
+
+describe("LinkedIn media leg (B-pub.3): initializeUpload → PUT bytes → post carries the image URN", () => {
+  const IMAGE_URN = "urn:li:image:IMG1";
+  const UPLOAD_URL = "https://upload.linkedin.example/img-1";
+  const MEDIA_INPUT: SocialPostInput = {
+    ...INPUT,
+    media: [
+      {
+        bytes: Buffer.from("fake-png-bytes"),
+        contentType: "image/png",
+        altText: "Three-panel horse drawing",
+      },
+    ],
+  };
+
+  const mediaRoutes = (
+    opts: { init?: () => Response; upload?: () => Response; post?: () => Response } = {},
+  ) =>
+    capture((url) => {
+      if (url.endsWith("/v2/userinfo")) {
+        return new Response(JSON.stringify({ sub: "AbC123" }), { status: 200 });
+      }
+      if (url.includes("/rest/images")) {
+        return (
+          opts.init?.() ??
+          new Response(JSON.stringify({ value: { uploadUrl: UPLOAD_URL, image: IMAGE_URN } }), {
+            status: 200,
+          })
+        );
+      }
+      if (url === UPLOAD_URL) {
+        return opts.upload?.() ?? new Response(null, { status: 201 });
+      }
+      return (
+        opts.post?.() ??
+        new Response(null, { status: 201, headers: { "x-restli-id": "urn:li:share:99" } })
+      );
+    });
+
+  it("accepted → four pinned requests; the post body carries content.media.id + altText, commentary verbatim", async () => {
+    const { seen, fetchImpl } = mediaRoutes();
+    const driver = createLinkedInDriver({ accessToken: TOKEN, fetchImpl });
+
+    const receipt = await driver.publish(MEDIA_INPUT);
+    expect(receipt.externalPostId).toBe("urn:li:share:99");
+
+    expect(seen.map((r) => r.url)).toEqual([
+      "https://api.linkedin.com/v2/userinfo",
+      "https://api.linkedin.com/rest/images?action=initializeUpload",
+      UPLOAD_URL,
+      "https://api.linkedin.com/rest/posts",
+    ]);
+
+    const init = seen[1];
+    expect(init.init.method).toBe("POST");
+    expect(headersOf(init)["LinkedIn-Version"]).toBe(LINKEDIN_VERSION);
+    expect(JSON.parse(String(init.init.body))).toEqual({
+      initializeUploadRequest: { owner: "urn:li:person:AbC123" },
+    });
+
+    const upload = seen[2];
+    expect(upload.init.method).toBe("PUT");
+    expect(headersOf(upload)["Content-Type"]).toBe("application/octet-stream");
+    expect(Buffer.from(upload.init.body as Uint8Array).equals(MEDIA_INPUT.media![0].bytes)).toBe(
+      true,
+    );
+
+    const post = JSON.parse(String(seen[3].init.body)) as Record<string, unknown>;
+    expect(post.commentary).toBe(INPUT.text);
+    expect(post.content).toEqual({
+      media: { id: IMAGE_URN, altText: "Three-panel horse drawing" },
+    });
+  });
+
+  it("initializeUpload refusal surfaces as SocialDriverApiError — the post request is never made", async () => {
+    const { seen, fetchImpl } = mediaRoutes({
+      init: () => new Response(JSON.stringify({ message: "denied" }), { status: 403 }),
+    });
+    const driver = createLinkedInDriver({ accessToken: TOKEN, fetchImpl });
+    const error = await apiError(driver.publish(MEDIA_INPUT));
+    expect(error.status).toBe(403);
+    expect(seen.some((r) => r.url.endsWith("/rest/posts"))).toBe(false);
+  });
+
+  it("a failed byte upload surfaces as SocialDriverApiError — the post request is never made", async () => {
+    const { seen, fetchImpl } = mediaRoutes({
+      upload: () => new Response(null, { status: 500 }),
+    });
+    const driver = createLinkedInDriver({ accessToken: TOKEN, fetchImpl });
+    const error = await apiError(driver.publish(MEDIA_INPUT));
+    expect(error.status).toBe(500);
+    expect(seen.some((r) => r.url.endsWith("/rest/posts"))).toBe(false);
+  });
+
+  it("a text-only input still makes exactly two requests — the media leg is structurally absent", async () => {
+    const { seen, fetchImpl } = mediaRoutes();
+    const driver = createLinkedInDriver({ accessToken: TOKEN, fetchImpl });
+    await driver.publish(INPUT);
+    expect(seen.map((r) => r.url)).toEqual([
+      "https://api.linkedin.com/v2/userinfo",
+      "https://api.linkedin.com/rest/posts",
+    ]);
+  });
+
+  it("x and facebook refuse a media input with SocialMediaUnsupportedError BEFORE any network call", async () => {
+    const neverFetch: typeof fetch = async () => {
+      throw new Error("the media guard must refuse before any call");
+    };
+    for (const driver of [
+      createXDriver({ accessToken: TOKEN, fetchImpl: neverFetch }),
+      createFacebookDriver({ accessToken: TOKEN, pageId: "42", fetchImpl: neverFetch }),
+    ]) {
+      const rejection = await driver.publish(MEDIA_INPUT).catch((err: Error) => err);
+      expect(rejection).toBeInstanceOf(SocialMediaUnsupportedError);
+      expect((rejection as SocialMediaUnsupportedError).platform).toBe(driver.platform);
+    }
   });
 });

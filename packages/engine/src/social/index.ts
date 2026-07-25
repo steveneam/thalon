@@ -5,6 +5,7 @@ export {
   SocialDailyCapReachedError,
   SocialDraftNotApprovedError,
   SocialFormatNotPublishableError,
+  SocialMediaUnsupportedError,
   SocialPublishDisarmedError,
   SocialPublisherDisarmedError,
 } from "./errors";
@@ -17,6 +18,7 @@ export {
   type RefusingSocialPublisher,
   type SocialDriverFactory,
   type SocialPostInput,
+  type SocialPostMedia,
   type SocialPublisher,
   type SocialPublishReceipt,
 } from "./registry";

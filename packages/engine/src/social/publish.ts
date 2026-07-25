@@ -6,7 +6,9 @@ import {
   type SocialPublishConfig,
   type TenantCtx,
 } from "@thalon/contracts";
-import type { BrandProfile, Repos, SocialPublicationRow } from "@thalon/db";
+import { ArtifactMissingError, type BrandProfile, type Draft, type Repos, type SocialPublicationRow } from "@thalon/db";
+import { getContentAddressed, getObjectStore, type ObjectStore } from "@thalon/platform";
+import { z } from "zod";
 import {
   DraftAlreadyPublishedError,
   SocialDailyCapReachedError,
@@ -14,7 +16,11 @@ import {
   SocialFormatNotPublishableError,
   SocialPublishDisarmedError,
 } from "./errors";
-import { isRefusingSocialPublisher, type SocialPublisher } from "./registry";
+import {
+  isRefusingSocialPublisher,
+  type SocialPostMedia,
+  type SocialPublisher,
+} from "./registry";
 
 /**
  * B-pub.1 (Sprint-8 window): the publish door — the ONLY path from an
@@ -53,6 +59,8 @@ export interface PublishApprovedDraftDeps {
    * ratchet (or a test injected the fake).
    */
   resolvePublisher(platform: SocialPlatform): SocialPublisher;
+  /** Media bytes source (B-pub.3) — defaults to the platform store (the deploy.ts convention); tests inject. */
+  objectStore?: ObjectStore;
 }
 
 /**
@@ -134,7 +142,8 @@ export async function publishApprovedDraft(
   // (f) only now: platform call → ledger, exactly once. The row snapshots
   // what actually went out (external id + judged-body hash) at post time;
   // a raced duplicate surfaces the repo's DuplicatePublicationError LOUD.
-  const receipt = await publisher.publish({ draftId: draft.id, text: draft.body });
+  const media = await loadDraftMedia(deps, draft);
+  const receipt = await publisher.publish({ draftId: draft.id, text: draft.body, media });
   const publication = await repos.socialPublications.record(ctx, {
     draftId: draft.id,
     platform,
@@ -163,4 +172,49 @@ function utcDayStart(now: Date): Date {
   const start = new Date(now.getTime());
   start.setUTCHours(0, 0, 0, 0);
   return start;
+}
+
+/**
+ * B-pub.3: the draft's media surface — `meta.mediaRefs` names
+ * content-addressed image artifacts (`social-media/<sha256>.<ext>`, put by
+ * the drafting path) that load VERIFIED here at publish time and travel to
+ * the driver as bytes. One image for now (the schema ceiling — lifting it
+ * is a per-driver reviewed change). A stored ref must never be trusted
+ * shapeless (the readSocialConfig convention), and a ref whose artifact is
+ * gone is a broken content-address invariant — ArtifactMissingError, never
+ * a silent text-only post. NOTE the judge gates cover the TEXT claim
+ * surface; the image itself rides the operator's approval (the approve
+ * queue is the human gate for what the picture shows).
+ */
+const mediaRefsSchema = z
+  .array(
+    z.object({
+      ref: z.string().min(1),
+      contentType: z.string().regex(/^image\//, "mediaRefs carry image/* content types only"),
+      altText: z.string().optional(),
+    }),
+  )
+  .max(1);
+
+async function loadDraftMedia(
+  deps: PublishApprovedDraftDeps,
+  draft: Draft,
+): Promise<SocialPostMedia[] | undefined> {
+  const raw = (draft.meta as { mediaRefs?: unknown }).mediaRefs;
+  if (raw === undefined || raw === null) return undefined;
+  const refs = mediaRefsSchema.parse(raw);
+  if (refs.length === 0) return undefined;
+  const store = deps.objectStore ?? getObjectStore();
+  const media: SocialPostMedia[] = [];
+  for (const entry of refs) {
+    const bytes = await getContentAddressed(store, entry.ref);
+    if (!bytes) {
+      throw new ArtifactMissingError(
+        entry.ref,
+        `draft "${draft.id}" media artifact "${entry.ref}" is missing from the object store — a broken content-address invariant, never a silent text-only post`,
+      );
+    }
+    media.push({ bytes, contentType: entry.contentType, altText: entry.altText });
+  }
+  return media;
 }
