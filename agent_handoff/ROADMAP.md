@@ -188,6 +188,52 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   (overview import strip · dossier "Media used" door · editor media pool);
   engine door = this bucket, built only when chartered.
 
+- **B-media.0 — SOURCE MEDIA ON EVERY SURFACE (thumbnails) [FOUNDER-DIRECTED
+  s74: "the media thumbnails will need to be done eventually, so that needs a
+  proper and clever UI/UX with the source thumbnails … wrap that planning in
+  next session when you have time (see how others do it)"]** — the s74 rebuild
+  wave shipped Approve, Runs, Create and Library/Transcription rows WITHOUT
+  thumbs, because nothing on the wire carries a media reference to join; three
+  lanes hit it independently and it is the single place the rebuilt surfaces
+  read thinner than the mock. It also sits directly against the founder's
+  MEDIA-FIRST doctrine (ui-overhaul-plan §5(1)), whose own words are that
+  Approve is where it matters MOST — scan-and-decide.
+  **Two halves, and the plan must cover both:**
+  (a) *the join* — where a thumbnail legitimately comes from per row kind:
+      a draft's own generated/attached media · a run's drafts' media · an
+      intel card's driver-captured `thumbnailUrl` (already captured, no new
+      plumbing) · a **transcription source's YouTube/video poster frame**,
+      which is the densest case because that surface is almost entirely video
+      (see the rename below). Content-addressed store + the `/assets/<sha256>`
+      door already exist (B-pub.4) — the gap is the read model, not storage.
+  (b) *the treatment* — **research-first, per the founder's "see how others do
+      it"**: how mature queue/library products handle poster frames, aspect
+      ratios, missing media, hover/scrub affordances, and the honest
+      placeholder. The sheets' striped `.thumb-sm`/`.thumb-md` with a mono
+      legend is the current honest fallback and stays the floor; the question
+      is what the RESOLVED state should be, and it deserves a plan doc + a
+      claude-design mock before code (DOCTRINE 0: a new visual pattern earns
+      a sheet).
+  **Sequencing:** plan next session in the lead's own time beside the wave-2
+  lanes; the join half is a contract-window candidate.
+- **B-media.1 — RENAME `Library` → `Transcription` [FOUNDER-DIRECTED s74: "the
+  libary (we should really rename it to Transcription) also needs the media/
+  thumbnail treatment, since it's mostly youtube/video based"]** — the surface
+  serves `video_transcript` sources only (its own row verbs are already
+  "Copy transcript" on every row, because the sheet's "Copy text"/"Open
+  profile" variants have no data behind them). Scope: rail label · surface
+  header · route `/app/library` → `/app/transcription` with a redirect so
+  existing deep links and the command palette keep working · component dir +
+  test names · the pin-file rows that carry the path.
+  **Two things to flag rather than assume:** (i) this is a DELIBERATE
+  DIVERGENCE FROM THE SHEET — `Library.dc.html` and every rail in all 16
+  sheets say "Library", so either the canvas is re-exported or this is
+  recorded as a founder amendment, and a future lane must not "correct" it
+  back; (ii) the name narrows the surface to transcripts — if it ever holds
+  PDFs/pages/notes as grounding sources, "Transcription" becomes the wrong
+  word, so the rename is right for what it IS today and worth revisiting only
+  if the source kinds widen.
+
 ### Integrations (ADR 0011 — the sprint's big build)
 - **B-int.0 contract window** — ✅ FROZEN (PR #66, migration 0018).
 - **B-int.1 vault core** — ✅ SHIPPED s68 (envelope crypto + doors + validate-ping
