@@ -1,0 +1,107 @@
+/*
+ * Pipeline board — the surface's own atomics, PORTED 1:1 from the helmet
+ * <style> of docs/research/mock-sheets/Board.dc.html (DOCTRINE 0: the sheet
+ * is the blueprint). Shared classes (.card, .pill, .seg, .btn, type roles)
+ * come from workspace.css — that file is the shell contract and is not
+ * edited from here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.board-surface` — the cross-lane contract
+ * (mock-sheets README rule 6, executable as lib/__tests__/surface-css-scope).
+ * The sheets reuse class names with different values, and this surface is a
+ * TAB OF HOME: its `.cols`/`.col` grammar and the Dashboard's `.tiles`/
+ * `.home-grid` render inside the same shell, so an unscoped file here would
+ * reach straight into its own sibling.
+ *
+ * The sheet's helmet also declares `.avatar`; it is already shared in
+ * workspace.css (identical in 15 of the 16 sheets), so it is deliberately NOT
+ * duplicated here.
+ */
+
+.board-surface .cols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  min-height: 0;
+  align-items: start;
+}
+.board-surface .col {
+  background: oklch(0.17 0.009 261);
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-card);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.board-surface .col-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--n-400);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.board-surface .col-ct {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--n-900);
+  background: var(--n-200);
+  border-radius: var(--r-pill);
+  padding: 1px 7px;
+  font-variant-numeric: tabular-nums;
+}
+.board-surface .col-bd {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.board-surface .k-card {
+  background: var(--n-100);
+  border: 1px solid var(--n-400);
+  border-radius: 8px;
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color var(--motion-fast);
+}
+.board-surface .k-card:hover { border-color: var(--n-500); }
+.board-surface .k-thumb {
+  height: 54px;
+  border-radius: 5px;
+  border: 1px solid var(--n-400);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--n-200),
+    var(--n-200) 7px,
+    var(--n-100) 7px,
+    var(--n-100) 14px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.board-surface .k-thumb span {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: var(--n-800);
+}
+.board-surface .k-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.board-surface .k-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--n-900);
+}
