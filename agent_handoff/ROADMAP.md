@@ -238,8 +238,16 @@ line item; founder unlocks calibrated on real data in WRAP-exemplar-arm.md
 acquisition breadth legally — **FOUNDER DIRECTIVE s71: intel eventually reads
 EVERY platform we post to (YouTube · TikTok · IG · Facebook · LinkedIn · X ·
 Bluesky …), the way competing SaaS/creators already do; wire each via its
-official surface and be honest per platform**: X paid search = the firehose,
-rides the month-end credit call; Reddit official API; YouTube LIVE already;
+official surface and be honest per platform**: X — **pricing model CHANGED
+(verified 2026-07, web): flat Basic $200/Pro $5k tiers CLOSED to new signups
+Feb 2026; new developers get PAY-PER-USE, no monthly minimum — ~$0.005/post
+read (2M reads/mo cap), $0.015/post write ($0.20 with a link). A ~500-reads/
+day intel sweep ≈ $75/mo; a proof run costs pocket change. FOUNDER GATE
+(s71, verbatim intent): "i would only pay if our learning engine is ready,
+not before" — no X spend until the admission→generation loop demonstrably
+converts exemplars into better drafts; then start metered-tiny. Re-verify
+pricing at purchase (X shifts terms often).** Reddit official API; YouTube
+LIVE already;
 TikTok = official research/display APIs (limited, app-review-gated); IG =
 own-insights + hashtag top-media only; Facebook = page insights; LinkedIn has
 NO trending API — barred from scraping, learned obliquely, (L3) OWN-POST
