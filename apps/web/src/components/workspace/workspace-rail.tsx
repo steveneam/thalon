@@ -7,6 +7,20 @@ import { usePulse } from "@/components/workspace/pulse-context";
 import { activeSurface, NAV_SURFACES } from "@/lib/workspace/nav";
 
 /**
+ * Where the brand mark points (founder, s76: "clicking on the thalon logo
+ * should take us to the landing page, not the dashboard").
+ *
+ * It is not simply "/" because `next.config.ts` redirects "/" → "/app" in
+ * DEVELOPMENT ONLY (founder direction s50: the dev box's daily door is the
+ * workspace, with "/?landing" as the documented escape hatch). A bare "/"
+ * would therefore bounce straight back to the dashboard on the dev box —
+ * looking broken to whoever tests the change — while behaving correctly in
+ * production. Resolving it per environment makes the mark mean the same
+ * thing in both.
+ */
+const LANDING_HREF = process.env.NODE_ENV === "development" ? "/?landing" : "/";
+
+/**
  * The side rail, rebuilt exactly from the mock sheets (DOCTRINE 0): brand
  * mark + name, then the three clusters the sheet draws with its separators
  * — work (Home…Calendar), outputs (Leads…Runs), and the bottom-pinned
@@ -41,7 +55,7 @@ export function WorkspaceRail() {
 
   return (
     <nav className="rail" aria-label="Workspace side navigation">
-      <Link href="/app" aria-label="Workspace home" className="rail-brand">
+      <Link href={LANDING_HREF} aria-label="Thalon home — the landing page" className="rail-brand">
         <span className="rail-mark" />
         <span className="rail-name">Thalon</span>
       </Link>

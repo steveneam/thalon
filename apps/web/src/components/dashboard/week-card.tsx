@@ -1,8 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { platformLabel, slotsInWeek } from "@/components/dashboard/dashboard-model";
+// The day view borrows the CALENDAR's geometry and event builders rather than
+// growing a second time grammar on the dashboard (founder s76: "same as the
+// main calendar"). calendar-model is pure — no React, no surface coupling.
+import {
+  gutterHours,
+  planEvents,
+  sweepEvents,
+  waitingEvents,
+  windowHeight,
+  yOf,
+  DAY_WINDOW,
+  FULL_WINDOW,
+} from "@/components/calendar/calendar-model";
 import { timeAgo } from "@/lib/workspace/format";
 import {
   dayKey,
@@ -116,6 +129,70 @@ export function WeekCard({
 
   const visibleDays = view === "today" ? days.filter((d) => d.isToday) : days;
 
+  // The day view's events. Built from the CALENDAR's own model rather than
+  // from marksFor(), because a time axis needs timestamps and marksFor()
+  // returns rendered text. Every one of these carries a real time: sweep
+  // ticks are projected, planned slots have scheduledFor, and a waiting
+  // draft is placed at waitingSince — the same honest placement the main
+  // calendar makes. Nothing is invented onto the clock.
+  const todayDays = days.filter((d) => d.isToday);
+  const todayDayKey = todayDays[0]?.key;
+  // planEvents() is not day-scoped (the calendar filters it downstream), so
+  // today's key does that here. Breaches are deliberately NOT passed: this
+  // strip does not compute cadence, so it shows no breach flags rather than
+  // an empty-map flag that would read as "no breaches".
+  const allDayEvents =
+    view === "today" && plan && todayDayKey
+      ? [
+          ...sweepEvents(plan.sweep, today, todayDays),
+          ...planEvents(plan.plannedSlots, plan.assets, new Map()),
+          ...waitingEvents(plan.assets, todayDays, today),
+        ].filter((e) => e.day === todayDayKey)
+      : [];
+  // The window widens to the full day when "now" falls outside the resting
+  // one, so the red line is ALWAYS on screen. A day view of the current day
+  // that cannot show the current time fails its own promise — and at 04:00
+  // the resting 06:00–21:00 window would hide it.
+  const nowHour = today.getHours() + today.getMinutes() / 60;
+  const win = nowHour >= DAY_WINDOW.start && nowHour < DAY_WINDOW.end ? DAY_WINDOW : FULL_WINDOW;
+  const dayEvents = allDayEvents
+    .filter((e) => {
+      const h = e.at.getHours() + e.at.getMinutes() / 60;
+      return h >= win.start && h < win.end;
+    })
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
+  // Anything outside the drawn window is COUNTED, never silently dropped.
+  const outsideCount = allDayEvents.length - dayEvents.length;
+
+  // A 24-hour axis is taller than the card, so the day view opens scrolled to
+  // the top — showing midnight, with the now-line and the day's events below
+  // the fold. It then reads as empty when it is not. Bring now into view
+  // instead, a third down so there is context on both sides of the line.
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const nowTop = yOf(nowHour, win);
+  useEffect(() => {
+    if (view !== "today") return;
+    const body = bodyRef.current;
+    if (!body) return;
+    body.scrollTop = Math.max(0, nowTop - body.clientHeight / 3);
+  }, [view, nowTop]);
+
+  // Density. The calendar's own placeColumn() splits colliding events into
+  // side-by-side columns, which is right across seven wide day columns and
+  // WRONG here: this strip is one ~340px column, so 21 collisions became 21
+  // ten-pixel slivers showing a single digit each. Instead the chips stay
+  // full width at their true time, and a run that collides collapses into the
+  // leading chip with a "+N" — the sheet's own "+N more" grammar, and the
+  // same trade the week rows already make with DAY_MARK_BOUND.
+  const CHIP_PX = 22;
+  const stacked: { event: (typeof dayEvents)[number]; top: number; hidden: number }[] = [];
+  for (const event of dayEvents) {
+    const top = yOf(event.at.getHours() + event.at.getMinutes() / 60, win);
+    const last = stacked[stacked.length - 1];
+    if (last && top < last.top + CHIP_PX) last.hidden += 1;
+    else stacked.push({ event, top, hidden: 0 });
+  }
+
   return (
     <section className="card" style={{ display: "flex", flexDirection: "column" }} aria-label="This week">
       <div className="card-head">
@@ -158,10 +235,68 @@ export function WeekCard({
       )}
       {status === "success" && plan && (
         <>
-          <div>
-            {visibleDays.map((day) => {
+          <div className="week-body" ref={bodyRef}>
+            {view === "today" ? (
+              <div className="wd-grid" style={{ height: windowHeight(win) }}>
+                <div className="wd-gut">
+                  {gutterHours(win).map((hour) => (
+                    <span key={hour} style={{ top: yOf(hour, win) }}>
+                      {`${hour}`.padStart(2, "0")}:00
+                    </span>
+                  ))}
+                </div>
+                <div className="wd-col">
+                  {gutterHours(win).map((hour) => (
+                    <div key={hour} className="wd-hourline" style={{ top: yOf(hour, win) }} />
+                  ))}
+                  {/* placeColumn is the calendar's own overlap solver: events
+                      whose boxes collide split the column side by side rather
+                      than stacking on top of each other. Two drafts 20 minutes
+                      apart are ~15px apart at HOUR_PX, so without it they
+                      overlap illegibly. */}
+                  {stacked.map(({ event, top, hidden }) => {
+                    const cls =
+                      event.kind === "plan" ? "wd-ev wd-plan" : event.kind === "you" ? "wd-ev wd-you" : "wd-ev";
+                    const body = (
+                      <>
+                        <span className="t-data" style={{ marginRight: 6 }}>
+                          {clock(event.at)}
+                        </span>
+                        {event.lead}
+                        {hidden > 0 && <span className="mark-quiet"> +{hidden}</span>}
+                      </>
+                    );
+                    const title = hidden > 0 ? `${event.lead} · +${hidden} more at this time` : event.lead;
+                    return event.href ? (
+                      <Link key={event.id} href={event.href} className={cls} style={{ top }} title={title}>
+                        {body}
+                      </Link>
+                    ) : (
+                      <span key={event.id} className={cls} style={{ top }} title={title}>
+                        {body}
+                      </span>
+                    );
+                  })}
+                  {dayEvents.length === 0 && (
+                    <span className="mark-quiet" style={{ position: "absolute", top: 8, left: 10 }}>
+                      Nothing on the clock today.
+                    </span>
+                  )}
+                </div>
+                {/* The same red line the calendar draws — and only when now is
+                    actually inside the drawn window, never pinned to an edge. */}
+                {/* Always drawn: `win` is chosen so now is inside it. */}
+                <div className="wd-now" style={{ top: yOf(nowHour, win) }} aria-hidden />
+                {outsideCount > 0 && (
+                  <span className="mark-quiet" style={{ position: "absolute", bottom: 6, left: 10 }}>
+                    {outsideCount} outside the drawn hours — not shown, not lost
+                  </span>
+                )}
+              </div>
+            ) : (
+              visibleDays.map((day) => {
               const marks = marksFor(day.key);
-              const shown = view === "today" ? marks : marks.slice(0, DAY_MARK_BOUND);
+              const shown = marks.slice(0, DAY_MARK_BOUND);
               const overflow = marks.length - shown.length;
               return (
                 <div
@@ -203,7 +338,8 @@ export function WeekCard({
                   </div>
                 </div>
               );
-            })}
+              })
+            )}
           </div>
           <div
             style={{
