@@ -120,7 +120,8 @@ async function main(): Promise<void> {
   let consecutiveFailures = 0;
   const tick = async (): Promise<void> => {
     if (stopped) return;
-    let tickMs = MAX_TICK_MS;
+    // Assigned on BOTH paths below — no dead initializer (no-useless-assignment).
+    let tickMs: number;
     try {
       const result = await pass(handle.repos);
       consecutiveFailures = result.failed > 0 ? consecutiveFailures + 1 : 0;
