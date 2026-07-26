@@ -35,6 +35,7 @@ import { compareLeadCards } from "@/lib/leads/serialize";
 import type { ImportReport, LeadCard, LeadsPayload } from "@/lib/leads/types";
 import { composeEmail } from "@/lib/outreach/client";
 import { timeAgo } from "@/lib/workspace/format";
+import { LeadsBoard } from "@/components/leads/leads-board";
 import { useListKeys } from "@/lib/workspace/keyboard";
 
 type QueueStatus = "loading" | "error" | "success";
@@ -429,12 +430,7 @@ export function LeadsSurface() {
                 <span className="t-label">Reading your leads…</span>
               </div>
             ) : view === "board" ? (
-              <div className="row">
-                <span className="t-label">
-                  The mock draws this tab but no board for it yet — every lead is in the list, best
-                  fit first.
-                </span>
-              </div>
+              <LeadsBoard />
             ) : visible.length === 0 ? (
               <div className="row">
                 <span className="t-label">

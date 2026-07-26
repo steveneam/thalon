@@ -1,3 +1,4 @@
+import { LEAD_STATUSES, LEAD_TRANSITIONS, type LeadStatus } from "@thalon/contracts";
 import { heatBand } from "@/components/intel/heat-grade";
 import type { FeedRun, GridDraft } from "@/lib/approve-queue/types";
 import type { LeadCard } from "@/lib/leads/types";
@@ -15,6 +16,35 @@ import type { LeadCard } from "@/lib/leads/types";
 
 /** The draft format outreach composes write (engine outreach/compose.ts). */
 export const OUTREACH_FORMAT = "outreach_email";
+
+/**
+ * The Board tab's columns (founder-directed s75: build the leads board on the
+ * mock's grammar, wire it next session).
+ *
+ * Column-as-field-value over the field that ACTUALLY exists — the contract's
+ * lead lifecycle — so the columns are derived from `LEAD_TRANSITIONS`, never
+ * hand-listed. A status with no exits is TERMINAL and is never a column: a
+ * terminal state is not a drop target, and `dismissed`/`unsubscribed` already
+ * have their own home in the list's Dismissed toggle. Adding a lifecycle
+ * value to the contract adds its column here for free; that is the point.
+ *
+ * NOTE this board is NOT `Board.dc.html`. That sheet is the CONTENT pipeline
+ * drawn under Home. This is the lead pipeline, built in the same column
+ * grammar because the founder asked for it on the mock's language.
+ */
+export const LEAD_BOARD_COLUMNS: readonly LeadStatus[] = LEAD_STATUSES.filter(
+  (status) => LEAD_TRANSITIONS[status].length > 0,
+);
+
+const LEAD_COLUMN_LABELS: Readonly<Record<string, string>> = {
+  new: "New",
+  scored: "Scored",
+  contacted: "Contacted",
+};
+
+export function leadColumnLabel(status: LeadStatus): string {
+  return LEAD_COLUMN_LABELS[status] ?? status;
+}
 
 /** The sheet's mono badge: two letters, from whatever identity the lead actually has. */
 export function leadInitials(lead: LeadCard): string {

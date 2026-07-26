@@ -418,13 +418,18 @@ describe("Leads (exact-mock rebuild — Leads.dc.html)", () => {
     expect(screen.queryByText(/scored/)).not.toBeInTheDocument();
   });
 
-  it("the Board tab states the gap rather than faking a board", async () => {
+  it("the Board tab renders the pipeline board, still honest that it is unwired", async () => {
+    // s75: the founder directed the board be BUILT on the mock's grammar
+    // (step 1 = structure, step 2 wires it next session), so the tab no
+    // longer states a gap — it states that the board it draws is unwired.
     seedLeads();
     const user = userEvent.setup();
-    render(<LeadsSurface />);
+    const { container } = render(<LeadsSurface />);
 
     await user.click(await screen.findByRole("button", { name: "Board" }));
-    expect(screen.getByText(/draws this tab but no board for it yet/)).toBeInTheDocument();
+    expect(container.querySelector(".lead-board")).not.toBeNull();
+    expect(container.querySelectorAll(".col")).toHaveLength(3);
+    expect(screen.getByText(/isn’t wired yet/)).toBeInTheDocument();
   });
 
   it("carries no legacy bridge styling — the rebuilt surface speaks the sheet's classes", async () => {
