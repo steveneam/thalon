@@ -32,6 +32,18 @@
 | s3-store | S3 driver behind the existing object-store seam (`OBJECT_STORE=s3` currently throws) — the flagged pre-launch durability gap; interface parity, verified-read semantics untouched, @aws-sdk/client-s3 (Apache-2.0), zero-network fakes — **founder-approved s71 close for s72 launch** | packages/platform/src/object-store.ts + tests + env docs (contracts untouched) | MERGED s72 (`1abe124` incl. lead NUL-escape fix; verify green; lane closed) |
 | rebrief | The 491089d0 ratchet: re-brief REPLACES groundingSourceIds (never appends) — reproduce, fix at the merge-owner seam, regression-pin — **founder-approved s71 close for s72 launch** | packages/engine origination/video brief path + tests (judge internals + contracts untouched) | MERGED s72 (`8429383`; verify green; lane closed) |
 
+### Sprint 9 / s77 — the media framework
+
+**Contract window FROZEN s77 (`13163d4`, direct-to-main on green verify) — CONTRACTS-ONLY, zero SQL migrations** (both meta columns were already jsonb, ground-truthed at plan time). Contents: `packages/contracts/src/media.ts` (new — `MediaRef` external|stored, envelope + provenance, the image/audio ext split, `deriveOrientation`) · `source.ts` media meta mini-contract + `sourceThumbnailEnvelope` · `video-project.ts` `videoTakePosterSchema` (the `meta.attribution` precedent) · RIDER `run-replay.ts` (arms Runs' Retry: a replay is a NEW run, scope defaults to `failed_only` so a partial fan-out never re-spends). **Amended once, pre-lane, by its owner: `capturedAt` is optional** — requiring it made the trend wire drop a thumbnail it genuinely held (see the commit; the window test pins the reason).
+
+**NOT in the window, deliberately:** Library's "grounds N drafts" count. `groundingSourceIds` lives inside `drafts.meta` jsonb, so it is a containment query needing a repo method and an index decision — real work with a performance question attached, not a shape to freeze. It belongs to whichever lane owns it.
+
+| lane | bucket | scope (files) | status |
+|---|---|---|---|
+| (lead-direct) | **B-media.0 lane A core** — resolver + `<SourceThumb>` + Transcription/Intel×2 migrated + `/api/media/[sha]` door | apps/web lib/media + components/media + the three surfaces | **SHIPPED s77 (`a70a53c`)** — verify 2153 green, screenshot gate passed both surfaces both themes. Rule 6 honoured (renders the SHARED `.thumb-*` so four per-surface overrides survive); css-scope ratchet gained a second, equally strict category for shared-component sheets |
+| media-lane-b | **B-media.0 lane B + B-audio.1** — ingest width/height capture · poster derivation + backfill door · **ffmpeg into Dockerfile.web (founder GO on record)** · audio bed/audition/mux | packages/engine ingest+render+video, Dockerfile.web (disjoint from lane A) | **PREPPED, awaiting the founder's fresh launch approval** (standing rule; plan §9 states it explicitly) |
+| (lead-direct) | Lane A remainder — Sites dossier mint strip adopts SourceThumb (first live `broken` caller); `lg` size earns a home or is cut | apps/web components/sites + videos | queued behind lane B |
+
 ## Work queue (open items + their gates)
 
 | # | item | gate / door | detail lives in |
