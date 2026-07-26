@@ -542,6 +542,173 @@ export const JOBS = {
     ],
   },
 
+  /**
+   * THE SURFACE THAT TAUGHT THE LESSON.
+   *
+   * Nothing in the product could create a plan until s78, and no reading audit
+   * saw it: `Reschedule` was gated on `kind === "plan"`, which reads as correct,
+   * and `planSlot` was reachable from exactly one place — inside `reschedule`,
+   * which only renders on an event that is ALREADY a plan. Unreachable by
+   * construction, while the Board said "approve a draft, then plan its slot".
+   *
+   * So the calendar's jobs are pinned here even though no s79 lane owns it:
+   * these are the exact capabilities the founder found missing by clicking, and
+   * a capability that was absent once can go absent again silently.
+   *
+   * A slot is a PLAN — none of this publishes, arms, or calls a platform.
+   * Jobs that write clean up after themselves so the gate stays repeatable.
+   */
+  calendar: {
+    route: "/app/calendar",
+    jobs: [
+      {
+        name: "PLAN an approved draft into an empty slot (the capability that did not exist)",
+        async run(page) {
+          const before = (await page.$$(".ev-plan")).length;
+          const col = await page.$(".dcol");
+          if (!col) throw new NoAffordance("no day columns on the week grid");
+          // Click empty grid: the planner door. A coordinate click, because the
+          // door is the column's own empty space, not a control with a name.
+          const box = await col.boundingBox();
+          await page.mouse.click(box.x + box.width / 2, box.y + 60);
+          await page.waitForNetworkIdle({ idleTime: 500, timeout: 6_000 }).catch(() => {});
+          const picker = await page.evaluate(() => {
+            const el = document.querySelector(".detail-card, [class*='picker'], [role='dialog']");
+            return el ? { text: (el.textContent || "").trim().slice(0, 160) } : null;
+          });
+          if (!picker) throw new NoAffordance("clicking an empty slot offers no way to plan anything");
+          // Either it lists something plannable, or it says WHY it cannot —
+          // an empty picker with no explanation is the dead end.
+          const option = await page.evaluate(() => {
+            const card = document.querySelector(".detail-card, [class*='picker'], [role='dialog']");
+            const btn = Array.from(card.querySelectorAll("button")).find(
+              (b) => !/^(✕|×|close|cancel)$/i.test((b.textContent || "").trim()),
+            );
+            return btn ? (btn.textContent || "").trim().slice(0, 60) : null;
+          });
+          if (!option) {
+            /**
+             * An empty picker is only acceptable if it states the TRUE reason.
+             * s79 found it claiming *"a draft becomes plannable once you approve
+             * it"* on a surface showing three chips reading "approved" — telling
+             * the operator to approve something they had already approved. So
+             * the harness checks the CLAIM against what the surface itself
+             * shows, rather than accepting any explanation as honest.
+             */
+            const approvedOnScreen = /\bapproved\b/i.test(await text(page));
+            if (/once you approve it/i.test(picker.text) && approvedOnScreen) {
+              throw new DeadDoor(
+                `the planner blames missing approval while the surface shows approved work: ${picker.text.slice(0, 90)}`,
+              );
+            }
+            if (/nothing|already|no .*(approved|draft|unplanned)/i.test(picker.text)) {
+              return `nothing plannable, and it says so truthfully: ${picker.text.slice(0, 90)}`;
+            }
+            throw new DeadDoor(`the planner opened with nothing to pick and no reason given: ${picker.text.slice(0, 80)}`);
+          }
+          await page.evaluate(() => {
+            const card = document.querySelector(".detail-card, [class*='picker'], [role='dialog']");
+            const btn = Array.from(card.querySelectorAll("button")).find(
+              (b) => !/^(✕|×|close|cancel)$/i.test((b.textContent || "").trim()),
+            );
+            btn.click();
+          });
+          await page.waitForNetworkIdle({ idleTime: 800, timeout: 8_000 }).catch(() => {});
+          const after = (await page.$$(".ev-plan")).length;
+          if (after <= before) {
+            throw new DeadDoor(`picked ${JSON.stringify(option)} and no plan appeared (${before} → ${after})`);
+          }
+          // Clean up: leave the surface as it was found.
+          await page.evaluate(() => {
+            const plans = Array.from(document.querySelectorAll(".ev-plan"));
+            if (plans.length > 0) plans[plans.length - 1].click();
+          });
+          await page.waitForNetworkIdle({ idleTime: 400, timeout: 5_000 }).catch(() => {});
+          const removed = await page.evaluate(() => {
+            const btn = Array.from(document.querySelectorAll("button")).find((b) => /^remove$/i.test((b.textContent || "").trim()));
+            if (!btn) return false;
+            btn.click();
+            return true;
+          });
+          await page.waitForNetworkIdle({ idleTime: 600, timeout: 6_000 }).catch(() => {});
+          return `planned ${JSON.stringify(option)} (${before} → ${after})${removed ? ", then removed it" : " — COULD NOT CLEAN UP"}`;
+        },
+      },
+      {
+        name: "REMOVE a plan, with the control actually clickable where it is drawn",
+        async run(page) {
+          const plan = await page.$(".ev-plan");
+          if (!plan) return "no plan on this week to remove";
+          await press(page, plan, "a planned slot");
+          const remove = await page.evaluate(() => {
+            const btn = Array.from(document.querySelectorAll("button")).find((b) => /^remove$/i.test((b.textContent || "").trim()));
+            if (!btn) return null;
+            const r = btn.getBoundingClientRect();
+            const cx = r.x + r.width / 2;
+            const cy = r.y + r.height / 2;
+            // elementFromPoint, not geometry: at s78 this control sat under an
+            // off-screen popover edge and measured perfectly fine.
+            const top = document.elementFromPoint(cx, cy);
+            return {
+              inViewport: cx >= 0 && cy >= 0 && cx <= window.innerWidth && cy <= window.innerHeight,
+              hit: Boolean(top && (top === btn || btn.contains(top))),
+              at: `${Math.round(cx)},${Math.round(cy)}`,
+            };
+          });
+          if (!remove) throw new NoAffordance("a plan's detail offers no Remove");
+          if (!remove.inViewport) throw new DeadDoor(`Remove is drawn outside the viewport at ${remove.at}`);
+          if (!remove.hit) throw new DeadDoor(`Remove at ${remove.at} is covered by another layer — a click there hits something else`);
+          return `Remove is hittable at ${remove.at} (not clicked — it would delete a real plan)`;
+        },
+      },
+      {
+        name: "dismiss the planner by clicking outside it",
+        async run(page) {
+          const col = await page.$(".dcol");
+          if (!col) throw new NoAffordance("no day columns on the week grid");
+          const box = await col.boundingBox();
+          await page.mouse.click(box.x + box.width / 2, box.y + 60);
+          await page.waitForNetworkIdle({ idleTime: 400, timeout: 5_000 }).catch(() => {});
+          const opened = await page.$(".detail-card, [class*='picker'], [role='dialog']");
+          if (!opened) throw new NoAffordance("no planner opened to dismiss");
+          // Click well away from the popover — the s78 finding was that outside
+          // clicks did not dismiss it at all.
+          await page.mouse.click(250, 700);
+          await page.waitForNetworkIdle({ idleTime: 400, timeout: 5_000 }).catch(() => {});
+          const still = await page.$(".detail-card, [class*='picker'], [role='dialog']");
+          if (still) throw new DeadDoor("clicking outside the planner does not dismiss it");
+          return "outside click dismisses it";
+        },
+      },
+      {
+        name: "keep the planner fully on screen wherever it opens",
+        async run(page) {
+          const cols = await page.$$(".dcol");
+          if (cols.length === 0) throw new NoAffordance("no day columns on the week grid");
+          // The LAST column and the BOTTOM of it: the two edges a popover runs
+          // off. s78 clamped it against a guessed 190px height and the grid's
+          // width instead of the visible viewport, and Remove went unclickable.
+          const box = await cols[cols.length - 1].boundingBox();
+          await page.mouse.click(box.x + box.width - 8, box.y + box.height - 30);
+          await page.waitForNetworkIdle({ idleTime: 500, timeout: 6_000 }).catch(() => {});
+          const fit = await page.evaluate(() => {
+            const el = document.querySelector(".detail-card, [class*='picker'], [role='dialog']");
+            if (!el) return null;
+            const r = el.getBoundingClientRect();
+            return {
+              ok: r.left >= 0 && r.top >= 0 && r.right <= window.innerWidth && r.bottom <= window.innerHeight,
+              rect: `${Math.round(r.left)},${Math.round(r.top)} ${Math.round(r.width)}×${Math.round(r.height)}`,
+              vp: `${window.innerWidth}×${window.innerHeight}`,
+            };
+          });
+          if (!fit) throw new NoAffordance("no planner opened at the grid's far corner");
+          if (!fit.ok) throw new DeadDoor(`the planner overflows the viewport: ${fit.rect} in ${fit.vp}`);
+          return `fits at ${fit.rect} in ${fit.vp}`;
+        },
+      },
+    ],
+  },
+
   videos: {
     route: "/app/videos",
     jobs: [

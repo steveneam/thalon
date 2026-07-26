@@ -18,6 +18,7 @@ import {
   monthCells,
   outsideWindow,
   placeColumn,
+  planEmptyReason,
   planEvents,
   plannableAssets,
   sweepEvents,
@@ -30,6 +31,7 @@ import {
   FULL_WINDOW,
   SCOPES,
   type CalEvent,
+  type PlanEmptyReason,
   type Scope,
 } from "@/components/calendar/calendar-model";
 import { platformLabel } from "@/lib/workspace/format";
@@ -744,6 +746,7 @@ export function CalendarSurface() {
                 anchorTop={yOf(planAt.hour, win)}
                 windowPx={windowHeight(win)}
                 assets={plannableAssets(plan?.assets ?? [], plan?.plannedSlots ?? [])}
+                emptyReason={planEmptyReason(plan?.assets ?? [], plan?.plannedSlots ?? [])}
                 busy={slotBusy}
                 error={slotError}
                 onPlan={planInto}
@@ -1119,6 +1122,7 @@ function PlanPicker({
   anchorTop,
   windowPx,
   assets,
+  emptyReason,
   busy,
   error,
   onPlan,
@@ -1128,6 +1132,8 @@ function PlanPicker({
   anchorTop: number;
   windowPx: number;
   assets: PipelineAsset[];
+  /** Which fact to state when `assets` is empty — see `planEmptyReason`. */
+  emptyReason: PlanEmptyReason;
   busy: boolean;
   error: string | null;
   onPlan: (draftId: string, at: Date) => void;
@@ -1163,10 +1169,21 @@ function PlanPicker({
       </span>
       {assets.length === 0 ? (
         <span className="t-label detail-foot">
-          Nothing to plan yet — a draft becomes plannable once you approve it.{" "}
-          <Link className="card-link" href="/app/approve">
-            Open Approve →
-          </Link>
+          {emptyReason === "all-planned" ? (
+            <>
+              Every approved draft already holds a slot — drag one to move it, or approve another.{" "}
+              <Link className="card-link" href="/app/approve">
+                Open Approve →
+              </Link>
+            </>
+          ) : (
+            <>
+              Nothing to plan yet — a draft becomes plannable once you approve it.{" "}
+              <Link className="card-link" href="/app/approve">
+                Open Approve →
+              </Link>
+            </>
+          )}
         </span>
       ) : (
         <div className="plan-choices">

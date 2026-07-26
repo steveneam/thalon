@@ -12,6 +12,7 @@ import {
   monthCells,
   outsideWindow,
   placeColumn,
+  planEmptyReason,
   plannableAssets,
   SNAP_MINUTES,
   planEvents,
@@ -386,6 +387,59 @@ describe("plannableAssets — what can actually be planned", () => {
         [slot({ draftId: "d1" })],
       ),
     ).toEqual([]);
+  });
+});
+
+/**
+ * THE EMPTY PICKER STATED THE WRONG FACT (s79, found by DRIVING the surface).
+ *
+ * `PlanPicker`'s own docstring promised this distinction — *"'nothing approved
+ * yet' and 'everything is already planned' are different facts and the
+ * operator's next move differs"* — and the code rendered ONE hardcoded line for
+ * both. On live dev that line was false: five drafts were approved and every
+ * plannable one already held a slot, so the picker told the operator to go and
+ * approve something they had already approved.
+ *
+ * No reading audit catches this, because the docstring describes the correct
+ * behaviour and the code reads as consistent with its own stated intent. Only
+ * opening the picker against real data shows the message is wrong for the case.
+ */
+describe("planEmptyReason — an empty picker must state the TRUE reason", () => {
+  it("says nothing is approved when nothing is approved", () => {
+    expect(planEmptyReason([asset({ draftId: "d1", status: "queued" })], [])).toBe("none-approved");
+    expect(planEmptyReason([], [])).toBe("none-approved");
+  });
+
+  it("says everything is already planned when that is what happened", () => {
+    // The live-dev shape: approved, unpublished, and already holding a slot.
+    expect(
+      planEmptyReason([asset({ draftId: "d1", status: "approved" })], [slot({ draftId: "d1" })]),
+    ).toBe("all-planned");
+  });
+
+  it("counts a PUBLISHED approved draft as no longer plannable, not as planned", () => {
+    // Published work is done, not pending a slot — telling the operator
+    // "everything is already planned" would be a second wrong fact.
+    expect(
+      planEmptyReason(
+        [asset({ draftId: "d1", status: "approved", publishedAt: at(23, 9).toISOString() })],
+        [],
+      ),
+    ).toBe("none-approved");
+  });
+
+  it("never claims 'already planned' while something is still plannable", () => {
+    // The pair derives from the same inputs on purpose. If this drifted, the
+    // picker could tell the operator everything is planned on a surface that is
+    // simultaneously offering them something to plan.
+    const mixed = [
+      asset({ draftId: "planned", status: "approved" }),
+      asset({ draftId: "free", status: "approved" }),
+    ];
+    expect(plannableAssets(mixed, [slot({ draftId: "planned" })]).map((r) => r.draftId)).toEqual([
+      "free",
+    ]);
+    expect(planEmptyReason(mixed, [slot({ draftId: "planned" })])).not.toBe("all-planned");
   });
 });
 

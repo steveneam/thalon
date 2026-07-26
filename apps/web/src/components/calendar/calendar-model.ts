@@ -538,6 +538,45 @@ export function plannableAssets(
   );
 }
 
+/**
+ * WHY the plan picker is empty — and the picker's docstring already promised
+ * this distinction before the code made it (s79, found by DRIVING).
+ *
+ * `PlanPicker` states: *"An empty list says WHY it is empty rather than
+ * rendering a blank menu, because 'nothing approved yet' and 'everything is
+ * already planned' are different facts and the operator's next move differs."*
+ * It then rendered ONE hardcoded line — *"a draft becomes plannable once you
+ * approve it"* — in both cases. On live dev that line was simply false: five
+ * drafts were approved and every plannable one already held a slot, so the
+ * operator was told to go and approve something they had already approved.
+ *
+ * A reading audit cannot catch this: the docstring describes the right
+ * behaviour, so the code reads as consistent with its own stated intent. Only
+ * opening the picker on real data shows the message is wrong for the case.
+ *
+ * Deliberately self-contained rather than relying on "it is only called when
+ * `plannableAssets` came back empty": an unstated precondition is how a correct
+ * function starts giving wrong answers from a new call site. `all-planned` is
+ * claimed only when approved, unpublished work EXISTS and every piece of it
+ * already holds a slot — so the message can never say "everything is already
+ * planned" while something is still plannable.
+ */
+export type PlanEmptyReason = "none-approved" | "all-planned";
+
+export function planEmptyReason(
+  assets: PipelineAsset[],
+  slots: PlannedSlotWire[],
+): PlanEmptyReason {
+  const planned = new Set(slots.map((s) => s.draftId));
+  const approvedUnpublished = assets.filter(
+    (a) => a.status === "approved" && a.publishedAt === null,
+  );
+  const stillUnplanned = approvedUnpublished.filter((a) => !planned.has(a.draftId));
+  return approvedUnpublished.length > 0 && stillUnplanned.length === 0
+    ? "all-planned"
+    : "none-approved";
+}
+
 /** Minutes a dropped or clicked instant snaps to — a calendar that lands on 10:07 is noise. */
 export const SNAP_MINUTES = 15;
 
