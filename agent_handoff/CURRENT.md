@@ -2,119 +2,126 @@
 
 ## Stamp
 
-2026-07-26 (session 79, syd4 — zero credit spend; OPUS 5, closed on Fable 5 after the founder's live `/model` switch). **THE VERIFY-AND-FIX PASS PART 2 OF 2 — DONE, BOTH LANES MERGED — THEN THE FOUNDER USED THE PRODUCT AND THE SESSION BECAME A LIVE FIX LOOP.** Final verify on merged main: **2392 passed / 9 skipped, 0 lint errors** (2293 at the s78 close). Tree clean, everything pushed, both worktrees/branches/tmux windows GC'd. **The jobs table: 14 works · 9 dead doors · 2 no-affordance at open → 29-of-29 works, console-clean, at close.**
+2026-07-26 (session 80, syd4 — **zero credit spend**; OPUS 5 (1M), the founder's own `/model` pick at boot, which answered the stamp's "confirm rather than assume"). **THE VIDEO EDITOR FULL BUILD-OUT — PRE-FLIGHT CLOSED, BOTH GATES MEASURED FOR THE FIRST TIME, THREE BUILD SLICES MERGED AND PUSHED.** Final verify on main: **2411 passed / 9 skipped, 0 lint errors** (2392 at the s79 close). Tree clean, everything pushed, `main == origin/main`.
 
-**THE ARC OF THE SESSION: the s78 lesson became a TOOL, and the tool was then hardened by its own failures.** `scripts/drive-surface.mjs` — `--inventory <route>` lists what a surface OFFERS; `--jobs <surface>|all` prints a JOBS TABLE scored **works · dead-door · no-affordance · undriven · ⚠ console**. `fe-check`'s G1 phase now DRIVES before reading (its prompt used to end *"verify every claim against the code"* — the gate whose purpose is finding what ISN'T there, verifying against the one thing that cannot show absence). The two verdicts added mid-session were both bought with a miss: **undriven** after the harness printed ✓ for a job an empty shelf made untestable, and **⚠ console** after the founder saw browser errors on a surface the table called green — the driver watched the DOM and never listened to the console.
+**THE TWO NUMBERS THIS SESSION CREATED.** The editor had a 27-job table written by a reading walk and a render gate recorded as *"does not match — unquantified"* for two sessions. Both are now things that RUN:
 
-**WHAT DRIVING FOUND THAT READING NEVER COULD, in one session:** (1) the calendar's empty planner stated the WRONG fact while its own docstring promised the right one ("nothing approved yet" vs "everything is already planned" — five drafts approved, all planned, operator told to approve). (2) **Video ingest was permanently dead** — founder-found by pasting a YouTube URL. Split brain: `llm_cache` (Postgres) holds pointers, the object store holds truth, and `THALON_DATA_DIR=.data` is RELATIVE so the store root follows the process cwd — dev server 71 embeddings, root-cwd runs 704, one shared index. The old code THREW on a dangling pointer and the row survives a throw, so the failure was permanent. Fixed (`93a9972`): a dangling pointer is a self-healing MISS, reported via `onCacheDangling`, never silent. Proven live: his 44-minute ingest = 882 segments, zero console errors. (3) **The Sites dossier's webfonts were CORS-blocked** — the preview iframe is sandboxed `allow-scripts` WITHOUT `allow-same-origin` (correct: previewed sites run real scripts), which makes its origin opaque, and fonts unlike `<img>` always fetch in CORS mode. Fixed at the preview door (`ACAO: *` — widens nothing, an opaque origin can't be allowlisted and wildcard forbids credentials). (4) Chrome's form-field issue: transcription's six fields had aria-labels but no `name` — all named.
+| gate | at boot | at close |
+|---|---|---|
+| **jobs** (`drive-surface.mjs --jobs editor`) | 6 works · 3 dead doors · 14 no-affordance · 3 console · 1 undriven | **14 works · 2 dead doors · 10 no-affordance · 1 undriven** |
+| **render** (`measure-sheet.mjs`, NEW) | *unquantified* | **48 sheet classes: 10 missing · 38 drifted · 8 app-only** |
 
-**BOTH LANES: 22 findings, 22 SURVIVED, 0 refuted — and 12 changed shape under verification.** Lane 3 (`44e3e00`): drove all three surfaces before fixing (D2: selection 743px down a 419px box, scrollTop 0); its own verifiers REFUSED its planned D3 fix (equalising counts trades one visible disagreement for two invisible ones) — it ships *"21 of 25 shown — the oldest wait in the queue →"*. **State the bound, don't chase the number.** Lane 4 (`5f3b1ee`): A2 much worse than reported — 11 of 13 waiting drafts have NO decision verb (product call homed with facts, see NEEDS-STEVEN); C3 wider — a failed profile read painted "Denylist · empty" against six real terms; Intel↔Create shipped as ONE decision, leading with "Create video", arming DISARMED per the sequence gate.
+All **29 jobs on the other eight surfaces re-driven and still green** — neither the pre-flight nor the harness changes moved a verdict elsewhere.
 
-**THE HARNESS'S OWN LEDGER, kept honest in `docs/research/jobs-table-s79.md`:** five wrong selectors, three false passes, and it contradicted lane 4 about Approve's grounding tiers and LOST (it read `body.innerText` instead of the panel's own `.reason-gate` column, on a waiting row instead of a blocked one). Two criteria demanded count-equality the lanes had correctly fixed by stating the gap. **A gate that insists on the wrong remedy is worse than one that misses the defect; a harness that measures the wrong element manufactures a contradiction with someone who measured right, and the more confident output wins.**
+**PRE-FLIGHT — both s79 rulings executed and verified before a line of editor code.** (a) Stage artifacts left the `needsYou` derivation: **25 → 10 live**. Three derivations had to move together or they would have started contradicting each other — `pulse.ts` (rail badge + topbar pill + dashboard), `dashboard-model.needsYouRows` (whose card reads "N of M read", so filtering the count but not the rows would have invented a gap), and `board-model`'s waiting column, which takes `Math.max(pulse.needsYou, its own count)` and would have OUT-VOTED the fixed pulse. `counts` stays RAW and gained `staged`, so the subtraction is auditable rather than a silent filter. (c) The Jul-19/25 dogfood archive: 48 judge_results, 15 drafts, 15 runs, 6 sources that no longer had a single reference. **Two attempts aborted on FK constraints and rolled back whole** (`source_chunks`, then a source shared with a draftless run); the committed pass deletes a source only when nothing references it, mirroring what `sources.remove` already refuses to do. Editor fixtures untouched and verified: **3 projects, 11 cuts, 76 takes**.
 
-**MAIN WENT RED FOUR SEPARATE TIMES THIS SESSION AND EVERY ONE WAS CAUGHT BY A GATE:** (1) at boot — both s78 guards of mine (the dead-link guard flagging kickoffs' own future wraps; the worktree ratchet false-redding inside the lanes it protects, now `--git-common-dir`-anchored); (2) a flaky intel j/k test (the suite's only raw `fireEvent.keyDown(window,…)` — now userEvent like its nine siblings); (3) my `vitest … | grep && git commit` gating on grep's exit — the rule said `tail`, so grep felt safe; now **gate on the exit code, never pipe into anything**; (4) 4 lint errors from undeclared browser globals — linted before adding the test, not after. Plus: a NUL byte made a 12KB test file BINARY to git and it merged with no reviewable diff — lane 3 caught it post-merge, cherry-picked after blob-identity check, and the class (second occurrence) is now `tests/no-nul-in-source.test.ts`. **And the tried-and-reverted one:** the absolute-`THALON_DATA_DIR` refusal (founder-approved) threw on a healthy dev server because `readEnv()` doesn't see `.env.local` at every call site — reverted within minutes of his "console and recoverable error"; the pollution fix that mattered shipped as hermetic test data dirs for engine+eval (`tests/setup/hermetic-data-dir.ts`).
+**THE CONTRACT WINDOW WAS ANSWERED *NO*, ON EVIDENCE, BEFORE ANY CODE** (`docs/research/video-editor-PREPLAN-s80.md` §1). Undo/redo is client state; the exit guard rides the already-live `saveCut`; insert/delete of a beat or caption adds and removes entries in arrays that already exist. The music swap was the one that could have needed a window and it turns on WHICH bridge: `edl.audio` is already `z.array(audioCueSchema)` and `AudioCue.source` is a **project-relative ref**, so choosing among the project's own `music-candidates/` takes needs nothing new — whereas pointing a cue at a **stored bed** (addressed by *sha*) would. That bridge is explicitly not the route, and the reason is recorded so s81 does not re-derive it.
 
-**FOUNDER RULINGS THIS SESSION, all homed in NEEDS-STEVEN:** video editor = **FULL BUILD-OUT, its own session — s80, planned below** · YouTube ration = CLOSED, the arithmetic that kept it open was wrong (cadence is 180 min; already fits) · transcription = **NOT a Thalon feature** — his own knowledge-ingestion tool ("get transcripts about system/building stuff to teach you"), free/deterministic by default, an AI button beside Ingest on demand, no second artifact (my two-artifact invariant withdrawn with its premise) · data-dir = his (b), tried, reverted, safe landing queued-and-confirmed · stage artifacts = **RULED at the close** (*"i'll follow your recommendation"*): (a) fix the counts + (c) archive the dogfood rows — their verb was always **advance**, not approve; execution = s80's pre-flight.
+**WHAT MERGED (three slices, each verified + driven + measured before the next began):**
+- **(a) THE SAFETY CORE** `c77a82f` — undo/redo behind the one `apply()` funnel with its own modifier-aware ⌘/Ctrl+Z listener (the shared list grammar deliberately returns early on ctrl/meta, which is exactly why ⌘Z was unbound); Undo/Redo/Discard as real BUTTONS, because a keyboard-only undo is invisible to whoever needs it most; **one capture-phase exit guard** covering any in-app anchor — the audit named three `<Link>`s but the rail is a dozen more and is rendered by the shell, so guarding three by hand would have read as done while leaving the rail open; and the honest player, which now says which render it is showing while dirty.
+- **(b) THE BLOCKER** `ecb8be8` — the three timeline block types carried only `onPointerDown`, and Enter/Space dispatches `click`, never `pointerdown`. Selecting a plate is the ONLY entry to the caption and music inspectors, so a keyboard-only operator could not edit a caption at all. **The ratchet was proven, not assumed:** stripping the caption `onClick` turns the suite red, putting it back turns it green.
+- **(c) THE MISSING VERBS** `6273de8` — `deleteBeat` (refuses to empty the lane; position 0 never inherits a transition), `insertBeat` (copies the neighbour's source KIND — a still is a loop-hold and a motion clip is not), `insertCaptionLine`, `deleteCaptionLine`. Every result is re-parsed through `edlSchema` in the tests, so a verb producing a contract-invalid EDL fails loudly rather than at render time.
 
-## Resume prompt (session 80, syd4 — "gogogo" boots this)
+**THE HARNESS WAS WRONG SIX TIMES AND WAS CORRECTED EACH TIME — THIS IS THE SESSION'S REAL LESSON.** `jobs-table-s79.md` recorded five wrong selectors; s80 added three more and fixed three job designs. (1) *"watch the cut on the timeline"* read ✓ *"aligns at x=341"* — `.playhead` **does not exist on this surface**, so the selector fell through to `DIV.tl-ruler[role=slider]` and compared the ruler's left edge against a lane starting at the same x: **one element measured against itself and called agreement.** (2) *"swap the music track"* read ✓ because an unscoped button sweep matched the **copilot CHIP** named "Swap music" — a suggestion that types words into the ask box. The chip is the ask, not the verb. (3) The first "cut with audio" picked was a 1-beat scored master with zero captions, leaving the caption jobs undriven for want of a plate. And three jobs were wrong about the slices they were meant to gate — checking for undo AT REST where there is correctly nothing to undo, reading `window.onbeforeunload` (blind to `addEventListener`), and a dirty-guard that let a failed drag through and then blamed the product. **Each was fixed to DRIVE, never loosened to pass.**
 
-**Resume · Thalon** — s80 = **THE VIDEO EDITOR FULL BUILD-OUT.** His ruling on
-the three options was the whole thing — not the safety slice, not parked.
-Boot model = the founder's default (he set **Fable 5** at the s79 close; the
-editor is design-heavy work, which is the standing Fable-5 doctrine — confirm
-at boot rather than assume).
+**ONE GATE WAS DELIBERATELY NARROWED, flagged rather than slipped in:** the driver counted every `requestfailed`, including `net::ERR_ABORTED` — a *cancellation* (a `<video preload="metadata">` whose element left the DOM when the inspector closed), not a failure. The editor selects and deselects on every interaction, so it fired on four otherwise-clean jobs, and treating it as an error would make "console clean" mean "nothing was ever cancelled", which no interactive surface can satisfy. **Only that one errorText is dropped**; ERR_FAILED, connection/DNS failures and every 4xx/5xx response still count.
 
-**The spec is use-truth, and it already exists:**
-`docs/research/video-editor-audit-s78.md` — 36 confirmed findings, and the real
-number is the JOBS table: **of 27 operator jobs, 8 work · 4 dead doors · 15
-with NO affordance at all.** The sheet is `Videos.dc.html` (the editor's real
-sheet — corrected s78; Videos Overview = the list, Video Dossier = the project
-page), and the render gate against it DOES NOT MATCH — unquantified.
+**NEW TOOL OF RECORD: `scripts/measure-sheet.mjs`** — the render gate as a NUMBER. `shoot-surface.mjs` produces two IMAGES, and two images need a human to decide whether they match, which is the judgement that goes soft after a session staring at one surface. It prints MISSING (the sheet draws it, the app renders it nowhere — the gap no pixel diff names), DRIFT (with the delta) and EXTRA (so an app adaptation is a decision, not an accident). Two methodology bugs were fixed before its number was believed: SVG `className` is an `SVGAnimatedString` that split into junk class names, and whole-document scope compared the app's first `.btn` (the rail's theme toggle) against the sheet's (the topbar's Create button) and called 937px between two different controls a drift.
 
-**Do these in this order:**
+**THE GATE FOUND THE SINGLE ROOT CAUSE UNDER THE AUDIT'S SCATTERED RHYTHM FINDINGS:** `.copilot` renders **60px against the sheet's 79** (its wrapping `.cop-box` became a single-line `<input>`, 57 → 38), and **every band below it is shifted by exactly −19px** — player top y=188 vs the sheet's 207. **Roughly twenty of the 38 drift rows are that one defect.** `.strip` is the other named one: 110px reserved in the sheet, 39 in the app (which is also the "selecting a beat jumps the page 260px" finding).
+
+## Resume prompt (session 81, syd4 — "gogogo" boots this)
+
+**Resume · Thalon** — s81 = **FINISH THE EDITOR BUILD-OUT.** Three slices merged;
+the remaining work is (c)-tail, (d) and (e), and it is all measured. Boot model =
+the founder's default (he set **Opus 5 (1M)** at the s80 boot).
+
+**Read first:** CLAUDE.md → this file → `docs/research/video-editor-PREPLAN-s80.md`
+(the plan of record, incl. the contract-window ruling) →
+`docs/research/video-editor-audit-s78.md` (the 36 findings) →
+`docs/research/jobs-table-s79.md` (the harness's own bug ledger — READ BEFORE
+TRUSTING A VERDICT; s80 added three more wrong selectors to its lesson).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
-   `git status` + this stamp. **No open founder calls — all three were RULED at
-   the s79 close** ("i'll follow your recommendation"); see NEEDS-STEVEN.
-0.5. **PRE-FLIGHT, lead-direct, ~30 min: execute the two ruled items.**
-   (a) stage artifacts (`direction_doc`/`storyboard`) leave the `needsYou`
-   derivation — a queue only counts what the operator can act on; expect the
-   rail/pulse/Board to drop from 25 to ~14 and lane-4's honest-gap copy plus
-   any count-pinned tests to need the same-change update. (c) archive the
-   Jul-19–25 dogfood stage DRAFTS (the video PROJECTS the editor drives
-   against are untouched — verify FK edges: approvals/verdicts rows, before
-   deleting). Full verify GATED ON THE EXIT CODE before the editor work
-   starts — the session should not stare at a dishonest count all day, and
-   the stale dogfood rows are exactly the fixtures the editor would trip
-   over.
-1. **AUTHOR THE 27 JOBS FIRST** — port the audit's jobs table into
-   `scripts/lib/surface-jobs.mjs` as an `editor` job set against
-   `/app/videos/<projectId>/edit`, driving what exists TODAY. Mechanical
-   wrinkle stated so it costs nothing: the editor's route is DYNAMIC — the
-   job set must resolve a real projectId at run time (first project off the
-   live videos list), not hardcode one that an archive or reseed would kill. That baseline is
-   the build's definition of done: every no-affordance row is a build item,
-   every dead door a fix, and the session ends with the table green. This is
-   use-truth-driven development — the tool s79 built is exactly what this
-   session needs, and its self-inflicted-bug ledger
-   (`docs/research/jobs-table-s79.md`) is required reading before trusting a
-   verdict.
-2. **MEASURE the render gate against `Videos.dc.html`** — first number of the
-   session; the drift is currently unquantified.
-3. **Pre-plan before code** (the ⑯ PREPLAN.md artifact class), and its FIRST
-   answer is the CONTRACT-WINDOW question — windows freeze before build, so
-   settle it before a line of code. The probe says the answer is likely NO
-   new schema, because the capabilities already exist as doors: `saveCut` is
-   live (so the exit guard can offer Save / Discard / Stay with zero schema),
-   undo/redo is a client-side spine over the one working copy the editor
-   already keeps ("one dirty bit, one working copy"), and music swap =
-   SURFACING the s77 bed system (`setAudioBed` + the operator-attested,
-   license-gated bed door) — never inventing a music library. If anything
-   turns out to need a table or contract after all, freeze the window FIRST.
-   Then the build order: (a) the SAFETY CORE: undo/redo spine + unsaved-work
-   guard on every exit (three plain `<Link>`s and the back button currently
-   discard the working copy silently) + the honest player (while dirty it
-   shows the PREVIOUS render with only an "unsaved" pill); (b) the BLOCKER:
-   keyboard-reachable timeline blocks (real `<button>`s wired to
-   `onPointerDown` only — caption/music inspectors unreachable by keyboard);
-   (c) the MISSING VERBS: insert/delete a beat, insert/delete a caption, swap
-   the music track, preview the working copy; (d) the 36 findings folded in
-   where they touch the same code; (e) the four copilot chips that spend a
-   metered call to be refused — wire them or make them honest.
-3.5. **BUILD IN MERGEABLE SLICES — the safety core lands as its own verified
-   checkpoint (verify + drive + measure) BEFORE the verbs begin.** "Full
-   build-out" is the scope, not one atomic change: if the session runs long,
-   what has merged is coherent and the remainder rolls cleanly to s81 —
-   never stop mid-edit (standing rule, learned at the s53 OOM).
-4. **Founder checkpoint at the pre-plan** — and the honest default is
-   **LEAD-DIRECT, not lanes**: the editor is ONE tightly-coupled file set
-   (`components/videos/editor*.tsx` + the `/edit` route), the work is
-   design-heavy (the Fable-5 doctrine's home turf), and two lanes in one
-   component tree buy conflicts, not speed. Propose a lane ONLY if the
-   pre-plan surfaces a genuinely disjoint engine seam (e.g. pure EDL
-   operations / the undo model as a lib with its own tests) — and any lane
-   still needs his fresh approval, per named run.
-5. **Merge-gate = the s79 ritual**: rebase · verify on merged main GATED ON
-   THE EXIT CODE · drive the editor's 27 jobs · measure the render · read the
-   screenshots.
+   `git status` + this stamp. **No open founder calls.**
+1. **Re-drive and re-measure FIRST** — `node scripts/drive-surface.mjs --jobs editor`
+   and `node scripts/measure-sheet.mjs --route "/app/videos/<id>/edit?cut=<id>"
+   --sheet Videos.dc.html`. Those two numbers are the session's scoreboard; do
+   not start from the ones written here, re-run them.
+2. **SLICE (d) FIRST this time, not last** — because the gate says it is ONE
+   defect, not twenty: restore `.copilot` to the sheet's 79px band by putting
+   the doctrine sentence back as visible text (`.cop-box em`) and giving the
+   input a short placeholder. That should retire ~20 drift rows in one change,
+   and it is the fix the audit already specified. Then `.strip`'s reserved
+   110px height. **Re-measure after each** — the number is the proof.
+3. **SLICE (c) TAIL, the two remaining verbs.** *Swap the music track* — over
+   the project's own `music-candidates/` takes, per the pre-plan's ruling (NOT
+   the stored-bed sha bridge, which would open a window). *Preview the working
+   copy* — the honest half shipped, the verb did not; it is a LOCAL render
+   (hyperframes + the ffmpeg in the image), so it is compute, not credits, and
+   inside the sequence gate by the founder's own line.
+4. **THE TWO REMAINING DEAD DOORS** — 16:9 is a `<span aria-hidden>` beside two
+   real buttons (route it to `cut.lineage.parentCutId`), and refusal reasons
+   live only in `title`, where disabled controls never fire a tooltip and AT
+   skips them.
+5. **SLICE (e) COPILOT HONESTY** — four chips that spend a metered call to be
+   refused. Wire them or say so. Reachability only; the gate stands.
+6. **Merge gate, unchanged:** verify GATED ON THE EXIT CODE · drive the 27 jobs ·
+   measure the render · read the screenshots.
 
-**Explicitly NOT s80:** any publish path (the sequence gate) · the 139 s77
-mediums+lows (s81+, re-read against the fixed code — and re-DRIVEN, not
-re-read) · transcription's free-tier flag + AI button (s81+, small, his
-sequencing).
+**The ten no-affordance rows still open, in the harness's own words:** swap the
+music track · tell candidate takes apart and watch one before swapping · preview
+the working copy · a playhead marker on the timeline (`.playhead` renders
+NOWHERE, even while playing) · who authored this version · derived-cut staleness
+against its parent · check on a render after coming back · compare two versions ·
+save as a NAMED variant · delete a version or an abandoned derived cut.
 
-▎ ▸ **Read first:** CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md` → `docs/research/mock-sheets/Videos.dc.html` + the sheets README → `agent_handoff/lanes/WRAP-media-lane-b.md` (**the raw material for the music/beat verbs**: the bed attestation door + its flagged EDL cue-add gap and project-ref-vs-stored-sha mismatch — this session either closes those or states why not) → `docs/research/jobs-table-s79.md` → `.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
-▎ ▸ **State:** main = origin, all pushed · verify **2392 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s79** · dev transcript shim = hand-started `.context/tools/transcript-shim.py` on 127.0.0.1:8787, NOT a unit — it dies with the session and only transcription ingest needs it.
-▎ ▸ ⛔ **THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until all the walks are verified and fixed."* No publish path, no platform call, no token-spending generation without his GO. The editor session's copilot chips SPEND (metered gateway calls) — reachability checks only until he says otherwise. **But draw the line where the money is, not wider:** the working-copy PREVIEW is a LOCAL render (hyperframes driver + the ffmpeg now in the image — compute, not credits, not a platform call), so building and exercising it is inside scope; treating local rendering as gated spend would hollow out the honest-player build, which is the safety core's whole point.
-▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · **GATE ON THE SUITE'S EXIT CODE — never pipe it into anything** · **vitest does NOT typecheck and does not lint** (five catches on record) · verify-on-merged-main = THE gate, plus a MEASURED render, plus DRIVE the surface, plus **watch the console** (the driver does now) · a LANE CANNOT SCREENSHOT OR DRIVE ITS OWN WORK (both enforced) · never full-verify while lane fan-outs are live · wrap = verify+commit+push+restamp.
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin; tmux back to `dev` + `agent`.
+▎ ▸ **One finding the pre-plan produced on its own, still open:** the editor
+opens **`project.cuts[0]`** — whatever the detail query returned first, not the
+master, not the latest, not the furthest along. On the concept film that is a
+1-beat scored master with no captions and no music. The founder's call
+("can make the one with the music the default") is honoured in the HARNESS,
+which resolves the richest cut explicitly; the PRODUCT still needs a stated rule.
+▎ ▸ **Known-and-stated gap:** the browser BACK button is not guarded. A history
+pop cannot be cancelled without pushing a decoy entry that corrupts the back
+stack for every other surface. `beforeunload` covers reload and close.
+▎ ▸ **Orphan flagged, not touched:** `lib/workspace/pipeline.ts`'s
+`kanbanColumns` has NO production caller (test-only) — orphaned by the Board
+rebuild. Left visible rather than deleted, per the s75 leads-board precedent.
+▎ ▸ **Three design-hook findings on `editor.css` judged FALSE POSITIVES and left
+unchanged, no suppression added:** `.play-tri` (L25) and `.playhead::before`
+(L51) are the CSS border-triangle technique (`width:0;height:0` + transparent
+sides) drawing the play glyph and the playhead arrow — geometry, not card
+accents — and they are byte-true sheet values, so changing them would move the
+render gate away from the sheet it is measured against.
+▎ ▸ **State:** main = origin, all pushed · verify **2411 passed / 9 skipped, 0
+lint errors** · budget 2M · balance 584.12 · **zero spend s80**.
+▎ ▸ ⛔ **THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until
+all the walks are verified and fixed."* No publish path, no platform call, no
+token-spending generation without his GO. The copilot's Propose and the judge
+behind Send-cut-to-Approve SPEND — the jobs measure reachability and say so.
+**The working-copy PREVIEW is a LOCAL render — compute, not credits — and is
+inside scope.**
+▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
+**every lane/subagent launch needs fresh founder approval** · **GATE ON THE
+SUITE'S EXIT CODE — never pipe it into anything** (caught again this session:
+`npx tsc | head` printed EXIT=0 for a failing typecheck) · **vitest does NOT
+typecheck and does not lint** · verify-on-merged-main = THE gate, plus a
+MEASURED render, plus DRIVE the surface, plus watch the console · a LANE CANNOT
+SCREENSHOT OR DRIVE ITS OWN WORK · wrap = verify+commit+push+restamp.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin.
 
 ## Pointer
 
-CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md` → `docs/research/jobs-table-s79.md` → `docs/research/workspace-audit-findings-s77.md` → `.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
+CLAUDE.md → this file → `docs/research/video-editor-PREPLAN-s80.md` →
+`docs/research/video-editor-audit-s78.md` → `docs/research/jobs-table-s79.md` →
+`.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
 
-## Delta (session 78)
+## Delta (session 79)
 
-s78 was part 1: the keyed-by-entity sweep (7 instances, one spelling), lanes 1+2 (23 findings, 20 fixed), the founder finding the calendar could not plan, the planner built, the 15th surface walked (the editor — s80's whole spec), and the harness gap named that s79 closed.
+s79 built the drive harness, merged both verify-and-fix lanes (22 findings, 22
+survived), and the founder's live walk found video ingest dead. Its three
+rulings — full editor build-out, transcription-is-not-Thalon, stage artifacts —
+were all executed or scoped by s80.
 
-## Next action — s80 (boot on the founder's model default, Fable 5 as of the s79 close): self-check · PRE-FLIGHT the two ruled items (honest counts + dogfood archive, verified) · author the editor's 27-job baseline and measure the sheet drift · pre-plan the build (safety core → keyboard blocker → missing verbs → findings → copilot honesty) · founder checkpoint · build.
+## Next action — s81: self-check · re-drive + re-measure · slice (d) FIRST (the copilot's 19px retires ~20 drift rows in one change) · the two remaining verbs · the two dead doors · copilot honesty.
