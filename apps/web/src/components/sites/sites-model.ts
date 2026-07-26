@@ -84,6 +84,15 @@ export function axisLabel(axis: string): string {
 }
 
 /**
+ * The design registers one card states, in the sheet's `·` grammar. This is
+ * the old gallery's per-card axis pair, re-entering behind the card's own
+ * chrome (s76) — the values are the catalog's, never a re-derivation.
+ */
+export function cardFacts(site: SiteRecord): string[] {
+  return [site.axes.primary, site.axes.secondary].filter((a): a is string => Boolean(a));
+}
+
+/**
  * The chip row, in the order the surface shows it: verticals first (most
  * built first — the portfolio's own weight), then the design registers, then
  * the build waves. The surface shows the first PRIMARY_CHIPS and hides the

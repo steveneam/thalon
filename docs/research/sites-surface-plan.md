@@ -95,7 +95,13 @@
 - Q4 Where does spend/credits display live (per-site total from manifests is
   derivable; is it founder-facing here or /guide-only)?
 - Q5 The 8899 preview server's future once the armed service exists (keep
-  for local; likely unchanged).
+  for local; likely unchanged). **ANSWERED s76 (B-sites.1):** the workspace
+  no longer depends on it at all — `/api/sites/preview` reads the template
+  directory directly in dev and proxies `SITES_BASE_URL` on staging/prod, so
+  preview media is same-origin for every viewer (an absolute origin was
+  right on the box and broken on the founder's laptop). The 8899 server stays
+  as the founder's raw-template review channel and as the
+  `SITES_PREVIEW_ORIGIN` override. See `agent_handoff/WRAP-sites-deepen.md`.
 
 ## 5. Build plan (one lane + two founder actions)
 
