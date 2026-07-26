@@ -23,7 +23,7 @@
 //   --sheet <file>   sheet in docs/research/mock-sheets to shoot beside it
 //                    (repeatable; pairs positionally with --route)
 //   --mode           dark | light | both      (default: both)
-//   --base           dev origin               (default: http://127.0.0.1:3111)
+//   --base           dev origin               (default: http://localhost:3111)
 //   --out            output directory         (default: a timestamped scratch dir)
 //   --full           full-page capture instead of the sheet-sized screen box
 

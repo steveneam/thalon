@@ -24,6 +24,24 @@ const nextConfig: NextConfig = {
   // orphaned process. `next dev` sets NODE_ENV=development; build/start set
   // production, so the split is total.
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
+  // DEV ONLY. Next dev blocks cross-origin requests to `/_next/*` dev assets,
+  // and it counts `127.0.0.1` as a DIFFERENT origin from the `localhost` it
+  // booted on. Hitting the dev box on the wrong one is not a visible error: the
+  // HTML and the API still answer 200, but every client chunk is blocked, React
+  // never hydrates, and each surface paints its SSR loading state forever —
+  // "Reading the runs…" under a "No tenant" topbar. That reads exactly like a
+  // broken workspace and is not one; it cost a real debugging hour in s76.
+  // Allowing the loopback alias here means the screenshot gate, a curl-minded
+  // agent, and anyone typing an IP all get the same working workspace.
+  // Remote viewers (the founder's laptop reaching this box by host or IP) add
+  // theirs via THALON_DEV_ORIGINS — env, not a tracked file, so no box address
+  // is ever committed (stealth posture unchanged).
+  allowedDevOrigins: [
+    "127.0.0.1",
+    ...(process.env.THALON_DEV_ORIGINS?.split(",")
+      .map((o) => o.trim())
+      .filter(Boolean) ?? []),
+  ],
   // DEV ONLY (founder direction s50): opening the dev box's root lands in
   // the workspace — the operator's daily door is /app, not the marketing
   // landing. Non-permanent and development-gated: production keeps the
