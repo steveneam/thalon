@@ -273,6 +273,18 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
 
           {status === "success" && expanded && (
             <DossierCard
+              /*
+                KEYED BY CARD, and this is a correctness fix, not tidiness.
+                Without it React reuses one DossierCard instance across cards,
+                so its titleIndex/angleIndex survive the switch: card B opens
+                showing a pick the operator never made, and when B has FEWER
+                titles than A the stale index is out of range — nothing renders
+                checked while the label still says one always rides, and the
+                promote payload carries an index the card does not have.
+                Founder-reported s77; reproduced across the demo cards (4/3 vs
+                3/2) before this fix.
+              */
+              key={expanded.id}
               card={toDossierView(expanded, now)}
               busy={busy}
               onDismiss={dismiss}

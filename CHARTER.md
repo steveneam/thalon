@@ -4,7 +4,7 @@
 
 ## Goal
 
-A **standalone, generic, multi-tenant content/social-automation engine**: one sentence or source in → fan-out into platform-native drafts → every draft passes the shared judge harness (G1 denylist + G3 grounding-to-provided-sources) → human **Approve** gate → (Sprint 3+ only) publish via official platform APIs. Brand/voice, grounding sources, and compliance rules are **per-tenant runtime config, never code**. The repo ships a generic self/demo tenant only and contains zero forbidden upstream brand tokens in any tracked file (enforced by `scripts/ci-grep-guard.ps1` in CI).
+A **standalone, generic, multi-tenant content/social-automation engine**: one sentence or source in → fan-out into platform-native drafts → every draft passes the shared judge harness (G1 denylist + G3 grounding-to-provided-sources) → human **Approve** gate → (Sprint 3+ only) publish via official platform APIs. Brand/voice, grounding sources, and compliance rules are **per-tenant runtime config, never code**. The repo ships a generic self/demo tenant only. (The brand-token guard that enforced a naming ban was retired 2026-07-26 by founder call; the engine's genericness is unchanged.)
 
 ## Ratified decisions (founder interview, 2026-07-02)
 
@@ -18,7 +18,7 @@ A **standalone, generic, multi-tenant content/social-automation engine**: one se
 ## Standing discipline (every bucket)
 
 - Checkpoint = founder review before the next bucket starts.
-- `scripts/ci-grep-guard.ps1` passes before every commit; the same guard is a required CI check.
+- `npm run verify` passes before every commit; `test`, `eval-gate` and `web-build` are the required CI checks. (The brand-token grep guard was retired 2026-07-26.)
 - Tests ship with the code they verify; small, verifiable steps.
 - Every founder override/correction becomes one eval row in the same change.
 - **No publish path is wired anywhere in Sprints 0–2.** A fan-out can never emit an ungated draft.

@@ -52,11 +52,12 @@ Thumbs.db
 .claude/worktrees/
 
 # ---------------------------------------------------------------------------
-# Vault pointer — MUST stay gitignored.
-# .context/ points at the read-only research vault whose absolute path itself
-# contains a forbidden upstream brand token. Keeping it untracked is what lets
-# the CI grep guard (scripts/ci-grep-guard.ps1) pass over tracked files while
-# the local build agent still has its vault context. Do NOT remove this line.
+# Local operator context — MUST stay gitignored.
+# .context/ holds the vault pointer AND real secrets: dev database credentials,
+# tenant profile JSON, client instantiations, operator runbooks. The brand-token
+# rationale for ignoring it was retired with the grep guard (2026-07-26, founder
+# call); the SECRETS rationale is the one that always mattered and it stands.
+# Do NOT remove this line.
 # ---------------------------------------------------------------------------
 .context/
 

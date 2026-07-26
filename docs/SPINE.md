@@ -163,7 +163,7 @@ E:\thalon/
 ├── apps/web/                    # Next.js: thin routes + UI only
 ├── eval/                        # promptfoo/DeepEval config, golden sets, Langfuse wiring
 ├── infra/                       # CDK-Python (B0.5)
-└── scripts/                     # ci-grep-guard.ps1 + repo tooling
+└── scripts/                     # repo tooling (launch-lane.sh, shoot-surface.mjs, …)
 ```
 
 Why now: B0.3 is the last cheap moment — the schema must land in `packages/db`, not `apps/web/src/lib/db`, or the parallel-lane partition (§5) has no package boundaries to cut along, and the moat (judge) would grow tangled into the web app.

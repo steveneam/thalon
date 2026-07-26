@@ -585,7 +585,18 @@ describe("X OAuth 1.0a mode (B-pub.3): the standing-arm auth)", () => {
     );
     const driver = createXDriver({
       accessToken: "account-token",
-      oauth1: { apiKey: "ck", apiKeySecret: "cs", accessTokenSecret: "ts" },
+      // FLAKE FIX (s77): these secrets were "cs"/"ts" — two characters, asserted
+      // absent from a RANDOM base64 signature. The nonce changes every run, so
+      // the test failed whenever the signature happened to contain those two
+      // chars (seen live: oauth_signature="EcnHEplocs1MVgVDSGCDYiFPDEg%3D").
+      // The assertion is right and worth keeping — a secret must never reach the
+      // header — so the FIXTURE gets long and distinctive enough for "not
+      // contains" to actually mean something.
+      oauth1: {
+        apiKey: "ck",
+        apiKeySecret: "consumer-secret-must-never-appear",
+        accessTokenSecret: "token-secret-must-never-appear",
+      },
       fetchImpl,
     });
     await driver.publish(MEDIA_INPUT);
@@ -595,7 +606,8 @@ describe("X OAuth 1.0a mode (B-pub.3): the standing-arm auth)", () => {
       expect(auth.startsWith("OAuth ")).toBe(true);
       expect(auth).toContain('oauth_token="account-token"');
       expect(auth).not.toContain("Bearer");
-      expect(auth).not.toContain("cs");
+      expect(auth).not.toContain("consumer-secret-must-never-appear");
+      expect(auth).not.toContain("token-secret-must-never-appear");
     }
   });
 

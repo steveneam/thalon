@@ -157,13 +157,12 @@ credential in a tracked file, and none in a logged error.
 
 ## Before you commit
 
-1. `pwsh scripts/ci-grep-guard.ps1` — zero forbidden brand tokens in tracked files.
-2. `npm run verify` — **the** gate. Write it to a file and read the file;
+1. `npm run verify` — **the** gate. Write it to a file and read the file;
    **never pipe the suite through `tail`** (it hid a failure for three
    sessions). Note that `vitest` does **not** typecheck — a green suite with a
    broken build is a real outcome here, twice on record.
-3. The render gate above, for anything visual.
-4. Leave a ratchet **in the same change**, as high up the ladder as it goes:
+2. The render gate above, for anything visual.
+3. Leave a ratchet **in the same change**, as high up the ladder as it goes:
    executable (test · CI check · constraint) > structural (seam · type ·
    schema) > configuration > documentary. Tag it **invariant** (safety, never
    loosened) or **opinion** (convention, freely revised).

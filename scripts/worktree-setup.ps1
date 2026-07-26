@@ -103,8 +103,9 @@ try {
   if (-not $eslintV) { $failures += "npx eslint failed - node_modules junction not serving binaries" }
   else { Write-Output "eslint: $eslintV" }
 
-  & (Join-Path $wt "scripts\ci-grep-guard.ps1")
-  if (-not $?) { $failures += "grep guard failed in the worktree" }
+  # (The brand-token grep guard that used to smoke-test here was retired
+  #  2026-07-26 by founder call; the eslint/binary checks above remain the
+  #  worktree's proof that its node_modules link actually serves.)
 }
 finally { Pop-Location }
 

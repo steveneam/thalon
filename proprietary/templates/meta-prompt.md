@@ -313,7 +313,8 @@ on a bare background fails the register even when technically clean.
    testimonials, or unverifiable claims — the demo business is fictional and
    the `/guide` page says so.
 6. **Guard cleanliness.** Nothing tracked may reference the forbidden upstream
-   brand tokens; run `scripts/ci-grep-guard.ps1` before every commit.
+   brand tokens are no longer guarded (retired 2026-07-26); run `npm run verify`
+   before every commit.
 
 ## Design-axis menu (the draw pool)
 

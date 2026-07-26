@@ -13,21 +13,11 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  ci-grep-guard:
-    name: ci-grep-guard
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Brand-cleanliness guard (zero forbidden tokens in tracked files)
-        shell: pwsh
-        run: ./scripts/ci-grep-guard.ps1
-
   # CI diet, part 2: docs-only changes skip the heavy jobs. QUALITY-PINNED
   # CONSERVATIVE: only `docs/**`, `agent_handoff/**`, and ROOT-level *.md
   # count as docs — everything else (including proprietary/** prompts, which
   # are hash-pinned runtime data) is code and runs the full matrix. Any
   # doubt (unknown base, force push, empty diff) fails safe to code=true.
-  # The grep guard above runs UNCONDITIONALLY — it is the hard constraint.
   changes:
     name: changes (docs-only detector)
     runs-on: ubuntu-latest

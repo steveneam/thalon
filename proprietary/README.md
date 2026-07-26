@@ -19,6 +19,6 @@ This folder holds the **novel artifacts that make this engine defensible**, kept
 
 ## Constraint
 
-Everything here obeys the repo's hard constraint: **no forbidden upstream brand names, ever** (see `../CI-GUARD.md`). The judge harness and profiles are generic and configurable; any specific tenant's rules arrive at runtime as data.
+Everything here stays **generic**: the judge harness and profiles are configurable, and any specific tenant's rules arrive at runtime as data — never baked in. (The brand-token guard that once enforced a naming ban was retired 2026-07-26 by founder call; genericness is the invariant, and it is unchanged.)
 
 > Empty for now — this is pre-charter scaffolding. Populate as buckets are built.

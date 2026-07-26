@@ -207,4 +207,39 @@ describe("Intel (exact-mock rebuild, Intel.dc.html)", () => {
     expect(first).toHaveAttribute("aria-checked", "true");
   });
 
+
+  /**
+   * Founder-reported, s77 ("check the other cards"): the dossier card carried
+   * NO react key, so one instance was reused across cards and its picks
+   * survived the switch. On a card with fewer titles the stale index fell out
+   * of range — nothing rendered checked while the label promised one always
+   * rides, and the promote payload carried an index the card did not have.
+   */
+  it("does not carry one card's picks onto the next", async () => {
+    const user = userEvent.setup();
+    render(<Intel />);
+
+    const titles = await screen.findByRole("radiogroup", { name: "Ready titles" });
+    const first = within(titles).getAllByRole("radio");
+    await user.click(first[first.length - 1]);
+    expect(first[first.length - 1]).toHaveAttribute("aria-checked", "true");
+
+    // Open a different card from the rising list.
+    const rows = screen.getAllByRole("button", { name: /^(We let an agent|Hot take|Captions with)/ });
+    await user.click(rows[0]);
+
+    const nextTitles = within(
+      await screen.findByRole("radiogroup", { name: "Ready titles" }),
+    ).getAllByRole("radio");
+    const checked = nextTitles.filter((r) => r.getAttribute("aria-checked") === "true");
+    // Exactly one rides, and it is this card's default — never the previous pick.
+    expect(checked).toHaveLength(1);
+    expect(nextTitles[0]).toHaveAttribute("aria-checked", "true");
+
+    const nextAngles = within(
+      screen.getByRole("radiogroup", { name: "Suggested angles" }),
+    ).getAllByRole("radio");
+    expect(nextAngles.every((r) => r.getAttribute("aria-checked") === "false")).toBe(true);
+  });
+
 });

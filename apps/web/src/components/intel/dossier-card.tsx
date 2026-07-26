@@ -49,6 +49,17 @@ export function DossierCard({
     window.setTimeout(() => setCopied((current) => (current === key ? null : current)), 1500);
   }
 
+  /*
+   * Defence in depth behind the `key` the caller now passes. A pick must never
+   * ride as an index the card does not have, so both are clamped to THIS
+   * card's lists at render: an out-of-range title falls back to the first (one
+   * always rides, as the label promises) and an out-of-range angle falls back
+   * to none (an angle is optional, so "none" is its honest default).
+   */
+  const safeTitleIndex = titleIndex >= 0 && titleIndex < card.titles.length ? titleIndex : 0;
+  const safeAngleIndex =
+    angleIndex !== null && angleIndex >= 0 && angleIndex < card.angles.length ? angleIndex : null;
+
   const rest = EXITS.filter((family) => family !== card.suggested.family);
 
   return (
@@ -145,6 +156,17 @@ export function DossierCard({
               </span>
             ) : (
               <div className="pick-rows" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {/*
+                  The two groups are DIFFERENT things and the sheet let colour
+                  plus an "Angle · " prefix carry that difference — which works
+                  at the canvas fixture's 2 titles + 1 angle and collapses at
+                  the real 4 + 3, where it reads as seven near-identical rows.
+                  Founder, s77: "why is there 2 selections? whats the
+                  difference?" So each group states what it is and whether it
+                  is required, in the sheet's own .sec-label grammar. Colour is
+                  no longer doing a heading's job.
+                */}
+                <span className="pick-group-label">Title · one always rides</span>
                 <div
                   role="radiogroup"
                   aria-label="Ready titles"
@@ -155,11 +177,11 @@ export function DossierCard({
                       <button
                         type="button"
                         role="radio"
-                        aria-checked={titleIndex === i}
+                        aria-checked={safeTitleIndex === i}
                         className="pick-hit"
                         onClick={() => setTitleIndex(i)}
                       >
-                        <span className={titleIndex === i ? "radio on" : "radio"} aria-hidden />
+                        <span className={safeTitleIndex === i ? "radio on" : "radio"} aria-hidden />
                         <span style={{ flex: 1 }}>{title}</span>
                       </button>
                       <button
@@ -173,6 +195,7 @@ export function DossierCard({
                     </div>
                   ))}
                 </div>
+                <span className="pick-group-label">Angle · optional</span>
                 <div
                   role="radiogroup"
                   aria-label="Suggested angles"
@@ -183,7 +206,7 @@ export function DossierCard({
                       <button
                         type="button"
                         role="radio"
-                        aria-checked={angleIndex === i}
+                        aria-checked={safeAngleIndex === i}
                         className="pick-hit"
                         // An angle is the operator's OPTIONAL extra, which
                         // this component already said in prose and did not
@@ -193,17 +216,46 @@ export function DossierCard({
                         // (founder s77: "the buttons cant be deselected").
                         // Titles deliberately do NOT toggle — a title always
                         // rides, so exactly one is always marked.
-                        title={angleIndex === i ? "Click again to ride without an angle" : undefined}
-                        onClick={() => setAngleIndex(angleIndex === i ? null : i)}
+                        title={safeAngleIndex === i ? "Click again to ride without an angle" : undefined}
+                        onClick={() => setAngleIndex(safeAngleIndex === i ? null : i)}
                       >
-                        <span className={angleIndex === i ? "radio on" : "radio"} aria-hidden />
-                        <span style={{ flex: 1 }}>Angle · {angle}</span>
+                        <span className={safeAngleIndex === i ? "radio on" : "radio"} aria-hidden />
+                        <span style={{ flex: 1 }}>{angle}</span>
+                      </button>
+                      {/*
+                        Angles had no copy while titles and the hook did, with
+                        no stated reason (founder s77: "why does some sentences
+                        have copy button next to it and some dont?"). The
+                        rationale was real but invisible — a title and a hook
+                        are finished text, an angle is an instruction to the
+                        generator. Invisible consistency rules read as bugs, and
+                        an operator may well want to paste an angle into a
+                        brief, so the row gets the same affordance.
+                      */}
+                      <button
+                        type="button"
+                        className="copy-ico"
+                        aria-label={`Copy angle: ${angle}`}
+                        onClick={() => copy(`angle-${i}`, angle)}
+                      >
+                        {copied === `angle-${i}` ? "copied" : "copy"}
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+            {/*
+              The hook is the THIRD thing in this section and the only one that
+              is not a choice: there is exactly one and it always rides (the
+              footer's "title, angle, hook, source" includes it
+              unconditionally), which is why it carries copy but no radio.
+              Founder, s77: "why is there a copy button next to [the hook] when
+              that sentence has no selection?" — the answer was right, the UI
+              just never said it. It now names itself like the two groups above,
+              so a row without a picker reads as deliberate rather than broken.
+            */}
+            {card.hook && <span className="pick-group-label">Hook · always rides</span>}
             {card.hook && (
               <div
                 style={{
@@ -249,8 +301,8 @@ export function DossierCard({
             onClick={() =>
               onPromote?.(card.id, {
                 family: card.suggested.family,
-                titleIndex,
-                angleIndex: angleIndex ?? undefined,
+                titleIndex: safeTitleIndex,
+                angleIndex: safeAngleIndex ?? undefined,
               })
             }
           >
@@ -263,7 +315,11 @@ export function DossierCard({
               className="btn btn-ghost"
               disabled={busy || !onPromote}
               onClick={() =>
-                onPromote?.(card.id, { family, titleIndex, angleIndex: angleIndex ?? undefined })
+                onPromote?.(card.id, {
+                  family,
+                  titleIndex: safeTitleIndex,
+                  angleIndex: safeAngleIndex ?? undefined,
+                })
               }
             >
               {family === "video" ? "Video" : family === "post" ? "Post" : "Page"}
