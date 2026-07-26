@@ -35,9 +35,15 @@ removed the only working path on that surface.
    `git status` + this stamp.
 1. **Ask the founder to approve the two lane launches** (standing rule: fresh
    approval, per named run). Mode B via `scripts/launch-lane.sh`, Opus-5 pin.
+   **Both kickoffs are ALREADY WRITTEN** — `agent_handoff/lanes/KICKOFF-s79-lane3.md`
+   + `KICKOFF-s79-lane4.md` — so boot = worktree prep + approval + launch.
 2. **Launch lanes 3 + 4** — `dashboard · transcription · sites` and
-   `approve · create · intel · videos`. Each verifies its **blocker+high ONLY**
-   (4 blockers · 20 high across both), then fixes survivors.
+   `approve · create · intel · videos`. Each verifies its **blocker+high ONLY**,
+   then fixes survivors. **The honest count is 3 blockers · 19 high (11 per
+   lane, balanced)** — the raw tables say 4 · 20, but the s78 sweep already
+   closed Approve's editor blocker and Transcription's selection high, and the
+   kickoffs name them so neither lane re-does them. (Recounted at s78 close —
+   the s77 stamp's own lesson about a resume prompt drifting from its doc.)
 3. **Lead merge-gates each lane** on rebase + `npm run verify` on merged main,
    **then MEASURES the rendered surface** — not just a screenshot, and not the
    lane's word. The s78 board regression was invisible to the suite, to jsdom
@@ -60,7 +66,7 @@ any publish path (the sequence gate below).
 
 ▎ ▸ **Read first:** CLAUDE.md → this file → `docs/research/workspace-audit-findings-s77.md` (the work list; its keyed-by-entity section names the 7 findings already CLOSED so no lane re-does them) → `.claude/skills/thalon-check/SKILL.md` → `agent_handoff/lanes/WRAP-s78-lane1.md` + `agent_handoff/lanes/WRAP-s78-lane2.md` → COORDINATION.md → NEEDS-STEVEN.md.
 ▎ ▸ **THE HARNESS GAP, worth fixing before s80's 139 mediums:** `fe-check` has no interaction driver — it reads code and refutes claims, so it cannot see a capability that is absent rather than wrong. Giving it a real browser step (drive the surface's job, not just render it) would have caught the calendar in round 1. That is the highest-value change available to the audit machinery.
-▎ ▸ **THE VIDEO EDITOR NEEDS ITS OWN SESSION, and it is not s79.** `docs/research/video-editor-audit-s78.md`: 36 confirmed findings, but the real number is **15 of 27 jobs with no affordance at all** — undo, exit-without-losing-work, add/remove a beat or caption, swap the music track, preview the working copy. That is not a fix list, it is a **build** list, and it wants the founder's call on scope before anyone starts. Its one blocker (keyboard-dead timeline blocks, so caption + music inspectors are unreachable by keyboard) is small and could ride s79's lane 4 if he wants it closed early.
+▎ ▸ **THE VIDEO EDITOR NEEDS ITS OWN SESSION, and it is not s79** (scope ask now homed in NEEDS-STEVEN, where his dashboard reads it). `docs/research/video-editor-audit-s78.md`: 36 confirmed findings, but the real number is **15 of 27 jobs with no affordance at all** — undo, exit-without-losing-work, add/remove a beat or caption, swap the music track, preview the working copy. That is not a fix list, it is a **build** list, and it wants the founder's call on scope before anyone starts. Its one blocker (keyboard-dead timeline blocks, so caption + music inspectors are unreachable by keyboard) is small and could ride s79's lane 4 if he wants it closed early.
 ▎ ▸ **The sheet map was wrong and is now right:** `Videos.dc.html` = the video EDITOR · `Videos Overview.dc.html` = the list · `Video Dossier.dc.html` = the project page. The editor's render gate against its real sheet DOES NOT MATCH — unquantified, and the first thing its session should measure.
 ▎ ▸ **State:** main = origin, all pushed · verify **2293 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s78** · both s78 worktrees/branches/tmux windows GC'd.
 ▎ ▸ ⛔ **THE SEQUENCE GATE, his words:** *"we're not posting anything yet until all the walks are verified and fixed."* s78 built a calendar WRITE route — a slot is a plan; it publishes nothing and arms nothing. No publish path was exercised, no platform API called. Posting still needs a fresh per-platform GO after the fixes land.
