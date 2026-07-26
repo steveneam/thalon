@@ -156,7 +156,21 @@ Settings → Integrations, now that the vault core exists:
 
 Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between sessions.
 
-### s76 FOUNDER POLISH PASS — five directives, lead-owned, GATED ON WAVE 3 FINISHING
+### s76 FOUNDER POLISH PASS — ✅ 1–4 SHIPPED s76 (`61e3434`, `c945faa`); 5 BLOCKED ON THE FOUNDER
+
+**Status:** items 1–4 are on main behind a green full verify (2102 tests).
+Item 5 is the only one outstanding and it is NOT a build task — **there is no
+logo in this repo to put back** (no file, none ever deleted; the rail's mark
+has always been a CSS gradient square). The question is in NEEDS-STEVEN.
+Three things learned doing the work, kept here because each cost a render:
+`flex: 1 1 0` (not `flex: 1`) is what stops a bounded row region from driving
+its card's height · the calendar's `placeColumn` is WRONG in a single narrow
+strip (21 collisions became 21 ten-pixel slivers) — collapse to "+N" instead
+· a 24-hour axis must auto-scroll to now or a populated day reads as empty.
+Still queued from the same pass: the orphaned `HeatGrade` and
+`workspace/bulk-bar.tsx` deletions (three more pins to zero).
+
+Original directives follow.
 
 Founder, s76, live, with an explicit timing instruction: *"do it when the
 rest of the lanes have completed as to not compete for CPU"*. All five are
