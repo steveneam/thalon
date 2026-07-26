@@ -24,6 +24,24 @@
 .leads-surface .sec-label { font-size: 12.5px; font-weight: 600; color: var(--n-900); }
 .leads-surface .reason { display: grid; grid-template-columns: 120px 54px 1fr; gap: 10px; align-items: center; font-size: 12.5px; }
 .leads-surface .reason .rname { color: var(--n-900); }
+/*
+ * Founder s76: "the Leads metrics could use the same treatment as the intel in
+ * terms of simplification." The scorer's reason strings are long — the fit line
+ * alone names role, vertical and region — so at this column width each of the
+ * four signals wrapped three to five lines and the provenance block dominated
+ * the dossier. Intel's s74 move was to compress the explanation to one line and
+ * keep the full text one hover away, which is exactly available here: the row
+ * already carries `title={reason.verbatim}`. So the signal, its value and its
+ * bar stay visible and scannable, and NOTHING is removed — the untruncated
+ * reason is on hover, where it always was.
+ */
+.leads-surface .reason > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  color: var(--n-900);
+}
 .leads-surface .mail { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
 .leads-surface .act-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; padding: 6px 0; }
 .leads-surface .mono-badge { width: 34px; height: 34px; border-radius: 8px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex: none; }
