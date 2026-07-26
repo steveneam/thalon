@@ -96,18 +96,37 @@ export function dismissTrendCard(cardOrId: TrendCard | string): IntelCapture {
 export interface PromotePick {
   /** Which exit door the operator clicked: → Video · → Post · → Page. */
   family: CreateFamily;
-  /** Dossier picks — default to the first entry (the smart default at the seam). */
+  /** The REQUIRED dossier pick — absent means "the first one", which is what the card's label promises. */
   titleIndex?: number;
+  /** The OPTIONAL dossier pick — absent means NO angle rides. Never defaulted. */
   angleIndex?: number;
 }
 
-function pick(list: string[], index: number | undefined, what: string): string | undefined {
-  if (list.length === 0) return undefined;
-  const i = index ?? 0;
+function inRange(list: string[], i: number, index: number | undefined, what: string): string {
   if (!Number.isInteger(i) || i < 0 || i >= list.length) {
     throw new IntelStoreError(`${what} index ${String(index)} is out of range`, 400);
   }
   return list[i];
+}
+
+/** A title always rides — the card says so ("Title · one always rides"), so absent means the first. */
+function pickRequired(list: string[], index: number | undefined, what: string): string | undefined {
+  if (list.length === 0) return undefined;
+  return inRange(list, index ?? 0, index, what);
+}
+
+/**
+ * An angle is the operator's OPTIONAL extra, and absent must mean absent.
+ * This used to share the required default (`index ?? 0`), so a card promoted
+ * with no angle picked still carried angles[0] into Create — which made the
+ * dossier's own "Click again to ride without an angle" a false promise, and
+ * seeded the brief with an angle nobody chose (s77 finding, live-confirmed
+ * s79: promoting with zero angle clicks wrote "Angle: <angles[0]>" into the
+ * Create prompt). The two defaults are now split at the seam.
+ */
+function pickOptional(list: string[], index: number | undefined, what: string): string | undefined {
+  if (list.length === 0 || index === undefined) return undefined;
+  return inRange(list, index, index, what);
 }
 
 /** A per-family exit — the promote capture carries the full context the Create surface resolves. A live card without a dossier (generation not yet armed) promotes with the raw item context only — never invented titles. */
@@ -121,8 +140,8 @@ export function promoteTrendCard(cardOrId: TrendCard | string, opts: PromotePick
     payload: {
       ...cardPayload(card),
       family: opts.family,
-      title: pick(card.dossier?.titles ?? [], opts.titleIndex, "title"),
-      angle: pick(card.dossier?.angles ?? [], opts.angleIndex, "angle"),
+      title: pickRequired(card.dossier?.titles ?? [], opts.titleIndex, "title"),
+      angle: pickOptional(card.dossier?.angles ?? [], opts.angleIndex, "angle"),
       hook: card.dossier?.hook,
     },
   };

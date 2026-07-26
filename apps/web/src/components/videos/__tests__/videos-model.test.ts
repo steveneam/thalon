@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   attributionLine,
   cardDate,
+  derivedElsewhere,
   derivedFrom,
   family,
   headlineCut,
@@ -9,6 +10,7 @@ import {
   passesFilter,
   provenance,
   runtime,
+  soleParentOf,
   staleAgainstParent,
   statePill,
   timecode,
@@ -153,6 +155,90 @@ describe("family — the derivative dimensions this engine records", () => {
       { text: "1 version", door: true },
       { text: "1 take", door: true },
     ]);
+  });
+
+  /**
+   * s79 V1, measured live on `thalon-concept-film`: the card read "4 aspect
+   * cuts" and the dossier it opened said "none yet", because the card counted
+   * every derived cut in the PROJECT while the dossier's band is per-version.
+   * Two of those four hung off a different cut — and one of them was the
+   * headline cut itself, counted among its own derivatives.
+   */
+  describe("the aspect count is scoped to the cut the card speaks for", () => {
+    const head = cut({ id: "head", name: "film-1x1", version: 2 });
+    const lineage = (parentCutId: string) => ({
+      parentCutId,
+      aspect: "1:1",
+      parentName: "film-16x9",
+      parentVersion: 6,
+      parentLatestVersion: 8,
+    });
+
+    it("does not count recuts that hang off another version", () => {
+      const detail = project([
+        cut({ id: "base", name: "film-16x9", version: 6 }),
+        cut({ id: "d1", name: "film-1x1", version: 1, lineage: lineage("base") }),
+        head,
+        cut({ id: "d2", name: "film-9x16", version: 1, lineage: lineage("base") }),
+      ]);
+      expect(family(detail, head).map((p) => p.text)).not.toContain("3 aspect cuts");
+      expect(family(detail, head).some((p) => p.text.includes("aspect cut"))).toBe(false);
+    });
+
+    it("never counts the headline cut as one of its own aspect cuts", () => {
+      // The live shape: the cut the card speaks for is ITSELF a recut, so a
+      // project-wide "has lineage" count included it in its own family line.
+      const derivedHead = cut({ id: "head", name: "film-1x1", version: 2, lineage: lineage("base") });
+      const detail = project([cut({ id: "base", name: "film-16x9", version: 6 }), derivedHead]);
+      expect(family(detail, derivedHead).map((p) => p.text)).toEqual(["1 version", "no takes yet"]);
+    });
+
+    it("still counts the recuts that DO hang off it", () => {
+      const detail = project([
+        head,
+        cut({ id: "d1", name: "film-9x16", version: 1, lineage: lineage("head") }),
+      ]);
+      expect(family(detail, head).map((p) => p.text)).toContain("1 aspect cut");
+    });
+  });
+});
+
+/** The other half of V1: narrowing the card's count must not hide the project's recuts. */
+describe("derivedElsewhere / soleParentOf — what the dossier's empty band still owes", () => {
+  const base = cut({ id: "base", name: "film-16x9", version: 6 });
+  const head = cut({ id: "head", name: "film-1x1", version: 2 });
+  const lineage = {
+    parentCutId: "base",
+    aspect: "1:1" as const,
+    parentName: "film-16x9",
+    parentVersion: 6,
+    parentLatestVersion: 8,
+  };
+  const cuts = [
+    base,
+    head,
+    cut({ id: "d1", name: "film-1x1", version: 1, lineage }),
+    cut({ id: "d2", name: "film-9x16", version: 1, lineage }),
+  ];
+
+  it("finds the recuts hanging off a different version", () => {
+    expect(derivedElsewhere(cuts, head).map((c) => c.id)).toEqual(["d1", "d2"]);
+  });
+
+  it("names their parent when they share one, and refuses to guess when they do not", () => {
+    expect(soleParentOf(cuts, derivedElsewhere(cuts, head))?.id).toBe("base");
+    const split = [...derivedElsewhere(cuts, head), cut({ id: "d3", lineage: { ...lineage, parentCutId: "head" } })];
+    expect(soleParentOf(cuts, split)).toBeNull();
+  });
+
+  it("never counts the picked cut itself, even when it is a recut — the live shape", () => {
+    const derivedHead = cut({ id: "head", name: "film-1x1", version: 2, lineage });
+    const all = [base, derivedHead, cut({ id: "d1", name: "film-9x16", version: 1, lineage })];
+    expect(derivedElsewhere(all, derivedHead).map((c) => c.id)).toEqual(["d1"]);
+  });
+
+  it("is empty when every recut hangs off the picked version", () => {
+    expect(derivedElsewhere([head, cut({ id: "d", lineage: { ...lineage, parentCutId: "head" } })], head)).toEqual([]);
   });
 });
 

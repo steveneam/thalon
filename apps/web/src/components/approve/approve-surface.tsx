@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyQueueView,
+  batchScopeNote,
   defaultSelection,
   FILTER_OPTIONS,
   flattenQueue,
@@ -177,7 +178,14 @@ export function ApproveSurface() {
   useEffect(() => {
     let cancelled = false;
     loadSurface().then((data) => {
-      if (cancelled || !data || data.length === 0) return;
+      // An EMPTY queue used to return before the deep-link check, so a
+      // `?run=`/`?draft=` that missed said nothing at all — the one case
+      // where the link is most obviously unresolvable was the one case with
+      // no alert (the half lane 1's fix left, s78 WRAP cross-lane note).
+      // `defaultSelection([])` is null and every miss branch below reads
+      // correctly against an empty view, so the guard only needs to cover a
+      // failed read — which the queue card reports itself.
+      if (cancelled || !data) return;
       // Selection walks the DEFAULT view (newest first) — the mount-time
       // knobs, not whatever the state holds mid-render.
       const view = applyQueueView(data, "newest", "all");
@@ -329,6 +337,13 @@ export function ApproveSurface() {
   // card, which owns edit state; r goes through the named confirm).
   // useListKeys guards typing targets and modifiers; the staged surface
   // owning the detail disables the whole grammar.
+  // NAVIGATION IS NEVER OWNED BY THE DETAIL PANE. j/k used to ride the same
+  // master gate as a/r, so selecting a staged row killed the whole grammar
+  // while the footer still advertised five keys — the operator was stuck on
+  // that row with no keyboard way off it (measured live s79: j moved 1→2 on
+  // a plain row and did nothing at all on a staged one). StagedFlow binds no
+  // keys of its own, and useListKeys already refuses while a typing target
+  // has focus, so its form is unaffected.
   const moveSelection = (delta: 1 | -1) => (event: KeyboardEvent) => {
     if (view.length === 0) return;
     event.preventDefault();
@@ -337,6 +352,10 @@ export function ApproveSurface() {
     selectDraft(view[next].draft.id);
   };
   const actOnSelected = (verb: "approve" | "reject") => (event: KeyboardEvent) => {
+    // a/r stay gated on the staged branch: a stage artifact has no
+    // approve/reject door on this surface at all, and a key that silently
+    // did nothing would be the same lie one level down. The footer states it.
+    if (stagedSelected) return;
     const selected = view.find((i) => i.draft.id === selectedDraftId)?.draft;
     if (!selected || selected.status !== "queued") return;
     event.preventDefault();
@@ -347,7 +366,7 @@ export function ApproveSurface() {
     void withBusy(() => approveDraft(selected.id), { message: "Draft approved." });
   };
   useListKeys({
-    enabled: !busy && !stagedSelected,
+    enabled: !busy,
     bindings: {
       j: moveSelection(1),
       k: moveSelection(-1),
@@ -362,6 +381,14 @@ export function ApproveSurface() {
 
   const waitingCount = items.filter((i) => i.draft.status === "queued").length;
   const blockedCount = items.filter((i) => i.draft.status === "blocked").length;
+  const stagedWaiting = items.filter(
+    (i) => i.draft.status === "queued" && isStagedDraftFormat(i.draft.format),
+  ).length;
+  const scopeNote = batchScopeNote({
+    waiting: waitingCount,
+    batchable: queuedItems.length,
+    stagedWaiting,
+  });
   const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "";
   const filterLabel = FILTER_OPTIONS.find((o) => o.value === filter)?.label ?? "";
 
@@ -429,6 +456,15 @@ export function ApproveSurface() {
           Approve all waiting ({queuedItems.length})
         </button>
       </div>
+      {/* The two counts above describe different sets and both are true; this
+          is the sentence that used to be missing between them. Absent when
+          they agree. `.content` is a 20px-gap flex column, so the note is
+          pulled up to read as part of the header band, not a stray line. */}
+      {scopeNote !== null && (
+        <span className="t-label" style={{ marginTop: -12 }}>
+          {scopeNote}
+        </span>
+      )}
       {/* Absent entirely at rest — it exists only when a deep link missed. */}
       {deepLinkMiss !== null && (
         <div
@@ -469,6 +505,7 @@ export function ApproveSurface() {
           selectedDraftId={selectedDraftId}
           reasons={reasons}
           inboxZero={inboxZero}
+          actionsDisabled={stagedSelected}
           onSelect={selectDraft}
           onRetry={() => {
             setQueueStatus("loading");

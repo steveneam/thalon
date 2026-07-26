@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   checkGlyph,
+  checkLabel,
   checkMarks,
   formatStamp,
   headWindow,
@@ -293,7 +294,14 @@ export function DraftCard({
                 >
                   {checkGlyph(mark)}
                 </span>
-                <span className="reason-gate">{mark.label.split(" — ")[0]}</span>
+                {/* The gate NAME comes from the gate, never from string
+                    surgery on the label. `checkLabel` already distinguishes
+                    "Grounding — screen" from "Grounding — final", and
+                    splitting on " — " collapsed both to "Grounding" — the
+                    two rows that can DISAGREE, rendered indistinguishable
+                    directly above the composite note explaining that they
+                    disagreed (live s79, a real blocked draft). */}
+                <span className="reason-gate">{checkLabel(mark.gate)}</span>
                 <span className="reason-lines">{mark.lines.join(" · ")}</span>
               </div>
             ))}

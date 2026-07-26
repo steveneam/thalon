@@ -205,6 +205,54 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     }
   });
 
+  /**
+   * The half lane 1's cross-lane fix left: the deep-link check sat AFTER an
+   * early return on an empty queue, so the one case where a `?run=` is most
+   * obviously unresolvable was the one case with no alert at all.
+   */
+  it("says the deep link missed even when the queue is EMPTY", async () => {
+    const MISSING_RUN = "aaaaaaaa-0000-0000-0000-000000000000";
+    server.use(http.get("/api/runs", () => HttpResponse.json({ runs: [] })));
+    window.history.replaceState(null, "", `/app/approve?run=${MISSING_RUN}`);
+    try {
+      render(<ApproveSurface />);
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent(/That run has no drafts in this queue/);
+      expect(within(alert).getByRole("link", { name: "Back to Runs" })).toBeInTheDocument();
+    } finally {
+      window.history.replaceState(null, "", "/app/approve");
+    }
+  });
+
+  /**
+   * s77/s79 A1 — measured live: "13 waiting" beside "Approve all waiting
+   * (2)", with nothing on screen naming the other 11. Both counts are true;
+   * the sentence between them was missing.
+   */
+  it("names the gap between the header's waiting count and what batch approve acts on", async () => {
+    render(<ApproveSurface />);
+    // The fixtures carry two waiting drafts, one of them a stage artifact.
+    expect(await screen.findByText("2 waiting")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve all waiting (1)" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /1 of 2 waiting can be approved together — 1 staged draft advance through their own flow/,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("says nothing when the two counts agree — the sentence exists only for a real gap", async () => {
+    server.use(
+      http.get("/api/runs", () => HttpResponse.json({ runs: [run(FIXTURE_RUN_1_ID, "2026-07-03T09:00:00.000Z", true, 1)] })),
+      http.get(`/api/runs/${FIXTURE_RUN_1_ID}/drafts`, () =>
+        HttpResponse.json({ drafts: [{ ...draftA, status: "queued" }] }),
+      ),
+    );
+    render(<ApproveSurface />);
+    expect(await screen.findByText("1 waiting")).toBeInTheDocument();
+    expect(screen.queryByText(/can be approved together/)).not.toBeInTheDocument();
+  });
+
   it("a ?run= that DOES match says nothing at all — the band is absent at rest", async () => {
     window.history.replaceState(null, "", `/app/approve?run=${FIXTURE_RUN_1_ID}`);
     try {

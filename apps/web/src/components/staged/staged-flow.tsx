@@ -136,7 +136,10 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
           {readOnly ? "Staged video — one-prompt run" : "Staged video — advanced mode"}
           <span className="ml-2 text-xs font-normal text-muted-foreground">
             {flow.family} plan · {flow.plan.stages.length} stages ·{" "}
-            {readOnly ? "read-only inspect; act on the draft panel" : "demo drivers, no spend"}
+            {/* "act on the draft panel" named a panel this component has
+                REPLACED — StagedFlow renders in the detail column's slot and
+                is the only thing mounted there (approve-surface.tsx). s79 A2. */}
+            {readOnly ? "read-only inspect" : "demo drivers, no spend"}
           </span>
         </h2>
         {stageDraft && <JudgeBadge results={stage.judgeResults} bodyHash={stageDraft.bodyHash} />}
@@ -164,9 +167,14 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
       <div className="mt-auto flex flex-wrap items-center gap-2">
         {readOnly && (
           <span className="text-xs text-muted-foreground">
+            {/* Both branches used to send the operator to a "draft panel" that
+                this pane replaces, and the blocked one sent them to Approve —
+                the surface they are already on. Neither door exists: a stage
+                artifact has no approve/reject/re-judge control anywhere today.
+                Stated as the refusal it is, rather than as a route (s79 A2). */}
             {stageDraft?.status === "blocked"
-              ? "This stage is blocked — open the draft in Approve to read the verdicts and re-judge."
-              : "Live one-prompt chain — stage editing isn't wired yet; approve, reject or re-judge from the draft panel."}
+              ? "This stage is blocked — its verdicts are on the stage above, and re-judging a stage artifact isn’t wired yet."
+              : "Live one-prompt chain — read-only here: stage editing, approve and reject aren’t wired for a stage artifact yet."}
           </span>
         )}
         {!readOnly && isCurrent && !isFinal && (

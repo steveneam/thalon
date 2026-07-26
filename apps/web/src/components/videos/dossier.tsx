@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
   attributionLine,
+  derivedElsewhere,
   derivedFrom,
   headlineCut,
+  soleParentOf,
   staleAgainstParent,
   statePill,
   timecode,
@@ -88,6 +90,11 @@ export function VideoDossier({ projectId }: { projectId: string }) {
     cuts.find((c) => c.id === pickedCutId) ?? headlineCut(cuts) ?? null;
   const versions = picked === null ? [] : versionsOf(cuts, picked.name);
   const derived = derivedFrom(cuts, picked);
+  // The band is per-version by design; these are the project's recuts that
+  // hang off a DIFFERENT version. Named here so narrowing the overview
+  // card's count to this version cannot hide them (s79 V1).
+  const elsewhere = derivedElsewhere(cuts, picked);
+  const elsewhereParent = soleParentOf(cuts, elsewhere);
   const pill = statePill(picked);
   const playable = detail?.playable === true && picked?.outputRef != null;
   const editorHref =
@@ -301,9 +308,15 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                 Aspect cuts — from {picked.name} v{picked.version}
               </span>
               <span className="t-label">
-                {derived.length === 0
-                  ? "none yet · a recut is measured from this timeline, 0 credits"
-                  : `${derived.length} · each a recorded derivation, recut per aspect`}
+                {derived.length > 0
+                  ? `${derived.length} · each a recorded derivation, recut per aspect`
+                  : elsewhere.length === 0
+                    ? "none yet · a recut is measured from this timeline, 0 credits"
+                    : `none from this version · ${elsewhere.length} elsewhere in this project${
+                        elsewhereParent
+                          ? `, from ${elsewhereParent.name} v${elsewhereParent.version}`
+                          : ""
+                      }`}
               </span>
               <div style={{ flex: 1 }} />
               <Link className="btn btn-ghost btn-sm" href={editorHref}>

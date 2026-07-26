@@ -104,17 +104,47 @@ describe("Intel (exact-mock rebuild, Intel.dc.html)", () => {
     expect(demo.container.querySelector("img")).toBeNull();
   });
 
-  it("promotes through the capture door — the pre-picked exit follows the DATA, not the sheet", async () => {
+  /**
+   * s77 BLOCKER, reproduced live at s79: the top card is Bluesky-sourced (as
+   * every demo card is), so the heuristic suggests `post` — and `post` is
+   * exactly the family whose Generate is refused at Create. The dossier's
+   * most emphatic button walked the flagship path into a wall.
+   *
+   * The editorial suggestion is unchanged and still on screen with its
+   * reason; what changed is that a PRIMARY button is a recommendation, so it
+   * only leads with an exit whose destination can actually run.
+   */
+  it("leads with an exit Create can run, and keeps the shut suggestion visible with its reason", async () => {
     const user = userEvent.setup();
     render(<Intel />);
-    // The top card is a Bluesky post, so the suggested exit is Post (the
-    // sheet's own card was video-native and drew "Create video · suggested").
-    const suggested = await screen.findByRole("button", { name: "Create post · suggested" });
-    expect(suggested).toHaveAttribute(
+
+    const leading = await screen.findByRole("button", { name: "Create video" });
+    expect(leading).toHaveClass("btn-primary");
+    expect(leading.getAttribute("title")).toContain(
+      "pre-picked: thread-shaped topics compose best as posts",
+    );
+
+    // The suggestion is demoted, not deleted — same word, same reason.
+    const demoted = screen.getByRole("button", { name: "Post · suggested" });
+    expect(demoted).toHaveClass("btn-ghost");
+    expect(demoted).toHaveAttribute(
       "title",
       "pre-picked: thread-shaped topics compose best as posts",
     );
-    await user.click(suggested);
+
+    // And the shut families say so on the surface, not only in a title.
+    expect(
+      screen.getByText(/post and page generation isn’t wired at Create yet/),
+    ).toBeInTheDocument();
+
+    await user.click(leading);
+    expect(push).toHaveBeenCalledWith(expect.stringContaining("/app/create?ctx=intel-capture-"));
+  });
+
+  it("still promotes through the capture door on a demoted exit — the capture is worth recording either way", async () => {
+    const user = userEvent.setup();
+    render(<Intel />);
+    await user.click(await screen.findByRole("button", { name: "Post · suggested" }));
     expect(push).toHaveBeenCalledWith(expect.stringContaining("/app/create?ctx=intel-capture-"));
   });
 

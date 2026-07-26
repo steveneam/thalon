@@ -97,4 +97,21 @@ describe("SearchTab", () => {
     await waitFor(() => expect(push).toHaveBeenCalled());
     expect(String(push.mock.calls.at(-1)![0])).toContain("/app/create?ctx=");
   });
+
+  /**
+   * s77/s79 I3 — reproduced live on the most opportune card ("Worth
+   * targeting now", 3 of 3 signals): Target this hands Create `page`, whose
+   * Generate is refused, and the footer's only promise was "no retyping at
+   * Create". The handoff is still worth making; what was missing is what
+   * happens at the other end.
+   */
+  it("says at the control that page generation is not wired where the query lands", async () => {
+    render(<SearchTab />);
+    await screen.findByText(/peering over the horizon/i);
+
+    const opportunity = screen.getByTestId("horizon-what is content automation");
+    expect(within(opportunity).getByText(/the query rides along — no retyping at Create/)).toHaveTextContent(
+      /page generation isn’t wired there yet, so the capture waits with your brief/,
+    );
+  });
 });

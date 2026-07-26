@@ -38,6 +38,44 @@ export function isWaiting(draft: GridDraft): boolean {
 }
 
 /**
+ * Why the header's "N waiting" and the bulk button's "(M)" are different
+ * numbers — stated on screen instead of left as an 11-row silent gap.
+ *
+ * The two counts describe genuinely different sets and both are true: the
+ * pill counts every queued draft (the same set the rail's "Needs you" and
+ * the pulse count), while batch approve acts only on the CURRENT VIEW and
+ * deliberately skips stage artifacts, which advance through their own
+ * staged surface. Live s79: "13 waiting" beside "Approve all waiting (2)",
+ * with nothing anywhere naming the other 11.
+ *
+ * Returns null when the numbers agree — the sentence only exists when there
+ * is a gap to explain.
+ */
+export function batchScopeNote(counts: {
+  /** Every queued draft in the queue — the header pill's number. */
+  waiting: number;
+  /** What the bulk button will actually act on — the view's non-staged queued drafts. */
+  batchable: number;
+  /** Queued drafts excluded because they are stage artifacts. */
+  stagedWaiting: number;
+}): string | null {
+  const { waiting, batchable, stagedWaiting } = counts;
+  if (waiting === batchable) return null;
+  const parts: string[] = [];
+  if (stagedWaiting > 0) {
+    parts.push(
+      `${stagedWaiting} staged draft${stagedWaiting === 1 ? "" : "s"} advance through their own flow`,
+    );
+  }
+  // Anything left over is the filter narrowing the view — named separately so
+  // a filtered view never reads as if staged work explained the whole gap.
+  const narrowed = waiting - batchable - stagedWaiting;
+  if (narrowed > 0) parts.push(`${narrowed} sit outside this view`);
+  if (parts.length === 0) return null;
+  return `${batchable} of ${waiting} waiting can be approved together — ${parts.join(", ")}.`;
+}
+
+/**
  * Wire status → the sheet's pill (word + channel). The sheet draws three:
  * Waiting (amber = needs you), Blocked (red), Approved (green); the states
  * it does not draw keep their own honest word on the neutral channel —

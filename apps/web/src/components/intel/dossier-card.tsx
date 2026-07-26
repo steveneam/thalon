@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { DossierView } from "@/components/intel/intel-model";
 import { SourceThumb } from "@/components/media/source-thumb";
+import { isGenerable, leadingExit } from "@/lib/create/families";
 import type { CreateFamily } from "@/lib/intel/types";
 
 /** The three per-family exits, in the sheet's order; the suggested one leads as the primary. */
@@ -36,9 +37,11 @@ export function DossierCard({
 }) {
   const [titleIndex, setTitleIndex] = useState(0);
   // The sheet marks the first TITLE and leaves the angle rows unmarked: an
-  // angle is the operator's optional extra, and the promote seam owns the
-  // "first entry" default (lib/intel/store PromotePick). Unpicked stays
-  // unmarked — the mark means "you chose this", never "something rides".
+  // angle is the operator's optional extra, so unpicked stays unmarked AND
+  // rides as nothing. The seam used to default an absent angle to the first
+  // entry, which made this card's own "ride without an angle" a lie
+  // (lib/intel/store `pickOptional`); the mark means "you chose this", and
+  // no mark now genuinely means no angle.
   const [angleIndex, setAngleIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -60,7 +63,24 @@ export function DossierCard({
   const safeAngleIndex =
     angleIndex !== null && angleIndex >= 0 && angleIndex < card.angles.length ? angleIndex : null;
 
-  const rest = EXITS.filter((family) => family !== card.suggested.family);
+  /*
+   * THE DOOR KNOWS WHERE IT LANDS. The dossier's editorial suggestion is
+   * kept exactly as it was — including its reason — but it only gets the
+   * PRIMARY slot when Create can actually generate that family. On today's
+   * data every demo card is Bluesky-sourced, so `post` was suggested on all
+   * of them and the flagship path's most emphatic button landed on a
+   * disabled Generate (s77 blocker, reproduced live s79).
+   *
+   * All three exits stay one click and all three still promote — the
+   * capture is worth recording either way, and the family stays changeable
+   * at Create. What changes is which one is recommended, and that a shut
+   * destination now says so at the control instead of at the far end.
+   */
+  const leading = leadingExit(card.suggested.family, EXITS);
+  const rest = EXITS.filter((family) => family !== leading);
+  const suggestionIsShut = leading !== card.suggested.family;
+  /** Named in the footer so the shut exits state themselves, not only in a title. */
+  const shutExits = EXITS.filter((family) => !isGenerable(family));
 
   return (
     <section className="card" aria-label="Top rising trend">
@@ -296,23 +316,32 @@ export function DossierCard({
           <button
             type="button"
             className="btn btn-primary"
-            title={card.suggested.reason}
+            title={
+              suggestionIsShut
+                ? `${card.suggested.reason} — but ${card.suggested.family} generation isn’t wired at Create yet, so ${leading} leads here.`
+                : card.suggested.reason
+            }
             disabled={busy || !onPromote}
             onClick={() =>
               onPromote?.(card.id, {
-                family: card.suggested.family,
+                family: leading,
                 titleIndex: safeTitleIndex,
                 angleIndex: safeAngleIndex ?? undefined,
               })
             }
           >
-            Create {card.suggested.label} · suggested
+            Create {leading}
+            {suggestionIsShut ? "" : " · suggested"}
           </button>
           {rest.map((family) => (
             <button
               key={family}
               type="button"
               className="btn btn-ghost"
+              // The demoted suggestion keeps its word AND its reason — the
+              // editorial advice is not lost, it just no longer wears the
+              // primary slot while its destination refuses to run.
+              title={family === card.suggested.family ? card.suggested.reason : undefined}
               disabled={busy || !onPromote}
               onClick={() =>
                 onPromote?.(card.id, {
@@ -323,10 +352,13 @@ export function DossierCard({
               }
             >
               {family === "video" ? "Video" : family === "post" ? "Post" : "Page"}
+              {family === card.suggested.family ? " · suggested" : ""}
             </button>
           ))}
           <span className="t-label" style={{ marginLeft: 6 }}>
             the pick rides along — title, angle, hook, source
+            {shutExits.length > 0 &&
+              ` · ${shutExits.join(" and ")} generation isn’t wired at Create yet — the capture still rides`}
           </span>
           <div style={{ flex: 1 }} />
         </div>

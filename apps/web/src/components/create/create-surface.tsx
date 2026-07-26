@@ -17,6 +17,7 @@ import {
   type RunRow,
 } from "@/components/create/create-model";
 import { heatBand } from "@/components/intel/heat-grade";
+import { createDoor } from "@/lib/create/families";
 import { fetchRunsFeed } from "@/lib/approve-queue/client";
 import type { CreateContext, CreateFamily } from "@/lib/intel/types";
 import { composeEmail } from "@/lib/outreach/client";
@@ -40,7 +41,19 @@ export interface CreateSurfaceProps {
   context?: CreateContext | null;
 }
 
-type ProfileState = { resolved: false } | { resolved: true; profile: ProfileWire | null };
+/**
+ * THREE states, not two. A failed read used to collapse into
+ * `{resolved:true, profile:null}` — the same state as "you have no active
+ * profile" — so a dead /api/profiles painted five positive claims about a
+ * profile nobody had read: "no active profile · these are the engine's own
+ * defaults", "none in your profile yet", "not set", "no terms yet", and
+ * "Denylist · empty · grounding · every gate on". Measured live s79 against
+ * a profile that really carries 6 denylist terms (s77 finding).
+ */
+type ProfileState =
+  | { status: "reading" }
+  | { status: "read"; profile: ProfileWire | null }
+  | { status: "failed" };
 type RunsState = "loading" | "error" | "success";
 
 type DoorState =
@@ -84,7 +97,7 @@ export function CreateSurface({
   // removing a field must not destroy what rode in.
   const [pruned, setPruned] = useState<ReadonlySet<PrunableField>>(() => new Set());
   const [pickOpen, setPickOpen] = useState(false);
-  const [profileState, setProfileState] = useState<ProfileState>({ resolved: false });
+  const [profileState, setProfileState] = useState<ProfileState>({ status: "reading" });
   const [runsStatus, setRunsStatus] = useState<RunsState>("loading");
   const [runs, setRuns] = useState<RunRow[]>([]);
   /** Stamped when the feed resolves — the "2h ago" column is as-of the read. */
@@ -92,20 +105,21 @@ export function CreateSurface({
   const [door, setDoor] = useState<DoorState>({ state: "idle" });
   const planRef = useRef<HTMLDivElement | null>(null);
 
+  const loadProfile = useCallback(
+    () =>
+      fetchProfiles()
+        .then((payload) => {
+          setProfileState({ status: "read", profile: payload.active });
+        })
+        .catch(() => {
+          // An unread profile is honestly "unread" — never a blank default set.
+          setProfileState({ status: "failed" });
+        }),
+    [],
+  );
   useEffect(() => {
-    let cancelled = false;
-    fetchProfiles()
-      .then((payload) => {
-        if (!cancelled) setProfileState({ resolved: true, profile: payload.active });
-      })
-      .catch(() => {
-        // An unread profile is honestly "unread" — never a blank default set.
-        if (!cancelled) setProfileState({ resolved: true, profile: null });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void loadProfile();
+  }, [loadProfile]);
 
   const loadRuns = useCallback(
     () =>
@@ -124,7 +138,11 @@ export function CreateSurface({
     void loadRuns();
   }, [loadRuns]);
 
-  const profile = profileState.resolved ? profileState.profile : null;
+  const profile = profileState.status === "read" ? profileState.profile : null;
+  /** The read failed — every row below must say "unread", never assert an absence. */
+  const profileUnread = profileState.status === "failed";
+  /** The read landed and there genuinely is no active profile. */
+  const profileEmpty = profileState.status === "read" && profileState.profile === null;
   const rawPick = pickDropped ? null : (context ?? null);
   // Everything downstream — the brief fallback, the discoverability terms, the
   // email compose payload, the video source URL — reads the PRUNED context, so
@@ -175,19 +193,32 @@ export function CreateSurface({
     }
   }
 
-  const armed = family === "video" || (family === "email" && Boolean(pick?.leadId));
+  // One seam owns "can Create generate this, and if not what do we say" —
+  // the same module Intel's exits read, so a door can never recommend a
+  // destination that refuses (lib/create/families.ts).
+  const familyDoor = createDoor(family, { hasLead: Boolean(pick?.leadId) });
+  const armed = familyDoor.armed;
 
   return (
     <div className="content create-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 className="t-headline">Create</h1>
         <div style={{ flex: 1 }} />
+        {/* The sheet draws this as `Advanced · staged flow →` with href="#" —
+            it never wired a destination, and the rebuild pointed it at
+            /app/approve. There IS no staged AUTHORING door: the staged flow
+            exists only as a read-only inspection of the chain a one-prompt
+            video run already produced (staged-flow.tsx, source === "live").
+            So the label named a capability that does not exist and sent the
+            typed brief away for nothing. Named for what it actually reaches,
+            with the missing half stated where it is read, not in a title. */}
+        <span className="t-label">advanced staged authoring isn’t wired yet</span>
         <Link
           className="card-link"
           href="/app/approve"
-          title="The staged brief — script → scenes → delivery, judged at every stage"
+          title="A one-prompt video run stages its own chain — script → scenes → delivery, judged at every stage. It is readable in the Approve queue."
         >
-          Advanced · staged flow →
+          Staged runs in Approve →
         </Link>
       </div>
 
@@ -296,11 +327,8 @@ export function CreateSurface({
             disabled={!armed || door.state === "running"}
             onClick={() => void runDoor()}
             title={
-              armed
-                ? "Judged before you see it — nothing renders, spends or ships without your click"
-                : family === "email"
-                  ? "Email drafts compose from a lead’s own context — use the → Email exit on a lead card"
-                  : `Live ${family} generation isn’t wired to this surface yet`
+              familyDoor.reason ??
+              "Judged before you see it — nothing renders, spends or ships without your click"
             }
           >
             {door.state === "running" ? "Generating + judging…" : "Generate"}
@@ -387,11 +415,12 @@ export function CreateSurface({
             </Link>
           </p>
         )}
-        {!armed && door.state === "idle" && (
+        {!armed && door.state === "idle" && familyDoor.reason !== null && (
           <span className="t-label">
+            {familyDoor.reason}
             {family === "email"
-              ? "Email drafts compose from a lead’s own context — use the → Email exit on a lead card so the recipient and their pain point ride in. Nothing here is ever sent automatically."
-              : `Live ${family} generation isn’t connected to this surface yet — the engine and judge lane already exist. Your brief and context are ready to ride along.`}
+              ? " Nothing here is ever sent automatically."
+              : " Your brief and context are ready to ride along."}
           </span>
         )}
       </div>
@@ -401,13 +430,27 @@ export function CreateSurface({
           <div className="card-head">
             <span className="t-title">This run, before it starts</span>
             <div style={{ flex: 1 }} />
-            <span className="t-label">
+            <span className="t-label" style={profileUnread ? { color: "var(--err)" } : undefined}>
               {profile
                 ? `prefilled from profile v${profile.version} — change anything`
-                : profileState.resolved
-                  ? "no active profile — these are the engine’s own defaults"
-                  : "reading your profile…"}
+                : profileUnread
+                  ? "Couldn’t read your profile — a read failure, not an empty one. Nothing below is prefilled."
+                  : profileEmpty
+                    ? "no active profile — these are the engine’s own defaults"
+                    : "reading your profile…"}
             </span>
+            {profileUnread && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setProfileState({ status: "reading" });
+                  void loadProfile();
+                }}
+              >
+                Try again
+              </button>
+            )}
           </div>
 
           <div className="dl-row">
@@ -421,7 +464,7 @@ export function CreateSurface({
                 ))
               ) : (
                 <span className="t-label">
-                  {profileState.resolved ? "none in your profile yet" : "–"}
+                  {profileUnread ? "unread" : profileEmpty ? "none in your profile yet" : "–"}
                 </span>
               )}
               <Link className="card-link" href="/app/profiles">
@@ -433,7 +476,7 @@ export function CreateSurface({
           <div className="dl-row">
             <dt>Voice</dt>
             <dd>
-              {voice ?? <span className="t-label">not set</span>}{" "}
+              {voice ?? <span className="t-label">{profileUnread ? "unread" : "not set"}</span>}{" "}
               <span className="t-label">· from the brand profile</span>
             </dd>
           </div>
@@ -442,6 +485,23 @@ export function CreateSurface({
             <dt>Grounding</dt>
             <dd>
               {pick ? "The capture above" : "Your prompt only"}
+              {/* The sheet draws a `view sources` door on this row
+                  (Create.dc.html:84) and the rebuild dropped it — so the
+                  capture's own source URL was on the surface as PLAIN TEXT in
+                  the prune panel and was not a link anywhere on Create
+                  (measured live s79: zero anchors to it). Every fact is a
+                  door, and this is the one fact the judge grounds against. */}
+              {pick?.sourceUrl && (
+                <a
+                  className="card-link"
+                  href={pick.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  title={pick.sourceUrl}
+                >
+                  view source ↗
+                </a>
+              )}
               <span className="t-label">
                 · sources are attached and checked at generation — the judge fails a claim no
                 provided source supports
@@ -460,9 +520,11 @@ export function CreateSurface({
                 ))
               ) : (
                 <span className="t-label">
-                  {profileState.resolved
-                    ? "no terms yet — add topics to your profile, or bring a capture from Intel"
-                    : "–"}
+                  {profileUnread
+                    ? "unread — your profile’s topics couldn’t be read"
+                    : profileEmpty
+                      ? "no terms yet — add topics to your profile, or bring a capture from Intel"
+                      : "–"}
                 </span>
               )}
               <Link className="card-link" href="/app/profiles">
@@ -478,9 +540,15 @@ export function CreateSurface({
           <div className="dl-row">
             <dt>Judge</dt>
             <dd>
-              {profileState.resolved
-                ? `Denylist${denylist > 0 ? ` · ${denylist} term${denylist === 1 ? "" : "s"}` : " · empty"} · grounding · every gate on`
-                : "–"}{" "}
+              {/* The gates are structural and always on; only the DENYLIST is
+                  profile data. An unread profile must not report an empty
+                  denylist — that is the sharpest of the five false claims,
+                  since it tells the operator no term protection exists. */}
+              {profileUnread
+                ? "Denylist unread · grounding · every gate on"
+                : profileState.status === "read"
+                  ? `Denylist${denylist > 0 ? ` · ${denylist} term${denylist === 1 ? "" : "s"}` : " · empty"} · grounding · every gate on`
+                  : "–"}{" "}
               <span className="t-label">· it gates — it never rewrites</span>
             </dd>
           </div>

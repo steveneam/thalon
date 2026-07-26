@@ -83,7 +83,15 @@ function plural(n: number, word: string): string {
  */
 export function family(detail: ProjectDetail, cut: CutView | null): FamilyPart[] {
   const versions = cut === null ? 0 : detail.cuts.filter((c) => c.name === cut.name).length;
-  const recuts = detail.cuts.filter((c) => c.lineage !== null).length;
+  // Scoped to the cut this card SPEAKS FOR — the same one the pill, the
+  // runtime badge and the provenance stamp describe, and the same one the
+  // dossier opens its aspect band on. It used to count every derived cut in
+  // the project, which broke the card's own one-rule doctrine twice: the
+  // card read "4 aspect cuts" while the dossier it opened said "none yet"
+  // (live s79, thalon-concept-film — the four hang off concept-film-16x9
+  // v6, not off the headline), and a headline cut that is ITSELF a recut
+  // counted itself among its own derivatives.
+  const recuts = derivedFrom(detail.cuts, cut).length;
   const parts: FamilyPart[] = [];
   if (versions > 0) parts.push({ text: plural(versions, "version"), door: true });
   if (recuts > 0) parts.push({ text: plural(recuts, "aspect cut"), door: true });
@@ -144,6 +152,30 @@ export function derivedFrom(cuts: CutView[], parent: CutView | null): CutView[] 
   return cuts
     .filter((c) => c.lineage?.parentCutId === parent.id)
     .sort((a, b) => a.name.localeCompare(b.name) || a.version - b.version);
+}
+
+/**
+ * The recuts this project holds that hang off some OTHER version — what the
+ * card's family line deliberately no longer counts. The aspect band is
+ * per-version by design ("one dimension per band"), so an empty band on one
+ * version must still say the project has recuts elsewhere, or narrowing the
+ * card's count would simply hide them (s79: four recuts, all off
+ * concept-film-16x9 v6, invisible from the headline's own band).
+ */
+export function derivedElsewhere(cuts: CutView[], parent: CutView | null): CutView[] {
+  const parentId = parent?.id ?? null;
+  return cuts.filter(
+    // The picked cut may itself be a recut (the live case), and the thing on
+    // screen is never "elsewhere".
+    (c) => c.lineage !== null && c.lineage.parentCutId !== parentId && c.id !== parentId,
+  );
+}
+
+/** The cut a set of recuts hangs off, when they all share one parent — named, never guessed from a majority. */
+export function soleParentOf(cuts: CutView[], derived: CutView[]): CutView | null {
+  const parents = new Set(derived.map((c) => c.lineage?.parentCutId).filter(Boolean));
+  if (parents.size !== 1) return null;
+  return cuts.find((c) => c.id === [...parents][0]) ?? null;
 }
 
 /**

@@ -10,9 +10,17 @@ import {
   targetThis,
 } from "@/lib/intel/client";
 import { HORIZON_SIGNALS, horizonRead } from "@/components/intel/horizon-read";
-import type { HorizonCard, HorizonPayload, TargetRow } from "@/lib/intel/types";
+import { isGenerable } from "@/lib/create/families";
+import type { CreateFamily, HorizonCard, HorizonPayload, TargetRow } from "@/lib/intel/types";
 
 type TabStatus = "loading" | "error" | "success";
+
+/**
+ * The family a targeted search hands Create — the route's own default
+ * (app/api/intel/search/target-this), named here so the button can say what
+ * waits at the other end.
+ */
+const TARGET_FAMILY: CreateFamily = "page";
 
 /** Provenance labels for the origin pill — first origin wins, so the label is durable. */
 const ORIGIN_LABEL: Record<TargetRow["origin"], string> = {
@@ -346,7 +354,18 @@ function HorizonOpportunity({
           {open ? "hide the numbers" : "the numbers →"}
         </button>
         <div style={{ flex: 1 }} />
-        <span className="t-label">the query rides along — no retyping at Create</span>
+        {/* The capture records the query's natural family — a targeted search
+            wants a page — and Create's picker stays changeable. But `page`
+            generation is not wired there, so "no retyping at Create" was the
+            whole truth about the handoff and none of the truth about what
+            happens next: the most opportune card's primary button landed on
+            a disabled Generate (s77 finding, reproduced live s79). Stated
+            here, from the same seam Create's own refusal reads. */}
+        <span className="t-label">
+          the query rides along — no retyping at Create
+          {!isGenerable(TARGET_FAMILY) &&
+            ` · ${TARGET_FAMILY} generation isn’t wired there yet, so the capture waits with your brief`}
+        </span>
       </div>
     </div>
   );

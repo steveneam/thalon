@@ -185,6 +185,70 @@ describe("VideoDossier (exact-mock rebuild — Video Dossier.dc.html, step 2)", 
     expect(screen.queryByText(/LinkedIn/)).toBeNull();
   });
 
+  /**
+   * s79 V1, the other half. The overview card's aspect count is now scoped
+   * to the cut it speaks for, which is right — but the band here is scoped
+   * to the picked VERSION, so a project whose recuts hang off a different
+   * version must still say they exist, or narrowing the card would simply
+   * hide them. (Live: four recuts, all off `concept-film-16x9 v6`, with the
+   * dossier's own band reading a bare "none yet".)
+   */
+  it("an empty aspect band still names the recuts hanging off another version", async () => {
+    serve({
+      ...DETAIL,
+      cuts: [
+        cut({ id: "base", version: 6, name: "film-16x9" }),
+        // The picked cut is ITSELF a recut, exactly as the live project's is.
+        cut({
+          id: "head",
+          version: 2,
+          name: "film-1x1",
+          status: "approved",
+          createdAt: "2026-07-25T00:00:00.000Z",
+          lineage: {
+            parentCutId: "base",
+            aspect: "1:1",
+            parentName: "film-16x9",
+            parentVersion: 6,
+            parentLatestVersion: 6,
+          },
+        }),
+        // …and a sibling recut off the same parent — the one that is genuinely
+        // elsewhere, and that the card's narrowed count no longer mentions.
+        cut({
+          id: "sibling",
+          version: 1,
+          name: "film-9x16",
+          status: "rendered",
+          lineage: {
+            parentCutId: "base",
+            aspect: "9:16",
+            parentName: "film-16x9",
+            parentVersion: 6,
+            parentLatestVersion: 6,
+          },
+        }),
+      ],
+    });
+    render(<VideoDossier projectId="p1" />);
+    await screen.findByRole("heading", { name: "concept film" });
+
+    expect(
+      screen.getByText(/none from this version · 1 elsewhere in this project, from film-16x9 v6/),
+    ).toBeInTheDocument();
+    // The bare "none yet" is reserved for a project that genuinely has none.
+    expect(screen.queryByText(/^none yet ·/)).toBeNull();
+  });
+
+  it("says a plain 'none yet' when the project really has no recuts at all", async () => {
+    serve({ ...DETAIL, cuts: [cut({ id: "c1", version: 1 })] });
+    render(<VideoDossier projectId="p1" />);
+    await screen.findByRole("heading", { name: "concept film" });
+
+    expect(screen.getByText(/none yet · a recut is measured from this timeline/)).toBeInTheDocument();
+    expect(screen.queryByText(/elsewhere in this project/)).toBeNull();
+  });
+
   it("keeps the record's keys and marks only real doors as doors", async () => {
     serve();
     render(<VideoDossier projectId="p1" />);

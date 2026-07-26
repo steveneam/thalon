@@ -24,6 +24,12 @@ interface QueueCardProps {
   reasons: Record<string, string[]>;
   /** True when the shell pulse says nothing waits anywhere (the zero-inbox state). */
   inboxZero: boolean;
+  /**
+   * True when the selected row is a stage artifact, whose detail pane has no
+   * approve/reject/edit door — so the legend must not advertise a/r/e as if
+   * it did. j/k are never gated: navigation is never owned by the detail pane.
+   */
+  actionsDisabled: boolean;
   onSelect: (draftId: string) => void;
   onRetry: () => void;
 }
@@ -44,6 +50,7 @@ export function QueueCard({
   selectedDraftId,
   reasons,
   inboxZero,
+  actionsDisabled,
   onSelect,
   onRetry,
 }: QueueCardProps) {
@@ -140,14 +147,21 @@ export function QueueCard({
       >
         <span className="t-label">{`${items.length} of ${totalCount}`}</span>
         <div style={{ flex: 1 }} />
+        {/* The sheet's own legend, kept byte-for-byte at rest. A legend that
+            advertises a key which does nothing is the same defect as a dead
+            door, so a/r/e wear the off state — and say why — whenever the
+            selected row's detail pane has no such verb. */}
+        {actionsDisabled && (
+          <span className="t-label">a · r · e aren’t wired for a staged draft</span>
+        )}
         <span className="kbd">j</span>
         <span className="kbd">k</span>
         <span className="t-label">row</span>
-        <span className="kbd">a</span>
+        <span className={actionsDisabled ? "kbd kbd-off" : "kbd"}>a</span>
         <span className="t-label">approve</span>
-        <span className="kbd">r</span>
+        <span className={actionsDisabled ? "kbd kbd-off" : "kbd"}>r</span>
         <span className="t-label">reject</span>
-        <span className="kbd">e</span>
+        <span className={actionsDisabled ? "kbd kbd-off" : "kbd"}>e</span>
         <span className="t-label">edit</span>
       </div>
     </section>

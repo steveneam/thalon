@@ -40,6 +40,39 @@ describe("intel fake-driver store", () => {
     expect(listTrendCards().map((c) => c.id)).toContain(card.id);
   });
 
+  // s79 I2 — the dossier offers "Click again to ride without an angle" and
+  // the seam re-attached the first one anyway, so the affordance lied and a
+  // brief was seeded with an angle nobody chose. The two defaults are split:
+  // a title always rides, an angle only rides when it was picked.
+  describe("the optional angle really is optional", () => {
+    it("rides as nothing when no angle was picked, while the title still defaults to the first", () => {
+      const card = fixtureTrendCards[1];
+      const { capture } = promoteTrendCard(card.id, { family: "post" });
+      expect(capture.payload.angle).toBeUndefined();
+      expect(capture.payload.title).toBe(card.dossier!.titles[0]);
+    });
+
+    it("rides when it WAS picked", () => {
+      const card = fixtureTrendCards[1];
+      const last = card.dossier!.angles.length - 1;
+      const { capture } = promoteTrendCard(card.id, { family: "post", angleIndex: last });
+      expect(capture.payload.angle).toBe(card.dossier!.angles[last]);
+    });
+
+    it("still refuses an explicit out-of-range angle rather than silently falling back", () => {
+      const card = fixtureTrendCards[1];
+      expect(() => promoteTrendCard(card.id, { family: "post", angleIndex: 99 })).toThrow(
+        IntelStoreError,
+      );
+    });
+
+    it("resolves into a Create context carrying no angle", () => {
+      const card = fixtureTrendCards[1];
+      const { capture } = promoteTrendCard(card.id, { family: "post" });
+      expect(resolveCreateContext(capture.id).angle).toBeUndefined();
+    });
+  });
+
   it("promote and dismiss write SYMMETRIC base payloads through the one capture door (wave-3 §3.6)", () => {
     const card = fixtureTrendCards[0];
     const promoted = promoteTrendCard(card.id, { family: "post" }).capture;
@@ -59,7 +92,10 @@ describe("intel fake-driver store", () => {
       kind: "trend_promote",
       family: "page",
       title: card.dossier!.titles[2],
-      angle: card.dossier!.angles[0],
+      // No angleIndex was passed, so NO angle rides. This assertion used to
+      // read `angles[0]` — it pinned the very defaulting that made the
+      // dossier's "ride without an angle" a false promise (s79 I2).
+      angle: undefined,
       hook: card.dossier!.hook,
       areaName: card.areaName,
       score: card.score,

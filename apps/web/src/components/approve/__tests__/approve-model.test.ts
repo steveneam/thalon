@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyQueueView,
+  batchScopeNote,
   checkGlyph,
   checkMarks,
   flattenQueue,
@@ -117,6 +118,35 @@ describe("the queue view", () => {
     const flat = flattenQueue([[{ draft: older, run: RUN }, { draft: newer, run: RUN }]]);
     expect(applyQueueView(flat, "oldest", "waiting").map((i) => i.draft.id)).toEqual(["a"]);
     expect(applyQueueView(flat, "oldest", "blocked").map((i) => i.draft.id)).toEqual(["b"]);
+  });
+});
+
+/**
+ * s79 A1 — measured live: the header read "13 waiting" beside "Approve all
+ * waiting (2)" with nothing on screen naming the other 11. Both numbers are
+ * true; the sentence between them was missing.
+ */
+describe("batchScopeNote — the gap between the two waiting counts", () => {
+  it("says nothing when the two counts agree", () => {
+    expect(batchScopeNote({ waiting: 4, batchable: 4, stagedWaiting: 0 })).toBeNull();
+  });
+
+  it("names the staged drafts batch approve leaves behind — the live 13-vs-2 case", () => {
+    const note = batchScopeNote({ waiting: 13, batchable: 2, stagedWaiting: 11 });
+    expect(note).toContain("2 of 13");
+    expect(note).toContain("11 staged drafts");
+  });
+
+  it("names a narrowing filter separately, so staged work never explains a gap it did not cause", () => {
+    const note = batchScopeNote({ waiting: 10, batchable: 3, stagedWaiting: 4 });
+    expect(note).toContain("4 staged drafts");
+    expect(note).toContain("3 sit outside this view");
+  });
+
+  it("singularises one staged draft", () => {
+    expect(batchScopeNote({ waiting: 3, batchable: 2, stagedWaiting: 1 })).toContain(
+      "1 staged draft advance",
+    );
   });
 });
 

@@ -9,6 +9,10 @@ import {
   FIXTURE_DRAFT_B_ID,
   FIXTURE_DRAFT_C_ID,
 } from "@/lib/approve-queue/fixtures";
+import {
+  FIXTURE_STAGED_PLATFORM,
+  FIXTURE_STORYBOARD_DRAFT_ID,
+} from "@/lib/staged-flow/fixtures";
 import { server } from "@/lib/testing/server";
 import { ApproveSurface } from "../approve-surface";
 
@@ -108,5 +112,77 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
     confirmSpy.mockReturnValue(true);
     await user.keyboard("r");
     await waitFor(() => expect(rejected).toEqual([FIXTURE_DRAFT_A_ID]));
+  });
+
+  /**
+   * s77/s79 A2 — measured live before the fix: with a staged row selected,
+   * `j` did nothing (control: it moved 1→2 on a plain row) while the footer
+   * still advertised j · k · a · r · e. The whole grammar rode one master
+   * gate, so the operator was stranded on that row with no keyboard way off
+   * it. Navigation is never owned by the detail pane.
+   */
+  describe("a staged row does not trap the keyboard", () => {
+    async function selectStagedRow(user: ReturnType<typeof userEvent.setup>) {
+      const queue = await screen.findByRole("region", { name: "Approve queue" });
+      const staged = await within(queue).findByRole("button", {
+        name: `Select ${FIXTURE_STAGED_PLATFORM} draft ${FIXTURE_STORYBOARD_DRAFT_ID}`,
+      });
+      await user.click(staged);
+      await waitFor(() => expect(staged).toHaveAttribute("aria-pressed", "true"));
+      return { queue, staged };
+    }
+
+    it("j still moves the selection off a staged row", async () => {
+      const user = userEvent.setup();
+      render(<ApproveSurface />);
+      const { staged } = await selectStagedRow(user);
+
+      await user.keyboard("k");
+      await waitFor(() => expect(staged).toHaveAttribute("aria-pressed", "false"));
+    });
+
+    it("states that a/r/e are not wired for it, instead of advertising five live keys", async () => {
+      const user = userEvent.setup();
+      render(<ApproveSurface />);
+      const { queue } = await selectStagedRow(user);
+
+      expect(
+        within(queue).getByText(/a · r · e aren’t wired for a staged draft/),
+      ).toBeInTheDocument();
+      for (const key of ["a", "r", "e"]) {
+        expect(within(queue).getByText(key)).toHaveClass("kbd-off");
+      }
+      // Navigation keys are never dimmed — they always work.
+      for (const key of ["j", "k"]) {
+        expect(within(queue).getByText(key)).not.toHaveClass("kbd-off");
+      }
+    });
+
+    it("says nothing and dims nothing on a plain row", async () => {
+      render(<ApproveSurface />);
+      const queue = await screen.findByRole("region", { name: "Approve queue" });
+      await waitFor(() =>
+        expect(within(queue).queryByText(/aren’t wired for a staged draft/)).not.toBeInTheDocument(),
+      );
+      for (const key of ["j", "k", "a", "r", "e"]) {
+        expect(within(queue).getByText(key)).not.toHaveClass("kbd-off");
+      }
+    });
+
+    it("'a' does not act while a staged row is selected — no silent no-op verb", async () => {
+      const user = userEvent.setup();
+      const approved: string[] = [];
+      server.use(
+        http.post("/api/drafts/:draftId/approve", ({ params }) => {
+          approved.push(String(params.draftId));
+          return HttpResponse.json({ ok: true });
+        }),
+      );
+      render(<ApproveSurface />);
+      await selectStagedRow(user);
+
+      await user.keyboard("a");
+      expect(approved).toEqual([]);
+    });
   });
 });
