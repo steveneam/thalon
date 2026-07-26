@@ -203,12 +203,25 @@ credential in a tracked file, and none in a logged error.
    does **not** typecheck — a green suite with a broken build is a real
    outcome here, twice on record.
 2. The render gate above, for anything visual.
-3. **A test fixture asserted absent must be long enough to mean it.** *Proven
+3. **DRIVE THE SURFACE — a passing suite is not a working surface.** For any
+   UI change, do the surface's actual job in a real browser before calling it
+   done: `node scripts/drive-surface.mjs --jobs <surface>` (and
+   `--inventory <route>` for the controls it genuinely offers). Verdicts are
+   **works · dead-door · no-affordance**; the third one is the point, because
+   pass/fail cannot express *"nothing here offers this job"* — the column the
+   calendar hid in for a whole session while 59 agents read its code.
+   *Ordering that matters, learned s78:* `elementFromPoint` beats geometry,
+   geometry beats a screenshot, a screenshot beats a passing test. A
+   `! HARNESS` line means the DRIVER is wrong, never that the product passed.
+   Lead-only, like the render gate — it refuses from a worktree, because the
+   dev server serves MAIN and a lane driving it would read main's behaviour as
+   its own branch passing.
+4. **A test fixture asserted absent must be long enough to mean it.** *Proven
    s77: an OAuth test asserted the signed header does not leak the consumer
    secret — correct — but the fixture secret was the 2-character string `"cs"`,
    checked against a random base64 signature. It failed whenever the nonce
    produced a signature containing those two characters.*
-4. Leave a ratchet **in the same change**, as high up the ladder as it goes:
+5. Leave a ratchet **in the same change**, as high up the ladder as it goes:
    executable (test · CI check · constraint) > structural (seam · type ·
    schema) > configuration > documentary. Tag it **invariant** (safety, never
    loosened) or **opinion** (convention, freely revised).

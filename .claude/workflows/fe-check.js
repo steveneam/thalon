@@ -3,7 +3,7 @@ export const meta = {
   description: 'Thalon front-end check — jobs-to-be-done walkthrough, the V·R·D·A·R·N interaction lenses plus a DEAD-DOOR lens, each finding adversarially verified, then a rendered-vs-sheet gate. Runs WHILE BUILDING (over a diff) or over a BUILT surface.',
   whenToUse: 'Before committing FE work: {mode:"building"} reviews the diff. Auditing shipped UI: {mode:"built", surface:"Intel", route:"/app/intel", sheet:"Intel.dc.html"}. Backend peer: be-check.',
   phases: [
-    { title: 'Tasks', detail: 'G1 — jobs-to-be-done walkthrough; which JTBD have a working affordance vs a gap' },
+    { title: 'Tasks', detail: 'G1 — DRIVE the surface in a real browser; which JTBD work vs dead door vs no affordance' },
     { title: 'Review', detail: 'V·R·D·A·R·N + DEAD-DOOR lenses inspect the surface in parallel' },
     { title: 'Verify', detail: 'adversarially refute each finding; drop the false positives' },
     { title: 'Render', detail: 'G2 — shoot the surface against its sheet, both themes' },
@@ -20,7 +20,9 @@ export const meta = {
  *  REFUTE (this is what stops a plausible-sounding audit from inventing
  *  work), the G1 jobs-to-be-done walkthrough (the only gate that finds
  *  MISSING affordances — no audit of existing code can), and a mandatory
- *  rendered gate that is never silently skipped.
+ *  rendered gate that is never silently skipped. G1 gained a real BROWSER
+ *  step at s79 (`scripts/drive-surface.mjs`), because reading is precisely
+ *  how it missed the calendar: it verified 'against the code'.
  *
  *  CHANGED — the scope model, and this is the structural one. Theirs reviews
  *  a DIFF before commit. The founder is asking for the opposite: a walk over
@@ -231,16 +233,47 @@ const RENDER_SCHEMA = {
 
 log(`fe-check [${MODE}]: ${MODE === 'built' ? `${SURFACE || 'shell'} ${ROUTE || '/app'}` : DIFF_SCOPE}`)
 
+/*
+ * DRIVE IT, DON'T REASON ABOUT IT (s79).
+ *
+ * G1's whole claim is that it finds MISSING affordances — and it verified
+ * "against the code", which is exactly how the calendar survived this gate.
+ * 189 findings and 59 agents on the editor alone, all reading: a reviewer saw
+ * `Reschedule` gated on `kind === "plan"` and marked it consistent, while
+ * there were zero plans and nothing in the product could create one. The
+ * founder found it in ten minutes of clicking.
+ *
+ * So in `built` mode with a route, G1 now runs the real browser driver and
+ * treats ITS table as primary evidence; code reading only explains what the
+ * table already showed. Same session it landed, driving found the empty plan
+ * picker stating the wrong reason on live data — a defect whose own docstring
+ * described the correct behaviour, so no reading pass could flag it.
+ */
+const DRIVE = MODE === 'built' && ROUTE
+  ? `\n\nDRIVE THE SURFACE FIRST — this is not optional, and it comes BEFORE reading any component.\n` +
+    `  1. Confirm the lead's dev server answers: \`curl -s -o /dev/null -w "%{http_code}" http://localhost:3111${ROUTE}\`\n` +
+    `     (localhost, NEVER 127.0.0.1 — Next dev blocks cross-origin /_next and a healthy app then looks dead).\n` +
+    `  2. \`node scripts/drive-surface.mjs --inventory ${ROUTE}\` — the controls the surface ACTUALLY offers.\n` +
+    `  3. If this surface has a job set, \`node scripts/drive-surface.mjs --jobs <surface>\` and use the\n` +
+    `     printed table verbatim. Verdicts are works · dead-door · no-affordance; a "! HARNESS" line means\n` +
+    `     the DRIVER is wrong, never that the product passed — say so and fix the selector.\n` +
+    `The inventory is how the GAP column is earned: compare the jobs an operator would try against what\n` +
+    `is actually on screen. A job you did not drive must be reported as undriven, not as present. Do NOT\n` +
+    `press anything that spends (Generate) or publishes — reachability only.`
+  : ''
+
 // G1 — the only gate that finds MISSING affordances. No audit of existing code can.
 phase('Tasks')
 const jtbd = await agent(
-  `You are the jobs-to-be-done lens for a Thalon front-end check. ${THALON}\n\n${TARGET}\n\n` +
+  `You are the jobs-to-be-done lens for a Thalon front-end check. ${THALON}\n\n${TARGET}${DRIVE}\n\n` +
   `Enumerate the concrete jobs an operator comes to this surface to do (in building mode: the jobs ` +
   `the touched surfaces serve). For each, name the control that serves it and mark it: present ` +
   `(works), dead (the control exists but does nothing useful), or gap (no control at all — e.g. no ` +
   `way to sort or filter a long list). Prioritise GAPS and DEAD controls; finding what SHOULD exist ` +
-  `but doesn't is the entire point of this gate, and no audit of existing code can do it. Verify ` +
-  `every claim against the code — do NOT edit anything.`,
+  `but doesn't is the entire point of this gate, and no audit of existing code can do it. ` +
+  `${MODE === 'built' && ROUTE
+    ? 'Ground every status in what the DRIVER showed; read the code only to explain what you observed.'
+    : 'Verify every claim against the code'} — do NOT edit anything.`,
   { label: 'jtbd', phase: 'Tasks', schema: JTBD_SCHEMA },
 )
 const tasks = (jtbd && jtbd.tasks) || []
