@@ -325,12 +325,36 @@ found the half that was missed.
 4. **Then the founder's re-introductions**: filters + sort where the fan-out
    independently agreed they are missing, and the calendar's write route
    (`/api/calendar` does not exist, which is why reschedule is unarmed).
-5. **Founder rulings to collect before the walk** (they change the work):
-   Approve's "Oldest first" chip vs its newest-first rows · the calendar
-   "+N more" sheet divergence · whether the Dashboard publish door should arm.
+5. **ALL FOUR FOUNDER RULINGS ARE IN (s77) — none of this is open any more:**
+   - **Approve sort = newest first.** The app already did this; the SHEET was
+     wrong and is now annotated as a founder amendment. No code change; do NOT
+     "fix" the app to match its chip.
+   - **Dashboard publish door = ARM IT.** Part of this pass.
+   - **Calendar = delegated to the lead, and decided:** adopt "+N more" for
+     concurrent events. The sheet already uses that treatment in its waiting
+     lane, so this applies its own vocabulary rather than inventing grammar,
+     and clipping a name mid-word loses information with no cue that anything
+     was lost. Recorded in the sheets README.
+   - **Post/page generation on Create = GO TO ARMING**, with a hard condition
+     in his own words: *"we're not posting anything yet until all the walks are
+     verified and fixed next session."*
 6. **The 15th surface never returned** (the run was stopped) — re-walk it.
 
-**Spend note, unchanged:** arming post/page generation on Create is the one
-item here that costs real tokens per click, so it wants an explicit founder GO
-on the arming, not just on the building.
+## The sequence gate — read this before arming anything
+
+The founder's GO covers **building** the arming. It does NOT cover exercising a
+publish path. His condition, verbatim: *"we're not posting anything yet until
+all the walks are verified and fixed."* So the order is fixed and is not a
+matter of taste:
+
+**verify the 189 → fix the survivors → THEN a publish path may be exercised,
+and only on a fresh per-platform GO.**
+
+Two independent reasons this gate is right, so it does not get argued away
+later. First, quality: publishing off a workspace with 10 unverified blockers —
+one of which writes draft A's body onto draft B — risks shipping the wrong
+content under his name. Second, spend: generation is the one item in this
+document that costs real tokens on every click, so the same gate protects the
+budget. Building the door, wiring the judge gate on the way out, and leaving it
+disarmed is entirely within the GO.
 

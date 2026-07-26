@@ -69,6 +69,33 @@ rounds, comments) stays https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b656
 
 ## Founder amendments — the sheets are WRONG here on purpose
 
+### `Approve.dc.html` — the sort chip says "Oldest first"; the rows are newest-first (RULED s77)
+
+The sheet contradicts itself: its chip reads *Oldest first* while its own five
+rows are drawn newest-first. The s74 lane followed the ROWS plus the founder's
+s66 ruling, so the app already defaults to `newest` (`approve-surface.tsx`
+`useState<QueueSort>("newest")`, label "Newest first"). **Founder ruling, s77:
+"newest first."** So the code is correct and the SHEET is the wrong one here —
+do not "fix" the app to match the chip. Both sort options stay available; only
+the default is settled.
+
+### `Calendar.dc.html` — concurrent events clip; adopt the sheet's own "+N more" (LEAD'S CALL, s77)
+
+When several platforms are approved for the same instant the week column
+splits N ways and each chip lands at ~45px, clipping mid-word ("Linked·",
+"Faceb·"). That is the sheet's own `.ev { overflow: hidden }` meeting a density
+its fixture never had. The founder handed the call to the lead ("calendar is up
+to you"), and the call is: **adopt "+N more"** — capped visible chips, the
+remainder collapsed behind a count that opens the day.
+
+Why this is the conservative choice rather than an invention: **the sheet
+ALREADY uses that treatment in its own waiting lane**, so this applies the
+sheet's existing vocabulary to a density it never drew, instead of introducing
+new grammar. Clipping a platform name mid-word is not an honest state — it
+loses information with no cue that anything was lost, which is exactly what the
+"+N more" pattern exists to prevent. Implementation rides the s78 fix pass.
+
+
 The sheets are the spec, with these recorded exceptions. **A lane must not
 "correct" one back to what the sheet draws.**
 
