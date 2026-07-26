@@ -2,7 +2,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Runs } from "@/components/runs/runs";
 import { run } from "@/lib/approve-queue/fixtures";
 import { server } from "@/lib/testing/server";
@@ -68,6 +68,10 @@ function seedFeed() {
 }
 
 describe("Runs (exact-mock rebuild, Runs.dc.html)", () => {
+  // `push` is module-scoped, so without this a later "never navigated" assertion
+  // would see an earlier test's call and pass (or fail) for the wrong reason.
+  beforeEach(() => push.mockClear());
+
   it("renders the sheet's bands: headline pills, the seg, a day card per day, the receipts footer", async () => {
     seedFeed();
     render(<Runs />);
@@ -135,7 +139,7 @@ describe("Runs (exact-mock rebuild, Runs.dc.html)", () => {
     render(<Runs />);
     await screen.findByText("Failed");
 
-    const rows = screen.getAllByRole("button", { name: /^Fan-out · / });
+    const rows = screen.getAllByRole("button", { name: /— (Failed|Published)$/ });
     expect(rows[0].className).toContain("row sel");
     await user.keyboard("j");
     await waitFor(() => expect(rows[1].className).toContain("row sel"));
@@ -143,6 +147,90 @@ describe("Runs (exact-mock rebuild, Runs.dc.html)", () => {
 
     await user.keyboard("{Enter}");
     expect(push).toHaveBeenCalledWith(`/app/approve?run=${PUBLISHED_ID}`);
+  });
+
+  /*
+   * s77 finding (runs.tsx:149): `useListKeys` listens on WINDOW and only skips
+   * typing targets, so the j/k grammar's Enter fired from every focused button
+   * and link — cancelling the seg button's own activation (preventDefault kills
+   * the keydown's default click) and navigating to the selected run instead.
+   * Verified live in s78 before the fix; these pin the guard.
+   */
+  it("Enter on the filter seg operates the FILTER, and never opens a run", async () => {
+    seedFeed();
+    const user = userEvent.setup();
+    render(<Runs />);
+    await screen.findByText("Failed", { selector: ".pill-err" });
+
+    const failedOption = screen.getByRole("button", { name: "Failed" });
+    failedOption.focus();
+    await user.keyboard("{Enter}");
+
+    expect(push).not.toHaveBeenCalled();
+    await waitFor(() => expect(failedOption).toHaveAttribute("aria-pressed", "true"));
+    // The published run is filtered out; the failed one remains.
+    expect(screen.getAllByRole("button", { name: /— (Failed|Published)$/ })).toHaveLength(1);
+  });
+
+  it("Enter on the published live-page link opens the page only — not Approve as well", async () => {
+    seedFeed();
+    const user = userEvent.setup();
+    render(<Runs />);
+
+    const live = await screen.findByRole("link", { name: /\/blog\/fixture-post ↗/ });
+    live.focus();
+    await user.keyboard("{Enter}");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("the j/k grammar still opens the selected run when no control holds focus", async () => {
+    seedFeed();
+    const user = userEvent.setup();
+    render(<Runs />);
+    await screen.findByText("Failed", { selector: ".pill-err" });
+
+    await user.keyboard("{Enter}");
+    expect(push).toHaveBeenCalledWith(`/app/approve?run=${FAILED_ID}`);
+  });
+
+  /* The view knobs the founder asked to re-introduce (s77). */
+  it("the platform filter and find narrow the rows, and an emptied view says the knob did it", async () => {
+    seedFeed();
+    const user = userEvent.setup();
+    render(<Runs />);
+    await screen.findByText("Failed", { selector: ".pill-err" });
+    expect(screen.getAllByRole("button", { name: /— (Failed|Published)$/ })).toHaveLength(2);
+
+    await user.type(screen.getByRole("searchbox", { name: "Find a run" }), "malformed shell");
+    await waitFor(() =>
+      expect(screen.getAllByRole("button", { name: /— (Failed|Published)$/ })).toHaveLength(1),
+    );
+
+    await user.clear(screen.getByRole("searchbox", { name: "Find a run" }));
+    await user.type(screen.getByRole("searchbox", { name: "Find a run" }), "nothing matches this");
+    // "No runs yet" would be a lie — the operator's own knob emptied it.
+    expect(await screen.findByText(/No runs match this view/)).toBeInTheDocument();
+    expect(screen.queryByText(/No runs yet/)).not.toBeInTheDocument();
+  });
+
+  it("sorting oldest-first reverses the day groups", async () => {
+    server.use(
+      http.get("/api/runs", () =>
+        HttpResponse.json({
+          runs: [run(PUBLISHED_ID, TODAY_9AM), run(FAILED_ID, "2026-01-02T09:00:00.000Z")],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<Runs />);
+    await screen.findByText(/^Today · /);
+
+    const headingsNow = screen.getAllByText(/July|January/).map((el) => el.textContent);
+    await user.selectOptions(screen.getByRole("combobox", { name: "Sort order" }), "oldest");
+    await waitFor(() => {
+      const after = screen.getAllByText(/July|January/).map((el) => el.textContent);
+      expect(after).toEqual([...headingsNow].reverse());
+    });
   });
 
   it("a failed feed read is an alert with retry, never an empty history", async () => {
@@ -181,7 +269,7 @@ describe("Runs (exact-mock rebuild, Runs.dc.html)", () => {
     seedFeed();
     window.history.replaceState({}, "", `/app/runs?run=${PUBLISHED_ID}`);
     render(<Runs />);
-    const rows = await screen.findAllByRole("button", { name: /^Fan-out · / });
+    const rows = await screen.findAllByRole("button", { name: /— (Failed|Published)$/ });
     // Feed order is newest-first; the deep-linked run is the second row.
     await waitFor(() => expect(rows[1].className).toContain("row sel"));
     const selected = rows[1];

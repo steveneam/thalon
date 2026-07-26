@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyQueueView,
@@ -92,6 +93,10 @@ export function ApproveSurface() {
   const [detailDraft, setDetailDraft] = useState<GridDraft | null>(null);
   const [judgeResults, setJudgeResults] = useState<PanelJudgeResult[]>([]);
   const [busy, setBusy] = useState(false);
+  /** A `?run=`/`?draft=` deep link that matched nothing in the queue — stated, never swallowed. */
+  const [deepLinkMiss, setDeepLinkMiss] = useState<{ kind: "run" | "draft"; id: string } | null>(
+    null,
+  );
   // Approve/reject/edit/re-judge run the judge lane synchronously
   // server-side (judge-runner.ts) — a thrown failure (no gateway key, a
   // budget halt) must fail LOUDLY here rather than vanish, since the draft
@@ -182,6 +187,18 @@ export function ApproveSurface() {
       // A ?run= link lands on that run's own waiting work first.
       const runItems = runId ? view.filter((i) => i.run.id === runId) : [];
       const linkedRunDraft = (runItems.find((i) => isWaiting(i.draft)) ?? runItems[0])?.draft.id ?? null;
+      // A deep link that matched NOTHING must say so. A failed run keeps its
+      // `?run=` door (Runs rows are all doors, and the unarmed Retry's own
+      // tooltip invites it), but a run that produced zero drafts has nothing
+      // here — and falling silently through to defaultSelection put the
+      // operator on an unrelated run's draft, under live Approve/Reject/Edit
+      // controls, with no cue the request had missed (s77 finding,
+      // runs-model.ts:133 — the half that lives on this surface).
+      if (runId !== null && linkedDraft === null && linkedRunDraft === null) {
+        setDeepLinkMiss({ kind: draftId !== null ? "draft" : "run", id: draftId ?? runId });
+      } else if (draftId !== null && linkedDraft === null) {
+        setDeepLinkMiss({ kind: "draft", id: draftId });
+      }
       selectDraft(linkedDraft ?? linkedRunDraft ?? defaultSelection(view));
     });
     return () => {
@@ -412,6 +429,38 @@ export function ApproveSurface() {
           Approve all waiting ({queuedItems.length})
         </button>
       </div>
+      {/* Absent entirely at rest — it exists only when a deep link missed. */}
+      {deepLinkMiss !== null && (
+        <div
+          className="card"
+          role="alert"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "11px 16px",
+            borderColor: "color-mix(in oklab, var(--warn) 40%, var(--n-400))",
+          }}
+        >
+          <span className="t-label">
+            {deepLinkMiss.kind === "run"
+              ? "That run has no drafts in this queue — a run can fail before it drafts anything. Nothing was selected for it; the queue's own default is showing instead."
+              : "That draft isn’t in this queue — it may have been decided already. The queue’s own default is showing instead."}
+          </span>
+          <span className="t-data">{`${deepLinkMiss.kind} ${deepLinkMiss.id.slice(0, 8)}`}</span>
+          <div style={{ flex: 1 }} />
+          <Link className="btn btn-ghost btn-sm" href="/app/runs">
+            Back to Runs
+          </Link>
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={() => setDeepLinkMiss(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       <div className="split">
         <QueueCard
           status={queueStatus}

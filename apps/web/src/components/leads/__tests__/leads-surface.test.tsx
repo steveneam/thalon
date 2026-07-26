@@ -353,7 +353,10 @@ describe("Leads (exact-mock rebuild — Leads.dc.html)", () => {
 
     const mail = await screen.findByText(/You asked whether launch content/);
     expect(mail.closest(".mail")?.textContent).toContain("Mara Kessler <mara@fieldline.example>");
-    expect(screen.getByText("judge passed")).toHaveClass("pill", "pill-ok");
+    // The verdict is a DOOR to its trail, not a dead span (every fact is a door).
+    const verdict = screen.getByRole("link", { name: /judge passed/ });
+    expect(verdict).toHaveClass("pill", "pill-ok");
+    expect(verdict).toHaveAttribute("href", "/app/approve?draft=draft-out-1");
     expect(screen.getByRole("link", { name: "Open in your mail client" })).toHaveAttribute(
       "href",
       expect.stringContaining("mailto:mara@fieldline.example?subject=Your%20webinar%20question"),
@@ -369,7 +372,49 @@ describe("Leads (exact-mock rebuild — Leads.dc.html)", () => {
     seedOutreach("lead-1", "blocked");
     render(<LeadsSurface />);
 
-    expect(await screen.findByText("judge blocked")).toHaveClass("pill", "pill-err");
+    expect(await screen.findByRole("link", { name: /judge blocked/ })).toHaveClass(
+      "pill",
+      "pill-err",
+    );
+  });
+
+  /*
+   * s77 finding (leads-surface.tsx:780): a judge-BLOCKED draft was handed over
+   * with exactly the same one-click send affordances as a passed one — Copy
+   * body (primary) and a prefilled mailto. Approve's state machine has no
+   * blocked → approved path, so this surface was the one route by which ungated
+   * copy could reach a real recipient. THE JUDGE GATES: it fails closed here.
+   */
+  it("a blocked draft fails closed — no copy, no prefilled mailto, and a route to the reasons", async () => {
+    seedLeads();
+    seedOutreach("lead-1", "blocked");
+    render(<LeadsSurface />);
+
+    await screen.findByRole("link", { name: /judge blocked/ });
+    expect(screen.getByRole("button", { name: "Copy body" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Copy subject" })).toBeDisabled();
+    // The mailto is gone entirely — an <a> cannot be disabled, so it rests as
+    // the unarmed span with its reason, the Runs surface's own treatment.
+    expect(
+      screen.queryByRole("link", { name: "Open in your mail client" }),
+    ).not.toBeInTheDocument();
+    const unarmed = screen.getByText("Open in your mail client");
+    expect(unarmed).toHaveAttribute("aria-disabled");
+    expect(unarmed).toHaveAttribute("title", expect.stringContaining("re-judge"));
+    // The block is stated on the surface, not only in a toast that has gone.
+    expect(screen.getByRole("alert")).toHaveTextContent(/The judge blocked this draft/);
+  });
+
+  it("a judge-PASSED draft keeps every send affordance", async () => {
+    seedLeads();
+    seedOutreach();
+    render(<LeadsSurface />);
+
+    await screen.findByRole("link", { name: /judge passed/ });
+    expect(screen.getByRole("button", { name: "Copy body" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Copy subject" })).toBeEnabled();
+    expect(screen.getByRole("link", { name: "Open in your mail client" })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("with no draft the band offers the compose door — never four dead buttons", async () => {
@@ -486,5 +531,213 @@ describe("Leads — the empty queue", () => {
 
     expect(await screen.findByText(/No leads yet — import a CSV/)).toBeInTheDocument();
     expect(screen.getByText("No lead selected — the queue is empty.")).toBeInTheDocument();
+  });
+
+  /*
+   * s77 BLOCKER (leads-surface.tsx:340): dismiss and mark-hot existed ONLY as
+   * the single keys d/h, whose legend sits one disclosure deep — a mouse-only
+   * operator could not triage at all, and on the Board tab the keys are gated
+   * off entirely. This is also a regression: the pre-rebuild lead card drew
+   * both verbs. Approve is the precedent — it binds a/r AND draws the buttons.
+   */
+  describe("the triage verbs have pointer parity (s77 blocker · leads:340)", () => {
+    it("Dismiss and Mark hot are real controls in the dossier, not keys only", async () => {
+      seedLeads();
+      let dismissed: unknown = null;
+      server.use(
+        http.post("/api/leads/triage", async ({ request }) => {
+          dismissed = await request.json();
+          return HttpResponse.json({ done: 1, failed: [] } satisfies TriageResult);
+        }),
+      );
+      const user = userEvent.setup();
+      render(<LeadsSurface />);
+
+      await user.click(await screen.findByRole("button", { name: "Dismiss" }));
+      expect(dismissed).toEqual({ action: "dismiss", ids: ["lead-1"] });
+    });
+
+    it("Mark hot flips to Clear hot on a pinned lead", async () => {
+      seedLeads({ leads: [card({ pinned: true })] });
+      render(<LeadsSurface />);
+
+      expect(await screen.findByRole("button", { name: "Clear hot" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Mark hot" })).not.toBeInTheDocument();
+    });
+
+    it("Dismiss rests as an honest refusal on an already-dismissed lead", async () => {
+      seedLeads({
+        leads: [card({ status: "dismissed" })],
+        counts: { new: 0, scored: 0, dismissed: 1 },
+      });
+      const user = userEvent.setup();
+      render(<LeadsSurface />);
+
+      await user.selectOptions(
+        await screen.findByRole("combobox", { name: "Status filter" }),
+        "dismissed",
+      );
+      const dismiss = await screen.findByRole("button", { name: "Dismiss" });
+      expect(dismiss).toBeDisabled();
+      expect(dismiss).toHaveAttribute("title", expect.stringContaining("Already dismissed"));
+    });
+  });
+
+  /*
+   * s77 finding (leads-surface.tsx:118): a FAILED run-feed read was caught into
+   * `[]`, so "broken" rendered as the affirmative "No draft yet" — an existing
+   * draft hidden behind a sentence saying there is none, with no retry.
+   */
+  it("a failed run-feed read says unresolved, never 'No draft yet'", async () => {
+    seedLeads();
+    server.use(http.get("/api/runs", () => HttpResponse.error()));
+    render(<LeadsSurface />);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/Couldn’t read the run feed/);
+    expect(alert).toHaveTextContent(/read failure, not an empty history/);
+    expect(screen.queryByText(/No draft yet/)).not.toBeInTheDocument();
+    // A read failure offers the read again — never the spend.
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Draft outreach" })).not.toBeInTheDocument();
+  });
+
+  /*
+   * s77 finding (leads-surface.tsx:147): the band scanned the BOUNDED 50-run
+   * feed, so an older compose run was invisible — while the compose toast said
+   * "showing the existing one". The door's own answer names the run exactly.
+   */
+  it("a draft on a run outside the feed window still resolves — the door names its run", async () => {
+    seedLeads();
+    const oldRunId = "88888888-8888-8888-8888-888888888888";
+    // The feed does NOT contain the lead's run: it has aged out of the window.
+    server.use(
+      http.get("/api/runs", () => HttpResponse.json({ runs: [] })),
+      http.post("/api/create/email", () =>
+        HttpResponse.json({
+          draftId: "draft-old-1",
+          runId: oldRunId,
+          status: "queued",
+          alreadyComposed: true,
+        }),
+      ),
+      http.get(`/api/runs/${oldRunId}/drafts`, () =>
+        HttpResponse.json({
+          drafts: [
+            makeDraft(
+              "draft-old-1",
+              oldRunId,
+              "email",
+              "An older subject\n\nAn older body that was composed weeks ago.",
+              "queued",
+              "hash-old-1",
+              {
+                format: "outreach_email",
+                meta: {
+                  subject: "An older subject",
+                  emailBody: "An older body that was composed weeks ago.",
+                  recipient: { leadId: "lead-1" },
+                },
+              },
+            ),
+          ],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<LeadsSurface />);
+
+    await user.click(await screen.findByRole("button", { name: "Draft outreach" }));
+
+    // The toast says the draft already existed; the band must actually show it.
+    expect(await screen.findByText(/already had a draft/)).toBeInTheDocument();
+    expect(await screen.findByText(/An older body that was composed weeks ago/)).toBeInTheDocument();
+    expect(screen.queryByText(/No draft yet/)).not.toBeInTheDocument();
+  });
+
+  /*
+   * s77 finding (leads-surface.tsx:134): the Dismissed view was a filter with no
+   * on-screen cue — once the provenance panel was closed nothing named it. It is
+   * now a labelled control that states its own value in resting chrome.
+   */
+  describe("the view knobs — find, status filter, sort (s77 · leads:134)", () => {
+    function seedThree() {
+      seedLeads({
+        leads: [
+          card({ id: "lead-1", name: "Mara Kessler", company: "Fieldline Robotics", score: 0.88 }),
+          card({
+            id: "lead-2",
+            name: "Jonah Tran",
+            company: "Brightpath Clinics",
+            email: "jonah@brightpath.example",
+            score: 0.81,
+            createdAt: "2026-07-20T02:00:00.000Z",
+          }),
+          card({
+            id: "lead-3",
+            name: "Rhea Solano",
+            company: "Copperline Cafés",
+            email: "rhea@copperline.example",
+            status: "dismissed",
+            score: 0.64,
+          }),
+        ],
+        counts: { new: 0, scored: 2, dismissed: 1 },
+      });
+    }
+
+    it("the Dismissed view NAMES itself in the header, and one control clears it", async () => {
+      seedThree();
+      const user = userEvent.setup();
+      render(<LeadsSurface />);
+      await screen.findByTestId("lead-row-lead-1");
+
+      const filter = screen.getByRole("combobox", { name: "Status filter" });
+      await user.selectOptions(filter, "dismissed");
+
+      // The cue is in resting chrome — no disclosure has to be open to see it.
+      expect(await screen.findByTestId("lead-row-lead-3")).toBeInTheDocument();
+      expect(screen.queryByTestId("lead-row-lead-1")).not.toBeInTheDocument();
+      expect(screen.getByText("Dismissed", { selector: ".sel-ctl" })).toBeInTheDocument();
+
+      await user.selectOptions(filter, "active");
+      expect(await screen.findByTestId("lead-row-lead-1")).toBeInTheDocument();
+      expect(screen.queryByTestId("lead-row-lead-3")).not.toBeInTheDocument();
+    });
+
+    it("find matches name, company and email; an emptied view says the knob did it", async () => {
+      seedThree();
+      const user = userEvent.setup();
+      render(<LeadsSurface />);
+      await screen.findByTestId("lead-row-lead-1");
+
+      const box = screen.getByRole("searchbox", { name: "Find a lead" });
+      await user.type(box, "brightpath");
+      expect(await screen.findByTestId("lead-row-lead-2")).toBeInTheDocument();
+      expect(screen.queryByTestId("lead-row-lead-1")).not.toBeInTheDocument();
+
+      await user.clear(box);
+      await user.type(box, "nobody at all");
+      expect(await screen.findByText(/No leads match this view/)).toBeInTheDocument();
+      // "No leads yet" would be a lie — there are three.
+      expect(screen.queryByText(/No leads yet/)).not.toBeInTheDocument();
+    });
+
+    it("sort switches between best-fit and newest, and defaults to the footer's own words", async () => {
+      seedThree();
+      const user = userEvent.setup();
+      const { container } = render(<LeadsSurface />);
+      await screen.findByTestId("lead-row-lead-1");
+
+      const ids = () =>
+        Array.from(container.querySelectorAll("[data-testid^=lead-row-]")).map((el) =>
+          el.getAttribute("data-testid"),
+        );
+      // Default is compareLeadCards — the ranking the footer names.
+      expect(ids()).toEqual(["lead-row-lead-1", "lead-row-lead-2"]);
+
+      await user.selectOptions(screen.getByRole("combobox", { name: "Sort order" }), "newest");
+      expect(ids()).toEqual(["lead-row-lead-2", "lead-row-lead-1"]);
+    });
   });
 });

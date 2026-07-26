@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyRunView,
   dayHeading,
   filterRows,
   groupByDay,
+  platformOptions,
   rowsFor,
   runRow,
   runsThisWeek,
@@ -101,7 +103,8 @@ describe("runRow (the sheet's row grammar, honestly derived)", () => {
     );
     expect(row.pill).toEqual({ tone: "warn", label: "1 waits" });
     expect(row.excerpt).toBe("One prompt → 2 drafts · 2 passed the judge · 1 waiting on you");
-    expect(row.lead).toBe("Fan-out · LinkedIn + X");
+    // Subject first, platforms second — the sheet's own lead grammar.
+    expect(row.lead).toBe("a draft body · LinkedIn + X");
   });
 
   it("a run the plan hasn't answered for says so; a failed plan read falls back to the feed", () => {
@@ -109,6 +112,39 @@ describe("runRow (the sheet's row grammar, honestly derived)", () => {
     expect(runRow(run(RUN_ID, AT, true, 2), [], "error").excerpt).toBe(
       "2 platforms requested · 2 waiting on you",
     );
+  });
+
+  /*
+   * s77 finding (runs-model.ts:134): the lead was derived from PLATFORMS
+   * alone, so 17 of 27 live rows read the identical "Fan-out · Video" and
+   * eight consecutive rows in one day card were byte-identical. The sheet's
+   * own leads are subject-first, and that is what these pin.
+   */
+  describe("the lead distinguishes one run from the next (s77 · runs-model:134)", () => {
+    it("two runs on the same platforms read DIFFERENTLY when their drafts differ", () => {
+      const video = { ...run("r-a", AT), platforms: ["video"] };
+      const a = runRow(video, [asset({ runId: "r-a", excerpt: "Roast log: first crack at 8:52" })], "success");
+      const b = runRow({ ...video, id: "r-b" }, [asset({ runId: "r-b", excerpt: "Switchboard one-clock scene" })], "success");
+      expect(a.lead).not.toBe(b.lead);
+      expect(a.lead).toBe("Roast log: first crack at 8:52 · Video");
+      expect(b.lead).toBe("Switchboard one-clock scene · Video");
+    });
+
+    it("a long subject is cut at a WORD boundary, never mid-word", () => {
+      const long =
+        "Rendering the whole launch film from HTML turned out to be a build step, not a project";
+      const lead = runRow(run(RUN_ID, AT), [asset({ excerpt: long })], "success").lead;
+      expect(lead.endsWith("… · LinkedIn + X")).toBe(true);
+      // The cut lands on a space, so no word is sliced in half.
+      const topic = lead.slice(0, lead.indexOf("…"));
+      expect(long.startsWith(topic)).toBe(true);
+      expect(long[topic.length]).toBe(" ");
+    });
+
+    it("a run the plan window doesn't cover keeps the honest platform-only line", () => {
+      expect(runRow(run(RUN_ID, AT), [], "success").lead).toBe("Fan-out · LinkedIn + X");
+      expect(runRow({ ...run(RUN_ID, AT), platforms: [] }, [], "success").lead).toBe("Fan-out run");
+    });
   });
 });
 
@@ -146,6 +182,46 @@ describe("filters, day groups, and the week count", () => {
     expect(days[0].heading).toMatch(/^Today · /);
     expect(days[1].heading).not.toMatch(/^Today/);
     expect(dayHeading(new Date("2026-07-24T16:20:00.000Z"), now)).toBe("Friday 24 July");
+  });
+
+  /* The view knobs the founder asked to re-introduce (s77). */
+  describe("the view knobs — platform filter, find, sort", () => {
+    it("offers only platforms the feed actually recorded, label-ordered", () => {
+      expect(platformOptions(rows)).toEqual(["linkedin", "x"]);
+    });
+
+    it("the platform filter narrows to the runs that requested it", () => {
+      const only = rowsFor([{ ...run("r-3", AT), platforms: ["video"] }, run("r-4", AT)], [], "success");
+      expect(
+        applyRunView(only, { filter: "all", platform: "video", find: "", sort: "newest" }).map((r) => r.id),
+      ).toEqual(["r-3"]);
+    });
+
+    it("find matches the text the row SHOWS — its lead and its excerpt", () => {
+      expect(
+        applyRunView(rows, { filter: "all", platform: null, find: "boom", sort: "newest" }).map((r) => r.id),
+      ).toEqual(["r-1"]);
+      expect(
+        applyRunView(rows, { filter: "all", platform: null, find: "nothing here", sort: "newest" }),
+      ).toHaveLength(0);
+    });
+
+    it("the knobs compose with the sheet's own All/Failed/Published seg", () => {
+      expect(
+        applyRunView(rows, { filter: "failed", platform: "linkedin", find: "", sort: "newest" }).map((r) => r.id),
+      ).toEqual(["r-1"]);
+      expect(
+        applyRunView(rows, { filter: "published", platform: null, find: "boom", sort: "newest" }),
+      ).toHaveLength(0);
+    });
+
+    it("'oldest' reverses BOTH the day groups and the rows inside them", () => {
+      const now = new Date("2026-07-25T12:00:00.000Z");
+      const newest = groupByDay(rows, now, "newest");
+      const oldest = groupByDay(rows, now, "oldest");
+      expect(newest.map((d) => d.key)).toEqual([...oldest.map((d) => d.key)].reverse());
+      expect(oldest[0].rows[0].id).toBe("r-2");
+    });
   });
 
   it("'this week' is the workspace's Monday-start local week", () => {

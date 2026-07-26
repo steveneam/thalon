@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { BoardSurface } from "@/components/board/board-surface";
+import { PulseProvider } from "@/components/workspace/pulse-context";
 import type { TrendCard, TrendsPayload } from "@/lib/intel/types";
 import { server } from "@/lib/testing/server";
 import type { PipelineAsset, PlanPayload, PlannedSlotWire } from "@/lib/workspace/types";
@@ -148,13 +149,16 @@ describe("Pipeline board (exact-mock rebuild — Board.dc.html)", () => {
       plannedSlots: [SLOT],
     });
     const { container } = render(<BoardSurface />);
-    await screen.findByText("composing draft");
+    // Platform-led title, as the sheet draws it (see the B4 ratchet below).
+    await screen.findByText("LinkedIn · composing draft");
 
     const cols = Array.from(container.querySelectorAll(".col"));
     const bodyOf = (label: string) =>
       cols.find((c) => c.querySelector(".col-hd")?.textContent?.startsWith(label)) as HTMLElement;
 
-    expect(within(bodyOf("Composing")).getByText("composing draft")).toBeInTheDocument();
+    expect(
+      within(bodyOf("Composing")).getByText("LinkedIn · composing draft"),
+    ).toBeInTheDocument();
     expect(within(bodyOf("Composing")).getByText("drafting · 3h in")).toBeInTheDocument();
     expect(within(bodyOf("At the judge")).getByText("2 gates · running")).toBeInTheDocument();
     expect(
@@ -296,5 +300,91 @@ describe("Pipeline board (exact-mock rebuild — Board.dc.html)", () => {
     expect(await screen.findByText("Nothing waiting — you’re clear.")).toBeInTheDocument();
     expect(screen.getByText("No plans yet — approve a draft, then plan its slot.")).toBeInTheDocument();
     expect(screen.getByText("No cards yet — the sweep's rising items land here.")).toBeInTheDocument();
+  });
+
+  /*
+   * s77 findings (board-surface.tsx:183 + board-model.ts:46), fixed together
+   * because they are one sentence on screen: the column rendered 12 of 21 under
+   * a note reading "column scrolls — all 21 counted above" (which explained the
+   * gap away and offered no door), while the shell topbar said "Needs you · 25"
+   * from the wider pulse window. One number, and an honest N-of-M with a door.
+   */
+  it("a bounded column says N of M and points at the queue that holds the rest", async () => {
+    seedTrends();
+    seedPlan({
+      assets: Array.from({ length: 15 }, (_, i) =>
+        asset({ draftId: `q${i}`, status: "queued", judgedAt: hoursAgo(i + 1) }),
+      ),
+    });
+    const { container } = render(<BoardSurface />);
+    await screen.findByText(/12 of 15 shown/);
+
+    const note = screen.getByText(/12 of 15 shown/);
+    expect(within(note).getByRole("link", { name: /open the queue for the rest/ })).toHaveAttribute(
+      "href",
+      "/app/approve",
+    );
+    // The old copy claimed scrolling reached everything. It never did.
+    expect(screen.queryByText(/counted above/)).not.toBeInTheDocument();
+    const waiting = Array.from(container.querySelectorAll(".col")).find((c) =>
+      c.querySelector(".col-hd")?.textContent?.startsWith("Waiting on you"),
+    ) as HTMLElement;
+    expect(waiting.querySelectorAll(".k-card")).toHaveLength(12);
+  });
+
+  it("the waiting count is the pulse's number — the one the topbar and rail show", async () => {
+    seedTrends();
+    seedPlan({
+      assets: Array.from({ length: 3 }, (_, i) =>
+        asset({ draftId: `q${i}`, status: "queued", judgedAt: hoursAgo(i + 1) }),
+      ),
+    });
+    // The pulse counts a WIDER run window than the plan read, so it legitimately
+    // knows about waiting work the board's own window cannot see.
+    server.use(
+      http.get("/api/app/pulse", () =>
+        HttpResponse.json({ tenant: null, profile: null, counts: {}, needsYou: 7 }),
+      ),
+    );
+    const { container } = render(
+      <PulseProvider>
+        <BoardSurface />
+      </PulseProvider>,
+    );
+    await screen.findByText(/3 of 7 shown/);
+
+    const waiting = Array.from(container.querySelectorAll(".col")).find((c) =>
+      c.querySelector(".col-hd")?.textContent?.startsWith("Waiting on you"),
+    ) as HTMLElement;
+    expect(waiting.querySelector(".col-ct")?.textContent).toBe("7");
+  });
+
+  /* The view knobs the founder asked to re-introduce (s77). */
+  it("the platform filter narrows the columns and says so where it cannot apply", async () => {
+    seedTrends([{ text: "a rising card", score: 0.8 }]);
+    seedPlan({
+      assets: [
+        asset({ draftId: "p-li", platform: "linkedin", status: "queued" }),
+        asset({ draftId: "p-x", platform: "x", status: "queued", excerpt: "an X draft" }),
+      ],
+    });
+    const user = userEvent.setup();
+    const { container } = render(<BoardSurface />);
+    await screen.findByText("Our launch video has no editor file");
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Platform filter" }), "x");
+
+    await waitFor(() =>
+      expect(screen.queryByText("Our launch video has no editor file")).not.toBeInTheDocument(),
+    );
+    expect(screen.getByText("an X draft")).toBeInTheDocument();
+    // Sweep cards have no platform, so that column is NOT narrowed — and says it.
+    expect(screen.getByText(/not narrowed — a sweep card has no platform/)).toBeInTheDocument();
+    // A column emptied BY the filter must not claim the pipeline is clear.
+    const composing = Array.from(container.querySelectorAll(".col")).find((c) =>
+      c.querySelector(".col-hd")?.textContent?.startsWith("Composing"),
+    ) as HTMLElement;
+    expect(within(composing).getByText(/Nothing here on X/)).toBeInTheDocument();
+    expect(within(composing).queryByText("Nothing composing right now.")).not.toBeInTheDocument();
   });
 });

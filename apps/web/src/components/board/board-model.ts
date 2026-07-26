@@ -39,7 +39,26 @@ export interface BoardColumn {
   empty: string;
   /** The needs-you column wears the signal channel; nothing else may. */
   signal?: boolean;
+  /**
+   * A platform filter is active but this column's cards carry no platform, so
+   * it is deliberately NOT narrowed — the column says so rather than letting
+   * the operator read an unfiltered column as a filtered one.
+   */
+  unfiltered?: boolean;
 }
+
+/**
+ * The operator's view knobs (founder s77: "re-introduce the good things (like
+ * filters, sort by …) from the old design" — he named a platform filter and a
+ * sort; the s77 fan-out reached the same conclusion here independently).
+ *
+ * Sort DEFAULTS to "oldest", which is not an arbitrary default: the waiting
+ * column has always been oldest-first ("the queue's own order" — what has been
+ * waiting longest is what needs you most), and the planned column has always
+ * run forward in time. So the default reproduces today's board exactly, and the
+ * knob only ever reverses it.
+ */
+export type BoardSort = "oldest" | "newest";
 
 const COMPOSING = new Set(["generated"]);
 const AT_JUDGE = new Set(["judging"]);
@@ -65,6 +84,53 @@ function assetTitle(asset: PipelineAsset): string {
   return asset.excerpt || `${platformLabel(asset.platform)} · ${asset.format ?? "draft"}`;
 }
 
+/**
+ * PLATFORM-LED title, which is what the sheet actually draws in every column
+ * except Waiting: "Deterministic-video explainer · LinkedIn" reads as
+ * `Blog · inside the build-step pipeline`, `Facebook · launch film post`
+ * (Board.dc.html). The port dropped the platform and substituted the draft's
+ * 120-char excerpt, and `.k-title` is a two-line clamp at 12px in a ~164px
+ * card — so a fan-out's siblings, whose excerpts diverge only after ~70
+ * characters, rendered as byte-identical cards. Leading with the platform puts
+ * the one distinguishing token where the clamp can never cut it (s77 finding,
+ * board-model.ts:138).
+ *
+ * The Waiting column deliberately does NOT use this: the sheet gives its meta
+ * line `LinkedIn · 26h`, so its platform is already named there.
+ */
+function platformTitle(asset: PipelineAsset): string {
+  const platform = platformLabel(asset.platform);
+  const rest = asset.excerpt || (asset.format ?? "draft");
+  return `${platform} · ${rest}`;
+}
+
+/**
+ * Card order inside a column, by the instant that column's OWN meta line talks
+ * about — so "oldest first" means the same thing in every column rather than
+ * whatever timestamp happened to be handy.
+ */
+function ordered(
+  assets: PipelineAsset[],
+  instant: (asset: PipelineAsset) => Date,
+  sort: BoardSort,
+): PipelineAsset[] {
+  const direction = sort === "newest" ? -1 : 1;
+  return [...assets].sort((a, b) => direction * (instant(a).getTime() - instant(b).getTime()));
+}
+
+const generatedAt = (asset: PipelineAsset) => new Date(asset.generatedAt);
+
+/** Every platform the pipeline ACTUALLY holds — a filter that can only offer real values. */
+export function boardPlatformOptions(
+  assets: PipelineAsset[],
+  slots: PlannedSlotWire[],
+): string[] {
+  const seen = new Set<string>();
+  for (const asset of assets) seen.add(asset.platform);
+  for (const slot of slots) seen.add(slot.platform);
+  return [...seen].sort((a, b) => platformLabel(a).localeCompare(platformLabel(b)));
+}
+
 export function intelCards(cards: TrendCard[], limit: number): BoardCard[] {
   return cards.slice(0, limit).map((card) => ({
     id: `intel-${card.id}`,
@@ -81,24 +147,30 @@ export function intelCards(cards: TrendCard[], limit: number): BoardCard[] {
   }));
 }
 
-export function composingCards(assets: PipelineAsset[], now: Date): BoardCard[] {
-  return assets
-    .filter((a) => COMPOSING.has(a.status))
+export function composingCards(
+  assets: PipelineAsset[],
+  now: Date,
+  sort: BoardSort = "oldest",
+): BoardCard[] {
+  return ordered(assets.filter((a) => COMPOSING.has(a.status)), generatedAt, sort)
     .map((asset) => ({
       id: asset.draftId,
-      title: assetTitle(asset),
+      title: platformTitle(asset),
       meta: `drafting · ${ageLabel(new Date(asset.generatedAt), now)} in`,
       thumb: thumbLabel(asset),
       href: approveHref(asset),
     }));
 }
 
-export function judgeCards(assets: PipelineAsset[], now: Date): BoardCard[] {
-  return assets
-    .filter((a) => AT_JUDGE.has(a.status))
+export function judgeCards(
+  assets: PipelineAsset[],
+  now: Date,
+  sort: BoardSort = "oldest",
+): BoardCard[] {
+  return ordered(assets.filter((a) => AT_JUDGE.has(a.status)), generatedAt, sort)
     .map((asset) => ({
       id: asset.draftId,
-      title: assetTitle(asset),
+      title: platformTitle(asset),
       meta:
         asset.gates.length > 0
           ? `${asset.gates.length} gate${asset.gates.length === 1 ? "" : "s"} · running`
@@ -108,11 +180,13 @@ export function judgeCards(assets: PipelineAsset[], now: Date): BoardCard[] {
     }));
 }
 
-/** Everything waiting on the operator, OLDEST FIRST — the queue's own order. */
-export function waitingCards(assets: PipelineAsset[], now: Date): BoardCard[] {
-  return assets
-    .filter((a) => WAITING.has(a.status))
-    .sort((a, b) => waitingSince(a).getTime() - waitingSince(b).getTime())
+/** Everything waiting on the operator, OLDEST FIRST by default — the queue's own order. */
+export function waitingCards(
+  assets: PipelineAsset[],
+  now: Date,
+  sort: BoardSort = "oldest",
+): BoardCard[] {
+  return ordered(assets.filter((a) => WAITING.has(a.status)), waitingSince, sort)
     .map((asset) => {
       const blocked = asset.status === "blocked";
       const age = ageLabel(waitingSince(asset), now);
@@ -127,12 +201,20 @@ export function waitingCards(assets: PipelineAsset[], now: Date): BoardCard[] {
     });
 }
 
-export function approvedCards(assets: PipelineAsset[]): BoardCard[] {
-  return assets
-    .filter((a) => APPROVED.has(a.status))
+export function approvedCards(
+  assets: PipelineAsset[],
+  sort: BoardSort = "oldest",
+): BoardCard[] {
+  return ordered(
+    assets.filter((a) => APPROVED.has(a.status)),
+    // The instant this column's meta talks about is the DECISION; an approved
+    // draft the engine never stamped falls back to when it was drafted.
+    (asset) => new Date(asset.decidedAt ?? asset.generatedAt),
+    sort,
+  )
     .map((asset) => ({
       id: asset.draftId,
-      title: assetTitle(asset),
+      title: platformTitle(asset),
       // "published ↗" only when a deploy actually recorded a live ref;
       // an approved draft is honestly still waiting for a plan.
       meta: asset.publishedAt !== null ? "published ↗" : "ready to plan",
@@ -145,10 +227,16 @@ export function approvedCards(assets: PipelineAsset[]): BoardCard[] {
 export function plannedCards(
   slots: PlannedSlotWire[],
   assets: PipelineAsset[],
+  sort: BoardSort = "oldest",
 ): BoardCard[] {
   const byDraft = new Map(assets.map((a) => [a.draftId, a]));
+  const direction = sort === "newest" ? -1 : 1;
   return [...slots]
-    .sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime())
+    .sort(
+      (a, b) =>
+        direction *
+        (new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime()),
+    )
     .map((slot) => {
       const at = new Date(slot.scheduledFor);
       const asset = byDraft.get(slot.draftId);
@@ -170,21 +258,35 @@ export function boardColumns(input: {
   slots: PlannedSlotWire[];
   trends: TrendCard[];
   now: Date;
+  /** null = every platform. Narrows the pipeline columns only — see `unfiltered`. */
+  platform?: string | null;
+  sort?: BoardSort;
 }): BoardColumn[] {
-  const { assets, slots, trends, now } = input;
+  const { assets: allAssets, slots: allSlots, trends, now } = input;
+  const platform = input.platform ?? null;
+  const sort = input.sort ?? "oldest";
+  // The filter narrows what the columns are BUILT from, so a column's count and
+  // its cards always describe the same set (the Bounded-List Rule holds either
+  // way — count stays the filtered total, never what happens to fit).
+  const assets =
+    platform === null ? allAssets : allAssets.filter((asset) => asset.platform === platform);
+  const slots =
+    platform === null ? allSlots : allSlots.filter((slot) => slot.platform === platform);
+
   const build = (
     id: string,
     label: string,
     cards: BoardCard[],
     empty: string,
-    signal?: boolean,
+    extra?: { signal?: boolean; unfiltered?: boolean },
   ): BoardColumn => ({
     id,
     label,
     cards: cards.slice(0, COLUMN_CARD_BOUND),
     count: cards.length,
     empty,
-    signal,
+    signal: extra?.signal,
+    unfiltered: extra?.unfiltered,
   });
 
   return [
@@ -193,31 +295,36 @@ export function boardColumns(input: {
       "Intel picks",
       intelCards(trends, COLUMN_CARD_BOUND),
       "No cards yet — the sweep's rising items land here.",
+      // A sweep card is a TREND, not a draft: it has no platform to filter by
+      // (a family is only chosen when it is promoted into Create). So the
+      // platform filter deliberately does not reach this column, and the column
+      // says so rather than passing for narrowed.
+      { unfiltered: platform !== null },
     ),
     build(
       "composing",
       "Composing",
-      composingCards(assets, now),
+      composingCards(assets, now, sort),
       "Nothing composing right now.",
     ),
-    build("judge", "At the judge", judgeCards(assets, now), "Nothing at the judge."),
+    build("judge", "At the judge", judgeCards(assets, now, sort), "Nothing at the judge."),
     build(
       "waiting",
       "Waiting on you",
-      waitingCards(assets, now),
+      waitingCards(assets, now, sort),
       "Nothing waiting — you’re clear.",
-      true,
+      { signal: true },
     ),
     build(
       "approved",
       "Approved",
-      approvedCards(assets),
+      approvedCards(assets, sort),
       "Nothing approved yet — approving is your click, never the engine’s.",
     ),
     build(
       "planned",
       "Planned",
-      plannedCards(slots, assets),
+      plannedCards(slots, assets, sort),
       "No plans yet — approve a draft, then plan its slot.",
     ),
   ];

@@ -17,3 +17,52 @@
 
 .runs-surface .day-hd { font-size: 12.5px; font-weight: 600; color: var(--n-900); padding: 4px 2px; }
 .runs-surface .run-lead { font-size: 13.5px; font-weight: 600; }
+
+/* App adaptation: the lead now carries the run's SUBJECT (the sheet's own
+   grammar — "Launch film · LinkedIn + X + Facebook"), and real subjects are
+   longer than the fixture's. The model bounds the topic at a word boundary;
+   this keeps the row one line tall whatever arrives, so the day card's rhythm
+   never reflows as data resolves (the same treatment `.excerpt` already has in
+   workspace.css). */
+.runs-surface .run-lead { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * App adaptation — THE VIEW KNOBS (founder s77: "re-introduce the good things
+ * (like filters, sort by …) from the old design"; the s77 fan-out reached the
+ * same conclusion here independently — "27 rows with no search, no platform
+ * filter and no sort").
+ *
+ * ONE grammar across the three surfaces this lane touches, and it is not a new
+ * one: these are Approve's own `.sel-ctl` picker atomics (approve.css, ported
+ * from Approve.dc.html's helmet) — the sheet's chip chrome with a transparent
+ * native <select> riding on top, so the control is genuinely keyboard- and
+ * screen-reader-operable and renders the platform's own menu.
+ *
+ * WHY RESTATED HERE rather than shared: `app/app/workspace.css` is the shell
+ * contract and lead-owned, and the one escape hatch for a shared component
+ * stylesheet is an explicit map inside a pinned ratchet test. Both are
+ * off-limits to a lane, and README rule 6 requires every rule in a surface
+ * stylesheet to be scoped under its own root anyway — which is why `.col*`
+ * already lives in both board.css and leads.css. Same reasoning, same shape.
+ * Promoting `.sel-ctl` into the shell is the lead's call, not a lane's.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+.runs-surface .sel-ctl { display: inline-flex; align-items: center; gap: 7px; position: relative; }
+.runs-surface .chev { width: 8px; height: 8px; border-right: 1.5px solid var(--n-800); border-bottom: 1.5px solid var(--n-800); transform: rotate(45deg) translateY(-2px); }
+.runs-surface .sel-native { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; appearance: none; font: inherit; }
+
+/* The find box has no sheet precedent (no sheet draws one), so it borrows the
+   `.btn-ghost.btn-sm` geometry it sits beside — same height, border, radius
+   and type — and reads as a peer of the chips rather than a browser default. */
+.runs-surface .find-input {
+  height: 27px;
+  width: 190px;
+  padding: 0 10px;
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-ctl);
+  background: var(--n-bg);
+  color: var(--n-1000);
+  font: 500 12.5px var(--font-ui);
+}
+.runs-surface .find-input::placeholder { color: var(--n-800); font-weight: 400; }
+.runs-surface .find-input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }

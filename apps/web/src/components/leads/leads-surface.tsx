@@ -6,17 +6,21 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   activityRows,
+  applyLeadView,
   draftEmail,
   heatColor,
   judgePill,
   leadExcerpt,
   leadInitials,
+  leadStatusFilterLabel,
   leadTitle,
   mailtoHref,
   outreachDraftOf,
   outreachRunFor,
   scoreReasons,
   sheetDate,
+  type LeadSort,
+  type LeadStatusFilter,
 } from "@/components/leads/leads-model";
 import { ActionToast, type ToastState } from "@/components/workspace/action-toast";
 import { fetchRunDrafts, fetchRunsFeed } from "@/lib/approve-queue/client";
@@ -31,7 +35,7 @@ import {
   syncWaitlist,
   triageLeads,
 } from "@/lib/leads/client";
-import { compareLeadCards } from "@/lib/leads/serialize";
+import { LEAD_STATUSES } from "@thalon/contracts";
 import type { ImportReport, LeadCard, LeadsPayload } from "@/lib/leads/types";
 import { composeEmail } from "@/lib/outreach/client";
 import { timeAgo } from "@/lib/workspace/format";
@@ -43,7 +47,10 @@ type Panel = "none" | "import" | "provenance";
 type OutreachState =
   | { state: "loading" }
   | { state: "none" }
+  /** THIS lead's drafts read failed. */
   | { state: "error" }
+  /** The run FEED read failed, so nothing about this lead's drafts is known. */
+  | { state: "feed-error" }
   | { state: "ready"; draft: GridDraft };
 
 /** Render order matches the scorer's own signal order — stable, never alphabetized. */
@@ -83,7 +90,12 @@ export function LeadsSurface() {
   const [status, setStatus] = useState<QueueStatus>("loading");
   const [payload, setPayload] = useState<LeadsPayload | null>(null);
   const [view, setView] = useState<"list" | "board">("list");
-  const [showDismissed, setShowDismissed] = useState(false);
+  // The view knobs (founder s77). `statusFilter` REPLACES the old
+  // `showDismissed` boolean: as a named value in a labelled control the filter
+  // states itself in resting chrome, which is what it never did before.
+  const [statusFilter, setStatusFilter] = useState<LeadStatusFilter>("active");
+  const [find, setFind] = useState("");
+  const [sort, setSort] = useState<LeadSort>("fit");
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [panel, setPanel] = useState<Panel>("none");
   const [busy, setBusy] = useState(false);
@@ -92,7 +104,16 @@ export function LeadsSurface() {
   const [readAt, setReadAt] = useState(0);
   // The run feed is the ONLY way to reach a lead's drafted outreach without a
   // new route: compose stamps `params.leadId` on the run it creates.
-  const [runs, setRuns] = useState<FeedRun[] | null>(null);
+  // `"error"` when that read FAILED — an empty array would make a broken read
+  // indistinguishable from a lead that has no draft (s77 finding, leads:118).
+  const [runs, setRuns] = useState<FeedRun[] | "error" | null>(null);
+  // The run the compose door just handed back. The feed is bounded (newest 50
+  // runs), so a lead whose compose run has aged out is invisible to a feed scan
+  // while the door's own answer names it exactly — and the door returns
+  // `alreadyComposed` for an existing draft, so this resolves the older draft
+  // rather than spending anything (s77 finding, leads:147). Keyed by lead: one
+  // lead's compose answer must never resolve another lead's band.
+  const [composedRun, setComposedRun] = useState<{ leadId: string; runId: string } | null>(null);
   /** The drafts of the selected lead's newest compose run — `"error"` when that read failed. */
   const [runDrafts, setRunDrafts] = useState<{
     runId: string;
@@ -126,8 +147,9 @@ export function LeadsSurface() {
       fetchRunsFeed()
         .then((feed) => setRuns(feed))
         // An unread run feed only costs the outreach band, never the queue —
-        // it says so there rather than pretending the lead has no draft.
-        .catch(() => setRuns([])),
+        // and it says "couldn't read" there. `[]` would have said "no draft
+        // yet", which is a DIFFERENT fact: broken must never render as empty.
+        .catch(() => setRuns("error")),
     [],
   );
 
@@ -137,9 +159,9 @@ export function LeadsSurface() {
   }, [loadLeads, loadRuns]);
 
   const leads = payload?.leads ?? [];
-  const visible = [...leads]
-    .filter((lead) => (showDismissed ? lead.status === "dismissed" : lead.status !== "dismissed"))
-    .sort(compareLeadCards);
+  const visible = applyLeadView(leads, { status: statusFilter, find, sort });
+  /** The operator narrowed the view themselves — an empty result must say so. */
+  const narrowed = statusFilter !== "active" || find.trim() !== "";
   // Selection is DERIVED: when the picked lead leaves the list (dismissed),
   // the head of the queue takes over rather than stranding the detail card.
   const selected: LeadCard | null =
@@ -150,8 +172,15 @@ export function LeadsSurface() {
   // that run. Only the READ lives in the effect — every other state here is
   // derived below, so the effect never sets state synchronously (the B1.4
   // cascading-render lesson, react-hooks/set-state-in-effect).
-  const outreachRun = runs === null || selectedId === null ? null : outreachRunFor(runs, selectedId);
-  const outreachRunId = outreachRun?.id ?? null;
+  const feedRun =
+    runs === null || runs === "error" || selectedId === null
+      ? null
+      : outreachRunFor(runs, selectedId);
+  // The compose door's own answer outranks a scan of the bounded feed — it is
+  // the same run, named exactly, and it survives the 50-run window.
+  const composedRunId =
+    composedRun !== null && composedRun.leadId === selectedId ? composedRun.runId : null;
+  const outreachRunId = composedRunId ?? feedRun?.id ?? null;
   useEffect(() => {
     if (outreachRunId === null) return;
     let cancelled = false;
@@ -170,9 +199,13 @@ export function LeadsSurface() {
   const outreach: OutreachState =
     selectedId === null || runs === null
       ? { state: "loading" }
-      : outreachRun === null
-        ? { state: "none" }
-        : runDrafts === null || runDrafts.runId !== outreachRun.id
+      : outreachRunId === null
+        ? // A failed feed read cannot claim "no draft yet" — with nothing to
+          // scan, the honest answer is that it is unresolved.
+          runs === "error"
+          ? { state: "feed-error" }
+          : { state: "none" }
+        : runDrafts === null || runDrafts.runId !== outreachRunId
           ? { state: "loading" }
           : runDrafts.drafts === "error"
             ? { state: "error" }
@@ -206,10 +239,9 @@ export function LeadsSurface() {
         message: "Lead dismissed — that verdict tunes the ranking.",
         action: {
           label: "View dismissed",
-          onClick: () => {
-            setShowDismissed(true);
-            setPanel("provenance");
-          },
+          // The filter chip in the header now carries this state, so the panel
+          // no longer has to be open for the operator to see where they are.
+          onClick: () => setStatusFilter("dismissed"),
         },
       };
     });
@@ -311,6 +343,9 @@ export function LeadsSurface() {
           },
         });
         await loadRuns();
+        // Hold the run the door named. Without it the band re-derives from the
+        // bounded feed and can contradict this very toast.
+        setComposedRun({ leadId: lead.id, runId: result.runId });
         return {
           message:
             result.status === "blocked"
@@ -393,6 +428,54 @@ export function LeadsSurface() {
           <span className="pill pill-warn">{`${hot} hot · follow up`}</span>
         )}
         <div style={{ flex: 1 }} />
+        {/* The view knobs (founder s77), in Approve's own `.sel-ctl` grammar and
+            LEFT of the sheet's List/Board seg so that control keeps the slot it
+            is drawn in. The status chip is also the fix for the Dismissed view
+            having no on-screen cue: the filter now names itself at rest. */}
+        {view === "list" && (
+          <>
+            <input
+              className="find-input"
+              type="search"
+              aria-label="Find a lead"
+              placeholder="Find name, company, email…"
+              value={find}
+              onChange={(event) => setFind(event.target.value)}
+            />
+            <div className="btn btn-ghost btn-sm sel-ctl">
+              {leadStatusFilterLabel(statusFilter)}
+              <span className="chev" />
+              <select
+                className="sel-native"
+                aria-label="Status filter"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as LeadStatusFilter)}
+              >
+                <option value="active">Active leads</option>
+                {/* Contract-derived, never hand-listed: a lifecycle value added
+                    to LEAD_STATUSES becomes a filter option for free. */}
+                {LEAD_STATUSES.map((value) => (
+                  <option key={value} value={value}>
+                    {leadStatusFilterLabel(value)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="btn btn-ghost btn-sm sel-ctl">
+              {sort === "fit" ? "Best fit first" : "Newest first"}
+              <span className="chev" />
+              <select
+                className="sel-native"
+                aria-label="Sort order"
+                value={sort}
+                onChange={(event) => setSort(event.target.value as LeadSort)}
+              >
+                <option value="fit">Best fit first</option>
+                <option value="newest">Newest first</option>
+              </select>
+            </div>
+          </>
+        )}
         <div className="seg" role="group" aria-label="Lead views">
           <button
             type="button"
@@ -435,9 +518,11 @@ export function LeadsSurface() {
           selectedId={selectedId}
           // A card is a door to the dossier, which lives in the List tab. The
           // board only ever draws non-terminal leads, so landing there must
-          // leave the Dismissed toggle behind or the pick would not be in view.
+          // clear any narrowing that would hide the pick — the status filter and
+          // the find box both would.
           onOpen={(id) => {
-            setShowDismissed(false);
+            setStatusFilter("active");
+            setFind("");
             setPickedId(id);
             setView("list");
           }}
@@ -475,8 +560,13 @@ export function LeadsSurface() {
               ) : visible.length === 0 ? (
                 <div className="row">
                   <span className="t-label">
-                    {showDismissed
-                      ? "Nothing dismissed yet — every dismiss is a verdict the ranking learns from."
+                    {/* Three different facts, never one line: the operator's own
+                        filter emptied it · the dismissed shelf is genuinely
+                        empty · there are no leads at all. */}
+                    {narrowed && leads.length > 0
+                      ? statusFilter === "dismissed" && find.trim() === ""
+                        ? "Nothing dismissed yet — every dismiss is a verdict the ranking learns from."
+                        : `No leads match this view — ${leadStatusFilterLabel(statusFilter).toLowerCase()}${find.trim() === "" ? "" : ` matching “${find.trim()}”`}. Widen it with the filter or the find box.`
                       : "No leads yet — import a CSV (any CRM export works), sync your waitlist, or let the API deliver them. With an ICP on your profile each one is scored against who you actually sell to, reasons spelled out."}
                   </span>
                 </div>
@@ -670,9 +760,13 @@ export function LeadsSurface() {
                   <button
                     type="button"
                     className="as-text-btn card-link"
-                    onClick={() => setShowDismissed(!showDismissed)}
+                    // Still a door — it now drives the same filter the header
+                    // chip shows, so the two controls can never disagree.
+                    onClick={() =>
+                      setStatusFilter(statusFilter === "dismissed" ? "active" : "dismissed")
+                    }
                   >
-                    {showDismissed
+                    {statusFilter === "dismissed"
                       ? "Back to active leads →"
                       : `Dismissed (${counts.dismissed}) — the verdicts the loop learns from →`}
                   </button>
@@ -714,6 +808,44 @@ export function LeadsSurface() {
                   <span className="t-title">{leadTitle(selected)}</span>
                   {selected.pinned && <span className="pill pill-warn">follow up</span>}
                   <div style={{ flex: 1 }} />
+                  {/*
+                   * POINTER PARITY for the two triage verbs (s77 blocker,
+                   * leads:340). `d` and `h` were the ONLY way to reach dismiss
+                   * and mark-hot, and their legend sits one disclosure deep, so
+                   * a mouse-only operator could not triage at all — and on the
+                   * Board tab the keys are gated off entirely. This restores the
+                   * parity the peer surface already has (Approve binds a/r AND
+                   * draws Approve/Reject buttons), and it is a REGRESSION being
+                   * closed: the pre-rebuild lead-card.tsx drew both verbs.
+                   * They ride the sheet's own card-head beside the #id stamp —
+                   * a state the card HAS, not a new band.
+                   */}
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={busy}
+                    title={
+                      selected.pinned
+                        ? "Clear the hot pick — that verdict tunes the ranking too (key: h)"
+                        : "Float this lead to the top and teach the ranking (key: h)"
+                    }
+                    onClick={() => onToggleHot(selected)}
+                  >
+                    {selected.pinned ? "Clear hot" : "Mark hot"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={busy || selected.status === "dismissed"}
+                    title={
+                      selected.status === "dismissed"
+                        ? "Already dismissed — the lifecycle has no route back from dismissed"
+                        : "Dismiss this lead — that verdict tunes the ranking (key: d)"
+                    }
+                    onClick={() => onDismiss(selected)}
+                  >
+                    Dismiss
+                  </button>
                   <span className="t-data" title={`lead ${selected.id}`}>
                     #{selected.id.slice(0, 8)}
                   </span>
@@ -780,17 +912,46 @@ export function LeadsSurface() {
                       <span className="sec-label">Drafted outreach — draft-only, never auto-sent</span>
                       <div style={{ flex: 1 }} />
                       {outreach.state === "ready" && (
-                        <span className={judgePill(outreach.draft.status).className}>
-                          {judgePill(outreach.draft.status).text}
-                        </span>
+                        // EVERY FACT IS A DOOR: a judge verdict with no route to
+                        // its reasons is the whole of the VISIBLE PROVENANCE
+                        // doctrine unmet. Approve consumes a mount-time
+                        // `?draft=` and opens the gate trail on that draft.
+                        <Link
+                          className={judgePill(outreach.draft.status).className}
+                          href={`/app/approve?draft=${encodeURIComponent(outreach.draft.id)}`}
+                          title="Open this draft in Approve — the judge's verdicts, verbatim"
+                        >
+                          {judgePill(outreach.draft.status).text} →
+                        </Link>
                       )}
                     </div>
 
                     {outreach.state === "ready" ? (
                       (() => {
                         const email = draftEmail(outreach.draft);
+                        // THE JUDGE GATES — a blocked draft must not leave this
+                        // surface. Approve's state machine has no blocked →
+                        // approved path, so handing over Copy body and a
+                        // prefilled mailto was the one route by which ungated
+                        // copy could reach a real recipient. It fails closed
+                        // here, in the same honest-refusal grammar as `Log a
+                        // call`: the control still says what it would do, and
+                        // says why it won't (s77 finding, leads:780).
+                        const blocked = outreach.draft.status === "blocked";
+                        const blockedWhy =
+                          "The judge blocked this draft — fix it in Approve and re-judge; nothing blocked leaves this surface.";
                         return (
                           <>
+                            {blocked && (
+                              <span
+                                className="t-label"
+                                role="alert"
+                                style={{ color: "var(--err)" }}
+                              >
+                                {blockedWhy} Its reasons are on the draft — the verdict above is the
+                                door.
+                              </span>
+                            )}
                             <div className="mail">
                               <div>
                                 <span style={{ color: "var(--n-900)" }}>To</span>&nbsp;{" "}
@@ -805,24 +966,42 @@ export function LeadsSurface() {
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                               <button
                                 type="button"
-                                className="btn btn-primary btn-sm"
+                                className={blocked ? "btn btn-quiet btn-sm" : "btn btn-primary btn-sm"}
+                                disabled={blocked}
+                                title={blocked ? blockedWhy : undefined}
                                 onClick={() => copy(email.body, "Body")}
                               >
                                 Copy body
                               </button>
                               <button
                                 type="button"
-                                className="btn btn-ghost btn-sm"
+                                className={blocked ? "btn btn-quiet btn-sm" : "btn btn-ghost btn-sm"}
+                                disabled={blocked}
+                                title={blocked ? blockedWhy : undefined}
                                 onClick={() => copy(email.subject, "Subject")}
                               >
                                 Copy subject
                               </button>
-                              <a
-                                className="btn btn-ghost btn-sm"
-                                href={mailtoHref(selected.email, email)}
-                              >
-                                Open in your mail client
-                              </a>
+                              {blocked ? (
+                                // An <a> cannot be disabled; the sheet-faithful
+                                // unarmed treatment is the Runs surface's own
+                                // aria-disabled span with its reason.
+                                <span
+                                  className="btn btn-quiet btn-sm"
+                                  aria-disabled
+                                  style={{ cursor: "default" }}
+                                  title={blockedWhy}
+                                >
+                                  Open in your mail client
+                                </span>
+                              ) : (
+                                <a
+                                  className="btn btn-ghost btn-sm"
+                                  href={mailtoHref(selected.email, email)}
+                                >
+                                  Open in your mail client
+                                </a>
+                              )}
                               <button
                                 type="button"
                                 className="btn btn-quiet btn-sm"
@@ -840,23 +1019,47 @@ export function LeadsSurface() {
                     ) : (
                       <>
                         <div className="mail">
-                          <span className="t-label">
+                          <span
+                            className="t-label"
+                            role={outreach.state === "feed-error" ? "alert" : undefined}
+                            style={
+                              outreach.state === "feed-error" ? { color: "var(--err)" } : undefined
+                            }
+                          >
                             {outreach.state === "loading"
                               ? "Reading this lead’s drafts…"
                               : outreach.state === "error"
                                 ? "Couldn’t read this lead’s drafts — a read failure, not an empty history."
-                                : "No draft yet. Compose one from this lead’s own context — role, company and the pain point above ride into the brief, the judge gates it, and it waits for you."}
+                                : outreach.state === "feed-error"
+                                  ? // The feed is what resolves a lead to its run,
+                                    // so with that read broken the honest answer is
+                                    // "unknown", never "none".
+                                    "Couldn’t read the run feed, so this lead’s drafts are unresolved — this is a read failure, not an empty history."
+                                  : "No draft yet. Compose one from this lead’s own context — role, company and the pain point above ride into the brief, the judge gates it, and it waits for you."}
                           </span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            disabled={busy || outreach.state === "loading"}
-                            onClick={() => onCompose(selected)}
-                          >
-                            {busy ? "Composing + judging…" : "Draft outreach"}
-                          </button>
+                          {outreach.state === "feed-error" ? (
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => {
+                                setRuns(null);
+                                void loadRuns();
+                              }}
+                            >
+                              Try again
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              disabled={busy || outreach.state === "loading"}
+                              onClick={() => onCompose(selected)}
+                            >
+                              {busy ? "Composing + judging…" : "Draft outreach"}
+                            </button>
+                          )}
                           <Link className="btn btn-ghost btn-sm" href="/app/approve">
                             Open Approve
                           </Link>

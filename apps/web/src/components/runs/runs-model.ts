@@ -15,6 +15,14 @@ import { dayKey, weekDays } from "@/lib/workspace/week";
 
 export type RunFilter = "all" | "failed" | "published";
 
+/**
+ * The operator's view knobs (founder s77: "re-introduce the good things (like
+ * filters, sort by …) from the old design"). Presentation state only — the
+ * derivations above are untouched by them, exactly as Approve's
+ * `applyQueueView` is a pure pass over its own rows.
+ */
+export type RunSort = "newest" | "oldest";
+
 /** How far the plan read has got — the excerpt says "reading…" only while it honestly is. */
 export type PlanReadStatus = "loading" | "error" | "success";
 
@@ -30,6 +38,8 @@ export interface RunRow {
   /** The run's receipts, one click deep — the whole row is this door. */
   href: string;
   lead: string;
+  /** What the run requested — what the platform filter narrows by. */
+  platforms: string[];
   excerpt: string;
   /** The excerpt rides the error channel (recorded failure / judge block). */
   excerptError: boolean;
@@ -53,6 +63,40 @@ export function platformsOf(run: FeedRun): string[] {
 
 function statusWord(status: string): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/** The lead's subject is one row's worth of topic, never a wrapped paragraph. */
+const LEAD_TOPIC_CHARS = 46;
+
+/**
+ * The row's lead, in the sheet's own grammar: SUBJECT first, platforms second —
+ * "Launch film · LinkedIn + X + Facebook", "Blog article · inside the
+ * build-step pipeline" (Runs.dc.html draws five leads and every one carries a
+ * distinguishing subject).
+ *
+ * The port derived the lead from platforms ALONE, so on live data 17 of 27 rows
+ * read the identical string "Fan-out · Video" and eight consecutive rows in one
+ * day card were byte-identical across lead, excerpt, thumb and pill — on the
+ * surface whose whole job is answering "which run was that" (s77 finding,
+ * runs-model.ts:134).
+ *
+ * The subject is the run's own first draft excerpt, which is the only
+ * run-identifying text the two existing reads carry. A run the plan window does
+ * not cover has none, and falls back to today's honest platform-only line
+ * rather than to an invented subject.
+ */
+export function runLead(platforms: string[], assets: PipelineAsset[]): string {
+  const spread = platforms.map(platformLabel).join(" + ");
+  const raw = assets.map((asset) => asset.excerpt).find((excerpt) => excerpt.trim() !== "");
+  if (raw === undefined) return spread === "" ? "Fan-out run" : `Fan-out · ${spread}`;
+  const collapsed = raw.replace(/\s+/g, " ").trim();
+  const topic =
+    collapsed.length <= LEAD_TOPIC_CHARS
+      ? collapsed
+      : // Cut at a word boundary — a lead clipped mid-word loses information
+        // with no cue that anything was lost.
+        `${collapsed.slice(0, collapsed.lastIndexOf(" ", LEAD_TOPIC_CHARS - 1) + 1 || LEAD_TOPIC_CHARS).trim()}…`;
+  return spread === "" ? topic : `${topic} · ${spread}`;
 }
 
 /** Drafts of this run, from the plan read's pipeline assets. */
@@ -131,10 +175,8 @@ export function runRow(run: FeedRun, assets: PipelineAsset[], planStatus: PlanRe
   return {
     id: run.id,
     href: `/app/approve?run=${encodeURIComponent(run.id)}`,
-    lead:
-      platforms.length > 0
-        ? `Fan-out · ${platforms.map(platformLabel).join(" + ")}`
-        : "Fan-out run",
+    lead: runLead(platforms, assets),
+    platforms,
     excerpt,
     excerptError,
     liveHref: published[0]?.deployRef ?? null,
@@ -162,6 +204,41 @@ export function filterRows(rows: RunRow[], filter: RunFilter): RunRow[] {
   return rows;
 }
 
+/**
+ * Every platform the feed ACTUALLY recorded, label-ordered — so the filter
+ * offers only values that can match something, and gains a new platform the
+ * day a run requests one (never a hand-kept list).
+ */
+export function platformOptions(rows: RunRow[]): string[] {
+  const seen = new Set<string>();
+  for (const row of rows) for (const platform of row.platforms) seen.add(platform);
+  return [...seen].sort((a, b) => platformLabel(a).localeCompare(platformLabel(b)));
+}
+
+export interface RunView {
+  filter: RunFilter;
+  /** null = every platform; otherwise the raw platform key, not its label. */
+  platform: string | null;
+  find: string;
+  sort: RunSort;
+}
+
+/**
+ * The view knobs as ONE pure pass (Approve's `applyQueueView` shape): the
+ * sheet's own All/Failed/Published seg, then the two knobs the founder named,
+ * then find over the text the row actually shows. Sort is applied by
+ * `groupByDay`, which owns row order inside its day groups.
+ */
+export function applyRunView(rows: RunRow[], view: RunView): RunRow[] {
+  const needle = view.find.trim().toLowerCase();
+  return filterRows(rows, view.filter).filter((row) => {
+    if (view.platform !== null && !row.platforms.includes(view.platform)) return false;
+    // Find matches what is ON the row — its lead and its excerpt — so a hit is
+    // always visible in the result rather than a match on hidden state.
+    return needle === "" || `${row.lead} ${row.excerpt}`.toLowerCase().includes(needle);
+  });
+}
+
 export interface RunDay {
   key: string;
   heading: string;
@@ -175,10 +252,16 @@ export function dayHeading(date: Date, now: Date): string {
   return dayKey(date) === dayKey(now) ? `Today · ${long}` : long;
 }
 
-/** Newest day first, rows newest first inside it — one `.day-hd` + `.card` per day. */
-export function groupByDay(rows: RunRow[], now: Date): RunDay[] {
+/**
+ * Newest day first, rows newest first inside it — one `.day-hd` + `.card` per
+ * day, which is the order the sheet draws. `sort: "oldest"` reverses BOTH
+ * levels: a day-grouped list whose groups ran one way and whose rows ran the
+ * other would be a third order the operator never asked for.
+ */
+export function groupByDay(rows: RunRow[], now: Date, sort: RunSort = "newest"): RunDay[] {
+  const direction = sort === "oldest" ? -1 : 1;
   const days: RunDay[] = [];
-  for (const row of [...rows].sort((a, b) => b.at.getTime() - a.at.getTime())) {
+  for (const row of [...rows].sort((a, b) => direction * (b.at.getTime() - a.at.getTime()))) {
     const key = dayKey(row.at);
     const day = days.find((d) => d.key === key);
     if (day) day.rows.push(row);

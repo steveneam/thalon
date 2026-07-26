@@ -4,16 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  filterRows,
+  applyRunView,
   groupByDay,
+  platformOptions,
   rowsFor,
   runsThisWeek,
   type PlanReadStatus,
   type RunFilter,
   type RunRow,
+  type RunSort,
 } from "@/components/runs/runs-model";
 import { fetchRunsFeed } from "@/lib/approve-queue/client";
 import { fetchPlan } from "@/lib/workspace/client";
+import { platformLabel } from "@/lib/workspace/format";
 import { useListKeys } from "@/lib/workspace/keyboard";
 import type { FeedRun } from "@/lib/approve-queue/types";
 import type { PlanPayload } from "@/lib/workspace/types";
@@ -26,14 +29,30 @@ const FILTERS: { key: RunFilter; label: string }[] = [
   { key: "published", label: "Published" },
 ];
 
+const SORTS: { key: RunSort; label: string }[] = [
+  { key: "newest", label: "Newest first" },
+  { key: "oldest", label: "Oldest first" },
+];
+
 /** The sheet's row stamp — 24h local time inside its day group ("09:00"). */
 function timeOfDay(at: Date): string {
   return at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Empty views name WHY they are empty — an unresolved read never reads as "nothing here". */
-function emptyLine(total: number, filter: RunFilter, planStatus: PlanReadStatus): string {
+/**
+ * Empty views name WHY they are empty — an unresolved read never reads as
+ * "nothing here", and neither does a view the OPERATOR narrowed: a filter or a
+ * find box that empties the list must say it was the knob, or the surface
+ * reports "no failed runs" when the truth is "none on this platform".
+ */
+function emptyLine(
+  total: number,
+  filter: RunFilter,
+  planStatus: PlanReadStatus,
+  narrowed: boolean,
+): string {
   if (total === 0) return "No runs yet — your first generation lands here with full provenance.";
+  if (narrowed) return "No runs match this view — clear the platform or the find box to widen it.";
   if (filter === "failed") return "No failed runs — nothing needs triage.";
   if (planStatus === "loading") return "Reading what published…";
   return "Nothing published yet — approved work ships from the queue.";
@@ -63,6 +82,11 @@ export function Runs() {
   const [planStatus, setPlanStatus] = useState<PlanReadStatus>("loading");
   const [plan, setPlan] = useState<PlanPayload | null>(null);
   const [filter, setFilter] = useState<RunFilter>("all");
+  // The view knobs the founder asked to re-introduce. Presentation state only:
+  // every derivation below reads them, none of them reaches a client.
+  const [platform, setPlatform] = useState<string | null>(null);
+  const [find, setFind] = useState("");
+  const [sort, setSort] = useState<RunSort>("newest");
   // null = the operator hasn't moved yet, so the deep-linked row (or the
   // newest run) is the selected one — derived, never an effect that writes
   // state back during render.
@@ -122,9 +146,12 @@ export function Runs() {
     [runs, plan, planStatus],
   );
   const days = useMemo(
-    () => groupByDay(filterRows(rows, filter), now),
-    [rows, filter, now],
+    () => groupByDay(applyRunView(rows, { filter, platform, find, sort }), now, sort),
+    [rows, filter, platform, find, sort, now],
   );
+  const platforms = useMemo(() => platformOptions(rows), [rows]);
+  /** The operator narrowed the view themselves — an empty result must say so. */
+  const narrowed = platform !== null || find.trim() !== "";
   // Rendered order, flattened — what j/k walks and what ↵ opens.
   const ordered = useMemo(() => days.flatMap((day) => day.rows), [days]);
   const failedCount = rows.filter((row) => row.failed).length;
@@ -159,6 +186,18 @@ export function Runs() {
         moveTo(active - 1);
       },
       Enter: (event) => {
+        // A FOCUSED CONTROL OWNS ITS OWN ENTER. `useListKeys` listens on
+        // window and only skips typing targets, so without this the j/k
+        // grammar swallowed Enter from every button and link on screen —
+        // the surface's own All/Failed/Published seg could not be operated
+        // by keyboard (its onClick never ran: preventDefault here cancels
+        // the keydown's activation default), and even the shell's side-nav
+        // links navigated to the selected RUN instead. Verified live, s78.
+        // `[role=button]` covers this surface's own rows, which are divs
+        // carrying their own Enter handler. Same guard, same words, as
+        // sites.tsx, intel.tsx, videos.tsx and calendar-surface.tsx —
+        // Runs was the outlier (s77 finding, runs.tsx:149).
+        if ((event.target as HTMLElement | null)?.closest("button, a, [role=button]")) return;
         if (ordered[active]) {
           event.preventDefault();
           router.push(ordered[active].href);
@@ -190,6 +229,54 @@ export function Runs() {
           <span className="pill pill-err">{failedCount} failed</span>
         )}
         <div style={{ flex: 1 }} />
+        {/* The view knobs (founder s77). They sit LEFT of the seg so the sheet's
+            own All/Failed/Published control keeps the rightmost slot it is
+            drawn in. Each states its current value at the control, so an
+            applied knob is visible and clearable without a banner. */}
+        <input
+          className="find-input"
+          type="search"
+          aria-label="Find a run"
+          placeholder="Find a run…"
+          value={find}
+          onChange={(event) => setFind(event.target.value)}
+        />
+        <div className="btn btn-ghost btn-sm sel-ctl">
+          {platform === null ? "All platforms" : platformLabel(platform)}
+          <span className="chev" />
+          <select
+            className="sel-native"
+            aria-label="Platform filter"
+            value={platform ?? ""}
+            onChange={(event) => {
+              setPlatform(event.target.value === "" ? null : event.target.value);
+              setSelectedId(null);
+            }}
+          >
+            <option value="">All platforms</option>
+            {platforms.map((key) => (
+              <option key={key} value={key}>
+                {platformLabel(key)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="btn btn-ghost btn-sm sel-ctl">
+          {SORTS.find((option) => option.key === sort)?.label ?? ""}
+          <span className="chev" />
+          <select
+            className="sel-native"
+            aria-label="Sort order"
+            value={sort}
+            onChange={(event) => setSort(event.target.value as RunSort)}
+          >
+            {SORTS.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="seg">
           {FILTERS.map((option) => (
             <button
@@ -256,7 +343,9 @@ export function Runs() {
       {runsStatus === "success" && ordered.length === 0 && (
         <div className="card">
           <div className="row">
-            <span className="t-label">{emptyLine(rows.length, filter, planStatus)}</span>
+            <span className="t-label">
+              {emptyLine(rows.length, filter, planStatus, narrowed)}
+            </span>
           </div>
         </div>
       )}
@@ -320,7 +409,12 @@ function RunRowView({
       onClick={onOpen}
       onFocus={onSelect}
       onKeyDown={(event) => {
-        if (event.key === "Enter") onOpen();
+        // Only when the ROW itself is focused: the excerpt's live-page anchor
+        // is inside this row, and without the target check Enter on that link
+        // both opened the page and threw the surface to Approve. (Logged as a
+        // medium for s80; it is fixed here because the R1 Enter guard lands in
+        // this exact code path and half a fix is worse than none.)
+        if (event.key === "Enter" && event.target === event.currentTarget) onOpen();
       }}
     >
       {row.thumb && (

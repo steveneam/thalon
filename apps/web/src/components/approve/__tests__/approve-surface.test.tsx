@@ -174,6 +174,48 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     }
   });
 
+  /*
+   * s77 finding (runs-model.ts:133) — the half that lives on THIS surface. Every
+   * Runs row is a door to `/app/approve?run=<id>`, including a failed run that
+   * produced zero drafts. The deep link then matched nothing and fell silently
+   * through to `defaultSelection`, so the operator landed on an unrelated run's
+   * draft — under live Approve / Reject / Edit controls — with no cue the
+   * request had missed. Reproduced on live data in s78 (run 7bc5254e, a failed
+   * staged-video run with zero drafts). CROSS-LANE: Approve is lane 4's surface.
+   */
+  it("a ?run= that matches nothing SAYS so instead of silently selecting another run's draft", async () => {
+    const MISSING_RUN = "aaaaaaaa-0000-0000-0000-000000000000";
+    window.history.replaceState(null, "", `/app/approve?run=${MISSING_RUN}`);
+    try {
+      render(<ApproveSurface />);
+
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent(/That run has no drafts in this queue/);
+      expect(alert).toHaveTextContent(/the queue's own default is showing instead/i);
+      // The operator gets back to where the door came from.
+      expect(within(alert).getByRole("link", { name: "Back to Runs" })).toHaveAttribute(
+        "href",
+        "/app/runs",
+      );
+      // The queue is still usable — the fallback selection stands, it is just no
+      // longer silent.
+      await screen.findByRole("region", { name: "Draft detail" });
+    } finally {
+      window.history.replaceState(null, "", "/app/approve");
+    }
+  });
+
+  it("a ?run= that DOES match says nothing at all — the band is absent at rest", async () => {
+    window.history.replaceState(null, "", `/app/approve?run=${FIXTURE_RUN_1_ID}`);
+    try {
+      render(<ApproveSurface />);
+      await screen.findByRole("region", { name: "Draft detail" });
+      expect(screen.queryByText(/has no drafts in this queue/)).not.toBeInTheDocument();
+    } finally {
+      window.history.replaceState(null, "", "/app/approve");
+    }
+  });
+
   it("defaults to WAITING work across runs (run-count scoped), never merely the newest run", async () => {
     server.use(
       http.get("/api/runs", () =>

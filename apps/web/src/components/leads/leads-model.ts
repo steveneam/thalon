@@ -37,14 +37,69 @@ export const LEAD_BOARD_COLUMNS: readonly LeadStatus[] = LEAD_STATUSES.filter(
   (status) => LEAD_TRANSITIONS[status].length > 0,
 );
 
-const LEAD_COLUMN_LABELS: Readonly<Record<string, string>> = {
+const LEAD_STATUS_LABELS: Readonly<Record<string, string>> = {
   new: "New",
   scored: "Scored",
   contacted: "Contacted",
+  dismissed: "Dismissed",
+  unsubscribed: "Unsubscribed",
 };
 
+/** One word per lifecycle value, for the board's columns AND the list's filter. */
+export function leadStatusLabel(status: LeadStatus): string {
+  return LEAD_STATUS_LABELS[status] ?? status;
+}
+
 export function leadColumnLabel(status: LeadStatus): string {
-  return LEAD_COLUMN_LABELS[status] ?? status;
+  return leadStatusLabel(status);
+}
+
+/**
+ * The list's view knobs (founder s77: "re-introduce the good things (like
+ * filters, sort by …) from the old design"; the s77 fan-out found the same gap
+ * here — "a queue built to swallow whole CRM exports offers no search, no
+ * filter and no sort").
+ *
+ * `status: "active"` is the DEFAULT and reproduces the surface's original
+ * behaviour exactly (everything not terminal-dismissed). It also replaces the
+ * old `showDismissed` boolean, which was a filter with no on-screen cue — as a
+ * named value in a labelled control, the filter now states itself in resting
+ * chrome, which is the whole of the s77 finding at leads-surface.tsx:134.
+ */
+export type LeadStatusFilter = "active" | LeadStatus;
+export type LeadSort = "fit" | "newest";
+
+export interface LeadView {
+  status: LeadStatusFilter;
+  find: string;
+  sort: LeadSort;
+}
+
+export function leadStatusFilterLabel(filter: LeadStatusFilter): string {
+  return filter === "active" ? "Active leads" : leadStatusLabel(filter);
+}
+
+/**
+ * The queue as the operator has narrowed it. Pure and total: filter, then find
+ * over the identity fields a CRM export actually fills, then order — `fit` is
+ * `compareLeadCards`, the ranking the footer names ("best fit first"), so the
+ * default view is byte-identical to the surface before the knobs existed.
+ */
+export function applyLeadView(leads: LeadCard[], view: LeadView): LeadCard[] {
+  const needle = view.find.trim().toLowerCase();
+  const rows = leads.filter((lead) => {
+    if (view.status === "active" ? lead.status === "dismissed" : lead.status !== view.status) {
+      return false;
+    }
+    if (needle === "") return true;
+    // Find over what identifies a lead — the fields the row and dossier show,
+    // never hidden state, so every hit is visible in the result.
+    return [lead.name, lead.company, lead.email, lead.role]
+      .some((field) => field !== null && field.toLowerCase().includes(needle));
+  });
+  return view.sort === "newest"
+    ? rows.sort((a, b) => (a.createdAt === b.createdAt ? compareLeadCards(a, b) : a.createdAt < b.createdAt ? 1 : -1))
+    : rows.sort(compareLeadCards);
 }
 
 /**
