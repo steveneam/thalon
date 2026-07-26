@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageRefEnvelopeSchema, storedImageRefSchema } from "./media";
 
 /**
  * B-ve.1 (amendment A17 / ADR 0010): the video-project contract + the EDL —
@@ -565,3 +566,32 @@ export const videoCutLineageSchema = z.object({
   aspect: z.string().regex(/^\d{1,3}:\d{1,3}$/),
 });
 export type VideoCutLineage = z.infer<typeof videoCutLineageSchema>;
+
+/* ------------------------------------------------------------------ */
+/* B-media.0 (s77): the take's poster.                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A take's poster frame (stored under the take row's `meta.posterRef`,
+ * validated at the write door — no table change, the `meta.attribution`
+ * pattern above).
+ *
+ * A take owns BYTES but no still, so the dossier has nothing to show until
+ * one is derived: ffprobe a frame at ~1s → 640w webp → sha256 → object store.
+ * That is why the ref must be **stored**, not external — the poster is
+ * something we made from bytes we hold, and a poster that could link off-box
+ * would reintroduce exactly the link-rot this framework exists to surface.
+ *
+ * `provenance` stays open across all three values on purpose. `derived` is
+ * today's only writer, but a poster is legitimately reachable as `captured`
+ * (a platform still we pulled into our own store) or `operator` (a human
+ * picks a better frame through the future import door) — and narrowing it
+ * now would cost a whole contract window to widen later.
+ *
+ * Its own chain is one link long and stops honestly: `meta.posterRef → empty`
+ * (invariant 1 — a take never borrows its project's or its cut's image).
+ */
+export const videoTakePosterSchema = imageRefEnvelopeSchema.extend({
+  ref: storedImageRefSchema,
+});
+export type VideoTakePoster = z.infer<typeof videoTakePosterSchema>;

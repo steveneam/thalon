@@ -84,7 +84,7 @@ const videosResponseSchema = z.object({
  * leaving the caller's message exactly as loud as it was before.
  */
 async function failureReason(response: { text(): Promise<string> }): Promise<string> {
-  let body = "";
+  let body: string;
   try {
     body = await response.text();
   } catch {

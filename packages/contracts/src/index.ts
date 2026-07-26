@@ -10,6 +10,8 @@ export * from "./integrations";
 export * from "./intel";
 export * from "./judge";
 export * from "./leads";
+export * from "./media";
+export * from "./run-replay";
 export * from "./search-intel";
 export * from "./social";
 export * from "./source";
