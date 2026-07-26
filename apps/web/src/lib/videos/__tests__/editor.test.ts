@@ -1,6 +1,7 @@
 import { edlSchema } from "@thalon/contracts";
 import { describe, expect, it } from "vitest";
 import {
+  auditionVolume,
   laneDuration,
   nextVersionFor,
   patchCaptionLine,
@@ -123,6 +124,15 @@ describe("captions / music / output", () => {
       audio: [{ source: { kind: "cut", ref: "cuts/master.mp4" }, mode: "copy" }],
     });
     expect(patchMusic(copyEdl, { offset: 9 })).toBe(copyEdl);
+  });
+
+  it("B-audio.1: the audition level is the cue's own gain, and a boost clamps honestly", () => {
+    expect(auditionVolume(0)).toBe(1);
+    expect(auditionVolume(-6)).toBeCloseTo(0.501, 3);
+    expect(auditionVolume(-20)).toBeCloseTo(0.1, 3);
+    // A player tops out at unity; the lane's copy says so rather than pretending.
+    expect(auditionVolume(9)).toBe(1);
+    expect(auditionVolume(Number.NaN)).toBe(1);
   });
 
   it("sets the output -t explicitly (never auto-synced)", () => {

@@ -136,6 +136,21 @@ export function patchMusic(
   return { ...edl, audio: [next, ...rest] };
 }
 
+/**
+ * B-audio.1 piece 2 (AUDITION): the music lane's static gain, in dB, as a
+ * player volume. The drawn waveform has been silent-by-omission since s44 —
+ * clicking it set the in-point but playback ignored both the in-point and the
+ * level, so the operator heard something the render would never produce.
+ *
+ * A boost above 0 dB cannot be auditioned (a player tops out at unity), so it
+ * CLAMPS and the lane says so rather than pretending — the same honesty the
+ * engine's `bedVolumeFromGainDb` applies on the render side.
+ */
+export function auditionVolume(gainDb: number): number {
+  if (!Number.isFinite(gainDb)) return 1;
+  return Math.max(0, Math.min(1, 10 ** (gainDb / 20)));
+}
+
 /** The output -t of record. Lane edits change the assembled duration — the operator confirms it explicitly (measured, not auto-synced under the endcard holds). */
 export function setOutputDuration(edl: Edl, duration: number): Edl {
   if (!(duration > 0)) return edl;

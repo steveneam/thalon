@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import type { MediaAudioExt } from "@thalon/contracts";
 import {
   assertCompositionProjectSafe,
   hyperframesLinter,
@@ -120,14 +121,27 @@ export interface RenderAudioCue {
 /**
  * The audio-tier seam (composition v2): injected CONFIG on this target —
  * the `RenderTarget` interface and every manifest byte stay untouched.
- * Arrays align by cue index (null = silent cue). `bed` is the honest empty
- * seam for audio v2.5's operator-licensed music: the plumbing exists,
- * nothing in-tree ever supplies a file (engaging-clips §6, founder-ratified).
+ * Arrays align by cue index (null = silent cue).
+ *
+ * `bed` was the honest empty seam through s76: the plumbing existed and
+ * nothing ever supplied a file. B-audio.1 (s77) fills it — from the
+ * OPERATOR's licensed track in our content-addressed store, never from
+ * anything in-tree (founder-ratified, `render/narration.ts:34-36`). The bytes
+ * carry their own extension because a bed is whatever the operator licensed;
+ * `null` remains a normal, stated state, not a degradation.
  */
 export interface RenderAudioBundle {
   narration: Array<RenderAudioCue | null>;
   sfx?: Array<Buffer | null>;
-  bed?: { wav: Buffer; volume: number } | null;
+  bed?: RenderAudioBed | null;
+}
+
+/** The music bed as the provider hands it over: bytes, the container they are in, and the level to mix at. */
+export interface RenderAudioBed {
+  bytes: Buffer;
+  ext: MediaAudioExt;
+  /** Linear 0–1, the composition's own scale (see `bedVolumeFromGainDb` for the cue's dB). */
+  volume: number;
 }
 
 export type RenderAudioProvider = (manifest: PillarRenderManifest) => Promise<RenderAudioBundle | null>;
@@ -183,8 +197,8 @@ function planAudioFiles(bundle: RenderAudioBundle, spec: CompositionSpec): Audio
     }),
     bed: (() => {
       if (!bundle.bed) return null;
-      const fileName = "audio/bed.wav";
-      files.push({ fileName, bytes: bundle.bed.wav });
+      const fileName = `audio/bed.${bundle.bed.ext}`;
+      files.push({ fileName, bytes: bundle.bed.bytes });
       return { fileName, volume: bundle.bed.volume };
     })(),
   };

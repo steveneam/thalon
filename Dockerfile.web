@@ -37,6 +37,35 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     THALON_DATA_DIR=/data
 
+# ffmpeg + ffprobe (B-media.0, s77 — founder GO on record: "image size vs
+# staging parity"). The poster derivation (write moment 2) probes a take and
+# cuts one 640w webp frame from it; without these binaries the box and the
+# image disagree about what the product can do, and staging silently reports
+# every poster as pending.
+#
+# RUNNER ONLY — the builder compiles TypeScript and never touches media.
+# --no-install-recommends + the apt lists removed IN THE SAME LAYER, so the
+# image carries the binaries and not the package cache.
+#
+# THE COST, measured on this box (2026-07-26) rather than estimated:
+# +472 MB unpacked / +175 MB compressed (pull), from Debian bookworm's
+# ffmpeg 5.1.9-0+deb12u1. Roughly a third of that is the Mesa/LLVM GL stack
+# the package pulls through ffplay's SDL dependency and that a headless frame
+# grab never executes — unavoidable without hand-rolling an ldd closure copy,
+# which trades 236 MB for a bespoke seam that breaks silently on any bump.
+#
+# NOT version-pinned, deliberately: the base image is digest-pinned to one
+# Debian release, and hard-pinning a decoder's patch version means the day
+# Debian ships a security fix is the day the image build breaks. What IS
+# pinned is that the binaries must WORK — the executable check below fails
+# the IMAGE BUILD, not the first poster derivation on the box (the same
+# discipline the PGlite asset check applies in the builder stage).
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg \
+  && rm -rf /var/lib/apt/lists/* \
+  && ffmpeg -version > /dev/null \
+  && ffprobe -version > /dev/null
+
 # The traced server (monorepo layout: server.js under apps/web, hoisted
 # node_modules at the root) + the static/public dirs standalone deliberately
 # leaves out.
