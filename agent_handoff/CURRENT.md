@@ -18,14 +18,54 @@
 
 ## Resume prompt (session 78, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s78 (**THE VERIFY-AND-FIX PASS**): (0) self-check (tmux `thalon` · pg_isready · units · `dev` 3111 · git status + stamp). (1) **THE HEADLINE, and it is job one: VERIFY the 189.** `docs/research/workspace-audit-findings-s77.md` is RAW — plausible, not refuted. The founder deferred the ~55-agent adversarial pass to this session ("i think you do the verify next session, since 55 is alot"). **Fix NOTHING off that list before it survives refutation** — that gate exists because a confident reviewer invents work. **SPLIT ACROSS TWO SESSIONS on his s77 call (usage safety): s78 = lanes 1+2 (leads · board · runs · calendar · settings · profiles — 6 blockers, 20 high, 97 findings); s79 = lanes 3+4 (dashboard · transcription · sites · approve · create · intel · videos — 4 blockers, 20 high, 92). Balanced as-is, no rebalancing needed. ⚠ ONE ORDERING CHANGE THIS FORCES, AND IT IS FREE: the keyed-by-entity sweep touches Approve/Create/Dashboard/Transcription — ALL in session B's lanes — and its Approve instance is the data-corruption blocker (Save edit writes draft A's body onto draft B). So the sweep runs LEAD-DIRECT IN s78, FIRST, BEFORE the lanes launch: no agent fan-out, so it costs nothing against the usage budget the split exists to protect, and it kills that blocker a session early. Also: a stopped run loses NOTHING — the 189 findings here were harvested from a deliberately-stopped run, and `resumeFromRunId` replays the rest. Architecture, per his s77 call — PARALLEL LANES, because the concurrency cap is PER WORKFLOW (`min(16, cores−2)` = 4 here), so one workflow queues everything behind 4 slots while four lanes give 16. The box is not the limit: load sat at 0.35–0.63 with 4 agents live. Split + sequencing = the audit doc's §s78 execution architecture (4 disjoint lanes; verify blocker+high FIRST, ~50 of the 189, because those drive the fix work). **MEDIUMS+LOWS (139) ARE A SEPARATE LATER SESSION (s80+), not background work inside s78/s79** — not just for usage: fixing blockers/highs CHANGES the code the mediums were found against, so a medium verified now and fixed later was verified against a file that no longer exists, and several are downstream symptoms that evaporate once the keyed-entity sweep lands. Re-triage the pile at the s80 boot rather than assuming all 139 still stand — but never DROP it: that pile is where a mis-severitied blocker hides..** (2) **Then the keyed-by-entity sweep as ONE change, done BEFORE the lanes launch** — it is a class, not four coincidences, and the Approve case writes one draft's body onto another. A pinned test per surface. (3) Then blockers → high, screenshot-gated. (4) Then his re-introductions: filters + sort where the fan-out independently agreed, and the calendar write route (**`/api/calendar` does not exist**, which is why reschedule is unarmed). (5) **Re-walk the 15th surface** — the run was stopped before it returned. (6) **`be-check {mode:"building"}` over lane B's diff**, its own recommendation, deferred with the agent-budget call.
+**Resume · Thalon** — s78 = **THE VERIFY-AND-FIX PASS, part 1 of 2.**
 
-▎ ▸ **Read first:** CLAUDE.md → this file → **`docs/research/workspace-audit-findings-s77.md` (the s78 work list)** → `.claude/skills/thalon-check/SKILL.md` (the lens set — READ IT BEFORE FIXING) → COORDINATION.md → NEEDS-STEVEN.md.
-▎ ▸ **State:** main = origin, all pushed · window FROZEN · lanes A+B MERGED · verify 2194 green · budget 2M · balance 584.12 · **zero spend s77** · sweeper healthy (20 admitted).
-▎ ▸ **ALL FOUR FOUNDER RULINGS ARE IN (s77 close) — none are open:** Approve sort = **newest first** (the app already did it; the SHEET was wrong and is now annotated — do NOT "fix" the app to match its chip) · Dashboard publish door = **ARM** · Calendar = delegated to the lead and **decided: adopt "+N more"** (the sheet already uses that treatment in its waiting lane, so it applies its own vocabulary; clipping a name mid-word loses information with no cue) · post/page generation on Create = **GO TO ARMING**.
-▎ ▸ ⛔ **THE SEQUENCE GATE, his words:** *"we're not posting anything yet until all the walks are verified and fixed next session."* The GO covers BUILDING the arming, never exercising a publish path. Order: **verify the 189 → fix the survivors → only then a publish path, on a fresh per-platform GO.** Two independent reasons, so it does not get argued away: publishing off a workspace with 10 unverified blockers (one writes draft A's body onto draft B) risks the wrong content under his name; and generation is the one item that spends tokens per click. Building the door + judge gate and leaving it DISARMED is fully within the GO.
-▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · NEVER pipe the suite through `tail` — write to a file and read it · **vitest does NOT typecheck** · verify-on-merged-main = THE gate · REDESIGN ERA MODEL = OPUS 5 · wrap = verify+commit+push+restamp (the grep guard is retired).
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; all committed+pushed; both lanes merged and GC'd.
+The work list is `docs/research/workspace-audit-findings-s77.md`: **189 RAW
+findings across 14 surfaces** — plausible, NOT yet refuted. **Fix nothing off
+that list before it survives adversarial verification.** That gate exists
+because a confident reviewer invents work.
+
+**Do these in this order:**
+
+0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
+   `git status` + this stamp.
+1. **THE KEYED-BY-ENTITY SWEEP — lead-direct, FIRST, before any lane launches.**
+   One change, one commit, a pinned test per surface. It spans Approve, Create,
+   Dashboard, Transcription (Intel is already done), so four lanes each fixing
+   their own instance would give four spellings of one fix and never name the
+   class. Its Approve instance is the **data-corruption blocker** — *the editor
+   outlives the draft: Save edit writes draft A's body onto draft B* — and that
+   is why it does not wait for s79 where those surfaces live. No agent fan-out,
+   so it costs nothing against the usage budget.
+2. **Ask the founder to approve the two lane launches** (standing rule: every
+   launch needs fresh approval, per named run). Mode B via
+   `scripts/launch-lane.sh`, Opus-5 pin.
+3. **Launch lanes 1 + 2 only** — `leads · board · runs` and
+   `calendar · settings(+integrations) · profiles`. Each verifies its
+   **blocker+high ONLY** (26 across both), then fixes what survives,
+   screenshot-gated via `scripts/shoot-surface.mjs`.
+4. **Lead merge-gates each lane** on rebase + `npm run verify` on merged main.
+5. **Then, if there is room:** re-walk the 15th surface (the s77 run was stopped
+   before it returned) and run `be-check {mode:"building"}` over lane B's merged
+   diff — the lane's own recommendation, deferred on the agent-budget call.
+
+**Explicitly NOT this session:** lanes 3+4 (that is s79) · the 139 mediums and
+lows (s80+, re-read against the FIXED code — verifying them now would verify
+files that are about to change) · any publish path (see the sequence gate below).
+
+**Carried into the fix work when their surfaces come up:** filters + sort where
+the fan-out independently agreed they are missing, and the calendar write route
+(**`/api/calendar` does not exist**, which is why reschedule is unarmed).
+
+▎ ▸ **Read first:** CLAUDE.md → this file → **`docs/research/workspace-audit-findings-s77.md`** (the work list AND the lane split / two-session plan) → `.claude/skills/thalon-check/SKILL.md` (the lens set — READ IT BEFORE FIXING) → COORDINATION.md → NEEDS-STEVEN.md.
+▎ ▸ **The split (founder s77, usage safety):** s78 = lanes 1+2 (6 blockers · 20 high · 97 findings) · s79 = lanes 3+4 (4 blockers · 20 high · 92) · s80+ = the 139 mediums+lows across all surfaces. Balanced as-is; no rebalancing needed.
+▎ ▸ **Why lanes at all:** the workflow concurrency cap is **per workflow**, `min(16, cores−2)` = **4** here — one workflow queues everything behind 4 slots (that is why 100+ verify agents sat waiting in s77); four lanes give 16. The box is NOT the limit: load sat at 0.35–0.63 with 4 agents live, 7 GiB free. These are API-bound.
+▎ ▸ **A stopped run loses NOTHING** — the 189 findings were harvested from a run deliberately stopped after 14 of 15 walks (`journal.jsonl` records every agent result as it lands), and `Workflow({scriptPath, resumeFromRunId})` replays completed agents from cache. Stopping mid-run is always safe.
+▎ ▸ **State:** main = origin, all pushed · s77 window FROZEN · lanes A+B MERGED · verify **2194 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s77** · sweeper healthy (swept clean 07:20Z, 20 admitted).
+▎ ▸ **ALL FOUR FOUNDER RULINGS ARE IN — none open:** Approve sort = **newest first** (the app already did it; the SHEET was wrong and is annotated — do NOT "fix" the app to match its chip) · Dashboard publish door = **ARM** · Calendar = delegated and **decided: "+N more"** · Create post/page generation = **GO TO ARMING**.
+▎ ▸ ⛔ **THE SEQUENCE GATE, his words:** *"we're not posting anything yet until all the walks are verified and fixed."* The GO covers BUILDING the arming, never exercising a publish path. Building the door + judge gate and leaving it **DISARMED** is fully within it; posting is not, and needs a fresh per-platform GO after the fixes land.
+▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · NEVER pipe the suite through `tail` — write to a file and read it · **vitest does NOT typecheck** (two catches on record) · verify-on-merged-main = THE gate · REDESIGN ERA MODEL = OPUS 5 · wrap = verify+commit+push+restamp (the grep guard is retired).
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin; both lanes merged, worktrees and branches GC'd; tmux back to `dev` + `agent`.
 
 ## Pointer
 
