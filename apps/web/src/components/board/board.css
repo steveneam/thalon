@@ -21,6 +21,16 @@
   flex: 1;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
+  /*
+   * ONE definite row, so `.col`'s `max-height: 100%` has something real to
+   * resolve against (merge-gate catch, s78). With auto rows the row sizes to
+   * the TALLEST column and `100%` of it is the column's own height — circular,
+   * so the cap did nothing and a 25-card column grew to 1078px inside a 798px
+   * region, scrolling the whole surface (headers and all) instead of itself.
+   * `align-items: start` still lets a short column hug its content exactly as
+   * the sheet draws it.
+   */
+  grid-template-rows: minmax(0, 1fr);
   gap: 12px;
   min-height: 0;
   align-items: start;

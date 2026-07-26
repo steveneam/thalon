@@ -52,4 +52,29 @@ describe("board.css — the column body is bounded by its container (s77 · boar
     const declarations = blocksFor(css, ".col ").concat(blocksFor(css, ".col{")).join(";");
     expect(declarations).toMatch(/max-height\s*:\s*100%/);
   });
+
+  /**
+   * MERGE-GATE CATCH (s78). The cap above shipped and did NOTHING, because
+   * `.cols` had auto rows: a grid row sized by its tallest item makes
+   * `max-height: 100%` resolve to the column's own height — circular. Measured
+   * live at 1440×940 on merged main: the 25-card Waiting column reached 1078px
+   * inside a 798px region, `.col-bd` never scrolled (scrollHeight ===
+   * clientHeight), and the whole surface scrolled instead — taking every
+   * column HEADER off screen on a kanban. Reachable, but not the fix's own
+   * stated behaviour.
+   *
+   * The two rules are a PAIR: the cap is meaningless without a definite row,
+   * so the row is pinned here beside it. Neither jsdom nor the stylesheet
+   * assertion above could see this — only measuring the rendered surface did,
+   * which is the gate's whole purpose.
+   */
+  it("the grid gives that row a definite height, or the cap above is circular", () => {
+    const declarations = blocksFor(css, ".cols").join(";");
+    expect(declarations).toMatch(/grid-template-rows\s*:\s*minmax\(\s*0\s*,\s*1fr\s*\)/);
+  });
+
+  it("short columns still hug their content, exactly as the sheet draws them", () => {
+    const declarations = blocksFor(css, ".cols").join(";");
+    expect(declarations).toMatch(/align-items\s*:\s*start/);
+  });
 });
