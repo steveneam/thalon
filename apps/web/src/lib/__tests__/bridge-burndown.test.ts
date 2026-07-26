@@ -47,8 +47,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // Search's followed the same session: the mock draws that TAB but no
   // panel, so Search was DESIGNED in the sheets' language (founder s74)
   // rather than ported — horizon-card.tsx and demo-banner.tsx were folded
-  // into it and deleted. heat-grade below still serves other surfaces.
-  ["components/intel/heat-grade.tsx", 1],
+  // into it and deleted. heat-grade's row burned to zero in s76 when its dead
+  // `HeatGrade` component was removed; the file lives on as pure banding
+  // (`heatBand`), which bridges nothing.
   // leads/ burned to zero at the s75 exact-mock rebuild (DOCTRINE 0): the
   // surface speaks Leads.dc.html's own classes, and step 2 deleted the old
   // implementation (lead-card.tsx, weights-provenance.tsx) outright.
@@ -85,7 +86,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // same wave (DOCTRINE 0 rule 3). The rebuild sits at ZERO bridged tokens;
   // every keeper re-entered as a state behind the sheets' own chrome.
   ["components/workspace/action-toast.tsx", 8],
-  ["components/workspace/bulk-bar.tsx", 2],
+  // bulk-bar.tsx was DELETED in s76: Approve's exact-mock rebuild grew its own
+  // bulk band from the sheet's chrome, leaving this shared component with no
+  // caller anywhere. Its convention survives where it is actually used.
   ["components/workspace/command-palette.tsx", 13],
   ["components/workspace/error-notice.tsx", 1],
 ]);

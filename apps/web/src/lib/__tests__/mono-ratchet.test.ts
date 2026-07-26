@@ -44,13 +44,11 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // approve + create + dashboard + intel pins all burned to zero at their
   // exact-mock rebuilds (DOCTRINE 0, s73–s74): the rebuilt surfaces speak the
   // sheets' own type roles, and their DATA labels ride the theme's mono style
-  // (no uppercase). heat-grade below is now down to its PURE half: every live
-  // consumer imports `heatBand` (leads, board, create, intel), and the
-  // `HeatGrade` component that carries this violation lost its last caller at
-  // the s76 leads-board wire — deleting it burns this pin and its bridge-
-  // burndown twin to zero, which is a components/intel change and so belongs
-  // to the lead, not to this lane.
-  ["components/intel/heat-grade.tsx", 1],
+  // (no uppercase). heat-grade's row is GONE as of s76: the lane that wired
+  // the leads board flagged that `HeatGrade` had lost its last caller and
+  // correctly refused to reach outside its file set, so the lead deleted the
+  // component here. Only the pure `heatBand` banding remains, which carries
+  // no mono violation — the pin burned to zero exactly as predicted.
   ["components/landing/feature-showcase.tsx", 3],
   ["components/landing/hero-vignette.tsx", 4],
   ["components/landing/site-footer.tsx", 1],
