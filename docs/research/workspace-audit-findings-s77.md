@@ -404,9 +404,8 @@ blocker+high findings**, not by the 92 mediums. So:
 - **Round 1:** each lane verifies its **blocker+high only** (~12–13 each, ~50
   total). At 16 concurrent that is a few minutes, and it produces the fix list.
 - **Round 2:** lanes fix what survived, screenshot-gated per surface.
-- **Round 3:** mediums/lows verified in the background while fixes land, so
-  nothing is lost — the medium pile is where a mis-severitied blocker hides,
-  and skipping it entirely would be the wrong economy.
+- **Round 3 is its OWN session (s80+), not background work inside s78/s79** —
+  see the correction below.
 
 This is a sequencing change, not a scope cut: all 189 still get verified, but
 the ones that gate the work go first.
@@ -470,3 +469,36 @@ from cache and only re-runs what never finished.
 
 Session B repeats 2–5 for lanes 3 + 4, starting from a main that already has
 the sweep.
+
+## Mediums and lows: a SEPARATE later session (corrected, s77 close)
+
+Founder: *"and the medium and low stuff is the other sessions right?"* — yes,
+and the first draft of this plan had it wrong. It had mediums verified "in the
+background while fixes land" inside s78/s79. That is wasteful for a reason that
+has nothing to do with usage:
+
+**Fixing blockers and highs changes the code the mediums were found against.** A
+medium verified in s78 and fixed in s80 was verified against a file that no
+longer exists in that form — the verdict is stale and the spend is wasted. And a
+meaningful share of the medium pile is *downstream symptoms* of the very things
+being fixed: several will simply evaporate once the keyed-by-entity sweep lands,
+because a stale-index symptom stops existing when the state is keyed.
+
+So the order is:
+
+| session | scope | verifications | fixes |
+|---|---|---|---|
+| **s78** | keyed-entity sweep (lead-direct) + lanes 1+2 | 26 blocker+high | those survivors |
+| **s79** | lanes 3+4 | 24 blocker+high | those survivors |
+| **s80+** | mediums + lows, ALL surfaces, one pass | 139 (92 medium · 47 low) | those survivors |
+
+**Two things this ordering buys.** Every blocker and high in the whole workspace
+is fixed before a single medium is verified — which is the right priority if the
+sessions ever stop early. And the 139 get **re-read against the fixed code**,
+so the verification is honest rather than archaeological. Expect the pile to
+shrink on its own before it is ever verified: re-triage it at the s80 boot
+rather than assuming all 139 still stand.
+
+**The one thing not to lose:** the medium pile is where a mis-severitied blocker
+hides. Deferring it is fine; dropping it is not. It stays on this list until
+each item is verified-and-fixed or verified-and-refuted, and s80 is its home.
