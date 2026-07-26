@@ -393,7 +393,12 @@ export function Integrations() {
       )}
 
       {connectCard && (
+        // Keyed per destination: the panel holds PASTED CREDENTIALS. Unkeyed,
+        // a secret typed for one destination stays in the box when the panel
+        // re-titles itself for another, and Connect seals it there — the
+        // worst instance of the keyed-by-entity class (s78 sweep).
         <ConnectPanel
+          key={connectCard.destination}
           card={connectCard}
           onCancel={() => setConnecting(null)}
           onDone={(probe) => {

@@ -6,12 +6,14 @@ import { describe, expect, it, vi } from "vitest";
 import { ApproveSurface } from "@/components/approve/approve-surface";
 import { CreateContextLoader } from "@/components/create/create-context-loader";
 import { NeedsYouCard } from "@/components/dashboard/needs-you-card";
+import { Integrations } from "@/components/settings/integrations";
 import { LeadsSurface } from "@/components/leads/leads-surface";
 import { Transcription } from "@/components/transcription/transcription";
 import { draftA, FIXTURE_DRAFT_A_ID, FIXTURE_DRAFT_B_ID } from "@/lib/approve-queue/fixtures";
 import type { NeedsYouRow } from "@/components/dashboard/dashboard-model";
 import type { CreateContext } from "@/lib/intel/types";
 import type { LeadCard, LeadsPayload } from "@/lib/leads/types";
+import type { WireIntegrationCard } from "@/lib/integrations/client";
 import { seedLibraryRow } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 
@@ -253,6 +255,51 @@ describe("keyed by entity — state must not outlive the entity it describes", (
     await waitFor(() => expect(screen.getByText("3 sources")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: "OLDER SOURCE" })).toHaveClass("sel");
     expect(screen.getByRole("button", { name: "NEWER SOURCE" })).not.toHaveClass("sel");
+  });
+
+  it("Settings/Integrations [blocker]: a pasted credential does not outlive its destination", async () => {
+    const user = userEvent.setup();
+    const intCard = (destination: string, label: string): WireIntegrationCard => ({
+      destination,
+      class: "social",
+      label,
+      driver: `${destination}-driver`,
+      state: "not_connected",
+      connectedAs: null,
+      validatedAt: null,
+      expiresAt: null,
+      envOverride: false,
+      fields: [{ key: "accessToken", optional: false }],
+    });
+    server.use(
+      http.get("/api/integrations", () =>
+        HttpResponse.json({
+          cards: [intCard("bluesky", "Bluesky"), intCard("mastodon", "Mastodon")],
+        }),
+      ),
+      http.get("/api/integrations/published", () =>
+        HttpResponse.json({ items: [], total: 0 }),
+      ),
+    );
+
+    render(<Integrations />);
+    const cardFor = (label: string) =>
+      screen.getByText(label, { selector: ".int-name" }).closest(".int-card") as HTMLElement;
+
+    // Paste a secret into Bluesky's panel — then walk away to Mastodon's
+    // WITHOUT connecting. The grid stays on screen, so this is one click.
+    await screen.findByText("Bluesky", { selector: ".int-name" });
+    await user.click(within(cardFor("Bluesky")).getByRole("button", { name: "Set up" }));
+    await user.type(screen.getByLabelText(/Access token/), "bluesky-secret-token");
+    expect(screen.getByLabelText(/Access token/)).toHaveValue("bluesky-secret-token");
+
+    await user.click(within(cardFor("Mastodon")).getByRole("button", { name: "Set up" }));
+    expect(screen.getByText("Connect Mastodon")).toBeInTheDocument();
+
+    // The box must be empty. Unkeyed, Bluesky's token is still sitting in
+    // it under Mastodon's title — and Connect would seal it there.
+    expect(screen.getByLabelText(/Access token/)).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Connect" })).toBeDisabled();
   });
 
   it("Leads: a compose failure does not outlive its lead — lead A's error never renders under lead B", async () => {
