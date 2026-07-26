@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+/* global document, localStorage */
+// The two globals above are NOT used in Node. They appear only inside the
+// callbacks handed to page.evaluate / evaluateOnNewDocument / waitForFunction,
+// which puppeteer serializes and runs INSIDE THE BROWSER. ESLint lints this
+// file as Node and cannot see that boundary, so it is declared here rather
+// than switched off.
+//
 // shoot-surface.mjs — the screenshot-vs-sheet merge gate, as something that RUNS.
 //
 // Why this exists (AGENTS.md rule 8: executable > documentary). The exact-mock
@@ -123,7 +130,9 @@ try {
     await page.evaluateOnNewDocument((mm) => {
       try {
         localStorage.setItem("thalon-workspace-mode", mm);
-      } catch {}
+      } catch {
+        // Storage can be denied; the theme just falls back to the default.
+      }
     }, m);
 
     for (const route of routes) {
