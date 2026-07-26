@@ -14,6 +14,76 @@
 
 ---
 
+## S77 PLAN — planned and ready (founder s76: "have it all planned and ready to do next session")
+
+**Boot:** self-check, then the sweeper morning read. The s76 backoff fix is
+live and verified; the YouTube quota resets at **Pacific** midnight (~07:00Z),
+so s77's opener is the first that can see a clean `swept — … admitted`. If it
+still 429s past ~08:00Z, read the reason VERBATIM — seven layers have been
+peeled and the eighth will be new.
+
+**The two builds, in this order — the second cannot start before the first.**
+
+**① B-media.0 — source media on every surface (VERDICTED by the founder s76).**
+Step 1 is a **CONTRACT WINDOW, and windows freeze BEFORE any lane launches**,
+which is exactly why this is first: `meta.posterRef` for takes, plus the
+oEmbed `thumbnail_width`/`height` we already parse and currently throw away,
+derived into an `orientation` field (that field is what the portrait
+crop-vs-contain decision needs). **Ride the same freeze with the two other
+queued window candidates rather than opening a second window later:** Runs'
+Retry replay route (rendered but resting unarmed since s74 — no replay route
+exists anywhere) and Library's "grounds N drafts" count. Use the
+`contract-window` skill. Then build `<SourceThumb>` (five states — resolved ·
+resolved-portrait · empty · broken · loading) and migrate the **four** surfaces
+that already resolve real media: Transcription · Intel · Videos/Dossier ·
+Sites. That is pure consolidation, verifiable against two surfaces that
+already work, and it retires a resolved `<img>` currently copy-pasted across
+them. Approve/Runs/Create/Dashboard keep honest striped placeholders — the
+founder's own s75 ruling, not a gap. The sheet is now portable (its do-not-port
+bar lifted s76). **Bonus already earned:** the s76 sites-deepen lane made the
+dossier the first surface that can actually REACH the "broken poster" state,
+so that new state has a real caller on day one.
+
+**② B-audio.1 — sound and music in the video editor (founder-directed s76:
+"definitely need to include the sound/music to the video editor").**
+What exists today, verified in code, so this is arming a seam and not a
+green field: the editor already carries music as an EDL CONCEPT — an
+`AudioCue` with offset/gain/tail, a `music-align` op, `patchMusic`, a drawn
+music lane with its wavesurfer waveform, and a "Swap music" chip. The engine
+already has the shapes too: `CompositionAudio`, `RenderAudioBundle`,
+`RenderAudioCue`, `RenderAudioProvider`, and a working TTS narration seam
+(`render/narration.ts`, keyless-local-first). **What is missing is that
+nothing is audible and nothing is muxed:** `CompositionAudio.bed` is written
+in the source as "the honest empty seam for audio v2.5's operator-licensed
+music", and the composition is explicitly commented "null = today's silent
+composition". So the cue the operator drags today changes numbers nobody
+hears. The three pieces, smallest first:
+  1. **A bed source.** Operator-licensed upload is the honest v1 (it rides the
+     s71 public-asset door and the object store). Generated music is a second
+     driver behind the same registry discipline — a seam, not a hard-coded
+     provider, and licensing is a launch gate to record rather than assume.
+  2. **Audition in the editor.** The cue becomes audible against the timeline:
+     the waveform is already drawn and the s44 measured-alignment method is
+     already the reason it is there (the lane restored it deliberately at
+     `5cf26b8`), so this is wiring playback to the offset/gain the cue holds.
+  3. **The bed reaches the render.** Mux it in the render target so a rendered
+     cut actually carries its music — otherwise the editor lies about output.
+Keep the refusal ladder honest: no bed configured is a NORMAL state that says
+so, never a silent failure.
+
+**Also queued, none blocking:** EmptyArt's final disposition (my
+recommendation: retire it — re-verified in s76 that the mock has NO
+illustration anywhere; every SVG in all 16 sheets is a 16×16 nav icon, the
+only `background-image` is Calendar's hour grid, and there are zero `<img>`
+tags, so its plates have no slot to return to and the striped-box + honest-copy
+answer already ships) · the Calendar concurrent-event clipping call · the
+`Approve.dc.html` "Oldest first" chip that contradicts its own newest-first
+rows · the videos lane's staged-flow keeper, which has no band in ANY of the
+three sheets (founder call — the lane correctly did not invent one) · then THE
+LANDING, now that all 16 sheets are the real workspace.
+
+---
+
 ## Recommended sequence — next session
 
 Ordered by what I'd actually do. Phase 1 is buildable with zero founder input, so
