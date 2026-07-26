@@ -15,6 +15,13 @@ exists precisely because a confident reviewer invents work; historically it
 drops a real fraction. Do not fix straight off this list: verify first, then
 fix what survives.
 
+> **The 15th surface is the VIDEO EDITOR** (identified s78, still unwalked).
+> Confirmed by absence, not by guess: **zero of the 189 findings below
+> reference `editor.tsx`, `editor-timeline.tsx`, `editor-inspector.tsx` or
+> the `/app/videos/[projectId]/edit` route.** The Videos walk covered
+> `videos.tsx`, `videos-model.ts` and `dossier.tsx` only. That leaves 1,916
+> lines — the largest unaudited surface in the workspace.
+
 ## The count
 
 | severity | n |
@@ -40,6 +47,35 @@ same disease in at least four more places, and one of them corrupts data:
 That is a class, not four coincidences, and it is now a named check in the
 skill. A single keyed-by-entity sweep plus a pinned test per surface likely
 closes all of them.
+
+> **✅ CLOSED s78 (`8d35a9e` + `93470ec`), lead-direct, before any lane
+> launched.** Seven instances, one spelling, seven pinned tests in ONE file
+> that names the class — all verified to fail with the fixes stashed. The
+> four above, plus three the prose did not have:
+>
+> - **Approve — `actionError` outlives the draft.** It lives ABOVE the
+>   remount, so keying `DraftCard` does not clear it; cleared in
+>   `selectDraft`.
+> - **Runs — the same index-shaped selection.** NOT in the fan-out; found by
+>   the sweep looking for the class. **Latent, not live:** `rowsFor` maps 1:1
+>   over a feed that is read exactly once, so the row set cannot change after
+>   mount. Fixed anyway — the next refresh path added would make it live.
+> - **Settings/Integrations — `ConnectPanel` is unkeyed** (listed as a
+>   blocker by BOTH Settings walkers, below). The worst instance: `values`
+>   holds **pasted credentials**, the grid stays on screen under the open
+>   panel, so one click moves a token typed for one destination into the
+>   next destination's box — and Connect seals it there. The sweep's own grep
+>   missed it (neither index-shaped nor a detail card); reading the findings
+>   to write the lane kickoffs caught it.
+>
+> Checked and found CLEAN, so deliberately NOT changed: the command palette
+> (index resets on query change, list derived not re-read) and Profiles'
+> wizard `step` (its only re-form is a save of the same profile).
+>
+> **Consequence for the s78/s79 lanes: do not re-verify or re-fix any of the
+> seven.** Eight existing Approve/StagedFlow tests now re-query the "Draft
+> detail" region per poll — a held node is stale BY DESIGN once the card
+> remounts.
 
 **The second theme is the founder's own "filters, sort by" ask**, which the
 fan-out reached independently: Intel and Transcription both flagged unbounded
