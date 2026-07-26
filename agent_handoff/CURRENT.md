@@ -2,94 +2,64 @@
 
 ## Stamp
 
-2026-07-26 (session 77, syd4 — zero credit spend, OPUS 5). **THE s77 WINDOW FROZE, BOTH LANES SHIPPED, AND THE FOUNDER FOUND FOUR BUGS BY USING THE PRODUCT.** Final verify on merged main: **2194 passed / 9 skipped, 0 lint errors** (2101 at the s76 baseline). Working tree clean, everything pushed, nothing in flight.
+2026-07-26 (session 78, syd4 — zero credit spend, OPUS 5). **THE VERIFY-AND-FIX PASS, PART 1 OF 2 — DONE, AND THE GATE EARNED ITS KEEP THREE TIMES.** Final verify on merged main: **2276 passed / 9 skipped, 0 lint errors** (2194 at the s77 baseline). Working tree clean, everything pushed, nothing in flight.
 
-**The plan of record executed in order.** The contract window froze first (`13163d4`, contracts-only, ZERO migrations) — `MediaRef` as a union on WHERE THE BYTES LIVE, with three departures from the plan's sketch that each closed a hole a type could close for free: the ext list SPLIT into image/audio families (one flat list let a poster be an mp3), audio STORED-ONLY (you cannot license bytes you do not hold), and `strictObject` everywhere so invariant 3 stops being a sentence — an envelope carrying `orientation` is REFUSED at the door. Lane A shipped lead-direct (`a70a53c`: the resolver, `<SourceThumb>`, three surfaces migrated, the authed `/api/media/[sha]` door). Lane B shipped and merged (`a39799a`: oEmbed dimensions, derived posters, **ffmpeg in the image at +472 MB unpacked / +175 MB compressed — the number he was owed**, and all three B-audio.1 pieces).
+**The keyed-by-entity sweep shipped FIRST, lead-direct, before any lane launched** (`8d35a9e` + `93470ec`). One disease, **7 instances, one spelling**, 7 pinned tests in ONE file that names the class — all verified to fail with the fixes stashed. It killed the Approve **data-corruption blocker** (open the editor on draft A, click draft B, Save edit → A's body written onto B) a whole session before Approve's own lane. **Two instances came from the sweep, not the fan-out:** Runs (**latent, not live** — `rowsFor` maps 1:1 over a feed read exactly once, so unreachable today; fixed so the next refresh path cannot make it live), and **Settings `ConnectPanel`** — the worst of them, a pasted credential riding into the NEXT destination's box where Connect would seal it. Both Settings walkers had flagged that one; my own grep missed it because it is neither index-shaped nor a detail card. Checked and left alone as genuinely clean: the command palette and Profiles' wizard step.
 
-**FOUR FOUNDER-FOUND BUGS in Intel's Ready-to-create, and the fourth is the one that mattered.** The pick list scrolled inside its own card (bounded at 176px holding 307px). Angles could not be un-picked though the code called them optional. "Why is there 2 selections?" and "why do some sentences have copy and some don't?" both had real answers the UI never gave — titles are required, angles optional, the hook always rides, which is exactly why it has copy but no radio; all three now say so. **And then: `DossierCard` carried NO react key**, so one instance was reused across cards and picks survived the switch — on a card with fewer titles the stale index went out of range, nothing rendered checked under a label promising one always rides, and **the promote payload carried an index that card never had**. Fixed at the root plus clamping; the regression test fails without the key.
+**Both lanes verified adversarially before fixing, and that is the whole point.** Lane 2: **11 findings → 8 survived, 3 refuted** — and on C4 the walker's proposed fix would have made the surface WORSE (narrowing `ordered` would have removed the only working route to overflowed waiting drafts; fixing C5 was the right answer to the same concern). Lane 1: **12 → 12 survived, 0 refuted**, but verification still corrected SIX of the twelve in ways that changed the fix, one reversing the planned approach entirely. Lane 2 also found the Profiles blocker was **wider than reported** — every identity catchall key was dropped, on load as well as save, and `renderBrandIdentity` feeds those extras into both the generation prompt and the judge's grounding chunk, so a Save silently changed what the judge grounds against. Third instance of that disease on record.
 
-**THE PROCESS LESSON, and it cost him three rounds of micromanagement.** Twice I verified what I had CHANGED rather than the whole region — measured `.pick-row` only, so the hook row sat outside the check; confirmed one card and called it done. Both times he immediately found what I had scoped out. **Ratcheted into `.claude/skills/thalon-check/SKILL.md` as two named process rules**, with both live cases cited so neither reads as generic advice.
+**`/api/calendar` — VERDICT: in scope, built, wired, tested.** The table, the contract, the repo, the events and the tenancy pin all shipped in s61; only the route was missing. Reschedule and Remove are live. Drag stays deliberately unwired (it cannot be render-verified from a lane, and shipping blind drag on a time grid is worse than not shipping it). **A slot is a plan — writing one publishes nothing and arms nothing.**
 
-**HIS ASK BECAME A DURABLE TOOL.** Adapted from a sibling project's `review-gauntlet`/`fe-review` at his direction: `.claude/skills/thalon-check/SKILL.md` (the inline checklist, costs nothing) plus `.claude/workflows/fe-check.js` + `be-check.js` (the fan-out, needs his opt-in). The machinery was worth taking — parallel lenses, no-barrier pipeline, adversarial verification that defaults `real:false`. The lenses are entirely ours, and one is NEW: **DEAD DOOR**, because our signature failure is a control that renders perfectly and does nothing.
+**THE MERGE GATE CAUGHT A REAL REGRESSION, and only measuring found it.** Lane 1's B2 fix replaced a 620px constant with `.col { max-height: 100% }` — right idea, shipped as a no-op: `.cols` had auto rows, so the row sizes to its tallest column and `100%` of it is the column's own height. Circular. Measured live at 1440×940: the 25-card Waiting column reached 1078px inside a 798px region, `.col-bd` never scrolled, and the whole surface scrolled instead — taking every column HEADER off screen on a kanban. Fixed with `grid-template-rows: minmax(0, 1fr)` (`b5140c7`); re-measured at 756px, scrolling itself, short columns still hugging. **Severity stated honestly: the content stayed REACHABLE — my first read said nothing scrolled, which was wrong; I had measured `documentElement` when the scroll container is `.content.board-surface`.** Neither jsdom nor a stylesheet assertion could see this; lane 1 said so itself when it wrote that test.
 
-**THE FAN-OUT PROVED IT HAS TEETH: 189 raw findings across 14 surfaces** (`docs/research/workspace-audit-findings-s77.md`). It independently found the Create dead-end as a blocker, found **state-that-outlives-its-entity in four MORE places including one that corrupts data** (Approve's editor writes draft A's body onto draft B), reached his "filters, sort by" ask on its own — and **caught a fix I had made an hour earlier**: the angle toggle-off ships, but the promote seam still defaults to the first angle, so the affordance lies.
+**MY OWN MISTAKE, RATCHETED TWICE ON THE FOUNDER'S CALL.** Both lane kickoffs told the lanes to screenshot-gate their own work. Wrong in the worst direction: `shoot-surface.mjs` targets the lead's dev server, which serves MAIN, so a lane would capture code that is not its own and read it as passing — **a false pass on a gate**. (`next dev` cannot run in a lane either; Turbopack rejects the out-of-root symlinks.) First fix was a runtime refusal in one script; the founder's verdict was *"better ratchet your mistake"*, and he was right — that is the shape of guard that rots (`npm run guard` sat broken for three buckets). Now **structural** (`scripts/lib/worktree.mjs`) plus **executable** (`tests/worktree-screenshot-guard.test.ts`, in the repo-wide suite CI runs). The pin that matters spawns the REAL script inside a fabricated worktree, so deleting the CALL fails even if the helper survives — verified by doing exactly that.
 
-**Also: the brand-token guard is RETIRED on his explicit call** (script, CI job, `npm run guard`, pre-commit hook, worktree invocation all gone; branch protection now requires `test` + `eval-gate` only). What was kept and written into AGENTS.md: the engine stays generic, tenant brand data stays runtime config, `.context/` stays gitignored **for secrets** (always the real reason), stealth remains a separate live call. **And the sweeper's eighth layer was peeled** — the code says `rateLimitExceeded`, the message says "Search Queries PER DAY", a daily cap wearing a rate-limit label. It swept CLEAN at 07:20Z: **60 cards / 419 polled / 20 admitted**, the first real admissions. One flaky test fixed en route (an OAuth secret fixture of `"cs"` asserted absent from a random base64 signature).
+**THE 15TH SURFACE IS WALKED** (`docs/research/video-editor-audit-s78.md`) — the video editor, 1,916 lines, identified by absence and then audited on the founder's call. 59 agents, **50 raw → 36 confirmed, 14 refuted**. The headline is the JOBS table: of 27 jobs an operator would try, **8 work, 4 are dead doors, 15 have no affordance at all** — no undo anywhere, no unsaved-work guard on any exit, no insert/delete of a beat or caption, and while dirty the player shows the PREVIOUS render with only an "unsaved" pill beside it. **It corrected my brief, too:** I told it the editor had no sheet; `Videos.dc.html` IS the editor's sheet, and the render gate against it does not match.
 
-## Resume prompt (session 78, syd4 — "gogogo" boots this)
+## Resume prompt (session 79, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s78 = **THE VERIFY-AND-FIX PASS, part 1 of 2.**
+**Resume · Thalon** — s79 = **THE VERIFY-AND-FIX PASS, part 2 of 2.**
 
-The work list is `docs/research/workspace-audit-findings-s77.md`: **189 RAW
-findings across 14 surfaces** — plausible, NOT yet refuted. **Fix nothing off
-that list before it survives adversarial verification.** That gate exists
-because a confident reviewer invents work.
+Same shape as s78, which worked: **verify adversarially first, fix only what
+survives.** The gate killed 3 of 23 findings across the two s78 lanes and
+rewrote the fix on eight more — including one whose proposed fix would have
+removed the only working path on that surface.
 
 **Do these in this order:**
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
    `git status` + this stamp.
-1. **THE KEYED-BY-ENTITY SWEEP — lead-direct, FIRST, before any lane launches.**
-   One change, one commit, a pinned test per surface. It spans Approve, Create,
-   Dashboard, Transcription (Intel is already done), so four lanes each fixing
-   their own instance would give four spellings of one fix and never name the
-   class. Its Approve instance is the **data-corruption blocker** — *the editor
-   outlives the draft: Save edit writes draft A's body onto draft B* — and that
-   is why it does not wait for s79 where those surfaces live. No agent fan-out,
-   so it costs nothing against the usage budget.
-2. **Ask the founder to approve the two lane launches** (standing rule: every
-   launch needs fresh approval, per named run). Mode B via
-   `scripts/launch-lane.sh`, Opus-5 pin.
-3. **Launch lanes 1 + 2 only** — `leads · board · runs` and
-   `calendar · settings(+integrations) · profiles`. Each verifies its
-   **blocker+high ONLY** (26 across both), then fixes what survives,
-   screenshot-gated via `scripts/shoot-surface.mjs`.
-4. **Lead merge-gates each lane** on rebase + `npm run verify` on merged main.
-5. **Then, if there is room:** re-walk the 15th surface (the s77 run was stopped
-   before it returned) and run `be-check {mode:"building"}` over lane B's merged
-   diff — the lane's own recommendation, deferred on the agent-budget call.
+1. **Ask the founder to approve the two lane launches** (standing rule: fresh
+   approval, per named run). Mode B via `scripts/launch-lane.sh`, Opus-5 pin.
+2. **Launch lanes 3 + 4** — `dashboard · transcription · sites` and
+   `approve · create · intel · videos`. Each verifies its **blocker+high ONLY**
+   (4 blockers · 20 high across both), then fixes survivors.
+3. **Lead merge-gates each lane** on rebase + `npm run verify` on merged main,
+   **then MEASURES the rendered surface** — not just a screenshot, and not the
+   lane's word. The s78 board regression was invisible to the suite, to jsdom
+   and to a stylesheet assertion, and showed up only in a live measurement.
+4. **Carry into the fix work:** Approve's unmatched-`?run=` honesty (lane 1
+   left the precise instruction in `WRAP-s78-lane1.md`), and Intel's
+   angle-toggle seam, which the s77 fan-out caught shipping half-fixed.
 
-**Explicitly NOT this session:** lanes 3+4 (that is s79) · the 139 mediums and
-lows (s80+, re-read against the FIXED code — verifying them now would verify
-files that are about to change) · any publish path (see the sequence gate below).
+**Explicitly NOT this session:** the 139 s77 mediums+lows (s80+, re-read against
+the FIXED code) · the 36 video-editor findings (their own session — see below) ·
+any publish path (the sequence gate below).
 
-**Carried into the fix work when their surfaces come up:** filters + sort where
-the fan-out independently agreed they are missing, and the calendar write route
-(**`/api/calendar` does not exist**, which is why reschedule is unarmed).
-
-▎ ▸ **Read first:** CLAUDE.md → this file → **`docs/research/workspace-audit-findings-s77.md`** (the work list AND the lane split / two-session plan) → `.claude/skills/thalon-check/SKILL.md` (the lens set — READ IT BEFORE FIXING) → COORDINATION.md → NEEDS-STEVEN.md.
-▎ ▸ **The split (founder s77, usage safety):** s78 = lanes 1+2 (6 blockers · 20 high · 97 findings) · s79 = lanes 3+4 (4 blockers · 20 high · 92) · s80+ = the 139 mediums+lows across all surfaces. Balanced as-is; no rebalancing needed.
-▎ ▸ **Why lanes at all:** the workflow concurrency cap is **per workflow**, `min(16, cores−2)` = **4** here — one workflow queues everything behind 4 slots (that is why 100+ verify agents sat waiting in s77); four lanes give 16. The box is NOT the limit: load sat at 0.35–0.63 with 4 agents live, 7 GiB free. These are API-bound.
-▎ ▸ **A stopped run loses NOTHING** — the 189 findings were harvested from a run deliberately stopped after 14 of 15 walks (`journal.jsonl` records every agent result as it lands), and `Workflow({scriptPath, resumeFromRunId})` replays completed agents from cache. Stopping mid-run is always safe.
-▎ ▸ **State:** main = origin, all pushed · s77 window FROZEN · lanes A+B MERGED · verify **2194 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s77** · sweeper healthy (swept clean 07:20Z, 20 admitted).
-▎ ▸ **ALL FOUR FOUNDER RULINGS ARE IN — none open:** Approve sort = **newest first** (the app already did it; the SHEET was wrong and is annotated — do NOT "fix" the app to match its chip) · Dashboard publish door = **ARM** · Calendar = delegated and **decided: "+N more"** · Create post/page generation = **GO TO ARMING**.
-▎ ▸ ⛔ **THE SEQUENCE GATE, his words:** *"we're not posting anything yet until all the walks are verified and fixed."* The GO covers BUILDING the arming, never exercising a publish path. Building the door + judge gate and leaving it **DISARMED** is fully within it; posting is not, and needs a fresh per-platform GO after the fixes land.
-▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · NEVER pipe the suite through `tail` — write to a file and read it · **vitest does NOT typecheck** (two catches on record) · verify-on-merged-main = THE gate · REDESIGN ERA MODEL = OPUS 5 · wrap = verify+commit+push+restamp (the grep guard is retired).
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin; both lanes merged, worktrees and branches GC'd; tmux back to `dev` + `agent`.
+▎ ▸ **Read first:** CLAUDE.md → this file → `docs/research/workspace-audit-findings-s77.md` (the work list; its keyed-by-entity section names the 7 findings already CLOSED so no lane re-does them) → `.claude/skills/thalon-check/SKILL.md` → `agent_handoff/WRAP-s78-lane1.md` + `WRAP-s78-lane2.md` → COORDINATION.md → NEEDS-STEVEN.md.
+▎ ▸ **THE VIDEO EDITOR NEEDS ITS OWN SESSION, and it is not s79.** `docs/research/video-editor-audit-s78.md`: 36 confirmed findings, but the real number is **15 of 27 jobs with no affordance at all** — undo, exit-without-losing-work, add/remove a beat or caption, swap the music track, preview the working copy. That is not a fix list, it is a **build** list, and it wants the founder's call on scope before anyone starts. Its one blocker (keyboard-dead timeline blocks, so caption + music inspectors are unreachable by keyboard) is small and could ride s79's lane 4 if he wants it closed early.
+▎ ▸ **The sheet map was wrong and is now right:** `Videos.dc.html` = the video EDITOR · `Videos Overview.dc.html` = the list · `Video Dossier.dc.html` = the project page. The editor's render gate against its real sheet DOES NOT MATCH — unquantified, and the first thing its session should measure.
+▎ ▸ **State:** main = origin, all pushed · verify **2276 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s78** · both s78 worktrees/branches/tmux windows GC'd.
+▎ ▸ ⛔ **THE SEQUENCE GATE, his words:** *"we're not posting anything yet until all the walks are verified and fixed."* s78 built a calendar WRITE route — a slot is a plan; it publishes nothing and arms nothing. No publish path was exercised, no platform API called. Posting still needs a fresh per-platform GO after the fixes land.
+▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · NEVER pipe the suite through `tail` · **vitest does NOT typecheck** (three catches on record, one this session) · verify-on-merged-main = THE gate, and **measure the rendered surface too** · a LANE CANNOT SCREENSHOT ITS OWN WORK (now enforced — `shoot-surface.mjs` refuses from a worktree) · **never run a full verify while lane fan-outs are live** (it produced 4 phantom engine failures this session; all 29 passed in isolation) · REDESIGN ERA MODEL = OPUS 5 · wrap = verify+commit+push+restamp.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin; both lanes merged and GC'd; tmux back to `dev` + `agent`.
 
 ## Pointer
 
-CLAUDE.md → this file → `docs/research/workspace-audit-findings-s77.md` → `.claude/skills/thalon-check/SKILL.md` → `docs/research/media-framework-plan.md` → COORDINATION.md → NEEDS-STEVEN.md.
+CLAUDE.md → this file → `docs/research/workspace-audit-findings-s77.md` → `docs/research/video-editor-audit-s78.md` → `.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
 
-## Delta (session 76)
+## Delta (session 77)
 
-**Wave 3 merged — all 16 sheets became the real workspace**, and the founder's five-item polish pass shipped on top of it. Two corrections went on the record that session: the `127.0.0.1`-vs-`localhost` cross-origin block (a healthy app reads as dead while curl still returns 200), and "there is no logo", which was flatly wrong — **a filename grep is not an existence proof; search by ROLE.** The screenshot gate became a script that runs (`scripts/shoot-surface.mjs`), and it is what caught the first bug. Second half, on Fable 5 at the founder's direction: the media framework was planned as ONE framework (`docs/research/media-framework-plan.md`) after he verdicted the thumbnail work as needing a sustainable schema; his three calls were ruled and executed same-session (remint granted-then-superseded, ffmpeg-in-image GO, zero-state = code-drawn with `docs/research/zero-art/zero-art-proposal.html` shipped as the evidence).
+The s77 contract window froze first (`13163d4`, contracts-only, ZERO migrations) — `MediaRef` as a union on WHERE THE BYTES LIVE. Lane A shipped the resolver, `<SourceThumb>`, three migrated surfaces and the authed `/api/media/[sha]` door; lane B shipped oEmbed dimensions, derived posters, **ffmpeg in the image (+472 MB unpacked / +175 MB compressed)** and the audio bed. The founder then found four bugs in Intel's Ready-to-create by hand, the fourth being a missing React `key` on `DossierCard` — which became s78's whole sweep. His ask also became a durable tool: `.claude/skills/thalon-check/SKILL.md` plus the `fe-check`/`be-check` workflows, whose fan-out produced the 189-finding audit that s78 and s79 are working through.
 
-## Delta (session 75)
-
-
-**Wave 2.** Three prepped worktrees launched inside ~3 minutes and ran ~50 minutes each. Merge gate: two merged clean; `estate-rebuild` hit three conflicts, all resolved deliberately. The instructive one was `selected-row.test.ts`, where each lane had removed **its own** entry from the legacy-selection pin — taking either side alone would have silently re-pinned a deleted file, so the correct merge removes both. All six surfaces were then rendered on dev 3111 and diffed against their sheets before the merge stood.
-
-**What the gate surfaced, homed rather than decided unilaterally:** `components/board/leads-board.tsx` was left **orphaned** — `Board.dc.html` is the CONTENT pipeline board drawn under Home, not a leads board, so rebuilt Leads rendered its Board tab and said so plainly. Both lanes found it independently and each correctly declined to touch the other's file. The lead did not delete a working capability on its own authority; **the founder then ruled it comes back**, and step 1 shipped the same session. Also flagged: Calendar clips concurrent same-instant events to ~45px chips (the sheet's own `overflow:hidden` meeting a density its fixture never had), and Sites turned out to be a fourth surface already resolving real media.
-
-**B-media.0, planned research-first** per the founder's "see how others do it". The findings that actually bore on a decision: `.thumb-sm` (64×40) is **exactly** Mux's 256×160 storyboard-tile ratio; a 16:9 poster cover-cropped into it loses ~10% of its width, inside the central-80% safe area creators already design for; a **9:16 Short loses ~65% of its height and gets decapitated**; and hover-scrub is out on structural grounds, not taste — the storyboard artifact requires owning the transcode, and our densest surface holds a YouTube URL and one poster. Reading the code also corrected the premise: **four surfaces already resolve real media**, so this generalises something that works. And `video-title.ts` parses the oEmbed reply for `thumbnail_url` while **discarding `thumbnail_width`/`height` from that same response** — free, and the only thing blocking the portrait decision.
-
-**B-media.1** renamed the surface only (`lib/library/`, `/api/library`, `LibrarySourceRow` keep their names — they serve the generic `sources` shelf), with `/app/library` kept permanently as a redirect and the divergence recorded under a new README section, *Founder amendments — the sheets are WRONG here on purpose*.
-
-**Create's pruning panel** restores the keeper as a state behind the sheet's own chip: the chip text becomes the disclosure, pruning reaches **generation** (not just display) through one `pruneContext()` every downstream consumer already reads, and dropping a field is reversible while dropping the whole chip is not — so the chip renders off the UNPRUNED context and cannot vanish mid-prune.
-
-**Discipline note carried forward.** The lead ran its own full verify while three lane suites were live and drove load to 13. It finished clean, but the s74 sequencing lesson applies to the lead too — the crm lane, which had that lesson in its kickoff, explicitly waited out its siblings and was right to. Both wave-3 kickoffs carry it.
-
-**The founder's Sites findings, diagnosed at the close (both confirmed, neither a guess).** *"there thumbnails seem broken"* — all 20 load ON THE BOX, because `lib/sites/provider.ts` hardcodes `DEV_PREVIEW_ORIGIN = "http://127.0.0.1:8899"` and both the card images and the dossier iframe resolve against it. From any other machine `127.0.0.1` is the VIEWER's loopback, so every one of them breaks. Not a rendering bug, and the images are not missing. `SITES_PREVIEW_ORIGIN` overrides it, but the real fix is same-origin serving (or catalog-time poster capture, which would also feed B-media.0) — the lane picks one and says why. *"clicking on one of them seem to take me to the old design"* — exactly right: `site-dossier.tsx` has not been touched since s61 and still carries 19 bridged tokens (it is pinned at that number). It has NO sheet, so the precedent is Intel's Search tab: DESIGN it in the sheets' language rather than port it. All three jobs are the `sites-deepen` kickoff.
-
-## Next action — s76 (BOOT ON OPUS 5): sweeper morning check (backoff should be visible in the log; quota resets ~07:00Z, PACIFIC midnight) · **LAUNCH WAVE 3 — `videos-rebuild` + `leadboard-wire` + `sites-deepen`, which finishes all 16 sheets and closes the founder's Sites findings** · lead merge-gates each on screenshot-vs-sheet + verify on merged main · lead's own queue = the B-media.0 verdict, the Calendar clipping call, EmptyArt's dark re-cut.
+## Next action — s79 (BOOT ON OPUS 5): self-check · ask for the two lane approvals · launch lanes 3+4 (`dashboard · transcription · sites` / `approve · create · intel · videos`) · merge-gate each on rebase + verify + a MEASURED render · then put the video editor's scope to the founder as its own session.
