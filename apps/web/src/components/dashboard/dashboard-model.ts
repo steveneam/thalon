@@ -1,3 +1,4 @@
+import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import type { PipelineAsset, PlannedSlotWire } from "@/lib/workspace/types";
 import { waitingSince, type WeekDay } from "@/lib/workspace/week";
 import { platformLabel } from "@/lib/workspace/format";
@@ -10,6 +11,18 @@ import { platformLabel } from "@/lib/workspace/format";
 
 const WAITING = new Set(["queued", "blocked"]);
 const DECIDED = new Set(["approved", "rejected", "published"]);
+
+/**
+ * Waits on the OPERATOR — the same rule the pulse counts by (pulse.ts), so the
+ * needs-you card's rows and the badge's number cannot disagree. A staged
+ * artifact (`storyboard`/`direction_doc`) sits in queued/blocked but its verb
+ * is ADVANCE, not approve/reject, so it is not the operator's queue (founder
+ * ruling, s79 close). Both derivations must move together or the card's
+ * "N of M read" line states a gap that isn't there.
+ */
+function waitsOnOperator(asset: Pick<PipelineAsset, "status" | "format">): boolean {
+  return WAITING.has(asset.status) && !isStagedDraftFormat(asset.format);
+}
 
 // platformLabel now has ONE home (lib/workspace/format.ts) — re-exported
 // here so the surfaces and tests that import it from the exemplar keep working.
@@ -33,7 +46,7 @@ export function composingCount(assets: PipelineAsset[]): number {
 
 /** Whole hours the oldest queued/blocked draft has waited — null when nothing waits. */
 export function oldestWaitHours(assets: PipelineAsset[], now: Date): number | null {
-  const waiting = assets.filter((a) => WAITING.has(a.status));
+  const waiting = assets.filter(waitsOnOperator);
   if (waiting.length === 0) return null;
   const oldest = Math.min(...waiting.map((a) => waitingSince(a).getTime()));
   return Math.max(0, Math.floor((now.getTime() - oldest) / 3_600_000));
@@ -55,7 +68,7 @@ export interface NeedsYouRow {
 /** Everything waiting on the operator, OLDEST FIRST (the sheet's footer states the order). */
 export function needsYouRows(assets: PipelineAsset[]): NeedsYouRow[] {
   return assets
-    .filter((a) => WAITING.has(a.status))
+    .filter(waitsOnOperator)
     .sort((a, b) => waitingSince(a).getTime() - waitingSince(b).getTime())
     .map((a) => {
       const blocked = a.status === "blocked";

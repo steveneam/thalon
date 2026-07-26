@@ -1,5 +1,6 @@
 import { thumbLabel } from "@/components/dashboard/dashboard-model";
 import type { TrendCard } from "@/lib/intel/types";
+import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import { platformLabel } from "@/lib/workspace/format";
 import type { PipelineAsset, PlannedSlotWire } from "@/lib/workspace/types";
 import { waitingSince } from "@/lib/workspace/week";
@@ -64,6 +65,21 @@ const COMPOSING = new Set(["generated"]);
 const AT_JUDGE = new Set(["judging"]);
 const WAITING = new Set(["queued", "blocked"]);
 const APPROVED = new Set(["approved", "published"]);
+
+/**
+ * Waits on the OPERATOR — the same rule the pulse counts by (lib/workspace/
+ * pulse.ts) and the dashboard's needs-you card filters by. A staged artifact
+ * (`storyboard`/`direction_doc`) sits in queued/blocked but its verb is
+ * ADVANCE through the staged lifecycle, not approve/reject, so it is not this
+ * column's work (founder ruling, s79 close). This MUST agree with the pulse:
+ * the waiting column takes `Math.max(pulse.needsYou, its own count)`
+ * (board-surface.tsx:125), so a column counting staged rows the pulse has
+ * dropped would out-vote it and put two different numbers on one screen —
+ * the exact defect that Math.max was added to fix.
+ */
+function waitsOnOperator(asset: Pick<PipelineAsset, "status" | "format">): boolean {
+  return WAITING.has(asset.status) && !isStagedDraftFormat(asset.format);
+}
 
 /**
  * The sheet's age grammar — "45m", "2h", "26h". Deliberately NOT timeAgo's
@@ -186,7 +202,7 @@ export function waitingCards(
   now: Date,
   sort: BoardSort = "oldest",
 ): BoardCard[] {
-  return ordered(assets.filter((a) => WAITING.has(a.status)), waitingSince, sort)
+  return ordered(assets.filter(waitsOnOperator), waitingSince, sort)
     .map((asset) => {
       const blocked = asset.status === "blocked";
       const age = ageLabel(waitingSince(asset), now);

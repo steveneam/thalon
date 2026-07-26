@@ -5,7 +5,7 @@ import type { ActivityItem, PipelineAsset, PlanPayload, WorkspacePulse, Workspac
 export const fixturePulse: WorkspacePulse = {
   tenant: { slug: "self", name: "Thalon" },
   profile: { version: 3, company: "Thalon" },
-  counts: { runs: 4, runsWithErrors: 1, drafts: 11, queued: 2, blocked: 1, approved: 5 },
+  counts: { runs: 4, runsWithErrors: 1, drafts: 11, queued: 2, blocked: 1, approved: 5, staged: 0 },
   needsYou: 3,
 };
 

@@ -30,7 +30,7 @@ describe("GET /api/app/pulse", () => {
     expect(body).toEqual({
       tenant: null,
       profile: null,
-      counts: { runs: 0, runsWithErrors: 0, drafts: 0, queued: 0, blocked: 0, approved: 0 },
+      counts: { runs: 0, runsWithErrors: 0, drafts: 0, queued: 0, blocked: 0, approved: 0, staged: 0 },
       needsYou: 0,
     });
     await handle.close();
@@ -62,7 +62,41 @@ describe("GET /api/app/pulse", () => {
       queued: 1,
       blocked: 1,
       approved: 0,
+      staged: 0,
     });
     expect(body.needsYou).toBe(2);
+  });
+
+  /*
+   * The founder's s79 ruling, made executable: a queue only counts what the
+   * operator can act on. A `storyboard`/`direction_doc` sits in queued/blocked
+   * like any draft, but "approve a storyboard" has no defined meaning against
+   * the judge gate — its verb is ADVANCE through the staged lifecycle, which
+   * the Approve surface's own staged pane owns. So it stays in the RAW counts
+   * (nothing is hidden) and is subtracted from needs-you.
+   */
+  it("does not count staged artifacts toward needs-you, and says how many it dropped", async () => {
+    seeded = await seedDraft();
+    repos = seeded.handle.repos;
+    const { ctx } = seeded;
+
+    // A real post waiting on approve/reject — this one IS the operator's work.
+    await repos.drafts.transition(ctx, seeded.draft.id, "judging");
+    await repos.judgeResults.append(ctx, { draftId: seeded.draft.id, gate: "g3_final", verdict: "pass" });
+    await repos.drafts.transition(ctx, seeded.draft.id, "queued");
+    // A stage artifact in the same waiting status — NOT the operator's queue.
+    const stage = await seedAdditionalRun(seeded.handle, ctx, {
+      platform: "video",
+      format: "storyboard",
+    });
+    await repos.drafts.transition(ctx, stage.draft.id, "judging");
+    await repos.drafts.transition(ctx, stage.draft.id, "blocked");
+
+    const body = await (await GET()).json();
+    // Raw counts still see both — the staged row is subtracted, never hidden.
+    expect(body.counts.queued).toBe(1);
+    expect(body.counts.blocked).toBe(1);
+    expect(body.counts.staged).toBe(1);
+    expect(body.needsYou).toBe(1);
   });
 });

@@ -12,11 +12,20 @@ export interface PulseCounts {
   runsWithErrors: number;
   /** All drafts across the feed-window runs. */
   drafts: number;
-  /** Waiting on the operator: judge-passed, unreviewed. */
+  /** Judge-passed, unreviewed — RAW, staged artifacts included. */
   queued: number;
-  /** Waiting on the operator: judge-blocked, needs edit/re-judge. */
+  /** Judge-blocked, needs edit/re-judge — RAW, staged artifacts included. */
   blocked: number;
   approved: number;
+  /**
+   * Of the queued+blocked rows, how many are STAGE artifacts
+   * (`storyboard`/`direction_doc`). Their verb is ADVANCE through the staged
+   * lifecycle, not approve/reject — "approve a storyboard" has no defined
+   * meaning against the judge gate — so they are subtracted from `needsYou`
+   * (founder ruling, s79 close). Kept as its own number rather than filtered
+   * away silently: the queue must be able to say what it is not counting.
+   */
+  staged: number;
 }
 
 /** Client-safe zero state (this module carries no server imports — the pulse READ lives in ./pulse.ts, server-only). */
@@ -27,6 +36,7 @@ export const EMPTY_COUNTS: PulseCounts = {
   queued: 0,
   blocked: 0,
   approved: 0,
+  staged: 0,
 };
 
 export interface WorkspacePulse {
@@ -35,7 +45,10 @@ export interface WorkspacePulse {
   /** The active brand-profile version, when one exists. */
   profile: { version: number; company: string | null } | null;
   counts: PulseCounts;
-  /** queued + blocked — the one number the shell badge and needs-you card show. */
+  /**
+   * queued + blocked MINUS staged artifacts — the one number the shell badge
+   * and needs-you card show. A queue only counts what the operator can act on.
+   */
   needsYou: number;
 }
 

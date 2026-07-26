@@ -30,7 +30,7 @@ export async function seedDraft(overrides: { platform?: string; body?: string } 
 export async function seedAdditionalRun(
   handle: DbHandle,
   ctx: TenantCtx,
-  overrides: { platform?: string; body?: string } = {},
+  overrides: { platform?: string; body?: string; format?: string } = {},
 ): Promise<{ run: FanoutRun; draft: Draft }> {
   const { repos } = handle;
   const profile = await repos.brandProfiles.getActive(ctx);
@@ -52,6 +52,7 @@ export async function seedAdditionalRun(
     sourceId: source.id,
     platform,
     body: overrides.body ?? "We shipped a thing today.",
+    format: overrides.format,
     generationKey: sha256Hex(`${ctx.tenantId}:draft:${n}`),
   });
   return { run, draft };
