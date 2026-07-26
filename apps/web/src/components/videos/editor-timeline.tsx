@@ -287,6 +287,16 @@ export function EditorTimeline({
                       style={{ width: `${widths[i]}%` }}
                       aria-pressed={selection?.kind === "beat" && selection.index === i}
                       title={`${clip.name} · ${clip.duration}s · ${clip.source.ref}`}
+                      /*
+                       * KEYBOARD ACTIVATION (s80 blocker fix). Enter/Space on a
+                       * focused button dispatches `click`, never `pointerdown`,
+                       * so a block carrying only onPointerDown was a silent
+                       * no-op from the keyboard: it took focus, painted its
+                       * focus ring, announced aria-pressed=false, and did
+                       * nothing. Idempotent for a pointer click, which fires
+                       * pointerdown then click and re-sets the same selection.
+                       */
+                      onClick={() => onSelect({ kind: "beat", index: i })}
                       onPointerDown={(event) => {
                         onSelect({ kind: "beat", index: i });
                         const rect = (event.currentTarget as Element).getBoundingClientRect();
@@ -351,6 +361,8 @@ export function EditorTimeline({
                       ? `${cue.source.ref} · stream-copied verbatim — no knobs by contract`
                       : `${cue.source.ref} · offset ${cue.offset}s · gain ${cue.gainDb}dB`
                   }
+                  // Keyboard activation — see the beat block above.
+                  onClick={() => onSelect({ kind: "music" })}
                   onPointerDown={(event) => {
                     onSelect({ kind: "music" });
                     if (cue.mode === "copy") return;
@@ -395,6 +407,11 @@ export function EditorTimeline({
                       aria-label={`Caption ${i + 1}: ${line?.text ?? ""}`}
                       aria-pressed={selection?.kind === "caption" && selection.index === i}
                       title={`${line?.text ?? ""} · ${line?.fadeIn ?? 0}s → ${line?.fadeOut ?? 0}s`}
+                      // Keyboard activation — see the beat block above. This is
+                      // the one that made the blocker a BLOCKER: selecting a
+                      // plate is the ONLY entry to the caption inspector, so a
+                      // keyboard-only operator could never edit a caption.
+                      onClick={() => onSelect({ kind: "caption", index: i })}
                       onPointerDown={(event) => {
                         onSelect({ kind: "caption", index: i });
                         beginDrag(

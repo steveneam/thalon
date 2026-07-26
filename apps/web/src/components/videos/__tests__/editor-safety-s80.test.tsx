@@ -209,6 +209,67 @@ describe("the editor's safety core", () => {
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 
+  /*
+   * THE BLOCKER (slice b). The three timeline block types are real <button>s
+   * with aria-pressed and focus rings, carrying ONLY onPointerDown. Enter/Space
+   * on a focused button dispatches `click`, never `pointerdown`, so keyboard
+   * activation was a silent no-op — and selecting a plate is the ONLY entry to
+   * the caption and music inspectors (`setSelection({kind:"caption"})` appears
+   * nowhere else in the tree, and j/k walk beats only). A keyboard-only
+   * operator could never edit a caption or the music bed on this surface.
+   *
+   * The existing suite MASKED it: `user.click` synthesizes pointerdown before
+   * click, so the pointer path was covered and the keyboard path was not. These
+   * fire the key, which is the only thing that could have caught it.
+   */
+  it("opens the caption inspector from the keyboard, not just the pointer", async () => {
+    serve();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const plate = container.querySelector<HTMLElement>(".blk-cap");
+    expect(plate).not.toBeNull();
+    plate!.focus();
+    expect(document.activeElement).toBe(plate);
+    await user.keyboard("{Enter}");
+
+    expect(await screen.findByText(/^Caption 1/)).toBeInTheDocument();
+    expect(plate).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("opens the music inspector from the keyboard", async () => {
+    serve();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const music = container.querySelector<HTMLElement>(".blk-music");
+    expect(music).not.toBeNull();
+    music!.focus();
+    await user.keyboard("{Enter}");
+
+    expect(await screen.findByText("Music cue")).toBeInTheDocument();
+    expect(screen.getByLabelText("offset (s)")).toHaveValue(3);
+  });
+
+  it("selects a beat from the keyboard without starting a drag", async () => {
+    serve();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    const before = widths(container);
+
+    const beat = container.querySelector<HTMLElement>(".lane-tr .blk");
+    beat!.focus();
+    await user.keyboard("{Enter}");
+
+    expect(await screen.findByText("Beat — beat-01")).toBeInTheDocument();
+    // Selecting is not editing: a keyboard activation must not dirty the cut.
+    expect(widths(container)).toEqual(before);
+    expect(screen.queryByText(/^unsaved/)).toBeNull();
+  });
+
   it("says which render the player is showing once the edit diverges from it", async () => {
     serve();
     const user = userEvent.setup();
