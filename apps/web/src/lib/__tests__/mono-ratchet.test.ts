@@ -34,15 +34,22 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/blog/page.tsx", 3],
   ["app/brand/page.tsx", 3],
   ["app/page.tsx", 5],
-  ["components/board/leads-board.tsx", 5],
+  // components/board/leads-board.tsx burned to zero at the s76 leads-board
+  // wire — the lead pipeline came back as components/leads/leads-board.tsx in
+  // the sheet's own type roles (its one DATA label rides the theme's mono
+  // style, no uppercase) and the legacy board was deleted in the same change.
   // components/calendar/* burned to zero at the s75 exact-mock rebuild: the
   // rebuilt surface speaks the sheet's type roles and its DATA labels ride the
   // theme's mono style (no uppercase); the old implementation was deleted.
   // approve + create + dashboard + intel pins all burned to zero at their
   // exact-mock rebuilds (DOCTRINE 0, s73–s74): the rebuilt surfaces speak the
   // sheets' own type roles, and their DATA labels ride the theme's mono style
-  // (no uppercase). heat-grade below still serves leads/board/library until
-  // each of those rebuilds.
+  // (no uppercase). heat-grade below is now down to its PURE half: every live
+  // consumer imports `heatBand` (leads, board, create, intel), and the
+  // `HeatGrade` component that carries this violation lost its last caller at
+  // the s76 leads-board wire — deleting it burns this pin and its bridge-
+  // burndown twin to zero, which is a components/intel change and so belongs
+  // to the lead, not to this lane.
   ["components/intel/heat-grade.tsx", 1],
   ["components/landing/feature-showcase.tsx", 3],
   ["components/landing/hero-vignette.tsx", 4],
