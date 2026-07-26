@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -129,16 +129,33 @@ describe("Intel (exact-mock rebuild, Intel.dc.html)", () => {
   });
 
   it("carries the one list keyboard grammar: j/k select a rising row, ↵ opens it", async () => {
+    const user = userEvent.setup();
     render(<Intel />);
     expect(await screen.findByText("More rising")).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: "j" });
     const rows = within(screen.getByLabelText("More rising"));
     // j lands on the first rising row (0.87), k would walk back up.
     const first = rows.getByText(/We let an agent draft every product update/);
+    /**
+     * DRIVEN THROUGH userEvent, like every other keyboard test in this suite.
+     *
+     * This was the suite's ONLY raw `fireEvent.keyDown(window, …)`, and it
+     * flaked the s79 merge gate — one failure at ~291s suite time, green in
+     * isolation every time. `useListKeys` registers its window listener in a
+     * PASSIVE effect, which React runs after paint, while a DOM-based find
+     * resolves off the commit's mutation; under load the find wins that race,
+     * so a synchronous press lands with NO listener attached and is dropped.
+     * Rows rendered, nothing selected — exactly the failure seen.
+     *
+     * The app is fine: a real browser attaches the listener long before a human
+     * reaches for j. The test was asserting on a listener it never waited for.
+     * userEvent awaits its own act flush, so the press cannot outrun the effect
+     * — which is why the nine other surfaces driving j/k this way never flaked.
+     */
+    await user.keyboard("j");
     // Selection is the sheet's own .row.sel — never a bespoke recipe.
     expect(first.closest(".row")).toHaveClass("sel");
 
-    fireEvent.keyDown(window, { key: "Enter" });
+    await user.keyboard("{Enter}");
     // ↵ opens it into the dossier above, where it carries the full band set.
     const dossier = within(await screen.findByLabelText("Top rising trend"));
     expect(dossier.getByText(/We let an agent draft every product update/)).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -67,9 +67,36 @@ describe("shoot-surface refuses to run from a git worktree", () => {
     expect(isWorktreeRoot(fakeRepo("file"))).toBe(true);
     expect(isWorktreeRoot(fakeRepo("dir"))).toBe(false);
     expect(isWorktreeRoot(fakeRepo("none"))).toBe(false);
-    // And the real thing, both ways round — the repo this suite runs in is
-    // the main checkout, so the predicate must not be trivially true.
-    expect(isWorktreeRoot(REPO)).toBe(false);
+  });
+
+  /**
+   * THE REAL CHECKOUTS — RESOLVED, NOT ASSUMED (s79).
+   *
+   * This assertion shipped as `expect(isWorktreeRoot(REPO)).toBe(false)`, i.e.
+   * "the suite running this is the main checkout". True on main and FALSE IN
+   * EVERY LANE — so the ratchet built at s78 to protect lanes went red *inside*
+   * them, and both s79 lanes would have opened on a red verify pointing at this
+   * line. The obvious way to make it green is to delete it, which is exactly
+   * how a guard rots: the s78 lesson was that a guard scoped to the place you
+   * already cleaned is not a guard, and this is the same mistake wearing the
+   * opposite face.
+   *
+   * `--git-common-dir` names the MAIN checkout's .git from any worktree, so the
+   * negative case now runs against a real main checkout wherever this suite
+   * runs. And where the suite IS a lane, the difference becomes extra coverage
+   * rather than a failure: assert the positive against a real worktree too.
+   */
+  it("agrees with git about real checkouts, wherever this suite runs", () => {
+    const commonDir = execFileSync(
+      "git",
+      ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+      { cwd: REPO, encoding: "utf8" },
+    ).trim();
+    const mainCheckout = path.dirname(commonDir);
+    expect(isWorktreeRoot(mainCheckout)).toBe(false);
+    if (path.resolve(REPO) !== path.resolve(mainCheckout)) {
+      expect(isWorktreeRoot(REPO)).toBe(true);
+    }
   });
 
   it("REFUSES with a non-zero exit when run from a worktree, before touching a browser", () => {

@@ -8,6 +8,20 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const HANDOFF = path.join(REPO, "agent_handoff");
 
 /**
+ * Is `ref` the wrap that `doc` — a kickoff — will itself produce?
+ *
+ * A lane's kickoff ends by naming its own wrap file; that wrap does not exist
+ * until the lane finishes, so the link is legitimately forward-looking. Every
+ * other missing lane-paperwork link is a rotted reference.
+ */
+function isOwnWrapForwardRef(doc: string, ref: string): boolean {
+  if (path.dirname(doc) !== "agent_handoff/lanes") return false;
+  const kickoff = /^KICKOFF-(.+)\.md$/.exec(path.basename(doc));
+  const wrap = /^WRAP-(.+)\.md$/.exec(path.basename(ref));
+  return kickoff !== null && wrap !== null && kickoff[1] === wrap[1];
+}
+
+/**
  * agent_handoff/ IS A DESK, NOT AN ATTIC (founder, s78).
  *
  * Its top level had reached 49 files, 43 of them dead lane paperwork going
@@ -65,6 +79,12 @@ describe("agent_handoff hygiene", () => {
    * at `agent_handoff/lanes/WRAP-pub2-drivers.md` while the file was still at
    * the root — turning one misfiled file into four dead links. Cheaper to
    * check every link than to remember.
+   *
+   * ONE exemption, and it has to stay narrow: a kickoff names the wrap IT WILL
+   * WRITE. That is a forward reference, not a rotted link — the wrap does not
+   * exist until the lane finishes. Learned immediately and the hard way:
+   * `ecee263` shipped the two s79 kickoffs and turned this guard RED on main,
+   * because each one ends "write agent_handoff/lanes/WRAP-s79-laneN.md".
    */
   it("every lane-paperwork link in tracked markdown resolves to a real file", () => {
     const broken: string[] = [];
@@ -74,10 +94,34 @@ describe("agent_handoff hygiene", () => {
     for (const doc of docs) {
       const body = readFileSync(path.join(REPO, doc), "utf8");
       for (const [, ref] of body.matchAll(/(agent_handoff\/lanes\/[A-Za-z0-9._-]+\.md)/g)) {
-        if (!existsSync(path.join(REPO, ref))) broken.push(`${doc} → ${ref}`);
+        if (existsSync(path.join(REPO, ref))) continue;
+        if (isOwnWrapForwardRef(doc, ref)) continue;
+        broken.push(`${doc} → ${ref}`);
       }
     }
     expect(broken).toEqual([]);
+  });
+
+  /**
+   * The exemption is SAME-SLUG ONLY, pinned because widening it to "kickoffs
+   * are exempt" would silently un-guard the cross-lane citations that are the
+   * most likely to rot: s79's kickoffs both cite `WRAP-s78-lane1.md`, and
+   * `KICKOFF-intel-rebuild.md` cites `WRAP-blearn.md`.
+   */
+  it("exempts a kickoff's own future wrap, and nothing else", () => {
+    const lanes = "agent_handoff/lanes";
+    // Its own wrap, by slug: exempt.
+    expect(isOwnWrapForwardRef(`${lanes}/KICKOFF-s79-lane3.md`, `${lanes}/WRAP-s79-lane3.md`)).toBe(true);
+    // Another lane's wrap: a real citation, still checked.
+    expect(isOwnWrapForwardRef(`${lanes}/KICKOFF-s79-lane3.md`, `${lanes}/WRAP-s78-lane1.md`)).toBe(false);
+    expect(isOwnWrapForwardRef(`${lanes}/KICKOFF-intel-rebuild.md`, `${lanes}/WRAP-blearn.md`)).toBe(false);
+    // A near-miss slug is a different lane, not a typo to forgive.
+    expect(isOwnWrapForwardRef(`${lanes}/KICKOFF-s79-lane3.md`, `${lanes}/WRAP-s79-lane30.md`)).toBe(false);
+    // Only a kickoff gets it, and only from lanes/ — a wrap or a standing doc
+    // citing a missing wrap is exactly the dead link this suite exists for.
+    expect(isOwnWrapForwardRef(`${lanes}/WRAP-s79-lane3.md`, `${lanes}/WRAP-s79-lane3.md`)).toBe(false);
+    expect(isOwnWrapForwardRef("agent_handoff/CURRENT.md", `${lanes}/WRAP-s79-lane3.md`)).toBe(false);
+    expect(isOwnWrapForwardRef("docs/KICKOFF-s79-lane3.md", `${lanes}/WRAP-s79-lane3.md`)).toBe(false);
   });
 
   it("still keeps the lane record reachable, rather than deleting the history", () => {
