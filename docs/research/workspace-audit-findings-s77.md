@@ -418,3 +418,55 @@ rounds is ~190 verify agents plus fix work — comfortably the largest agent
 spend of any session so far, which is why it wants the founder's explicit
 launch approval per the standing rule, and why round 1 is scoped to produce a
 decision point before the rest runs.
+
+## Split across TWO sessions (founder s77) — usage safety
+
+*"can we divide that over 2 sessions to be safe, next session just lane 1 and
+2, then the session after that is lane 3 and 4, in case more things come up and
+i dont run out of usage mid run."*
+
+The pairing balances almost exactly as it stands, so no rebalancing is needed:
+
+| session | lanes | surfaces | blockers | high | all |
+|---|---|---|---|---|---|
+| **A (s78)** | 1 + 2 | leads · board · runs · calendar · settings(+integrations) · profiles | 6 | 20 | 97 |
+| **B (s79)** | 3 + 4 | dashboard · transcription · sites · approve · create · intel · videos | 4 | 20 | 92 |
+
+### ONE ordering change this split forces — and it is free
+
+The keyed-by-entity sweep touches **Approve, Create, Dashboard and
+Transcription**, every one of which sits in lanes 3–4 = **session B**. Its
+Approve instance is the data-corruption blocker — *"the editor outlives the
+draft: Save edit writes draft A's body onto draft B."* Leaving that live across
+two sessions is the one risk in this plan worth refusing.
+
+**So the sweep runs LEAD-DIRECT in session A, first thing, before lane 1 and 2
+launch.** It costs nothing against the usage budget the split exists to protect
+(it is one lead-authored change with a pinned test per surface — no agent
+fan-out at all), it kills the data-corruption blocker a whole session earlier,
+and it means session B's lanes start from a main that already carries it. It
+also sweeps lanes 1–2's own surfaces for the same class while it is there.
+
+### Why running out mid-run is already survivable
+
+Worth knowing, because it lowers the stakes on the whole split: **a stopped run
+loses nothing.** The workflow journal records every agent's return value as it
+lands, and that is not theory — the 189 findings in this document were
+harvested from a run that was deliberately STOPPED partway, after 14 of 15
+walks. So if usage runs out mid-session, the completed verdicts are still on
+disk at
+`~/.claude/projects/.../subagents/workflows/<runId>/journal.jsonl` and get
+harvested exactly the same way. Resume is also supported directly
+(`Workflow({scriptPath, resumeFromRunId})`), which replays completed agents
+from cache and only re-runs what never finished.
+
+### Session A running order
+
+1. **Keyed-by-entity sweep, lead-direct** (above). Verify + commit before anything launches.
+2. **Founder approval for the two lane launches** (standing rule, per named run).
+3. **Lanes 1 + 2 launch**, Mode B via `scripts/launch-lane.sh`, each verifying its **blocker+high first** (26 across both), then fixing survivors, screenshot-gated.
+4. **Mediums/lows verified in the background** while fixes land.
+5. Lead merge-gates each lane on rebase + `npm run verify` on merged main.
+
+Session B repeats 2–5 for lanes 3 + 4, starting from a main that already has
+the sweep.
