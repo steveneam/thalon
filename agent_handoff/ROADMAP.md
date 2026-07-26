@@ -189,7 +189,24 @@ Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between ses
   engine door = this bucket, built only when chartered.
 
 - **B-media.0 — SOURCE MEDIA ON EVERY SURFACE (thumbnails) — ✅ PLANNED s75,
-  AWAITING THE FOUNDER'S VERDICT (no code shipped, by design)**. The plan is
+  ✅ VERDICTED s76: THE FOUNDER APPROVED IT, TARGET s77.** His words: *"my
+  verdict on b-media is that its worth doing right? maybe next session"*.
+  The proposal sheet's do-not-port bar is lifted (README section updated in
+  the same change). **No re-ask was needed on the plan's one open question:**
+  his s75 ruling (*"also have placeholder until bmedia ready"*) already
+  settles §1-iii — Approve/Runs/Create/Dashboard keep honest striped
+  placeholders until B-media proper (the operator import door, the charter
+  candidate above) gives drafts real media. **THE SEQUENCING CONSTRAINT that
+  survives the verdict:** plan step 1 is a CONTRACT WINDOW — `meta.posterRef`
+  plus the oEmbed `thumbnail_width/height` we already parse and discard,
+  derived into `orientation` — and a window must be FROZEN BEFORE any lane
+  launches against it. So s77 opens the window first, then builds
+  `<SourceThumb>` and migrates the FOUR surfaces that already resolve real
+  media (Transcription · Intel · Videos/Dossier · Sites), which is pure
+  consolidation verifiable against two surfaces that already work. Other
+  queued window candidates that could ride the same freeze rather than wait
+  for another: Runs' Retry replay route (rendered but unarmed, s74) and
+  Library's "grounds N drafts" count (s74). The plan is
   `docs/research/source-media-plan.md`; the proposal sheet is
   `mock-sheets/Source Media.dc.html`, filed under the README's new
   "Proposals — NOT yet verdicted (do not port)" section. **The correction it

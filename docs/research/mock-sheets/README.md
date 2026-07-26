@@ -95,6 +95,19 @@ question. They are drawn in the sheets' language and live on the same
 canvas, but **no lane may port one until the founder has ruled on it** —
 they carry open questions on purpose.
 
+- ~~**`Source Media.dc.html`**~~ — **VERDICTED s76, MOVED OUT OF THIS SECTION.
+  The founder ruled it worth doing** (*"my verdict on b-media is that its
+  worth doing right? maybe next session"*), so the do-not-port bar is LIFTED
+  and it is a portable sheet like any other. Its one open question needed no
+  re-ask: his s75 ruling (*"also have placeholder until bmedia ready"*)
+  already answers it — Approve/Runs/Create/Dashboard keep honest striped
+  placeholders until B-media proper gives drafts real media. **Sequencing
+  constraint that survives the verdict:** step 1 of the plan is a CONTRACT
+  WINDOW (`meta.posterRef`, and the discarded oEmbed
+  `thumbnail_width/height` → a derived `orientation`), and windows freeze
+  BEFORE lanes launch — so the window opens first, then the build. Details
+  below stand as written.
+
 - **`Source Media.dc.html`** (s75, B-media.0, founder-directed s74: *"the
   media thumbnails … needs a proper and clever UI/UX with the source
   thumbnails … see how others do it"*) — the source-thumbnail component
