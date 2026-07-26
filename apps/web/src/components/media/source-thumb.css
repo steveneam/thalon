@@ -1,0 +1,151 @@
+/*
+ * <SourceThumb>'s OWN atomics — ported from the founder-verdicted sheet
+ * (docs/research/mock-sheets/Source Media.dc.html, `<helmet data-dc-atomics>`)
+ * per DOCTRINE 0. Shared classes (.thumb-sm/.thumb-md/.thumb-lg) come from
+ * src/app/app/workspace.css READ-ONLY and are never restated here.
+ *
+ * Deliberate adaptations, each named (s73-close lane rule (ii)):
+ *
+ *  1. THE SHEET'S `.tb` IS NOT USED. The sheet draws its own box atomic
+ *     (`.tb`/`.tb-sm`/`.tb-md`/`.tb-lg`) because an artboard has no shell to
+ *     borrow from. The app HAS one, and four surfaces already override the
+ *     shared box legitimately — `.approve-surface .q-row .thumb-sm`,
+ *     `.editor-surface .take .thumb-md` (118×68), `.dossier-surface .ver
+ *     .thumb-sm` (52×33), `.site-dossier-surface .clipcard .thumb-md`
+ *     (148×92). Rendering `.tb` would silently flatten all four. So the
+ *     component renders the SHARED class and every state below hangs off the
+ *     additive `.src-thumb` hook. The rendered result is the sheet's.
+ *  2. `position: relative` lives on `.src-thumb`, not on `.thumb-*`. The
+ *     shared classes need a positioning context for the fills, and putting it
+ *     here rather than in workspace.css keeps that file untouched (rule 6)
+ *     while every per-surface size override keeps applying.
+ *  3. EMPTY IS THE BARE BOX. The sheet separates `.tb` from `.tb-striped`;
+ *     the shipped `.thumb-*` classes already bake the stripe in, so the empty
+ *     state is the shared box with nothing over it — which is what ships
+ *     today and what the sheet keeps. The other states COVER that stripe.
+ *  4. The backdrop is a real <img> rather than the sheet's CSS gradient
+ *     stand-in: the sheet could only mock "a blurred dim of itself" with a
+ *     gradient, and the actual artifact is the media blurred behind itself.
+ */
+
+.src-thumb {
+  position: relative;
+}
+
+/* ── resolved ─────────────────────────────────────────────────────── */
+
+/*
+ * Landscape covers: a 16:9 poster loses ~10% of its width in a 1.6 box,
+ * inside the central-80% safe area creators already design for.
+ */
+.src-thumb-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/*
+ * Portrait CONTAINS instead — cover-cropping a 9:16 Short discards ~65% of
+ * the frame height and reliably cuts the subject's head off. The box does not
+ * change size, so the row rhythm holds.
+ */
+.src-thumb-contain {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* The media's own blurred dim, filling the space contain leaves at the sides. */
+.src-thumb-backdrop {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  object-fit: cover;
+  filter: blur(9px) saturate(0.55);
+  opacity: 0.42;
+  display: block;
+}
+
+/* ── broken: we had a URL and it died ─────────────────────────────── */
+
+/*
+ * Flat, not striped. "Never had media" and "had media and lost it" are
+ * different facts about the source and must never look alike — the first is
+ * permanent and correct, the second is something an operator may want to act
+ * on. The solid ground is what tells them apart at a glance.
+ */
+.src-thumb-broken {
+  background: var(--n-100);
+}
+
+.src-thumb-legend {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: var(--n-700);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+}
+
+.thumb-md.src-thumb-broken .src-thumb-legend,
+.thumb-lg.src-thumb-broken .src-thumb-legend {
+  font-size: 10px;
+}
+
+.src-thumb-slash {
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--n-600);
+  border-radius: 3px;
+  position: relative;
+}
+
+.src-thumb-slash::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 6px;
+  width: 19px;
+  height: 1px;
+  background: var(--n-600);
+  transform: rotate(-38deg);
+}
+
+/* ── loading: the box reserved, bytes in flight ───────────────────── */
+
+.src-thumb-load {
+  background: var(--n-100);
+}
+
+.src-thumb-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, var(--n-200) 50%, transparent 80%);
+  animation: src-thumb-sweep 1.4s linear infinite;
+}
+
+@keyframes src-thumb-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .src-thumb-shimmer {
+    animation: none;
+    opacity: 0.5;
+  }
+}

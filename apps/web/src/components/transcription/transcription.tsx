@@ -10,6 +10,7 @@ import {
   transcriptStamp,
   webOrigin,
 } from "@/components/transcription/transcription-model";
+import { SourceThumb } from "@/components/media/source-thumb";
 import { deleteSource, fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
 import {
   EXPORT_BUILDERS,
@@ -327,21 +328,11 @@ export function Transcription() {
                     if (event.key === "Enter") void openSource(row);
                   }}
                 >
-                  {/* Media-first: the oEmbed thumbnail when the ingest captured
-                      one, the sheet's striped placeholder when it didn't. */}
-                  <div className="thumb-sm">
-                    {row.thumbnailUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- remote oEmbed host, unoptimized by design
-                      <img
-                        src={row.thumbnailUrl}
-                        alt=""
-                        loading="lazy"
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    ) : (
-                      <span>video</span>
-                    )}
-                  </div>
+                  {/* Media-first, through the one component (B-media.0): the
+                      resolved oEmbed poster, contained when it is portrait,
+                      the striped box when the source never had media, and a
+                      distinct "gone" when the poster died on the platform. */}
+                  <SourceThumb resolution={row.media} legend="video" />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="src-lead">{sourceLead(row)}</div>
                     <div className="excerpt" title={relevance?.reason}>

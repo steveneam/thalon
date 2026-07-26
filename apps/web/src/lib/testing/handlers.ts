@@ -65,7 +65,7 @@ export function seedLibraryRow(
   const full: LibrarySourceRow = {
     id: `test-lib-${++librarySeq}`,
     title: null,
-    thumbnailUrl: null,
+    media: { state: "empty" },
     tags: [],
     areaRelevance: [],
     provider: "hosted-vendor",

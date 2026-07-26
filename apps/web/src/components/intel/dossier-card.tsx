@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DossierView } from "@/components/intel/intel-model";
+import { SourceThumb } from "@/components/media/source-thumb";
 import type { CreateFamily } from "@/lib/intel/types";
 
 /** The three per-family exits, in the sheet's order; the suggested one leads as the primary. */
@@ -108,21 +109,9 @@ export function DossierCard({
               <span>{card.prov.areaName}</span>
             </div>
           </div>
-          {/* Media-first: the platform thumbnail when a driver captured one,
-              the sheet's striped placeholder when it honestly didn't. */}
-          <div className="thumb-md">
-            {card.thumbnailUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- remote platform media, no loader
-              <img
-                src={card.thumbnailUrl}
-                alt=""
-                loading="lazy"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            ) : (
-              <span>{card.thumbLabel}</span>
-            )}
-          </div>
+          {/* Media-first, through the one component (B-media.0): the driver's
+              captured thumbnail, the striped box when it honestly had none. */}
+          <SourceThumb resolution={card.media} legend={card.thumbLabel} size="md" />
         </div>
 
         <div

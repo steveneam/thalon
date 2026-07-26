@@ -69,11 +69,21 @@ describe("MediaRef — where the bytes live", () => {
 });
 
 describe("the envelope — who put it there", () => {
-  it("requires a provenance and a capture time", () => {
+  it("always requires a provenance — media with no stated origin is media we borrowed", () => {
     const ref = { kind: "external" as const, url: "https://cdn.test/a.jpg" };
     expect(mediaRefEnvelopeSchema.safeParse({ ref, capturedAt: AT }).success).toBe(false);
-    expect(mediaRefEnvelopeSchema.safeParse({ ref, provenance: "captured" }).success).toBe(false);
     expect(mediaRefEnvelopeSchema.safeParse({ ref, provenance: "invented", capturedAt: AT }).success).toBe(false);
+  });
+
+  /**
+   * capturedAt is OPTIONAL, and the reason is on the record: requiring it made
+   * the trend wire drop a thumbnail it genuinely held, because its sweep stamp
+   * is not always plumbed. Absent means "we did not record when" — a fact. A
+   * fabricated timestamp would not be, and a hidden poster serves no one.
+   */
+  it("allows an unrecorded capture time but never a malformed one", () => {
+    const ref = { kind: "external" as const, url: "https://cdn.test/a.jpg" };
+    expect(mediaRefEnvelopeSchema.safeParse({ ref, provenance: "captured" }).success).toBe(true);
     expect(mediaRefEnvelopeSchema.safeParse({ ref, provenance: "captured", capturedAt: "yesterday" }).success).toBe(
       false,
     );

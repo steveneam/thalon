@@ -96,8 +96,9 @@ describe("intel view model (the sheet's own rows, built from the wire)", () => {
       sourceLabel: "Bluesky",
       areaName: "Short-form video tooling",
     });
-    // No driver thumbnail on demo cards — the sheet's placeholder legend stands in.
-    expect(view.thumbnailUrl).toBeUndefined();
+    // No driver thumbnail on demo cards — the sheet's placeholder legend
+    // stands in, and the resolution says `empty` rather than inventing one.
+    expect(view.media).toEqual({ state: "empty" });
     expect(view.thumbLabel).toBe("post media");
     // A bluesky item is not video-native, so the suggested exit is the post door.
     expect(view.suggested.family).toBe("post");

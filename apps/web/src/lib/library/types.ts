@@ -5,6 +5,8 @@
  * these, so the client bundle never imports engine types.
  */
 
+import type { MediaResolution } from "@/lib/media/resolve";
+
 /** One timed transcript segment on the wire — untimed (plain-text) ingests carry no startMs/endMs. */
 export interface WireSegment {
   text: string;
@@ -31,8 +33,13 @@ export interface LibrarySourceRow {
   uri: string | null;
   /** oEmbed title (sources.meta.title, mini-contract) — null on pre-rider rows: the URL stays the row's identity. */
   title: string | null;
-  /** oEmbed thumbnail (sources.meta.thumbnailUrl) — the Source-Link Rule's visual identity; null on pre-rider rows and non-visual sources. */
-  thumbnailUrl: string | null;
+  /**
+   * The row's media, already RESOLVED (B-media.0): the Source-Link Rule's
+   * visual identity as one state the surface renders rather than a URL it has
+   * to interpret. `empty` on pre-rider rows and on non-visual sources — which
+   * is the truth about them, not a degradation.
+   */
+  media: MediaResolution;
   /** Operator-set tags (sources.meta.tags) — empty on pre-rider rows. */
   tags: string[];
   /** Relevance to monitored areas (sources.meta.areaRelevance) — empty until the engine scores it. */

@@ -1,6 +1,7 @@
 import type { Source } from "@thalon/db";
 import { registeredTranscriptProviders } from "@thalon/engine";
 import { readEnv } from "@thalon/platform";
+import { resolveSourceMedia } from "@/lib/media/resolve";
 import type { AreaRelevance, LibrarySourceRow, TranscriptSeamStatus } from "./types";
 
 /** meta.tags per the mini-contract is string[]; anything else degrades to none — never invented. */
@@ -36,10 +37,10 @@ export function toLibraryRow(source: Source): LibrarySourceRow {
     id: source.id,
     uri: source.uri,
     title: typeof meta.title === "string" && meta.title.trim() !== "" ? meta.title : null,
-    thumbnailUrl:
-      typeof meta.thumbnailUrl === "string" && /^https:\/\//.test(meta.thumbnailUrl)
-        ? meta.thumbnailUrl
-        : null,
+    // One resolver, one place — the surface receives a state, never a URL to
+    // interpret. The https rule that used to live inline here now lives in
+    // the contract, so the writer and every reader share it.
+    media: resolveSourceMedia(source),
     tags: readTags(meta.tags),
     areaRelevance: readAreaRelevance(meta.areaRelevance),
     provider: typeof meta.transcriptProvider === "string" ? meta.transcriptProvider : null,

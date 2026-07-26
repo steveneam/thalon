@@ -32,6 +32,28 @@ const COMPONENTS = path.resolve(dirname, "../../components");
 /** `.foo-surface`, optionally followed by more selector. */
 const SCOPED = /^\.[a-z][\w-]*-surface\b/;
 
+/**
+ * SHARED COMPONENT stylesheets — a second, equally strict category (B-media.0,
+ * s77).
+ *
+ * `<SourceThumb>` is deliberately NOT a surface: it is one component that four
+ * surfaces render, which is the entire point of consolidating three
+ * copy-pasted `<img>` blocks. Surface-scoping its rules is therefore
+ * impossible (it has no single surface root), and dumping them into
+ * workspace.css would push component internals into the shell contract.
+ *
+ * So this category carries its own guarantee, and it is not a weaker one:
+ * every selector in the file must carry the component's OWN unique namespace
+ * prefix. Where surface scoping prevents collisions by fencing a surface, this
+ * prevents them by owning a name nothing else uses — checked, not assumed.
+ *
+ * The map is explicit on purpose: adding a shared component stylesheet is one
+ * reviewable line here, never an escape hatch that silently widens.
+ */
+const SHARED_COMPONENT_SHEETS: Record<string, string> = {
+  "media/source-thumb.css": "src-thumb",
+};
+
 function surfaceStylesheets(): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(COMPONENTS, { withFileTypes: true })) {
@@ -73,10 +95,33 @@ describe("surface-css scope ratchet (mock-sheets README rule 6)", () => {
     expect(sheets.length).toBeGreaterThan(0);
   });
 
+  it("every declared shared-component stylesheet exists and owns a unique namespace", () => {
+    // A guard on the guard: a renamed or deleted shared sheet must fail here
+    // rather than quietly leaving its category unpoliced.
+    const found = sheets.map((f) => path.relative(COMPONENTS, f).split(path.sep).join("/"));
+    for (const rel of Object.keys(SHARED_COMPONENT_SHEETS)) expect(found).toContain(rel);
+  });
+
+  it("every rule in a shared-component stylesheet carries that component's namespace", () => {
+    const unnamespaced: string[] = [];
+    for (const [rel, prefix] of Object.entries(SHARED_COMPONENT_SHEETS)) {
+      const css = readFileSync(path.join(COMPONENTS, rel), "utf8");
+      for (const sel of selectorsOf(css)) {
+        if (!sel.includes(`.${prefix}`)) unnamespaced.push(`${rel}: ${sel}`);
+      }
+    }
+    expect(
+      unnamespaced,
+      "a shared-component stylesheet rule that does not carry the component's own namespace — it can collide with any surface. Prefix the class, or move a genuinely shared class to app/app/workspace.css.",
+    ).toEqual([]);
+  });
+
   it("every rule in a per-surface stylesheet is scoped under its surface root class", () => {
     const unscoped: string[] = [];
     for (const file of sheets) {
       const rel = path.relative(COMPONENTS, file).split(path.sep).join("/");
+      // Shared component sheets are policed by namespace above, not by surface.
+      if (rel in SHARED_COMPONENT_SHEETS) continue;
       for (const sel of selectorsOf(readFileSync(file, "utf8"))) {
         if (!SCOPED.test(sel)) unscoped.push(`${rel}: ${sel}`);
       }

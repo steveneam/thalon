@@ -1,7 +1,26 @@
 import { heatBand } from "@/components/intel/heat-grade";
 import { compactCount, freshnessStamp, suggestedExit } from "@/components/intel/launchpad";
 import { timeAgo, timeUntil } from "@/lib/workspace/format";
+import { resolveTrendItemMedia, type MediaResolution } from "@/lib/media/resolve";
 import type { AreaRow, CreateFamily, TrendCard, TrendsPayload } from "@/lib/intel/types";
+
+/**
+ * A trend card's media (B-media.0). Drivers pass a platform thumbnail
+ * through and never synthesize one, so a card without a thumbnail resolves
+ * `empty` and the sheet's legend stands in.
+ *
+ * The sweep stamp rides along when the read plumbed it and is simply absent
+ * otherwise — it is provenance metadata, never a gate. Gating the thumbnail
+ * on it would hide a poster we actually hold to protect a field nobody reads.
+ */
+function trendCardMedia(card: TrendCard): MediaResolution {
+  return resolveTrendItemMedia({
+    thumbnailUrl: card.thumbnailUrl,
+    thumbnailWidth: card.thumbnailWidth,
+    thumbnailHeight: card.thumbnailHeight,
+    capturedAt: card.capturedAt,
+  });
+}
 
 /**
  * The view model the Intel sheet draws (Intel.dc.html). Every field here is
@@ -46,8 +65,8 @@ export interface DossierView {
     url?: string;
     areaName: string;
   };
-  /** A real platform thumbnail when the driver captured one; never synthesized. */
-  thumbnailUrl?: string;
+  /** The card's media, already resolved (B-media.0) — never synthesized for demo cards. */
+  media: MediaResolution;
   /** The sheet's placeholder legend inside the striped thumb. */
   thumbLabel: string;
   reasons: ReasonView[];
@@ -62,7 +81,7 @@ export interface DossierView {
 export interface RisingView {
   id: string;
   band: { word: string; pill: string };
-  thumbnailUrl?: string;
+  media: MediaResolution;
   thumbLabel: string;
   text: string;
   /** "YouTube · 12.1k · 5h ago" — the row's mono data stamp. */
@@ -179,7 +198,7 @@ export function toDossierView(card: TrendCard, now: number = Date.now()): Dossie
       url: card.url,
       areaName: card.areaName,
     },
-    thumbnailUrl: card.thumbnailUrl,
+    media: trendCardMedia(card),
     thumbLabel: thumbLabel(card, true),
     reasons: reasonViews(card.reasons),
     titles: card.dossier?.titles ?? [],
@@ -195,7 +214,7 @@ export function toRisingView(card: TrendCard, now: number = Date.now()): RisingV
   return {
     id: card.id,
     band: { word: band.word, pill: band.pill },
-    thumbnailUrl: card.thumbnailUrl,
+    media: trendCardMedia(card),
     thumbLabel: thumbLabel(card, false),
     text: card.text,
     data: [sourceLabel(card.source), views === null ? null : compactCount(views), timeAgo(card.publishedAt, now)]

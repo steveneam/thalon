@@ -28,13 +28,17 @@ export async function readLiveSweep(tenantId: string): Promise<SweepBundle | nul
   return readSweepBundle(tenantId);
 }
 
-export function toTrendCard(card: SweepCard): TrendCard {
+export function toTrendCard(card: SweepCard, sweptAtMs?: number): TrendCard {
   return {
     id: card.id,
     source: card.source,
     externalId: card.externalId,
     url: card.url,
     thumbnailUrl: card.thumbnailUrl,
+    // When WE saw this ref, which is what a captured thumbnail's provenance
+    // means — not when the platform published the item. Absent on fixture
+    // cards, which is honest: nothing swept them.
+    ...(sweptAtMs === undefined ? {} : { capturedAt: new Date(sweptAtMs).toISOString() }),
     text: card.text,
     account: card.account,
     publishedAt: new Date(card.publishedAtMs).toISOString(),
@@ -51,7 +55,17 @@ export function toTrendCard(card: SweepCard): TrendCard {
 
 /** The merged live cards, wire-shaped — score-ordered union across every swept source. */
 export function mergedTrendCards(bundles: readonly SweepBundle[]): TrendCard[] {
-  return mergeSweepCards(bundles).map(toTrendCard);
+  // The merge flattens bundles and keeps the highest-scoring instance of an
+  // id, so the owning bundle's sweep stamp is lost by the time we map. Carry
+  // it here: for an id seen in several sweeps the LATEST stamp is the honest
+  // answer, since that is when we most recently saw the ref alive.
+  const sweptAtMs = new Map<string, number>();
+  for (const bundle of bundles) {
+    for (const card of bundle.cards) {
+      sweptAtMs.set(card.id, Math.max(sweptAtMs.get(card.id) ?? 0, bundle.sweptAtMs));
+    }
+  }
+  return mergeSweepCards(bundles).map((card) => toTrendCard(card, sweptAtMs.get(card.id)));
 }
 
 /** Card lookup for the action routes (dismiss/promote): EVERY source's live bundle; null falls back to the fixture path. */

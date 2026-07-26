@@ -157,8 +157,19 @@ export type MediaProvenance = (typeof MEDIA_PROVENANCES)[number];
 /** Envelope fields shared by every family; the `ref` is supplied per family below. */
 const envelopeFields = {
   provenance: z.enum(MEDIA_PROVENANCES),
-  /** When the ref was WRITTEN — not when the underlying media was made. */
-  capturedAt: z.iso.datetime({ offset: true }),
+  /**
+   * When the ref was WRITTEN — not when the underlying media was made.
+   *
+   * OPTIONAL, and that is a deliberate amendment made while this window was
+   * still the owner's (s77, pre-lane). Requiring it forced every call site to
+   * either invent a timestamp or drop media it genuinely holds: the trend
+   * wire carries a captured thumbnail whose sweep stamp is not always plumbed
+   * through, and the first draft of this contract answered that by rendering
+   * `empty` — hiding a real poster to protect a field nobody was reading.
+   * Absent means "we did not record when", which is a fact; a fabricated time
+   * would not be, and a hidden thumbnail serves no one.
+   */
+  capturedAt: z.iso.datetime({ offset: true }).optional(),
   /**
    * Alt text. ABSENT means decorative (the consumer renders `aria-hidden`),
    * which is a real editorial choice and not the same as an empty string —

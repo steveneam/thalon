@@ -15,7 +15,7 @@ function row(overrides: Partial<LibrarySourceRow> = {}): LibrarySourceRow {
     id: "11111111-1111-1111-1111-111111111111",
     uri: "https://youtube.com/watch?v=abc",
     title: null,
-    thumbnailUrl: null,
+    media: { state: "empty" },
     tags: [],
     areaRelevance: [],
     provider: null,

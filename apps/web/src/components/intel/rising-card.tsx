@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { RisingView } from "@/components/intel/intel-model";
+import { SourceThumb } from "@/components/media/source-thumb";
 
 /**
  * The "More rising" card, ported 1:1 from Intel.dc.html: one compact row per
@@ -52,19 +53,7 @@ export function RisingCard({
             className={selectedId === row.id ? "row sel" : "row"}
           >
             <span className={`pill ${row.band.pill}`}>{row.band.word}</span>
-            <div className="thumb-sm">
-              {row.thumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- remote platform media, no loader
-                <img
-                  src={row.thumbnailUrl}
-                  alt=""
-                  loading="lazy"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <span>{row.thumbLabel}</span>
-              )}
-            </div>
+            <SourceThumb resolution={row.media} legend={row.thumbLabel} />
             <button
               type="button"
               className="row-open"

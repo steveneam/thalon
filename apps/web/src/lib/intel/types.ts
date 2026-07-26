@@ -47,6 +47,11 @@ export interface TrendCard {
   url?: string;
   /** Platform thumbnail for visual origins (Source-Link Rule) — absent until a live driver provides one; never synthesized for demo cards. */
   thumbnailUrl?: string;
+  /** Intrinsic size of that thumbnail when the platform reported it — what decides crop vs contain (B-media.0). */
+  thumbnailWidth?: number;
+  thumbnailHeight?: number;
+  /** When the sweep that carried this thumbnail ran — the ref's provenance stamp, not the item's publish time. */
+  capturedAt?: string;
   text: string;
   account: string;
   publishedAt: string;

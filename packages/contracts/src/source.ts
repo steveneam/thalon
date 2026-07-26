@@ -67,7 +67,7 @@ export type SourceMediaMeta = z.infer<typeof sourceMediaMetaSchema>;
  */
 export function sourceThumbnailEnvelope(
   meta: unknown,
-  capturedAt: Date | string,
+  capturedAt?: Date | string,
 ): ImageRefEnvelope | null {
   const parsed = sourceMediaMetaSchema.safeParse(meta ?? {});
   if (!parsed.success) return null;
@@ -85,6 +85,8 @@ export function sourceThumbnailEnvelope(
         : {}),
     },
     provenance: "captured",
-    capturedAt: typeof capturedAt === "string" ? capturedAt : capturedAt.toISOString(),
+    ...(capturedAt === undefined
+      ? {}
+      : { capturedAt: typeof capturedAt === "string" ? capturedAt : capturedAt.toISOString() }),
   };
 }
