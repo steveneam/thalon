@@ -514,3 +514,38 @@ field fix (first real versioned call found it dead) · main-RED #4 fixed
 cap raises documented in .env.local; month-end reset queued).
 
 Prior sessions: `COORDINATION.md` close messages.
+
+- **B-sites.1 — DEEPEN THE SITES SURFACE [FOUNDER-DIRECTED s75: "can you
+  also plan to have the Sites feature a bit more built as well. there
+  thumbnails seem broken, and clicking on one of them seem to take me to the
+  old design. there were some good features from the old design, so see if
+  you can add them back in now that the design structure is in place"]** —
+  prepped as the `sites-deepen` lane for s76. Both of his observations were
+  CONFIRMED by the lead before the kickoff was written:
+  (a) *the broken thumbnails are an ORIGIN bug, not a rendering one.*
+      `lib/sites/provider.ts` hardcodes
+      `DEV_PREVIEW_ORIGIN = "http://127.0.0.1:8899"`, and both the gallery
+      card images and the dossier iframe resolve against it. All 20 load on
+      the box; from any other machine `127.0.0.1` is the VIEWER's loopback,
+      so every one breaks. `SITES_PREVIEW_ORIGIN` overrides it, but the real
+      fix is same-origin serving through the app (a thin
+      `/api/sites/preview/[...path]` proxy) or catalog-time poster capture —
+      the latter would also feed B-media.0's poster work. One or the other,
+      never both.
+  (b) *the dossier really is the old design.* `components/sites/site-dossier.tsx`
+      has not been touched since s61 and still carries 19 bridged legacy
+      tokens (it is pinned at exactly that in `bridge-burndown.test.ts`), so
+      clicking a card leaves the mock's language entirely. **It has NO
+      sheet** — the precedent is Intel's Search tab (s74): DESIGN it in the
+      sheets' language rather than port it, keeping every capability the old
+      one has (live preview + desktop/390 toggles, the site record, manifest
+      mint facts with dims and pinned-hash tails, /guide links, verdict
+      status).
+  (c) *the old gallery's good features* — the estate lane already carried
+      the facet filtering and count honesty across, so the lane VERIFIES
+      that before assuming a gap, then mines the deleted
+      `sites-gallery.tsx` history for what genuinely did not come over and
+      re-enters it behind byte-true resting chrome (the re-entry rule).
+  Note Sites is the one surface with REAL preview media, which is why its
+  origin fix is worth doing while every other surface's thumbnails stay
+  placeholders until B-media (founder s75).
