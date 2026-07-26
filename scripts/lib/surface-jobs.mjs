@@ -317,25 +317,47 @@ export const JOBS = {
       {
         name: "tell the two grounding tiers apart in the reasons panel",
         async run(page) {
-          const row = await page.$(".row, .draft-card, [class*='draft']");
-          if (!row) throw new NoAffordance("no draft rows in the queue");
-          await press(page, row, "a draft row");
-          // Read the RENDERED LINES, not leaf nodes: "Grounding — screen" is a
-          // label with nested markup, so a `children.length === 0` filter missed
-          // it entirely and this job reported "no affordance" on a panel that
-          // has two grounding rows.
+          // A BLOCKED draft: the tiers can only be seen to disagree where a
+          // gate actually failed, so picking the first row of any kind is not
+          // enough to exercise this.
+          const row = await page.evaluateHandle(() => {
+            const rows = Array.from(document.querySelectorAll(".row"));
+            return rows.find((r) => /blocked|needs edit/i.test(r.textContent || "")) || rows[0] || null;
+          });
+          const exists = await row.evaluate((el) => Boolean(el));
+          if (!exists) throw new NoAffordance("no draft rows in the queue");
+          await press(page, row, "a blocked draft row");
+          /**
+           * Read the PANEL'S OWN gate column (`.reason-gate`), on a BLOCKED
+           * draft, after opening "reasons on record".
+           *
+           * Two earlier versions of this job were wrong, and the second was
+           * worse than the first. v1 filtered leaf nodes and reported "no
+           * affordance" on a panel that has three gate rows. v2 read
+           * `body.innerText` for lines starting with "Grounding", found
+           * "Grounding — screen" / "Grounding — final" somewhere else on the
+           * surface, and reported the job as WORKING — while the panel's own
+           * column really did read Denylist / Grounding / Grounding. Lane 4
+           * measured it correctly and this harness contradicted it; the harness
+           * was wrong. Read the element the defect lives in, on the row that
+           * exhibits it.
+           */
+          await page.evaluate(() => {
+            const btn = Array.from(document.querySelectorAll("button, summary, a")).find((b) =>
+              /reasons on record/i.test(b.textContent || ""),
+            );
+            btn?.click();
+          });
+          await page.waitForNetworkIdle({ idleTime: 400, timeout: 5_000 }).catch(() => {});
           const labels = await page.evaluate(() =>
-            document.body.innerText
-              .split("\n")
-              .map((l) => l.trim())
-              .filter((l) => /^grounding\b/i.test(l)),
+            Array.from(document.querySelectorAll(".reason-gate")).map((e) => (e.textContent || "").trim()),
           );
-          if (labels.length === 0) throw new NoAffordance("no grounding rows in the reasons panel");
-          const unique = new Set(labels.map((l) => l.toLowerCase()));
-          if (labels.length > 1 && unique.size === 1) {
-            throw new DeadDoor(`${labels.length} grounding rows share one label ${JSON.stringify(labels[0])} — the two tiers that can disagree are indistinguishable`);
+          if (labels.length === 0) throw new NoAffordance("no gate rows in the reasons panel");
+          const dupes = labels.filter((l, i) => labels.indexOf(l) !== i);
+          if (dupes.length > 0) {
+            throw new DeadDoor(`the gate column reads ${labels.join(" / ")} — ${JSON.stringify(dupes[0])} appears twice, so the two tiers that can DISAGREE are indistinguishable`);
           }
-          return `${labels.length} grounding row(s): ${labels.join(" / ")}`;
+          return `gate column distinguishes every row: ${labels.join(" / ")}`;
         },
       },
       {
