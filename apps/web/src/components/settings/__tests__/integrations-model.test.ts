@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  armedPill,
+  capabilityNote,
   cardActions,
   platformGlyph,
   probeLine,
@@ -23,6 +25,8 @@ function card(overrides: Partial<WireIntegrationCard> = {}): WireIntegrationCard
     validatedAt: null,
     expiresAt: null,
     envOverride: false,
+    armed: null,
+    armedReason: null,
     fields: [{ key: "accessToken", optional: false }],
     ...overrides,
   };
@@ -151,5 +155,69 @@ describe("integrations model (exact-mock rebuild)", () => {
     expect(seatRows(status({}, "unconfigured"))[2].value).toBe(
       "openai/text-embedding-3-small · gateway unconfigured — this seat can’t run",
     );
+  });
+});
+
+/**
+ * s78 — the two facts the card was missing, both of them about whether
+ * anything will actually post.
+ */
+describe("ARMED is the top rung of the ladder the card already enumerates", () => {
+  it("a connected-but-unarmed social seat says so, in words, with its reason", () => {
+    const seat = card({
+      state: "connected",
+      connectedAs: "@thalon",
+      armed: false,
+      armedReason: 'not armed — the active profile\'s social block has no "linkedin" entry',
+    });
+    const pill = armedPill(seat);
+    expect(pill?.text).toBe("Not armed");
+    // Colour is never the only channel.
+    expect(pill?.className).toContain("pill-warn");
+  });
+
+  it("an armed seat says Armed", () => {
+    const pill = armedPill(
+      card({
+        state: "connected",
+        armed: true,
+        armedReason: "armed by the active profile's social block",
+      }),
+    );
+    expect(pill?.text).toBe("Armed");
+    expect(pill?.className).toContain("pill-ok");
+  });
+
+  it("a destination that never posts claims no arming state at all", () => {
+    expect(armedPill(card({ destination: "website_hosted", class: "website", state: "connected" }))).toBeNull();
+    // …and neither does an unconnected social seat: it is not yet a question.
+    expect(armedPill(card({ state: "not_connected", armed: false, armedReason: "no stored credential to arm" }))).toBeNull();
+  });
+});
+
+describe("CAPABILITY — what the driver can do is not what the credential says", () => {
+  it("Instagram carries the sheet's own caveat, in every state, before any paste", () => {
+    const note = capabilityNote(card({ destination: "instagram", class: "social" }));
+    expect(note).toMatch(/needs image or video media/);
+    expect(note).toMatch(/nothing posts from here yet/);
+  });
+
+  it("a driver that cannot post never claims the class verb 'Posting as'", () => {
+    const ig = card({
+      destination: "instagram",
+      class: "social",
+      label: "Instagram",
+      driver: "instagram-text-refusal",
+      state: "connected",
+      connectedAs: "@thalon",
+    });
+    expect(subLine(ig, NOW)).toContain("Connected as @thalon");
+    expect(subLine(ig, NOW)).not.toContain("Posting as");
+  });
+
+  it("a driver that CAN post still says Posting as", () => {
+    const li = card({ state: "connected", connectedAs: "@steven" });
+    expect(subLine(li, NOW)).toContain("Posting as @steven");
+    expect(capabilityNote(li)).toBeNull();
   });
 });

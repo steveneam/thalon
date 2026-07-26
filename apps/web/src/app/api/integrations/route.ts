@@ -1,3 +1,4 @@
+import { socialPublishConfigSchema } from "@thalon/contracts";
 import { listIntegrationCards } from "@thalon/engine";
 import { readEnv } from "@thalon/platform";
 import { NextResponse } from "next/server";
@@ -20,7 +21,18 @@ export async function GET() {
   }
   try {
     const { features } = await repos.entitlements.getEffective(ctx);
-    const cards = await listIntegrationCards({ repos, ctx, env: readEnv() }, { features });
+    // s78: arming is tenant DATA (the active profile's social block), and the
+    // card states it — so the read carries it in. A malformed stored block
+    // disarms rather than throwing: the surface must still render.
+    const profile = await repos.brandProfiles.getActive(ctx);
+    const parsedSocial =
+      profile?.social === undefined || profile.social === null
+        ? null
+        : socialPublishConfigSchema.safeParse(profile.social);
+    const cards = await listIntegrationCards(
+      { repos, ctx, env: readEnv() },
+      { features, socialConfig: parsedSocial?.success ? parsedSocial.data : null },
+    );
     return NextResponse.json({
       cards: cards.map((card) => ({
         ...card,

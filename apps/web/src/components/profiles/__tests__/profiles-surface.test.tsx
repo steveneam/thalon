@@ -225,6 +225,50 @@ describe("Profiles (exact-mock rebuild — Profiles.dc.html)", () => {
     expect(saves[0].voice.tone).toBe("direct, technical, no hype");
   });
 
+  /**
+   * s78 — the review row must state what the SAVE will write. It used to
+   * derive its own answer from the STORED tone, so it lied in both
+   * directions: it printed a free-text register the save was about to
+   * delete, and it printed derived chips the save was about to discard.
+   */
+  it("clearing every chip says the tone is going, and the save agrees", async () => {
+    const profile = activeProfile({
+      voice: { tone: "direct, technical, no hype", sample: "" },
+    } as Partial<ProfileWire["config"]>);
+    const { saves } = seedProfile(profile);
+    const user = userEvent.setup();
+    render(<ProfilesSurface />);
+
+    // The free text lights "No hype" and "Technical" by substring match.
+    await user.click(await screen.findByTestId("wizard-step-1"));
+    await user.click(screen.getByRole("button", { name: "No hype" }));
+    await user.click(screen.getByRole("button", { name: "Technical" }));
+
+    await goToReview(user);
+    expect(screen.getByText(/tone cleared — this save removes it/)).toBeInTheDocument();
+    expect(screen.queryByText(/direct, technical, no hype/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save v5" }));
+    await screen.findByRole("status");
+    expect("tone" in saves[0].voice).toBe(false);
+  });
+
+  it("an UNTOUCHED free-text tone reviews as the free text the save will keep, not as derived chips", async () => {
+    const profile = activeProfile({
+      voice: { tone: "direct, technical, no hype", sample: "" },
+    } as Partial<ProfileWire["config"]>);
+    const { saves } = seedProfile(profile);
+    const user = userEvent.setup();
+    render(<ProfilesSurface />);
+
+    await goToReview(user);
+    expect(screen.getByText(/direct, technical, no hype/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save v5" }));
+    await screen.findByRole("status");
+    expect(saves[0].voice.tone).toBe("direct, technical, no hype");
+  });
+
   it("picking chips writes them as the tone and keeps every other voice key", async () => {
     const profile = activeProfile({
       voice: { tone: ["Confident"], sample: "It has a build step.", persona: "the builder" },

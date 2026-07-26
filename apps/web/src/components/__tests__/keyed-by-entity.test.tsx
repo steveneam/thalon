@@ -269,6 +269,11 @@ describe("keyed by entity — state must not outlive the entity it describes", (
       validatedAt: null,
       expiresAt: null,
       envOverride: false,
+      // s78 lane 2 widened WireIntegrationCard with the arming rung; these
+      // two keep this fixture compiling. COMPILE-ONLY — no assertion here
+      // changed, and this pin still tests exactly what it always did.
+      armed: null,
+      armedReason: null,
       fields: [{ key: "accessToken", optional: false }],
     });
     server.use(

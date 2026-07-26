@@ -136,3 +136,45 @@ describe("listIntegrationCards", () => {
     expect(JSON.stringify(cards)).not.toContain("ciphertext");
   });
 });
+
+/**
+ * s78 — ARMED on the card. A credential can be perfectly healthy and post
+ * nothing, and the card enumerated every OTHER rung of "will this post" (the
+ * plan gate, expiry, re-auth, the env seat), which made it read as the
+ * complete ladder while omitting the top one.
+ *
+ * The derivation itself is pure and lives with the publish ratchet that
+ * shares it (`socialArmed`, social-arming.test.ts) — two spellings of
+ * "armed" would be two truths. This pins the WIRING: that the card carries
+ * the fact, and that only destinations which can post claim it.
+ */
+describe("listIntegrationCards — the arming rung (s78)", () => {
+  it("carries armed + its reason on social seats, and claims nothing on the rest", async () => {
+    await connectDestination(deps(), {
+      destination: "linkedin",
+      credentials: { accessToken: "tok-linkedin-value" },
+      connectedAs: "@thalon",
+    });
+
+    const cards = await listIntegrationCards(deps(), { features: ALL_ON, now: NOW });
+    const linkedin = cards.find((c) => c.destination === "linkedin");
+    expect(linkedin?.state).toBe("connected");
+    // Connected, and NOT armed — the two facts the card used to conflate.
+    expect(linkedin?.armed).toBe(false);
+    expect(linkedin?.armedReason).toContain("social block");
+
+    // Named in the tenant's social block, the same seat arms.
+    const armed = await listIntegrationCards(deps(), {
+      features: ALL_ON,
+      now: NOW,
+      socialConfig: { linkedin: { maxPostsPerDay: 1 } },
+    });
+    expect(armed.find((c) => c.destination === "linkedin")?.armed).toBe(true);
+
+    // Nothing that cannot post makes an arming claim.
+    for (const card of cards.filter((c) => c.class !== "social")) {
+      expect(card.armed).toBeNull();
+      expect(card.armedReason).toBeNull();
+    }
+  });
+});

@@ -27,6 +27,10 @@ export interface WireIntegrationCard {
   expiresAt: string | null;
   /** The box env fills this seat and takes precedence over the vault row. */
   envOverride: boolean;
+  /** Whether this seat is ARMED — the fact that decides if anything posts. `null` where the class never posts. */
+  armed: boolean | null;
+  /** Why armed reads as it does, in the operator's words. */
+  armedReason: string | null;
   fields: Array<{ key: string; optional: boolean }>;
 }
 

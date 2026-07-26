@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   assetEvents,
@@ -300,5 +301,34 @@ describe("scope, layout and labels", () => {
     expect(cells[0].date.getDay()).toBe(1);
     expect(cells.filter((c) => c.inMonth)).toHaveLength(31);
     expect(cells.filter((c) => c.isToday)).toHaveLength(1);
+  });
+});
+
+/**
+ * s78 — two CSS facts that cost the surface its honesty, pinned as tests
+ * because neither is reachable from jsdom (layout and cursor are not
+ * computed there) and both were REGRESSIONS OF A PORTED SHEET RULE. A
+ * documentary note would have rotted; this runs.
+ */
+describe("calendar.css — the two rules a real day breaks", () => {
+  // Comments in this file DISCUSS the rules they replaced, so the pins read
+  // declarations only — a note about `cursor: grab` must not read as one.
+  const css = readFileSync(new URL("../calendar.css", import.meta.url), "utf8").replace(
+    /\/\*[\s\S]*?\*\//g,
+    "",
+  );
+
+  it("the week card takes its natural height, so the grid can never clip without a scrollbar", () => {
+    const rule = /\.calendar-surface \.cal \{([^}]*)\}/.exec(css);
+    expect(rule).not.toBeNull();
+    // `flex: 1` inside `.content` (flex:1; overflow:hidden auto) sizes the
+    // card to the free space and clips it — the evening and the whole 21–24
+    // band, including the band that would have said anything was hidden.
+    expect(rule?.[1]).toContain("flex: 0 0 auto");
+    expect(rule?.[1]).not.toMatch(/flex:\s*1\s*;/);
+  });
+
+  it("no event box advertises a drag, because drag is not wired", () => {
+    expect(css).not.toMatch(/cursor:\s*grab/);
   });
 });

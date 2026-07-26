@@ -133,3 +133,84 @@ describe("formToConfig carry — the non-form-backed blocks the form doesn't edi
     expect(noCarry.config && "icp" in noCarry.config).toBe(false);
   });
 });
+
+/**
+ * s78 — the same disease one level DOWN. `brandIdentitySchema` is
+ * `.catchall(z.unknown())`, so identity holds tenant data this form does not
+ * edit; rebuilding identity from the eight form-backed keys dropped all of
+ * it. The live case is `identity.style` (the video render's brand colours,
+ * read by engine render/composition.ts `deriveBrandStyle`), and every extra
+ * also feeds `renderBrandIdentity` → the generation prompt AND the judge's
+ * grounding chunk, so the drop silently changed what the judge grounds
+ * against. These pin the CLASS, not the one field: an arbitrary unknown key
+ * must survive the round trip.
+ */
+describe("formToConfig carry — identity's catchall keys (s78)", () => {
+  const form: ProfileFormState = {
+    company: "Thalon",
+    oneLiner: "",
+    philosophy: "",
+    audience: "",
+    offers: "",
+    facts: "",
+    topics: "",
+    links: "",
+    denylist: "",
+    voiceJson: "",
+    platformProfilesJson: "",
+  };
+
+  it("preserves an UNKNOWN identity key through the round trip — not just the named one", () => {
+    const stored: ProfileWire = {
+      id: "p-1",
+      version: 4,
+      active: true,
+      config: {
+        voice: {},
+        denylist: [],
+        platformProfiles: {},
+        identity: {
+          company: "Thalon",
+          topics: ["ai video"],
+          // The live loss…
+          style: { background: "#161411", textColor: "#ece7dd", accentColor: "#eeb64b" },
+          // …and a key nothing in this repo knows about, which must ride too.
+          mascot: "the grip",
+        },
+      },
+      createdAt: new Date().toISOString(),
+    };
+
+    const round = formToConfig(profileToForm(stored), stored.config);
+    expect(round.error).toBeNull();
+    const identity = round.config?.identity as Record<string, unknown>;
+    expect(identity.style).toEqual(stored.config.identity.style);
+    expect(identity.mascot).toBe("the grip");
+    // …and the form-backed keys still round-trip.
+    expect(identity.company).toBe("Thalon");
+    expect(identity.topics).toEqual(["ai video"]);
+  });
+
+  it("a form-owned key wins over the stored copy — the carry never resurrects an edited value", () => {
+    const mapped = formToConfig(
+      { ...form, company: "Renamed" },
+      { identity: { company: "Thalon", style: { accentColor: "#eeb64b" } } },
+    );
+    expect(mapped.error).toBeNull();
+    const identity = mapped.config?.identity as Record<string, unknown>;
+    expect(identity.company).toBe("Renamed");
+    expect(identity.style).toEqual({ accentColor: "#eeb64b" });
+  });
+
+  it("no stored identity invents nothing", () => {
+    const mapped = formToConfig(form, {});
+    expect(mapped.error).toBeNull();
+    expect(Object.keys(mapped.config?.identity ?? {}).sort()).toEqual([
+      "company",
+      "facts",
+      "links",
+      "offers",
+      "topics",
+    ]);
+  });
+});

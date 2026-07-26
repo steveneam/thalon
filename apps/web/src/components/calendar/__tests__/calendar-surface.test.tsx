@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -138,7 +138,9 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     expect(box).toHaveClass("ev-plan");
     expect(box).toHaveStyle({ top: "154px" }); // 09:30 → (9.5 − 6) × 44
     expect(box?.textContent).toContain("09:30 · pipeline thread");
-    expect(box?.querySelector(".grip")).not.toBeNull();
+    // s78: the ⋮⋮ grip is the sheet's DRAG handle and drag is not wired, so
+    // it is not drawn. It comes back in the change that wires drag.
+    expect(box?.querySelector(".grip")).toBeNull();
   });
 
   it("dresses published work as done and never dresses a rejection as a success", async () => {
@@ -219,12 +221,9 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       "/app/approve?run=run-1&draft=d-plan",
     );
 
-    // The write doors are honestly disabled — the slot store has no route.
-    const reschedule = within(detail).getByRole("button", { name: "Reschedule" });
-    const remove = within(detail).getByRole("button", { name: "Remove" });
-    expect(reschedule).toBeDisabled();
-    expect(remove).toBeDisabled();
-    expect(reschedule).toHaveAttribute("title", expect.stringContaining("read route only"));
+    // s78: the write doors are LIVE — /api/calendar/slots exists.
+    expect(within(detail).getByRole("button", { name: "Reschedule" })).toBeEnabled();
+    expect(within(detail).getByRole("button", { name: "Remove" })).toBeEnabled();
 
     // Selection wears the sheet's own `.sel`.
     expect(container.querySelector(".ev-plan.sel")).not.toBeNull();
@@ -238,11 +237,78 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     const { container } = render(<CalendarSurface />);
     await screen.findByText("1 planned");
 
+    // s78: the write route landed, DRAG did not — so the note names the real
+    // route to the verbs instead of the missing store, and no box advertises
+    // a gesture the grid cannot perform.
     expect(
-      screen.getByText("drag to reschedule isn’t wired — the slot store has no write route yet"),
+      screen.getByText("drag isn’t wired — open a plan to reschedule or remove it"),
     ).toBeInTheDocument();
     // No drop ghost: there is no drag to land.
     expect(container.querySelector(".ghost")).toBeNull();
+    expect(container.querySelector(".ev .grip")).toBeNull();
+  });
+
+  /**
+   * s78 — the calendar's WRITE door. `/api/calendar/slots` rides the slot
+   * store shipped in the Phase-I window: no new table, no new contract, no
+   * migration. A slot is a PLAN — writing one publishes nothing.
+   */
+  it("Reschedule moves a real plan through the slot write route, then re-reads the plan", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
+    const posted: Array<Record<string, unknown>> = [];
+    server.use(
+      http.post("/api/calendar/slots", async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        posted.push(body);
+        return HttpResponse.json({
+          slot: { draftId: "d-plan", scheduledFor: body.scheduledFor, note: "pipeline thread" },
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+
+    await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
+    const detail = container.querySelector(".detail") as HTMLElement;
+    await user.click(within(detail).getByRole("button", { name: "Reschedule" }));
+
+    const field = within(detail).getByLabelText("Move this plan to") as HTMLInputElement;
+    // The field opens at the plan's CURRENT instant — a move starts from the truth.
+    expect(field.value).toBe(
+      `${today(9, 30).getFullYear()}-${`${today(9, 30).getMonth() + 1}`.padStart(2, "0")}-${`${today(9, 30).getDate()}`.padStart(2, "0")}T09:30`,
+    );
+
+    fireEvent.change(field, { target: { value: field.value.replace("T09:30", "T16:45") } });
+    await user.click(within(detail).getByRole("button", { name: "Move" }));
+
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(posted[0].draftId).toBe("d-plan");
+    expect(new Date(posted[0].scheduledFor as string).getHours()).toBe(16);
+    expect(new Date(posted[0].scheduledFor as string).getMinutes()).toBe(45);
+  });
+
+  it("Remove asks first, then unplans — and says nothing changed when the route refuses", async () => {
+    seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
+    server.use(
+      http.delete("/api/calendar/slots", () =>
+        HttpResponse.json({ error: "planned slot for draft not found" }, { status: 404 }),
+      ),
+    );
+    const user = userEvent.setup();
+    const { container } = render(<CalendarSurface />);
+
+    await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
+    const detail = container.querySelector(".detail") as HTMLElement;
+    await user.click(within(detail).getByRole("button", { name: "Remove" }));
+
+    // Destructive verbs confirm — and say what survives.
+    expect(within(detail).getByText(/Remove this plan\?/)).toBeInTheDocument();
+    await user.click(within(detail).getByRole("button", { name: "Remove" }));
+
+    // A refused write is surfaced verbatim, never swallowed into a success.
+    expect(await within(detail).findByRole("alert")).toHaveTextContent(
+      "planned slot for draft not found",
+    );
   });
 
   it("projects the engine's next sweep, and nothing at all from an overdue pointer", async () => {
@@ -420,5 +486,103 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     await user.keyboard("j");
     await user.keyboard("{Enter}");
     expect(push).toHaveBeenCalledWith("/app/approve?run=run-1&draft=d-plan");
+  });
+
+  /**
+   * s78 blocker — THE CLOCK DECIDES WHICH DAY IS TODAY. `weekDays` flags
+   * today against its own argument, so passing the navigation anchor marked
+   * one day of EVERY paged week as today: a "· today" label and a tinted
+   * column in a week that has no today, a now-line drawn on it, and every
+   * carried waiting draft piled onto that fake day.
+   */
+  describe("today is the clock's, never the pager's", () => {
+    /** Three drafts that started waiting well before this week — the carry set. */
+    const olderWaiting = [
+      asset({ draftId: "w1", status: "queued", judgedAt: hoursAgo(24 * 20) }),
+      asset({ draftId: "w2", status: "queued", judgedAt: hoursAgo(24 * 21) }),
+      asset({ draftId: "w3", status: "blocked", judgedAt: hoursAgo(24 * 22) }),
+    ];
+
+    it("marks today on the current week and carries older waiting work into it", async () => {
+      seedPlan({ assets: olderWaiting });
+      const { container } = render(<CalendarSurface />);
+      await screen.findByText("0 planned");
+
+      expect(container.querySelectorAll(".cal-dh.today")).toHaveLength(1);
+      expect(container.querySelector(".nowline")).not.toBeNull();
+      expect(screen.getByText("+1 more")).toBeInTheDocument();
+    });
+
+    it("marks NO day today on a navigated week, draws no now-line, and carries nothing into it", async () => {
+      seedPlan({ assets: olderWaiting });
+      const user = userEvent.setup();
+      const { container } = render(<CalendarSurface />);
+      await screen.findByText("0 planned");
+
+      await user.click(screen.getByRole("button", { name: "Next week" }));
+
+      expect(container.querySelector(".cal-dh.today")).toBeNull();
+      expect(container.querySelector(".dcol.today")).toBeNull();
+      expect(screen.queryByText(/· today/)).not.toBeInTheDocument();
+      // A line that means "now" may not be drawn on a week without now.
+      expect(container.querySelector(".nowline")).toBeNull();
+      // …and the carry has no day to land on, so it does not invent one.
+      expect(container.querySelector(".amber-chip")).toBeNull();
+      expect(screen.queryByText(/more$/)).not.toBeInTheDocument();
+    });
+  });
+
+  /**
+   * s78 — "+N more" stated a quantity and did nothing. Its only disclosure
+   * was a mouse-only `title`, so keyboard and touch had no route at all.
+   */
+  it("+N more is a real control that opens the agenda at Needs-you scope", async () => {
+    seedPlan({
+      assets: [
+        asset({ draftId: "w1", status: "queued", judgedAt: hoursAgo(2) }),
+        asset({ draftId: "w2", status: "queued", judgedAt: hoursAgo(3) }),
+        asset({ draftId: "w3", status: "blocked", judgedAt: hoursAgo(4) }),
+        asset({ draftId: "w4", status: "queued", judgedAt: hoursAgo(5) }),
+      ],
+    });
+    const user = userEvent.setup();
+    render(<CalendarSurface />);
+    await screen.findByText("0 planned");
+
+    const more = screen.getByRole("button", { name: /Open all 4 waiting this week/ });
+    await user.click(more);
+
+    expect(screen.getByRole("button", { name: "Agenda" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Needs you" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    // All four are listed, not two plus a count.
+    expect(screen.getAllByText("needs you")).toHaveLength(4);
+  });
+
+  /**
+   * s78 — a carried waiting row keeps its true instant but is filed under
+   * today, so a bare weekday stamp named a day that also exists inside the
+   * labelled range: a three-week-old draft read as in-range, and sorted to
+   * the top as if it were the week's first item.
+   */
+  it("an agenda row carried from outside the range says so, and prints its true date", async () => {
+    const started = new Date(Date.now() - 24 * 20 * 3_600_000);
+    seedPlan({
+      assets: [asset({ draftId: "w-old", status: "queued", judgedAt: started.toISOString() })],
+    });
+    const user = userEvent.setup();
+    render(<CalendarSurface />);
+    await screen.findByText("0 planned");
+
+    await user.click(screen.getByRole("button", { name: "Agenda" }));
+
+    expect(screen.getByText(/started waiting before this week/)).toBeInTheDocument();
+    // The stamp is the real date, not a weekday the labelled week also has.
+    const stamp = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" }).format(
+      started,
+    );
+    expect(screen.getByText(new RegExp(stamp))).toBeInTheDocument();
   });
 });

@@ -83,6 +83,8 @@ export interface CalEvent {
   flagged: boolean;
   /** Why it is flagged — verbatim in the popover; empty when it is not. */
   flagReason: string;
+  /** Plan events only: the draft whose slot this is — the write door's subject (s78). */
+  draftId?: string;
   /** Waiting events only: whole hours waited so far. */
   hours?: number;
   /** Waiting events only: true when it started waiting before the visible week. */
@@ -118,6 +120,7 @@ export function planEvents(
     return {
       id: `plan-${slot.draftId}`,
       kind: "plan" as const,
+      draftId: slot.draftId,
       at,
       day: dayKey(at),
       lead: `Planned · ${platformLabel(slot.platform)}`,
@@ -232,7 +235,15 @@ export function sweepEvents(
 export function waitingEvents(assets: PipelineAsset[], days: WeekDay[], now: Date): CalEvent[] {
   if (days.length === 0) return [];
   const keys = new Set(days.map((d) => d.key));
-  const todayKey = days.find((d) => d.isToday)?.key ?? days[0].key;
+  /**
+   * The carry needs a REAL today to carry into. The old `?? days[0].key`
+   * fallback meant a range that doesn't contain today still had a target, so
+   * paging one week forward dumped every older waiting draft onto that
+   * week's Monday — work stamped days it has nothing to do with. Null here
+   * means "this range has no today", and the carry is skipped: a navigated
+   * week shows its own waiting work and nothing else.
+   */
+  const todayKey = days.find((d) => d.isToday)?.key ?? null;
   const windowStart = days[0].date.getTime();
 
   return assets
@@ -241,8 +252,9 @@ export function waitingEvents(assets: PipelineAsset[], days: WeekDay[], now: Dat
       const at = waitingSince(asset);
       const key = dayKey(at);
       const inWeek = keys.has(key);
-      const carried = !inWeek && at.getTime() < windowStart;
-      // Later than the visible week (a clock skew or a future stamp): out of view.
+      const carried = !inWeek && at.getTime() < windowStart && todayKey !== null;
+      // Later than the visible week (a clock skew or a future stamp), or a
+      // week with no today to carry into: out of view.
       if (!inWeek && !carried) return [];
       const hours = Math.max(0, Math.floor((now.getTime() - at.getTime()) / 3_600_000));
       return [
@@ -250,7 +262,7 @@ export function waitingEvents(assets: PipelineAsset[], days: WeekDay[], now: Dat
           id: `wait-${asset.draftId}`,
           kind: "you",
           at,
-          day: inWeek ? key : todayKey,
+          day: inWeek ? key : (todayKey as string),
           lead: `${platformLabel(asset.platform)} · ${asset.status === "blocked" ? "needs edit" : "your review"}`,
           meta: `waiting ${hours}h`,
           href: approveHref(asset),

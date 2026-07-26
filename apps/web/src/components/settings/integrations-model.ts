@@ -51,6 +51,36 @@ export function isConnected(card: WireIntegrationCard): boolean {
   return card.state === "connected" || card.state === "needs_reauth" || card.state === "expiring";
 }
 
+/**
+ * CAPABILITY is a different fact from credential health, and the card used to
+ * state only the second. Instagram's driver refuses EVERY publish
+ * (`InstagramTextOnlyUnsupportedError` — the official content-publish flow
+ * requires media, and faking one would alter the judged body), yet its card
+ * offered the same guided paste as LinkedIn's, validated for real, and then
+ * read "Posting as @handle". So an operator could spend a real Meta app, a
+ * content-publishing permission and a token on a destination that cannot
+ * post, and nothing said so in words.
+ *
+ * The sheet already had the answer and the rebuild dropped it — the mock's
+ * Instagram card reads "Almost ready · Needs public image URLs — shipping —
+ * then the Graph connect" (Integrations.dc.html:77-79). This restores that
+ * line in the sheet's own voice, at TODAY's truth: the refusal is
+ * unconditional, media included, so the note must not promise that an image
+ * post would go out.
+ *
+ * Keyed by destination rather than by driver name so a driver swap does not
+ * silently drop the caveat with it.
+ */
+const CAPABILITY_NOTES: Readonly<Record<string, string>> = {
+  instagram:
+    "Almost ready — the content-publish flow needs image or video media, and this driver refuses every post until that lands. Connecting stores the credential; nothing posts from here yet.",
+};
+
+/** The destination's capability caveat, or null where the driver can do its class's job. */
+export function capabilityNote(card: WireIntegrationCard): string | null {
+  return CAPABILITY_NOTES[card.destination] ?? null;
+}
+
 export interface StatePill {
   text: string;
   className: string;
@@ -82,6 +112,23 @@ export function statePill(card: WireIntegrationCard): StatePill {
 }
 
 /**
+ * The ARMING pill (s78). The card already enumerated every other rung of
+ * "will this post" — the plan gate, expiry, re-auth, the env seat — which
+ * made it read as the complete ladder while omitting the top rung. A
+ * connected credential and an armed one are different facts, and only the
+ * second decides whether anything goes out.
+ *
+ * Worded, never colour-only, and shown ONLY where a credential exists: an
+ * unconnected seat's arming state is not yet a question the operator has.
+ */
+export function armedPill(card: WireIntegrationCard): StatePill | null {
+  if (card.armed === null || !isConnected(card)) return null;
+  return card.armed
+    ? { text: "Armed", className: "pill pill-ok" }
+    : { text: "Not armed", className: "pill pill-warn" };
+}
+
+/**
  * The card's one sub-line: who it acts as, when it was last verified, and
  * which driver consumes the credential (visible provenance — the driver name
  * is how a live post is traced back to a seat).
@@ -105,8 +152,14 @@ export function subLine(card: WireIntegrationCard, now: number = Date.now()): st
   } else {
     switch (card.state) {
       case "connected":
+        // A destination whose driver cannot do its class's job must not claim
+        // the class verb: "Posting as @handle" is a present-tense assertion,
+        // and on Instagram it is false. Name the identity instead, and let
+        // the capability note say why.
         parts.push(
-          card.connectedAs ? `${ROLE_VERB[card.class]} as ${card.connectedAs}` : "Connected",
+          card.connectedAs
+            ? `${capabilityNote(card) ? "Connected" : ROLE_VERB[card.class]} as ${card.connectedAs}`
+            : "Connected",
         );
         break;
       case "expiring":

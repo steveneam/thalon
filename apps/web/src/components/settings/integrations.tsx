@@ -7,6 +7,8 @@ import {
   FIELD_LABELS,
   GUIDED_STEPS,
   SECRET_KEYS,
+  armedPill,
+  capabilityNote,
   cardActions,
   platformGlyph,
   probeLine,
@@ -296,6 +298,7 @@ export function Integrations() {
         <div className="int-grid">
           {cards.map((card) => {
             const pill = statePill(card);
+            const armed = armedPill(card);
             const probe = probes[card.destination];
             const line = probe ? probeLine(probe) : null;
             const error = actionErrors[card.destination];
@@ -312,8 +315,22 @@ export function Integrations() {
                   </div>
                   <span className="int-name">{card.label}</span>
                   <span className={pill.className}>{pill.text}</span>
+                  {armed && <span className={armed.className}>{armed.text}</span>}
                 </div>
                 <span className="int-sub">{subLine(card, readAt || undefined)}</span>
+                {armed && card.armedReason && (
+                  // VISIBLE PROVENANCE: the pill states the fact, this states
+                  // why — including an env force-arm, which is the one an
+                  // operator most needs to see and cannot infer.
+                  <span className="int-sub">{card.armedReason}</span>
+                )}
+                {capabilityNote(card) && (
+                  // What this destination CAN do, stated before the paste —
+                  // not discovered at publish time.
+                  <span className="int-sub" style={{ color: "var(--warn)" }}>
+                    {capabilityNote(card)}
+                  </span>
+                )}
                 {actions.length > 0 && (
                   <div className="int-actions">
                     {actions.map((action) =>

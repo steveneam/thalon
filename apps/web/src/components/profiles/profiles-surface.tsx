@@ -8,6 +8,7 @@ import {
   MAX_TONES,
   nextVersion,
   readVoice,
+  toneSummary,
   TONE_CHIPS,
   writeVoice,
 } from "@/components/profiles/profiles-model";
@@ -113,6 +114,10 @@ export function ProfilesSurface() {
   const voiceRead = readVoice(active?.config.voice ?? {});
   const cadence = cadenceRows(active);
   const carried = carriedBlocks(active);
+  // The review row reads the object the save will WRITE, never the stored one
+  // — see toneSummary. Same call the save makes, so the two cannot disagree.
+  const pendingVoice = writeVoice(active?.config.voice ?? {}, { tone, toneTouched, sample });
+  const storedHadTone = active?.config.voice?.tone !== undefined;
 
   function set<K extends keyof ProfileFormState>(key: K, value: string) {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
@@ -519,7 +524,7 @@ export function ProfilesSurface() {
                     <dd>{form.company.trim() || "not set"}</dd>
                     <dt>Voice</dt>
                     <dd>
-                      {tone.length > 0 ? tone.join(" · ") : voiceRead.storedTone ?? "no tone set"}
+                      {toneSummary(pendingVoice, storedHadTone)}
                       {sample.trim() ? " · with a voice sample" : " · no sample"}
                     </dd>
                     <dt>Topics</dt>

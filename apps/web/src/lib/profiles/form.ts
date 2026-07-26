@@ -94,11 +94,48 @@ export function profileToForm(profile: ProfileWire | null): ProfileFormState {
   };
 }
 
-/** The non-form-backed blocks the editor doesn't edit but must never drop on save (window 1 + the window-2 outreach/social pair). */
+/** The non-form-backed blocks the editor doesn't edit but must never drop on save (window 1 + the window-2 outreach/social pair, and identity's catchall keys — s78). */
 export type CarriedConfigBlocks = Pick<
   ProfileWire["config"],
   "icp" | "cadence" | "routing" | "outreach" | "social"
->;
+> &
+  Partial<Pick<ProfileWire["config"], "identity">>;
+
+/**
+ * The identity keys THIS FORM owns. `brandIdentitySchema` is
+ * `.catchall(z.unknown())` on purpose, so any other key is contract-legal
+ * tenant data — `identity.style` is the live case (the video render's brand
+ * colours, read by packages/engine render/composition.ts `deriveBrandStyle`),
+ * and `renderBrandIdentity` feeds every extra into BOTH the generation prompt
+ * and the judge's grounding chunk.
+ */
+const FORM_IDENTITY_KEYS = new Set([
+  "company",
+  "oneLiner",
+  "philosophy",
+  "audience",
+  "offers",
+  "facts",
+  "topics",
+  "links",
+]);
+
+/**
+ * The stored identity keys the form does NOT own, carried verbatim. Third
+ * instance of one disease: a save rebuilt from the fields the form knows
+ * drops everything it doesn't (top-level blocks, 2026-07-14; the window-2
+ * pair, 2026-07-19; identity's catchall keys, s78). The carry is keyed on
+ * what the form OWNS rather than on a list of known extras, so a key added
+ * to the schema later rides through without another live loss.
+ */
+function carriedIdentityExtras(identity: unknown): Record<string, unknown> {
+  if (!identity || typeof identity !== "object" || Array.isArray(identity)) return {};
+  return Object.fromEntries(
+    Object.entries(identity as Record<string, unknown>).filter(
+      ([key]) => !FORM_IDENTITY_KEYS.has(key),
+    ),
+  );
+}
 
 export function formToConfig(
   form: ProfileFormState,
@@ -109,6 +146,11 @@ export function formToConfig(
    * cadence gate / routing / outreach / the social publish door (found live
    * on staging, 2026-07-14; recurred for the window-2 pair, 2026-07-19).
    * Callers pass the fetched active wire config; absent blocks stay absent.
+   *
+   * s78: `identity` rides here too. Identity is NOT a form-backed block in
+   * full — the schema's catchall means the form owns eight keys and the
+   * tenant may hold any others, so the same drop happened one level down
+   * (`identity.style`, the render's brand colours). See carriedIdentityExtras.
    */
   carry?: CarriedConfigBlocks,
 ): { config: BrandProfileConfigInput; error: null } | { config: null; error: string } {
@@ -124,6 +166,8 @@ export function formToConfig(
       denylist: linesToList(form.denylist),
       platformProfiles: platforms.value as BrandProfileConfigInput["platformProfiles"],
       identity: {
+        // Extras FIRST — a form-owned key always wins over the stored copy.
+        ...carriedIdentityExtras(carry?.identity),
         ...(form.company.trim() ? { company: form.company.trim() } : {}),
         ...(form.oneLiner.trim() ? { oneLiner: form.oneLiner.trim() } : {}),
         ...(form.philosophy.trim() ? { philosophy: form.philosophy.trim() } : {}),

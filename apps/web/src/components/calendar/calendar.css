@@ -22,8 +22,26 @@
  * a label may never drift from the slot it names.
  */
 
+/*
+ * APP ADAPTATION (named — see the block at the foot of this file).
+ * The sheet writes `.cal { flex: 1; min-height: 0 }`, and inside `.content`
+ * (`flex: 1; overflow: hidden auto`) that makes the card size to the free
+ * space and CLIP with `overflow: hidden` — it can never grow the scroll
+ * container, so no scrollbar ever appears. At the sheet's own fixture that
+ * is invisible (the bands sum to ~790px against ~797px available at
+ * 1440×940). At real density it loses the day: the collapsed grid cuts the
+ * last hours plus the whole `21–24` band — the band that carries the hidden
+ * count and the second toggle, so the cue that anything was lost is itself
+ * the thing clipped — and `expand` is worse, stamping a 1056px column into
+ * the same box and hiding roughly 15:00–24:00 while the top band says
+ * "quiet hours · shown".
+ * `flex: 0 0 auto` lets the card take its natural height so `.content`
+ * scrolls, which is the surface's own scroll contract. The resting 1440×940
+ * render is unchanged — the card still fits — so this is a real-density fix,
+ * not a geometry change.
+ */
 .calendar-surface .cal {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -113,7 +131,8 @@
   font-size: 11px;
   color: var(--n-900);
   overflow: hidden;
-  cursor: grab;
+  /* The sheet says `grab`; drag is not wired — see the cursor note below. */
+  cursor: pointer;
 }
 .calendar-surface .ev b {
   display: block;
@@ -141,7 +160,7 @@
   border-color: var(--act);
   border-style: solid;
   box-shadow: 0 0 0 1px var(--act);
-  cursor: grabbing;
+  /* The sheet's `grabbing` is dropped with the grab cursor — nothing is dragged. */
 }
 .calendar-surface .flag { color: var(--warn); font-size: 10px; }
 .calendar-surface .nowline {
@@ -221,10 +240,22 @@
  *    Month and Agenda have no canvas sheet of their own.
  * ───────────────────────────────────────────────────────────────────────── */
 
+/*
+ * 4. THE CURSOR MUST NOT PROMISE A GESTURE THAT DOES NOTHING. The sheet
+ *    draws `.ev { cursor: grab }` plus a `⋮⋮` grip on plans, and
+ *    `.ev-plan.sel { cursor: grabbing }` — a drag affordance. s78 armed the
+ *    slot store's WRITE route and wired Reschedule/Remove in the detail
+ *    popover, but the grid still has NO drag handler, so grab/grabbing and
+ *    the grip advertise a gesture the surface cannot perform. The box is a
+ *    real door (click opens the detail, where the two verbs live), so
+ *    `pointer` is the truthful cursor; the grip is dropped with it in
+ *    calendar-surface.tsx. Restore both in the same change that wires drag.
+ */
 .calendar-surface button.ev {
   font-family: inherit;
   text-align: left;
   appearance: none;
+  cursor: pointer;
 }
 .calendar-surface button.ev:focus-visible,
 .calendar-surface .bare:focus-visible {

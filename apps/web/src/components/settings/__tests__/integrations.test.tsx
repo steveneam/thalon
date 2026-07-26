@@ -18,6 +18,8 @@ function card(overrides: Partial<WireIntegrationCard>): WireIntegrationCard {
     validatedAt: null,
     expiresAt: null,
     envOverride: false,
+    armed: null,
+    armedReason: null,
     fields: [{ key: "accessToken", optional: false }],
     ...overrides,
   };
@@ -328,5 +330,53 @@ describe("Integrations (exact-mock rebuild — Integrations.dc.html)", () => {
     expect(container.querySelector('[class*="text-muted-foreground"]')).toBeNull();
     expect(container.querySelector('[class*="bg-muted"]')).toBeNull();
     expect(container.querySelector('[class*="border-border"]')).toBeNull();
+  });
+});
+
+/**
+ * s78 — the two facts the grid was missing. Both answer "will anything post
+ * from here", which is the highest-stakes question this surface takes.
+ */
+describe("the arming rung and the capability caveat, on the card", () => {
+  it("a connected-but-unarmed seat says Not armed and names why, in words", async () => {
+    wire([
+      card({
+        destination: "linkedin",
+        label: "LinkedIn",
+        state: "connected",
+        connectedAs: "@steven",
+        armed: false,
+        armedReason: 'not armed — the active profile\'s social block has no "linkedin" entry',
+      }),
+    ]);
+    render(<Integrations />);
+
+    const li = await screen.findByText("LinkedIn", { selector: ".int-name" });
+    const cardEl = li.closest(".int-card") as HTMLElement;
+    expect(within(cardEl).getByText("Connected")).toBeInTheDocument();
+    expect(within(cardEl).getByText("Not armed")).toBeInTheDocument();
+    expect(within(cardEl).getByText(/social block has no "linkedin" entry/)).toBeInTheDocument();
+  });
+
+  it("Instagram states before the paste that nothing posts from it, and never claims 'Posting as'", async () => {
+    wire([
+      card({
+        destination: "instagram",
+        label: "Instagram",
+        driver: "instagram-text-refusal",
+        state: "connected",
+        connectedAs: "@thalon",
+        armed: true,
+        armedReason: "armed by the active profile's social block",
+      }),
+    ]);
+    render(<Integrations />);
+
+    const ig = await screen.findByText("Instagram", { selector: ".int-name" });
+    const cardEl = ig.closest(".int-card") as HTMLElement;
+    expect(within(cardEl).getByText(/needs image or video media/)).toBeInTheDocument();
+    // Even ARMED, the driver cannot post — so the card must not say it does.
+    expect(cardEl.textContent).toContain("Connected as @thalon");
+    expect(cardEl.textContent).not.toContain("Posting as");
   });
 });

@@ -31,9 +31,9 @@ import {
 } from "@/components/calendar/calendar-model";
 import { fetchViews, putView } from "@/lib/views/client";
 import { useListKeys } from "@/lib/workspace/keyboard";
-import { fetchPlan } from "@/lib/workspace/client";
+import { fetchPlan, planSlot, removeSlot } from "@/lib/workspace/client";
 import type { PlanPayload } from "@/lib/workspace/types";
-import { weekDays } from "@/lib/workspace/week";
+import { dayKey, weekDays } from "@/lib/workspace/week";
 
 type Density = "week" | "month" | "agenda";
 type ReadState = "loading" | "error" | "success";
@@ -90,8 +90,11 @@ function coerceView(config: Record<string, unknown>): SavedConfig {
  *    and the keeper saved view (tenant-wide, /api/views) restores the
  *    operator's density/scope without adding a band the sheet does not draw;
  *  - HONEST STATES: a failed read says so and offers retry, an empty week says
- *    it is empty, and the reschedule doors name their missing write route
- *    instead of pretending to move a plan.
+ *    it is empty, and a failed write says nothing changed;
+ *  - s78: the slot store's WRITE route (`/api/calendar/slots`) is armed, so
+ *    Reschedule and Remove move and delete real plans from the detail
+ *    popover. Drag is still not wired, which is why no event box advertises
+ *    one any more (no grab cursor, no grip).
  */
 export function CalendarSurface() {
   const router = useRouter();
@@ -103,6 +106,9 @@ export function CalendarSurface() {
   const [scope, setScope] = useState<Scope>(DEFAULT_VIEW.scope);
   const [expanded, setExpanded] = useState(DEFAULT_VIEW.expanded);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  /** The slot write door's in-flight state — one plan is moved or removed at a time. */
+  const [slotBusy, setSlotBusy] = useState(false);
+  const [slotError, setSlotError] = useState<string | null>(null);
   /** The saved view is loaded before it is written back — never clobber it with defaults. */
   const [viewLoaded, setViewLoaded] = useState(false);
   /** What the views store already holds — a write only follows a real change. */
@@ -183,7 +189,26 @@ export function CalendarSurface() {
   }, [viewLoaded, density, scope, expanded]);
 
   const win = expanded ? FULL_WINDOW : DAY_WINDOW;
-  const days = useMemo(() => (anchor ? weekDays(anchor) : []), [anchor]);
+  /**
+   * THE CLOCK DECIDES WHICH DAY IS TODAY, never the navigation anchor.
+   * `weekDays` flags today against its OWN argument (it is documented as "the
+   * week containing now"), so feeding it the anchor marked one day of EVERY
+   * paged week as today: the "· today" label and the tinted column moved with
+   * the pager, `NowLine`'s only gate (`days.some(d => d.isToday)`) never went
+   * false so a line meaning "now" drew on weeks that do not contain now, and
+   * `waitingEvents` piled every carried draft onto that fake day. Re-flagging
+   * here against `now` is exactly what `monthCells(anchor, now)` already does
+   * — the week grid was the one place that contradicted the rest of the
+   * surface. Kept local: `weekDays` is shared with Dashboard and Runs, which
+   * correctly pass the real clock.
+   */
+  const days = useMemo(() => {
+    if (!anchor) return [];
+    const week = weekDays(anchor);
+    if (!now) return week.map((day) => ({ ...day, isToday: false }));
+    const key = dayKey(now);
+    return week.map((day) => ({ ...day, isToday: day.key === key }));
+  }, [anchor, now]);
 
   const breaches = useMemo(
     () => cadenceBreaches(plan?.plannedSlots ?? [], plan?.cadence ?? []),
@@ -276,6 +301,42 @@ export function CalendarSurface() {
     },
   });
 
+  /**
+   * The slot write door (s78, /api/calendar/slots). A plan is an intention:
+   * moving or removing one publishes nothing and arms nothing. Both re-read
+   * the plan afterwards so the grid shows the stored truth, not an optimistic
+   * guess — the write is the record, the surface only ever holds a copy.
+   */
+  async function reschedule(draftId: string, at: Date) {
+    setSlotBusy(true);
+    setSlotError(null);
+    try {
+      await planSlot({ draftId, scheduledFor: at.toISOString() });
+      setSelectedId(null);
+      await load();
+    } catch (err) {
+      setSlotError(err instanceof Error ? err.message : "Couldn’t move the plan — nothing changed.");
+    } finally {
+      setSlotBusy(false);
+    }
+  }
+
+  async function removePlan(draftId: string) {
+    setSlotBusy(true);
+    setSlotError(null);
+    try {
+      await removeSlot(draftId);
+      setSelectedId(null);
+      await load();
+    } catch (err) {
+      setSlotError(
+        err instanceof Error ? err.message : "Couldn’t remove the plan — nothing changed.",
+      );
+    } finally {
+      setSlotBusy(false);
+    }
+  }
+
   function navigate(direction: 1 | -1) {
     setSelectedId(null);
     setAnchor((current) => {
@@ -297,7 +358,7 @@ export function CalendarSurface() {
   const headerNote =
     density === "month"
       ? "the plan read covers ±2 weeks — a month shows what it carries"
-      : "drag to reschedule isn’t wired — the slot store has no write route yet";
+      : "drag isn’t wired — open a plan to reschedule or remove it";
 
   const toggleQuiet = (
     <button type="button" className="bare quiet-toggle" onClick={() => setExpanded((v) => !v)}>
@@ -445,9 +506,28 @@ export function CalendarSurface() {
                     </Link>
                   ))}
                   {overflow > 0 && (
-                    <span className="lane-more" title={lane.slice(shown.length).map((e) => e.lead).join(" · ")}>
+                    // A count is not a door. The remainder used to be
+                    // reachable only through a mouse-only `title`, so
+                    // keyboard and touch had no route to it at all. Agenda
+                    // at "Needs you" scope is the density that lists every
+                    // waiting item untruncated, each with its own Approve
+                    // link — the surface's own vocabulary, no new grammar.
+                    <button
+                      type="button"
+                      className="bare lane-more"
+                      aria-label={`Open all ${lane.length} waiting this week in the agenda`}
+                      title={lane
+                        .slice(shown.length)
+                        .map((e) => e.lead)
+                        .join(" · ")}
+                      onClick={() => {
+                        setDensity("agenda");
+                        setScope("needs");
+                        setSelectedId(null);
+                      }}
+                    >
                       +{overflow} more
-                    </span>
+                    </button>
                   )}
                 </div>
               );
@@ -504,10 +584,17 @@ export function CalendarSurface() {
 
             {selected && (
               <DetailCard
+                // Keyed by the event: the card holds a mode and a typed
+                // instant, and neither may survive into a different plan.
+                key={selected.id}
                 event={selected}
                 anchorTop={yOf(selected.at.getHours() + selected.at.getMinutes() / 60, win)}
                 windowPx={windowHeight(win)}
                 onClose={() => setSelectedId(null)}
+                onReschedule={reschedule}
+                onRemove={removePlan}
+                busy={slotBusy}
+                error={slotError}
               />
             )}
           </div>
@@ -551,15 +638,25 @@ export function CalendarSurface() {
                       <MonthMark key={event.id} event={event} />
                     ))}
                     {marks.length > shown.length && (
-                      <span
-                        className="mark-quiet"
+                      // The same dead count as the week lane. Here the
+                      // honest destination is the day itself: open the week
+                      // that holds it, where every mark is a placed box.
+                      <button
+                        type="button"
+                        className="bare mark-quiet"
+                        aria-label={`Open the week of ${cell.date.getDate()} to see all ${marks.length}`}
                         title={marks
                           .slice(MONTH_MARK_BOUND)
                           .map((e) => `${e.lead} · ${e.meta}`)
                           .join(" · ")}
+                        onClick={() => {
+                          setAnchor(cell.date);
+                          setDensity("week");
+                          setSelectedId(null);
+                        }}
                       >
                         +{marks.length - shown.length} more
-                      </span>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -662,7 +759,8 @@ function EventBox({
       aria-pressed={selected}
       onClick={onSelect}
     >
-      {event.kind === "plan" && <span className="grip">⋮⋮</span>}
+      {/* The ⋮⋮ grip is the sheet's drag handle; drag is not wired, so it is
+          not drawn (see the cursor note in calendar.css). */}
       <b>
         {event.lead} {event.flagged && <span className="flag">⚑</span>}
       </b>
@@ -674,29 +772,54 @@ function EventBox({
 function MonthMark({ event }: { event: CalEvent }) {
   const className =
     event.kind === "plan" ? "mark mark-plan" : event.kind === "you" ? "mark mark-you" : "mark";
-  const text = `${event.lead} ${clockLabel(event.at)}`;
+  // Same carried-row gap as the agenda: a clock from another day, printed in
+  // today's cell, is a time this cell never held. The hours waited is the
+  // fact that IS true of a carried item.
+  const text = event.carried
+    ? `${event.lead} · ${event.hours}h waiting`
+    : `${event.lead} ${clockLabel(event.at)}`;
+  const title = event.carried
+    ? `started waiting before this week — ${event.hours}h`
+    : event.meta;
   return event.href ? (
-    <Link href={event.href} className={className} title={event.meta}>
+    <Link href={event.href} className={className} title={title}>
       {text}
     </Link>
   ) : (
-    <span className={className} title={event.meta}>
+    <span className={className} title={title}>
       {text}
     </span>
   );
 }
 
+/** "14 Jul" — the carried row's true date, which its weekday alone cannot tell. */
+const CARRIED_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" });
+
 function AgendaRow({ event }: { event: CalEvent }) {
+  /**
+   * A CARRIED waiting item keeps its true instant but is filed under today,
+   * so a bare weekday stamp names a day that also exists inside the labelled
+   * range — a three-week-old draft read as "Sat 09:00" under "21 – 27 July",
+   * and sorted to the top as if it were the week's first item. The week lane
+   * already discloses this ("started waiting before this week"); agenda did
+   * not, because `excerpt || meta` suppressed the "waiting Nh" line for every
+   * real draft. Both channels now carry it: a dated stamp, and the words.
+   */
   const body = (
     <>
       <span className="t-data agenda-when">
-        {DAY_NAMES[(event.at.getDay() + 6) % 7]} {clockLabel(event.at)}
+        {event.carried
+          ? `${CARRIED_DATE.format(event.at)} ${clockLabel(event.at)}`
+          : `${DAY_NAMES[(event.at.getDay() + 6) % 7]} ${clockLabel(event.at)}`}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="agenda-lead">
           {event.lead} {event.flagged && <span className="flag">⚑</span>}
         </div>
-        <div className="excerpt">{event.excerpt || event.meta}</div>
+        <div className="excerpt">
+          {event.carried && `started waiting before this week · ${event.hours}h — `}
+          {event.excerpt || event.meta}
+        </div>
       </div>
       {event.kind === "plan" && <span className="pill pill-idle">plan</span>}
       {event.kind === "you" && <span className="pill pill-warn">needs you</span>}
@@ -711,23 +834,43 @@ function AgendaRow({ event }: { event: CalEvent }) {
   );
 }
 
+/** A Date as the value a `datetime-local` input wants — local parts, no zone. */
+function toLocalInputValue(date: Date): string {
+  const pad = (n: number) => `${n}`.padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 /**
  * The sheet's detail popover, at the selected event's own height. Its two
- * doors state the truth: the planned-slot store has a READ route only, so
- * Reschedule and Remove name the missing write door instead of pretending to
- * move a plan.
+ * plan doors are LIVE as of s78: `/api/calendar/slots` writes the slot store
+ * (POST upserts = plan or re-plan, DELETE unplans), so Reschedule moves a
+ * real plan and Remove deletes one. Both are still PLANS — neither publishes
+ * nor arms anything.
+ *
+ * Keyed by the selected event at the call site: this component holds a mode
+ * and a typed instant, and state must never outlive the entity it describes.
  */
 function DetailCard({
   event,
   anchorTop,
   windowPx,
   onClose,
+  onReschedule,
+  onRemove,
+  busy,
+  error,
 }: {
   event: CalEvent;
   anchorTop: number;
   windowPx: number;
   onClose: () => void;
+  onReschedule: (draftId: string, at: Date) => void;
+  onRemove: (draftId: string) => void;
+  busy: boolean;
+  error: string | null;
 }) {
+  const [mode, setMode] = useState<"idle" | "move" | "remove">("idle");
+  const [when, setWhen] = useState(() => toLocalInputValue(event.at));
   const DETAIL_HEIGHT = 190;
   const top = Math.max(0, Math.min(anchorTop, Math.max(0, windowPx - DETAIL_HEIGHT)));
   return (
@@ -765,27 +908,108 @@ function DetailCard({
             : "Open Intel →"}
         </Link>
       )}
-      {event.kind === "plan" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            style={{ flex: 1, padding: "0 6px" }}
-            disabled
-            title="The planned-slot store has a read route only — planning and re-planning are engine-side today."
-          >
-            Reschedule
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger btn-sm"
-            style={{ padding: "0 7px" }}
-            disabled
-            title="Removing a plan needs the slot store’s write route — it isn’t exposed yet."
-          >
-            Remove
-          </button>
-        </div>
+      {event.kind === "plan" && event.draftId && (
+        <>
+          {mode === "idle" && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                style={{ flex: 1, padding: "0 6px" }}
+                disabled={busy}
+                onClick={() => setMode("move")}
+              >
+                Reschedule
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                style={{ padding: "0 7px" }}
+                disabled={busy}
+                onClick={() => setMode("remove")}
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
+          {mode === "move" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label className="t-label" htmlFor={`move-${event.id}`}>
+                Move this plan to
+              </label>
+              <input
+                id={`move-${event.id}`}
+                className="input"
+                type="datetime-local"
+                value={when}
+                disabled={busy}
+                onChange={(e) => setWhen(e.target.value)}
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  style={{ flex: 1, padding: "0 6px" }}
+                  disabled={busy || when === ""}
+                  onClick={() => {
+                    const at = new Date(when);
+                    if (Number.isNaN(at.getTime())) return;
+                    onReschedule(event.draftId as string, at);
+                  }}
+                >
+                  {busy ? "Moving…" : "Move"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm"
+                  style={{ padding: "0 7px" }}
+                  disabled={busy}
+                  onClick={() => {
+                    setWhen(toLocalInputValue(event.at));
+                    setMode("idle");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {mode === "remove" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span className="t-label">
+                Remove this plan? The draft stays — only the slot goes, and you can plan it again.
+              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  style={{ flex: 1, padding: "0 6px" }}
+                  disabled={busy}
+                  onClick={() => onRemove(event.draftId as string)}
+                >
+                  {busy ? "Removing…" : "Remove"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm"
+                  style={{ padding: "0 7px" }}
+                  disabled={busy}
+                  onClick={() => setMode("idle")}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <span className="t-label" role="alert" style={{ color: "var(--err)" }}>
+              {error}
+            </span>
+          )}
+        </>
       )}
       <span className="t-label detail-foot">
         {event.flagged

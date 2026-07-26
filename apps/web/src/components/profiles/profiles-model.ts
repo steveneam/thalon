@@ -76,6 +76,31 @@ export function writeVoice(
   return next;
 }
 
+/**
+ * The tone the SAVE is about to write, worded for the review row.
+ *
+ * s78: the review row used to read the STORED tone whenever no chip was lit,
+ * so it asserted a register the save was about to delete (clear every chip on
+ * a free-text tone → `writeVoice` drops the key, review still printed it) —
+ * and lied the other way too (untouched chips derived from free text showed
+ * the chips while the save wrote the free text back). Both directions come
+ * from the row deriving its own answer. It doesn't any more: this reads the
+ * very object `writeVoice` produces, so the review cannot disagree with the
+ * save.
+ */
+export function toneSummary(
+  pendingVoice: Record<string, unknown>,
+  storedHadTone: boolean,
+): string {
+  const tone = pendingVoice.tone;
+  if (Array.isArray(tone)) {
+    const picked = tone.filter((v): v is string => typeof v === "string" && v.trim() !== "");
+    if (picked.length > 0) return picked.join(" · ");
+  }
+  if (typeof tone === "string" && tone.trim() !== "") return tone;
+  return storedHadTone ? "tone cleared — this save removes it" : "no tone set";
+}
+
 export interface CadenceRow {
   platform: string;
   rule: string;

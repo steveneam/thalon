@@ -4,7 +4,12 @@ import { readEnv, type EnvSource } from "@thalon/platform";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isRefusingSocialPublisher } from "../../social/registry";
 import { VaultKeyMissingError } from "../errors";
-import { vaultSocialEnvView, vaultSocialPublisherResolver, type SocialArmingDeps } from "../social-arming";
+import {
+  socialArmed,
+  vaultSocialEnvView,
+  vaultSocialPublisherResolver,
+  type SocialArmingDeps,
+} from "../social-arming";
 import { connectDestination } from "../vault";
 
 /**
@@ -181,5 +186,52 @@ describe("vaultSocialPublisherResolver (the untouched ratchet over the merged vi
     const resolve = await vaultSocialPublisherResolver(deps());
     expect(isRefusingSocialPublisher(resolve("x"))).toBe(true);
     expect(isRefusingSocialPublisher(resolve("linkedin"))).toBe(false);
+  });
+});
+
+/**
+ * s78 — `socialArmed` is the ONE arming answer, extracted so the Integrations
+ * card and the publish ratchet cannot drift into two spellings of "armed".
+ * Pure: no vault, no db. The env pair is the emergency OVERRIDE and wins in
+ * BOTH directions, which is the part a second implementation always gets
+ * wrong (it is easy to treat an override as arm-only).
+ */
+describe("socialArmed — the one arming answer (s78)", () => {
+  const bare = readEnv({});
+
+  it("needs BOTH a credential and a social-block entry", () => {
+    expect(socialArmed(bare, "linkedin", { connected: true, configured: true }).armed).toBe(true);
+    expect(socialArmed(bare, "linkedin", { connected: true, configured: false }).armed).toBe(false);
+    expect(socialArmed(bare, "linkedin", { connected: false, configured: true }).armed).toBe(false);
+    expect(socialArmed(bare, "linkedin", { connected: false, configured: false }).armed).toBe(false);
+  });
+
+  it("names WHY, distinguishing a missing credential from a missing social entry", () => {
+    expect(socialArmed(bare, "x", { connected: false, configured: true }).reason).toContain(
+      "no stored credential",
+    );
+    expect(socialArmed(bare, "x", { connected: true, configured: false }).reason).toContain(
+      'no "x" entry',
+    );
+  });
+
+  it("the env seat overrides in BOTH directions", () => {
+    const forceOn = readEnv({ SOCIAL_FACEBOOK_ARMED: "true" });
+    const forceOff = readEnv({ SOCIAL_FACEBOOK_ARMED: "false" });
+
+    // Force-ARMS a platform the tenant never configured…
+    const on = socialArmed(forceOn, "facebook", { connected: false, configured: false });
+    expect(on.armed).toBe(true);
+    expect(on.reason).toContain("force-armed");
+
+    // …and force-DISARMS one the tenant did.
+    const off = socialArmed(forceOff, "facebook", { connected: true, configured: true });
+    expect(off.armed).toBe(false);
+    expect(off.reason).toContain("force-disarmed");
+  });
+
+  it("anything other than the literal \"true\" disarms — a typo never arms a platform", () => {
+    const typo = readEnv({ SOCIAL_INSTAGRAM_ARMED: "TRUE" });
+    expect(socialArmed(typo, "instagram", { connected: true, configured: true }).armed).toBe(false);
   });
 });

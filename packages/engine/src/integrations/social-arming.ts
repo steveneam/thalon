@@ -33,7 +33,12 @@ import type { VaultDeps, VaultRepos } from "./vault";
 
 /** The social destinations ↔ platform seats (same strings by design; tiktok has no destination — review-gated, no driver). */
 const SOCIAL_VAULT_DESTINATIONS = ["linkedin", "x", "facebook", "instagram"] as const;
-type SocialVaultDestination = (typeof SOCIAL_VAULT_DESTINATIONS)[number];
+export type SocialVaultDestination = (typeof SOCIAL_VAULT_DESTINATIONS)[number];
+
+/** Whether a destination key is a social publish seat at all — website/intel/newsletter never post. */
+export function isSocialVaultDestination(destination: string): destination is SocialVaultDestination {
+  return (SOCIAL_VAULT_DESTINATIONS as readonly string[]).includes(destination);
+}
 
 /** platform → its env-override ARMED seat (the credential seats live in env-view's VAULT_ENV_SEATS). */
 const SOCIAL_ARMED_SEATS = {
@@ -42,6 +47,45 @@ const SOCIAL_ARMED_SEATS = {
   facebook: "SOCIAL_FACEBOOK_ARMED",
   instagram: "SOCIAL_INSTAGRAM_ARMED",
 } as const satisfies Record<SocialVaultDestination, keyof ThalonEnv>;
+
+export interface SocialArmingVerdict {
+  armed: boolean;
+  /** Why, in the operator's words — the Integrations card renders this verbatim. */
+  reason: string;
+}
+
+/**
+ * THE arming answer for one destination, from the two tenant-data facts that
+ * decide it plus the emergency env override. Exported and shared so the
+ * publish ratchet and the Integrations card cannot drift into two spellings
+ * of "armed" — s78 added the card, and a second derivation would have been a
+ * second truth.
+ *
+ * Env, when set, wins in BOTH directions: "true" force-arms a platform the
+ * tenant never configured, anything else force-disarms one the tenant did.
+ * That is what an emergency override means.
+ */
+export function socialArmed(
+  env: ThalonEnv,
+  destination: SocialVaultDestination,
+  facts: { connected: boolean; configured: boolean },
+): SocialArmingVerdict {
+  const seat = SOCIAL_ARMED_SEATS[destination];
+  const override = env[seat];
+  if (override !== undefined && override !== "") {
+    return override === "true"
+      ? { armed: true, reason: `force-armed by ${seat} in the box environment` }
+      : { armed: false, reason: `force-disarmed by ${seat} in the box environment` };
+  }
+  if (!facts.connected) return { armed: false, reason: "no stored credential to arm" };
+  if (!facts.configured) {
+    return {
+      armed: false,
+      reason: `not armed — the active profile's social block has no "${destination}" entry`,
+    };
+  }
+  return { armed: true, reason: "armed by the active profile's social block" };
+}
 
 /**
  * The arming rung reads two tenant-data facts, so the deps widen past the
@@ -70,12 +114,13 @@ export async function vaultSocialEnvView(deps: SocialArmingDeps): Promise<Thalon
   // means nothing to arm, and the profile read is skipped on purpose.
   if (connected.size === 0) return view;
   const config = await readSocialConfig(deps);
-  if (config) {
-    for (const destination of SOCIAL_VAULT_DESTINATIONS) {
-      if (config[destination] && connected.has(destination)) {
-        view[SOCIAL_ARMED_SEATS[destination]] ??= "true";
-      }
-    }
+  for (const destination of SOCIAL_VAULT_DESTINATIONS) {
+    // One spelling of "armed" — the same helper the Integrations card reads.
+    const { armed } = socialArmed(view, destination, {
+      connected: connected.has(destination),
+      configured: Boolean(config?.[destination]),
+    });
+    if (armed) view[SOCIAL_ARMED_SEATS[destination]] ??= "true";
   }
   return view;
 }

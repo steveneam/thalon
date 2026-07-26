@@ -5,9 +5,11 @@ import {
   type DestinationClass,
   type DestinationKey,
   type EntitlementFeature,
+  type SocialPublishConfig,
 } from "@thalon/contracts";
 import { z } from "zod";
 import { VAULT_ENV_SEATS } from "./env-view";
+import { isSocialVaultDestination, socialArmed } from "./social-arming";
 import { listCredentialCards, type CredentialCard, type VaultDeps } from "./vault";
 
 /**
@@ -90,6 +92,17 @@ export interface IntegrationCard {
   expiresAt: Date | null;
   /** True when the box env fills any of this destination's credential seats — env takes precedence over the vault row (emergency-override honesty, read off the one precedence table). */
   envOverride: boolean;
+  /**
+   * s78: whether this seat is ARMED — the fact that decides whether anything
+   * posts, and the top rung of the ladder the card already enumerates
+   * (plan-gating, expiry, re-auth, env precedence). A credential can be
+   * perfectly healthy and post nothing, so "Connected" alone was a status
+   * ladder with its most consequential rung missing. `null` for destinations
+   * that never post (website · newsletter · intel).
+   */
+  armed: boolean | null;
+  /** Why armed reads as it does, in the operator's words. `null` alongside `armed: null`. */
+  armedReason: string | null;
   fields: IntegrationCardField[];
 }
 
@@ -135,7 +148,17 @@ export function pasteFields(destination: DestinationKey): IntegrationCardField[]
  */
 export async function listIntegrationCards(
   deps: VaultDeps,
-  opts: { features: Record<EntitlementFeature, boolean>; now?: Date },
+  opts: {
+    features: Record<EntitlementFeature, boolean>;
+    now?: Date;
+    /**
+     * The active profile's social block — the tenant-data half of arming
+     * (s78). Passed in rather than read here so this stays a pure merge of
+     * vault + entitlements + env, and so a card read never opens an
+     * envelope to answer "is it armed".
+     */
+    socialConfig?: SocialPublishConfig | null;
+  },
 ): Promise<IntegrationCard[]> {
   const stored = await listCredentialCards(deps);
   const byDestination = new Map(stored.map((card) => [card.destination, card]));
@@ -145,16 +168,28 @@ export async function listIntegrationCards(
     const row = byDestination.get(destination) ?? null;
     const feature = CLASS_ENTITLEMENT[def.class];
     const entitled = feature === null ? true : opts.features[feature];
+    const state = deriveCardState({ stored: row, entitled, now });
+    // Arming is a SOCIAL fact — nothing else posts, so nothing else claims a
+    // rung it does not have.
+    const arming =
+      isSocialVaultDestination(destination) && entitled
+        ? socialArmed(deps.env, destination, {
+            connected: state === "connected" || state === "expiring" || state === "needs_reauth",
+            configured: Boolean(opts.socialConfig?.[destination]),
+          })
+        : null;
     return {
       destination,
       class: def.class,
       label: def.label,
       driver: def.driver,
-      state: deriveCardState({ stored: row, entitled, now }),
+      state,
       connectedAs: row?.connectedAs ?? null,
       validatedAt: row?.validatedAt ?? null,
       expiresAt: row?.expiresAt ?? null,
       envOverride: envOverridesDestination(deps.env, destination),
+      armed: arming?.armed ?? null,
+      armedReason: arming?.reason ?? null,
       fields: pasteFields(destination),
     };
   });
