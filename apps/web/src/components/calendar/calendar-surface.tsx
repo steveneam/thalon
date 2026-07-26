@@ -3,7 +3,7 @@
 import "@/components/calendar/calendar.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   assetEvents,
   byMarkPriority,
@@ -13,10 +13,13 @@ import {
   eventsInScope,
   groupByKey,
   gutterHours,
+  hourFromOffset,
+  instantOn,
   monthCells,
   outsideWindow,
   placeColumn,
   planEvents,
+  plannableAssets,
   sweepEvents,
   waitingEvents,
   weekRangeLabel,
@@ -29,11 +32,12 @@ import {
   type CalEvent,
   type Scope,
 } from "@/components/calendar/calendar-model";
+import { platformLabel } from "@/lib/workspace/format";
 import { fetchViews, putView } from "@/lib/views/client";
 import { useListKeys } from "@/lib/workspace/keyboard";
 import { fetchPlan, planSlot, removeSlot } from "@/lib/workspace/client";
-import type { PlanPayload } from "@/lib/workspace/types";
-import { dayKey, weekDays } from "@/lib/workspace/week";
+import type { PipelineAsset, PlanPayload } from "@/lib/workspace/types";
+import { dayKey, weekDays, type WeekDay } from "@/lib/workspace/week";
 
 type Density = "week" | "month" | "agenda";
 type ReadState = "loading" | "error" | "success";
@@ -93,8 +97,11 @@ function coerceView(config: Record<string, unknown>): SavedConfig {
  *    it is empty, and a failed write says nothing changed;
  *  - s78: the slot store's WRITE route (`/api/calendar/slots`) is armed, so
  *    Reschedule and Remove move and delete real plans from the detail
- *    popover. Drag is still not wired, which is why no event box advertises
- *    one any more (no grab cursor, no grip).
+ *    popover — and s78b closed the gap the founder found by using it: nothing
+ *    could CREATE a plan, so those two verbs were unreachable by construction.
+ *    Clicking empty grid opens the plan picker; a plan box drags to a new
+ *    instant. Both write the same slot door. A plan is an intention — neither
+ *    publishes anything nor arms anything.
  */
 export function CalendarSurface() {
   const router = useRouter();
@@ -106,6 +113,28 @@ export function CalendarSurface() {
   const [scope, setScope] = useState<Scope>(DEFAULT_VIEW.scope);
   const [expanded, setExpanded] = useState(DEFAULT_VIEW.expanded);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Where a drag is currently hovering, and the empty instant the operator
+  // clicked to open the plan picker. Both are transient view state.
+  const [dragTo, setDragTo] = useState<{ day: WeekDay; hour: number } | null>(null);
+  const [planAt, setPlanAt] = useState<{ day: WeekDay; hour: number } | null>(null);
+  /**
+   * `?plan=<draftId>` — Approve's "Plan a slot →" hands the draft over and the
+   * next empty-slot click places THAT draft. Read once at mount, router-free
+   * (the surface stays mountable outside a Next router, as ?run= does on Runs).
+   * One-shot: cleared the moment it is used or dismissed, so it cannot re-arm
+   * a later click.
+   */
+  /**
+   * Was a popover open when this press began? `useDismissOnOutside` clears it
+   * on pointerdown, which runs BEFORE click — so without this the same press
+   * that dismissed a popover would open the planner underneath it, and the
+   * popover would read as never having closed (founder s78b). One press does
+   * one thing: the first dismisses, the next plans.
+   */
+  const dismissedRef = useRef(false);
+  const [planDraftId, setPlanDraftId] = useState<string | null>(() =>
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("plan") : null,
+  );
   /** The slot write door's in-flight state — one plan is moved or removed at a time. */
   const [slotBusy, setSlotBusy] = useState(false);
   const [slotError, setSlotError] = useState<string | null>(null);
@@ -321,6 +350,77 @@ export function CalendarSurface() {
     }
   }
 
+  /**
+   * DRAG A PLAN TO A NEW INSTANT (founder s78: "can the boxes be moved
+   * around? because i cant move them around").
+   *
+   * Pointer-based rather than HTML5 drag-and-drop: it works by touch and pen,
+   * and the drop instant comes from real geometry — the column under the
+   * pointer gives the day, the offset within it gives the hour through
+   * `hourFromOffset`, the exact inverse of the `yOf` the box was drawn with.
+   * Below the snap threshold nothing is written, so a click that wobbles two
+   * pixels still opens the detail card instead of silently re-planning.
+   */
+  function beginDrag(event: CalEvent, startEvent: React.PointerEvent) {
+    if (event.kind !== "plan" || !event.draftId) return;
+    const draftId = event.draftId;
+    const startX = startEvent.clientX;
+    const startY = startEvent.clientY;
+    let moved = false;
+
+    function target(x: number, y: number): { day: WeekDay; hour: number } | null {
+      const col = document
+        .elementsFromPoint(x, y)
+        .find((el) => el instanceof HTMLElement && el.classList.contains("dcol"));
+      if (!(col instanceof HTMLElement)) return null;
+      const key = col.dataset.dayKey;
+      const day = days.find((d) => d.key === key);
+      if (!day) return null;
+      return { day, hour: hourFromOffset(y - col.getBoundingClientRect().top, win) };
+    }
+
+    function onMove(move: PointerEvent) {
+      if (!moved && Math.hypot(move.clientX - startX, move.clientY - startY) > 4) moved = true;
+      if (moved) setDragTo(target(move.clientX, move.clientY));
+    }
+
+    function onUp(up: PointerEvent) {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      setDragTo(null);
+      if (!moved) return; // a click, not a drag — let onClick own it
+      // The release lands ON a column, so the browser fires a click there next.
+      // Without this the drop would also open the plan picker on the slot just
+      // dropped into (founder s78b: "dragging a box and placing it in a new
+      // space causes the create a slot box to appear for no reason").
+      dismissedRef.current = true;
+      const drop = target(up.clientX, up.clientY);
+      if (drop) void reschedule(draftId, instantOn(drop.day, drop.hour));
+    }
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  /**
+   * PLAN A DRAFT INTO AN EMPTY SLOT — the step that did not exist (founder
+   * s78: clicking a box showed only "Open draft →"). Reschedule and Remove
+   * could never appear because nothing could create the plan they act on.
+   */
+  async function planInto(draftId: string, at: Date) {
+    setSlotBusy(true);
+    setSlotError(null);
+    try {
+      await planSlot({ draftId, scheduledFor: at.toISOString() });
+      setPlanAt(null);
+      await load();
+    } catch (err) {
+      setSlotError(err instanceof Error ? err.message : "Couldn’t plan that slot — nothing changed.");
+    } finally {
+      setSlotBusy(false);
+    }
+  }
+
   async function removePlan(draftId: string) {
     setSlotBusy(true);
     setSlotError(null);
@@ -358,7 +458,7 @@ export function CalendarSurface() {
   const headerNote =
     density === "month"
       ? "the plan read covers ±2 weeks — a month shows what it carries"
-      : "drag isn’t wired — open a plan to reschedule or remove it";
+      : "click an empty slot to plan · drag a plan to move it";
 
   const toggleQuiet = (
     <button type="button" className="bare quiet-toggle" onClick={() => setExpanded((v) => !v)}>
@@ -546,6 +646,23 @@ export function CalendarSurface() {
             </div>
           </div>
 
+          {planDraftId && (
+            <div className="plan-armed" role="status">
+              <span>
+                Placing{" "}
+                <b>
+                  {(() => {
+                    const a = (plan?.assets ?? []).find((x) => x.draftId === planDraftId);
+                    return a ? `${platformLabel(a.platform)} · ${a.excerpt || "approved draft"}` : "the draft you brought";
+                  })()}
+                </b>{" "}
+                — click an empty slot to place it.
+              </span>
+              <button type="button" className="btn btn-quiet btn-sm" onClick={() => setPlanDraftId(null)}>
+                Cancel
+              </button>
+            </div>
+          )}
           <div className="grid-wrap">
             <NowLine now={now} days={days} win={win} />
             <div className="gut" style={expanded ? { height: windowHeight(win) } : undefined}>
@@ -563,9 +680,46 @@ export function CalendarSurface() {
               return (
                 <div
                   key={day.key}
+                  data-day-key={day.key}
                   className={day.isToday ? "dcol today" : "dcol"}
                   style={expanded ? { height: windowHeight(win) } : undefined}
+                  onPointerDown={() => {
+                    // A press that closes a popover does not also plan; a drop
+                    // that just moved a plan does not plan again either. Both
+                    // are consumed by the click that follows.
+                    dismissedRef.current = selectedId !== null || planAt !== null;
+                  }}
+                  onClick={(clickEvent) => {
+                    // Empty space only — a click that landed on a box is that
+                    // box's own. Planning starts where the operator pointed.
+                    if (clickEvent.target !== clickEvent.currentTarget) return;
+                    // This press closed a popover; it does not also plan.
+                    if (dismissedRef.current) {
+                      dismissedRef.current = false;
+                      return;
+                    }
+                    const top = clickEvent.currentTarget.getBoundingClientRect().top;
+                    const hour = hourFromOffset(clickEvent.clientY - top, win);
+                    setSelectedId(null);
+                    if (planDraftId) {
+                      // Carried from Approve: place THAT draft, no second pick.
+                      const draftId = planDraftId;
+                      setPlanDraftId(null);
+                      void planInto(draftId, instantOn(day, hour));
+                      return;
+                    }
+                    setPlanAt({ day, hour });
+                  }}
                 >
+                  {dragTo?.day.key === day.key && (
+                    <div
+                      className="drop-hint"
+                      style={{ top: yOf(dragTo.hour, win) }}
+                      aria-hidden
+                    >
+                      {clockLabel(instantOn(dragTo.day, dragTo.hour))}
+                    </div>
+                  )}
                   {placeColumn(inWindow, win).map(({ event, top, height, leftPct, widthPct }) => (
                     <EventBox
                       key={event.id}
@@ -576,11 +730,26 @@ export function CalendarSurface() {
                       widthPct={widthPct}
                       selected={event.id === selectedId}
                       onSelect={() => setSelectedId(event.id === selectedId ? null : event.id)}
+                      draggable={event.kind === "plan" && event.draftId !== null}
+                      onDragStart={(pointerEvent) => beginDrag(event, pointerEvent)}
                     />
                   ))}
                 </div>
               );
             })}
+
+            {planAt && (
+              <PlanPicker
+                at={instantOn(planAt.day, planAt.hour)}
+                anchorTop={yOf(planAt.hour, win)}
+                windowPx={windowHeight(win)}
+                assets={plannableAssets(plan?.assets ?? [], plan?.plannedSlots ?? [])}
+                busy={slotBusy}
+                error={slotError}
+                onPlan={planInto}
+                onClose={() => setPlanAt(null)}
+              />
+            )}
 
             {selected && (
               <DetailCard
@@ -734,6 +903,8 @@ function EventBox({
   widthPct,
   selected,
   onSelect,
+  draggable = false,
+  onDragStart,
 }: {
   event: CalEvent;
   top: number;
@@ -742,6 +913,9 @@ function EventBox({
   widthPct: number;
   selected: boolean;
   onSelect: () => void;
+  /** Plans only — everything else on this grid is a record of what happened. */
+  draggable?: boolean;
+  onDragStart?: (e: React.PointerEvent) => void;
 }) {
   return (
     <button
@@ -758,9 +932,23 @@ function EventBox({
       }}
       aria-pressed={selected}
       onClick={onSelect}
+      {...(draggable
+        ? {
+            // Drag moves a PLAN and nothing else — the other kinds record when
+            // something happened and cannot be moved by wanting them moved.
+            // Pointer events (not HTML5 dnd) so it works by touch and pen, and
+            // so the drop instant is computed from real geometry.
+            onPointerDown: onDragStart,
+            "aria-describedby": "cal-drag-hint",
+          }
+        : {})}
     >
-      {/* The ⋮⋮ grip is the sheet's drag handle; drag is not wired, so it is
-          not drawn (see the cursor note in calendar.css). */}
+      {/* The sheet's ⋮⋮ drag handle, drawn only where drag is real (s78). */}
+      {draggable && (
+        <span className="grip" aria-hidden>
+          ⋮⋮
+        </span>
+      )}
       <b>
         {event.lead} {event.flagged && <span className="flag">⚑</span>}
       </b>
@@ -850,6 +1038,168 @@ function toLocalInputValue(date: Date): string {
  * Keyed by the selected event at the call site: this component holds a mode
  * and a typed instant, and state must never outlive the entity it describes.
  */
+
+/**
+ * KEEP A POPOVER ON SCREEN (founder s78b: "the popover goes off screen, i
+ * cant click to remove").
+ *
+ * Both popovers are absolutely positioned inside the grid and were clamped
+ * against the GRID's height — 1056px with quiet hours expanded — while the
+ * surface's visible scroll viewport is a few hundred pixels of it. A plan late
+ * in the day therefore opened below the fold, and expanding Reschedule grew it
+ * further down, so the verbs existed and could not be reached.
+ *
+ * Measured after layout, because the height is not knowable in advance: it
+ * changes when the panel switches mode. The popover is pulled up so it fits
+ * inside the grid, then scrolled into view within whatever container is doing
+ * the scrolling. Re-runs on `deps` so opening Reschedule re-fits it.
+ */
+/**
+ * CLICK OUTSIDE CLOSES IT (founder s78b: "common sense, but when you click
+ * outside the popover it should hide it, not just me clicking on the x").
+ *
+ * Pointerdown rather than click, so it closes on the press that begins a drag
+ * elsewhere instead of waiting for a release that may never land on this
+ * surface. Escape closes it too — the house convention.
+ */
+function useDismissOnOutside(ref: React.RefObject<HTMLElement | null>, onClose: () => void): void {
+  useEffect(() => {
+    function onDown(event: PointerEvent) {
+      const el = ref.current;
+      if (el && event.target instanceof Node && !el.contains(event.target)) onClose();
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [ref, onClose]);
+}
+
+function useFitInView<T extends HTMLElement>(
+  windowPx: number,
+  preferredTop: number,
+  deps: unknown[],
+): [React.RefObject<T | null>, number] {
+  const ref = useRef<T | null>(null);
+  const [top, setTop] = useState(preferredTop);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const height = el.offsetHeight;
+    // Never above the grid, never past its bottom — and if it simply cannot
+    // fit, favour the TOP so the header and its close button stay reachable.
+    const fitted = Math.max(0, Math.min(preferredTop, windowPx - height));
+    setTop(fitted);
+    // Optional call: jsdom implements no layout and no scrollIntoView, and
+    // the surface must stay mountable in tests (the runs.tsx precedent).
+    el.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowPx, preferredTop, ...deps]);
+  return [ref, top];
+}
+
+/**
+ * PLAN A DRAFT INTO THIS SLOT — the control the product never had.
+ *
+ * It lists what is actually plannable: approved, not yet published, not
+ * already holding a slot. An empty list says WHY it is empty rather than
+ * rendering a blank menu, because "nothing approved yet" and "everything is
+ * already planned" are different facts and the operator's next move differs.
+ *
+ * Planning writes a slot and nothing else — it publishes nothing, arms
+ * nothing, and calls no platform.
+ */
+function PlanPicker({
+  at,
+  anchorTop,
+  windowPx,
+  assets,
+  busy,
+  error,
+  onPlan,
+  onClose,
+}: {
+  at: Date;
+  anchorTop: number;
+  windowPx: number;
+  assets: PipelineAsset[];
+  busy: boolean;
+  error: string | null;
+  onPlan: (draftId: string, at: Date) => void;
+  onClose: () => void;
+}) {
+  const [ref, top] = useFitInView<HTMLDivElement>(windowPx, anchorTop, [assets.length, error]);
+  useDismissOnOutside(ref, onClose);
+  return (
+    <div
+      ref={ref}
+      className="detail"
+      role="dialog"
+      aria-label={`Plan a draft for ${clockLabel(at)}`}
+      // The same dress as the detail popover — two popovers on one surface
+      // that look different read as two different kinds of thing.
+      style={{ top, right: 2, width: 184, padding: "11px 12px" }}
+    >
+      {/* The detail popover's OWN header row, glyph and body classes — not a
+          lookalike. It previously used a `.detail-hd` class with no rule
+          behind it and a ✕ (U+2715) where the detail card uses × (U+00D7), so
+          the two popovers differed in close-icon position, size and type
+          scale (founder s78b). */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span className="t-title detail-title">Plan for {clockLabel(at)}</span>
+        <div style={{ flex: 1 }} />
+        <button type="button" className="bare detail-close" aria-label="Close" onClick={onClose}>
+          ×
+        </button>
+      </div>
+      <span className="t-label detail-when">
+        {new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric" }).format(at)} ·{" "}
+        {clockLabel(at)} · a plan is an intention
+      </span>
+      {assets.length === 0 ? (
+        <span className="t-label detail-foot">
+          Nothing to plan yet — a draft becomes plannable once you approve it.{" "}
+          <Link className="card-link" href="/app/approve">
+            Open Approve →
+          </Link>
+        </span>
+      ) : (
+        <div className="plan-choices">
+          {assets.slice(0, 5).map((asset) => (
+            <button
+              key={asset.draftId}
+              type="button"
+              className="bare plan-choice"
+              disabled={busy}
+              onClick={() => onPlan(asset.draftId, at)}
+            >
+              {platformLabel(asset.platform)} · {asset.excerpt || "approved draft"}
+            </button>
+          ))}
+          {assets.length > 5 && (
+            <span className="t-label detail-foot">
+              {assets.length - 5} more approved —{" "}
+              <Link className="card-link" href="/app/approve">
+                open Approve →
+              </Link>
+            </span>
+          )}
+        </div>
+      )}
+      {error && (
+        <span className="t-label" role="alert" style={{ color: "var(--err)" }}>
+          {error}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function DetailCard({
   event,
   anchorTop,
@@ -871,10 +1221,14 @@ function DetailCard({
 }) {
   const [mode, setMode] = useState<"idle" | "move" | "remove">("idle");
   const [when, setWhen] = useState(() => toLocalInputValue(event.at));
-  const DETAIL_HEIGHT = 190;
-  const top = Math.max(0, Math.min(anchorTop, Math.max(0, windowPx - DETAIL_HEIGHT)));
+  // Measured, not assumed: a hard-coded 190px was wrong the moment `mode`
+  // opened the Reschedule field, which is exactly when the popover ran off
+  // the bottom and its verbs became unreachable.
+  const [ref, top] = useFitInView<HTMLDivElement>(windowPx, anchorTop, [mode, error, busy]);
+  useDismissOnOutside(ref, onClose);
   return (
     <div
+      ref={ref}
       className="detail"
       style={{ top, right: 2, width: 184, padding: "11px 12px" }}
       role="dialog"

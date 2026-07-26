@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   checkGlyph,
@@ -382,6 +383,16 @@ export function DraftCard({
               <button type="button" className="btn btn-primary" onClick={onPublish} disabled={busy}>
                 Publish to site
               </button>
+            )}
+            {/* Approval is the moment a draft BECOMES plannable, so the door to
+                planning belongs here as well as on the calendar (founder s78:
+                "shouldnt plan be in the calendar and Create section or
+                something?" — Create is too early; the draft does not exist yet
+                and may never pass the judge). Planning writes a slot only. */}
+            {draft.status === "approved" && (
+              <Link className="btn btn-ghost" href={`/app/calendar?plan=${draft.id}`}>
+                Plan a slot →
+              </Link>
             )}
             <span className="t-label" style={{ marginLeft: 6 }}>
               {canApproveReject

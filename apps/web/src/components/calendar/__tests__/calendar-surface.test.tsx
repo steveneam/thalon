@@ -138,9 +138,9 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     expect(box).toHaveClass("ev-plan");
     expect(box).toHaveStyle({ top: "154px" }); // 09:30 → (9.5 − 6) × 44
     expect(box?.textContent).toContain("09:30 · pipeline thread");
-    // s78: the ⋮⋮ grip is the sheet's DRAG handle and drag is not wired, so
-    // it is not drawn. It comes back in the change that wires drag.
-    expect(box?.querySelector(".grip")).toBeNull();
+    // s78b: drag IS wired, so the sheet's ⋮⋮ drag handle is drawn again —
+    // this is "the change that wires drag" the previous note pointed at.
+    expect(box?.querySelector(".grip")).not.toBeNull();
   });
 
   it("dresses published work as done and never dresses a rejection as a success", async () => {
@@ -232,20 +232,30 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     expect(container.querySelector(".detail")).toBeNull();
   });
 
-  it("never claims a drag it cannot do", async () => {
+  /**
+   * INVERTED s78b. Lane 2 pinned "never claims a drag it cannot do" while drag
+   * was unwired — right then. The founder then hit the real gap by using the
+   * calendar, drag was wired, and the sheet's own affordance came back. The
+   * invariant is unchanged and still the point: the grip appears on a PLAN and
+   * nowhere else, because a completed run is a record of when something
+   * happened and dragging it would promise to move history.
+   */
+  it("advertises drag on a plan, and only on a plan", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT] });
     const { container } = render(<CalendarSurface />);
     await screen.findByText("1 planned");
 
-    // s78: the write route landed, DRAG did not — so the note names the real
-    // route to the verbs instead of the missing store, and no box advertises
-    // a gesture the grid cannot perform.
     expect(
-      screen.getByText("drag isn’t wired — open a plan to reschedule or remove it"),
+      screen.getByText("click an empty slot to plan · drag a plan to move it"),
     ).toBeInTheDocument();
-    // No drop ghost: there is no drag to land.
-    expect(container.querySelector(".ghost")).toBeNull();
-    expect(container.querySelector(".ev .grip")).toBeNull();
+    expect(container.querySelector(".ev-plan .grip")).not.toBeNull();
+    for (const box of container.querySelectorAll(".ev")) {
+      if (!box.classList.contains("ev-plan")) {
+        expect(box.querySelector(".grip")).toBeNull();
+      }
+    }
+    // Nothing is being dragged at rest, so no drop hint is drawn.
+    expect(container.querySelector(".drop-hint")).toBeNull();
   });
 
   /**

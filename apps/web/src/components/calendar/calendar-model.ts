@@ -512,3 +512,50 @@ export function groupByKey<T extends { day: string }>(items: T[]): Map<string, T
   }
   return grouped;
 }
+
+/* ── PLANNING: the step that was missing ────────────────────────────────────
+ *
+ * The founder hit this by using the calendar (s78): clicking a box showed only
+ * "Open draft →", never Reschedule or Remove. The cause was not the popover.
+ * `planSlot` was reachable from exactly ONE place — inside `reschedule`, which
+ * renders only on an event that is ALREADY a plan — so the product could
+ * re-plan and un-plan but could never PLAN. With zero slots stored, no plan
+ * event could exist, so the controls were unreachable by construction and
+ * there was nothing to drag either. The Board said "approve a draft, then plan
+ * its slot" while no such control existed anywhere.
+ *
+ * A plan is an intention. Creating one publishes nothing and arms nothing.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/** Approved, not yet published, and not yet holding a slot — what can be planned. */
+export function plannableAssets(
+  assets: PipelineAsset[],
+  slots: PlannedSlotWire[],
+): PipelineAsset[] {
+  const planned = new Set(slots.map((s) => s.draftId));
+  return assets.filter(
+    (a) => a.status === "approved" && a.publishedAt === null && !planned.has(a.draftId),
+  );
+}
+
+/** Minutes a dropped or clicked instant snaps to — a calendar that lands on 10:07 is noise. */
+export const SNAP_MINUTES = 15;
+
+/**
+ * Pixels within a day column → the local hour they mean. The exact inverse of
+ * `yOf`, snapped, and clamped INTO the visible window so a drag that overshoots
+ * the column lands on its edge rather than on a time the grid never drew.
+ */
+export function hourFromOffset(y: number, win: TimeWindow = DAY_WINDOW): number {
+  const raw = win.start + y / HOUR_PX;
+  const step = SNAP_MINUTES / 60;
+  const snapped = Math.round(raw / step) * step;
+  return Math.min(Math.max(snapped, win.start), win.end - step);
+}
+
+/** A day + a local fractional hour → the instant to store. */
+export function instantOn(day: WeekDay, hour: number): Date {
+  const at = new Date(day.date);
+  at.setHours(Math.floor(hour), Math.round((hour % 1) * 60), 0, 0);
+  return at;
+}

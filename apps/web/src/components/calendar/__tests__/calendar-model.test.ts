@@ -7,9 +7,13 @@ import {
   cadenceLine,
   eventsInScope,
   gutterHours,
+  hourFromOffset,
+  instantOn,
   monthCells,
   outsideWindow,
   placeColumn,
+  plannableAssets,
+  SNAP_MINUTES,
   planEvents,
   sweepEvents,
   waitingEvents,
@@ -328,7 +332,144 @@ describe("calendar.css — the two rules a real day breaks", () => {
     expect(rule?.[1]).not.toMatch(/flex:\s*1\s*;/);
   });
 
-  it("no event box advertises a drag, because drag is not wired", () => {
-    expect(css).not.toMatch(/cursor:\s*grab/);
+  /**
+   * INVERTED s78b, and the invariant is the same one either way: **a drag
+   * cursor only where drag actually works.**
+   *
+   * Lane 2 asserted the absence of `grab` because nothing could be dragged —
+   * correct then. The founder then found the deeper gap (nothing could CREATE
+   * a plan, so there was never anything to drag OR reschedule), drag was
+   * wired, and the sheet's own affordance came back. What must never return is
+   * the lie: a grab cursor on a box that cannot move.
+   */
+  it("offers a drag cursor ONLY on plans — the one kind that can be moved", () => {
+    const grabbing = [...css.matchAll(/([^{}]+)\{([^{}]*cursor:\s*grab[^{}]*)\}/g)];
+    expect(grabbing.length).toBeGreaterThan(0);
+    for (const [, selector] of grabbing) {
+      expect(selector).toContain(".ev-plan");
+    }
+  });
+
+  it("never puts a drag cursor on the record kinds — history does not move", () => {
+    for (const kind of [".ev-ok", ".ev.done", ".mark"]) {
+      const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(
+        ([, sel, body]) => sel.includes(kind) && /cursor:\s*grab/.test(body),
+      );
+      expect(rule).toBeUndefined();
+    }
+  });
+});
+
+/* ── PLANNING (s78b, founder-found) ──────────────────────────────────────── */
+
+describe("plannableAssets — what can actually be planned", () => {
+  it("offers approved, unpublished drafts that hold no slot", () => {
+    const rows = plannableAssets([asset({ draftId: "d1", status: "approved" })], []);
+    expect(rows.map((r) => r.draftId)).toEqual(["d1"]);
+  });
+
+  it("never offers a draft that is not approved — planning is post-approval", () => {
+    expect(plannableAssets([asset({ draftId: "d1", status: "queued" })], [])).toEqual([]);
+    expect(plannableAssets([asset({ draftId: "d1", status: "blocked" })], [])).toEqual([]);
+  });
+
+  it("never offers one already published, or one that already holds a slot", () => {
+    expect(
+      plannableAssets(
+        [asset({ draftId: "d1", status: "approved", publishedAt: at(23, 9).toISOString() })],
+        [],
+      ),
+    ).toEqual([]);
+    expect(
+      plannableAssets(
+        [asset({ draftId: "d1", status: "approved" })],
+        [slot({ draftId: "d1" })],
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe("hourFromOffset — the exact inverse of yOf, snapped and clamped", () => {
+  it("round-trips a drawn hour back to itself", () => {
+    for (const hour of [6, 9.5, 12.25, 18]) {
+      expect(hourFromOffset(yOf(hour, DAY_WINDOW), DAY_WINDOW)).toBeCloseTo(hour, 5);
+    }
+  });
+
+  it("snaps to the quarter hour, so a drop never lands on 10:07", () => {
+    const hour = hourFromOffset(yOf(10.1, DAY_WINDOW), DAY_WINDOW);
+    expect(Math.round((hour % 1) * 60) % SNAP_MINUTES).toBe(0);
+  });
+
+  it("clamps INTO the window — an overshooting drag lands on the edge, never off-grid", () => {
+    expect(hourFromOffset(-500, DAY_WINDOW)).toBe(DAY_WINDOW.start);
+    expect(hourFromOffset(99999, DAY_WINDOW)).toBeLessThan(DAY_WINDOW.end);
+    expect(hourFromOffset(99999, DAY_WINDOW)).toBeGreaterThanOrEqual(DAY_WINDOW.end - 1);
+  });
+});
+
+describe("instantOn — a day plus a fractional hour is a real local instant", () => {
+  it("places 14.25 as 14:15 on that day", () => {
+    const day = { date: new Date(2026, 6, 22), key: "2026-07-22", isToday: false };
+    const at = instantOn(day, 14.25);
+    expect(at.getHours()).toBe(14);
+    expect(at.getMinutes()).toBe(15);
+    expect(at.getDate()).toBe(22);
+  });
+});
+
+/**
+ * THE POPOVER MUST BE MEASURED, NOT GUESSED (founder s78b: "the popover goes
+ * off screen, i cant click to remove").
+ *
+ * It was clamped with a hard-coded `DETAIL_HEIGHT = 190`, against the GRID's
+ * height rather than the visible scroll viewport. Both were wrong: with quiet
+ * hours expanded the grid is 1056px, and opening Reschedule grows the popover
+ * past 190 — which is precisely when its verbs ran off the bottom.
+ *
+ * jsdom computes no layout (`offsetHeight` is 0), so the fit itself cannot be
+ * asserted here; it was verified in a real browser with `elementFromPoint`,
+ * confirming Remove is hittable and not merely on screen. What IS pinnable is
+ * that the guessed constant never comes back.
+ */
+describe("calendar popovers fit themselves to what is visible", () => {
+  const source = readFileSync(
+    new URL("../calendar-surface.tsx", import.meta.url),
+    "utf8",
+  );
+
+  it("no hard-coded popover height — the height is measured after layout", () => {
+    expect(source).not.toMatch(/DETAIL_HEIGHT\s*=\s*\d/);
+  });
+
+  it("neither popover uses a class with no rule behind it", () => {
+    // `.detail-hd` was invented for the plan picker and never given a rule, so
+    // its ✕ sat wherever the title text ended while the detail popover's sat at
+    // the right edge — two popovers, two close buttons, two places (founder
+    // s78b). Both now share the detail popover's own header markup.
+    // The className, not a mention of it in the note explaining why it went.
+    expect(source).not.toMatch(/className="detail-hd"/);
+    expect([...source.matchAll(/className="bare detail-close"/g)]).toHaveLength(2);
+    // Same GLYPH too: × (U+00D7), never ✕ (U+2715) — different characters
+    // render at different sizes, and that is what the founder saw. Comments
+    // are stripped first: the note explaining the fix names the old glyph.
+    const code = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    expect(code).not.toMatch(/\u2715/);
+    expect([...source.matchAll(/className="t-title detail-title"/g)]).toHaveLength(2);
+  });
+
+  it("an outside press dismisses, and does not also plan underneath it", () => {
+    expect(source).toMatch(/function useDismissOnOutside/);
+    expect([...source.matchAll(/useDismissOnOutside\(ref, onClose\)/g)]).toHaveLength(2);
+    // The same press must not close a popover AND open the planner.
+    expect(source).toMatch(/dismissedRef/);
+  });
+
+  it("both popovers route their top through the fit-in-view measurement", () => {
+    expect(source).toMatch(/function useFitInView/);
+    // Two callers: the detail card and the plan picker.
+    expect([...source.matchAll(/useFitInView<HTMLDivElement>/g)]).toHaveLength(2);
+    // Optional call — jsdom has no scrollIntoView (the runs.tsx precedent).
+    expect(source).toMatch(/scrollIntoView\?\.\(\{\s*block:\s*"nearest"/);
   });
 });
