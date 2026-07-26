@@ -118,7 +118,13 @@ try {
       rows.push({ job: job.name, verdict, note });
       await page.close();
     }
-    const mark = { works: "✓", "dead-door": "✗ DEAD DOOR", "no-affordance": "— NO AFFORDANCE", error: "! HARNESS" };
+    const mark = {
+      works: "✓",
+      "dead-door": "✗ DEAD DOOR",
+      "no-affordance": "— NO AFFORDANCE",
+      undriven: "· UNDRIVEN",
+      error: "! HARNESS",
+    };
     for (const r of rows) {
       console.log(`  ${mark[r.verdict]}  ${r.job}${r.note ? `\n        ${r.note}` : ""}`);
     }

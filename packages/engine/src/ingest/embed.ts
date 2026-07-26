@@ -16,6 +16,13 @@ export interface EmbedChunksDeps {
   driver: EmbeddingDriver;
   tracer?: Tracer;
   objectStore?: ObjectStore;
+  /**
+   * Called when a cache row resolved to nothing — the row survives, its object
+   * is gone. Treated as a miss and healed, but never silently: a store whose
+   * objects keep vanishing re-spends on every ingest, and that deserves a
+   * report rather than a shrug. Absent by default so callers opt in.
+   */
+  onCacheDangling?: (info: { key: string; valueRef: string }) => void;
 }
 
 export interface EmbeddedChunk {
@@ -51,17 +58,41 @@ export async function embedChunks(
       inputHash: chunk.contentHash,
     });
     const cached = await repos.caches.llm.get(key);
-    if (cached) {
-      const raw = await store.get(cached.valueRef);
-      if (!raw) {
-        throw new Error(`llm cache row points at a missing object "${cached.valueRef}"`);
-      }
+    const raw = cached ? await store.get(cached.valueRef) : null;
+    if (cached && raw) {
       results[index] = {
         contentHash: chunk.contentHash,
         embedding: JSON.parse(raw.toString("utf8")) as number[],
         cacheHit: true,
       };
     } else {
+      /**
+       * A DANGLING CACHE POINTER IS A MISS, NOT A FATAL ERROR (s79).
+       *
+       * This threw `llm cache row points at a missing object "…"`, which made
+       * the failure PERMANENT: the row survives, so every later ingest of the
+       * same chunk text hit the same dead pointer and the whole feature stayed
+       * broken with no path back. The founder found it by pasting a YouTube URL
+       * and asking whether transcription still worked — it did not, and the
+       * transcript itself was fine.
+       *
+       * The split is the point: `llm_cache` (Postgres) holds a POINTER, the
+       * object store holds the truth. They can diverge for ordinary reasons —
+       * here `THALON_DATA_DIR=.data` is RELATIVE and the store root is resolved
+       * against the process's working directory, so the dev server (cwd
+       * `apps/web`) and anything run from the repo root share ONE cache index
+       * across TWO different stores. Every root-cwd test, script and eval run
+       * wrote rows the dev server could never resolve.
+       *
+       * A pointer whose target is gone is exactly what a cache miss IS. Re-embed
+       * and `put` again, which upserts the row and heals it. Spend stays guarded
+       * by the same budget assertion every real miss passes through, and the
+       * divergence is reported rather than swallowed — silence here would hide a
+       * misconfigured store while quietly re-spending on every ingest.
+       */
+      if (cached) {
+        deps.onCacheDangling?.({ key, valueRef: cached.valueRef });
+      }
       misses.push({ index, text: chunk.text, key });
     }
   }

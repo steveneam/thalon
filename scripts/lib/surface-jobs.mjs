@@ -20,7 +20,7 @@
 // is for, so they stay valid across sessions and lanes; that is what makes the
 // table comparable over time instead of a snapshot of one diff.
 
-import { control, DeadDoor, NoAffordance, press, text } from "./surface-driver.mjs";
+import { control, DeadDoor, NoAffordance, press, text, Undriven } from "./surface-driver.mjs";
 
 /** Wait for a body-text predicate, or fail with what was actually on screen. */
 async function expectText(page, pattern, what) {
@@ -37,6 +37,38 @@ async function expectText(page, pattern, what) {
 
 async function urlNow(page) {
   return page.evaluate(() => window.location.pathname + window.location.search);
+}
+
+/**
+ * Does the surface EXPLAIN a numeric disagreement, on screen?
+ *
+ * Two counts that differ are not automatically a defect — the defect is a
+ * difference the operator cannot account for. s79 proved the distinction the
+ * hard way, in both directions:
+ *
+ *  - Dashboard's pill says 25 while the card lists 21, because the two read
+ *    different windows. Lane 3's verifiers named the "just equalise them" fix
+ *    as WORSE: the topbar chip and the rail badge render the pulse's number on
+ *    the same screen, so equalising the card trades one visible disagreement
+ *    for two invisible ones. It ships "21 of 25 shown — the oldest wait in the
+ *    queue →" instead. State the bound, don't chase the number.
+ *  - Approve's "13 waiting" beside "Approve all waiting (2)" ships "2 of 13
+ *    waiting can be approved together — 11 staged drafts advance through their
+ *    own flow."
+ *
+ * Both jobs originally demanded equality, which would have graded the correct
+ * fix as still-broken and pushed toward the worse one. A gate that insists on
+ * the wrong remedy is worse than a gate that misses the defect.
+ */
+function explainsGap(body, a, b) {
+  const nums = [String(a), String(b)];
+  return body
+    .split("\n")
+    .map((l) => l.trim())
+    .some(
+      (line) =>
+        /\bof\b/i.test(line) && nums.every((n) => line.includes(n)) && /[a-z]{4,}/i.test(line),
+    );
 }
 
 /**
@@ -98,12 +130,14 @@ export const JOBS = {
           if (!seen) throw new NoAffordance("no 'Needs you' card");
           if (seen.stated.length === 0) return `card lists ${seen.rows} rows and the surface states no count`;
           const mismatched = seen.stated.filter((n) => n !== seen.rows);
-          if (mismatched.length > 0) {
-            // Two reads, two windows, and no statement of the gap: the operator
-            // is told 25 items need them and handed a list of 21.
-            throw new DeadDoor(`the surface states ${mismatched.join("/")} and the card offers ${seen.rows} rows, with nothing on screen explaining the gap`);
+          if (mismatched.length === 0) return `count agrees at ${seen.rows}`;
+          // A gap is fine if the surface OWNS it — see `explainsGap`.
+          const body = await text(page);
+          if (explainsGap(body, mismatched[0], seen.rows)) {
+            const line = body.split("\n").map((l) => l.trim()).find((l) => /\bof\b/.test(l) && l.includes(String(seen.rows)));
+            return `states ${mismatched.join("/")}, offers ${seen.rows}, and says so: ${JSON.stringify(line)}`;
           }
-          return `count agrees at ${seen.rows}`;
+          throw new DeadDoor(`the surface states ${mismatched.join("/")} and the card offers ${seen.rows} rows, with nothing on screen explaining the gap`);
         },
       },
       {
@@ -188,29 +222,68 @@ export const JOBS = {
       {
         name: "drop a file into the ingest box (it is advertised in the copy)",
         async run(page) {
-          const body = await text(page);
-          if (!/drop a file/i.test(body)) return "not advertised — nothing to honour";
-          // Advertised: then a drop target must exist. The s77 finding says the
-          // copy promises it and no handler exists anywhere.
-          const hasDrop = await page.evaluate(() => {
-            const nodes = Array.from(document.querySelectorAll("*"));
-            return nodes.some((el) => el.ondrop || el.getAttribute("data-drop") !== null);
+          /**
+           * The promise lives in a PLACEHOLDER attribute, which `innerText` never
+           * returns — so an earlier version of this job reported "not advertised,
+           * nothing to honour" on a surface whose input literally reads "Paste a
+           * video URL or drop a file". Read attributes as well as text.
+           */
+          const advertised = await page.evaluate(() => {
+            const inText = /drop a file/i.test(document.body.innerText);
+            const inAttr = Array.from(document.querySelectorAll("input, textarea, [title], [aria-label]")).some((el) =>
+              /drop a file/i.test(
+                `${el.getAttribute("placeholder") || ""} ${el.getAttribute("title") || ""} ${el.getAttribute("aria-label") || ""}`,
+              ),
+            );
+            return inText || inAttr;
           });
-          const hasFileInput = await page.$("input[type='file']");
-          if (!hasDrop && !hasFileInput) {
-            throw new DeadDoor("the copy advertises 'or drop a file' and no drop handler or file input exists");
+          if (!advertised) return "not advertised — nothing to honour";
+          /**
+           * Advertised, so it must WORK. React attaches listeners at the root, so
+           * `el.ondrop` is always null and cannot be introspected — dispatch a
+           * real drop instead and require the surface to respond. A wrong
+           * extension must be refused BY NAME (lane 3's fix), which is a visible
+           * response and therefore provable.
+           */
+          const target = await page.$("input[type='text'], form");
+          if (!target) throw new NoAffordance("no ingest box to drop onto");
+          const responded = await page.evaluate((el) => {
+            const before = document.body.innerText;
+            const dt = new DataTransfer();
+            dt.items.add(new File(["x"], "not-a-caption.exe", { type: "application/octet-stream" }));
+            el.dispatchEvent(new DragEvent("dragover", { bubbles: true, dataTransfer: dt }));
+            el.dispatchEvent(new DragEvent("drop", { bubbles: true, dataTransfer: dt }));
+            return before;
+          }, target);
+          await page.waitForNetworkIdle({ idleTime: 500, timeout: 6_000 }).catch(() => {});
+          const after = await text(page);
+          if (after === responded) {
+            throw new DeadDoor("the copy advertises 'drop a file' and a real drop changed nothing on screen — no handler behind it");
           }
-          return "drop target present";
+          const said = after.split("\n").map((l) => l.trim()).find((l) => /\.exe|not-a-caption|refus|can.t|only/i.test(l));
+          return said ? `a wrong file is refused by name: ${JSON.stringify(said.slice(0, 90))}` : "the drop was handled";
         },
       },
       {
         name: "find one source in the shelf (search / filter / sort)",
         async run(page) {
+          const body = await text(page);
+          const count = body.match(/(\d+)\s+sources?/i);
           const search = await page.$("input[type='search'], input[placeholder*='search' i], input[placeholder*='find' i]");
-          if (search) return "search present";
           const seg = await page.$(".seg, .sel-ctl, [role='tablist']");
-          if (!seg) throw new NoAffordance("an unbounded shelf with no search, no filter and no sort");
-          return "filter/sort controls present";
+          if (search || seg) return search ? "search present" : "filter/sort controls present";
+          /**
+           * An EMPTY shelf cannot be searched, and saying "no affordance" about
+           * it would be a finding about the fixture rather than the product.
+           * Lane 3's `repro` lens refuted half this finding for exactly that
+           * reason: `/api/library` returns zero sources today, so the controls
+           * have nothing to act on. Report it as UNDRIVEN — never as ✓, which is
+           * what an earlier version of this job would have printed.
+           */
+          if (count && Number(count[1]) === 0) {
+            throw new Undriven(`the shelf holds ${count[0]} — nothing to search, so the controls cannot be exercised on today's data`);
+          }
+          throw new NoAffordance(`a shelf of ${count ? count[0] : "unknown size"} with no search, no filter and no sort`);
         },
       },
       {
@@ -255,7 +328,7 @@ export const JOBS = {
       },
       {
         name: "follow the dossier's own Wave fact back to the filtered portfolio",
-        async run(page) {
+        async run(page, { base }) {
           const card = await page.$("a[href*='/app/sites/']");
           if (!card) throw new NoAffordance("cannot reach a dossier to test its facts");
           await press(page, card, "a site card");
@@ -266,13 +339,36 @@ export const JOBS = {
               (el) => el.children.length === 0 && /^wave\b/i.test((el.textContent || "").trim()),
             );
             if (els.length === 0) return { found: false };
-            const row = els[0].closest("div, li, tr, section") || els[0].parentElement;
-            const link = row ? row.querySelector("a[href]") : null;
-            return { found: true, label: (row?.textContent || "").trim().slice(0, 40), linked: Boolean(link) };
+            // Look UP for the enclosing link, not down from the label. The fact
+            // is wrapped BY the <a>, so an earlier version of this job searched
+            // a tight inner div, found nothing, and reported "the Wave fact is
+            // not a door" on a dossier where it demonstrably is one.
+            const anchor = els.map((el) => el.closest("a[href]")).find(Boolean);
+            return {
+              found: true,
+              label: els.map((e) => (e.textContent || "").trim()).join(" "),
+              href: anchor ? anchor.getAttribute("href") : null,
+            };
           });
           if (!wave.found) throw new NoAffordance("no Wave fact on the dossier");
-          if (!wave.linked) throw new DeadDoor(`the Wave fact is not a door here: ${JSON.stringify(wave.label)}`);
-          return `Wave links: ${wave.label}`;
+          if (!wave.href) throw new DeadDoor(`the Wave fact is not a door here: ${JSON.stringify(wave.label)}`);
+          // FOLLOW IT. The s77 blocker was not a missing link, it was a link
+          // whose destination silently dropped the filter for wave 2.5 — so a
+          // door that exists proves nothing until you walk through it.
+          await page.goto(`${base}${wave.href}`, { waitUntil: "networkidle2" });
+          await page.waitForNetworkIdle({ idleTime: 600, timeout: 10_000 }).catch(() => {});
+          const applied = await page.evaluate(() => {
+            const on = Array.from(document.querySelectorAll("button.cat-chip")).filter((b) =>
+              String(b.className).includes("on"),
+            );
+            const count = (document.body.innerText.match(/(\d+)\s+of\s+(\d+)\s+built/i) || []);
+            const total = (document.body.innerText.match(/(\d+)\s+built/i) || []);
+            return { on: on.map((b) => (b.textContent || "").trim()), slice: count[0] || total[0] || null };
+          });
+          if (applied.on.length === 0) {
+            throw new DeadDoor(`${wave.href} silently dropped the filter — no chip is active and the grid reads ${JSON.stringify(applied.slice)}`);
+          }
+          return `${JSON.stringify(wave.label)} → ${wave.href} → chip ${JSON.stringify(applied.on[0])} on, ${applied.slice}`;
         },
       },
       {
@@ -283,19 +379,37 @@ export const JOBS = {
           const label = await page.evaluate((el) => (el.textContent || "").trim(), chip);
           await press(page, chip, `the ${JSON.stringify(label)} filter chip`);
           /**
-           * Reversibility (thalon-check): an operator who filters must be able
-           * to UNDO it from what is on screen. The s77 finding is that the chip
-           * can end up applied while hidden behind "More →", leaving no visible
-           * way back to the whole portfolio.
+           * Reversibility (thalon-check): DRIVE THE UNDO. An earlier version
+           * demanded a literal "clear"/"all" control and reported a dead door
+           * because there is none — but lane 3's fix hoists the ACTIVE chip into
+           * the resting five and marks it `.on`, so one click on it clears the
+           * filter. Requiring a particular widget graded a working affordance as
+           * broken; what matters is that the operator can get back.
            */
-          const clearable = await page.evaluate(() => {
-            const els = Array.from(document.querySelectorAll("button, a[href]")).filter((el) => el.offsetParent);
-            return els.some((el) => /^(clear|all|reset|× ?clear)/i.test((el.textContent || "").trim()));
+          const active = await page.evaluate(() => {
+            const on = Array.from(document.querySelectorAll("button.cat-chip")).filter(
+              (b) => String(b.className).includes("on") && b.offsetParent,
+            );
+            return on.map((b) => (b.textContent || "").trim());
           });
-          if (!clearable) {
-            throw new DeadDoor(`the ${JSON.stringify(label)} filter is applied with no visible clear/all control to undo it`);
+          if (active.length === 0) {
+            throw new DeadDoor(`the ${JSON.stringify(label)} filter is applied but no chip is marked active — the operator cannot see what is filtering, let alone undo it`);
           }
-          return `filter applied and clearable`;
+          const before = await urlNow(page);
+          await page.evaluate(() => {
+            const on = Array.from(document.querySelectorAll("button.cat-chip")).find(
+              (b) => String(b.className).includes("on") && b.offsetParent,
+            );
+            on?.click();
+          });
+          await page.waitForNetworkIdle({ idleTime: 500, timeout: 8_000 }).catch(() => {});
+          const stillOn = await page.evaluate(
+            () => Array.from(document.querySelectorAll("button.cat-chip")).filter((b) => String(b.className).includes("on")).length,
+          );
+          if (stillOn > 0) {
+            throw new DeadDoor(`clicking the active chip ${JSON.stringify(active[0])} did not clear the filter (was ${before})`);
+          }
+          return `applied ${JSON.stringify(active[0])}, and one click on it cleared the filter`;
         },
       },
     ],
@@ -372,6 +486,10 @@ export const JOBS = {
           // reported a dead door — a real finding reached by a broken measurement
           // is indistinguishable from an invented one.
           if (waiting[1] !== bulk[1]) {
+            if (explainsGap(body, waiting[1], bulk[1])) {
+              const line = body.split("\n").map((l) => l.trim()).find((l) => /\bof\b/.test(l) && l.includes(bulk[1]) && l.includes(waiting[1]));
+              return `${waiting[1]} waiting vs bulk ${bulk[1]}, and the surface accounts for it: ${JSON.stringify(line)}`;
+            }
             throw new DeadDoor(`"${waiting[1]} waiting" beside "Approve all waiting (${bulk[1]})" — staged rows are counted, silently excluded, and indistinguishable`);
           }
           return `counts agree at ${waiting[1]}`;
@@ -431,13 +549,15 @@ export const JOBS = {
            */
           const exit = await page.evaluateHandle(() => {
             const els = Array.from(document.querySelectorAll("button, a[href]"));
-            return (
-              els.find(
-                (el) =>
-                  !el.closest("nav, .rail, .topbar, header") &&
-                  /create (post|page|draft)|target this/i.test(el.textContent || ""),
-              ) || null
+            const cands = els.filter(
+              (el) =>
+                !el.closest("nav, .rail, .topbar, header") &&
+                /^create\b|target this/i.test((el.textContent || "").trim()),
             );
+            // The PRIMARY recommendation, not merely the first match — lane 4's
+            // fix leads with "Create video" and keeps "Post · suggested" as a
+            // ghost, so "first match" would grade the wrong button.
+            return cands.find((el) => /btn-primary/.test(String(el.className))) || cands[0] || null;
           });
           const found = await exit.evaluate((el) => (el ? (el.textContent || "").trim().slice(0, 40) : null));
           if (!found) throw new NoAffordance("the dossier offers no primary exit into Create");
@@ -497,21 +617,46 @@ export const JOBS = {
       },
       {
         name: "get back to the source behind the grounding row",
-        async run(page) {
-          const body = await text(page);
-          if (!/grounding|source/i.test(body)) throw new NoAffordance("no grounding row on Create");
-          const link = await page.evaluate(() => {
-            const els = Array.from(document.querySelectorAll("*")).filter(
-              (el) => el.children.length === 0 && /grounding|source/i.test(el.textContent || ""),
+        async run(page, { base }) {
+          /**
+           * Arrive WITH a capture. A bare `/app/create` holds no grounding
+           * source, so "no link" there is an honest empty state, not a dead
+           * door — and an earlier version of this job graded that state and
+           * reported a defect against a fix that was actually in place (lane 4's
+           * C4). Test the state where the fact EXISTS: the handover from Intel.
+           */
+          await page.goto(`${base}/app/intel`, { waitUntil: "networkidle2" });
+          await page.waitForNetworkIdle({ idleTime: 600, timeout: 10_000 }).catch(() => {});
+          const handed = await page.evaluate(() => {
+            const cands = Array.from(document.querySelectorAll("button, a[href]")).filter(
+              (el) =>
+                !el.closest("nav, .rail, .topbar, header") &&
+                /^create\b/i.test((el.textContent || "").trim()),
             );
-            for (const el of els) {
-              const row = el.closest("div, li, section");
-              if (row && row.querySelector("a[href^='http'], a[href*='/api/'], button")) return true;
-            }
-            return false;
+            const hit = cands.find((el) => /btn-primary/.test(String(el.className))) || cands[0];
+            if (!hit) return false;
+            hit.click();
+            return true;
           });
-          if (!link) throw new DeadDoor("the grounding row has no way back to the source — the capture's URL is never a link");
-          return "source reachable from the grounding row";
+          if (!handed) throw new NoAffordance("no capture handover available to carry a source");
+          await page.waitForNetworkIdle({ idleTime: 800, timeout: 10_000 }).catch(() => {});
+          const landed = await urlNow(page);
+          if (!/^\/app\/create/.test(landed)) throw new DeadDoor(`the handover did not reach Create — ${landed}`);
+          const link = await page.evaluate(() => {
+            const a = Array.from(document.querySelectorAll("a[href]")).find((el) =>
+              /view source|view sources/i.test(el.textContent || ""),
+            );
+            return a ? { text: (a.textContent || "").trim(), href: a.getAttribute("href") } : null;
+          });
+          if (!link) {
+            throw new DeadDoor(
+              `arrived at ${landed} carrying a capture and the grounding row still offers no way back to the source`,
+            );
+          }
+          if (!/^https?:\/\//.test(link.href || "")) {
+            throw new DeadDoor(`the source door points at ${JSON.stringify(link.href)}, not the capture's URL`);
+          }
+          return `${JSON.stringify(link.text)} → ${link.href}`;
         },
       },
     ],
@@ -550,11 +695,15 @@ export const JOBS = {
           // note on the create job set, where taking the nav link produced a
           // false pass on the flagship path.
           const found = await page.evaluate(() => {
-            const hit = Array.from(document.querySelectorAll("button, a[href]")).find(
+            const cands = Array.from(document.querySelectorAll("button, a[href]")).filter(
               (el) =>
                 !el.closest("nav, .rail, .topbar, header") &&
-                /create (post|page|draft)|target this/i.test(el.textContent || ""),
+                /^create\b|target this/i.test((el.textContent || "").trim()),
             );
+            // Prefer the PRIMARY: s79 lane 4 demoted "Post · suggested" to a
+            // ghost and led with "Create video", and a job that grabs whichever
+            // matches first would report on the demoted one.
+            const hit = cands.find((el) => /btn-primary/.test(String(el.className))) || cands[0];
             return hit ? (hit.textContent || "").trim().slice(0, 40) : null;
           });
           if (!found) throw new NoAffordance("the dossier offers no primary exit into Create");

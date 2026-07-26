@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { tenantCtx, type TenantCtx } from "@thalon/contracts";
-import { BudgetExceededError, openTestDb, sha256Hex, type DbHandle, type Repos } from "@thalon/db";
+import { BudgetExceededError, llmCacheKey, openTestDb, sha256Hex, type DbHandle, type Repos } from "@thalon/db";
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { embedChunks } from "../embed";
@@ -88,5 +88,72 @@ describe("embedChunks (the B1.1 gateway choke-point caller)", () => {
 
     const events = await repos.events.list(ctx, { entityType: "tenant" });
     expect(events.map((e) => e.event)).toContain("budget.exceeded");
+  });
+  /**
+   * A DANGLING CACHE POINTER IS A MISS, NOT A DEAD END (s79, founder-found).
+   *
+   * `llm_cache` holds a pointer; the object store holds the truth. They diverge
+   * for ordinary reasons — `THALON_DATA_DIR` is relative, so the store root
+   * follows the process's working directory, and the dev server (cwd
+   * `apps/web`) shared one cache index with every root-cwd test, script and
+   * eval run while writing to a DIFFERENT store. The old code threw, which made
+   * the breakage permanent: the row survives, so each retry hit the same dead
+   * pointer and video ingest stayed broken forever.
+   *
+   * The founder found it by pasting a YouTube URL and asking whether
+   * transcription still worked. The transcript was fine; this was the failure.
+   */
+  it("treats a cache row whose object has vanished as a MISS, and heals the row", async () => {
+    const { ctx, repos, store } = await setup();
+    const fake = createFakeEmbeddingDriver(8);
+    let calls = 0;
+    const countingDriver: EmbeddingDriver = {
+      model: fake.model,
+      embed: (texts) => {
+        calls += 1;
+        return fake.embed(texts);
+      },
+    };
+    const chunk = {
+      seq: 0,
+      tokenCount: 3,
+      contentHash: sha256Hex("vanishing act"),
+      text: "vanishing act",
+    };
+    const input = { chunks: [chunk], model: "test/model", capTokens: 1_000_000 };
+
+    const first = await embedChunks(ctx, repos, input, { driver: countingDriver, objectStore: store });
+    expect(first[0].cacheHit).toBe(false);
+    expect(calls).toBe(1);
+
+    // Lose the object, keep the row — exactly the live state on dev.
+    const rowKey = llmCacheKey({
+      promptVersion: "embedding.v1",
+      model: "test/model",
+      params: {},
+      inputHash: chunk.contentHash,
+    });
+    const row = await repos.caches.llm.get(rowKey);
+    expect(row).not.toBeNull();
+    rmSync(path.join(storeRoot!, row!.valueRef), { force: true });
+    expect(await store.get(row!.valueRef)).toBeNull();
+
+    const dangling: { key: string; valueRef: string }[] = [];
+    const second = await embedChunks(ctx, repos, input, {
+      driver: countingDriver,
+      objectStore: store,
+      onCacheDangling: (info) => dangling.push(info),
+    });
+
+    // Re-embedded rather than thrown, and reported rather than swallowed.
+    expect(second[0].cacheHit).toBe(false);
+    expect(second[0].embedding).toHaveLength(8);
+    expect(calls).toBe(2);
+    expect(dangling).toEqual([{ key: rowKey, valueRef: row!.valueRef }]);
+
+    // HEALED: the next call is a real hit again, with no driver traffic.
+    const third = await embedChunks(ctx, repos, input, { driver: countingDriver, objectStore: store });
+    expect(third[0].cacheHit).toBe(true);
+    expect(calls).toBe(2);
   });
 });

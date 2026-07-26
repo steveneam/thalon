@@ -74,6 +74,24 @@ export class DeadDoor extends Error {
   }
 }
 
+/**
+ * Thrown when the PRECONDITION for the job is absent, so the job could not be
+ * exercised at all — an empty shelf offers nothing to search, and a queue with
+ * nothing plannable cannot prove planning works.
+ *
+ * Added at s79 because the alternative was worse: the job returned normally and
+ * the table printed ✓ for work that was never done. "I could not test this" and
+ * "this works" are different facts, and a gate that renders them identically is
+ * the same class of lie the product's own honest-states rule exists to prevent
+ * ("empty" and "broken" must never look alike).
+ */
+export class Undriven extends Error {
+  constructor(message) {
+    super(message);
+    this.verdict = "undriven";
+  }
+}
+
 export async function launch(puppeteer) {
   return puppeteer.launch({
     headless: "shell",
