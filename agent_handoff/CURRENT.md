@@ -49,7 +49,10 @@ page), and the render gate against it DOES NOT MATCH — unquantified.
    over.
 1. **AUTHOR THE 27 JOBS FIRST** — port the audit's jobs table into
    `scripts/lib/surface-jobs.mjs` as an `editor` job set against
-   `/app/videos/<projectId>/edit`, driving what exists TODAY. That baseline is
+   `/app/videos/<projectId>/edit`, driving what exists TODAY. Mechanical
+   wrinkle stated so it costs nothing: the editor's route is DYNAMIC — the
+   job set must resolve a real projectId at run time (first project off the
+   live videos list), not hardcode one that an archive or reseed would kill. That baseline is
    the build's definition of done: every no-affordance row is a build item,
    every dead door a fix, and the session ends with the table green. This is
    use-truth-driven development — the tool s79 built is exactly what this
@@ -58,18 +61,31 @@ page), and the render gate against it DOES NOT MATCH — unquantified.
    verdict.
 2. **MEASURE the render gate against `Videos.dc.html`** — first number of the
    session; the drift is currently unquantified.
-3. **Pre-plan before code** (the ⑯ PREPLAN.md artifact class): the build
-   order that wants to be true — (a) the SAFETY CORE first: undo/redo spine +
-   unsaved-work guard on every exit (three plain `<Link>`s and the back button
-   currently discard the working copy silently) + the honest player (while
-   dirty it shows the PREVIOUS render with only an "unsaved" pill); (b) the
-   BLOCKER: keyboard-reachable timeline blocks (real `<button>`s wired to
+3. **Pre-plan before code** (the ⑯ PREPLAN.md artifact class), and its FIRST
+   answer is the CONTRACT-WINDOW question — windows freeze before build, so
+   settle it before a line of code. The probe says the answer is likely NO
+   new schema, because the capabilities already exist as doors: `saveCut` is
+   live (so the exit guard can offer Save / Discard / Stay with zero schema),
+   undo/redo is a client-side spine over the one working copy the editor
+   already keeps ("one dirty bit, one working copy"), and music swap =
+   SURFACING the s77 bed system (`setAudioBed` + the operator-attested,
+   license-gated bed door) — never inventing a music library. If anything
+   turns out to need a table or contract after all, freeze the window FIRST.
+   Then the build order: (a) the SAFETY CORE: undo/redo spine + unsaved-work
+   guard on every exit (three plain `<Link>`s and the back button currently
+   discard the working copy silently) + the honest player (while dirty it
+   shows the PREVIOUS render with only an "unsaved" pill); (b) the BLOCKER:
+   keyboard-reachable timeline blocks (real `<button>`s wired to
    `onPointerDown` only — caption/music inspectors unreachable by keyboard);
    (c) the MISSING VERBS: insert/delete a beat, insert/delete a caption, swap
-   the music track the copilot chip already offers, preview the working copy;
-   (d) the 36 findings folded in where they touch the same code; (e) the four
-   copilot chips that spend a metered call to be refused — either wire them or
-   make them honest.
+   the music track, preview the working copy; (d) the 36 findings folded in
+   where they touch the same code; (e) the four copilot chips that spend a
+   metered call to be refused — wire them or make them honest.
+3.5. **BUILD IN MERGEABLE SLICES — the safety core lands as its own verified
+   checkpoint (verify + drive + measure) BEFORE the verbs begin.** "Full
+   build-out" is the scope, not one atomic change: if the session runs long,
+   what has merged is coherent and the remainder rolls cleanly to s81 —
+   never stop mid-edit (standing rule, learned at the s53 OOM).
 4. **Founder checkpoint at the pre-plan** — and the honest default is
    **LEAD-DIRECT, not lanes**: the editor is ONE tightly-coupled file set
    (`components/videos/editor*.tsx` + the `/edit` route), the work is
@@ -87,7 +103,7 @@ mediums+lows (s81+, re-read against the fixed code — and re-DRIVEN, not
 re-read) · transcription's free-tier flag + AI button (s81+, small, his
 sequencing).
 
-▎ ▸ **Read first:** CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md` → `docs/research/mock-sheets/Videos.dc.html` + the sheets README → `docs/research/jobs-table-s79.md` → `.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
+▎ ▸ **Read first:** CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md` → `docs/research/mock-sheets/Videos.dc.html` + the sheets README → `agent_handoff/lanes/WRAP-media-lane-b.md` (**the raw material for the music/beat verbs**: the bed attestation door + its flagged EDL cue-add gap and project-ref-vs-stored-sha mismatch — this session either closes those or states why not) → `docs/research/jobs-table-s79.md` → `.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
 ▎ ▸ **State:** main = origin, all pushed · verify **2392 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s79** · dev transcript shim = hand-started `.context/tools/transcript-shim.py` on 127.0.0.1:8787, NOT a unit — it dies with the session and only transcription ingest needs it.
 ▎ ▸ ⛔ **THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until all the walks are verified and fixed."* No publish path, no platform call, no token-spending generation without his GO. The editor session's copilot chips SPEND (metered gateway calls) — reachability checks only until he says otherwise. **But draw the line where the money is, not wider:** the working-copy PREVIEW is a LOCAL render (hyperframes driver + the ffmpeg now in the image — compute, not credits, not a platform call), so building and exercising it is inside scope; treating local rendering as gated spend would hollow out the honest-player build, which is the safety core's whole point.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · **GATE ON THE SUITE'S EXIT CODE — never pipe it into anything** · **vitest does NOT typecheck and does not lint** (five catches on record) · verify-on-merged-main = THE gate, plus a MEASURED render, plus DRIVE the surface, plus **watch the console** (the driver does now) · a LANE CANNOT SCREENSHOT OR DRIVE ITS OWN WORK (both enforced) · never full-verify while lane fan-outs are live · wrap = verify+commit+push+restamp.
