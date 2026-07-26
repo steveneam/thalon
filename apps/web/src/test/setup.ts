@@ -41,6 +41,22 @@ if (typeof window !== "undefined" && typeof HTMLMediaElement !== "undefined") {
   HTMLMediaElement.prototype.pause = () => {};
 }
 
+// jsdom's Blob/File implement no `.text()` (browsers have had it since 2019).
+// Two real product paths read a dropped or picked file that way — Leads' CSV
+// import (leads-surface.tsx) and Transcription's caption drop — so without this
+// the read silently rejects and the test sees a surface that did nothing.
+// Minimal spec-shaped stub over the bytes jsdom does hold.
+if (typeof Blob !== "undefined" && typeof Blob.prototype.text !== "function") {
+  Blob.prototype.text = function text(this: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error ?? new Error("file read failed"));
+      reader.readAsText(this);
+    });
+  };
+}
+
 // jsdom also ships no ResizeObserver (the Astryx AppShell measures its nav
 // regions). No-op stub — layout math is a browser-pass concern, not jsdom's.
 if (typeof window !== "undefined" && typeof window.ResizeObserver !== "function") {

@@ -4,17 +4,36 @@ import { loadSites } from "@/lib/sites/provider";
 
 export const dynamic = "force-dynamic";
 
-/** `?vertical=&axis=&wave=` — the dossier's fact doors land here, pre-filtered. */
-function readFilters(params: { [key: string]: string | string[] | undefined }): SiteFilters {
+/**
+ * `?vertical=&axis=&wave=` — the dossier's fact doors land here, pre-filtered.
+ *
+ * Exported for the test that pins the wave parse: the dossier is the producer
+ * and this is the consumer, and they disagreed silently for a whole wave of
+ * the portfolio. A door's parse belongs under test, not inside a page body.
+ */
+export function readFilters(params: {
+  [key: string]: string | string[] | undefined;
+}): SiteFilters {
   const one = (key: string): string | undefined => {
     const value = params[key];
     return typeof value === "string" && value !== "" ? value : undefined;
   };
+  // FINITE, not integer (s79 verify round, 3/3): build waves are not all whole
+  // numbers — the catalog carries `wave: 2.5` (Sprig & Barrow), the dossier
+  // renders it as a fact door (`?wave=2.5`), and `Number.isInteger` dropped the
+  // filter on the way in, so the door landed on the unfiltered portfolio with
+  // nothing saying the filter had been discarded. The surface's own chip path
+  // always accepted 2.5 (sites-model `toggleChip` parses with plain `Number`);
+  // this makes the URL read agree with it. `Number.isFinite` still refuses the
+  // garbage the guard was there for — `?wave=abc` is NaN, and `?wave=` never
+  // gets here (`one()` drops the empty string). Letting NaN through would be
+  // WORSE than the bug: `r.wave === NaN` is false for every record, so a typo
+  // would silently empty the grid instead of merely ignoring the filter.
   const wave = Number(one("wave"));
   return {
     vertical: one("vertical"),
     axis: one("axis"),
-    wave: Number.isInteger(wave) ? wave : undefined,
+    wave: Number.isFinite(wave) ? wave : undefined,
   };
 }
 

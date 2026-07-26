@@ -93,10 +93,16 @@ export function cardFacts(site: SiteRecord): string[] {
 }
 
 /**
- * The chip row, in the order the surface shows it: verticals first (most
- * built first — the portfolio's own weight), then the design registers, then
- * the build waves. The surface shows the first PRIMARY_CHIPS and hides the
- * rest behind the sheet's own "More →" chip.
+ * The chip row, in the order the surface shows it: verticals first (heaviest
+ * first — the portfolio's own weight, alphabetical between equals), then the
+ * design registers, then the build waves. This is the EXPANDED row's reading
+ * order — what it is, how it looks, when it shipped.
+ *
+ * The weight sort is currently a no-op and that is worth stating rather than
+ * discovering twice: today's catalog is 20 sites across 20 DISTINCT verticals,
+ * so every count is 1, the discriminant is always 0 and the tie-break decides
+ * the whole order. That is exactly why the RESTING slice is no longer the head
+ * of this list — see `restingChips`.
  */
 export function siteChips(records: SiteRecord[]): SiteChip[] {
   const counts = new Map<string, number>();
@@ -117,6 +123,62 @@ export function siteChips(records: SiteRecord[]): SiteChip[] {
 
 /** How many chips rest in the row before "More →" — the sheet draws five. */
 export const PRIMARY_CHIPS = 5;
+
+/** How many records this chip would leave on the grid, from a clean slate. */
+export function chipMatchCount(records: SiteRecord[], chip: SiteChip): number {
+  return applyFilters(records, toggleChip(chip, {})).length;
+}
+
+/** What the chip filters, and how hard — the resting row mixes kinds, so it says which. */
+export function chipTitle(records: SiteRecord[], chip: SiteChip): string {
+  const kind = chip.kind === "vertical" ? "Vertical" : chip.kind === "axis" ? "Design register" : "Build wave";
+  const n = chipMatchCount(records, chip);
+  return `${kind} · ${n} ${n === 1 ? "site" : "sites"}`;
+}
+
+/**
+ * WHICH five chips rest in the row (s79 verify round, S2 2/3 + S3 3/3 — one
+ * change because they are one row).
+ *
+ * The sheet draws five chips then "More →", and that geometry is kept byte-true.
+ * Two things were wrong about the five it drew here:
+ *
+ * 1. **An ACTIVE chip could sit past the bound.** Expand the row, pick a wave,
+ *    collapse it: the grid stayed filtered with no chip on screen naming what
+ *    filtered it. (The header pill did say "5 of 20 built", so the slice was
+ *    never silent — but a count is not the filter's identity, and the only
+ *    "Clear filters" control lives in the zero-result state, which a working
+ *    filter never reaches.) Actives lead the slice now, so the pick is always
+ *    on screen and one click clears it. At most three can be active — one per
+ *    kind — so the sheet's five slots always have room for the rest.
+ * 2. **The other slots went to bookmarks, not cuts.** The head of the row is
+ *    verticals, and on today's catalog every vertical matches exactly ONE site,
+ *    so the resting row was five one-result niches while the registers and
+ *    waves — the facets that actually group the portfolio — were all behind
+ *    "More →". A chip that cuts 20 to 1 is a lookup; a chip that cuts 20 to 9
+ *    is a filter. So the remaining slots go to the chips that cut hardest,
+ *    skipping any that match one record (a bookmark) or all of them (no cut).
+ *
+ * Nothing is dropped: every chip stays in the expanded row in its own reading
+ * order. This only decides who gets the five seats.
+ */
+export function restingChips(
+  chips: SiteChip[],
+  records: SiteRecord[],
+  filters: SiteFilters,
+): SiteChip[] {
+  const active = chips.filter((c) => chipActive(c, filters));
+  const rest = chips.filter((c) => !chipActive(c, filters));
+  const counted = rest.map((chip) => ({ chip, n: chipMatchCount(records, chip) }));
+  const cuts = counted
+    .filter(({ n }) => n > 1 && n < records.length)
+    .sort((a, b) => b.n - a.n)
+    .map(({ chip }) => chip);
+  // Fill from the row's own order when there aren't five real cuts to give —
+  // the row stays five chips deep rather than shrinking below the sheet.
+  const filler = rest.filter((c) => !cuts.includes(c));
+  return [...active, ...cuts, ...filler].slice(0, PRIMARY_CHIPS);
+}
 
 /** True when this chip is the active filter — one filter per kind, exactly like the old facet rows. */
 export function chipActive(chip: SiteChip, filters: SiteFilters): boolean {

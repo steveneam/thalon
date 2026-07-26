@@ -12,7 +12,9 @@ import {
   axisLabel,
   cardFacts,
   chipActive,
+  chipTitle,
   headerPills,
+  restingChips,
   siteChips,
   toggleChip,
   verdictStatus,
@@ -109,7 +111,10 @@ export function Sites({
     selectedRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [selected]);
 
-  const visibleChips = expanded ? chips : chips.slice(0, PRIMARY_CHIPS);
+  // Which five rest is a derivation, not a slice — see `restingChips`: an
+  // ACTIVE chip is never off-screen, and the other seats go to the facets that
+  // actually cut the portfolio instead of the head of the vertical list.
+  const visibleChips = expanded ? chips : restingChips(chips, records, filters);
 
   return (
     <div className="content sites-surface" style={{ gap: 16 }}>
@@ -162,6 +167,11 @@ export function Sites({
                   type="button"
                   className={on ? "cat-chip on" : "cat-chip"}
                   aria-pressed={on}
+                  // The resting row now mixes kinds by design, so each chip
+                  // says which facet it is and how hard it cuts — the row is
+                  // no longer readable as "verticals, then registers, then
+                  // waves" from position alone.
+                  title={chipTitle(records, chip)}
                   onClick={() => setFilters((f) => toggleChip(chip, f))}
                 >
                   {chip.label}
