@@ -1,6 +1,8 @@
-/* global document, window */
+/* global document, window, DataTransfer, DragEvent, File */
 // The globals above run INSIDE THE BROWSER via page.evaluate — see the note in
-// surface-driver.mjs.
+// surface-driver.mjs. `DataTransfer`/`DragEvent`/`File` are the drag payload the
+// transcription drop job dispatches; ESLint lints this file as Node and cannot
+// see the boundary, so they are declared rather than switched off.
 //
 // surface-jobs.mjs — THE JOBS AN OPERATOR WOULD TRY, per surface.
 //
