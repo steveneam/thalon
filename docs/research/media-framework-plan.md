@@ -226,8 +226,28 @@ Three pieces, smallest first, all consuming §1's contract:
    Lanes A/B are launchable in parallel (disjoint sets, the wave-2/3 shape);
    every launch still needs the founder's fresh approval per standing rule.
 
-## 10. Founder calls this plan surfaces (nothing blocking a start)
+## 10. Founder calls — ALL THREE RULED (s76 second half, live)
 
-- **Remint GO** for the eight dark plates (≤1.5cr est).
-- **ffmpeg in the web image** (staging poster parity) vs. box-only for now.
-- Whether zero-state designs should become canvas sheets after the fact.
+- **Remint: GRANTED** ("sure can remint") — and then **superseded by his third
+  ruling**: he delegated the future-proof path to the lead ("your choice"),
+  and the choice is **code-drawn, token-native SVG** (§7 as amended below).
+  The GO stands recorded as the fallback if he prefers the etching look —
+  per-plate mixing is possible, since both paths fill the same slot.
+- **ffmpeg into the web image: GO.** Now an s77 implementation item, not a
+  question: add ffmpeg to `Dockerfile.web` (lane B's file set), and the
+  poster-derivation gate on binary presence stays as defense in depth.
+- **Zero-state future path (lead's choice, made and EVIDENCED):** the eight
+  subjects re-expressed as mono `currentColor` stroke SVGs in the sheets' own
+  grammar — **proposal rendered at `docs/research/zero-art/zero-art-proposal.html`**
+  (ten plates: the founder's eight + Calendar and Videos as new-surface
+  proofs; both registers from identical markup). Why it wins: themes multiply
+  (dark, light, per-tenant later) and rasters cost a remint batch per theme
+  forever; stroke art is the design system's native language — the etching
+  plates reading as imported art is WHY three lanes rejected them on dark;
+  new surfaces become a sketch, not a mint; mono keeps every colour-grammar
+  rule intact (no mark tokens, no needs-you amber). Honest craft note: the
+  glove and the shelves are the weakest two — refine during s77 wiring or
+  swap those two to mints under the standing GO. §7's remint batch is
+  replaced by this; the `<EmptyState>` component plan itself is unchanged.
+  Canvas-sheet question: resolved by construction — code-drawn plates can be
+  pasted into a dc.html sheet verbatim whenever he wants them on the canvas.

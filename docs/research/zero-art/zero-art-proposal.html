@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zero-state art — code-drawn proposal (s76, Fable 5)</title>
+<style>
+  /* Self-contained on purpose: the art itself carries NO colour — every plate
+     is mono currentColor with opacity layers, so it inherits ANY theme. The
+     two panels below prove exactly that: same markup, two inks. */
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: ui-sans-serif, system-ui, sans-serif; background: #1a1d23; padding: 28px; }
+  h1 { color: #d6dae2; font-size: 21px; margin-bottom: 5px; }
+  p.note { color: #8a919e; font-size: 12.5px; max-width: 880px; line-height: 1.5; margin-bottom: 18px; }
+  .panel { border-radius: 12px; padding: 22px 24px 14px; margin-bottom: 18px; }
+  .panel.dark  { background: #101318; color: #c9ced8; }
+  .panel.paper { background: #f7f4ee; color: #2a2e35; }
+  .panel h2 { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .55; margin-bottom: 14px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cell { width: 148px; text-align: center; padding: 10px 6px 12px; border-radius: 10px; }
+  .panel.dark .cell  { background: rgba(255,255,255,.025); }
+  .panel.paper .cell { background: rgba(0,0,0,.03); }
+  .cell svg { width: 96px; height: 96px; display: block; margin: 0 auto 6px; }
+  .cell b { display: block; font-size: 11.5px; font-weight: 600; }
+  .cell span { font-size: 10.5px; opacity: .55; }
+  path, circle, rect, line { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .p1 { opacity: .92; }  /* the subject */
+  .p2 { opacity: .45; }  /* the supporting structure */
+  .p3 { opacity: .22; }  /* the ghost — what will exist */
+  .dash { stroke-dasharray: 4 4; }
+</style>
+</head>
+<body>
+<h1>Zero-state art — code-drawn, token-native (PROPOSAL)</h1>
+<p class="note">The founder's eight minted subjects, re-expressed in the sheets' own stroke
+grammar (96-grid, round caps, mono currentColor, three opacity layers: subject ·
+support · ghost). No colour is baked in — both panels render the identical markup,
+which is the theme-proof claim itself: every present and future theme gets these
+for free, and a new surface's plate is a sketch, not a mint (the last two prove it).
+If the etching look is preferred instead, the granted remint GO stands as the fallback.</p>
+
+<!-- ═══ the ten plates, defined once ═══ -->
+<script type="text/plain" id="plates-note">Defined inline twice (dark/paper) — no JS, file:// friendly.</script>
+
+<div class="panel dark">
+<h2>Dark workspace (the default register)</h2>
+<div class="grid" id="g1">
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M34,66 C32,48 37,34 48,30 C59,34 64,48 62,66"/>
+  <path class="p1" d="M34,66 L62,66 L60,78 L36,78 Z"/>
+  <path class="p1" d="M38,52 C31,50 27,43 30,37 C35,35 39,41 41,47"/>
+  <path class="p2" d="M44,78 L42,88 M52,78 L54,88"/>
+  <circle class="p2" cx="42" cy="90" r="1.6"/>
+  <path class="p3 dash" d="M38,18 Q48,9 58,18"/>
+</svg><b>Approve</b><span>the falconer's glove</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M26,34 L62,30 L66,54 L30,58 Z"/>
+  <path class="p2" d="M29,63 L66,59 M31,68 L67,64"/>
+  <path class="p3 dash" d="M34,41 L54,39"/>
+  <path class="p1" d="M71,58 C71,52 83,52 83,58 L81,68 C81,70 73,70 73,68 Z"/>
+  <path class="p2" d="M87,38 L77,57 M87,38 L84,34"/>
+</svg><b>Runs</b><span>blank paper, inkwell</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p2" d="M12,72 L84,72"/>
+  <path class="p2" d="M36,72 L42,34 M60,72 L54,34 M38,66 L57,51"/>
+  <path class="p1" d="M38,34 L58,34 M40,34 L40,27 M56,34 L56,27 M38,27 L58,27 M36,27 L48,17 L60,27"/>
+  <circle class="p1" cx="78" cy="69" r="2.2"/>
+  <path class="p1" d="M78,63.5 L78,60.5 M73.5,66 L71.5,64 M82.5,66 L84.5,64"/>
+</svg><b>Intel</b><span>watchtower, one ember</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p3" d="M12,70 C30,60 44,74 62,66 M14,58 C28,50 40,64 52,57 M18,48 C30,42 38,52 48,47"/>
+  <circle class="p1" cx="52" cy="42" r="16"/>
+  <path class="p1" d="M63,54 L76,68"/>
+  <path class="p2" d="M40,46 C46,40 54,48 62,42"/>
+</svg><b>Search</b><span>lens, unmarked contours</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M48,32 C38,27 26,29 20,33 L20,64 C26,60 38,58 48,63 C58,58 70,60 76,64 L76,33 C70,29 58,27 48,32 L48,63"/>
+  <path class="p3" d="M26,42 C33,39 40,39 44,41 M26,49 C33,46 40,46 44,48 M26,56 C33,53 40,53 44,55"/>
+  <path class="p2 dash" d="M52,41 C60,39 67,39 70,41"/>
+  <path class="p3" d="M52,48 C60,46 67,46 70,48 M52,55 C60,53 67,53 70,55"/>
+</svg><b>Leads</b><span>the ledger, first line open</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p2" d="M24,22 L24,76 M72,22 L72,76"/>
+  <path class="p1" d="M24,36 L72,36 M24,52 L72,52 M24,68 L72,68"/>
+  <path class="p1" d="M44,52 L44,68 L48,63 L52,68 L52,52"/>
+</svg><b>Transcription</b><span>shelves, one ribbon</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M20,26 L76,22 L78,70 L22,74 Z"/>
+  <path class="p3" d="M39,25 L41,72 M58,23 L60,71"/>
+  <path class="p2 dash" d="M32,46 C40,38 56,40 62,48 C66,56 54,64 44,62 C36,60 30,54 32,46"/>
+  <path class="p1" d="M48,38 C54,38 56,44 52,50 L48,56 L44,50 C40,44 42,38 48,38 Z"/>
+  <circle class="p1" cx="48" cy="44" r="2.4"/>
+</svg><b>Areas</b><span>survey chart, empty pin</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M22,34 L70,28 L74,58 L26,64 Z"/>
+  <path class="p3" d="M30,42 L52,39 M30,48 L44,46"/>
+  <circle class="p2 dash" cx="61" cy="51" r="8"/>
+</svg><b>Profiles</b><span>calling card, unstamped</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M20,28 L76,28 L76,68 L20,68 Z M20,38 L76,38"/>
+  <path class="p3" d="M34,38 L34,68 M48,38 L48,68 M62,38 L62,68"/>
+  <rect class="p2 dash" x="50" y="44" width="10" height="7"/>
+  <path class="p1" d="M20,58 L76,58"/>
+  <circle class="p1" cx="20" cy="58" r="1.8"/>
+</svg><b>Calendar</b><span>new-surface proof #1</span></div>
+
+<div class="cell"><svg viewBox="0 0 96 96">
+  <path class="p1" d="M24,40 L72,40 L72,66 L24,66 Z"/>
+  <path class="p1" d="M24,40 L20,31 L67,26 L71,35"/>
+  <path class="p2" d="M28,38.6 L25,32 M38,37.6 L35,30.9 M48,36.5 L45,29.9 M58,35.5 L55,28.8"/>
+  <rect class="p3 dash" x="32" y="47" width="12" height="11"/>
+</svg><b>Videos</b><span>new-surface proof #2</span></div>
+
+</div>
+</div>
+
+<div class="panel paper">
+<h2>Light / paper (the toggle — identical markup, zero changes)</h2>
+<div class="grid" id="g2"></div>
+</div>
+
+<script>
+  // The one script line, and it IS the proof: light mode = copy the nodes.
+  document.getElementById("g2").innerHTML = document.getElementById("g1").innerHTML;
+</script>
+</body>
+</html>
