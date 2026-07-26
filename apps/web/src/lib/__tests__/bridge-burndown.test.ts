@@ -80,7 +80,10 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/videos/num-field.tsx", 6],
   ["components/videos/project-browser.tsx", 35],
   ["components/videos/track-view.tsx", 30],
-  ["components/videos/video-projects.tsx", 8],
+  // components/videos/video-projects.tsx left the map at the s76 exact-mock
+  // rebuild: the overview was rebuilt from Videos Overview.dc.html and the
+  // old list was deleted in the same change (DOCTRINE 0 rule 3). The rebuild
+  // sits at ZERO bridged tokens.
   ["components/videos/videos-subnav.tsx", 6],
   ["components/workspace/action-toast.tsx", 8],
   ["components/workspace/bulk-bar.tsx", 2],

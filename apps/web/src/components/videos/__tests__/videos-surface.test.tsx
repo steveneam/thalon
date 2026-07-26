@@ -4,21 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "@/lib/testing/server";
-import type { ProjectDetail, ProjectSummary } from "@/lib/videos/types";
+import type { ProjectDetail } from "@/lib/videos/types";
 import { ProjectBrowser } from "../project-browser";
-import { VideoProjects } from "../video-projects";
-
-const SUMMARIES: ProjectSummary[] = [
-  {
-    id: "p1",
-    name: "concept film",
-    description: "the reference project",
-    keepers: 12,
-    rejects: 9,
-    cuts: 2,
-    createdAt: "2026-07-16T00:00:00.000Z",
-  },
-];
 
 const DETAIL: ProjectDetail = {
   id: "p1",
@@ -62,22 +49,8 @@ const DETAIL: ProjectDetail = {
   ],
 };
 
-describe("VideoProjects (list)", () => {
-  it("renders projects with their keeper/reject/cut counts", async () => {
-    server.use(http.get("/api/videos", () => HttpResponse.json({ projects: SUMMARIES })));
-    render(<VideoProjects />);
-    expect(await screen.findByText("concept film")).toBeInTheDocument();
-    expect(screen.getByText("12 keepers")).toBeInTheDocument();
-    expect(screen.getByText("9 rejects")).toBeInTheDocument();
-    expect(screen.getByText("2 cuts")).toBeInTheDocument();
-  });
-
-  it("shows the empty state when nothing is registered", async () => {
-    server.use(http.get("/api/videos", () => HttpResponse.json({ projects: [] })));
-    render(<VideoProjects />);
-    expect(await screen.findByText(/No video projects yet/)).toBeInTheDocument();
-  });
-});
+/* The list surface's own tests moved to videos.test.tsx at the s76 exact-mock
+   rebuild — VideoProjects was deleted in the same change (DOCTRINE 0 rule 3). */
 
 describe("ProjectBrowser (detail)", () => {
   function serveDetail(detail: ProjectDetail) {

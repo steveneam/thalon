@@ -40,10 +40,23 @@
 /*
  * ── App adaptations (each NAMED; the 1440×940 render stays indistinguishable
  * from the sheet) ──
- * The sheet's family line is three dotted <a href="#"> stubs. Until a door
- * has a real destination it is a SPAN, so the surface never ships a dead
- * link — `.fam-link` carries the sheet's exact dotted treatment for the
- * unwired form, and the ported `.fam a` rule above covers it once it is a
- * real Link (step 2).
+ *  - the sheet's family line is three dotted <a href="#"> stubs, and the CARD
+ *    is what opens the project (an anchor inside an anchor is invalid), so a
+ *    family fact keeps the sheet's exact dotted treatment as a span;
+ *  - real project names are longer than the fixture's, so the title cell is
+ *    shrinkable and clips rather than pushing the state pill out of the card;
+ *  - the card and the new-project tile are real links, so they inherit the
+ *    surface type and shed the UA chrome, nothing more;
+ *  - selection: the sheet draws no picked card, so the keyboard grammar's
+ *    mark is the sheet's OWN `.row.sel` accent (workspace.css) worn by a
+ *    card — nothing is picked at rest;
+ *  - the import disclosure is a keeper-style STATE behind the band's own two
+ *    buttons (never extra resting chrome): absent entirely until opened.
  */
 .videos-surface .fam .fam-link { color: var(--n-900); border-bottom: 1px dotted var(--n-600); }
+.videos-surface .vcard .t-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.videos-surface a.vcard, .videos-surface a.newcard { color: inherit; }
+.videos-surface .vcard.sel { border-color: var(--act); box-shadow: inset 2px 0 0 var(--act); }
+.videos-surface .vcard:focus-visible, .videos-surface .newcard:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.videos-surface .imp-panel { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--n-900); }
+.videos-surface .imp-panel .t-data { color: var(--n-900); }

@@ -55,7 +55,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/videos/frame-composer.tsx", 1],
   ["components/videos/project-browser.tsx", 4],
   ["components/videos/track-view.tsx", 1],
-  ["components/videos/video-projects.tsx", 1],
+  // components/videos/video-projects.tsx left the map at the s76 exact-mock
+  // rebuild — the ported overview speaks the sheet's own type roles, and its
+  // DATA labels ride the theme's mono style (no uppercase).
   ["components/workspace/command-palette.tsx", 2],
 ]);
 
