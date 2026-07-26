@@ -47,7 +47,8 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
 
     // The split: both cards, each labelled.
     const queue = screen.getByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     // Rows speak the sheet's grammar: platform brand name · format word,
     // status as a pill WORD, and the exact creation stamp (never an age).
@@ -63,19 +64,20 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
 
     // The draft card: version strip, checks band with its verbatim-reasons
     // door, and the provenance line stating the invariant in operator copy.
-    await within(detail).findByText("Run2 X draft");
-    expect(within(detail).getByText(/engine draft/)).toBeInTheDocument();
+    await waitFor(() => within(detail()).getByText("Run2 X draft"));
+    expect(within(detail()).getByText(/engine draft/)).toBeInTheDocument();
     // Named on the checks band, and again in the receipt this blocked draft
     // opens for itself.
-    expect(within(detail).getAllByText("Denylist").length).toBeGreaterThan(0);
-    expect(within(detail).getAllByText("Grounding — screen").length).toBeGreaterThan(0);
-    expect(within(detail).getByText(/the judge gates — it never rewrites/)).toBeInTheDocument();
+    expect(within(detail()).getAllByText("Denylist").length).toBeGreaterThan(0);
+    expect(within(detail()).getAllByText("Grounding — screen").length).toBeGreaterThan(0);
+    expect(within(detail()).getByText(/the judge gates — it never rewrites/)).toBeInTheDocument();
   });
 
   it("a blocked draft quotes its failing reason VERBATIM — in the row and in the receipt", async () => {
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     // The row's excerpt slot carries the judge's own words, not a paraphrase.
     expect(
@@ -84,7 +86,7 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
 
     // A blocking failure opens the receipt without a click — a block must
     // state its reason — and the claim + evidence are recorded verbatim.
-    const receipt = await within(detail).findByRole("group", { name: "Judge verdicts" });
+    const receipt = await waitFor(() => within(detail()).getByRole("group", { name: "Judge verdicts" }));
     expect(
       within(receipt).getByText(/Works with every platform — no provided source supports this claim/),
     ).toBeInTheDocument();
@@ -92,44 +94,47 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
 
   it("fail-closed: a blocked draft has NO approve/reject — absent, not greyed — and the rail states the rule", async () => {
     render(<ApproveSurface />);
-    const detail = screen.getByRole("region", { name: "Draft detail" });
-    await within(detail).findByText("Run2 X draft");
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
+    await waitFor(() => within(detail()).getByText("Run2 X draft"));
 
-    expect(within(detail).queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();
-    expect(within(detail).queryByRole("button", { name: "Reject…" })).not.toBeInTheDocument();
-    expect(within(detail).getByText(/approve is absent while any check fails/)).toBeInTheDocument();
+    expect(within(detail()).queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();
+    expect(within(detail()).queryByRole("button", { name: "Reject…" })).not.toBeInTheDocument();
+    expect(within(detail()).getByText(/approve is absent while any check fails/)).toBeInTheDocument();
     // The ways forward stay: edit (the judge re-runs) and re-judge.
-    expect(within(detail).getByRole("button", { name: "Edit" })).toBeInTheDocument();
-    expect(within(detail).getByRole("button", { name: "Re-judge" })).toBeInTheDocument();
+    expect(within(detail()).getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    expect(within(detail()).getByRole("button", { name: "Re-judge" })).toBeInTheDocument();
   });
 
   it("a queued draft wears the sheet's action rail: Approve · Edit · the consequence · Reject…", async () => {
     const user = userEvent.setup();
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     await user.click(
       await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }),
     );
-    await within(detail).findByText("Run2 LinkedIn draft");
+    await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
 
-    expect(within(detail).getByRole("button", { name: "Approve" })).toBeInTheDocument();
-    expect(within(detail).getByRole("button", { name: "Edit" })).toBeInTheDocument();
-    expect(within(detail).getByRole("button", { name: "Reject…" })).toBeInTheDocument();
+    expect(within(detail()).getByRole("button", { name: "Approve" })).toBeInTheDocument();
+    expect(within(detail()).getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    expect(within(detail()).getByRole("button", { name: "Reject…" })).toBeInTheDocument();
     expect(
-      within(detail).getByText("recorded — nothing publishes until the door arms"),
+      within(detail()).getByText("recorded — nothing publishes until the door arms"),
     ).toBeInTheDocument();
     // The seats: which profile version and which models shaped this draft.
-    expect(within(detail).getByText(/profile v1/)).toBeInTheDocument();
-    expect(within(detail).getByText(/drafted test\/model · judged test\/model/)).toBeInTheDocument();
+    expect(within(detail()).getByText(/profile v1/)).toBeInTheDocument();
+    expect(within(detail()).getByText(/drafted test\/model · judged test\/model/)).toBeInTheDocument();
   });
 
   it("selection drives the detail card, and the sort/filter pickers re-cut the view", async () => {
     const user = userEvent.setup();
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     const names = () =>
       within(queue)
@@ -153,15 +158,17 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     expect(within(queue).getByText(`${names().length} of 4`)).toBeInTheDocument();
 
     // Selection followed the view rather than stranding on a hidden row.
-    await within(detail).findByText("Run2 LinkedIn draft");
+    await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
   });
 
   it("consumes a ?run= deep link: selection lands on that run's own waiting work", async () => {
     window.history.replaceState(null, "", `/app/approve?run=${FIXTURE_RUN_1_ID}`);
     try {
       render(<ApproveSurface />);
-      const detail = await screen.findByRole("region", { name: "Draft detail" });
-      await within(detail).findByText("Run1 LinkedIn draft");
+      await screen.findByRole("region", { name: "Draft detail" });
+      // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+      const detail = () => screen.getByRole("region", { name: "Draft detail" });
+      await waitFor(() => within(detail()).getByText("Run1 LinkedIn draft"));
     } finally {
       window.history.replaceState(null, "", "/app/approve");
     }
@@ -203,8 +210,9 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
   it("a failed detail read says so in the card instead of showing a blank pane", async () => {
     server.use(http.get(`/api/drafts/${FIXTURE_DRAFT_B_ID}`, () => HttpResponse.error()));
     render(<ApproveSurface />);
-    const detail = screen.getByRole("region", { name: "Draft detail" });
-    expect(await within(detail).findByText(/Couldn’t read this draft/)).toBeInTheDocument();
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
+    expect(await waitFor(() => within(detail()).getByText(/Couldn’t read this draft/))).toBeInTheDocument();
   });
 
   it("the queue states inbox zero when the shell pulse says nothing waits anywhere", async () => {

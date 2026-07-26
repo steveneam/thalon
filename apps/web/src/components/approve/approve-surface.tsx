@@ -110,6 +110,11 @@ export function ApproveSurface() {
     selectedDraftIdRef.current = draftId;
     setSelectedDraftId(draftId);
     setDetailStatus(draftId ? "loading" : "idle");
+    // The failure belongs to the draft it happened on. Keying DraftCard
+    // does NOT clear this one — it lives HERE, above the remount — so a
+    // rejected approve on draft A would otherwise still be on screen,
+    // in the error channel, under draft B (keyed-by-entity sweep, s78).
+    setActionError(null);
   }, []);
 
   // The queue read: runs feed → each run's drafts → one flat FIFO list. The
@@ -433,7 +438,12 @@ export function ApproveSurface() {
             <StagedFlow key={selectedDraftId} draftId={selectedDraftId} />
           </section>
         ) : (
+          // Keyed remount per draft, exactly as StagedFlow above it. The
+          // editor's body lives INSIDE this card, so without the key an
+          // open editor survives the switch and "Save edit" writes draft
+          // A's body onto draft B (keyed-by-entity sweep, s78).
           <DraftCard
+            key={selectedDraftId ?? "none"}
             status={detailStatus}
             draft={detailDraft}
             run={selectedItem?.run ?? null}

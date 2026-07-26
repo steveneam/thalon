@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { ApproveSurface } from "@/components/approve/approve-surface";
@@ -93,10 +93,11 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
     const user = userEvent.setup();
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
     // Newest-first view (s66) auto-selects the blocked draft — walk to the classic queued one.
     await user.click(await within(queue).findByRole("button", { name: /Select linkedin draft aaaaaaaa/ }));
-    await within(detail).findByText("Run2 LinkedIn draft");
+    await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
     expect(screen.queryByRole("region", { name: "Staged video flow" })).not.toBeInTheDocument();
     // The staged chain rides the queue as its own row.
     const stagedRow = within(queue).getByRole("button", {

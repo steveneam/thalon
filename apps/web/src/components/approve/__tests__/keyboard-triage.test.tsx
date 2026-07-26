@@ -57,15 +57,16 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
     );
 
     render(<ApproveSurface />);
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     // Newest-first view (s66) auto-selects the blocked draft — select the queued one.
     await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
-    await within(detail).findByText("Run2 LinkedIn draft");
+    await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
 
     // 'e' opens the editor (queued draft is editable)…
     await user.keyboard("e");
-    const textarea = await within(detail).findByRole("textbox", { name: "Edit draft body" });
+    const textarea = await waitFor(() => within(detail()).getByRole("textbox", { name: "Edit draft body" }));
     // …and single-letter keys typed INSIDE it are just text, not actions.
     await user.type(textarea, "ajr");
     expect(approved).toHaveLength(0);
@@ -92,10 +93,11 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 
     render(<ApproveSurface />);
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
-    await within(detail).findByText("Run2 LinkedIn draft");
+    await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
 
     // Declined confirm: nothing happens.
     await user.keyboard("r");

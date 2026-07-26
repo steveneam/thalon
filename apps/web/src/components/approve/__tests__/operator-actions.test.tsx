@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -51,32 +51,33 @@ describe("Approve — operator actions", () => {
 
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(detail).findByText("Run2 X draft");
+    await waitFor(() => within(detail()).getByText("Run2 X draft"));
     // The composite block states its own rule — a tier DISAGREEMENT is not
     // visible in any single gate row.
-    expect(within(detail).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
+    expect(within(detail()).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
 
-    await user.click(within(detail).getByRole("button", { name: "Edit" }));
-    const textarea = within(detail).getByRole("textbox", { name: "Edit draft body" });
+    await user.click(within(detail()).getByRole("button", { name: "Edit" }));
+    const textarea = within(detail()).getByRole("textbox", { name: "Edit draft body" });
     await user.clear(textarea);
     await user.type(textarea, editedBody);
-    await user.click(within(detail).getByRole("button", { name: /save edit/i }));
+    await user.click(within(detail()).getByRole("button", { name: /save edit/i }));
 
-    await within(detail).findByText(editedBody);
+    await waitFor(() => within(detail()).getByText(editedBody));
     expect(edited).toBe(true);
     // The receipt now reflects the NEW body's verdicts: nothing blocks, so
     // it closes itself and the failing reason is gone.
-    expect(within(detail).queryByText(/the gate blocks until they agree/)).not.toBeInTheDocument();
+    expect(within(detail()).queryByText(/the gate blocks until they agree/)).not.toBeInTheDocument();
     expect(
-      within(detail).queryByText(/no provided source supports this claim/),
+      within(detail()).queryByText(/no provided source supports this claim/),
     ).not.toBeInTheDocument();
-    expect(within(detail).queryByRole("group", { name: "Judge verdicts" })).not.toBeInTheDocument();
+    expect(within(detail()).queryByRole("group", { name: "Judge verdicts" })).not.toBeInTheDocument();
     // …and the version strip attributes the edit as v2, re-judged.
-    expect(within(detail).getByText(/edited by you/)).toBeInTheDocument();
-    expect(within(detail).getByText("judge re-ran on v2")).toBeInTheDocument();
+    expect(within(detail()).getByText(/edited by you/)).toBeInTheDocument();
+    expect(within(detail()).getByText("judge re-ran on v2")).toBeInTheDocument();
   });
 
   it("re-judge retries a blocked draft unmodified through the dedicated action and reaches the fully-judged outcome (queued)", async () => {
@@ -103,20 +104,21 @@ describe("Approve — operator actions", () => {
 
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(detail).findByText("Run2 X draft");
-    expect(within(detail).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
+    await waitFor(() => within(detail()).getByText("Run2 X draft"));
+    expect(within(detail()).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
 
-    const reJudgeButton = within(detail).getByRole("button", { name: "Re-judge" });
+    const reJudgeButton = within(detail()).getByRole("button", { name: "Re-judge" });
     expect(reJudgeButton).toBeEnabled();
     await user.click(reJudgeButton);
 
     // Every gate passes on the unmodified body: the receipt closes and the
     // approve rail is back.
-    await within(detail).findByRole("button", { name: "Approve" });
-    expect(within(detail).queryByRole("group", { name: "Judge verdicts" })).not.toBeInTheDocument();
+    await waitFor(() => within(detail()).getByRole("button", { name: "Approve" }));
+    expect(within(detail()).queryByRole("group", { name: "Judge verdicts" })).not.toBeInTheDocument();
     expect(reJudged).toBe(true);
   });
 
@@ -131,17 +133,18 @@ describe("Approve — operator actions", () => {
 
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
-    const detail = screen.getByRole("region", { name: "Draft detail" });
+    // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
     await user.click(within(queue).getByRole("button", { name: `Select x draft ${FIXTURE_DRAFT_B_ID}` }));
-    await within(detail).findByText("Run2 X draft");
+    await waitFor(() => within(detail()).getByText("Run2 X draft"));
 
-    await user.click(within(detail).getByRole("button", { name: "Re-judge" }));
+    await user.click(within(detail()).getByRole("button", { name: "Re-judge" }));
 
-    expect(await within(detail).findByRole("alert")).toHaveTextContent(/over its daily token budget/);
+    expect(await waitFor(() => within(detail()).getByRole("alert"))).toHaveTextContent(/over its daily token budget/);
     // No unhandled GET override was registered for this test — the refresh
     // that follows a failed action re-fetches the draft's real current
     // state rather than papering over the failure with stale "success" data.
-    expect(within(detail).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
+    expect(within(detail()).getByText(/the gate blocks until they agree/)).toBeInTheDocument();
   });
 });

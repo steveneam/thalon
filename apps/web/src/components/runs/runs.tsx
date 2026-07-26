@@ -66,7 +66,14 @@ export function Runs() {
   // null = the operator hasn't moved yet, so the deep-linked row (or the
   // newest run) is the selected one — derived, never an effect that writes
   // state back during render.
-  const [selected, setSelected] = useState<number | null>(null);
+  //
+  // The selection is a RUN, not a position: Try again re-reads the feed
+  // while the old rows are still on screen, and a newly-finished run
+  // arrives at the top, so an index would slide the selection onto a
+  // neighbour and ↵ would open a run the operator never chose. Not in the
+  // s77 fan-out — found by the sweep looking for the same class
+  // (keyed-by-entity sweep, s78).
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // ?run= deep link (the dashboard-provenance keeper: activity rows and
   // pipeline steps land on the ENTITY). Read from location once at mount,
@@ -124,27 +131,32 @@ export function Runs() {
   // The deep-linked run is selected until the operator moves (keeper: the
   // dashboard-provenance ?run= link lands ON the entity).
   const deepIndex = targetRunId ? ordered.findIndex((row) => row.id === targetRunId) : -1;
-  const active = Math.min(
-    selected ?? (deepIndex >= 0 ? deepIndex : 0),
-    Math.max(0, ordered.length - 1),
-  );
+  const selectedIndex = selectedId ? ordered.findIndex((row) => row.id === selectedId) : -1;
+  const active =
+    selectedIndex >= 0
+      ? selectedIndex
+      : Math.min(deepIndex >= 0 ? deepIndex : 0, Math.max(0, ordered.length - 1));
+  const moveTo = (index: number) => {
+    const row = ordered[Math.max(0, Math.min(index, ordered.length - 1))];
+    if (row) setSelectedId(row.id);
+  };
 
   useEffect(() => {
-    if (deepIndex >= 0 && selected === null) {
+    if (deepIndex >= 0 && selectedId === null) {
       selectedRef.current?.scrollIntoView?.({ block: "center" });
     }
-  }, [deepIndex, selected]);
+  }, [deepIndex, selectedId]);
 
   useListKeys({
     enabled: runsStatus === "success" && ordered.length > 0,
     bindings: {
       j: (event) => {
         event.preventDefault();
-        setSelected(Math.min(active + 1, ordered.length - 1));
+        moveTo(active + 1);
       },
       k: (event) => {
         event.preventDefault();
-        setSelected(Math.max(active - 1, 0));
+        moveTo(active - 1);
       },
       Enter: (event) => {
         if (ordered[active]) {
@@ -187,7 +199,7 @@ export function Runs() {
               aria-pressed={filter === option.key}
               onClick={() => {
                 setFilter(option.key);
-                setSelected(null);
+                setSelectedId(null);
               }}
             >
               {option.label}
@@ -261,7 +273,7 @@ export function Runs() {
                   row={row}
                   selected={position === active}
                   ref={position === active ? selectedRef : undefined}
-                  onSelect={() => setSelected(position)}
+                  onSelect={() => setSelectedId(row.id)}
                   onOpen={() => router.push(row.href)}
                 />
               );

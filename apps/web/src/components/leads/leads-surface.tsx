@@ -98,7 +98,13 @@ export function LeadsSurface() {
     runId: string;
     drafts: GridDraft[] | "error";
   } | null>(null);
-  const [outreachError, setOutreachError] = useState<string | null>(null);
+  // The failure belongs to the lead it happened on. Unkeyed, lead A's
+  // compose failure stays on screen in lead B's dossier, in the error
+  // channel, describing work never attempted on B (keyed-by-entity
+  // sweep, s78).
+  const [outreachError, setOutreachError] = useState<{ leadId: string; message: string } | null>(
+    null,
+  );
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const loadLeads = useCallback(
@@ -314,7 +320,10 @@ export function LeadsSurface() {
                 : "Draft composed and judged — read it below, then send it yourself.",
         };
       } catch (err) {
-        setOutreachError(err instanceof Error ? err.message : "Couldn’t compose a draft.");
+        setOutreachError({
+          leadId: lead.id,
+          message: err instanceof Error ? err.message : "Couldn’t compose a draft.",
+        });
         return null;
       }
     });
@@ -856,9 +865,9 @@ export function LeadsSurface() {
                         </div>
                       </>
                     )}
-                    {outreachError && (
+                    {outreachError && outreachError.leadId === selectedId && (
                       <span className="t-label" role="alert" style={{ color: "var(--err)" }}>
-                        {outreachError}
+                        {outreachError.message}
                       </span>
                     )}
                   </div>

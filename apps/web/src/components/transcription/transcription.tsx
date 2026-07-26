@@ -52,7 +52,11 @@ export function Transcription() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptPayload | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [selected, setSelected] = useState<number | null>(null);
+  // The selection is a SOURCE, not a position. Ingest prepends and delete
+  // removes, so an index re-points at a different source after every one
+  // of them — and the Copy/Export buttons act on the row the index lands
+  // on (keyed-by-entity sweep, s78). null = the operator hasn't moved yet.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [now] = useState(() => new Date());
 
@@ -79,8 +83,13 @@ export function Transcription() {
   const rows = payload?.sources ?? [];
   const seam = payload?.seam;
   const captionMode = seam?.selected === "caption-file";
-  const active = Math.min(selected ?? 0, Math.max(0, rows.length - 1));
+  const selectedIndex = selectedId ? rows.findIndex((row) => row.id === selectedId) : -1;
+  const active = selectedIndex >= 0 ? selectedIndex : 0;
   const activeRow: LibrarySourceRow | undefined = rows[active];
+  const moveTo = (index: number) => {
+    const row = rows[Math.max(0, Math.min(index, rows.length - 1))];
+    if (row) setSelectedId(row.id);
+  };
   const openRow = transcript ? (rows.find((row) => row.id === transcript.sourceId) ?? null) : null;
   const timed = transcript ? hasTimings(transcript.segments) : false;
 
@@ -171,11 +180,11 @@ export function Transcription() {
     bindings: {
       j: (event) => {
         event.preventDefault();
-        setSelected(Math.min(active + 1, rows.length - 1));
+        moveTo(active + 1);
       },
       k: (event) => {
         event.preventDefault();
-        setSelected(Math.max(active - 1, 0));
+        moveTo(active - 1);
       },
       Enter: (event) => {
         if (!activeRow) return;
@@ -320,10 +329,10 @@ export function Transcription() {
                   style={{ cursor: "pointer" }}
                   aria-label={sourceLead(row)}
                   onClick={() => {
-                    setSelected(index);
+                    setSelectedId(row.id);
                     void openSource(row);
                   }}
-                  onFocus={() => setSelected(index)}
+                  onFocus={() => setSelectedId(row.id)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") void openSource(row);
                   }}
@@ -361,7 +370,7 @@ export function Transcription() {
                     disabled={busy}
                     onClick={(event) => {
                       event.stopPropagation();
-                      setSelected(index);
+                      setSelectedId(row.id);
                       void copySource(row);
                     }}
                   >
@@ -373,7 +382,7 @@ export function Transcription() {
                     disabled={busy}
                     onClick={(event) => {
                       event.stopPropagation();
-                      setSelected(index);
+                      setSelectedId(row.id);
                       void openSource(row);
                     }}
                   >

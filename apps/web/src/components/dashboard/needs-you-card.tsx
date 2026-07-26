@@ -33,19 +33,29 @@ export function NeedsYouCard({
 }) {
   const router = useRouter();
   const clock = (now ?? new Date()).getTime();
-  const [selected, setSelected] = useState(0);
-  const active = Math.min(selected, Math.max(0, rows.length - 1));
+  // The selection is a DRAFT, not a position. The card re-reads on the
+  // dashboard's pulse, so an index silently re-points at whatever row
+  // took that slot — j/k/↵ would then open a draft the operator never
+  // chose (keyed-by-entity sweep, s78). Falls back to row 0 when the
+  // selected draft leaves the list.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedIndex = selectedId ? rows.findIndex((row) => row.draftId === selectedId) : -1;
+  const active = selectedIndex >= 0 ? selectedIndex : 0;
+  const moveTo = (index: number) => {
+    const row = rows[Math.max(0, Math.min(index, rows.length - 1))];
+    if (row) setSelectedId(row.draftId);
+  };
 
   useListKeys({
     enabled: status === "success" && rows.length > 0,
     bindings: {
       j: (event) => {
         event.preventDefault();
-        setSelected((i) => Math.min(i + 1, rows.length - 1));
+        moveTo(active + 1);
       },
       k: (event) => {
         event.preventDefault();
-        setSelected((i) => Math.max(i - 1, 0));
+        moveTo(active - 1);
       },
       Enter: (event) => {
         if (rows[active]) {
@@ -100,7 +110,7 @@ export function NeedsYouCard({
               className={i === active ? "row sel" : "row"}
               style={{ cursor: "pointer" }}
               onClick={() => router.push(row.href)}
-              onFocus={() => setSelected(i)}
+              onFocus={() => setSelectedId(row.draftId)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") router.push(row.href);
               }}

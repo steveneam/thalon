@@ -19,26 +19,30 @@ interface CreateContextLoaderProps {
  * convenience, never a gate.
  */
 export function CreateContextLoader({ contextId, ...rest }: CreateContextLoaderProps) {
-  const [state, setState] = useState<{ resolved: boolean; context: CreateContext | null }>({
-    resolved: false,
-    context: null,
-  });
+  // The resolved context is stamped with the capture it belongs TO. A
+  // ?ctx= change re-renders this loader without unmounting it, so an
+  // unstamped `resolved: true` would render the PREVIOUS capture's
+  // context while the new read is still in flight (keyed-by-entity
+  // sweep, s78). Derived during render — no effect writes state back.
+  const [state, setState] = useState<{ id: string; context: CreateContext | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchCreateContext(contextId)
       .then((context) => {
-        if (!cancelled) setState({ resolved: true, context });
+        if (!cancelled) setState({ id: contextId, context });
       })
       .catch(() => {
-        if (!cancelled) setState({ resolved: true, context: null });
+        if (!cancelled) setState({ id: contextId, context: null });
       });
     return () => {
       cancelled = true;
     };
   }, [contextId]);
 
-  if (!state.resolved) {
+  const resolved = state && state.id === contextId ? state : null;
+
+  if (!resolved) {
     // The sheet's own resting chrome — the surface's shell, not a bridged
     // one-off (this file left the bridge burn-down map with Create's s74
     // rebuild).
@@ -49,5 +53,7 @@ export function CreateContextLoader({ contextId, ...rest }: CreateContextLoaderP
       </div>
     );
   }
-  return <CreateSurface {...rest} context={state.context} />;
+  // Keyed by the capture: Create's own draft/prompt state must not ride
+  // from one capture's handoff into the next.
+  return <CreateSurface key={contextId} {...rest} context={resolved.context} />;
 }
