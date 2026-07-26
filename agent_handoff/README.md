@@ -25,9 +25,25 @@ good code and build proper products with this mess of a repo"*. He is right —
 a directory where the live file is 1-in-8 is a directory nobody can read.
 
 **The rule, and it is enforced:** no `KICKOFF-*.md` or `WRAP-*.md` at the top
-level, ever. `tests/agent-handoff-hygiene.test.ts` fails the suite if one
-appears, because a documented convention rots and an executable one does not
-(AGENTS.md rule 8).
+level **or at the repo root**, ever, and every `agent_handoff/lanes/…` link in
+tracked markdown must resolve. `tests/agent-handoff-hygiene.test.ts` fails the
+suite on any of the three, because a documented convention rots and an
+executable one does not (AGENTS.md rule 8).
+
+**The root check exists because the first version of this guard missed the very
+file the founder named.** `WRAP-pub2-drivers.md` had never been in
+`agent_handoff/` at all — it sat at the REPO ROOT from s65, so the cleanup glob
+never saw it and this suite went green around it. A guard scoped to the drawer
+you just tidied is not a guard. The link check exists because the bulk path
+rewrite that accompanied the cleanup pointed four references at the new
+location while the file was still at the root — turning one misfiled file into
+four dead links, and surfacing five older ones that had been rotting since
+their lanes were deleted.
+
+**That file is also the answer to "is it still needed?" — yes.**
+`NEEDS-STEVEN.md` cites it as the per-platform **pre-live checklist** for a
+first live post. It is live content that had been misfiled, not dead
+paperwork.
 
 **When a lane's content still matters, it does not live here.** Move the
 durable part into its real home — `COORDINATION.md` for the lane record,
