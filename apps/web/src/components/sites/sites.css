@@ -20,7 +20,11 @@
 .sites-surface .site-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; cursor: pointer; transition: border-color var(--motion-fast); display: flex; flex-direction: column; }
 .sites-surface .site-card:hover { border-color: var(--n-500); }
 .sites-surface .site-shot { height: 150px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; }
-.sites-surface .site-shot span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
+/* `> span` narrows the sheet's rule to the PLACEHOLDER caption it was written
+   for — a direct child of the shot. The declaration is the sheet's, untouched;
+   without the child combinator it also swallows the record caption's own spans
+   (proved on screen: the one-liner rendered as 10px mono). */
+.sites-surface .site-shot > span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
 .sites-surface .site-meta { padding: 11px 14px; display: flex; align-items: center; gap: 9px; }
 .sites-surface .prompt-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 13px 16px; font-size: 14px; color: var(--n-800); flex: 1; }
 .sites-surface .cat-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border: 1px solid var(--n-400); border-radius: var(--r-pill); font-size: 12.5px; color: var(--n-900); background: var(--n-100); cursor: pointer; }
@@ -38,7 +42,13 @@
  *    inherit the surface type and shed the UA chrome, nothing more;
  *  - selection: the sheet draws no selected card, so the keyboard grammar's
  *    mark is the sheet's OWN `.row.sel` accent (workspace.css) worn by a
- *    card — nothing is selected at rest.
+ *    card — nothing is selected at rest;
+ *  - the record caption (s76): the old gallery's per-card one-liner, design
+ *    register and build date re-enter as a REVEAL inside the shot the sheet
+ *    already draws — opacity 0 at rest, so a resting screenshot is still
+ *    byte-identical to the sheet, and the card's geometry never moves. Its
+ *    surface is the sheet's own `--n-bg` + `--n-400` hairline, and its type
+ *    is the sheet's own `.t-label`/`.t-data` roles.
  */
 .sites-surface .site-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sites-surface .site-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -46,6 +56,16 @@
 .sites-surface .site-card .card-link { color: var(--act); }
 .sites-surface .site-card.sel { border-color: var(--act); box-shadow: inset 2px 0 0 var(--act); }
 .sites-surface .site-card:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.sites-surface .site-shot { position: relative; }
+.sites-surface .site-cap { position: absolute; inset: auto 0 0 0; padding: 8px 14px; display: flex; flex-direction: column; gap: 3px; background: var(--n-bg); border-top: 1px solid var(--n-400); opacity: 0; transition: opacity var(--motion-fast); pointer-events: none; }
+.sites-surface .site-card:hover .site-cap,
+.sites-surface .site-card:focus-visible .site-cap,
+.sites-surface .site-card.sel .site-cap { opacity: 1; }
+/* Type is the sheet's roles, worn not restated: the line is a `.t-label`, the date a `.t-data`. */
+.sites-surface .site-cap-foot { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sites-surface .site-line,
+.sites-surface .site-cap-foot .t-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .sites-surface button.cat-chip { font-family: inherit; }
 .sites-surface .cat-chip.on { background: var(--n-300); color: var(--n-1000); border-color: var(--n-500); }
 .sites-surface input.prompt-box { width: 100%; font-family: inherit; min-width: 0; }

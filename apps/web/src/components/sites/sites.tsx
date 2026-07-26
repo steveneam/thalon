@@ -9,6 +9,8 @@ import {
   VERDICT_PILL,
   VERDICT_WORDS,
   applyFilters,
+  axisLabel,
+  cardFacts,
   chipActive,
   headerPills,
   siteChips,
@@ -16,6 +18,7 @@ import {
   verdictStatus,
   type SiteFilters,
 } from "@/components/sites/sites-model";
+import { previewUrl } from "@/lib/sites/preview";
 import type { SitesSource } from "@/lib/sites/provider";
 import { useListKeys } from "@/lib/workspace/keyboard";
 
@@ -26,7 +29,10 @@ import { useListKeys } from "@/lib/workspace/keyboard";
  *
  *  - the grid is the portfolio the sites origin actually serves, each card
  *    wearing its own hero as the preview shot (media-first) and the sheet's
- *    striped placeholder where a record has no card image;
+ *    striped placeholder where a record has no card image. Those heroes are
+ *    served SAME-ORIGIN by the workspace's own preview route (s76) — an
+ *    absolute origin here is right on the box and broken on every other
+ *    machine, which is what the founder saw at s75;
  *  - the state pill says what the catalog RECORDS — the founder's verdict —
  *    because no deploy state exists to call a site "live";
  *  - the category chips are the catalog's own vocabulary (vertical, design
@@ -38,22 +44,34 @@ import { useListKeys } from "@/lib/workspace/keyboard";
  *  - an unconfigured or unreachable origin is a READ state, never an empty
  *    portfolio, and it names the fix.
  *
- * Keeper woven back in (old-design-keepers, s73): the one list keyboard
- * grammar — j/k move · ↵ open — marking the selected card with the sheet's
- * own `.row.sel` accent. Nothing is selected at rest, so the resting chrome
- * stays exactly the sheet's.
+ * Keepers woven back in (old-design-keepers, s73 — each a STATE behind
+ * byte-true resting chrome, never an extra band):
+ *  - the one list keyboard grammar — j/k move · ↵ open — marking the pick
+ *    with the sheet's own `.row.sel` accent. Nothing is selected at rest;
+ *  - the old card's record line — one-liner, design register, build date —
+ *    rests hidden inside the shot and rises on hover / focus / the pick
+ *    (founder s75: "there were some good features from the old design").
  */
-export function Sites({ source }: { source: SitesSource }) {
+export function Sites({
+  source,
+  initialFilters,
+}: {
+  source: SitesSource;
+  /** A deep link from a dossier fact door — `?vertical=`/`?axis=`/`?wave=`. */
+  initialFilters?: SiteFilters;
+}) {
   const router = useRouter();
   const records = useMemo(
     () => (source.kind === "local" || source.kind === "remote" ? source.records : []),
     [source],
   );
-  const previewOrigin =
-    source.kind === "local" || source.kind === "remote" ? source.previewOrigin : "";
 
-  const [filters, setFilters] = useState<SiteFilters>({});
-  const [expanded, setExpanded] = useState(false);
+  const [filters, setFilters] = useState<SiteFilters>(initialFilters ?? {});
+  // A deep link may pick a chip that rests behind "More →"; open the row so
+  // the operator can SEE what is filtering their grid, never a silent slice.
+  const [expanded, setExpanded] = useState(
+    Boolean(initialFilters?.vertical || initialFilters?.axis || initialFilters?.wave !== undefined),
+  );
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const selectedRef = useRef<HTMLAnchorElement | null>(null);
 
@@ -204,10 +222,11 @@ export function Sites({ source }: { source: SitesSource }) {
           </div>
         </div>
       ) : (
-        <div className="site-grid">
+        <section className="site-grid" aria-label="Portfolio sites">
           {shown.map((site) => {
             const status = verdictStatus(site);
             const isSelected = site.slug === selected;
+            const facts = cardFacts(site);
             return (
               <Link
                 key={site.slug}
@@ -218,16 +237,31 @@ export function Sites({ source }: { source: SitesSource }) {
               >
                 <div className="site-shot">
                   {site.cardImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- preview-origin images are external to the Next image pipeline on purpose
-                    <img
-                      src={`${previewOrigin}/${site.cardImage}`}
-                      alt=""
-                      width={640}
-                      height={360}
-                      loading="lazy"
-                    />
+                    // eslint-disable-next-line @next/next/no-img-element -- preview media is served by the app's own route, outside the Next image pipeline on purpose
+                    <img src={previewUrl(site.cardImage)} alt="" width={640} height={360} loading="lazy" />
                   ) : (
                     <span>site preview · hero</span>
+                  )}
+                  {/*
+                   * The old gallery's per-card record — one-liner, design
+                   * register, build date — re-entering as a STATE, not a
+                   * band: it rests hidden inside the shot the sheet already
+                   * draws, and rises on hover / focus / the keyboard pick.
+                   * The card's geometry never changes.
+                   */}
+                  {(site.oneLiner || facts.length > 0 || site.built) && (
+                    <div className="site-cap">
+                      {site.oneLiner && <span className="site-line t-label">{site.oneLiner}</span>}
+                      {(facts.length > 0 || site.built) && (
+                        <div className="site-cap-foot">
+                          <span className="t-label subtle">
+                            {facts.map((axis) => axisLabel(axis)).join(" · ")}
+                          </span>
+                          <div style={{ flex: 1 }} />
+                          {site.built && <span className="t-data">{site.built}</span>}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div className="site-meta">
@@ -240,7 +274,7 @@ export function Sites({ source }: { source: SitesSource }) {
               </Link>
             );
           })}
-        </div>
+        </section>
       )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -250,8 +284,8 @@ export function Sites({ source }: { source: SitesSource }) {
         <div style={{ flex: 1 }} />
         {(source.kind === "local" || source.kind === "remote") && (
           <span className="t-data">
-            {source.kind === "local" ? "local template dir" : "catalog.json"} · previews from{" "}
-            {previewOrigin}
+            {source.kind === "local" ? "local template dir" : "catalog.json"} · previews served by
+            the workspace from {source.previewUpstream}
           </span>
         )}
       </div>

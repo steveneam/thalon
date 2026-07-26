@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { assembleSiteRecord, parseCatalog } from "@/lib/sites/catalog";
 import {
   applyFilters,
+  cardFacts,
   chipActive,
   facetValues,
   headerPills,
@@ -99,6 +100,35 @@ describe("sites catalog + surface model (W-sites s61, re-homed at the exact-mock
     const cleared = toggleChip(vertical, two);
     expect(cleared.vertical).toBeUndefined();
     expect(cleared.axis).toBe(axis.value);
+  });
+
+  it("cardFacts is the old card's axis pair, straight from the catalog — never a re-derivation", () => {
+    expect(
+      cardFacts({
+        ...localRecords()[0],
+        axes: { primary: "editorial-print", secondary: "data-instrument" },
+      }),
+    ).toEqual(["editorial-print", "data-instrument"]);
+    // A record with one axis states one; nothing is invented to fill the row.
+    expect(cardFacts({ ...localRecords()[0], axes: { primary: "editorial-print" } })).toEqual([
+      "editorial-print",
+    ]);
+    expect(cardFacts({ ...localRecords()[0], axes: { primary: "" } })).toEqual([]);
+  });
+
+  it("the sheet's placeholder rule stays a CHILD selector — it swallowed the record caption once", () => {
+    // Found on screen, invisible to every other test: `.site-shot span` is
+    // the sheet's rule for the striped placeholder's mono caption, and it
+    // also matched the record caption nested inside the shot, rendering the
+    // one-liner as 10px mono. The child combinator is what keeps the sheet's
+    // declaration exactly as written without it reaching further than the
+    // element it was written for.
+    const css = readFileSync(
+      path.join(fileURLToPath(new URL(".", import.meta.url)), "../sites.css"),
+      "utf8",
+    );
+    expect(css).toContain(".sites-surface .site-shot > span {");
+    expect(css).not.toMatch(/\.sites-surface \.site-shot span \{/);
   });
 
   it("the image-side assembler (build-sites-catalog.mjs) emits a catalog the workspace parser accepts — the drift guard", () => {

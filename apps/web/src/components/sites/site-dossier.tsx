@@ -1,152 +1,252 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import {
+  VERDICT_PILL,
+  VERDICT_WORDS,
+  axisLabel,
+  verdictStatus,
+  verticalLabel,
+} from "@/components/sites/sites-model";
 import type { SiteRecord } from "@/lib/sites/catalog";
-import { verdictStatus, VERDICT_WORDS } from "./sites-model";
+import { previewUrl, sitePageUrl } from "@/lib/sites/preview";
 
 /**
- * One site's dossier (W-sites, s61): live preview beside the record — the
- * case study a prospect conversation reaches for. Preview iframes the real
- * page from the sites origin with device-width toggles (desktop / 390);
- * the record shows the axes, the design seeds, the honest mint facts from
- * the manifest (dimensions + pinned-hash tail), and links out to the
- * page's own /guide (Q2: link, not embed — the guide is its own honest
- * page). Credits stay /guide-only (Q4).
+ * One site's dossier — the case study a prospect conversation reaches for:
+ * the page itself, live, beside the record that produced it.
+ *
+ * THERE IS NO `Site Dossier.dc.html` in the mock, so this is DESIGNED in the
+ * sheets' language rather than ported — the s74 Search-tab precedent. The
+ * language is unusually literal here, because the mock DOES draw a dossier
+ * for the sibling artifact (`Video Dossier.dc.html`): the same headline row
+ * with a back door and two actions, the same `.dgrid` of stage-beside-record,
+ * the same `.fact-row` record card, the same media `.strip`. A site dossier
+ * and a video dossier are one idea about two artifacts, and they now read as
+ * the same product. Every atomic is that sheet's, scoped (site-dossier.css).
+ *
+ * Every capability of the s61 dossier survives — this is a re-expression,
+ * not a reduction: the live preview with its desktop/390 toggles, the site
+ * record, the manifest's mint facts (dimensions + pinned-hash tails), the
+ * /guide links, and the verdict.
+ *
+ * Honesty rules it keeps:
+ *  - the preview is the REAL page, served same-origin by the workspace's own
+ *    route (lib/sites/preview.ts), so it renders for a viewer who is not on
+ *    the box — the s75 founder report;
+ *  - a fact is only a door when it opens something. Vertical, axis and wave
+ *    open the portfolio filtered to themselves; the rest are plain rows with
+ *    no arrow, because there is nothing behind them to reach;
+ *  - the mint strip states its true count, and every tile carries the
+ *    pinned-hash tail — the provenance pointer, human-scale. Credits stay on
+ *    the page's own /guide (the s61 Q4 ruling), which is one click away.
  */
-export function SiteDossier({
-  site,
-  previewOrigin,
-}: {
-  site: SiteRecord;
-  previewOrigin: string;
-}) {
+export function SiteDossier({ site }: { site: SiteRecord }) {
   const [width, setWidth] = useState<"desktop" | "phone">("desktop");
   const status = verdictStatus(site);
-  const siteUrl = `${previewOrigin}/${site.slug}/`;
+  const pageUrl = sitePageUrl(site.slug);
+  const guideUrl = sitePageUrl(site.slug, "guide");
 
-  const facts: Array<[string, string | undefined]> = [
-    ["Vertical", site.vertical],
-    ["Primary axis", site.axes.primary],
-    ["Secondary axis", site.axes.secondary],
+  /** The record card's rows. `href` is present only where something opens. */
+  const facts: Array<{ key: string; value: string; href?: string; external?: boolean }> = [];
+  if (site.vertical) {
+    facts.push({
+      key: "Vertical",
+      value: verticalLabel(site.vertical),
+      href: `/app/sites?vertical=${encodeURIComponent(site.vertical)}`,
+    });
+  }
+  if (site.axes.primary) {
+    facts.push({
+      key: "Primary axis",
+      value: axisLabel(site.axes.primary),
+      href: `/app/sites?axis=${encodeURIComponent(site.axes.primary)}`,
+    });
+  }
+  if (site.axes.secondary) {
+    facts.push({
+      key: "Secondary axis",
+      value: axisLabel(site.axes.secondary),
+      href: `/app/sites?axis=${encodeURIComponent(site.axes.secondary)}`,
+    });
+  }
+  if (site.wave !== undefined) {
+    facts.push({ key: "Wave", value: `Wave ${site.wave}`, href: `/app/sites?wave=${site.wave}` });
+  }
+  if (site.built) facts.push({ key: "Built", value: site.built });
+  facts.push({
+    key: "Verdict",
+    value: site.verdict?.note
+      ? `${VERDICT_WORDS[status]} — ${site.verdict.note}`
+      : VERDICT_WORDS[status],
+  });
+  facts.push({
+    key: "How it was made",
+    value: "the page's own guide — prompts, models, credits",
+    href: guideUrl,
+    external: true,
+  });
+
+  /**
+   * The design brief. These four are PROSE — a hundred to three hundred
+   * characters each — and the sheet's `.fact-row` is a one-LINE fact
+   * ("3 sources · cited verbatim"). Pouring them into the 320px rail would
+   * keep the class name and break the density the class exists to hold, so
+   * the brief gets its own card in the wide column: same grammar, room to
+   * read. Nothing is dropped and nothing is truncated.
+   */
+  const brief: Array<[string, string]> = [
     ["Axis note", site.axisNote],
     ["Palette seed", site.paletteSeed],
     ["Type", site.typeDirection],
     ["Motion budget", site.motionBudget],
-    ["Wave", site.wave !== undefined ? String(site.wave) : undefined],
-    ["Built", site.built],
-  ];
+  ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/app/sites"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Sites
+    <div className="content site-dossier-surface" style={{ gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Link className="card-link" href="/app/sites">
+          ← Sites
         </Link>
-        <h1 className="text-lg font-semibold">{site.name}</h1>
-        {status === "awaiting" ? (
-          <Badge variant="outline" className="border-amber-600/40 text-amber-700">
-            {VERDICT_WORDS[status]}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">
-            {VERDICT_WORDS[status]}
-            {site.verdict?.note ? ` — ${site.verdict.note}` : ""}
-          </span>
-        )}
+        <h1 className="t-headline">{site.name}</h1>
+        <span className={VERDICT_PILL[status]}>{VERDICT_WORDS[status]}</span>
+        <div style={{ flex: 1 }} />
+        <a className="btn btn-ghost btn-sm" href={guideUrl} target="_blank" rel="noreferrer">
+          How it was made
+        </a>
+        <a className="btn btn-primary btn-sm" href={pageUrl} target="_blank" rel="noreferrer">
+          Open the site
+        </a>
       </div>
-      <p className="max-w-3xl text-sm text-muted-foreground">{site.oneLiner}</p>
-
-      <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs">
-            {(["desktop", "phone"] as const).map((w) => (
-              <button
-                key={w}
-                type="button"
-                onClick={() => setWidth(w)}
-                className={cn(
-                  "rounded border px-2.5 py-1 transition-colors",
-                  width === w
-                    ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {w === "desktop" ? "Desktop" : "390 px"}
-              </button>
-            ))}
-            <a
-              href={siteUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="ml-auto inline-flex items-center gap-1 text-primary hover:underline"
-            >
-              Open full <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-            </a>
-            <a
-              href={`${siteUrl}guide/`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
-            >
-              How it was made <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-            </a>
-          </div>
-          <div className="overflow-auto rounded-lg border bg-muted/40 p-3">
-            <iframe
-              src={siteUrl}
-              title={`${site.name} — live preview`}
-              className={cn(
-                "mx-auto h-[70vh] rounded border bg-white",
-                width === "desktop" ? "w-full" : "w-[390px]",
-              )}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground/70">
-            Served live from {previewOrigin} — if the frame is blank in dev, start the preview
-            server: <code className="rounded bg-muted px-1">python3 scripts/preview-server.py</code>
-          </p>
+      {site.oneLiner && (
+        <div style={{ display: "flex" }}>
+          <span className="t-label">{site.oneLiner}</span>
         </div>
+      )}
 
-        <aside className="space-y-4">
-          <dl className="space-y-2 rounded-lg border p-3 text-sm">
-            {facts
-              .filter((f): f is [string, string] => Boolean(f[1]))
-              .map(([label, value]) => (
-                <div key={label}>
-                  <dt className="text-xs uppercase tracking-wide text-muted-foreground/70">
-                    {label}
-                  </dt>
-                  <dd className="text-sm leading-snug">{value}</dd>
+      <div className="dgrid">
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+          <div className="card">
+            <div className="card-head" style={{ padding: "9px 16px" }}>
+              <span className="t-title">Live preview</span>
+              <span className="t-label">the page itself, not a screenshot</span>
+              <div style={{ flex: 1 }} />
+              <div className="seg">
+                {(["desktop", "phone"] as const).map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    className={width === w ? "seg-opt on" : "seg-opt"}
+                    aria-pressed={width === w}
+                    onClick={() => setWidth(w)}
+                  >
+                    {w === "desktop" ? "Desktop" : "390 px"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="stage">
+              <iframe
+                key={site.slug}
+                src={pageUrl}
+                title={`${site.name} — live preview`}
+                className={width === "phone" ? "stage-frame phone" : "stage-frame"}
+                // Served from the workspace's own origin, so the frame is
+                // sandboxed OUT of it: scripts run (the pages carry real
+                // motion), but the document sits in an opaque origin and can
+                // never reach the workspace around it. It matters more later
+                // than now — these pages are hand-built today and generated
+                // per tenant once B-sitegen lands.
+                sandbox="allow-scripts"
+              />
+            </div>
+          </div>
+
+          {brief.length > 0 && (
+            <div className="card">
+              <div className="card-head" style={{ padding: "9px 16px" }}>
+                <span className="t-title">The design brief</span>
+                <span className="t-label">what the engine was aiming at, in its own words</span>
+              </div>
+              {brief.map(([key, value]) => (
+                <div className="brief-row" key={key}>
+                  <span className="t-label">{key}</span>
+                  <span className="t-body muted">{value}</span>
                 </div>
               ))}
-          </dl>
-          <div className="rounded-lg border p-3">
-            <p className="mb-2 text-xs uppercase tracking-wide text-muted-foreground/70">
-              Minted assets · {site.assets.length}
-            </p>
-            <ul className="space-y-1 font-mono text-xs text-muted-foreground">
-              {site.assets.map((a) => (
-                <li key={a.file} className="flex justify-between gap-2">
-                  <span className="truncate">{a.file}</span>
-                  <span className="shrink-0">
-                    {a.width}×{a.height} · …{a.hashTail}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-xs leading-snug text-muted-foreground/70">
-              Every file is a deterministic derive of a pinned original (model, prompt, credits on
-              the provenance manifest); the page&apos;s /guide tells the honest story.
-            </p>
+            </div>
+          )}
+
+          <div className="card">
+            <div className="card-head" style={{ padding: "9px 16px" }}>
+              <span className="t-title">Minted assets</span>
+              <span className="t-label">
+                {site.assets.length === 0
+                  ? "none on the manifest — this page draws everything in code"
+                  : `${site.assets.length} · each a deterministic derive of a pinned original`}
+              </span>
+            </div>
+            {site.assets.length > 0 && (
+              <div className="strip">
+                {site.assets.map((asset) => (
+                  <div className="clipcard" key={asset.file}>
+                    <div className="thumb-md">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- preview media is served by the app's own route, outside the Next image pipeline on purpose */}
+                      <img
+                        src={previewUrl(`${site.slug}/assets/${asset.file}`)}
+                        alt=""
+                        width={148}
+                        height={92}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div>
+                      <div className="clip-cap" title={asset.file}>
+                        {asset.file}
+                      </div>
+                      <div className="clip-kind">
+                        {asset.width}×{asset.height} · …{asset.hashTail}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </aside>
+        </div>
+
+        <div className="card" style={{ display: "flex", flexDirection: "column" }}>
+          <div className="card-head">
+            <span className="t-title">The record</span>
+            <span className="t-label">the arrows are doors</span>
+          </div>
+          {facts.map((fact) => {
+            const body = (
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="fact-k">{fact.key}</div>
+                <div className="fact-v">{fact.value}</div>
+              </div>
+            );
+            if (!fact.href) return <div className="fact-row" key={fact.key}>{body}</div>;
+            return fact.external ? (
+              <a className="fact-row" href={fact.href} target="_blank" rel="noreferrer" key={fact.key}>
+                {body}
+                <span className="tile-arrow">↗</span>
+              </a>
+            ) : (
+              <Link className="fact-row" href={fact.href} key={fact.key}>
+                {body}
+                <span className="tile-arrow">→</span>
+              </Link>
+            );
+          })}
+          <div style={{ padding: "10px 14px", borderTop: "1px solid var(--n-400)" }}>
+            <span className="t-label">
+              Every file is a deterministic derive of a pinned original — model, prompt and credits
+              stay on the page&apos;s own guide, which tells the honest story.
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

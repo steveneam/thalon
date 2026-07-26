@@ -61,11 +61,12 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // The Settings ROOT below has no sheet of its own in the mock, so it keeps
   // its bridged styling until the founder calls that surface.
   ["components/settings/settings-panel.tsx", 7],
-  // components/sites/sites-gallery.tsx was DELETED at the s75 exact-mock
-  // rebuild (DOCTRINE 0 rule 3) — the ported surface replaced it. The
-  // dossier below is the one Sites file with no sheet of its own, so it
-  // keeps its bridged styling until the founder calls that sub-surface.
-  ["components/sites/site-dossier.tsx", 19],
+  // components/sites/* burned to zero across two sessions: sites-gallery.tsx
+  // was DELETED at the s75 exact-mock rebuild, and site-dossier.tsx at s76 —
+  // the mock draws no dossier for a SITE, so it was DESIGNED in the sheets'
+  // language out of the dossier the mock DOES draw (Video Dossier.dc.html),
+  // the s74 Search-tab precedent. The old implementation went in the same
+  // change (DOCTRINE 0 rule 3).
   ["components/staged/candidate-picker.tsx", 7],
   ["components/staged/capture-log.tsx", 3],
   ["components/staged/direction-editor.tsx", 25],

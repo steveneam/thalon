@@ -51,7 +51,7 @@ const RECORDS: SiteRecord[] = [
 const LOCAL: SitesSource = {
   kind: "local",
   records: RECORDS,
-  previewOrigin: "http://127.0.0.1:8899",
+  previewUpstream: "the local template directory",
 };
 
 /**
@@ -79,7 +79,7 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
     // sheet's striped placeholder rather than an empty box.
     expect(cards[0].querySelector("img")).toHaveAttribute(
       "src",
-      "http://127.0.0.1:8899/sparkwright/assets/hero.webp",
+      "/api/sites/preview/sparkwright/assets/hero.webp",
     );
     expect(cards[2].querySelector("img")).toBeNull();
     expect(within(cards[2] as HTMLElement).getByText("site preview · hero")).toBeInTheDocument();
@@ -90,7 +90,71 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
       ),
     ).toHaveClass("t-label");
     // Visible provenance: which origin answered, right on the surface.
-    expect(screen.getByText(/local template dir · previews from/)).toHaveClass("t-data");
+    expect(
+      screen.getByText(/local template dir · previews served by the workspace from/),
+    ).toHaveClass("t-data");
+  });
+
+  it("resolves every preview against the WORKSPACE, never an origin only the box can reach", () => {
+    // The s75 founder report: `127.0.0.1` is the viewer's own loopback, so
+    // from any machine but the box every thumbnail was broken. No absolute
+    // origin may survive anywhere on this surface.
+    const { container } = render(<Sites source={LOCAL} />);
+
+    for (const img of container.querySelectorAll("img")) {
+      expect(img.getAttribute("src")).toMatch(/^\/api\/sites\/preview\//);
+    }
+    expect(container.innerHTML).not.toContain("127.0.0.1");
+  });
+
+  it("re-enters the old card's record — one-liner, register, built — behind the shot", () => {
+    // The re-entry rule: a keeper comes back as a STATE behind byte-true
+    // resting chrome. The caption lives INSIDE the shot the sheet draws
+    // (rising on hover/focus/the pick), so the card's own geometry — shot
+    // over a meta row of name · pill · door — is untouched.
+    const { container } = render(
+      <Sites
+        source={{
+          kind: "local",
+          previewUpstream: "the local template directory",
+          records: [
+            site({
+              slug: "sparkwright",
+              name: "Sparkwright Electrical",
+              oneLiner: "The switchboard people, after dark.",
+              axes: { primary: "high-quality-3d", secondary: "cinematic-imagery" },
+              built: "2026-07-16",
+            }),
+          ],
+        }}
+      />,
+    );
+
+    const shot = container.querySelector(".site-card .site-shot")!;
+    const caption = shot.querySelector(".site-cap")!;
+    expect(caption).not.toBeNull();
+    expect(within(caption as HTMLElement).getByText("The switchboard people, after dark.")).toHaveClass(
+      "t-label",
+    );
+    expect(
+      within(caption as HTMLElement).getByText("High quality 3d · Cinematic imagery"),
+    ).toBeInTheDocument();
+    expect(within(caption as HTMLElement).getByText("2026-07-16")).toHaveClass("t-data");
+
+    // The sheet's own meta row gains nothing.
+    const meta = container.querySelector(".site-meta")!;
+    expect(meta.children).toHaveLength(3);
+    expect(meta.querySelector(".site-cap")).toBeNull();
+  });
+
+  it("lands pre-filtered when a dossier fact door deep-links into the grid", () => {
+    const { container } = render(<Sites source={LOCAL} initialFilters={{ wave: 2 }} />);
+
+    expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(1);
+    expect(screen.getByText("1 of 3 built")).toBeInTheDocument();
+    // The chip doing the filtering is VISIBLE — a deep link never hides its
+    // own reason behind "More →".
+    expect(screen.getByRole("button", { name: "Wave 2" })).toHaveClass("cat-chip", "on");
   });
 
   it("the state pill says what the catalog RECORDS — the verdict, never an invented deploy state", () => {
@@ -190,7 +254,9 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
   });
 
   it("an empty catalog says the origin answered, not that the read failed", () => {
-    render(<Sites source={{ kind: "remote", records: [], previewOrigin: "https://sites.example" }} />);
+    render(
+      <Sites source={{ kind: "remote", records: [], previewUpstream: "https://sites.example" }} />,
+    );
 
     expect(screen.getByText("0 built")).toBeInTheDocument();
     expect(screen.getByText(/answered with an empty catalog/)).toBeInTheDocument();
