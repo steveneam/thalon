@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Crop, Edl } from "@thalon/contracts";
 import type { Selection } from "@/components/videos/editor-timeline";
 import { mediaUrl } from "@/lib/videos/client";
@@ -86,7 +86,9 @@ export function EditorInspector({
       {selection.kind === "caption" && (
         <CaptionFields edl={edl} index={selection.index} onEdl={onEdl} />
       )}
-      {selection.kind === "music" && <MusicFields edl={edl} onEdl={onEdl} />}
+      {selection.kind === "music" && (
+        <MusicFields projectId={projectId} edl={edl} playable={playable} onEdl={onEdl} />
+      )}
 
       {overlay !== null && (
         <div className="inspector-row">
@@ -258,7 +260,17 @@ function CaptionFields({
   );
 }
 
-function MusicFields({ edl, onEdl }: { edl: Edl; onEdl: (fn: (edl: Edl) => Edl) => void }) {
+function MusicFields({
+  projectId,
+  edl,
+  playable,
+  onEdl,
+}: {
+  projectId: string;
+  edl: Edl;
+  playable: boolean;
+  onEdl: (fn: (edl: Edl) => Edl) => void;
+}) {
   const cue = edl.audio[0];
   if (!cue) return null;
   if (cue.mode === "copy") {
@@ -277,6 +289,15 @@ function MusicFields({ edl, onEdl }: { edl: Edl; onEdl: (fn: (edl: Edl) => Edl) 
       <div className="inspector-row">
         <span className="t-data inspector-ref">{cue.source.ref}</span>
       </div>
+      {playable && (
+        <div className="inspector-row">
+          <Waveform
+            src={mediaUrl(projectId, cue.source.ref)}
+            offset={cue.offset}
+            onOffset={(offset) => onEdl((current) => patchMusic(current, { offset }))}
+          />
+        </div>
+      )}
       <div className="inspector-row">
         <Field
           label="offset (s)"
@@ -339,6 +360,85 @@ function MusicFields({ edl, onEdl }: { edl: Edl; onEdl: (fn: (edl: Edl) => Edl) 
         </span>
       </div>
     </>
+  );
+}
+
+/** The wavesurfer surface this lane uses (v7); dynamic-imported so the editor bundle stays lean. */
+interface WaveSurferHandle {
+  destroy(): void;
+  playPause(): Promise<void> | void;
+  on(event: "interaction" | "ready", cb: (value: number) => void): void;
+}
+
+/**
+ * The measured-alignment keeper (s44 method): clicking the waveform sets the
+ * in-point AND auditions from it — one gesture, measured, never estimated.
+ * The amber marker shows where the cut enters the track.
+ */
+function Waveform({
+  src,
+  offset,
+  onOffset,
+}: {
+  src: string;
+  offset: number;
+  onOffset: (seconds: number) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const wsRef = useRef<WaveSurferHandle | null>(null);
+  const [trackDuration, setTrackDuration] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    let ws: WaveSurferHandle | null = null;
+    void import("wavesurfer.js").then(({ default: WaveSurfer }) => {
+      if (cancelled || !containerRef.current) return;
+      ws = WaveSurfer.create({
+        container: containerRef.current,
+        url: src,
+        height: 56,
+        waveColor: "var(--n-600)",
+        progressColor: "var(--act)",
+        cursorColor: "var(--act)",
+      }) as unknown as WaveSurferHandle;
+      ws.on("ready", (duration) => setTrackDuration(duration));
+      ws.on("interaction", (at) => onOffset(Math.round(at * 100) / 100));
+      wsRef.current = ws;
+    });
+    return () => {
+      cancelled = true;
+      ws?.destroy();
+      wsRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-create only when the source changes; onOffset is stable enough per render
+  }, [src]);
+
+  return (
+    <div className="wave">
+      <div className="wave-stage">
+        <div ref={containerRef} aria-label="Music waveform — click to set the offset" />
+        {trackDuration > 0 && (
+          <span
+            aria-hidden
+            className="wave-mark"
+            style={{ left: `${Math.min(100, (offset / trackDuration) * 100)}%` }}
+          />
+        )}
+      </div>
+      <div className="inspector-row">
+        <span className="t-label">
+          Click the waveform to set where the track enters; playback auditions from the click.
+        </span>
+        <div style={{ flex: 1 }} />
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          onClick={() => void wsRef.current?.playPause()}
+        >
+          Play / pause
+        </button>
+      </div>
+    </div>
   );
 }
 
