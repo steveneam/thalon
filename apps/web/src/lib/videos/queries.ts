@@ -1,7 +1,9 @@
 import {
   edlSchema,
+  videoCutAttributionSchema,
   videoCutLineageSchema,
   type TenantCtx,
+  type VideoCutAttribution,
   type VideoCutStatus,
   type VideoTakeDisposition,
   type VideoTakeKind,
@@ -76,6 +78,24 @@ export function lineageViewFor(
   };
 }
 
+/**
+ * B-ve.4: a cut's stored attribution, resolved for the surface. The save
+ * door stamps `meta.attribution` itself (never trusting the client), so a
+ * missing one means a row written before that door existed — null, which
+ * the version strip says out loud rather than guessing an author. A
+ * malformed one resolves to null too: the write doors validate, so
+ * malformed means a legacy hand-write, and the surface stays quiet.
+ */
+export function attributionOf(meta: unknown): VideoCutAttribution | null {
+  const raw =
+    typeof meta === "object" && meta !== null
+      ? (meta as { attribution?: unknown }).attribution
+      : undefined;
+  if (raw === undefined) return null;
+  const parsed = videoCutAttributionSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
+
 /** keepers before rejects within a slot; slotless (music candidates) last. */
 function takeOrder(a: TakeView, b: TakeView): number {
   if ((a.slot === null) !== (b.slot === null)) return a.slot === null ? 1 : -1;
@@ -130,6 +150,7 @@ export async function getCutDetail(
     outputRef: cut.outputRef,
     edl: edlSchema.parse(cut.edl),
     lineage: lineageViewFor(cut.meta, projectCuts),
+    attribution: attributionOf(cut.meta),
     createdAt: cut.createdAt.toISOString(),
   };
 }
@@ -175,6 +196,7 @@ export async function getProjectDetail(
           outputRef: c.outputRef,
           edl: summarizeEdl(c.edl),
           lineage: lineageViewFor(c.meta, cuts),
+          attribution: attributionOf(c.meta),
           createdAt: c.createdAt.toISOString(),
         }),
       )

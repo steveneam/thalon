@@ -78,15 +78,12 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/ui/button.tsx", 36],
   ["components/ui/card.tsx", 4],
   ["components/ui/skeleton.tsx", 1],
-  ["components/videos/assist-panel.tsx", 20],
-  ["components/videos/cut-editor.tsx", 33],
-  ["components/videos/frame-composer.tsx", 12],
-  ["components/videos/music-lane.tsx", 5],
-  ["components/videos/num-field.tsx", 6],
-  ["components/videos/project-browser.tsx", 35],
-  ["components/videos/track-view.tsx", 30],
-  ["components/videos/video-projects.tsx", 8],
-  ["components/videos/videos-subnav.tsx", 6],
+  // The whole components/videos/ block left the map at the s76 exact-mock
+  // rebuild: all three video surfaces were rebuilt from their sheets and the
+  // old implementation (list, browser, cut-editor, track-view, assist-panel,
+  // music-lane, frame-composer, num-field, videos-subnav) was deleted in the
+  // same wave (DOCTRINE 0 rule 3). The rebuild sits at ZERO bridged tokens;
+  // every keeper re-entered as a state behind the sheets' own chrome.
   ["components/workspace/action-toast.tsx", 8],
   ["components/workspace/bulk-bar.tsx", 2],
   ["components/workspace/command-palette.tsx", 13],

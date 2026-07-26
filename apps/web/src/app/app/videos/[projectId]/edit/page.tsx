@@ -1,6 +1,10 @@
-import { CutEditor } from "@/components/videos/cut-editor";
+import { VideoEditor } from "@/components/videos/editor";
 
-/** B-ve.3: the dedicated editor route — the detail page stays the browse surface. */
+/**
+ * The video editor: the exact-mock rebuild of Videos.dc.html (DOCTRINE 0) —
+ * the multi-track EDL surface with the agent as its front door. `?cut=`
+ * picks the version; without one, the project's first cut opens.
+ */
 export default async function CutEditPage({
   params,
   searchParams,
@@ -10,5 +14,5 @@ export default async function CutEditPage({
 }) {
   const { projectId } = await params;
   const { cut } = await searchParams;
-  return <CutEditor projectId={projectId} cutId={typeof cut === "string" ? cut : null} />;
+  return <VideoEditor projectId={projectId} cutId={typeof cut === "string" ? cut : null} />;
 }
