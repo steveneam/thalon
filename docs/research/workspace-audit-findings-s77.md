@@ -358,3 +358,63 @@ document that costs real tokens on every click, so the same gate protects the
 budget. Building the door, wiring the judge gate on the way out, and leaving it
 disarmed is entirely within the GO.
 
+## s78 execution architecture — parallel lanes (founder s77)
+
+**The founder's read is right, and here is the mechanism.** The workflow
+concurrency cap is `min(16, cores − 2)` and it is **per workflow, not per
+box** — on this 6-core box that is **4**. One workflow therefore queues
+everything behind 4 slots, which is exactly why 100+ verify agents sat waiting.
+**Four parallel lanes each get their own cap of 4 → 16 concurrent.**
+
+**The box is not the constraint.** Measured during the fan-out: load average
+**0.35–0.63** with 4 agents live, and 7 GiB RAM free. These agents are
+API-bound, not CPU-bound, so the cap of 4 is a conservative default rather than
+a machine limit. 16 concurrent is safe here; the honest ceiling is API
+throughput and token budget, not the hardware.
+
+### The split — four lanes, DISJOINT component directories
+
+Balanced on blocker+high (the findings that actually drive fix work), and
+disjoint so the FIX phase cannot conflict. `Settings` and `Integrations` ride
+together because both live in `components/settings/**`.
+
+| lane | surfaces | blocker+high | all findings |
+|---|---|---|---|
+| 1 | leads · board · runs | 13 | 44 |
+| 2 | calendar · settings (+integrations) · profiles | 13 | 53 |
+| 3 | dashboard · transcription · sites | 12 | 43 |
+| 4 | approve · create · intel · videos | 12 | 49 |
+
+### Two things that must NOT be split
+
+1. **The keyed-by-entity sweep is ONE change, done FIRST, before the lanes
+   launch.** It spans Approve, Create, Dashboard, Transcription and Intel — if
+   four lanes each fix their own instance, the repo gets four different
+   spellings of one fix and the class is never named. Lead-direct, one commit,
+   a pinned test per surface. THEN the lanes start from a main that already has
+   it.
+2. **Shared files stay lead-owned**, as in every previous wave:
+   `app/app/workspace.css`, `packages/contracts/**`, and the ratchet pins.
+
+### Sequencing recommendation — verify blocker+high FIRST
+
+189 verifications is real spend, and **the fix work is driven by the 50
+blocker+high findings**, not by the 92 mediums. So:
+
+- **Round 1:** each lane verifies its **blocker+high only** (~12–13 each, ~50
+  total). At 16 concurrent that is a few minutes, and it produces the fix list.
+- **Round 2:** lanes fix what survived, screenshot-gated per surface.
+- **Round 3:** mediums/lows verified in the background while fixes land, so
+  nothing is lost — the medium pile is where a mis-severitied blocker hides,
+  and skipping it entirely would be the wrong economy.
+
+This is a sequencing change, not a scope cut: all 189 still get verified, but
+the ones that gate the work go first.
+
+### Cost, stated plainly
+
+Round 1 ≈ 50 verify agents + 4 lane sessions. The full pass across all three
+rounds is ~190 verify agents plus fix work — comfortably the largest agent
+spend of any session so far, which is why it wants the founder's explicit
+launch approval per the standing rule, and why round 1 is scoped to produce a
+decision point before the rest runs.
