@@ -49,5 +49,5 @@ governed by per-area knobs as CONFIG-DATA.**
 
 ## Wrap
 
-`agent_handoff/WRAP-exemplar-arm.md`: what shipped, the knob defaults chosen
+`agent_handoff/lanes/WRAP-exemplar-arm.md`: what shipped, the knob defaults chosen
 and why, any contract-window ask, and the first real sweep's admission count.

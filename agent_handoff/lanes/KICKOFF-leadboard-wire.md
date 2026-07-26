@@ -95,7 +95,7 @@ contract-window change and is not yours.
 ## Definition of done
 
 Board wired, legacy set deleted, `npm run verify` GREEN at the repo root,
-worktree clean, branch pushed, and `agent_handoff/WRAP-leadboard-wire.md`
+worktree clean, branch pushed, and `agent_handoff/lanes/WRAP-leadboard-wire.md`
 written: what you wired, the layout call and why, the keyboard-grammar
 verdict, proof the deleted files were genuinely orphaned, pin deltas, and
 anything above this lane's pay grade. The lead merge-gates on a live

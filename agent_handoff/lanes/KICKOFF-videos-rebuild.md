@@ -97,7 +97,7 @@ the other two shipped and the domain in your head.
 
 Three sheets shipped two-step, `npm run verify` GREEN at the repo root
 (guard · suite · typecheck · lint), worktree clean, branch pushed, and
-`agent_handoff/WRAP-videos-rebuild.md` written: what shipped per sheet,
+`agent_handoff/lanes/WRAP-videos-rebuild.md` written: what shipped per sheet,
 every keeper's fate (re-entered where / deliberately retired / flagged),
 every honest deviation with its REASON, the pin-file deltas, and anything
 you found that is above this lane's pay grade. The lead merge-gates on a

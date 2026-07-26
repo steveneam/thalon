@@ -26,7 +26,7 @@ Read `CLAUDE.md` first, then IN ORDER:
 - `apps/web/src/components/sites/site-dossier.tsx` — **the old design, still
   live.** Untouched since s61.
 - `docs/research/old-design-keepers.md` — the re-entry rule.
-- `agent_handoff/WRAP-estate-rebuild.md` — the lane that rebuilt the gallery
+- `agent_handoff/lanes/WRAP-estate-rebuild.md` — the lane that rebuilt the gallery
   last session; it names what it carried over and what it left.
 
 ## The three jobs, in this order
@@ -126,7 +126,7 @@ touch either.**
 Previews working for a viewer who is not on the box (say how you tested
 that), the dossier rebuilt in the sheets' language with every old capability
 accounted for, the old file deleted, `npm run verify` GREEN at the repo
-root, worktree clean, branch pushed, and `agent_handoff/WRAP-sites-deepen.md`
+root, worktree clean, branch pushed, and `agent_handoff/lanes/WRAP-sites-deepen.md`
 written: the preview approach you chose and why, the dossier's design
 decisions, every old feature's fate, pin deltas, and anything above this
 lane's pay grade.

@@ -143,7 +143,7 @@ sheets README. (This bears on the `medium` "concurrent events collapse to
 Commit on your branch `s78-lane2-calsetprof`. **Do NOT merge** — the lead
 merge-gates every lane on rebase + verify on merged main.
 
-Write `agent_handoff/WRAP-s78-lane2.md` covering: what verification KILLED
+Write `agent_handoff/lanes/WRAP-s78-lane2.md` covering: what verification KILLED
 (with the refutation reason), what survived and shipped, the screenshot
 results, the `/api/calendar` verdict with its evidence, and anything you
 deliberately left. State your final verify numbers.

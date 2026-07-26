@@ -47,5 +47,5 @@ Close that: **generation DECLARES `meta.targetTerms` on social drafts.**
 
 ## Wrap
 
-`agent_handoff/WRAP-p2c-genterms.md`: what shipped, the derivation rules as
+`agent_handoff/lanes/WRAP-p2c-genterms.md`: what shipped, the derivation rules as
 built, blog-mirror pairing notes (Phase 2c (d) — next slice, NOT this lane).

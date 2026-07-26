@@ -101,7 +101,7 @@
   preview media is same-origin for every viewer (an absolute origin was
   right on the box and broken on the founder's laptop). The 8899 server stays
   as the founder's raw-template review channel and as the
-  `SITES_PREVIEW_ORIGIN` override. See `agent_handoff/WRAP-sites-deepen.md`.
+  `SITES_PREVIEW_ORIGIN` override. See `agent_handoff/lanes/WRAP-sites-deepen.md`.
 
 ## 5. Build plan (one lane + two founder actions)
 

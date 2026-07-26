@@ -7,7 +7,7 @@
 > fast-forwards this worktree to the window-freeze commit before launch.**
 
 Read `CLAUDE.md` (repo protocol) first, then:
-- `agent_handoff/WRAP-exemplar-arm.md` § "Contract-window ask" — the L0 spec
+- `agent_handoff/lanes/WRAP-exemplar-arm.md` § "Contract-window ask" — the L0 spec
   this lane executes against;
 - `packages/engine/src/trend/admission.ts` — module header + the "Cap
   honesty" comment (the documented race you close);
@@ -54,7 +54,7 @@ you consume are EXACTLY the ones the lead's window froze — invent no schema.
 
 ## Wrap
 
-`agent_handoff/WRAP-blearn.md`: what shipped per slice, the deprecation
+`agent_handoff/lanes/WRAP-blearn.md`: what shipped per slice, the deprecation
 diff (request-level areas map removal), the durable-cap shape, the merged
 trends read contract, test deltas. Commit everything on the branch, leave
 the worktree clean. The lead merges behind a full post-merge verify.

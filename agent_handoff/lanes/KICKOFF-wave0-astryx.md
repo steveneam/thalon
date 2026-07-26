@@ -101,7 +101,7 @@ the landing (`/` keeps its own register) · contracts/db · any publish path.
 
 ## Wrap
 
-`agent_handoff/WRAP-wave0-astryx.md`: pinned version, theme file path, what
+`agent_handoff/lanes/WRAP-wave0-astryx.md`: pinned version, theme file path, what
 the cascade looks like, screenshot evidence list, the mono-allowlist
 ratchet's starting count, anything that fought you (swizzle used? why).
 Guard + commit on the branch; the LEAD merges on green post-merge verify.

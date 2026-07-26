@@ -1,4 +1,4 @@
-# KICKOFF — lane `estate-rebuild` (exact-mock rebuild: Sites, then Settings/Integrations — two-step each)
+# KICKOFF — lane `planner-rebuild` (exact-mock rebuild: Calendar, then Board — two-step each)
 
 > **APPROVAL ON RECORD (founder, s73 close): parallel rebuild lanes opened
 > ("if that rule and logic is followed exact, then parallel workflows
@@ -12,13 +12,13 @@ Read `CLAUDE.md` first, then IN ORDER:
   the sheet's own HTML/CSS ported 1:1, NEVER re-expressed through a
   component library — that re-expression is the pinned s72 failure; rule 4
   carries the lanes-open amendment you are working under);
-- `docs/research/mock-sheets/Sites.dc.html` and `Integrations.dc.html` +
+- `docs/research/mock-sheets/Calendar.dc.html` and `Board.dc.html` +
   `theme.css` beside them — your two surfaces' spec (open them in your
   head; you cannot run a browser);
 - `docs/research/old-design-keepers.md` — the re-entry rule + YOUR rows
-  (no step-2 keeper rows are pinned to these two surfaces — but the
-  **s66 findability door** and the **light-mode toggle** already live in
-  the topbar tenant panel and must keep working; do not move them);
+  (**saved-view tabs** — tenant-wide named views over `/api/views`, which
+  BOTH your surfaces carry; **the calendar engine** — month/week/agenda
+  grids, slot chips, reschedule doors);
 - `docs/research/ui-overhaul-plan.md` §5 DOCTRINE 0 + the two s73 blocks;
 - THE WORKED EXEMPLARS — three surfaces shipped this way already:
   `apps/web/src/app/app/workspace.css` (the shared ported classes —
@@ -28,19 +28,19 @@ Read `CLAUDE.md` first, then IN ORDER:
   backend: read its step-1 and step-2 commits (`7ddb43f`, `a22fdf7`) and
   copy that discipline exactly.
 
-You are on branch `agent/estate-rebuild`. Work ONLY in
-`apps/web/src/components/sites/`, `apps/web/src/components/settings/`,
+You are on branch `agent/planner-rebuild`. Work ONLY in
+`apps/web/src/components/calendar/`, `apps/web/src/components/board/`,
 their app routes under `apps/web/src/app/app/`, your surfaces' tests, and
 your OWN rows in the pin files (below).
 
 ## Mission — TWO-STEP PER SURFACE (founder-ratified s73)
 
-Do **Sites first, complete (both steps), then Settings/Integrations** — one surface in
+Do **Calendar first, complete (both steps), then Board** — one surface in
 flight at a time, so each has a clean verdict point.
 
 **Step 1 — pure port.** Rebuild the surface EXACTLY from its sheet: the
 sheet's markup React-ized, its helmet `<style>` atomics ported into a NEW
-surface-scoped stylesheet (`sites.css` / `settings.css`, imported by the
+surface-scoped stylesheet (`calendar.css` / `board.css`, imported by the
 surface — NEVER edit workspace.css/shell/theme/tokens). Shared classes
 (.card, .row, .pill, .seg, .btn, .thumb-sm, type roles…) come from
 workspace.css as-is. Sheet placeholder content in this step; commit it
@@ -59,16 +59,9 @@ preference.
 **Step 2 — wire + keepers.** Real data through the EXISTING clients (no API
 changes); honest states everywhere (loading/error/empty are never
 real-looking success — a failed read says so and offers retry); weave YOUR
-keeper rows back in BEHIND byte-true resting chrome. DELETE the old
-implementation of that surface in the same step.
-
-**INTEGRATIONS IS THE HONESTY-CRITICAL SURFACE.** Its card states come from
-ONE engine derivation and must never be prettied up: an env-override badge
-says so, `connectedAs` stamps the card, a validate failure shows the real
-reason (the LinkedIn 426-vs-400 versioned-pin proof is a shipped
-behaviour), and the PUBLISHED VIEW is the ledger of what actually went
-out. Port the sheet's chrome around those truths — never soften a state
-word to fit the fixture.
+keeper rows back in BEHIND byte-true resting chrome (saved-view tabs on
+both surfaces; the calendar engine's grids, slot chips and reschedule
+doors). DELETE the old implementation of that surface in the same step.
 
 ## Constraints (each is a merge-gate check)
 
@@ -106,7 +99,7 @@ word to fit the fixture.
 
 ## Wrap
 
-`agent_handoff/WRAP-estate-rebuild.md`: per surface, step-1 vs step-2
+`agent_handoff/lanes/WRAP-planner-rebuild.md`: per surface, step-1 vs step-2
 commits, keeper rows woven (each named), pin deltas, deletions list, test
 deltas, and anything the sheet left ambiguous (flag — never improvise).
 Commit everything on the branch, leave the worktree clean. The lead merges

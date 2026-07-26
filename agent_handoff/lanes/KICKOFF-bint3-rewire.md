@@ -63,6 +63,6 @@ requires the `SOCIAL_<P>_ARMED` env flags. After this lane:
 
 ## Wrap
 
-Write `agent_handoff/WRAP-bint3-rewire.md`: what shipped, the precedence
+Write `agent_handoff/lanes/WRAP-bint3-rewire.md`: what shipped, the precedence
 table as built, any contract-window asks, and anything the Integrations
 surface (B-int.2, shipped s70) should change in response.

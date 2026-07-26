@@ -16,7 +16,7 @@ Read `CLAUDE.md` first, then IN ORDER:
 - `docs/research/ui-overhaul-plan.md` §5 DOCTRINE 0 + the two s73 blocks;
 - THE WORKED EXEMPLAR: `apps/web/src/app/app/workspace.css` (READ-ONLY
   shared classes) + `apps/web/src/components/dashboard/` + its tests;
-- `agent_handoff/WRAP-blearn.md` §Slice 3 — the trends read you consume:
+- `agent_handoff/lanes/WRAP-blearn.md` §Slice 3 — the trends read you consume:
   `/api/intel/trends` now serves the MERGED multi-source union + a NEW
   `sources` field (per-source sweep stamps). Additive; the wire types are
   in `apps/web/src/lib/intel/types.ts` (update the client type for
@@ -64,6 +64,6 @@ synthesized). DELETE the old intel components in this same step.
 
 ## Wrap
 
-`agent_handoff/WRAP-intel-rebuild.md`: step-1 vs step-2 commits, keepers
+`agent_handoff/lanes/WRAP-intel-rebuild.md`: step-1 vs step-2 commits, keepers
 woven, pin deltas, deletions, test deltas, ambiguities flagged. Worktree
 clean; the lead merges behind screenshot-vs-sheet + full post-merge verify.

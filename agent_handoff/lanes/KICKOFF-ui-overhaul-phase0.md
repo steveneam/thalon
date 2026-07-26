@@ -78,6 +78,6 @@ thing being judged, not as constraints.
 
 ## Wrap
 
-`agent_handoff/WRAP-ui-overhaul-phase0.md`: one-page summary + pointer to
+`agent_handoff/lanes/WRAP-ui-overhaul-phase0.md`: one-page summary + pointer to
 the plan doc + your recommendation in three sentences. Guard + commit on
 your branch; the lead merges. Do NOT push to main.

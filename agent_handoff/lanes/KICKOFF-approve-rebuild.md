@@ -69,7 +69,7 @@ files, and any approve-specific workspace helpers that die with them).
 
 ## Wrap
 
-`agent_handoff/WRAP-approve-rebuild.md`: step-1 vs step-2 commits, keeper
+`agent_handoff/lanes/WRAP-approve-rebuild.md`: step-1 vs step-2 commits, keeper
 rows woven (each named), pin deltas, deletions list, test deltas, anything
 the sheet left ambiguous (flag — never improvise). Commit everything on
 the branch, leave the worktree clean. The lead merges behind its own

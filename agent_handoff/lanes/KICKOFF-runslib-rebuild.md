@@ -51,7 +51,7 @@ media, DELETE the old surface components in the same step.
 
 ## Wrap
 
-`agent_handoff/WRAP-runslib-rebuild.md`: per-surface step-1/step-2
+`agent_handoff/lanes/WRAP-runslib-rebuild.md`: per-surface step-1/step-2
 commits, keepers woven, pin deltas, deletions, test deltas, ambiguities
 flagged. Worktree clean; the lead merges behind screenshot-vs-sheet +
 full post-merge verify.

@@ -91,6 +91,6 @@ Before EVERY commit: `npm test -w @thalon/engine` green, root `npm run
 typecheck` + `npm run lint` clean, `pwsh scripts/ci-grep-guard.ps1` PASS.
 Commit locally on the branch in small steps — **do NOT push, do NOT open a
 PR, do NOT merge**; the lead reviews and merges. When done (or blocked), write
-`WRAP-pub2-drivers.md` in the worktree root: what shipped, per-driver endpoint
+`agent_handoff/lanes/WRAP-pub2-drivers.md` in the worktree root: what shipped, per-driver endpoint
 + version pinned, any contract gaps found (report, never work around), test
 counts, and anything the founder must do before a first live post. Then stop.

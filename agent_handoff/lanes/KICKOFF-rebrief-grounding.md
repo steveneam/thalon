@@ -44,7 +44,7 @@ Judge internals (frozen tuning, s69 arc closed) · prompt files · anything in
 
 ## Wrap
 
-`agent_handoff/WRAP-rebrief-grounding.md`: the located seam(s), the shape of
+`agent_handoff/lanes/WRAP-rebrief-grounding.md`: the located seam(s), the shape of
 the fix (owner-of-merge vs per-caller), test names, any behavior deltas
 (e.g. key changes on re-brief runs). The LEAD merges on green post-merge
 verify.

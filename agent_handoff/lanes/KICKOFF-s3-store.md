@@ -39,7 +39,7 @@ durability. Same interface, byte-identical semantics.
 
 ## Wrap
 
-`agent_handoff/WRAP-s3-store.md`: interface diffs (should be ~none), env
+`agent_handoff/lanes/WRAP-s3-store.md`: interface diffs (should be ~none), env
 table, test inventory, what the founder must provision (bucket + IAM policy
 sketch, least-privilege: Get/Put/Head on the one prefix) — provisioning
 itself is a founder/console step, NOT this lane. Full `npm run verify`

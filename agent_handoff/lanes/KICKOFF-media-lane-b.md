@@ -150,7 +150,7 @@ that nothing fills the slot, nothing is audible, and nothing is muxed —
 
 ## Wrap
 
-Write `agent_handoff/WRAP-media-lane-b.md`: what shipped, the image-size
+Write `agent_handoff/lanes/WRAP-media-lane-b.md`: what shipped, the image-size
 delta with both numbers, what you deliberately did not do, every flag for
 the lead, and the verify totals verbatim. Then stop — **the lead rebases,
 re-runs verify on merged main, and merges.** Do not merge to main yourself.

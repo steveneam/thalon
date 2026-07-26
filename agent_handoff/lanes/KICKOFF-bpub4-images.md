@@ -43,5 +43,5 @@ a public `image_url`, never uploaded bytes).
 
 ## Wrap
 
-`agent_handoff/WRAP-bpub4-images.md`: what shipped, the public-URL shape (the
+`agent_handoff/lanes/WRAP-bpub4-images.md`: what shipped, the public-URL shape (the
 exact form IG/Threads will consume), and what the IG connect still needs.
