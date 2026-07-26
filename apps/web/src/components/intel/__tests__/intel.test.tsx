@@ -176,4 +176,35 @@ describe("Intel (exact-mock rebuild, Intel.dc.html)", () => {
     // Trends-only chrome leaves with the tab — no stamp for a surface it can't stamp.
     expect(screen.queryByRole("button", { name: "Sweep now" })).not.toBeInTheDocument();
   });
+
+  /**
+   * Founder-reported, s77: "the buttons cant be deselected and so on".
+   * An angle is the operator's OPTIONAL extra — this component said so in
+   * prose while making unpicked unreachable once anything was picked.
+   */
+  it("lets an angle be UNPICKED, because riding without one is a real choice", async () => {
+    const user = userEvent.setup();
+    render(<Intel />);
+    const angles = await screen.findByRole("radiogroup", { name: "Suggested angles" });
+    const angle = within(angles).getAllByRole("radio")[0];
+    expect(angle).toHaveAttribute("aria-checked", "false");
+
+    await user.click(angle);
+    expect(angle).toHaveAttribute("aria-checked", "true");
+
+    await user.click(angle);
+    expect(angle).toHaveAttribute("aria-checked", "false");
+  });
+
+  /** A title always rides, so exactly one stays marked — clicking it again is a no-op. */
+  it("keeps a title always picked — the required half of the pair does not toggle off", async () => {
+    const user = userEvent.setup();
+    render(<Intel />);
+    const group = await screen.findByRole("radiogroup", { name: "Ready titles" });
+    const first = within(group).getAllByRole("radio")[0];
+    expect(first).toHaveAttribute("aria-checked", "true");
+    await user.click(first);
+    expect(first).toHaveAttribute("aria-checked", "true");
+  });
+
 });

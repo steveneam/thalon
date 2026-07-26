@@ -185,7 +185,16 @@ export function DossierCard({
                         role="radio"
                         aria-checked={angleIndex === i}
                         className="pick-hit"
-                        onClick={() => setAngleIndex(i)}
+                        // An angle is the operator's OPTIONAL extra, which
+                        // this component already said in prose and did not
+                        // honour: once picked there was no way back to
+                        // unpicked, so "the mark means you chose this" became
+                        // unfalsifiable. Clicking the marked angle clears it
+                        // (founder s77: "the buttons cant be deselected").
+                        // Titles deliberately do NOT toggle — a title always
+                        // rides, so exactly one is always marked.
+                        title={angleIndex === i ? "Click again to ride without an angle" : undefined}
+                        onClick={() => setAngleIndex(angleIndex === i ? null : i)}
                       >
                         <span className={angleIndex === i ? "radio on" : "radio"} aria-hidden />
                         <span style={{ flex: 1 }}>Angle · {angle}</span>

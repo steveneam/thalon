@@ -232,11 +232,16 @@
 .intel-surface .dossier-cols > * {
   min-width: 0;
 }
-/* The pick list is BOUNDED: the sheet draws three picks; a real dossier
-   carries up to four titles plus three angles. It scrolls inside the card
-   instead of growing the band (the Bounded-List Rule). */
+/* The pick list is BOUNDED, but the bound must clear the REAL maximum.
+   s77 (founder: "the side scroll is also in the way"): 176px held 307px of
+   content, so a normal dossier — four titles plus three angles — scrolled
+   inside the card, putting a scrollbar in the middle of the one band the
+   operator is reading. That is the Bounded-List Rule applied to a list that
+   is not actually unbounded: the dossier's shape is structurally capped at
+   4 + 3 by the generator. So the bound now clears that maximum and stays
+   only as a safety valve for a pathological payload. */
 .intel-surface .pick-rows {
-  max-height: 176px;
+  max-height: 340px;
   overflow-y: auto;
 }
 
