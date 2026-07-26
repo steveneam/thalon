@@ -76,6 +76,42 @@ const videosResponseSchema = z.object({
   ),
 });
 
+/**
+ * The API's own words for WHY a call failed, formatted as a suffix.
+ *
+ * This runs on a path that is already failing, so it may never throw itself:
+ * every read is guarded and an unreadable body degrades to the empty string,
+ * leaving the caller's message exactly as loud as it was before.
+ */
+async function failureReason(response: Response): Promise<string> {
+  let body = "";
+  try {
+    body = await response.text();
+  } catch {
+    return "";
+  }
+  if (!body.trim()) return "";
+  try {
+    const parsed = JSON.parse(body) as {
+      error?: { message?: unknown; errors?: Array<{ reason?: unknown; message?: unknown }> };
+    };
+    const first = parsed.error?.errors?.[0];
+    const reason = typeof first?.reason === "string" ? first.reason : undefined;
+    const message =
+      typeof parsed.error?.message === "string"
+        ? parsed.error.message
+        : typeof first?.message === "string"
+          ? first.message
+          : undefined;
+    if (reason && message) return ` — ${reason}: ${message}`;
+    if (reason) return ` — ${reason}`;
+    if (message) return ` — ${message}`;
+  } catch {
+    // Not JSON; fall through to the raw slice below.
+  }
+  return ` — ${body.replace(/\s+/g, " ").trim().slice(0, 200)}`;
+}
+
 export function youtubeTrendSource(deps: YoutubeSourceDeps = {}): TrendSource {
   const fetchImpl = deps.fetchImpl ?? fetch;
   const config = youtubeConfigSchema.parse(deps.config ?? {});
@@ -89,7 +125,12 @@ export function youtubeTrendSource(deps: YoutubeSourceDeps = {}): TrendSource {
     url.searchParams.set("key", apiKey ?? "");
     const response = await fetchImpl(url.toString());
     if (!response.ok) {
-      throw new Error(`youtube ${resource} responded ${response.status}`);
+      // The status alone is ambiguous where it matters most: a 403/429 is
+      // `quotaExceeded` (daily units gone — resets at Pacific midnight),
+      // `rateLimitExceeded` (slow down, retry works) or `keyInvalid` (the key
+      // is wrong and no amount of waiting fixes it). Those are three different
+      // remedies, and the API states which one in the body — so carry it.
+      throw new Error(`youtube ${resource} responded ${response.status}${await failureReason(response)}`);
     }
     const body = await response.text();
     try {

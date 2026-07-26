@@ -153,6 +153,41 @@ describe("youtube trend source", () => {
     );
   });
 
+  // s77: the sweeper logged "responded 429" for ~18 hours without ever saying
+  // WHICH 429 — daily quota (wait for Pacific midnight) reads identically to a
+  // rate limit (retry works) and to a bad key (waiting never helps). The API
+  // states the reason in the body; these pin that it reaches the operator.
+  it("carries the API's own failure reason, not just the status", async () => {
+    const source = youtubeTrendSource({
+      config: { apiKey: "k-test" },
+      fetchImpl: (async () =>
+        new Response(
+          JSON.stringify({
+            error: {
+              code: 403,
+              message: "The request cannot be completed because you have exceeded your quota.",
+              errors: [{ reason: "quotaExceeded", domain: "youtube.quota", message: "quota" }],
+            },
+          }),
+          { status: 403 },
+        )) as unknown as typeof fetch,
+    });
+    await expect(source.poll({ source: "youtube", accounts: [], queries: ["x"] })).rejects.toThrow(
+      /responded 403 — quotaExceeded: The request cannot be completed/,
+    );
+  });
+
+  it("degrades to the raw body when the failure is not JSON, and never throws itself", async () => {
+    const source = youtubeTrendSource({
+      config: { apiKey: "k-test" },
+      fetchImpl: (async () =>
+        new Response("<html>502 Bad Gateway</html>", { status: 502 })) as unknown as typeof fetch,
+    });
+    await expect(source.poll({ source: "youtube", accounts: [], queries: ["x"] })).rejects.toThrow(
+      /responded 502 — <html>502 Bad Gateway<\/html>/,
+    );
+  });
+
   it("chunks videos.list at 50 ids — a wide sweep never sends one giant 400 (s72)", async () => {
     // Three searches × 40 unique ids = 120 collected → 3 videos.list chunks.
     const calls: string[] = [];
