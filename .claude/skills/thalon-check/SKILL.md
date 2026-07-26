@@ -193,10 +193,15 @@ credential in a tracked file, and none in a logged error.
 
 ## Before you commit
 
-1. `npm run verify` — **the** gate. Write it to a file and read the file;
-   **never pipe the suite through `tail`** (it hid a failure for three
-   sessions). Note that `vitest` does **not** typecheck — a green suite with a
-   broken build is a real outcome here, twice on record.
+1. `npm run verify` — **the** gate. Write it to a file, read the file, and
+   **gate on the suite's own exit code**. Never pipe it into ANYTHING —
+   `| tail` hid a failure for three sessions, and the rule spelled with
+   `tail` in it is exactly why `| grep` felt safe at s79: chaining
+   `vitest … | grep -E "Tests"  &&  git commit` gates on *grep's* status (it
+   found matches) and pushed a red main. A pipeline's exit code is the LAST
+   command's; the suite's verdict is gone by then. Note also that `vitest`
+   does **not** typecheck — a green suite with a broken build is a real
+   outcome here, twice on record.
 2. The render gate above, for anything visual.
 3. **A test fixture asserted absent must be long enough to mean it.** *Proven
    s77: an OAuth test asserted the signed header does not leak the consumer
