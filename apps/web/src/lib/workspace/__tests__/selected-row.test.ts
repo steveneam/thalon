@@ -18,10 +18,13 @@ const componentsDir = path.resolve(
  * src/app/app/workspace.css) — one recipe there too. When the last legacy
  * surface rebuilds, this ratchet retires with the bridge.
  */
-const SELECTION_SURFACES = [
+const SELECTION_SURFACES: string[] = [
   // approve left this list at its exact-mock rebuild — its rows mark
   // selection with the sheet's own `.row.sel` (DOCTRINE 0).
-  "board/leads-board.tsx",
+  // board/leads-board.tsx left it at the s76 leads-board wire: the lead
+  // pipeline came back as components/leads/leads-board.tsx, whose cards wear
+  // the sheet's own `.row.sel` accent (components/leads/leads.css), and the
+  // legacy board was deleted in the same change.
   // leads/ left this list at its s75 exact-mock rebuild — the rebuilt rows
   // mark selection with the sheet's own `.row.sel` (DOCTRINE 0).
   // sites left it in the same wave — the ported grid marks the keyboard
@@ -32,6 +35,16 @@ const SELECTION_SURFACES = [
 describe("the ONE selected-row recipe (s40 ratchet)", () => {
   it("pins the recipe to the action channel (Two-Channel: blue = you act, incl. selection)", () => {
     expect(SELECTED_ROW).toBe("border-primary/40 bg-primary/5");
+  });
+
+  it("holds no surface any more — a new entry here would be a rebuild going backwards", () => {
+    // The list is EMPTY as of s76 and must stay that way: every rebuilt
+    // surface marks selection with the sheets' `.row.sel`, so a name
+    // reappearing here means a surface reached for the legacy recipe instead.
+    // The constant itself is NOT dead — components/videos/{video-projects,
+    // project-browser}.tsx still import it and were never on this list; this
+    // ratchet retires with the bridge when the Videos rebuild lands.
+    expect(SELECTION_SURFACES).toEqual([]);
   });
 
   it("every selection surface imports SELECTED_ROW instead of restating classes", () => {

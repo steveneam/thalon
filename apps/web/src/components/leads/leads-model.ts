@@ -1,6 +1,7 @@
 import { LEAD_STATUSES, LEAD_TRANSITIONS, type LeadStatus } from "@thalon/contracts";
 import { heatBand } from "@/components/intel/heat-grade";
 import type { FeedRun, GridDraft } from "@/lib/approve-queue/types";
+import { compareLeadCards } from "@/lib/leads/serialize";
 import type { LeadCard } from "@/lib/leads/types";
 
 /**
@@ -44,6 +45,55 @@ const LEAD_COLUMN_LABELS: Readonly<Record<string, string>> = {
 
 export function leadColumnLabel(status: LeadStatus): string {
   return LEAD_COLUMN_LABELS[status] ?? status;
+}
+
+/**
+ * What actually puts a lead in each column — so an empty column reads as a
+ * state of the pipeline rather than a suspicious zero. A lifecycle value the
+ * contract gains later still gets a column (that is the point) and falls back
+ * to naming itself rather than to a fabricated explanation.
+ */
+const LEAD_COLUMN_EMPTY: Readonly<Record<string, string>> = {
+  new: "New leads land here from a CSV import, a waitlist sync, or the API.",
+  scored: "Score now moves new leads here, with the reasons spelled out.",
+  contacted: "A recorded send sets contacted — nothing is ever sent from here.",
+};
+
+export function leadColumnEmpty(status: LeadStatus): string {
+  return LEAD_COLUMN_EMPTY[status] ?? `Nothing at ${leadColumnLabel(status).toLowerCase()} yet.`;
+}
+
+export interface LeadBoardColumn {
+  status: LeadStatus;
+  label: string;
+  /** This column's leads, in the SAME order the list ranks by — the two views agree. */
+  leads: LeadCard[];
+  /** Honest empty copy: what would put a lead here. */
+  empty: string;
+}
+
+/**
+ * The board's columns with the real queue in them. Terminal-status leads
+ * (dismissed, unsubscribed) land in NO column — they are not drop targets —
+ * so the board states their counts beside itself rather than dropping them
+ * silently. Ordering inside a column is `compareLeadCards`, the list's own
+ * ranking, so a lead sits in the same relative place in both views.
+ */
+export function leadBoardColumns(leads: LeadCard[]): LeadBoardColumn[] {
+  return LEAD_BOARD_COLUMNS.map((status) => ({
+    status,
+    label: leadColumnLabel(status),
+    leads: leads.filter((lead) => lead.status === status).sort(compareLeadCards),
+    empty: leadColumnEmpty(status),
+  }));
+}
+
+/** The leads the board deliberately has no column for — counted, never hidden. */
+export function terminalLeadCounts(leads: LeadCard[]): Record<string, number> {
+  const terminal = LEAD_STATUSES.filter((status) => LEAD_TRANSITIONS[status].length === 0);
+  return Object.fromEntries(
+    terminal.map((status) => [status, leads.filter((lead) => lead.status === status).length]),
+  );
 }
 
 /** The sheet's mono badge: two letters, from whatever identity the lead actually has. */

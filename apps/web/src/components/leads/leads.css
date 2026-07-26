@@ -67,13 +67,24 @@
 .leads-surface .lead-panel dt { color: var(--n-900); }
 .leads-surface .lead-panel dd { color: var(--n-1000); margin: 0; }
 
-/* ── Board tab (B-leadboard step 1, founder-directed s75) ──────────────────
+/* ── Board tab (B-leadboard, founder-directed s75; wired step 2) ───────────
    The CONTENT board's column grammar (Board.dc.html) re-cut for the lead
    lifecycle. Values track that sheet; the one deliberate difference is the
    column COUNT — the content pipeline draws six, the lead lifecycle has
    three non-terminal states. That is precisely why README rule 6 exists and
    why every rule here is scoped: `.cols`/`.col`/`.col-hd` mean different
-   things on the two surfaces and must never leak across. */
+   things on the two surfaces and must never leak across.
+
+   The Board tab REPLACES the split (it does not nest inside its 480px list
+   pane), so the board owns the content width — three columns at ~150px would
+   be a re-expression of the sheet's grammar, not a port of it.
+
+   The sheet's `.cols` carries `flex: 1`, which is deliberately NOT ported: in
+   Board.dc.html nothing follows the columns, so that rule only fills empty
+   background. Here the honest-limit footnote follows them, and `flex: 1`
+   would strand it at the bottom of the viewport, a layout the sheet never
+   draws. With `align-items: start` the columns hug their content either way,
+   so the column band itself renders identically. */
 .leads-surface .cols {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -117,8 +128,7 @@
 }
 
 /* A lead card, not a draft card: identity badge + name, then the score bar
-   the list already grades by. Unwired at step 1, so it carries no hover
-   affordance — nothing here is clickable yet and it must not pretend to be. */
+   the list already grades by. */
 .leads-surface .l-card {
   background: var(--n-100);
   border: 1px solid var(--n-400);
@@ -159,6 +169,43 @@
   background: var(--n-300);
   overflow: hidden;
 }
-.leads-surface .l-bar-fill { display: block; width: 38%; height: 100%; background: var(--n-500); }
-.leads-surface .lead-board { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+.leads-surface .l-bar-fill { display: block; height: 100%; }
+.leads-surface .lead-board { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .leads-surface .lead-board-foot { display: flex; flex-direction: column; gap: 4px; }
+
+/* ── Board tab, app adaptations (each NAMED; the resting render stays the
+ * sheet's) ────────────────────────────────────────────────────────────────
+ * 1. REAL DOORS. The sheet's cards are `cursor: pointer` with nowhere to go;
+ *    wired, each card opens its lead in the List tab, so it is a BUTTON —
+ *    which needs the browser's own button chrome reset away, exactly as the
+ *    list rows above needed it. The compound selector out-specifies `.l-card`
+ *    regardless of stylesheet order.
+ * 2. SELECTION. Which lead the dossier is showing is a state a card HAS, so
+ *    it wears the sheet's own `.row.sel` accent (workspace.css) on a card.
+ * 3. HONEST STATES. A real read can be pending or fail; the sheet draws
+ *    neither, so the note style below carries them INSIDE the column and the
+ *    error banner appears only on failure — never at rest.
+ * 4. The sheet writes its `.k-meta` pill dress inline (height 17, font 10);
+ *    here the hot pill is a state a lead HAS, so the values ride a rule.
+ */
+.leads-surface button.l-card {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--motion-fast);
+}
+.leads-surface button.l-card:hover { border-color: var(--n-500); }
+.leads-surface .l-card.sel { background: var(--n-300); box-shadow: inset 2px 0 0 var(--act); }
+.leads-surface button.l-card:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.leads-surface .l-meta .pill { height: 17px; font-size: 10px; flex: none; }
+.leads-surface .col-note { font-size: 10.5px; color: var(--n-800); line-height: 1.45; }
+.leads-surface .col-note-err { color: var(--err); }
+.leads-surface .read-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-color: color-mix(in oklab, var(--err) 40%, var(--n-400));
+}

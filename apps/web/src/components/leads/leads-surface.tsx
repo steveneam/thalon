@@ -69,6 +69,14 @@ const SIGNAL_ORDER = ["relevance", "fit", "completeness", "recency"] as const;
  *  - "Drafted outreach" reads the lead's own composed draft through the
  *    existing run clients; with none, the band offers the compose door
  *    instead of four dead buttons. Nothing is ever sent from here.
+ *
+ * THE BOARD TAB replaces the split rather than nesting inside it. The sheet
+ * draws List and Board as mutually exclusive `seg-opt`s, and Board.dc.html
+ * draws its column grammar at `flex: 1` across the whole content width — three
+ * lifecycle columns inside this sheet's 480px list pane would be ~150px each,
+ * which is a re-expression of that grammar rather than a port of it. So Board
+ * owns the content width, and the dossier the split's right half carries stays
+ * one click away: a board card opens its lead in the List tab.
  */
 export function LeadsSurface() {
   const router = useRouter();
@@ -397,444 +405,469 @@ export function LeadsSurface() {
         <button
           type="button"
           className="btn btn-ghost btn-sm"
-          aria-expanded={panel === "import"}
-          onClick={() => setPanel(panel === "import" ? "none" : "import")}
+          aria-expanded={view === "list" && panel === "import"}
+          // The intake panel lives under the list (the sheet's own chrome), so
+          // from the Board tab this is a door back to it rather than a control
+          // that silently does nothing.
+          onClick={() => {
+            const open = view === "board" || panel !== "import";
+            setView("list");
+            setPanel(open ? "import" : "none");
+          }}
         >
           Import contacts
         </button>
       </div>
 
-      <div className="split">
-        <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-          <div className="lead-scroll">
-            {status === "error" ? (
-              <div className="row" role="alert">
-                <div style={{ flex: 1, minWidth: 0 }}>
+      {view === "board" ? (
+        <LeadsBoard
+          status={status}
+          leads={leads}
+          selectedId={selectedId}
+          // A card is a door to the dossier, which lives in the List tab. The
+          // board only ever draws non-terminal leads, so landing there must
+          // leave the Dismissed toggle behind or the pick would not be in view.
+          onOpen={(id) => {
+            setShowDismissed(false);
+            setPickedId(id);
+            setView("list");
+          }}
+          onRetry={() => {
+            setStatus("loading");
+            void loadLeads();
+          }}
+        />
+      ) : (
+        <div className="split">
+          <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <div className="lead-scroll">
+              {status === "error" ? (
+                <div className="row" role="alert">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span className="t-label">
+                      Couldn’t read your leads — this is a read failure, not an empty queue.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => {
+                      setStatus("loading");
+                      void loadLeads();
+                    }}
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : status === "loading" ? (
+                <div className="row">
+                  <span className="t-label">Reading your leads…</span>
+                </div>
+              ) : visible.length === 0 ? (
+                <div className="row">
                   <span className="t-label">
-                    Couldn’t read your leads — this is a read failure, not an empty queue.
+                    {showDismissed
+                      ? "Nothing dismissed yet — every dismiss is a verdict the ranking learns from."
+                      : "No leads yet — import a CSV (any CRM export works), sync your waitlist, or let the API deliver them. With an ICP on your profile each one is scored against who you actually sell to, reasons spelled out."}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => {
-                    setStatus("loading");
-                    void loadLeads();
+              ) : (
+                visible.map((lead) => (
+                  <button
+                    type="button"
+                    key={lead.id}
+                    data-testid={`lead-row-${lead.id}`}
+                    className={lead.id === selectedId ? "row lead-row sel" : "row lead-row"}
+                    aria-pressed={lead.id === selectedId}
+                    onClick={() => setPickedId(lead.id)}
+                  >
+                    <div className="mono-badge">{leadInitials(lead)}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="lead-name">{leadTitle(lead)}</div>
+                      <div className="excerpt">{leadExcerpt(lead)}</div>
+                    </div>
+                    <div className="score-chip">
+                      <div className="bar-trough" style={{ width: 44 }}>
+                        {lead.score !== null && (
+                          <div
+                            className="bar-fill"
+                            style={{
+                              width: `${Math.round(lead.score * 100)}%`,
+                              background: heatColor(lead.score),
+                            }}
+                          />
+                        )}
+                      </div>
+                      <span
+                        className="t-data"
+                        title={lead.score === null ? "not scored yet" : `score ${lead.score} of 1`}
+                      >
+                        {lead.score === null ? "–" : lead.score.toFixed(2)}
+                      </span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            {panel === "import" && (
+              <div className="lead-panel">
+                <div className="lead-panel-row">
+                  <span className="t-label">Import contacts</span>
+                  <div style={{ flex: 1 }} />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={busy}
+                    onClick={onSyncWaitlist}
+                  >
+                    Sync waitlist
+                  </button>
+                </div>
+                <span>
+                  Standard CRM headers work out of the box — HubSpot, Salesforce and Pipedrive
+                  exports, or{" "}
+                  <a href="/leads-template.csv" download>
+                    our minimal template
+                  </a>
+                  . Email is required; unknown columns stay on the lead. The file is parsed and
+                  discarded — never stored.
+                </span>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  aria-label="CSV file"
+                  disabled={busy}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void file.text().then(onImportCsv);
                   }}
-                >
-                  Try again
-                </button>
+                />
+                {lastImport && lastImport.reasons.length > 0 && (
+                  <details>
+                    <summary>
+                      {lastImport.invalid} invalid row{lastImport.invalid === 1 ? "" : "s"} from the
+                      last import
+                    </summary>
+                    <dl>
+                      {lastImport.reasons.map((reason) => (
+                        <span key={`${reason.row}-${reason.reason}`} style={{ display: "contents" }}>
+                          <dt>row {reason.row}</dt>
+                          <dd>{reason.reason}</dd>
+                        </span>
+                      ))}
+                    </dl>
+                  </details>
+                )}
               </div>
-            ) : status === "loading" ? (
-              <div className="row">
-                <span className="t-label">Reading your leads…</span>
+            )}
+
+            {panel === "provenance" && (
+              <div className="lead-panel" data-testid="weights-provenance">
+                <div className="lead-panel-row">
+                  <span className="t-label">
+                    {weights?.state ? "Learned weights" : "Base weights"}
+                  </span>
+                  {weights?.state && (
+                    <span className="t-data">
+                      state {weights.state.id.slice(0, 8)} · {timeAgo(weights.state.computedAt, readAt)}{" "}
+                      · from {weights.state.verdicts} verdict
+                      {weights.state.verdicts === 1 ? "" : "s"} ({weights.state.rows} triage row
+                      {weights.state.rows === 1 ? "" : "s"})
+                    </span>
+                  )}
+                  <div style={{ flex: 1 }} />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={busy}
+                    onClick={onLearn}
+                  >
+                    Learn from feedback
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={busy || !payload?.scoringArmed}
+                    title={
+                      payload?.scoringArmed
+                        ? "Re-score every lead with the weights above"
+                        : "Add an ICP block to your profile first"
+                    }
+                    onClick={onScoreNow}
+                  >
+                    Score now
+                  </button>
+                </div>
+                {weights?.state && (
+                  <span>
+                    {SIGNAL_ORDER.map((signal, i) => (
+                      <span key={signal}>
+                        {i > 0 && " · "}
+                        {signal}{" "}
+                        <span className="t-data">×{weights.state?.multipliers[signal].toFixed(2)}</span>
+                      </span>
+                    ))}
+                  </span>
+                )}
+                {weights?.state && scoredLeads.length > 0 && (
+                  <span style={lagging > 0 ? { color: "var(--warn)" } : undefined}>
+                    {lagging === 0
+                      ? `applied to all ${scoredLeads.length} scored lead${scoredLeads.length === 1 ? "" : "s"}`
+                      : `${lagging} of ${scoredLeads.length} scored lead${scoredLeads.length === 1 ? "" : "s"} riding older weights — Score now refreshes them`}
+                  </span>
+                )}
+                {!weights?.state &&
+                  (weights?.staleForProfile ? (
+                    <span style={{ color: "var(--warn)" }}>
+                      The ICP changed since weights were last learned — scores ride base weights until
+                      the loop re-runs.
+                    </span>
+                  ) : (
+                    <span>Every dismiss and hot pick is a verdict the loop can learn from.</span>
+                  ))}
+                {payload && !payload.scoringArmed && (
+                  <span>
+                    Scoring isn’t armed: add an <strong>ICP block</strong> to your{" "}
+                    <Link href="/app/profiles">active profile</Link> and every lead gets a
+                    deterministic score with its reasons.
+                  </span>
+                )}
+                {selected && (
+                  <div className="lead-panel-row">
+                    <span>
+                      {leadTitle(selected)} into Create — role, company and the pain point ride in:
+                    </span>
+                    {(["post", "video", "page"] as const).map((family) => (
+                      <button
+                        key={family}
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        disabled={busy}
+                        onClick={() => onPromote(selected, family)}
+                      >
+                        {family === "post" ? "Post" : family === "video" ? "Video" : "Page"}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="lead-panel-row">
+                  <span>
+                    keys · <span className="kbd">j</span> <span className="kbd">k</span> move ·{" "}
+                    <span className="kbd">d</span> dismiss · <span className="kbd">h</span> hot
+                  </span>
+                  <div style={{ flex: 1 }} />
+                  <button
+                    type="button"
+                    className="as-text-btn card-link"
+                    onClick={() => setShowDismissed(!showDismissed)}
+                  >
+                    {showDismissed
+                      ? "Back to active leads →"
+                      : `Dismissed (${counts.dismissed}) — the verdicts the loop learns from →`}
+                  </button>
+                </div>
               </div>
-            ) : view === "board" ? (
-              <LeadsBoard />
-            ) : visible.length === 0 ? (
-              <div className="row">
+            )}
+
+            <div className="lead-foot">
+              <button
+                type="button"
+                className="t-label as-text-btn"
+                aria-expanded={panel === "provenance"}
+                title="What the ranking applied, and what taught it"
+                onClick={() => setPanel(panel === "provenance" ? "none" : "provenance")}
+              >
+                best fit first · reasons on every score
+              </button>
+              <div style={{ flex: 1 }} />
+              <span className="kbd">j</span>
+              <span className="kbd">k</span>
+              <span className="t-label">move</span>
+            </div>
+          </div>
+
+          <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+            {selected === null ? (
+              <div className="lead-detail-scroll">
                 <span className="t-label">
-                  {showDismissed
-                    ? "Nothing dismissed yet — every dismiss is a verdict the ranking learns from."
-                    : "No leads yet — import a CSV (any CRM export works), sync your waitlist, or let the API deliver them. With an ICP on your profile each one is scored against who you actually sell to, reasons spelled out."}
+                  {status === "success"
+                    ? "No lead selected — the queue is empty."
+                    : status === "error"
+                      ? "The queue read failed — the retry sits in the list beside this."
+                      : "Reading your leads…"}
                 </span>
               </div>
             ) : (
-              visible.map((lead) => (
-                <button
-                  type="button"
-                  key={lead.id}
-                  data-testid={`lead-row-${lead.id}`}
-                  className={lead.id === selectedId ? "row lead-row sel" : "row lead-row"}
-                  aria-pressed={lead.id === selectedId}
-                  onClick={() => setPickedId(lead.id)}
-                >
-                  <div className="mono-badge">{leadInitials(lead)}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="lead-name">{leadTitle(lead)}</div>
-                    <div className="excerpt">{leadExcerpt(lead)}</div>
-                  </div>
-                  <div className="score-chip">
-                    <div className="bar-trough" style={{ width: 44 }}>
-                      {lead.score !== null && (
-                        <div
-                          className="bar-fill"
-                          style={{
-                            width: `${Math.round(lead.score * 100)}%`,
-                            background: heatColor(lead.score),
-                          }}
-                        />
+              <>
+                <div className="card-head">
+                  <span className="t-title">{leadTitle(selected)}</span>
+                  {selected.pinned && <span className="pill pill-warn">follow up</span>}
+                  <div style={{ flex: 1 }} />
+                  <span className="t-data" title={`lead ${selected.id}`}>
+                    #{selected.id.slice(0, 8)}
+                  </span>
+                </div>
+                <div className="lead-detail-scroll">
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <span className="sec-label">Why this score</span>
+                      {selected.reasons.length === 0 ? (
+                        <span className="t-label">
+                          {payload?.scoringArmed
+                            ? "Not scored yet — Score now applies your ICP and writes the reasons here."
+                            : "Not scored: your profile has no ICP block yet, so scoring is disarmed."}
+                        </span>
+                      ) : (
+                        scoreReasons(selected).map((reason) => (
+                          <div className="reason" key={reason.verbatim} title={reason.verbatim}>
+                            <span className="rname">{reason.name}</span>
+                            <div className="bar-trough">
+                              {reason.value !== null && (
+                                <div
+                                  className="bar-fill"
+                                  style={{
+                                    width: `${Math.round(reason.value * 100)}%`,
+                                    background: heatColor(reason.value),
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <span>{reason.detail}</span>
+                          </div>
+                        ))
+                      )}
+                      {stale && (
+                        <span className="t-label" style={{ color: "var(--warn)" }}>
+                          scored against an older ICP — Score now refreshes it
+                        </span>
                       )}
                     </div>
-                    <span
-                      className="t-data"
-                      title={lead.score === null ? "not scored yet" : `score ${lead.score} of 1`}
-                    >
-                      {lead.score === null ? "–" : lead.score.toFixed(2)}
-                    </span>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <span className="sec-label">Activity</span>
+                      {activityRows(selected).map((row) => (
+                        <div className="act-row" key={`${row.text}-${row.at}`}>
+                          <span
+                            className="dot"
+                            style={{ background: "var(--n-700)", marginTop: 5 }}
+                          />
+                          <span style={{ flex: 1 }}>
+                            {row.text}
+                            <br />
+                            <span className="t-data">{sheetDate(row.at)}</span>
+                          </span>
+                        </div>
+                      ))}
+                      <span className="t-label">
+                        intake and scoring are what the lead spine records — opens, clicks and replies
+                        need an engagement store that doesn’t exist yet
+                      </span>
+                    </div>
                   </div>
-                </button>
-              ))
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span className="sec-label">Drafted outreach — draft-only, never auto-sent</span>
+                      <div style={{ flex: 1 }} />
+                      {outreach.state === "ready" && (
+                        <span className={judgePill(outreach.draft.status).className}>
+                          {judgePill(outreach.draft.status).text}
+                        </span>
+                      )}
+                    </div>
+
+                    {outreach.state === "ready" ? (
+                      (() => {
+                        const email = draftEmail(outreach.draft);
+                        return (
+                          <>
+                            <div className="mail">
+                              <div>
+                                <span style={{ color: "var(--n-900)" }}>To</span>&nbsp;{" "}
+                                {selected.name ? `${selected.name} <${selected.email}>` : selected.email}
+                              </div>
+                              <div>
+                                <span style={{ color: "var(--n-900)" }}>Subject</span>&nbsp;{" "}
+                                {email.subject}
+                              </div>
+                              <div style={{ color: "var(--n-900)", lineHeight: 1.6 }}>{email.body}</div>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => copy(email.body, "Body")}
+                              >
+                                Copy body
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => copy(email.subject, "Subject")}
+                              >
+                                Copy subject
+                              </button>
+                              <a
+                                className="btn btn-ghost btn-sm"
+                                href={mailtoHref(selected.email, email)}
+                              >
+                                Open in your mail client
+                              </a>
+                              <button
+                                type="button"
+                                className="btn btn-quiet btn-sm"
+                                disabled
+                                title="Call logging needs the engagement store the Activity column names — nothing records it yet"
+                              >
+                                Log a call
+                              </button>
+                              <div style={{ flex: 1 }} />
+                              <span className="t-label">you send it — from your own mailbox</span>
+                            </div>
+                          </>
+                        );
+                      })()
+                    ) : (
+                      <>
+                        <div className="mail">
+                          <span className="t-label">
+                            {outreach.state === "loading"
+                              ? "Reading this lead’s drafts…"
+                              : outreach.state === "error"
+                                ? "Couldn’t read this lead’s drafts — a read failure, not an empty history."
+                                : "No draft yet. Compose one from this lead’s own context — role, company and the pain point above ride into the brief, the judge gates it, and it waits for you."}
+                          </span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            disabled={busy || outreach.state === "loading"}
+                            onClick={() => onCompose(selected)}
+                          >
+                            {busy ? "Composing + judging…" : "Draft outreach"}
+                          </button>
+                          <Link className="btn btn-ghost btn-sm" href="/app/approve">
+                            Open Approve
+                          </Link>
+                          <div style={{ flex: 1 }} />
+                          <span className="t-label">you send it — from your own mailbox</span>
+                        </div>
+                      </>
+                    )}
+                    {outreachError && (
+                      <span className="t-label" role="alert" style={{ color: "var(--err)" }}>
+                        {outreachError}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
-
-          {panel === "import" && (
-            <div className="lead-panel">
-              <div className="lead-panel-row">
-                <span className="t-label">Import contacts</span>
-                <div style={{ flex: 1 }} />
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  disabled={busy}
-                  onClick={onSyncWaitlist}
-                >
-                  Sync waitlist
-                </button>
-              </div>
-              <span>
-                Standard CRM headers work out of the box — HubSpot, Salesforce and Pipedrive
-                exports, or{" "}
-                <a href="/leads-template.csv" download>
-                  our minimal template
-                </a>
-                . Email is required; unknown columns stay on the lead. The file is parsed and
-                discarded — never stored.
-              </span>
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".csv,text/csv"
-                aria-label="CSV file"
-                disabled={busy}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) void file.text().then(onImportCsv);
-                }}
-              />
-              {lastImport && lastImport.reasons.length > 0 && (
-                <details>
-                  <summary>
-                    {lastImport.invalid} invalid row{lastImport.invalid === 1 ? "" : "s"} from the
-                    last import
-                  </summary>
-                  <dl>
-                    {lastImport.reasons.map((reason) => (
-                      <span key={`${reason.row}-${reason.reason}`} style={{ display: "contents" }}>
-                        <dt>row {reason.row}</dt>
-                        <dd>{reason.reason}</dd>
-                      </span>
-                    ))}
-                  </dl>
-                </details>
-              )}
-            </div>
-          )}
-
-          {panel === "provenance" && (
-            <div className="lead-panel" data-testid="weights-provenance">
-              <div className="lead-panel-row">
-                <span className="t-label">
-                  {weights?.state ? "Learned weights" : "Base weights"}
-                </span>
-                {weights?.state && (
-                  <span className="t-data">
-                    state {weights.state.id.slice(0, 8)} · {timeAgo(weights.state.computedAt, readAt)}{" "}
-                    · from {weights.state.verdicts} verdict
-                    {weights.state.verdicts === 1 ? "" : "s"} ({weights.state.rows} triage row
-                    {weights.state.rows === 1 ? "" : "s"})
-                  </span>
-                )}
-                <div style={{ flex: 1 }} />
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  disabled={busy}
-                  onClick={onLearn}
-                >
-                  Learn from feedback
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  disabled={busy || !payload?.scoringArmed}
-                  title={
-                    payload?.scoringArmed
-                      ? "Re-score every lead with the weights above"
-                      : "Add an ICP block to your profile first"
-                  }
-                  onClick={onScoreNow}
-                >
-                  Score now
-                </button>
-              </div>
-              {weights?.state && (
-                <span>
-                  {SIGNAL_ORDER.map((signal, i) => (
-                    <span key={signal}>
-                      {i > 0 && " · "}
-                      {signal}{" "}
-                      <span className="t-data">×{weights.state?.multipliers[signal].toFixed(2)}</span>
-                    </span>
-                  ))}
-                </span>
-              )}
-              {weights?.state && scoredLeads.length > 0 && (
-                <span style={lagging > 0 ? { color: "var(--warn)" } : undefined}>
-                  {lagging === 0
-                    ? `applied to all ${scoredLeads.length} scored lead${scoredLeads.length === 1 ? "" : "s"}`
-                    : `${lagging} of ${scoredLeads.length} scored lead${scoredLeads.length === 1 ? "" : "s"} riding older weights — Score now refreshes them`}
-                </span>
-              )}
-              {!weights?.state &&
-                (weights?.staleForProfile ? (
-                  <span style={{ color: "var(--warn)" }}>
-                    The ICP changed since weights were last learned — scores ride base weights until
-                    the loop re-runs.
-                  </span>
-                ) : (
-                  <span>Every dismiss and hot pick is a verdict the loop can learn from.</span>
-                ))}
-              {payload && !payload.scoringArmed && (
-                <span>
-                  Scoring isn’t armed: add an <strong>ICP block</strong> to your{" "}
-                  <Link href="/app/profiles">active profile</Link> and every lead gets a
-                  deterministic score with its reasons.
-                </span>
-              )}
-              {selected && (
-                <div className="lead-panel-row">
-                  <span>
-                    {leadTitle(selected)} into Create — role, company and the pain point ride in:
-                  </span>
-                  {(["post", "video", "page"] as const).map((family) => (
-                    <button
-                      key={family}
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      disabled={busy}
-                      onClick={() => onPromote(selected, family)}
-                    >
-                      {family === "post" ? "Post" : family === "video" ? "Video" : "Page"}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div className="lead-panel-row">
-                <span>
-                  keys · <span className="kbd">j</span> <span className="kbd">k</span> move ·{" "}
-                  <span className="kbd">d</span> dismiss · <span className="kbd">h</span> hot
-                </span>
-                <div style={{ flex: 1 }} />
-                <button
-                  type="button"
-                  className="as-text-btn card-link"
-                  onClick={() => setShowDismissed(!showDismissed)}
-                >
-                  {showDismissed
-                    ? "Back to active leads →"
-                    : `Dismissed (${counts.dismissed}) — the verdicts the loop learns from →`}
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="lead-foot">
-            <button
-              type="button"
-              className="t-label as-text-btn"
-              aria-expanded={panel === "provenance"}
-              title="What the ranking applied, and what taught it"
-              onClick={() => setPanel(panel === "provenance" ? "none" : "provenance")}
-            >
-              best fit first · reasons on every score
-            </button>
-            <div style={{ flex: 1 }} />
-            <span className="kbd">j</span>
-            <span className="kbd">k</span>
-            <span className="t-label">move</span>
-          </div>
         </div>
-
-        <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-          {selected === null ? (
-            <div className="lead-detail-scroll">
-              <span className="t-label">
-                {status === "success"
-                  ? "No lead selected — the queue is empty."
-                  : status === "error"
-                    ? "The queue read failed — the retry sits in the list beside this."
-                    : "Reading your leads…"}
-              </span>
-            </div>
-          ) : (
-            <>
-              <div className="card-head">
-                <span className="t-title">{leadTitle(selected)}</span>
-                {selected.pinned && <span className="pill pill-warn">follow up</span>}
-                <div style={{ flex: 1 }} />
-                <span className="t-data" title={`lead ${selected.id}`}>
-                  #{selected.id.slice(0, 8)}
-                </span>
-              </div>
-              <div className="lead-detail-scroll">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <span className="sec-label">Why this score</span>
-                    {selected.reasons.length === 0 ? (
-                      <span className="t-label">
-                        {payload?.scoringArmed
-                          ? "Not scored yet — Score now applies your ICP and writes the reasons here."
-                          : "Not scored: your profile has no ICP block yet, so scoring is disarmed."}
-                      </span>
-                    ) : (
-                      scoreReasons(selected).map((reason) => (
-                        <div className="reason" key={reason.verbatim} title={reason.verbatim}>
-                          <span className="rname">{reason.name}</span>
-                          <div className="bar-trough">
-                            {reason.value !== null && (
-                              <div
-                                className="bar-fill"
-                                style={{
-                                  width: `${Math.round(reason.value * 100)}%`,
-                                  background: heatColor(reason.value),
-                                }}
-                              />
-                            )}
-                          </div>
-                          <span>{reason.detail}</span>
-                        </div>
-                      ))
-                    )}
-                    {stale && (
-                      <span className="t-label" style={{ color: "var(--warn)" }}>
-                        scored against an older ICP — Score now refreshes it
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    <span className="sec-label">Activity</span>
-                    {activityRows(selected).map((row) => (
-                      <div className="act-row" key={`${row.text}-${row.at}`}>
-                        <span
-                          className="dot"
-                          style={{ background: "var(--n-700)", marginTop: 5 }}
-                        />
-                        <span style={{ flex: 1 }}>
-                          {row.text}
-                          <br />
-                          <span className="t-data">{sheetDate(row.at)}</span>
-                        </span>
-                      </div>
-                    ))}
-                    <span className="t-label">
-                      intake and scoring are what the lead spine records — opens, clicks and replies
-                      need an engagement store that doesn’t exist yet
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span className="sec-label">Drafted outreach — draft-only, never auto-sent</span>
-                    <div style={{ flex: 1 }} />
-                    {outreach.state === "ready" && (
-                      <span className={judgePill(outreach.draft.status).className}>
-                        {judgePill(outreach.draft.status).text}
-                      </span>
-                    )}
-                  </div>
-
-                  {outreach.state === "ready" ? (
-                    (() => {
-                      const email = draftEmail(outreach.draft);
-                      return (
-                        <>
-                          <div className="mail">
-                            <div>
-                              <span style={{ color: "var(--n-900)" }}>To</span>&nbsp;{" "}
-                              {selected.name ? `${selected.name} <${selected.email}>` : selected.email}
-                            </div>
-                            <div>
-                              <span style={{ color: "var(--n-900)" }}>Subject</span>&nbsp;{" "}
-                              {email.subject}
-                            </div>
-                            <div style={{ color: "var(--n-900)", lineHeight: 1.6 }}>{email.body}</div>
-                          </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm"
-                              onClick={() => copy(email.body, "Body")}
-                            >
-                              Copy body
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-sm"
-                              onClick={() => copy(email.subject, "Subject")}
-                            >
-                              Copy subject
-                            </button>
-                            <a
-                              className="btn btn-ghost btn-sm"
-                              href={mailtoHref(selected.email, email)}
-                            >
-                              Open in your mail client
-                            </a>
-                            <button
-                              type="button"
-                              className="btn btn-quiet btn-sm"
-                              disabled
-                              title="Call logging needs the engagement store the Activity column names — nothing records it yet"
-                            >
-                              Log a call
-                            </button>
-                            <div style={{ flex: 1 }} />
-                            <span className="t-label">you send it — from your own mailbox</span>
-                          </div>
-                        </>
-                      );
-                    })()
-                  ) : (
-                    <>
-                      <div className="mail">
-                        <span className="t-label">
-                          {outreach.state === "loading"
-                            ? "Reading this lead’s drafts…"
-                            : outreach.state === "error"
-                              ? "Couldn’t read this lead’s drafts — a read failure, not an empty history."
-                              : "No draft yet. Compose one from this lead’s own context — role, company and the pain point above ride into the brief, the judge gates it, and it waits for you."}
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-sm"
-                          disabled={busy || outreach.state === "loading"}
-                          onClick={() => onCompose(selected)}
-                        >
-                          {busy ? "Composing + judging…" : "Draft outreach"}
-                        </button>
-                        <Link className="btn btn-ghost btn-sm" href="/app/approve">
-                          Open Approve
-                        </Link>
-                        <div style={{ flex: 1 }} />
-                        <span className="t-label">you send it — from your own mailbox</span>
-                      </div>
-                    </>
-                  )}
-                  {outreachError && (
-                    <span className="t-label" role="alert" style={{ color: "var(--err)" }}>
-                      {outreachError}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      )}
       <ActionToast toast={toast} onClear={() => setToast(null)} />
     </div>
   );

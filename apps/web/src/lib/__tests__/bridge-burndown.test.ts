@@ -31,7 +31,11 @@ const LEGACY_TOKEN_RE =
 const PINNED: ReadonlyMap<string, number> = new Map([
   // app/app/sites/page.tsx left the map at the s75 exact-mock rebuild — the
   // route now renders the ported surface and holds no styling of its own.
-  ["components/board/leads-board.tsx", 22],
+  // components/board/leads-board.tsx left the map at the s76 leads-board
+  // wire: the lead pipeline came back as components/leads/leads-board.tsx in
+  // the sheet's own column classes, and the legacy board was deleted in the
+  // same change (DOCTRINE 0 rule 3). board-surface.tsx beside it — the CONTENT
+  // pipeline board, shipped s75 — was never in the map: it sits at ZERO.
   // components/calendar/* left the map entirely at the s75 exact-mock rebuild:
   // the surface was rebuilt from Calendar.dc.html and the old implementation
   // (week/month/agenda grids, day panel, slot chip) was deleted in the same

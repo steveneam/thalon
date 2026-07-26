@@ -418,18 +418,54 @@ describe("Leads (exact-mock rebuild — Leads.dc.html)", () => {
     expect(screen.queryByText(/scored/)).not.toBeInTheDocument();
   });
 
-  it("the Board tab renders the pipeline board, still honest that it is unwired", async () => {
-    // s75: the founder directed the board be BUILT on the mock's grammar
-    // (step 1 = structure, step 2 wires it next session), so the tab no
-    // longer states a gap — it states that the board it draws is unwired.
+  it("the Board tab shows the real queue, at the full content width", async () => {
+    // s76 step 2: the board is wired, and it REPLACES the split rather than
+    // nesting inside its 480px list pane — the sheet draws List and Board as
+    // mutually exclusive, and the column grammar is a full-width band.
     seedLeads();
     const user = userEvent.setup();
     const { container } = render(<LeadsSurface />);
 
     await user.click(await screen.findByRole("button", { name: "Board" }));
     expect(container.querySelector(".lead-board")).not.toBeNull();
+    expect(container.querySelector(".split")).toBeNull();
     expect(container.querySelectorAll(".col")).toHaveLength(3);
-    expect(screen.getByText(/isn’t wired yet/)).toBeInTheDocument();
+
+    // The one real lead is in its lifecycle column, counted, not a placeholder.
+    const scored = Array.from(container.querySelectorAll<HTMLElement>(".col")).find(
+      (col) => col.querySelector(".col-hd span")?.textContent === "Scored",
+    );
+    expect(scored?.querySelector(".col-ct")?.textContent).toBe("1");
+    expect(scored?.querySelector(".l-name")?.textContent).toBe("Mara Kessler · Fieldline Robotics");
+    expect(screen.queryByText(/isn’t wired yet/)).not.toBeInTheDocument();
+  });
+
+  it("a board card opens that lead in the list, where its dossier is", async () => {
+    seedLeads();
+    const user = userEvent.setup();
+    const { container } = render(<LeadsSurface />);
+
+    await user.click(await screen.findByRole("button", { name: "Board" }));
+    await user.click(
+      screen.getByRole("button", { name: "Open Mara Kessler · Fieldline Robotics in the list" }),
+    );
+
+    expect(container.querySelector(".split")).not.toBeNull();
+    expect(container.querySelector(".row.lead-row.sel")).not.toBeNull();
+    expect(container.querySelector(".card-head .t-title")?.textContent).toBe(
+      "Mara Kessler · Fieldline Robotics",
+    );
+  });
+
+  it("the board's own read failure is a read failure, not an empty pipeline", async () => {
+    server.use(http.get("/api/leads", () => HttpResponse.error()));
+    const user = userEvent.setup();
+    render(<LeadsSurface />);
+
+    await user.click(await screen.findByRole("button", { name: "Board" }));
+    const alerts = await screen.findAllByRole("alert");
+    expect(alerts.some((el) => /read failure, not an empty pipeline/.test(el.textContent ?? "")))
+      .toBe(true);
   });
 
   it("carries no legacy bridge styling — the rebuilt surface speaks the sheet's classes", async () => {

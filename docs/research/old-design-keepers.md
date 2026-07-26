@@ -92,13 +92,39 @@ founder's verdict — each is a backend gap, not a design choice):
 | Judge-verdict provenance blocks (per-gate verdicts, reasons verbatim) | `components/approve/judge-verdicts.tsx`, `lib/approve-queue/*` | Approve step 2 |
 | Capture doors (promote/dismiss → create ctx; every action records a capture) | `components/intel/*`, `lib/intel/store.ts` | Intel step 2 |
 | Demo-banner + cadence-stamp honesty (fake-driver era named, never implied live) | `components/intel/demo-banner.tsx`, `cadence-stamp.tsx` | Intel step 2 |
-| Saved-view tabs (tenant-wide named views, `/api/views`) | `components/board/`, `components/calendar/`, `lib` views client | Board + Calendar step 2 |
+| Saved-view tabs (tenant-wide named views, `/api/views`) | `components/calendar/calendar-surface.tsx` (live), `lib/views/*` | **Calendar step 2 SHIPPED s75** — the rebuilt calendar still loads and saves its view. The two BOARDS did not take it: the content board (s75) has no view state to save, and the leads board's own saved view retired with the legacy implementation (below). The store and its client stay live for the calendar |
 | Calendar engine (month/week/agenda grids, slot chips, reschedule doors) | `components/calendar/*` | Calendar step 2 |
 | Staged-flow multi-stage video UX (candidate picker, direction editor, storyboard) | `components/staged/*` | **Videos step 2** (per plan §4.2 wave-2 mini-spec). Create shipped s74 without it: the sheet's header carries one `Advanced · staged flow →` door, exactly as the sheet draws it — the stage-by-stage walk belongs to the Videos re-conception, not to the one-prompt surface |
 | **The Thalon logo** (BrandMark, landing-amber DNA) — the rail currently wears the SHEET's gradient square; the real mark re-enters once the whole shell structure is verdicted (founder named this one s73) | `components/brand/marks.tsx` | shell polish pass, after all-surfaces structural |
 | EmptyArt illustrations + demo media | `components/ui/empty-art.tsx`, `lib/brand-assets.ts`, `public/` | each surface's empty states; NEVER deleted |
 | Command palette (⌘K, one nav registry) | `workspace/command-palette.tsx` (still live) | its own restyle pass, last |
 | Lead-score provenance (weights + reasons spelled out) | `components/leads/weights-provenance.tsx` | Leads step 2 |
+
+## Retired with the legacy leads board (s76, `components/board/leads-board.tsx` + `model.ts`)
+
+The lead pipeline came back as `components/leads/leads-board.tsx` on the
+sheets' column grammar, and the Phase-I implementation was deleted in the same
+change (DOCTRINE 0 rule 3). It was already ORPHANED — nothing had imported it
+since the s75 Leads rebuild, so these three capabilities had been dark for a
+session before the deletion. **Pre-demolition ref: `73a4752`.** Each is a
+founder call to restore, not a lane's:
+
+- **The 2D keyboard grammar** (j/k within a column, h/l across; Phase-D Q5).
+  It cannot re-enter as-is: `h` is the rebuilt Leads surface's own "mark hot"
+  verb, so h/l would give one key two meanings on one surface, and the board's
+  chrome draws no legend to teach a second grammar. The board's cards are real
+  buttons instead — native focus order, ↵ to open.
+- **Advisory WIP limits** (`count / limit · over`, per-view, default none;
+  Phase-D Q7) and **the board's saved view** (Q8) — the whole reason
+  `components/board/model.ts` talked to `/api/views`. A board with three
+  engine-owned columns and no operator-set stage has little to limit; this
+  belongs with the operator-owned stage field, not before it.
+- **Multi-select + the shared bulk bar on board cards** (x picks, selection
+  spans columns). The rebuilt Leads surface is single-selection throughout —
+  its list has no checkboxes either — so re-entering it on the board alone
+  would make the two views disagree about what selection means.
+  `components/workspace/bulk-bar.tsx` is now imported by nothing; deleting it
+  is a `components/workspace/**` change and so the lead's, not this lane's.
 
 ## Retired, deliberately (not keepers)
 
