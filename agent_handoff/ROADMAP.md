@@ -16,6 +16,30 @@
 
 ## S77 PLAN — planned and ready (founder s76: "have it all planned and ready to do next session")
 
+> **s76 SECOND HALF, ON FABLE 5 (founder-directed model switch for the
+> planning; Opus 5 implements): the plan below is now SUBSUMED by
+> `docs/research/media-framework-plan.md`** — the founder ruled the thumbnail
+> work "requires a sustainable plan… a schema and framework so that
+> images/media/thumbnails can dynamically change based on the sources and
+> content", so B-media.0 and B-audio.1 were re-planned as one framework:
+> a `MediaRef` contract (external-vs-stored × captured/derived/operator),
+> a pure per-entity resolver with declared no-borrowing chains, two serving
+> doors (authed `/api/media/[sha]` for the workspace; the public allowlist
+> door untouched), dynamism as three write moments (ingest · render-complete
+> poster derivation + backfill · operator upload later), `<SourceThumb>` off
+> the verdicted sheet, the zero-state layer as a SEPARATE question (dark
+> plate remints = founder GO line), and the audio bed as the same stored-ref
+> shape. **The whole s77 window is contracts-only — both meta columns are
+> jsonb, zero SQL migrations — verified in code, not assumed. One executable
+> constraint found while planning: ffmpeg exists on the box but NOT in
+> Dockerfile.web, so poster derivation gates on binary presence (founder
+> call: add to image vs box-only).** s77 order: freeze the window (incl. the
+> Retry-replay + grounds-count riders) → lane A (web: resolver + SourceThumb
+> + 4 surfaces + media route) ∥ lane B (engine: dims capture + posters +
+> backfill + audio bed/audition/mux) → EmptyState re-entry behind the remint
+> GO. The two lanes are disjoint; launches still need the founder's fresh
+> per-run approval. Everything below stands as background and detail.
+
 **Boot:** self-check, then the sweeper morning read. The s76 backoff fix is
 live and verified; the YouTube quota resets at **Pacific** midnight (~07:00Z),
 so s77's opener is the first that can see a clean `swept — … admitted`. If it

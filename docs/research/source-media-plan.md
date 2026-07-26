@@ -1,5 +1,13 @@
 # B-media.0 — Source media on every surface (thumbnails)
 
+> **s76 addendum — the framework this plan's joins generalise into is
+> `media-framework-plan.md`** (founder-directed "sustainable plan": the
+> `MediaRef` contract, the per-entity resolver, serving doors, the dynamism
+> model, the empty-state layer, and B-audio.1 riding the same shape). This
+> doc remains the UI treatment spec of record — five states, three sizes,
+> 1.6 ratio, the portrait call — all founder-verdicted s76. Where the two
+> overlap: the sheet wins on appearance, the framework wins on data.
+
 > **Founder-directed, s74:** *"the media thumbnails will need to be done
 > eventually, so that needs a proper and clever UI/UX with the source
 > thumbnails … wrap that planning in next session when you have time (see how
