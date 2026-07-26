@@ -115,11 +115,16 @@ surfaces do not grow three vocabularies.
 3. ⛔ **THE SEQUENCE GATE, the founder's words:** *"we're not posting
    anything yet until all the walks are verified and fixed."* You may build
    and wire; you may NOT exercise any publish path, and you may not arm one.
-4. **Screenshot-gate every surface you change** — `scripts/shoot-surface.mjs`
-   against dev 3111, diffed against the surface's sheet. The script refuses
-   not-ready shots; that refusal is information, not an obstacle. Use
-   `localhost`, never `127.0.0.1` (Next blocks `/_next` cross-origin — a
-   healthy app reads as dead).
+4. **You CANNOT screenshot-gate your own work — do not try.** `scripts/shoot-surface.mjs`
+   points at the lead's dev server, which serves MAIN, so shooting it from
+   here would capture code that is not yours and hand you a **false pass on a
+   gate**; and `next dev` cannot run in a lane at all (Turbopack rejects the
+   out-of-root node_modules symlinks). The script now REFUSES to run from a
+   worktree, so this is enforced, not trusted. **The lead runs the
+   screenshot-vs-sheet gate at merge time on merged main.** What you owe
+   instead: for every surface you change, list the visual deltas you expect
+   in your wrap (surface · what moves or appears · which sheet region must
+   still match), so the gate knows what to look for.
 5. **`npm run verify` before you wrap** — and **NEVER pipe the suite through
    `tail`**; write it to a file and read the file. **vitest does NOT
    typecheck** — three catches on record, one of them this session.
