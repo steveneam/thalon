@@ -1,0 +1,61 @@
+/*
+ * Video editor — the surface's own atomics, PORTED 1:1 from the helmet
+ * <style> of docs/research/mock-sheets/Videos.dc.html (DOCTRINE 0: the
+ * sheet is the blueprint, never a re-expression through a component
+ * library). Shared classes (.card, .card-head, .pill, .seg, .btn,
+ * .card-link, .thumb-md, .bar-trough/.bar-fill, the type roles) come from
+ * app/app/workspace.css — the shell contract, read-only here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.editor-surface` (mock-sheets README rule 6,
+ * executable as lib/__tests__/surface-css-scope.test.ts). This sheet shares
+ * FOUR class names with the dossier sheet beside it and gives every one of
+ * them different values: `.play-btn` is 54px here and 48px there,
+ * `.play-tri` 14px/9px against 12px/8px, `.strip` gap 10 padding 10/16
+ * against gap 12 padding 12/16, and `.take .thumb-md` re-sizes the shared
+ * 148×96 to 118×68. Unscoped, whichever file happened to load last would
+ * win — silently, on the other surface.
+ *
+ * The sheet's helmet also declares `.avatar`; that is topbar chrome the
+ * shell already ports (workspace.css), so it is deliberately not restated.
+ */
+
+.editor-surface .ed-grid { display: grid; grid-template-columns: 1fr 320px; gap: 14px; align-items: stretch; }
+.editor-surface .player { background: oklch(0.1 0.008 262); border: 1px solid var(--n-400); border-radius: var(--r-card); position: relative; display: flex; align-items: center; justify-content: center; height: 264px; }
+.editor-surface .play-btn { width: 54px; height: 54px; border-radius: 50%; background: oklch(1 0 0 / 0.09); border: 1px solid oklch(1 0 0 / 0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.editor-surface .play-tri { width: 0; height: 0; border-left: 14px solid var(--n-1000); border-top: 9px solid transparent; border-bottom: 9px solid transparent; margin-left: 4px; }
+.editor-surface .scrub { position: absolute; left: 16px; right: 16px; bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.editor-surface .beat-row { display: flex; align-items: center; gap: 10px; padding: 7px 14px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
+.editor-surface .beat-row:first-child { border-top: none; }
+.editor-surface .beat-row.on { background: var(--n-300); box-shadow: inset 2px 0 0 var(--act); }
+.editor-surface .beat-thumb { width: 42px; height: 26px; border-radius: 4px; flex: none; border: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 6px, var(--n-100) 6px, var(--n-100) 12px); }
+.editor-surface .strip { display: flex; gap: 10px; padding: 10px 16px; overflow: hidden; }
+.editor-surface .take { display: flex; flex-direction: column; gap: 5px; flex: none; cursor: pointer; }
+.editor-surface .take .thumb-md { width: 118px; height: 68px; }
+.editor-surface .take.on .thumb-md { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); }
+.editor-surface .take-cap { font-size: 11px; color: var(--n-900); }
+
+/* ── Multi-track timeline (the EDL surface: video · music · captions) ── */
+.editor-surface .tl-head { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--n-400); }
+.editor-surface .tl-body { position: relative; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 6px; }
+.editor-surface .lane { display: flex; align-items: center; gap: 10px; }
+.editor-surface .lane-hd { width: 74px; flex: none; font-size: 11.5px; font-weight: 500; color: var(--n-900); display: flex; flex-direction: column; line-height: 1.25; }
+.editor-surface .lane-hd small { font-size: 10px; color: var(--n-800); font-weight: 400; }
+.editor-surface .lane-tr { flex: 1; display: flex; gap: 3px; position: relative; }
+.editor-surface .blk { height: 34px; border-radius: 5px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: flex-end; padding: 3px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); overflow: hidden; white-space: nowrap; }
+.editor-surface .blk.on { background: var(--act-subtle); border-color: var(--act); color: var(--n-1000); }
+.editor-surface .blk-music { height: 30px; background: repeating-linear-gradient(90deg, var(--n-400) 0 2px, var(--n-200) 2px 5px); border: 1px solid var(--n-500); position: relative; }
+.editor-surface .cresc { position: absolute; top: -4px; width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); background: var(--heat-warm); }
+.editor-surface .blk-cap { height: 22px; border-radius: 4px; background: var(--n-200); border: 1px solid var(--n-500); }
+.editor-surface .blk-cap.on { background: var(--act-subtle); border-color: var(--act); }
+.editor-surface .playhead { position: absolute; top: 6px; bottom: 6px; left: calc(84px + (100% - 100px) * 0.34); width: 2px; background: var(--act); border-radius: 1px; z-index: 2; }
+.editor-surface .playhead::before { content: ""; position: absolute; top: -5px; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--act); }
+
+/* ── Direct the edit — the agent-native front door (founder s72) ── */
+.editor-surface .copilot { border: 1px solid var(--n-500); background: var(--n-100); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.editor-surface .cop-box { flex: 1; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 9px; padding: 8px 12px; font-size: 13px; color: var(--n-800); }
+.editor-surface .cop-box em { color: var(--n-900); font-style: normal; }
+.editor-surface .chipbtn { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--r-pill); border: 1px solid var(--n-400); background: transparent; font-size: 11.5px; font-weight: 500; color: var(--n-900); cursor: pointer; transition: border-color var(--motion-fast), color var(--motion-fast); white-space: nowrap; }
+.editor-surface .chipbtn:hover { border-color: var(--n-600); color: var(--n-1000); }
+.editor-surface .prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid var(--n-400); background: var(--warn-subtle); border-radius: var(--r-card) var(--r-card) 0 0; font-size: 12.5px; }
+.editor-surface .blk.prop { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); color: var(--n-1000); }
+.editor-surface .prop-tag { font-family: var(--font-data); font-size: 9px; color: var(--warn); margin-left: 3px; }
