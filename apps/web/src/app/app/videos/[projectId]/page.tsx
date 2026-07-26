@@ -2,9 +2,14 @@ import { VideoDossier } from "@/components/videos/dossier";
 
 /**
  * One video project: the exact-mock rebuild of Video Dossier.dc.html
- * (DOCTRINE 0) — the family behind one card. STEP 1 is the sheet's own
- * placeholder content; step 2 puts the project record behind these bands.
+ * (DOCTRINE 0) — the family behind one card, with the project record read
+ * client-side through the existing videos client.
  */
-export default function VideoProjectPage() {
-  return <VideoDossier />;
+export default async function VideoProjectPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
+  const { projectId } = await params;
+  return <VideoDossier projectId={projectId} />;
 }

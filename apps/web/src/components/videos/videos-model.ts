@@ -131,6 +131,64 @@ export function cardDate(iso: string, now: number): string {
   return `${at.getUTCDate()} ${MONTHS[at.getUTCMonth()]}`;
 }
 
+/* ── The dossier's own reads (Video Dossier.dc.html) ───────────────────── */
+
+/** Every version of one cut name, oldest first — the version strip's spine. */
+export function versionsOf(cuts: CutView[], name: string): CutView[] {
+  return cuts.filter((c) => c.name === name).sort((a, b) => a.version - b.version);
+}
+
+/** The cuts derived FROM a given version (B-ve.5 lineage pins the exact parent row). */
+export function derivedFrom(cuts: CutView[], parent: CutView | null): CutView[] {
+  if (parent === null) return [];
+  return cuts
+    .filter((c) => c.lineage?.parentCutId === parent.id)
+    .sort((a, b) => a.name.localeCompare(b.name) || a.version - b.version);
+}
+
+/**
+ * A derived cut is STALE when its parent has moved on since the pin. There
+ * is no auto-sync by design (auto-apply does not exist), so the surface says
+ * it rather than quietly resyncing.
+ */
+export function staleAgainstParent(cut: CutView): boolean {
+  const { lineage } = cut;
+  return (
+    lineage !== null &&
+    lineage.parentVersion !== null &&
+    lineage.parentLatestVersion !== null &&
+    lineage.parentLatestVersion > lineage.parentVersion
+  );
+}
+
+/**
+ * The version strip's attribution line — the sheet's "every version names
+ * what changed it". A cut written before the attributed save door existed
+ * (the import's own rows) says so; it never gets an author guessed for it.
+ */
+export function attributionLine(cut: CutView, now: number): string {
+  const when = cardDate(cut.createdAt, now);
+  // Nullish, not `=== null`: a payload cached from a deploy before this
+  // field existed arrives undefined, and an unknown author is still unknown.
+  const attribution = cut.attribution ?? null;
+  if (attribution === null) return `no attribution recorded · ${when}`;
+  if (attribution.authoredBy === "operator") return `your edit · ${when}`;
+  const proposal = attribution.proposal;
+  const ask = proposal?.ask ? ` · “${proposal.ask}”` : "";
+  return `agent · ${proposal?.model ?? "model unrecorded"}${ask} · ${when}`;
+}
+
+/**
+ * The scrub's timecode, the sheet's own format — m:ss.t. Counted in whole
+ * TENTHS so a float duration can't round 59.99 into "0:60.0".
+ */
+export function timecode(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds * 10));
+  const tenths = total % 10;
+  const whole = (total - tenths) / 10;
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}.${tenths}`;
+}
+
 /** The sheet's segmented control, in the engine's state vocabulary. */
 export const FILTERS = [
   { id: "all", label: "All" },

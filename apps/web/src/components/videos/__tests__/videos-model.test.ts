@@ -1,13 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  attributionLine,
   cardDate,
+  derivedFrom,
   family,
   headlineCut,
   mintModel,
   passesFilter,
   provenance,
   runtime,
+  staleAgainstParent,
   statePill,
+  timecode,
+  versionsOf,
 } from "@/components/videos/videos-model";
 import type { CutView, ProjectDetail, TakeView } from "@/lib/videos/types";
 
@@ -19,6 +24,7 @@ function cut(over: Partial<CutView> = {}): CutView {
     status: over.status ?? "draft",
     outputRef: over.outputRef ?? null,
     lineage: over.lineage ?? null,
+    attribution: over.attribution ?? null,
     edl: over.edl ?? {
       beats: 8,
       captionLines: 4,
@@ -186,6 +192,90 @@ describe("cardDate — the sheet's own date grammar", () => {
 
   it("passes an unparseable stamp through rather than inventing a date", () => {
     expect(cardDate("not a date", now)).toBe("not a date");
+  });
+});
+
+describe("timecode — the scrub's own format", () => {
+  it("counts in whole tenths, so a float duration never rounds into :60", () => {
+    expect(timecode(0)).toBe("0:00.0");
+    expect(timecode(42.3)).toBe("0:42.3");
+    expect(timecode(59.99)).toBe("1:00.0");
+    expect(timecode(185.04)).toBe("3:05.0");
+    expect(timecode(-1)).toBe("0:00.0");
+  });
+});
+
+describe("attributionLine — every version names what changed it", () => {
+  const now = Date.parse("2026-07-26T10:00:00.000Z");
+
+  it("names the operator, the agent with its model and ask, and the unattributed", () => {
+    expect(attributionLine(cut({ attribution: { authoredBy: "operator" } }), now)).toBe(
+      "your edit · Mon",
+    );
+    expect(
+      attributionLine(
+        cut({
+          attribution: {
+            authoredBy: "agent",
+            proposal: {
+              baseCutId: "c1",
+              model: "test/proposer",
+              promptName: "edl-propose",
+              promptHash: "abc",
+              ask: "tighten the middle",
+              decidedBy: "operator",
+              diff: { version: 1, summary: "trim", ops: [] },
+            },
+          },
+        }),
+        now,
+      ),
+    ).toBe("agent · test/proposer · “tighten the middle” · Mon");
+    // A cut written before the attributed save door existed is never credited.
+    expect(attributionLine(cut(), now)).toBe("no attribution recorded · Mon");
+  });
+});
+
+describe("staleAgainstParent — honest, because there is no auto-sync", () => {
+  const lineage = {
+    parentCutId: "c2",
+    aspect: "9:16",
+    parentName: "film-16x9",
+    parentVersion: 2,
+    parentLatestVersion: 2,
+  };
+
+  it("is true only when the parent has moved past the pin", () => {
+    expect(staleAgainstParent(cut({ lineage }))).toBe(false);
+    expect(staleAgainstParent(cut({ lineage: { ...lineage, parentLatestVersion: 4 } }))).toBe(true);
+    expect(staleAgainstParent(cut())).toBe(false);
+  });
+});
+
+describe("versionsOf / derivedFrom — the two bands the dossier splits", () => {
+  it("keeps versions to one name, and derives by the exact pinned parent row", () => {
+    const parent = cut({ id: "c2", version: 2 });
+    const cuts = [
+      cut({ id: "c1", version: 1 }),
+      parent,
+      cut({
+        id: "c3",
+        version: 1,
+        name: "film-9x16",
+        lineage: {
+          parentCutId: "c2",
+          aspect: "9:16",
+          parentName: "film-16x9",
+          parentVersion: 2,
+          parentLatestVersion: 2,
+        },
+      }),
+    ];
+    expect(versionsOf(cuts, "film-16x9").map((c) => c.version)).toEqual([1, 2]);
+    expect(derivedFrom(cuts, parent).map((c) => c.id)).toEqual(["c3"]);
+    // A derive is pinned to ONE version — v1 has none of its own.
+    expect(derivedFrom(cuts, cuts[0])).toEqual([]);
+    expect(derivedFrom(cuts, null)).toEqual([]);
   });
 });
 

@@ -65,6 +65,7 @@ const DETAIL: ProjectDetail = {
       version: 6,
       status: "draft",
       outputRef: null,
+      attribution: null,
       edl: { beats: 2, captionLines: 1, audio: "encode", width: 1280, height: 720, fps: 24, duration: 9.5 },
       lineage: null,
       createdAt: "2026-07-16T00:00:00.000Z",
@@ -79,6 +80,7 @@ const CUT: CutDetail = {
   status: "draft",
   outputRef: null,
   lineage: null,
+  attribution: null,
   createdAt: "2026-07-16T00:00:00.000Z",
   edl: {
     version: 1,

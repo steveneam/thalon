@@ -1,4 +1,10 @@
-import type { Edl, VideoCutStatus, VideoTakeDisposition, VideoTakeKind } from "@thalon/contracts";
+import type {
+  Edl,
+  VideoCutAttribution,
+  VideoCutStatus,
+  VideoTakeDisposition,
+  VideoTakeKind,
+} from "@thalon/contracts";
 
 /**
  * B-ve.2 wire shapes: the read-only project surface over the frozen B-ve.1
@@ -68,6 +74,14 @@ export interface CutView {
   edl: EdlSummary;
   /** B-ve.5: present on derived cuts. */
   lineage: CutLineageView | null;
+  /**
+   * B-ve.4: WHO authored this version — stamped at the save door under
+   * `meta.attribution` and never trusted from the client. Null on cuts
+   * written before that door existed (the import's own rows). Projected for
+   * the dossier's version strip: VISIBLE PROVENANCE (ui-overhaul-plan §5)
+   * wants every version naming what changed it.
+   */
+  attribution: VideoCutAttribution | null;
   createdAt: string;
 }
 
@@ -81,6 +95,8 @@ export interface CutDetail {
   edl: Edl;
   /** B-ve.5: present on derived cuts. */
   lineage: CutLineageView | null;
+  /** B-ve.4: who authored this version (see CutView.attribution). */
+  attribution: VideoCutAttribution | null;
   createdAt: string;
 }
 

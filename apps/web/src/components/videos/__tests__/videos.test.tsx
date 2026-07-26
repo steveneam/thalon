@@ -70,8 +70,8 @@ const P1: ProjectDetail = {
     },
   ],
   cuts: [
-    { id: "c1", name: "film-16x9", version: 1, status: "draft", outputRef: null, lineage: null, edl: EDL, createdAt: "2026-07-16T00:00:00.000Z" },
-    { id: "c2", name: "film-16x9", version: 2, status: "approved", outputRef: "cuts/master.mp4", lineage: null, edl: EDL, createdAt: "2026-07-18T00:00:00.000Z" },
+    { id: "c1", name: "film-16x9", version: 1, status: "draft", outputRef: null, lineage: null, attribution: null, edl: EDL, createdAt: "2026-07-16T00:00:00.000Z" },
+    { id: "c2", name: "film-16x9", version: 2, status: "approved", outputRef: "cuts/master.mp4", lineage: null, attribution: null, edl: EDL, createdAt: "2026-07-18T00:00:00.000Z" },
     {
       id: "c3",
       name: "film-9x16",
@@ -85,6 +85,7 @@ const P1: ProjectDetail = {
         parentVersion: 2,
         parentLatestVersion: 2,
       },
+      attribution: null,
       edl: EDL,
       createdAt: "2026-07-19T00:00:00.000Z",
     },

@@ -78,7 +78,10 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/videos/frame-composer.tsx", 12],
   ["components/videos/music-lane.tsx", 5],
   ["components/videos/num-field.tsx", 6],
-  ["components/videos/project-browser.tsx", 35],
+  // components/videos/project-browser.tsx left the map at the s76 exact-mock
+  // rebuild: the dossier was rebuilt from Video Dossier.dc.html and the old
+  // browser was deleted in the same change (DOCTRINE 0 rule 3) — its takes +
+  // provenance keepers re-entered as a state behind the record's Runs row.
   ["components/videos/track-view.tsx", 30],
   // components/videos/video-projects.tsx left the map at the s76 exact-mock
   // rebuild: the overview was rebuilt from Videos Overview.dc.html and the

@@ -43,3 +43,53 @@
 .dossier-surface .fact-k { font-size: 12.5px; font-weight: 500; }
 .dossier-surface .fact-v { font-size: 12px; color: var(--n-900); }
 .dossier-surface .strip { display: flex; gap: 12px; padding: 12px 16px; overflow: hidden; }
+
+/*
+ * ── App adaptations (each NAMED; the 1440×940 render stays indistinguishable
+ * from the sheet at rest) ──
+ *  - the sheet's version chips and record rows are <div>s; real ones are
+ *    BUTTONS and LINKS (click + keyboard + aria-pressed), so the compound
+ *    selectors below shed the UA chrome and out-specify nothing else;
+ *  - a real project has more versions and more aspect cuts than the canvas
+ *    fixture, so both strips SCROLL horizontally inside their card rather
+ *    than clipping (the Bounded-List Rule's sideways twin);
+ *  - the player reveals the real rendered cut on play (media-first): the
+ *    video fills the sheet's own black box, and the resting state stacks the
+ *    play button over an honest line when there is nothing to play;
+ *  - a fact row that opens nothing is not a door — it drops the pointer
+ *    cursor and the hover, so only real doors look like doors;
+ *  - the takes panel and the gate notice are keeper-style STATES behind the
+ *    sheet's own chrome: absent entirely at rest.
+ */
+.dossier-surface .dgrid > * { min-width: 0; }
+.dossier-surface button.ver, .dossier-surface a.ver { font: inherit; color: inherit; text-align: left; }
+.dossier-surface .ver-t, .dossier-surface .ver-a { overflow: hidden; text-overflow: ellipsis; }
+.dossier-surface .ver:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.dossier-surface .ver-strip { overflow-x: auto; }
+.dossier-surface .strip { overflow-x: auto; }
+
+.dossier-surface .player-video { width: 100%; height: 100%; border-radius: var(--r-card); object-fit: contain; background: oklch(0.1 0.008 262); }
+.dossier-surface .player-rest { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 24px; text-align: center; }
+.dossier-surface button.play-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.dossier-surface button.fact-row { width: 100%; font: inherit; color: inherit; text-align: left; background: transparent; border: none; border-top: 1px solid var(--n-400); }
+.dossier-surface .fact-row[data-door="false"] { cursor: default; }
+.dossier-surface .fact-row[data-door="false"]:hover { background: transparent; }
+.dossier-surface .fact-row:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; }
+
+.dossier-surface .gate-notice { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border-color: var(--err); background: var(--err-subtle); }
+.dossier-surface .gate-notice .t-label { color: var(--n-1000); }
+
+.dossier-surface .takes-panel { display: flex; flex-direction: column; }
+.dossier-surface .takes-scroll { max-height: 320px; overflow-y: auto; }
+.dossier-surface .take-slot { padding: 8px 16px 2px; }
+.dossier-surface .row.take-row { width: 100%; font: inherit; color: inherit; text-align: left; background: transparent; border: none; border-top: 1px solid var(--n-400); }
+.dossier-surface .row.take-row:first-child { border-top: none; }
+.dossier-surface .row.take-row:hover { background: var(--n-200); }
+.dossier-surface .row.take-row.sel { background: var(--n-300); box-shadow: inset 2px 0 0 var(--act); }
+.dossier-surface .row.take-row:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; }
+.dossier-surface .take-ref { flex: none; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dossier-surface .take-manifest { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border-top: 1px solid var(--n-400); background: var(--n-bg); }
+.dossier-surface .take-manifest dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; }
+.dossier-surface .take-manifest dt { font-size: 12px; color: var(--n-900); }
+.dossier-surface .take-manifest dd { margin: 0; word-break: break-all; }
