@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BrandMark } from "@/components/brand/marks";
 import { RAIL_ICONS } from "@/components/workspace/rail-icons";
 import { usePulse } from "@/components/workspace/pulse-context";
 import { activeSurface, NAV_SURFACES } from "@/lib/workspace/nav";
@@ -56,7 +57,7 @@ export function WorkspaceRail() {
   return (
     <nav className="rail" aria-label="Workspace side navigation">
       <Link href={LANDING_HREF} aria-label="Thalon home — the landing page" className="rail-brand">
-        <span className="rail-mark" />
+        <BrandMark className="rail-mark" />
         <span className="rail-name">Thalon</span>
       </Link>
       {["Home", "Intel", "Create", "Approve", "Calendar"].map(item)}

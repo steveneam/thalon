@@ -78,7 +78,16 @@
 .rail { width: 216px; flex: none; background: var(--n-rail); border-right: 1px solid var(--n-400); display: flex; flex-direction: column; padding: 14px 10px; gap: 2px; }
 .rail-brand { display: flex; align-items: center; gap: 9px; padding: 6px 10px 16px; }
 .screen a.rail-brand { color: var(--n-1000); }
-.rail-mark { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, var(--brand-hi), var(--brand-lo)); flex: none; }
+/* The REAL mark, not a stand-in (founder s76: "we should put the logo back
+   in"). The sheet drew a rounded gradient tile as a placeholder for a mark it
+   could not embed; the actual founder-picked Grip II lives in
+   components/brand/marks.tsx and every other surface — landing header and
+   footer, hero, sticky CTA, app/icon.svg, the favicon — already renders it.
+   The workspace rail was the last placeholder. It is a single-colour
+   `currentColor` SVG on a 32-grid, so it takes the brand colour through
+   `color` rather than a background gradient, and the mark-only token rule
+   holds: --brand-hi is the MARK's, never status, never interactive. */
+.rail-mark { width: 22px; height: 22px; flex: none; color: var(--brand-hi); }
 .rail-name { font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: var(--r-ctl); color: var(--n-900); font-size: 13px; font-weight: 500; cursor: pointer; transition: background var(--motion-fast), color var(--motion-fast); }
 .screen a.nav-item { color: var(--n-900); }
