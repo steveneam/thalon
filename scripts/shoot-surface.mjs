@@ -34,9 +34,10 @@
 //   --out            output directory         (default: a timestamped scratch dir)
 //   --full           full-page capture instead of the sheet-sized screen box
 
-import { mkdirSync, readFileSync, existsSync, statSync } from "node:fs";
+import { mkdirSync, readFileSync, existsSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { isWorktreeRoot, worktreeRefusalMessage } from "./lib/worktree.mjs";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SHEET_DIR = join(REPO, "docs/research/mock-sheets");
@@ -44,43 +45,19 @@ const SHEET_DIR = join(REPO, "docs/research/mock-sheets");
 /**
  * A WORKTREE LANE CANNOT SHOOT ITS OWN WORK (ratchet, s78).
  *
- * The dev server this script points at is served from the MAIN checkout, so
- * a lane running it screenshots main's code and reads the result as a pass
- * on its own branch — a false pass on a gate, which is worse than no gate.
- * And a lane cannot simply start its own dev server instead: `next dev`
- * refuses to run in a worktree here, because Turbopack rejects the
- * out-of-root node_modules symlinks the lanes are prepped with
- * (`agent_handoff/WRAP-videos-rebuild.md:207`).
+ * The reasoning lives with the predicate in `lib/worktree.mjs`; both are
+ * pinned by `tests/worktree-screenshot-guard.test.ts`, which spawns THIS
+ * script inside a fabricated worktree so removing the call — not just the
+ * helper — turns the suite red. The lesson was written into two lane
+ * kickoffs as prose and was wrong in both, so prose is not where it lives
+ * (AGENTS.md rule 8: executable > documentary).
  *
- * So the screenshot-vs-sheet gate belongs to the LEAD, at merge time, on
- * merged main — which is how every wave has actually run it. This refusal
- * exists because the lesson was written into two lane kickoffs as prose and
- * was WRONG in both; executable beats documentary (AGENTS.md rule 8).
- *
- * In a git worktree, `.git` is a FILE containing a gitdir pointer, not a
- * directory. `--i-am-the-lead` is the deliberate override for the case
- * where a lane has been given its own real dev server on another port.
+ * `--i-am-the-lead` is the deliberate override for a lane that has genuinely
+ * been given its own dev server on another port.
  */
 function refuseInsideWorktree(baseUrl, overridden) {
-  const dotGit = join(REPO, ".git");
-  const inWorktree = existsSync(dotGit) && statSync(dotGit).isFile();
-  if (!inWorktree || overridden) return;
-  console.error(
-    [
-      "REFUSING: this is a git WORKTREE, and " + baseUrl + " is served from the main checkout.",
-      "",
-      "Shooting it would capture main's code and report it as YOUR branch passing —",
-      "a false pass on a gate. `next dev` cannot run in a lane either (Turbopack",
-      "rejects the out-of-root node_modules symlinks).",
-      "",
-      "The screenshot-vs-sheet gate is the LEAD's, run at merge time on merged main.",
-      "In your wrap, list the visual deltas you expect per surface so the gate knows",
-      "what to look for — that is what you owe here.",
-      "",
-      "Override only with a dev server that genuinely serves THIS worktree:",
-      "  --base http://localhost:<your-port> --i-am-the-lead",
-    ].join("\n"),
-  );
+  if (overridden || !isWorktreeRoot(REPO)) return;
+  console.error(worktreeRefusalMessage(baseUrl));
   process.exit(2);
 }
 
