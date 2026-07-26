@@ -59,3 +59,83 @@
 .editor-surface .prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid var(--n-400); background: var(--warn-subtle); border-radius: var(--r-card) var(--r-card) 0 0; font-size: 12.5px; }
 .editor-surface .blk.prop { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); color: var(--n-1000); }
 .editor-surface .prop-tag { font-family: var(--font-data); font-size: 9px; color: var(--warn); margin-left: 3px; }
+
+/*
+ * ── App adaptations (each NAMED; the 1440×940 render stays indistinguishable
+ * from the sheet AT REST — nothing below exists until the operator acts) ──
+ *  - the sheet's blocks, plates, chips and beat rows are <div>s; real ones
+ *    are BUTTONS and INPUTS, so the compound selectors shed the UA chrome
+ *    and keep the sheet's exact geometry;
+ *  - the playhead's position is the sheet's own calc() with the fixture's
+ *    0.34 lifted into a variable the real playhead sets;
+ *  - zoom past "fit" widens the lane body inside a scroller (at fit, which
+ *    is the resting state, nothing scrolls and the geometry is the sheet's);
+ *  - a real cut has more beats than the canvas fixture's eight, so the beats
+ *    rail SCROLLS inside its card (the Bounded-List Rule) instead of
+ *    clipping rows the sheet's `overflow:hidden` would swallow;
+ *  - the player reveals the real rendered cut on play (media-first);
+ *  - the INSPECTOR, the diff panel and the notice band are keeper-style
+ *    STATES behind the sheet's own chrome: absent entirely at rest.
+ */
+.editor-surface .ed-grid > * { min-width: 0; }
+
+.editor-surface button.blk, .editor-surface button.blk-cap, .editor-surface button.blk-music { font-family: var(--font-data); color: var(--n-900); cursor: grab; text-align: left; }
+.editor-surface button.blk-cap, .editor-surface button.blk-music { padding: 0; }
+.editor-surface .blk:focus-visible, .editor-surface .blk-cap:focus-visible, .editor-surface .blk-music:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.editor-surface .blk-music.on { box-shadow: 0 0 0 1px var(--act); border-color: var(--act); }
+.editor-surface .blk-music.prop { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
+.editor-surface .blk-cap.prop { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
+.editor-surface .lane-tr .t-label { padding: 8px 0; }
+/* The endcard overlay is a TAIL over the beat lane, not a beat beside them:
+   it starts at its own freeze boundary and holds to the end, so it is drawn
+   as a marker across the lane rather than a block that would push the beats
+   it overlaps. Its freeze boundary is editable in the inspector. */
+.editor-surface .blk-overlay { position: absolute; top: -2px; right: 0; height: 38px; border: 1px dashed var(--warn); border-radius: 5px; display: flex; align-items: center; padding: 0 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--warn); pointer-events: none; white-space: nowrap; overflow: hidden; }
+
+.editor-surface .playhead { left: calc(84px + (100% - 100px) * var(--playhead, 0)); }
+.editor-surface .tl-scroll { overflow-x: auto; }
+.editor-surface .tl-ruler { display: flex; align-items: center; justify-content: flex-end; height: 18px; margin-left: 84px; cursor: col-resize; border-top: 1px solid var(--n-400); padding-top: 2px; }
+.editor-surface .tl-ruler:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+.editor-surface .tl-foot { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-top: 1px solid var(--n-400); }
+
+.editor-surface button.snap-pill { border: none; font-family: inherit; cursor: pointer; }
+.editor-surface .snap-pill.on { background: var(--act-subtle); color: var(--act); }
+.editor-surface .as-text-btn { background: none; border: none; padding: 0; font: inherit; color: var(--act); cursor: pointer; }
+
+.editor-surface input.cop-box { font-family: inherit; min-width: 0; }
+.editor-surface input.cop-box::placeholder { color: var(--n-800); }
+.editor-surface button.chipbtn { font-family: inherit; }
+
+.editor-surface .player-video { width: 100%; height: 100%; border-radius: var(--r-card); object-fit: contain; background: oklch(0.1 0.008 262); }
+.editor-surface .player-rest { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 24px; text-align: center; }
+.editor-surface button.play-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.editor-surface .notice-band { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; }
+.editor-surface .notice-band.refused { border-color: var(--err); background: var(--err-subtle); }
+.editor-surface .notice-band .t-label { color: var(--n-1000); }
+
+.editor-surface .diff-panel { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--n-400); background: var(--n-bg); font-size: 12.5px; }
+.editor-surface .diff-op { display: flex; align-items: center; gap: 10px; width: 100%; }
+
+.editor-surface .inspector { display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 12px; border-top: 1px solid var(--n-400); background: var(--n-bg); }
+.editor-surface .inspector-head { display: flex; align-items: center; gap: 10px; }
+.editor-surface .inspector-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.editor-surface .inspector-ref { word-break: break-all; }
+.editor-surface .numfield { display: flex; flex-direction: column; gap: 3px; font-size: 11.5px; color: var(--n-900); }
+.editor-surface .numfield input { width: 100px; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-ctl); padding: 5px 8px; font: 400 12.5px var(--font-ui); color: var(--n-1000); font-variant-numeric: tabular-nums; }
+.editor-surface .numfield input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.editor-surface .reframe-stage { position: relative; width: 100%; max-width: 420px; overflow: hidden; border-radius: 8px; border: 1px solid var(--n-400); background: var(--n-200); user-select: none; }
+.editor-surface .reframe-stage video { display: block; width: 100%; }
+.editor-surface .reframe-win { position: absolute; border: 2px solid var(--act); background: var(--act-subtle); cursor: move; }
+.editor-surface .reframe-win.end { border-style: dashed; background: transparent; }
+
+.editor-surface button.take { font: inherit; color: inherit; background: transparent; border: none; padding: 0; text-align: left; }
+.editor-surface .take:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+.editor-surface .take-cap { max-width: 118px; }
+
+.editor-surface .beats-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.editor-surface button.beat-row { width: 100%; font: inherit; color: inherit; background: transparent; border: none; border-top: 1px solid var(--n-400); text-align: left; cursor: pointer; }
+.editor-surface button.beat-row:first-child { border-top: none; }
+.editor-surface button.beat-row:hover { background: var(--n-200); }
+.editor-surface button.beat-row:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; }
+.editor-surface .beat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

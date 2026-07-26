@@ -51,15 +51,9 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // speaks the sheet's own type roles, and its DATA labels ride the theme's
   // mono style (no uppercase).
   // library + runs pins burned to zero at the s74 exact-mock rebuild (DOCTRINE 0).
-  ["components/videos/cut-editor.tsx", 2],
-  ["components/videos/frame-composer.tsx", 1],
-  // components/videos/project-browser.tsx left the map at the s76 exact-mock
-  // rebuild — the ported dossier speaks the sheet's own type roles, and its
-  // DATA labels ride the theme's mono style (no uppercase).
-  ["components/videos/track-view.tsx", 1],
-  // components/videos/video-projects.tsx left the map at the s76 exact-mock
-  // rebuild — the ported overview speaks the sheet's own type roles, and its
-  // DATA labels ride the theme's mono style (no uppercase).
+  // The whole components/videos/ block left the map at the s76 exact-mock
+  // rebuild — the three ported surfaces speak the sheets' own type roles, and
+  // their DATA labels ride the theme's mono style (no uppercase).
   ["components/workspace/command-palette.tsx", 2],
 ]);
 
