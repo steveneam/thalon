@@ -1,5 +1,6 @@
 "use client";
 
+import "@/components/dashboard/dashboard.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -113,12 +114,18 @@ export function Dashboard() {
   const assets = planStatus === "success" && plan ? plan.assets : [];
   const composing = planStatus === "success" ? String(composingCount(assets)) : "–";
   const oldestWait = oldestWaitHours(assets, now);
+  const rows = needsYouStatus === "success" ? needsYouRows(assets) : [];
+  /** How many waiting drafts the PLAN read actually returned — null until it has. */
+  const waitingRead = needsYouStatus === "success" ? rows.length : null;
   const slotsCount =
     planStatus === "success" && plan ? String(slotsInWeek(plan.plannedSlots, weekDays(now)).length) : "–";
   const published = publishedRows(assets);
 
   return (
-    <div className="content">
+    // `.dashboard-surface` is the scope root every rebuilt surface carries
+    // (README rule 6). This surface shipped without one, which is why a status
+    // colour it needed to override had nowhere to live — see dashboard.css.
+    <div className="content dashboard-surface">
       {firstRun && (
         <section className="card" style={{ padding: "14px 16px" }} aria-label="First run">
           <p className="t-title">Welcome — three steps to your first draft</p>
@@ -226,13 +233,22 @@ export function Dashboard() {
           <span className="fact" style={needsYou > 0 ? { color: "var(--warn)" } : undefined}>
             {pulseStatus === "success" ? needsYou : "–"}
           </span>
+          {/* The tile's number is the pulse's; the wait beside it is computed
+              from the narrower plan window, so when the two disagree the wait
+              is the oldest of what was READ, not of the queue — and the drafts
+              outside the window are the oldest ones. Say which set it measures
+              rather than printing a real-looking number for the wrong one
+              (this surface's own rule: visibly bounded beats confidently
+              wrong). The card below carries the same bound with its door. */}
           <span className="ctx">
             {pulseStatus !== "success"
               ? "reading the queue…"
               : needsYou === 0
                 ? "queue clear"
                 : oldestWait !== null
-                  ? `oldest has waited ${oldestWait}h`
+                  ? waitingRead !== null && waitingRead < needsYou
+                    ? `${waitingRead} of ${needsYou} read · oldest of those ${oldestWait}h`
+                    : `oldest has waited ${oldestWait}h`
                   : "waiting on your review"}
           </span>
         </Link>
@@ -249,7 +265,7 @@ export function Dashboard() {
 
       <div className="home-grid">
         <NeedsYouCard
-          rows={needsYouStatus === "success" ? needsYouRows(assets) : []}
+          rows={rows}
           count={needsYou}
           status={needsYouStatus}
           onRetry={retryPlan}

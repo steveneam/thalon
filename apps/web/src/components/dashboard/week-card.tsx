@@ -32,6 +32,8 @@ export type WeekCardStatus = "loading" | "error" | "success";
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 /** The per-day mark bound (the sheet draws 1–2 marks; a real queue folds): 3 marks, then "+N more". */
 const DAY_MARK_BOUND = 3;
+/** The day view's waiting lane, one row of chips deep before "+N more waiting →". */
+const WAIT_LANE_BOUND = 3;
 
 function clock(date: Date): string {
   return `${date.getHours()}:${`${date.getMinutes()}`.padStart(2, "0")}`;
@@ -131,17 +133,28 @@ export function WeekCard({
 
   // The day view's events. Built from the CALENDAR's own model rather than
   // from marksFor(), because a time axis needs timestamps and marksFor()
-  // returns rendered text. Every one of these carries a real time: sweep
-  // ticks are projected, planned slots have scheduledFor, and a waiting
-  // draft is placed at waitingSince — the same honest placement the main
-  // calendar makes. Nothing is invented onto the clock.
+  // returns rendered text.
+  //
+  // WHAT MAY GO ON THE CLOCK (s79 verify round, D4 3/3). Sweep ticks are
+  // projected and planned slots carry scheduledFor, so both are genuinely
+  // timed. Waiting drafts are NOT: `waitingEvents` deliberately re-files a
+  // draft that started waiting before this week under today's key while
+  // keeping its true `at` (the carry exists so waiting work cannot vanish —
+  // critique P1, s39). Placing those by `at` put a draft that has waited since
+  // last Saturday on TODAY's axis at 12:08, asserting a state change this day
+  // never held. The comment that used to sit here claimed this was "the same
+  // honest placement the main calendar makes" — it is the opposite of what the
+  // calendar does: the calendar filters every `kind === "you"` event OFF the
+  // hour axis into a non-timed `waiting` lane. That mistaken rationale is what
+  // shipped this. So: carried waiting work goes in a lane above the grid, and
+  // only a draft that started waiting TODAY keeps its place on the clock.
   const todayDays = days.filter((d) => d.isToday);
   const todayDayKey = todayDays[0]?.key;
   // planEvents() is not day-scoped (the calendar filters it downstream), so
   // today's key does that here. Breaches are deliberately NOT passed: this
   // strip does not compute cadence, so it shows no breach flags rather than
   // an empty-map flag that would read as "no breaches".
-  const allDayEvents =
+  const allTodayEvents =
     view === "today" && plan && todayDayKey
       ? [
           ...sweepEvents(plan.sweep, today, todayDays),
@@ -149,18 +162,33 @@ export function WeekCard({
           ...waitingEvents(plan.assets, todayDays, today),
         ].filter((e) => e.day === todayDayKey)
       : [];
+  // The lane: waiting work carried in from before this week. Longest wait
+  // first — it is the one the operator most needs to see.
+  const waitLane = allTodayEvents
+    .filter((e) => e.kind === "you" && e.carried)
+    .sort((a, b) => (b.hours ?? 0) - (a.hours ?? 0));
+  const allDayEvents = allTodayEvents.filter((e) => !(e.kind === "you" && e.carried));
   // The window widens to the full day when "now" falls outside the resting
   // one, so the red line is ALWAYS on screen. A day view of the current day
   // that cannot show the current time fails its own promise — and at 04:00
   // the resting 06:00–21:00 window would hide it.
   const nowHour = today.getHours() + today.getMinutes() / 60;
   const win = nowHour >= DAY_WINDOW.start && nowHour < DAY_WINDOW.end ? DAY_WINDOW : FULL_WINDOW;
+  const hourOf = (at: Date) => at.getHours() + at.getMinutes() / 60;
+  // Sorted by POSITION on the axis, not by absolute instant. `stacked` below
+  // walks the list assuming each `top` is ≥ the last one, so an instant-sorted
+  // list silently swallowed chips whenever the two orders disagreed — which is
+  // exactly what a carried event did: a week-old 06:48 draft sorted before
+  // today's 12:08 one and then landed 235px above it, so the 12:08 chip
+  // absorbed it as "+1". Carried events are off the axis now, which makes the
+  // two orders agree again; sorting by the value the layout actually uses is
+  // what keeps them agreeing.
   const dayEvents = allDayEvents
     .filter((e) => {
-      const h = e.at.getHours() + e.at.getMinutes() / 60;
+      const h = hourOf(e.at);
       return h >= win.start && h < win.end;
     })
-    .sort((a, b) => a.at.getTime() - b.at.getTime());
+    .sort((a, b) => hourOf(a.at) - hourOf(b.at) || a.at.getTime() - b.at.getTime());
   // Anything outside the drawn window is COUNTED, never silently dropped.
   const outsideCount = allDayEvents.length - dayEvents.length;
 
@@ -235,6 +263,32 @@ export function WeekCard({
       )}
       {status === "success" && plan && (
         <>
+          {/* The waiting lane sits ABOVE the scrolling body, not inside it: a
+              draft that has waited nine days must not be reachable only by
+              scrolling a time axis it does not belong to. Present only in the
+              day view, and only when something actually carried in. */}
+          {view === "today" && waitLane.length > 0 && (
+            <div className="wd-wait">
+              <span className="wd-wait-gut">waiting</span>
+              {waitLane.slice(0, WAIT_LANE_BOUND).map((event) => (
+                <Link
+                  key={event.id}
+                  href={event.href ?? "/app/approve"}
+                  className="wd-wait-chip"
+                  title={`started waiting before this week — ${event.hours}h, so it has no place on today's clock`}
+                >
+                  {event.lead} · {event.hours}h →
+                </Link>
+              ))}
+              {waitLane.length > WAIT_LANE_BOUND && (
+                // A count is not a door (the calendar's own ruling): the
+                // remainder gets the queue that holds all of it.
+                <Link className="card-link" href="/app/approve">
+                  +{waitLane.length - WAIT_LANE_BOUND} more waiting →
+                </Link>
+              )}
+            </div>
+          )}
           <div className="week-body" ref={bodyRef}>
             {view === "today" ? (
               <div className="wd-grid" style={{ height: windowHeight(win) }}>
@@ -279,7 +333,11 @@ export function WeekCard({
                   })}
                   {dayEvents.length === 0 && (
                     <span className="mark-quiet" style={{ position: "absolute", top: 8, left: 10 }}>
-                      Nothing on the clock today.
+                      {waitLane.length > 0
+                        ? // An empty axis over a full lane is not a quiet day —
+                          // say which fact the empty axis reports.
+                          "Nothing is timed for today — the waiting work above has no clock time."
+                        : "Nothing on the clock today."}
                     </span>
                   )}
                 </div>

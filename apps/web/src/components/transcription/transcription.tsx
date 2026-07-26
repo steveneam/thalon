@@ -2,13 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  SHELF_DEFAULTS,
+  SHELF_SORT_WORDS,
+  applyShelfFilters,
   dayStamp,
   parseTags,
+  shelfNarrowed,
+  shelfTags,
   sourceFacts,
   sourceLead,
   topRelevance,
   transcriptStamp,
   webOrigin,
+  type ShelfFilters,
+  type ShelfSort,
 } from "@/components/transcription/transcription-model";
 import { SourceThumb } from "@/components/media/source-thumb";
 import { deleteSource, fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
@@ -24,6 +31,9 @@ import { useListKeys } from "@/lib/workspace/keyboard";
 import type { LibraryPayload, LibrarySourceRow, TranscriptPayload } from "@/lib/library/types";
 
 type ReadStatus = "loading" | "error" | "success";
+
+/** What the ingest box's advertised drop will actually read (see `acceptDrop`). */
+const CAPTION_EXTENSIONS = [".srt", ".vtt", ".txt"];
 
 /**
  * Transcription, rebuilt exactly from Library.dc.html (DOCTRINE 0 — the sheet is
@@ -50,6 +60,8 @@ export function Transcription() {
   const [ingestOpen, setIngestOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  /** Neutral channel for what a dropped file did — refusals stay in actionError. */
+  const [dropNote, setDropNote] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptPayload | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   // The selection is a SOURCE, not a position. Ingest prepends and delete
@@ -57,6 +69,7 @@ export function Transcription() {
   // of them — and the Copy/Export buttons act on the row the index lands
   // on (keyed-by-entity sweep, s78). null = the operator hasn't moved yet.
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<ShelfFilters>(SHELF_DEFAULTS);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [now] = useState(() => new Date());
 
@@ -83,11 +96,18 @@ export function Transcription() {
   const rows = payload?.sources ?? [];
   const seam = payload?.seam;
   const captionMode = seam?.selected === "caption-file";
-  const selectedIndex = selectedId ? rows.findIndex((row) => row.id === selectedId) : -1;
+  // The shelf the operator is actually looking at. Every downstream index — the
+  // `.row.sel` cursor, j/k, ↵ open, d delete — walks THIS list, never the
+  // unnarrowed one: a cursor that can land on a row the filter removed is the
+  // same keyed-by-entity hazard the s78 sweep closed here, one step removed.
+  const shown = applyShelfFilters(rows, filters);
+  const narrowed = shelfNarrowed(filters);
+  const tags = shelfTags(rows);
+  const selectedIndex = selectedId ? shown.findIndex((row) => row.id === selectedId) : -1;
   const active = selectedIndex >= 0 ? selectedIndex : 0;
-  const activeRow: LibrarySourceRow | undefined = rows[active];
+  const activeRow: LibrarySourceRow | undefined = shown[active];
   const moveTo = (index: number) => {
-    const row = rows[Math.max(0, Math.min(index, rows.length - 1))];
+    const row = shown[Math.max(0, Math.min(index, shown.length - 1))];
     if (row) setSelectedId(row.id);
   };
   const openRow = transcript ? (rows.find((row) => row.id === transcript.sourceId) ?? null) : null;
@@ -122,7 +142,69 @@ export function Transcription() {
       setCaptions("");
       setTagsRaw("");
       setIngestOpen(false);
+      setDropNote(null);
+      // A write must not land behind a filter: an ingest the operator cannot
+      // see reads as a failed ingest. The narrowing clears (the sort, which
+      // hides nothing, stays).
+      setFilters((f) => ({ ...SHELF_DEFAULTS, sort: f.sort }));
     });
+  }
+
+  /**
+   * The ingest box's advertised file drop (s79 verify round, T2 3/3).
+   *
+   * The sheet's own placeholder says "or drop a file" and nothing read one, so
+   * a dropped .srt was handled by the BROWSER: Chrome navigates the tab to the
+   * file (losing the typed URL and tags), Firefox pastes a file:// path into
+   * the box that then fails ingest's https-only refine. So the first duty here
+   * is `preventDefault` on both events — the drop can never leave the surface.
+   *
+   * WHAT THE NAIVE FIX WOULD HAVE DONE (the audit's own sketch): read the file
+   * into `captions` and stop. That is worse than the bug. Captions are consumed
+   * ONLY by the caption-file provider (packages/engine transcript.ts) — the
+   * live seam is hosted-vendor, which fetches from the link and ignores them —
+   * and the captions textarea is not even rendered outside caption mode. The
+   * file would have vanished into invisible state under a button still disabled
+   * by `!url.trim()`. So a drop the seam cannot use is REFUSED BY NAME instead,
+   * and a drop it can use opens the panel so the operator sees where it landed.
+   */
+  async function acceptDrop(file: File) {
+    const name = file.name.toLowerCase();
+    if (!CAPTION_EXTENSIONS.some((ext) => name.endsWith(ext))) {
+      setDropNote(null);
+      setActionError(
+        `“${file.name}” isn’t a caption file — drop a .srt, .vtt or .txt transcript, or paste the video URL instead.`,
+      );
+      return;
+    }
+    if (!captionMode) {
+      setDropNote(null);
+      setActionError(
+        `This workspace transcribes from the link (provider “${seam?.selected ?? "unknown"}”), so a dropped caption file has nothing to read it — paste the video URL instead. A dropped transcript only applies on the caption-file provider.`,
+      );
+      return;
+    }
+    let text: string;
+    try {
+      text = await file.text();
+    } catch (err) {
+      // A read that fails is a read that failed — never a silent no-op.
+      setDropNote(null);
+      setActionError(
+        `Couldn’t read “${file.name}”: ${err instanceof Error ? err.message : "the file could not be read"}`,
+      );
+      return;
+    }
+    setCaptions(text);
+    setIngestOpen(true);
+    setActionError(null);
+    // The schema requires a URL regardless — the source keeps its provenance —
+    // so say so at the moment the captions land rather than at submit.
+    setDropNote(
+      `Read ${text.split(/\r?\n/).length} lines from ${file.name}${
+        url.trim() ? "" : " — paste the video URL above to ingest it"
+      }.`,
+    );
   }
 
   async function openSource(row: LibrarySourceRow) {
@@ -204,8 +286,15 @@ export function Transcription() {
     <div className="content transcription-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 className="t-headline">Transcription</h1>
+        {/* A narrowed shelf never passes for the whole shelf: the pill states
+            the bound, so the count can't assert a number nothing on screen
+            supports. */}
         <span className="pill pill-idle">
-          {status === "success" ? `${rows.length} sources` : "– sources"}
+          {status !== "success"
+            ? "– sources"
+            : narrowed
+              ? `${shown.length} of ${rows.length} sources`
+              : `${rows.length} sources`}
         </span>
         <div style={{ flex: 1 }} />
         <span className="t-label">
@@ -213,7 +302,18 @@ export function Transcription() {
         </span>
       </div>
 
-      <form className="ingest" onSubmit={submitIngest}>
+      <form
+        className="ingest"
+        onSubmit={submitIngest}
+        // Both are required: without onDragOver's preventDefault the drop event
+        // never fires at all, and without onDrop's the browser owns the file.
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          const file = event.dataTransfer?.files?.[0];
+          if (file) void acceptDrop(file);
+        }}
+      >
         <input
           className="ingest-box"
           aria-label="Video URL"
@@ -222,12 +322,26 @@ export function Transcription() {
           onChange={(event) => setUrl(event.target.value)}
           onFocus={() => setIngestOpen(true)}
         />
+        {/* A dimmed control must say WHICH kind of not-now it is: the label
+            flips while the ingest is in flight (running ≠ not ready), and the
+            resting refusal names what it is waiting for instead of leaving the
+            operator to guess why the primary button is inert. */}
         <button
           type="submit"
           className="btn btn-primary"
           disabled={busy || !url.trim() || (captionMode && !captions.trim())}
+          aria-busy={busy || undefined}
+          title={
+            busy
+              ? undefined
+              : !url.trim()
+                ? "Paste a video URL first — it becomes the source's provenance."
+                : captionMode && !captions.trim()
+                  ? "The caption-file provider can’t fetch from a link — paste the captions below."
+                  : undefined
+          }
         >
-          Ingest
+          {busy ? "Ingesting…" : "Ingest"}
         </button>
       </form>
 
@@ -274,6 +388,12 @@ export function Transcription() {
         </span>
       )}
 
+      {dropNote && (
+        <span className="t-label" role="status">
+          {dropNote}
+        </span>
+      )}
+
       {status === "loading" && (
         <div className="card">
           <div className="row">
@@ -310,14 +430,95 @@ export function Transcription() {
         </section>
       )}
 
+      {/* THE VIEW KNOBS. Gated on a shelf that HAS rows: a filter row above
+          "Nothing ingested yet" would be a control with nothing to control —
+          the exact dead affordance this pass exists to remove. */}
+      {status === "success" && rows.length > 0 && (
+        <div className="shelf-knobs">
+          <input
+            className="find-input"
+            type="search"
+            aria-label="Find a source"
+            placeholder="Find title, URL, tag…"
+            value={filters.find}
+            onChange={(event) => setFilters((f) => ({ ...f, find: event.target.value }))}
+          />
+          {tags.length > 0 && (
+            <div className="btn btn-ghost btn-sm sel-ctl">
+              {filters.tag === "" ? "All tags" : filters.tag}
+              <span className="chev" />
+              <select
+                className="sel-native"
+                aria-label="Tag filter"
+                value={filters.tag}
+                onChange={(event) => setFilters((f) => ({ ...f, tag: event.target.value }))}
+              >
+                <option value="">All tags</option>
+                {/* The shelf's own vocabulary — a tag exists as a filter option
+                    only because a source carries it. */}
+                {tags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="btn btn-ghost btn-sm sel-ctl">
+            {SHELF_SORT_WORDS[filters.sort]}
+            <span className="chev" />
+            <select
+              className="sel-native"
+              aria-label="Sort order"
+              value={filters.sort}
+              onChange={(event) =>
+                setFilters((f) => ({ ...f, sort: event.target.value as ShelfSort }))
+              }
+            >
+              {(Object.keys(SHELF_SORT_WORDS) as ShelfSort[]).map((value) => (
+                <option key={value} value={value}>
+                  {SHELF_SORT_WORDS[value]}
+                </option>
+              ))}
+            </select>
+          </div>
+          {narrowed && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setFilters((f) => ({ ...SHELF_DEFAULTS, sort: f.sort }))}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {status === "success" && (
         <div className="card">
           {rows.length === 0 ? (
             <div className="row">
               <span className="t-label">Nothing ingested yet — paste a video URL above.</span>
             </div>
+          ) : shown.length === 0 ? (
+            <div className="row">
+              {/* The KNOB emptied it, never "nothing here" — lane 1's rule
+                  across leads/board/runs, one grammar. */}
+              <span className="t-label" style={{ flex: 1 }}>
+                No source matches {filters.find.trim() !== "" ? `“${filters.find.trim()}”` : "this tag"}
+                {filters.tag !== "" && filters.find.trim() !== "" ? ` tagged ${filters.tag}` : ""} —{" "}
+                {rows.length} {rows.length === 1 ? "source is" : "sources are"} on the shelf.
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setFilters((f) => ({ ...SHELF_DEFAULTS, sort: f.sort }))}
+              >
+                Clear
+              </button>
+            </div>
           ) : (
-            rows.map((row, index) => {
+            shown.map((row, index) => {
               const relevance = topRelevance(row);
               const origin = webOrigin(row.uri);
               return (
@@ -368,25 +569,27 @@ export function Transcription() {
                     type="button"
                     className="btn btn-ghost btn-sm"
                     disabled={busy}
+                    aria-busy={busy || undefined}
                     onClick={(event) => {
                       event.stopPropagation();
                       setSelectedId(row.id);
                       void copySource(row);
                     }}
                   >
-                    {copiedId === row.id ? "Copied" : "Copy transcript"}
+                    {copiedId === row.id ? "Copied" : busy ? "Working…" : "Copy transcript"}
                   </button>
                   <button
                     type="button"
                     className="btn btn-quiet btn-sm"
                     disabled={busy}
+                    aria-busy={busy || undefined}
                     onClick={(event) => {
                       event.stopPropagation();
                       setSelectedId(row.id);
                       void openSource(row);
                     }}
                   >
-                    Export
+                    {busy ? "Working…" : "Export"}
                   </button>
                   <span className="t-data">{dayStamp(row.createdAt, now)}</span>
                 </div>
@@ -410,6 +613,7 @@ export function Transcription() {
                 type="button"
                 className="btn btn-quiet btn-sm"
                 disabled={busy || (EXPORT_BUILDERS[format].timed && !timed)}
+                aria-busy={busy || undefined}
                 title={
                   EXPORT_BUILDERS[format].timed && !timed
                     ? "This transcript has no cue timings (plain-text ingest) — timed exports would invent timestamps."
@@ -425,9 +629,10 @@ export function Transcription() {
                 type="button"
                 className="btn btn-danger btn-sm"
                 disabled={busy}
+                aria-busy={busy || undefined}
                 onClick={() => void removeSource(openRow)}
               >
-                Delete
+                {busy ? "Working…" : "Delete"}
               </button>
             )}
             <button

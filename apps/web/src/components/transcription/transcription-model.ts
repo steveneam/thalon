@@ -66,6 +66,67 @@ export function topRelevance(row: LibrarySourceRow): { area: string; reason: str
   return { area: top.areaName, reason: top.reason };
 }
 
+/* ── THE VIEW KNOBS (founder s77: "re-introduce the good things (like filters,
+   sort by …) from the old design"; the s77 fan-out reached the same gap here
+   independently — "an unbounded shelf with no search, no filter and no sort").
+   Pure so the narrowing is unit-testable, and ONE grammar with lane 1's three
+   surfaces: Approve's `.sel-ctl` pickers plus a find box.
+
+   The verify round (T3 2/3) killed the finding's other half: the per-row tags
+   are NOT chip-shaped, so they are not a lying control — they are prose inside
+   a nowrap `.excerpt` that clips them out of view. The fix is therefore a real
+   tag control in the band, never the row text restyled into chips. ── */
+
+export type ShelfSort = "newest" | "oldest" | "title";
+
+export interface ShelfFilters {
+  find: string;
+  /** "" = every tag; otherwise the one tag being filtered on. */
+  tag: string;
+  sort: ShelfSort;
+}
+
+export const SHELF_DEFAULTS: ShelfFilters = { find: "", tag: "", sort: "newest" };
+
+/** Every tag on the shelf, deduped and sorted — the tag filter's own vocabulary. */
+export function shelfTags(rows: LibrarySourceRow[]): string[] {
+  return [...new Set(rows.flatMap((row) => row.tags))].sort((a, b) => a.localeCompare(b));
+}
+
+/** True when any knob is off its default — what the surface must SAY it is doing. */
+export function shelfNarrowed(filters: ShelfFilters): boolean {
+  return filters.find.trim() !== "" || filters.tag !== "";
+}
+
+/**
+ * Find matches the row's identity, its URL and its tags — the three things an
+ * operator would type. Sort defaults to the route's own newest-first.
+ */
+export function applyShelfFilters(
+  rows: LibrarySourceRow[],
+  filters: ShelfFilters,
+): LibrarySourceRow[] {
+  const needle = filters.find.trim().toLowerCase();
+  const matched = rows.filter((row) => {
+    if (filters.tag !== "" && !row.tags.includes(filters.tag)) return false;
+    if (needle === "") return true;
+    const haystack = [sourceLead(row), row.uri ?? "", ...row.tags].join(" ").toLowerCase();
+    return haystack.includes(needle);
+  });
+  const at = (row: LibrarySourceRow) => new Date(row.createdAt).getTime();
+  return [...matched].sort((a, b) => {
+    if (filters.sort === "title") return sourceLead(a).localeCompare(sourceLead(b));
+    return filters.sort === "oldest" ? at(a) - at(b) : at(b) - at(a);
+  });
+}
+
+/** The knob's own word, for the `.sel-ctl` chip face. */
+export const SHELF_SORT_WORDS: Record<ShelfSort, string> = {
+  newest: "Newest first",
+  oldest: "Oldest first",
+  title: "Title A–Z",
+};
+
 /** The transcript panel's stamp: segment count, plus the run time when the ingest carried timings. */
 export function transcriptStamp(segments: WireSegment[]): string {
   const count = `${segments.length} segment${segments.length === 1 ? "" : "s"}`;

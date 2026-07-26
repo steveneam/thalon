@@ -1,0 +1,88 @@
+/*
+ * Dashboard surface atomics.
+ *
+ * The Dashboard sheet's helmet lives in the shell (app/app/workspace.css) for
+ * historical reasons — this surface was rebuilt before README rule 6 existed,
+ * and moving those rules is a lead-owned migration, not a lane's. This file
+ * exists for the rules this lane genuinely owns, and every rule in it is
+ * SCOPED under `.dashboard-surface` (rule 6, enforced by
+ * lib/__tests__/surface-css-scope.test.ts).
+ *
+ * ── WHY THIS FILE EXISTS AT ALL: a status colour lost to the shell's own
+ * link rule (s79 verify round, D5 3/3, measured live) ──
+ *
+ * `.screen a { color: var(--act) }` (workspace.css:76) has specificity (0,1,1)
+ * and beats `.mark-you` (0,1,0). Every waiting mark on this surface is a
+ * <Link> — because every fact is a door — so the amber status text turned
+ * accent blue: measured on /app, all six `.mark-you` computed to `--act`
+ * exactly, over a `--warn-subtle` fill that survived. An amber pill with blue
+ * text is not a status channel, it is a contradiction, and it is the one mark
+ * kind that matters most (what waits on YOU).
+ *
+ * The shell already owns this idiom for every other atom that became a link —
+ * `.pill-warn, .screen a.pill-warn` (workspace.css:146), `.btn-primary,
+ * .screen a.btn-primary` (:133), `.nav-item` (:93). The mark family at
+ * :250-252 was simply missed, and THE BETTER FIX IS THERE: one line in
+ * workspace.css repairs the Calendar's month marks in the same stroke
+ * (calendar-surface.tsx renders the same `.mark`/`.mark-you` grammar as
+ * Links). workspace.css is lead-owned and read-only to a lane, so this is the
+ * lane-legal form and the shell promotion is written up for the lead — the
+ * same call `.sel-ctl` got in s78 lane 1.
+ */
+
+/* Restore each mark's own colour channel against `.screen a`. Scoped `a.mark*`
+   is (0,2,1) and wins; the declarations are byte-identical to the shell's, so
+   a linked mark renders exactly as its span sibling does. `.mark` and
+   `.mark-plan` are covered too — only `you` marks are links today, and the
+   next fact promoted to a door must not have to rediscover this. */
+.dashboard-surface a.mark { color: var(--n-900); }
+.dashboard-surface a.mark-you { color: var(--warn); }
+.dashboard-surface a.mark-plan { color: var(--n-900); }
+.dashboard-surface a.mark:hover { color: var(--n-1000); }
+.dashboard-surface a.mark-you:hover { color: var(--warn); }
+
+/* The day view's chips are the same story one grammar over: `.wd-ev`
+   (workspace.css:208) sets no colour, so a span chip inherits the surface's
+   reading colour while a <Link> chip takes `--act` — the two kinds of chip on
+   one axis disagreed for no reason. */
+.dashboard-surface a.wd-ev { color: var(--n-1000); }
+.dashboard-surface a.wd-ev.wd-you { color: var(--warn); }
+
+/* ── The day view's WAITING LANE (s79 verify round, D4 3/3) ──
+ *
+ * Carried waiting work is not an event on today's clock; it is a present state
+ * that started before this week. The main calendar already draws exactly this
+ * distinction — a non-timed `waiting` lane above the hour grid — so this is
+ * the calendar's own vocabulary at the dashboard's scale, not new grammar.
+ * The chip geometry follows the calendar's `.amber-chip`. */
+.dashboard-surface .wd-wait {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 7px 10px 7px 12px;
+  border-bottom: 1px solid var(--n-400);
+  background: var(--n-100);
+}
+.dashboard-surface .wd-wait-gut {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--n-800);
+  flex: none;
+}
+.dashboard-surface a.wd-wait-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: var(--warn-subtle);
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dashboard-surface a.wd-wait-chip:hover { color: var(--warn); }
