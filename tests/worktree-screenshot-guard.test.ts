@@ -43,12 +43,22 @@ describe("shoot-surface refuses to run from a git worktree", () => {
     while (temps.length > 0) rmSync(temps.pop()!, { recursive: true, force: true });
   });
 
-  /** A fake repo root carrying a real copy of the script + its lib. */
+  /**
+   * Every script that reports on the LEAD's dev server, and so must refuse to
+   * run from a lane. Both carry the same false-pass hazard: the server they
+   * point at serves MAIN, so a lane running either one measures code that is
+   * not its own and reads the result as its branch passing.
+   */
+  const GATED_SCRIPTS = ["scripts/shoot-surface.mjs", "scripts/drive-surface.mjs"];
+
+  /** A fake repo root carrying real copies of the scripts + their libs. */
   function fakeRepo(dotGit: "file" | "dir" | "none"): string {
     const root = tempDir();
     mkdirSync(path.join(root, "scripts", "lib"), { recursive: true });
-    cpSync(path.join(REPO, "scripts/shoot-surface.mjs"), path.join(root, "scripts/shoot-surface.mjs"));
-    cpSync(path.join(REPO, "scripts/lib/worktree.mjs"), path.join(root, "scripts/lib/worktree.mjs"));
+    for (const s of GATED_SCRIPTS) cpSync(path.join(REPO, s), path.join(root, s));
+    for (const lib of ["worktree.mjs", "surface-driver.mjs", "surface-jobs.mjs"]) {
+      cpSync(path.join(REPO, "scripts/lib", lib), path.join(root, "scripts/lib", lib));
+    }
     if (dotGit === "file") {
       writeFileSync(path.join(root, ".git"), "gitdir: /home/deploy/work/thalon/.git/worktrees/lane\n");
     } else if (dotGit === "dir") {
@@ -57,8 +67,8 @@ describe("shoot-surface refuses to run from a git worktree", () => {
     return root;
   }
 
-  function runScript(root: string, args: string[]) {
-    return spawnSync(process.execPath, [path.join(root, "scripts/shoot-surface.mjs"), ...args], {
+  function runScript(root: string, args: string[], script = "scripts/shoot-surface.mjs") {
+    return spawnSync(process.execPath, [path.join(root, script), ...args], {
       encoding: "utf8",
     });
   }
@@ -134,5 +144,47 @@ describe("shoot-surface refuses to run from a git worktree", () => {
     }).stdout;
     expect(src).toContain("isWorktreeRoot");
     expect(src).toMatch(/refuseInsideWorktree\(\s*base\s*,/);
+  });
+
+  /**
+   * THE INTERACTION DRIVER IS GATED THE SAME WAY (s79).
+   *
+   * `drive-surface.mjs` answers "can an operator do the job?" against the dev
+   * server — which is the LEAD's, serving MAIN. A lane driving it would exercise
+   * main's code and read the resulting jobs table as its own branch passing:
+   * the identical false pass the screenshot gate refuses, and a worse one,
+   * because a jobs table reads as proof the surface WORKS.
+   *
+   * Pinned as its own case rather than folded into the loop above so the failure
+   * message names the driver when someone deletes its refusal.
+   */
+  it("REFUSES to drive a surface from a worktree too — a jobs table reads as proof", () => {
+    const result = runScript(fakeRepo("file"), ["--jobs", "dashboard"], "scripts/drive-surface.mjs");
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(WORKTREE_REFUSAL_LEAD);
+    expect(result.stderr).toContain("false pass on a gate");
+    // Refused before any browser or job ran — no table, not even an empty one.
+    expect(result.stdout).not.toContain("JOBS");
+
+    const src = spawnSync("cat", [path.join(REPO, "scripts/drive-surface.mjs")], {
+      encoding: "utf8",
+    }).stdout;
+    expect(src).toContain("isWorktreeRoot");
+    expect(src).toContain("worktreeRefusalMessage");
+  });
+
+  /**
+   * A harness error must never be reported as a passing job. The driver counts
+   * them separately and exits non-zero, because the s79 baseline run proved the
+   * hazard is real: four of its own selectors were wrong, two of which produced
+   * PASSES on surfaces that genuinely carry the defect.
+   */
+  it("keeps the driver's harness-error path distinct from a product verdict", () => {
+    const src = spawnSync("cat", [path.join(REPO, "scripts/drive-surface.mjs")], {
+      encoding: "utf8",
+    }).stdout;
+    expect(src).toMatch(/verdict\s*=\s*err && err\.verdict \? err\.verdict : "error"/);
+    expect(src).toContain("failed inside the HARNESS, not the product");
+    expect(src).toMatch(/process\.exit\(1\)/);
   });
 });
