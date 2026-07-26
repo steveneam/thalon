@@ -102,3 +102,32 @@ export function contentTypeFor(name: string): string | null {
  * cheap because every dir-served response carries an ETag.
  */
 export const PREVIEW_CACHE_CONTROL = "no-cache, must-revalidate";
+
+/**
+ * THE PREVIEW DOOR MUST ANSWER A NULL-ORIGIN REQUEST (s79, founder-found).
+ *
+ * The dossier renders each site in `sandbox="allow-scripts"` WITHOUT
+ * `allow-same-origin` — deliberately, because the previewed pages carry real
+ * scripts and must not be able to reach the workspace's origin. The cost of that
+ * (correct) choice is that the iframe's document has an OPAQUE origin, so every
+ * subresource it fetches is cross-origin relative to this app.
+ *
+ * Fonts are always fetched in CORS mode, so without this header they are blocked
+ * outright: the browser logs `Access to font at '…/fonts/shantell-sans-var.woff2'
+ * from origin 'null' has been blocked by CORS policy`, and the preview silently
+ * falls back to system type — on a portfolio whose whole point is showing
+ * typography, including a "novel typography" category. `<img>` is not CORS-mode,
+ * which is exactly why the images looked fine and only the type was wrong.
+ *
+ * The founder saw the console errors before any gate did; the driver had reported
+ * the surface green because it watched the DOM and never listened to the console.
+ *
+ * Wildcard is the honest value and it widens nothing: an opaque origin can never
+ * be named in an allowlist, this door serves only content-type-allowlisted static
+ * bytes out of the portfolio tree, and a wildcard forbids credentialed requests
+ * by spec — so the workspace auth gate in front of `/api/…` is untouched.
+ * Fixing it the other way (adding `allow-same-origin`) would hand the previewed
+ * sites' scripts the workspace origin, which is the one thing the sandbox exists
+ * to prevent.
+ */
+export const PREVIEW_ALLOW_ORIGIN = "*";

@@ -1,6 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import {
+  PREVIEW_ALLOW_ORIGIN,
   PREVIEW_CACHE_CONTROL,
   contentTypeFor,
   hasExtension,
@@ -94,7 +95,14 @@ async function serveFromDir(
   if (!info.isFile()) return notFound();
 
   const etag = `W/"${info.size.toString(16)}-${Math.trunc(info.mtimeMs).toString(16)}"`;
-  const revalidation = { etag, "cache-control": PREVIEW_CACHE_CONTROL };
+  // The sandboxed dossier iframe has an OPAQUE origin, so its font fetches are
+  // cross-origin and CORS-mode — see PREVIEW_ALLOW_ORIGIN for why wildcard is
+  // both correct and non-widening here.
+  const revalidation = {
+    etag,
+    "cache-control": PREVIEW_CACHE_CONTROL,
+    "access-control-allow-origin": PREVIEW_ALLOW_ORIGIN,
+  };
   if (request.headers.get("if-none-match") === etag) {
     return new Response(null, { status: 304, headers: revalidation });
   }
@@ -134,6 +142,9 @@ async function serveFromOrigin(
       "content-type": contentType,
       "cache-control": upstream.headers.get("cache-control") ?? PREVIEW_CACHE_CONTROL,
       "x-content-type-options": "nosniff",
+      // Same reason as the dir path: staging serves the dossier's fonts to a
+      // null-origin sandboxed iframe.
+      "access-control-allow-origin": PREVIEW_ALLOW_ORIGIN,
     },
   });
 }

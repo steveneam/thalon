@@ -22,6 +22,9 @@ export default defineConfig({
   test: {
     name: "engine",
     environment: "node",
+    // Hermetic data dir — a suite that writes the developer's real .data
+    // wrote the state that broke video ingest at s79 (see the setup file).
+    setupFiles: [path.resolve(dirname, "../../tests/setup/hermetic-data-dir.ts")],
     // PGlite (via @thalon/db fixtures) is WASM; first boot per test file can be slow on CI.
     testTimeout: 30_000,
   },

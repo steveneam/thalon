@@ -316,6 +316,7 @@ export function Transcription() {
       >
         <input
           className="ingest-box"
+          name="video-url"
           aria-label="Video URL"
           placeholder="Paste a video URL or drop a file — transcript in, chunked, ready to ground on…"
           value={url}
@@ -355,6 +356,7 @@ export function Transcription() {
           {captionMode && (
             <textarea
               className="ingest-box ingest-field"
+              name="captions"
               aria-label="Captions (SRT, WebVTT, or plain text)"
               placeholder="Paste the captions here (SRT / WebVTT / plain text)…"
               rows={5}
@@ -364,6 +366,7 @@ export function Transcription() {
           )}
           <input
             className="ingest-box ingest-field"
+            name="tags"
             aria-label="Tags (comma-separated, optional)"
             placeholder="Tags, comma-separated (optional) — e.g. hooks, ai tools"
             value={tagsRaw}
@@ -438,6 +441,7 @@ export function Transcription() {
           <input
             className="find-input"
             type="search"
+            name="find-source"
             aria-label="Find a source"
             placeholder="Find title, URL, tag…"
             value={filters.find}
@@ -449,6 +453,7 @@ export function Transcription() {
               <span className="chev" />
               <select
                 className="sel-native"
+                name="tag-filter"
                 aria-label="Tag filter"
                 value={filters.tag}
                 onChange={(event) => setFilters((f) => ({ ...f, tag: event.target.value }))}
@@ -469,6 +474,7 @@ export function Transcription() {
             <span className="chev" />
             <select
               className="sel-native"
+              name="sort-order"
               aria-label="Sort order"
               value={filters.sort}
               onChange={(event) =>

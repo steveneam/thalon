@@ -23,7 +23,7 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isWorktreeRoot, worktreeRefusalMessage } from "./lib/worktree.mjs";
-import { DEFAULT_BASE, goto, inventory, launch, openPage } from "./lib/surface-driver.mjs";
+import { DEFAULT_BASE, goto, inventory, launch, openPage, watchConsole } from "./lib/surface-driver.mjs";
 import { JOBS, surfaces } from "./lib/surface-jobs.mjs";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -102,6 +102,7 @@ try {
     console.log(`\n=== JOBS ${name} (${spec.route}) ===`);
     for (const job of spec.jobs) {
       const page = await openPage(browser, { mode });
+      const problems = watchConsole(page);
       let verdict = "works";
       let note = "";
       try {
@@ -115,6 +116,12 @@ try {
         note = (err && err.message ? err.message : String(err)).split("\n")[0].slice(0, 160);
         if (verdict === "error") broken++;
       }
+      // A surface that LOOKS right while the console is red is not working — the
+      // founder saw exactly that on a table this driver called 29-of-29 green.
+      if (verdict === "works" && problems.length > 0) {
+        verdict = "console";
+        note = `${problems.length} console/page problem(s): ${problems.slice(0, 2).map((p) => `[${p.kind}] ${p.text}`).join(" · ")}`;
+      }
       rows.push({ job: job.name, verdict, note });
       await page.close();
     }
@@ -123,6 +130,7 @@ try {
       "dead-door": "✗ DEAD DOOR",
       "no-affordance": "— NO AFFORDANCE",
       undriven: "· UNDRIVEN",
+      console: "⚠ CONSOLE",
       error: "! HARNESS",
     };
     for (const r of rows) {

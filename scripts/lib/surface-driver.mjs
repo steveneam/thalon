@@ -99,6 +99,39 @@ export async function launch(puppeteer) {
   });
 }
 
+/**
+ * COLLECT WHAT THE BROWSER COMPLAINS ABOUT (s79).
+ *
+ * The founder said "its showing console and recoverable error" on a surface this
+ * driver had just reported as 29-of-29 green — because the driver watched the DOM
+ * and never listened to the console. A React error boundary that recovers, a
+ * failed fetch, an unhandled rejection: all of them leave the page looking
+ * correct and the operator staring at a red badge.
+ *
+ * So every page now records console errors and page exceptions, and a job set is
+ * only clean if the console is clean too.
+ */
+export function watchConsole(page) {
+  const problems = [];
+  page.on("console", (msg) => {
+    if (msg.type() !== "error" && msg.type() !== "warning") return;
+    const text = msg.text();
+    // Next's dev overlay narrates its own hydration/HMR chatter; keep real errors.
+    if (/Download the React DevTools/i.test(text)) return;
+    problems.push({ kind: msg.type(), text: text.slice(0, 300) });
+  });
+  page.on("pageerror", (err) => {
+    problems.push({ kind: "pageerror", text: String(err.message || err).slice(0, 300) });
+  });
+  page.on("requestfailed", (req) => {
+    problems.push({ kind: "requestfailed", text: `${req.method()} ${req.url().slice(0, 120)} — ${req.failure()?.errorText ?? "failed"}` });
+  });
+  page.on("response", (res) => {
+    if (res.status() >= 500) problems.push({ kind: "http", text: `${res.status()} ${res.url().slice(0, 120)}` });
+  });
+  return problems;
+}
+
 export async function openPage(browser, { mode = "dark" } = {}) {
   const page = await browser.newPage();
   const { width, height } = screenSize();
