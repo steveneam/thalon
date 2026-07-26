@@ -1,4 +1,4 @@
-/* global document, window, DataTransfer, DragEvent, File */
+/* global document, window, DataTransfer, DragEvent, File, fetch */
 // The globals above run INSIDE THE BROWSER via page.evaluate — see the note in
 // surface-driver.mjs. `DataTransfer`/`DragEvent`/`File` are the drag payload the
 // transcription drop job dispatches; ESLint lints this file as Node and cannot
@@ -22,7 +22,7 @@
 // is for, so they stay valid across sessions and lanes; that is what makes the
 // table comparable over time instead of a snapshot of one diff.
 
-import { control, DeadDoor, NoAffordance, press, text, Undriven } from "./surface-driver.mjs";
+import { control, DeadDoor, goto, NoAffordance, press, text, Undriven } from "./surface-driver.mjs";
 
 /** Wait for a body-text predicate, or fail with what was actually on screen. */
 async function expectText(page, pattern, what) {
@@ -913,6 +913,616 @@ export const JOBS = {
             throw new DeadDoor(`the card says "${cuts[0]}" and the page it opens says "none yet" — the family line mixes scopes`);
           }
           return `card says ${cuts[0]}, project page agrees`;
+        },
+      },
+    ],
+  },
+
+  /*
+   * THE VIDEO EDITOR — the 27 jobs from the s78 walk, made executable.
+   *
+   * This set is the s80 build's DEFINITION OF DONE. The walk scored the surface
+   * 8 work · 4 dead doors · 15 with no affordance at all, and that table was the
+   * most useful artifact s78 produced precisely because 15 rows were things the
+   * product could not do — a class no pass/fail gate can express. The jobs are
+   * copied here in the walk's own words so the two are comparable line for line;
+   * every no-affordance row is a build item and every dead door a fix.
+   *
+   * Authored from `--inventory` against the live surface, per this file's rule.
+   * What that turned up, which reading would not have:
+   *   - 16:9 really is `SPAN.seg-opt on[aria-hidden]` beside two real BUTTONs.
+   *   - `.blk-cap` plates are real buttons named "Caption N: <text>".
+   *   - No cut the editor opens by DEFAULT carries a music cue (`edl.audio` is
+   *     an empty array on it), so the music jobs report `undriven` rather than
+   *     inventing a verdict from an absent fixture.
+   *
+   * NOT PRESSED, deliberately: `Propose` and `Send cut to Approve` are metered
+   * gateway calls (copilot + the judge) and the sequence gate stands; the aspect
+   * derives and Save MUTATE stored cuts, so driving them would make the table
+   * non-idempotent. Those jobs check that the control is real, enabled and
+   * hittable — reachability, never the spend.
+   */
+  editor: {
+    route: "/app/videos/<projectId>/edit",
+    /**
+     * The operator's real path in: the list, then the project with the most to
+     * edit — and then, deliberately, THE CUT THAT CARRIES A MUSIC CUE.
+     *
+     * Founder call, s80: "can make the one with the music the default". The cut
+     * the editor opens on its own is `project.cuts[0]` — whatever the query
+     * happened to return first — and on this data that cut's `edl.audio` is an
+     * empty array, so every music job would have scored `undriven` and the
+     * whole music lane would have gone unmeasured. Picking the cut with a cue
+     * makes beats + captions + music drivable in one pass.
+     *
+     * This reads the editor's OWN endpoints to find that cut rather than
+     * hardcoding an id, so it keeps working when the fixtures change. That the
+     * default is arbitrary at all is a product finding in its own right, not
+     * something this harness should paper over — it is on the build list.
+     */
+    async resolveRoute(page, { base }) {
+      await goto(page, base, "/app/videos");
+      const pick = await page.evaluate(() => {
+        const scored = Array.from(document.querySelectorAll("a[href*='/app/videos/']"))
+          .map((a) => {
+            const t = (a.textContent || "").replace(/\s+/g, " ");
+            const takes = t.match(/(\d+)\s+takes?/i);
+            return { href: a.getAttribute("href"), takes: takes ? Number(takes[1]) : 0 };
+          })
+          .filter((r) => r.href && /\/app\/videos\/[0-9a-f-]{36}/.test(r.href));
+        if (scored.length === 0) return null;
+        scored.sort((a, b) => b.takes - a.takes);
+        return scored[0];
+      });
+      if (!pick) throw new Undriven("no video project on the list — the editor has nothing to open");
+      const projectId = pick.href.match(/\/app\/videos\/([0-9a-f-]{36})/)[1];
+      const withMusic = await page.evaluate(async (id) => {
+        const detail = await fetch(`/api/videos/${id}`).then((r) => (r.ok ? r.json() : null));
+        const scored = [];
+        for (const cut of detail?.cuts ?? []) {
+          const full = await fetch(`/api/videos/${id}/cuts/${cut.id}`).then((r) => (r.ok ? r.json() : null));
+          const edl = full?.edl;
+          if (!edl || (edl.audio ?? []).length === 0) continue;
+          // RICHEST, not first: the first cut carrying a cue on this data is a
+          // 1-beat scored master with no captions, which left the caption jobs
+          // undriven for want of a plate. Rank by what the job set needs to
+          // exercise — beats AND captions AND the cue.
+          scored.push({
+            id: cut.id,
+            weight: (edl.video ?? []).length + (edl.captions?.lines ?? []).length,
+          });
+        }
+        scored.sort((a, b) => b.weight - a.weight);
+        return scored[0]?.id ?? null;
+      }, projectId);
+      return withMusic
+        ? `/app/videos/${projectId}/edit?cut=${withMusic}`
+        : `/app/videos/${projectId}/edit`;
+    },
+    jobs: [
+      // ---- the four DEAD DOORS the walk found -------------------------------
+      {
+        name: "ask the agent for one of the four edits the copilot suggests",
+        async run(page) {
+          const chip = await page.$(".chipbtn");
+          if (!chip) throw new NoAffordance("no copilot chips on the surface");
+          const label = await page.evaluate((el) => el.textContent.trim(), chip);
+          await press(page, chip, `the "${label}" chip`);
+          const ask = await page.evaluate(
+            () => (document.querySelector("input.cop-box") || {}).value ?? null,
+          );
+          if (ask === null) throw new DeadDoor("the chip has no ask field to fill");
+          // The chip states an edit; the only control that could perform it is
+          // Propose. A chip that fills a box whose one exit is refused is a
+          // suggestion the surface cannot honour.
+          const propose = await page.evaluate(() => {
+            const b = Array.from(document.querySelectorAll("button")).find(
+              (el) => el.textContent.trim() === "Propose",
+            );
+            return b ? { disabled: b.disabled, title: b.getAttribute("title") || "" } : null;
+          });
+          if (!propose) throw new DeadDoor(`chip filled the ask with "${ask}" but there is no Propose control`);
+          if (propose.disabled) {
+            throw new DeadDoor(
+              `chip filled the ask with "${ask}" and Propose is disabled — reason lives only in title: "${propose.title}"`,
+            );
+          }
+          // Reachability only — pressing Propose is a metered gateway call and
+          // the sequence gate stands. The chip fills the ask; whether the agent
+          // HONOURS "Tighten to 30s" is not measured here.
+          return `chip filled the ask with "${ask}" and Propose is live (not pressed — the agent call spends)`;
+        },
+      },
+      {
+        name: "get back to the 16:9 master after switching into a derived cut",
+        async run(page) {
+          const master = await page.evaluate(() => {
+            const el = Array.from(document.querySelectorAll(".seg-opt")).find(
+              (e) => e.textContent.trim() === "16:9",
+            );
+            if (!el) return null;
+            return {
+              tag: el.tagName.toLowerCase(),
+              hidden: el.getAttribute("aria-hidden") === "true",
+              href: el.getAttribute("href") || "",
+            };
+          });
+          if (!master) throw new NoAffordance("the aspect segment offers no 16:9 option");
+          if (master.tag !== "button" && master.tag !== "a") {
+            throw new DeadDoor(
+              `16:9 is a <${master.tag}>${master.hidden ? " aria-hidden" : ""} beside two real buttons — it takes the hover and eats the click`,
+            );
+          }
+          return "16:9 is a real control";
+        },
+      },
+      {
+        name: "select a caption plate or the music cue to edit it, using the keyboard",
+        async run(page) {
+          const cap = await page.$(".blk-cap");
+          if (!cap) throw new Undriven("this cut carries no caption plates to select");
+          await page.evaluate((el) => el.focus(), cap);
+          const focused = await page.evaluate(() => document.activeElement?.className || "");
+          if (!/blk-cap/.test(focused)) throw new DeadDoor("the caption plate cannot take keyboard focus");
+          await page.keyboard.press("Enter");
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          const opened = await page.evaluate(() => /caption/i.test(document.body.innerText) &&
+            document.querySelectorAll(".numfield").length > 0);
+          if (!opened) {
+            throw new DeadDoor(
+              "the plate is focusable and paints its focus ring, but Enter does nothing — it carries onPointerDown only, so the caption inspector is unreachable by keyboard",
+            );
+          }
+          return "Enter on a focused caption plate opens its inspector";
+        },
+      },
+      {
+        name: "find out why Derive or Propose won't respond right now",
+        async run(page) {
+          const refused = await page.evaluate(() => {
+            const els = Array.from(document.querySelectorAll("button.seg-opt, button")).filter(
+              (b) => b.disabled && (b.textContent.trim() === "Propose" || /^(9:16|1:1)$/.test(b.textContent.trim())),
+            );
+            return els.map((b) => ({ label: b.textContent.trim(), title: b.getAttribute("title") || "" }));
+          });
+          if (refused.length === 0) return "nothing is refusing right now — no reason owed";
+          const body = await text(page);
+          // The reason must be READABLE, not parked in a title: disabled
+          // controls get no pointer events, so the tooltip never fires.
+          const spoken = refused.filter((r) => r.title && body.includes(r.title.split(" — ")[0]));
+          if (spoken.length === 0) {
+            throw new DeadDoor(
+              `${refused.length} control(s) refuse with the reason only in a title attribute (e.g. "${refused[0].title}") — disabled controls never show a tooltip and AT skips them`,
+            );
+          }
+          return `${spoken.length} refusal(s) stated on screen`;
+        },
+      },
+
+      // ---- the fifteen with NO AFFORDANCE ----------------------------------
+      {
+        name: "undo a mistaken edit — a bad trim, a wrong take swap, a caption dragged off",
+        async run(page) {
+          const undo = await page.evaluate(() => {
+            const hit = Array.from(document.querySelectorAll("button, [role='button']")).find((b) =>
+              /undo|revert|discard/i.test((b.getAttribute("aria-label") || b.textContent || "")),
+            );
+            return hit ? (hit.textContent || "").trim() : null;
+          });
+          if (!undo) throw new NoAffordance("no undo, revert or discard control anywhere on the surface");
+          return `undo offered as "${undo}"`;
+        },
+      },
+      {
+        name: "leave the surface (or reload) without losing unsaved work",
+        async run(page) {
+          const guard = await page.evaluate(() => {
+            // A guard is either a beforeunload handler or an intercepting exit.
+            const hasBeforeUnload = typeof window.onbeforeunload === "function";
+            const exits = Array.from(document.querySelectorAll("a[href]"))
+              .filter((a) => /\/app\//.test(a.getAttribute("href") || ""))
+              .slice(0, 40).length;
+            return { hasBeforeUnload, exits };
+          });
+          if (!guard.hasBeforeUnload) {
+            throw new NoAffordance(
+              `no unsaved-work guard: ${guard.exits} in-app links leave this surface and none of them intercepts a dirty working copy`,
+            );
+          }
+          return "an unsaved-work guard is installed";
+        },
+      },
+      {
+        name: "drop a beat that shouldn't be in the cut, or add one from the takes pool",
+        async run(page) {
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beat blocks to act on");
+          await press(page, blk, "a beat block");
+          const verbs = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button")).map((b) => (b.textContent || "").trim())
+              .filter((t) => /(remove|delete|insert|add)\b.*(beat|clip|shot)|(beat|clip|shot).*(remove|delete|insert|add)/i.test(t)),
+          );
+          if (verbs.length === 0) {
+            throw new NoAffordance("beat selected — the inspector offers no insert or delete for a beat");
+          }
+          return `beat verbs offered: ${verbs.join(" · ")}`;
+        },
+      },
+      {
+        name: "add a caption line, or delete one the generator wrote",
+        async run(page) {
+          const cap = await page.$(".blk-cap");
+          if (!cap) throw new Undriven("this cut carries no caption plates");
+          await press(page, cap, "a caption plate");
+          const verbs = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button")).map((b) => (b.textContent || "").trim())
+              .filter((t) => /(add|new|delete|remove)\b.*caption|caption.*(add|new|delete|remove)/i.test(t)),
+          );
+          if (verbs.length === 0) {
+            throw new NoAffordance("caption selected — the inspector only patches the existing line; no add, no delete");
+          }
+          return `caption verbs offered: ${verbs.join(" · ")}`;
+        },
+      },
+      {
+        name: "swap the music track for a different one",
+        async run(page) {
+          const music = await page.$(".blk-music");
+          if (!music) throw new Undriven("no cut in this project carries a music cue");
+          await press(page, music, "the music block");
+          /*
+           * SCOPE NOTE, bought with a false pass (s80). An unscoped sweep of
+           * every button matched the COPILOT CHIP labelled "Swap music" — a
+           * suggestion that types words into the ask box, sitting in a
+           * different band of the surface entirely — and scored the job ✓ on a
+           * capability the inspector does not have. The chip is the ask, not
+           * the verb. Look only where the verb would live: the inspector the
+           * music block opens.
+           */
+          const verbs = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button"))
+              .filter((b) => !b.classList.contains("chipbtn") && !b.closest(".copilot"))
+              .map((b) => (b.textContent || "").trim())
+              .filter((t) => /(swap|change|replace|choose|browse).*(track|music|bed)/i.test(t)),
+          );
+          if (verbs.length === 0) {
+            throw new NoAffordance("music selected — the inspector offers offset, gain and tail only; the track itself cannot be changed (the 'Swap music' chip is a copilot ask, not a verb)");
+          }
+          return `music-swap offered in the inspector: ${verbs.join(" · ")}`;
+        },
+      },
+      {
+        name: "choose between candidate takes for a beat — tell them apart, watch one before swapping",
+        async run(page) {
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beats, so no takes strip to fill");
+          await press(page, blk, "a beat block");
+          const strip = await page.evaluate(() => {
+            const tiles = Array.from(document.querySelectorAll("button.take"));
+            return {
+              tiles: tiles.length,
+              named: tiles.filter((t) => /\.(mp4|mov|png|jpg|webm)/i.test(t.textContent || "")).length,
+              playable: tiles.filter((t) => t.querySelector("video, .play-btn, [aria-label*='play' i]")).length,
+            };
+          });
+          if (strip.tiles === 0) throw new Undriven("this beat has no candidate takes to choose between");
+          if (strip.playable === 0) {
+            throw new NoAffordance(
+              `${strip.tiles} candidate take(s) and none can be previewed before swapping; ${strip.named} name their file`,
+            );
+          }
+          return `${strip.tiles} candidates, ${strip.playable} previewable`;
+        },
+      },
+      {
+        name: "see what my edit looks like before committing to a render",
+        async run(page) {
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beats to edit, so nothing to preview");
+          const before = await text(page);
+          // Make the working copy dirty with a real drag, then ask for a preview.
+          const box = await blk.boundingBox();
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2, { steps: 8 });
+          await page.mouse.up();
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          const after = await text(page);
+          if (!/unsaved/i.test(after) && before === after) {
+            throw new Undriven("the drag did not dirty the working copy — cannot ask for a preview of it");
+          }
+          const previews = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button")).map((b) => (b.textContent || "").trim())
+              .filter((t) => /preview|play/i.test(t)),
+          );
+          const honest = /unsaved/i.test(after) && /previous render|last render|not this edit/i.test(after);
+          if (!honest) {
+            throw new NoAffordance(
+              `working copy is dirty and the player still offers only ${previews.join(" · ") || "nothing"} — it plays the PREVIOUS render and never says so`,
+            );
+          }
+          return "the player states it is showing the previous render while dirty";
+        },
+      },
+      {
+        name: "watch the cut and see where I am on the timeline",
+        async run(page) {
+          /*
+           * SELECTOR NOTE, bought with a false pass (s80). This job first read
+           * `.playhead, [role=slider][aria-label*=layhead]` and reported ✓
+           * "aligns at x=341" — because `.playhead` does not exist on this
+           * surface at all, so it matched `DIV.tl-ruler[role=slider]` and
+           * compared the ruler's own left edge against a lane starting at the
+           * same x. It measured one element against itself and called it
+           * agreement. Read the element the defect lives in: the playhead is a
+           * MARKER, and its absence is the finding.
+           */
+          const playBtn = await page.$(".play-btn");
+          if (playBtn) {
+            const disabled = await page.evaluate((el) => el.disabled, playBtn);
+            if (!disabled) {
+              await playBtn.click();
+              await page.waitForNetworkIdle({ idleTime: 500, timeout: 6_000 }).catch(() => {});
+            }
+          }
+          const head = await page.evaluate(() => {
+            const marker = document.querySelector(".playhead");
+            const lane = document.querySelector(".lane-tr");
+            if (!marker || !lane) return { marker: !!marker, lane: !!lane };
+            const a = marker.getBoundingClientRect();
+            const b = lane.getBoundingClientRect();
+            return { marker: true, lane: true, headX: Math.round(a.x), laneX: Math.round(b.x) };
+          });
+          if (!head.marker) {
+            throw new NoAffordance(
+              "the timeline draws no playhead marker — even with the render playing, nothing on the track says where you are, so there is no moment to stop at",
+            );
+          }
+          const drift = head.headX - head.laneX;
+          if (Math.abs(drift) > 2) {
+            throw new DeadDoor(
+              `playhead sits ${drift}px from the lane origin (head x=${head.headX}, lane x=${head.laneX}) — it indexes a different origin than the ruler in its own card`,
+            );
+          }
+          return `playhead marker tracks the lane origin (x=${head.headX})`;
+        },
+      },
+      {
+        name: "see who authored the version I'm editing — me or the agent, and off which ask",
+        async run(page) {
+          const body = await text(page);
+          if (!/(your edit|agent ·|authored by|no attribution recorded)/i.test(body)) {
+            throw new NoAffordance("the header names the cut and its version and never says who authored it");
+          }
+          return "authorship is stated in the header";
+        },
+      },
+      {
+        name: "know that the derived cut I'm editing has fallen behind its parent",
+        async run(page) {
+          const body = await text(page);
+          if (!/derived from|parent now v|no auto-sync/i.test(body)) {
+            throw new NoAffordance(
+              "lineage is loaded and carried forward on save but never shown — no parent name, no staleness, no door to the master",
+            );
+          }
+          return "lineage and staleness are stated";
+        },
+      },
+      {
+        name: "check on a render after reloading the page or coming back from another surface",
+        async run(page, { base }) {
+          const url = await urlNow(page);
+          await goto(page, base, "/app/videos");
+          await goto(page, base, url);
+          const body = await text(page);
+          if (!/render(ing|)\b.*(in flight|running|queued|%)|job \w+/i.test(body)) {
+            throw new NoAffordance(
+              "came back to the surface and it states nothing about any render in flight — the job poll starts fresh and a running render is invisible",
+            );
+          }
+          return "an in-flight render is reported on return";
+        },
+      },
+      {
+        name: "compare two versions to see what actually changed between v6 and v7",
+        async run(page) {
+          const diff = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button, a")).map((b) => (b.textContent || "").trim())
+              .filter((t) => /diff|compare|what changed/i.test(t)),
+          );
+          if (diff.length === 0) {
+            throw new NoAffordance("no compare or diff control — 'Cut history →' leads to a version strip with authorship, not a diff");
+          }
+          return `compare offered as ${diff.join(" · ")}`;
+        },
+      },
+      {
+        name: "save an edit as a new NAMED variant instead of the next version of the same name",
+        async run(page) {
+          const saveAs = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button")).map((b) => (b.textContent || "").trim())
+              .filter((t) => /save as|new variant|duplicate|fork/i.test(t)),
+          );
+          if (saveAs.length === 0) {
+            throw new NoAffordance("the primary button hard-codes the cut's own name — every save is the next version of the same cut");
+          }
+          return `variant save offered as ${saveAs.join(" · ")}`;
+        },
+      },
+      {
+        name: "delete a bad version or an abandoned derived cut",
+        async run(page) {
+          const del = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button")).map((b) => (b.textContent || "").trim())
+              .filter((t) => /delete|remove|discard/i.test(t) && /version|cut|derive/i.test(t)),
+          );
+          if (del.length === 0) throw new NoAffordance("no way to delete a version or an abandoned derived cut");
+          return `delete offered as ${del.join(" · ")}`;
+        },
+      },
+      {
+        name: "start the first cut on a project that has takes but none",
+        async run(page) {
+          const body = await text(page);
+          if (!/no cut yet|start (the )?first cut|create a cut/i.test(body)) {
+            return "this project already has a cut — the empty state is not on screen";
+          }
+          const start = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button, a")).some((b) =>
+              /start|create|new cut/i.test((b.textContent || "").trim()),
+            ),
+          );
+          if (!start) throw new NoAffordance("the no-cut empty state is text only — it names no way to start one");
+          return "the empty state offers a way to start the first cut";
+        },
+      },
+
+      // ---- the eight the walk found PRESENT — they must stay working -------
+      {
+        name: "reorder beats, trim at the edges, nudge a caption's fade window",
+        async run(page) {
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beat blocks to drag");
+          const before = await text(page);
+          const box = await blk.boundingBox();
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(box.x + box.width / 2 + 70, box.y + box.height / 2, { steps: 10 });
+          await page.mouse.up();
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          const after = await text(page);
+          if (!/unsaved/i.test(after) && before === after) {
+            throw new DeadDoor("dragged a beat block and nothing about the cut changed");
+          }
+          return "a drag edits the working copy and marks it unsaved";
+        },
+      },
+      {
+        name: "set where the music enters and how it eases out, by ear",
+        async run(page) {
+          const music = await page.$(".blk-music");
+          if (!music) throw new Undriven("no cut in this project carries a music cue");
+          await press(page, music, "the music block");
+          const knobs = await page.evaluate(() => document.querySelectorAll(".numfield").length);
+          if (knobs === 0) throw new DeadDoor("music selected and the inspector offers no controls");
+          return `${knobs} music controls open`;
+        },
+      },
+      {
+        name: "reframe a beat for a vertical crop",
+        async run(page) {
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beats to reframe");
+          await press(page, blk, "a beat block");
+          // Reframe is a WINDOW over the real take, not a button named
+          // "Reframe" — its controls read "x: static → pan". Selector taken
+          // from the live DOM (`.reframe-win`), not from the control's name.
+          const reframe = await page.evaluate(() => ({
+            win: document.querySelectorAll(".reframe-win, .reframe-stage").length,
+            named: /reframe/i.test(document.body.innerText),
+          }));
+          if (reframe.win === 0 && !reframe.named) {
+            throw new NoAffordance("beat selected and no Reframe window is offered");
+          }
+          return `Reframe window open on the selected beat (${reframe.win} stage element(s))`;
+        },
+      },
+      {
+        name: "save the edit as a new version without overwriting the old one",
+        async run(page) {
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beats to edit, so nothing to save");
+          const box = await blk.boundingBox();
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(box.x + box.width / 2 + 70, box.y + box.height / 2, { steps: 10 });
+          await page.mouse.up();
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          // Reachability only — pressing it would write a new version and make
+          // this table non-idempotent.
+          const save = await page.evaluate(() => {
+            const b = Array.from(document.querySelectorAll("button")).find((el) =>
+              /save as v\d+/i.test((el.textContent || "").trim()),
+            );
+            return b ? { label: b.textContent.trim(), disabled: b.disabled } : null;
+          });
+          if (!save) throw new NoAffordance("the cut is dirty and no 'Save as vN+1' control appeared");
+          if (save.disabled) throw new DeadDoor(`"${save.label}" is present but refused on a dirty cut`);
+          return `"${save.label}" is live (not pressed — it would write a version)`;
+        },
+      },
+      {
+        name: "render the cut locally and send it through the judge gate",
+        async run(page) {
+          const controls = await page.evaluate(() => {
+            const all = Array.from(document.querySelectorAll("button"));
+            const find = (re) => {
+              const b = all.find((el) => re.test((el.textContent || "").trim()));
+              return b ? { label: b.textContent.trim(), disabled: b.disabled } : null;
+            };
+            return { render: find(/^render/i), approve: find(/send cut to approve/i) };
+          });
+          if (!controls.render && !controls.approve) {
+            throw new NoAffordance("neither a Render nor a send-to-Approve control is on the surface");
+          }
+          // Never pressed: the render is local compute but the judge gate behind
+          // Approve is a metered call, and the sequence gate stands.
+          const live = [controls.render, controls.approve].filter((c) => c && !c.disabled);
+          if (live.length === 0) {
+            throw new DeadDoor(
+              `both render/approve controls are refused: ${[controls.render, controls.approve].filter(Boolean).map((c) => c.label).join(" · ")}`,
+            );
+          }
+          return `${live.map((c) => `"${c.label}"`).join(" + ")} reachable (not pressed — judge gate spends)`;
+        },
+      },
+      {
+        name: "review an agent proposal, apply it, or dismiss it with a reason",
+        async run(page) {
+          const row = await page.$(".prop-row");
+          if (!row) throw new Undriven("no agent proposal is pending on this cut to review");
+          const verbs = await page.evaluate(() =>
+            Array.from(document.querySelectorAll(".prop-row button")).map((b) => (b.textContent || "").trim()),
+          );
+          if (!verbs.some((v) => /apply/i.test(v)) || !verbs.some((v) => /dismiss/i.test(v))) {
+            throw new DeadDoor(`a proposal is pending and offers only: ${verbs.join(" · ")}`);
+          }
+          return `proposal offers ${verbs.join(" · ")}`;
+        },
+      },
+      {
+        name: "derive a 9:16 or 1:1 recut from this cut",
+        async run(page) {
+          const derive = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button.seg-opt"))
+              .filter((b) => /^(9:16|1:1)$/.test((b.textContent || "").trim()))
+              .map((b) => ({ label: b.textContent.trim(), disabled: b.disabled })),
+          );
+          if (derive.length === 0) throw new NoAffordance("the aspect segment offers no derive options");
+          const live = derive.filter((d) => !d.disabled);
+          if (live.length === 0) {
+            throw new DeadDoor(`both derive options are refused: ${derive.map((d) => d.label).join(" · ")}`);
+          }
+          // Not pressed — a derive writes a new cut row.
+          return `${live.map((d) => d.label).join(" · ")} live (not pressed — a derive writes a cut)`;
+        },
+      },
+      {
+        name: "tell which beats are riding rejected takes",
+        async run(page) {
+          const marks = await page.evaluate(() => {
+            const rows = Array.from(document.querySelectorAll(".beats-scroll button, .beat-row"));
+            return {
+              rows: rows.length,
+              marked: rows.filter((r) => /[✓!·]/.test(r.textContent || "") || r.getAttribute("title")).length,
+            };
+          });
+          if (marks.rows === 0) throw new Undriven("the beats rail has no rows on this cut");
+          if (marks.marked === 0) {
+            throw new NoAffordance(`${marks.rows} beats in the rail and none carries a take-state mark`);
+          }
+          return `${marks.marked} of ${marks.rows} beats carry a take-state mark`;
         },
       },
     ],

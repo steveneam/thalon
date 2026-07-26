@@ -106,7 +106,17 @@ try {
       let verdict = "works";
       let note = "";
       try {
-        await goto(page, base, spec.route);
+        /*
+         * A surface whose route carries an ID cannot be a constant. The editor
+         * lives at /app/videos/<projectId>/edit, and hardcoding one id would
+         * make the table go red the first time a reseed or an archive removed
+         * that row — reporting a PRODUCT defect for a fixture that moved.
+         * `resolveRoute` drives the real list and picks a project the way an
+         * operator reaches one, so the table survives the data changing under
+         * it. `spec.route` stays as the human label for the header line.
+         */
+        const route = spec.resolveRoute ? await spec.resolveRoute(page, { base }) : spec.route;
+        await goto(page, base, route);
         const out = await job.run(page, { base });
         if (typeof out === "string") note = out;
       } catch (err) {
