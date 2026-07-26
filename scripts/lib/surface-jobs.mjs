@@ -1103,33 +1103,85 @@ export const JOBS = {
       {
         name: "undo a mistaken edit — a bad trim, a wrong take swap, a caption dragged off",
         async run(page) {
+          /*
+           * MAKE the mistake, then undo it. The first version of this job
+           * looked for an undo control AT REST and scored no-affordance even
+           * after undo shipped — because there is nothing to undo until
+           * something has been edited, so the control correctly is not there.
+           * A job that checks for a verb without creating the state the verb
+           * acts on measures the fixture, not the product.
+           */
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beat blocks to mis-edit");
+          const order = () =>
+            page.evaluate(() => Array.from(document.querySelectorAll(".blk")).map((b) => b.textContent.trim()).join("|"));
+          const before = await order();
+          const box = await blk.boundingBox();
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(box.x + box.width / 2 + 90, box.y + box.height / 2, { steps: 10 });
+          await page.mouse.up();
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          const mistaken = await order();
+          if (mistaken === before) throw new Undriven("the drag changed nothing, so there is no mistake to undo");
           const undo = await page.evaluate(() => {
             const hit = Array.from(document.querySelectorAll("button, [role='button']")).find((b) =>
-              /undo|revert|discard/i.test((b.getAttribute("aria-label") || b.textContent || "")),
+              /^undo\b/i.test((b.getAttribute("aria-label") || b.textContent || "").trim()),
             );
-            return hit ? (hit.textContent || "").trim() : null;
+            if (!hit) return null;
+            hit.click();
+            return (hit.textContent || "").trim();
           });
-          if (!undo) throw new NoAffordance("no undo, revert or discard control anywhere on the surface");
-          return `undo offered as "${undo}"`;
+          if (!undo) throw new NoAffordance("an edit was made and no undo control appeared anywhere on the surface");
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          const restored = await order();
+          if (restored !== before) {
+            throw new DeadDoor(`"${undo}" was pressed and the cut did not return to its previous state`);
+          }
+          return `a bad drag was undone by "${undo}" — the beat order returned to what it was`;
         },
       },
       {
         name: "leave the surface (or reload) without losing unsaved work",
         async run(page) {
-          const guard = await page.evaluate(() => {
-            // A guard is either a beforeunload handler or an intercepting exit.
-            const hasBeforeUnload = typeof window.onbeforeunload === "function";
-            const exits = Array.from(document.querySelectorAll("a[href]"))
-              .filter((a) => /\/app\//.test(a.getAttribute("href") || ""))
-              .slice(0, 40).length;
-            return { hasBeforeUnload, exits };
-          });
-          if (!guard.hasBeforeUnload) {
+          /*
+           * DRIVE THE EXIT. The first version read
+           * `typeof window.onbeforeunload === "function"`, which is blind to a
+           * guard registered with addEventListener — it would have scored
+           * no-affordance against a working guard, and worse, it tested at rest
+           * where a correct guard is deliberately disarmed. Dirty the cut, then
+           * actually try to leave.
+           */
+          const blk = await page.$(".blk");
+          if (!blk) throw new Undriven("this cut has no beats to edit, so nothing can be at risk");
+          const box = await blk.boundingBox();
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(box.x + box.width / 2 + 90, box.y + box.height / 2, { steps: 10 });
+          await page.mouse.up();
+          await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
+          if (!/unsaved/i.test(await text(page))) {
+            throw new Undriven("the drag did not dirty the working copy");
+          }
+          const from = await urlNow(page);
+          const exit = await page.$("a.card-link[href*='/app/videos/']");
+          if (!exit) throw new Undriven("no in-surface exit link to try");
+          await exit.click();
+          await page.waitForNetworkIdle({ idleTime: 600, timeout: 6_000 }).catch(() => {});
+          const to = await urlNow(page);
+          if (to !== from) {
             throw new NoAffordance(
-              `no unsaved-work guard: ${guard.exits} in-app links leave this surface and none of them intercepts a dirty working copy`,
+              `clicking an exit left for ${to} with unsaved edits on screen — nothing asked, nothing kept`,
             );
           }
-          return "an unsaved-work guard is installed";
+          const body = await text(page);
+          const offers = ["save", "discard", "stay"].filter((v) => new RegExp(v, "i").test(body));
+          if (offers.length < 3) {
+            throw new DeadDoor(
+              `the exit was blocked but the operator is only offered: ${offers.join(" · ") || "nothing"}`,
+            );
+          }
+          return `the exit was intercepted and offers save · discard · stay`;
         },
       },
       {
@@ -1219,29 +1271,49 @@ export const JOBS = {
         async run(page) {
           const blk = await page.$(".blk");
           if (!blk) throw new Undriven("this cut has no beats to edit, so nothing to preview");
-          const before = await text(page);
           // Make the working copy dirty with a real drag, then ask for a preview.
           const box = await blk.boundingBox();
           await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
           await page.mouse.down();
-          await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2, { steps: 8 });
+          await page.mouse.move(box.x + box.width / 2 + 90, box.y + box.height / 2, { steps: 10 });
           await page.mouse.up();
           await page.waitForNetworkIdle({ idleTime: 300, timeout: 4_000 }).catch(() => {});
           const after = await text(page);
-          if (!/unsaved/i.test(after) && before === after) {
+          /*
+           * Require the dirty state POSITIVELY. The first guard here was
+           * `!dirty && before === after`, which let a failed drag through
+           * whenever anything else on the page had changed a character — and
+           * then scored the honest-player line as missing when it was simply
+           * never asked for. If the precondition did not happen, say undriven.
+           */
+          if (!/unsaved/i.test(after)) {
             throw new Undriven("the drag did not dirty the working copy — cannot ask for a preview of it");
           }
-          const previews = await page.evaluate(() =>
-            Array.from(document.querySelectorAll("button")).map((b) => (b.textContent || "").trim())
-              .filter((t) => /preview|play/i.test(t)),
-          );
-          const honest = /unsaved/i.test(after) && /previous render|last render|not this edit/i.test(after);
-          if (!honest) {
+          /*
+           * Two separate facts, scored separately (they were conflated at
+           * first, which made an honest player look like a missing one):
+           *   1. does the player SAY it is showing a different EDL? and
+           *   2. can the operator preview the WORKING COPY at all?
+           * (1) is the honesty fix; (2) is the missing verb. Both must hold
+           * before this job is done.
+           */
+          const saysSo = /unsaved edits are not in it|previous render|last render|not this edit/i.test(after);
+          if (!saysSo) {
             throw new NoAffordance(
-              `working copy is dirty and the player still offers only ${previews.join(" · ") || "nothing"} — it plays the PREVIOUS render and never says so`,
+              "working copy is dirty and the player never says which render it is showing — the edit is read into a video that does not contain it",
             );
           }
-          return "the player states it is showing the previous render while dirty";
+          const canPreview = await page.evaluate(() =>
+            Array.from(document.querySelectorAll("button"))
+              .map((b) => (b.getAttribute("aria-label") || b.textContent || "").trim())
+              .some((t) => /preview (this|the) edit|preview working|render preview/i.test(t)),
+          );
+          if (!canPreview) {
+            throw new NoAffordance(
+              "the player is honest about showing the old render, but there is still no way to preview the working copy itself",
+            );
+          }
+          return "the player names the render it is showing, and the working copy can be previewed";
         },
       },
       {

@@ -84,8 +84,29 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   // MANUAL edit after Apply clears it — the EDL is no longer base + diff and
   // the save door would (rightly) refuse the replay check.
   const [pending, setPending] = useState<VideoCutAttribution | null>(null);
+  /*
+   * THE SAFETY CORE (s80). `apply()` was the single funnel for every manual
+   * edit and it only ever pushed FORWARD — nothing retained the EDL the
+   * operator started from, so a pointer-down within 9px of a beat's right edge
+   * (which starts a trim) plus one pixel of movement rewrote a duration that
+   * could then be restored only by reloading the page, which was never offered
+   * and never warned about. Versioning protected the SAVED version; the working
+   * copy had nothing.
+   *
+   * `past`/`future` are the bounded undo spine; `baseEdl` is the EDL as loaded
+   * or last saved, which is what Discard returns to. All three are client
+   * state over the one working copy — no schema, no new door (pre-plan §1).
+   */
+  const [past, setPast] = useState<Edl[]>([]);
+  const [future, setFuture] = useState<Edl[]>([]);
+  const [baseEdl, setBaseEdl] = useState<Edl | null>(null);
+  /** Where an intercepted exit was heading — non-null means the guard is open. */
+  const [exitTo, setExitTo] = useState<string | null>(null);
   const askRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  /** Bounded so a long session cannot grow the heap without limit. */
+  const UNDO_LIMIT = 50;
 
   const load = useCallback(
     () =>
@@ -105,6 +126,11 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           return fetchCutDetail(projectId, target).then((found) => {
             setCut(found);
             setEdl(found?.edl ?? null);
+            // The stored EDL is what Discard returns to; history starts empty.
+            setBaseEdl(found?.edl ?? null);
+            setPast([]);
+            setFuture([]);
+            setDirty(false);
             setStatus("ready");
           });
         })
@@ -133,12 +159,128 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     return () => clearInterval(timer);
   }, [job, projectId]);
 
-  /** The ONE manual edit funnel — one dirty bit, one working copy. */
+  /**
+   * The ONE manual edit funnel — one dirty bit, one working copy, and now one
+   * history. Every edit pushes the PREVIOUS EDL onto `past` and clears `future`
+   * (a new edit after an undo forks: the redone-away branch is gone, which is
+   * the standard and the only one that cannot surprise).
+   */
   const apply = useCallback((fn: (edl: Edl) => Edl) => {
-    setEdl((current) => (current === null ? current : fn(current)));
+    setEdl((current) => {
+      if (current === null) return current;
+      setPast((stack) => [...stack, current].slice(-UNDO_LIMIT));
+      setFuture([]);
+      return fn(current);
+    });
     setDirty(true);
     setPending(null);
   }, []);
+
+  /** Step back one edit. Dirty stays true — undoing to base is not the same as saving. */
+  const undo = useCallback(() => {
+    setPast((stack) => {
+      if (stack.length === 0) return stack;
+      const previous = stack[stack.length - 1];
+      setEdl((current) => {
+        if (current !== null) setFuture((f) => [current, ...f].slice(0, UNDO_LIMIT));
+        return previous;
+      });
+      setDirty(true);
+      setPending(null);
+      return stack.slice(0, -1);
+    });
+  }, []);
+
+  const redo = useCallback(() => {
+    setFuture((stack) => {
+      if (stack.length === 0) return stack;
+      const [next, ...rest] = stack;
+      setEdl((current) => {
+        if (current !== null) setPast((p) => [...p, current].slice(-UNDO_LIMIT));
+        return next;
+      });
+      setDirty(true);
+      setPending(null);
+      return rest;
+    });
+  }, []);
+
+  /** Back to the stored version — the whole working copy, in one step. */
+  const discard = useCallback(() => {
+    if (baseEdl === null) return;
+    setEdl(baseEdl);
+    setPast([]);
+    setFuture([]);
+    setDirty(false);
+    setPending(null);
+    setSelection(null);
+  }, [baseEdl]);
+
+  /*
+   * ⌘/Ctrl+Z and ⇧⌘/Ctrl+Z. This CANNOT ride `useListKeys`: that grammar
+   * deliberately returns early on ctrlKey||metaKey (lib/workspace/keyboard.ts),
+   * because j/k list navigation must not eat browser shortcuts. So undo needs
+   * its own modifier-aware listener, which is exactly why the audit found
+   * ⌘Z unbound across the whole surface.
+   */
+  useEffect(() => {
+    if (status !== "ready") return;
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "z") return;
+      if ((event.target as HTMLElement | null)?.closest("input, textarea")) return;
+      event.preventDefault();
+      if (event.shiftKey) redo();
+      else undo();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [status, undo, redo]);
+
+  /*
+   * THE UNSAVED-WORK GUARD — every exit, not just the ones in this file.
+   *
+   * The audit named three plain <Link>s ("← project", "Cut history →", "All
+   * takes →") that discard a dirty working copy silently, but they are not the
+   * whole set: the workspace rail is a dozen more, and it is rendered by the
+   * shell, outside this component. Rather than guard three links by hand and
+   * leave the rail unguarded — the kind of partial fix that reads as done — one
+   * CAPTURE-phase listener catches any in-app anchor click while dirty and asks
+   * first. `capture: true` so it runs before Next's own router handler.
+   *
+   * NOT covered, stated rather than implied: the browser BACK button. A history
+   * pop cannot be cancelled without pushing a decoy entry, which corrupts the
+   * back stack for every other surface. beforeunload covers reload and close;
+   * back remains a way to lose a working copy, and it is on the list.
+   */
+  useEffect(() => {
+    if (!dirty) return;
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey) return;
+      const anchor = (event.target as HTMLElement | null)?.closest("a[href]");
+      if (!anchor) return;
+      const href = anchor.getAttribute("href") ?? "";
+      if (!href.startsWith("/") || href.startsWith("//")) return;
+      // Staying on this cut is not an exit.
+      const here = `${window.location.pathname}${window.location.search}`;
+      if (href === here) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setExitTo(href);
+    };
+    document.addEventListener("click", onClick, { capture: true });
+    return () => document.removeEventListener("click", onClick, { capture: true } as EventListenerOptions);
+  }, [dirty]);
+
+  /** Reload and tab-close — the browser's own guard, armed only while dirty. */
+  useEffect(() => {
+    if (!dirty) return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
 
   const beats = useMemo(() => (edl === null ? [] : splitLane(edl).beats), [edl]);
   const marks = useMemo(
@@ -182,6 +324,11 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       });
       setCut(saved);
       setEdl(saved.edl);
+      // The saved version becomes the new base — Discard now means "back to
+      // v{saved.version}", and the pre-save history is no longer reachable.
+      setBaseEdl(saved.edl);
+      setPast([]);
+      setFuture([]);
       setDirty(false);
       setJob(null);
       setPending(null);
@@ -379,6 +526,42 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             </button>
           ))}
         </div>
+        {/*
+          Undo is bound to ⌘/Ctrl+Z, but a keyboard-only undo is an invisible
+          one — the operator who most needs it is the one who does not know it
+          exists. These render only while there is something to undo, so the
+          resting surface is unchanged.
+        */}
+        {past.length > 0 && (
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={undo}
+            title={`Undo the last edit (${past.length} step${past.length === 1 ? "" : "s"} back) — ⌘Z`}
+          >
+            Undo
+          </button>
+        )}
+        {future.length > 0 && (
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={redo}
+            title={`Redo (${future.length} forward) — ⇧⌘Z`}
+          >
+            Redo
+          </button>
+        )}
+        {dirty && baseEdl !== null && (
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={discard}
+            title={`Throw away every unsaved edit and return to the stored v${cut.version}`}
+          >
+            Discard changes → v{cut.version}
+          </button>
+        )}
         <button
           type="button"
           className="btn btn-ghost btn-sm"
@@ -421,6 +604,64 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         </button>
       </div>
 
+      {/*
+        THE EXIT GUARD. Save / Discard / Stay — the three honest answers. It
+        names the destination and the version, because "you have unsaved
+        changes" without saying unsaved SINCE WHAT is a question the operator
+        cannot answer.
+      */}
+      {exitTo !== null && (
+        <div className="card notice-band refused" role="alertdialog" aria-label="Unsaved changes">
+          <span className="t-label">
+            You have unsaved edits to {cut.name} v{cut.version}. Leaving now throws them away.
+          </span>
+          <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={busy}
+              onClick={() => {
+                const to = exitTo;
+                setExitTo(null);
+                // Save first, then leave — onSave clears `dirty`, so the guard
+                // will not re-arm and swallow this navigation a second time.
+                run(async () => {
+                  const { cut: saved } = await saveCut(projectId, {
+                    name: cut.name,
+                    edl,
+                    ...(pending ? { attribution: pending } : {}),
+                    ...(cut.lineage
+                      ? { meta: { lineage: { parentCutId: cut.lineage.parentCutId, aspect: cut.lineage.aspect } } }
+                      : {}),
+                  });
+                  setDirty(false);
+                  setBaseEdl(saved.edl);
+                  router.push(to);
+                  return `Saved as ${saved.name} v${saved.version} — leaving.`;
+                });
+              }}
+            >
+              Save, then leave
+            </button>
+            <button
+              type="button"
+              className="btn btn-quiet btn-sm"
+              onClick={() => {
+                const to = exitTo;
+                discard();
+                setExitTo(null);
+                router.push(to);
+              }}
+            >
+              Discard and leave
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setExitTo(null)}>
+              Stay here
+            </button>
+          </div>
+        </div>
+      )}
+
       {(notice !== null || refusals.length > 0) && (
         <div className={refusals.length > 0 ? "card notice-band refused" : "card notice-band"} role="status">
           {notice !== null && <span className="t-label">{notice}</span>}
@@ -462,6 +703,19 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                       {cut.outputRef === null
                         ? `no render yet for v${cut.version} — the primary button renders it, locally, 0 credits`
                         : "no media root configured on this box — refs on record, playback off"}
+                    </span>
+                  )}
+                  {/*
+                    THE HONEST PLAYER. While the working copy is dirty this
+                    plate still shows the PREVIOUS render — the only cue was an
+                    "unsaved" pill 200px away in the header, so the operator
+                    reads their own edit into a video that does not contain it.
+                    Empty and broken must never look alike; neither must
+                    "your edit" and "the last render of a different EDL".
+                  */}
+                  {dirty && cut.outputRef !== null && (
+                    <span className="t-data">
+                      showing the render of v{cut.version} — your unsaved edits are not in it
                     </span>
                   )}
                 </div>
