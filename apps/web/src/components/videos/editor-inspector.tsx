@@ -6,6 +6,10 @@ import type { Selection } from "@/components/videos/editor-timeline";
 import { mediaUrl } from "@/lib/videos/client";
 import {
   auditionVolume,
+  deleteBeat,
+  deleteCaptionLine,
+  insertBeat,
+  insertCaptionLine,
   patchCaptionLine,
   patchMusic,
   reorderBeat,
@@ -85,7 +89,7 @@ export function EditorInspector({
         />
       )}
       {selection.kind === "caption" && (
-        <CaptionFields edl={edl} index={selection.index} onEdl={onEdl} />
+        <CaptionFields edl={edl} index={selection.index} onEdl={onEdl} onSelect={onSelect} />
       )}
       {selection.kind === "music" && (
         <MusicFields projectId={projectId} edl={edl} playable={playable} onEdl={onEdl} />
@@ -183,6 +187,43 @@ function BeatFields({
           later →
         </button>
       </div>
+      {/*
+        THE MISSING VERBS (s80, slice c). The lane could be reordered and
+        trimmed but never CHANGED: no way to drop a beat that shouldn't be in
+        the cut, and no way to bring one in from the takes pool. Insert copies
+        this beat's source kind and duration rather than inventing them — a
+        still is a loop-hold and a motion clip is not, and guessing wrong
+        compiles into something nobody asked for.
+      */}
+      <div className="inspector-row">
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          onClick={() => {
+            onEdl((current) => insertBeat(current, index, clip.source.ref));
+            onSelect({ kind: "beat", index: index + 1 });
+          }}
+          title="Insert a beat after this one, on the same source — then swap its take from the strip"
+        >
+          + Insert beat
+        </button>
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          disabled={beats.length <= 1}
+          title={
+            beats.length <= 1
+              ? "the last beat can't be deleted — a cut with no beats can't be rendered"
+              : "Delete this beat from the cut — ⌘Z brings it back"
+          }
+          onClick={() => {
+            onEdl((current) => deleteBeat(current, index));
+            onSelect(null);
+          }}
+        >
+          Delete beat
+        </button>
+      </div>
       {clip.crop && (
         <Reframe
           projectId={projectId}
@@ -205,10 +246,12 @@ function CaptionFields({
   edl,
   index,
   onEdl,
+  onSelect,
 }: {
   edl: Edl;
   index: number;
   onEdl: (fn: (edl: Edl) => Edl) => void;
+  onSelect: (selection: Selection) => void;
 }) {
   const line = edl.captions?.lines[index];
   if (!line) return null;
@@ -250,6 +293,37 @@ function CaptionFields({
           min={0}
           onCommit={(v) => onEdl((current) => patchCaptionLine(current, index, { fadeOut: v }))}
         />
+      </div>
+      {/*
+        THE MISSING VERBS (s80, slice c). This inspector could only ever PATCH
+        a line the generator had already written — there was no way to add a
+        caption or delete one, on the surface whose whole job is the cut. Add
+        lands the new plate after this one and selects it, so the operator is
+        typing into the thing they just made rather than hunting for it.
+      */}
+      <div className="inspector-row">
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          onClick={() => {
+            onEdl((current) => insertCaptionLine(current, index, "new caption"));
+            onSelect({ kind: "caption", index: index + 1 });
+          }}
+          title="Add a caption line after this one — it inherits this plate's placement"
+        >
+          + Add caption
+        </button>
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          onClick={() => {
+            onEdl((current) => deleteCaptionLine(current, index));
+            onSelect(null);
+          }}
+          title="Delete this caption line — ⌘Z brings it back"
+        >
+          Delete caption {index + 1}
+        </button>
       </div>
       <div className="inspector-row">
         <span className="t-label">

@@ -100,6 +100,87 @@ export function swapBeatSource(edl: Edl, index: number, ref: string): Edl {
   return joinLane(edl, { ...lane, beats });
 }
 
+/**
+ * Drop a beat from the cut (s80 — one of the fifteen jobs with no affordance).
+ *
+ * Refuses to empty the lane: a cut with no beats is not a shorter cut, it is a
+ * broken one the compiler cannot lower, and "delete" should never be the door
+ * to that. The overlay tail and the transition rhythm are handled exactly as
+ * `reorderBeat` handles them — transitions are POSITION-bound, so the surviving
+ * beats keep the fade rhythm and position 0 never carries a transitionIn.
+ */
+export function deleteBeat(edl: Edl, index: number): Edl {
+  const lane = splitLane(edl);
+  if (index < 0 || index >= lane.beats.length || lane.beats.length <= 1) return edl;
+  const beats = lane.beats.filter((_, i) => i !== index);
+  return joinLane(edl, {
+    ...lane,
+    beats: beats.map((clip, i) => {
+      const rest = { ...clip };
+      delete rest.transitionIn;
+      // Position 0 must not carry a transition; every later position keeps the
+      // transition that belongs to ITS slot, not to the clip that moved out.
+      const transition = i === 0 ? undefined : lane.beats[i]?.transitionIn;
+      return transition ? { ...rest, transitionIn: transition } : rest;
+    }),
+  });
+}
+
+/**
+ * Insert a beat AFTER `index`, sourced from an existing take ref.
+ *
+ * The new beat copies the neighbour's duration and source KIND rather than
+ * inventing them: a still is a loop-hold and a motion clip is not, and guessing
+ * that wrong produces a cut the compiler lowers into something nobody asked
+ * for. `in` starts at 0 — the operator trims from there.
+ */
+export function insertBeat(edl: Edl, index: number, ref: string): Edl {
+  const lane = splitLane(edl);
+  if (lane.beats.length === 0) return edl;
+  const at = Math.max(-1, Math.min(index, lane.beats.length - 1));
+  const neighbour = lane.beats[Math.max(0, at)];
+  const inserted = {
+    name: `${neighbour.name}-insert`,
+    source: { ...neighbour.source, ref },
+    in: 0,
+    duration: neighbour.duration,
+  };
+  const beats = [...lane.beats];
+  beats.splice(at + 1, 0, inserted);
+  return joinLane(edl, { ...lane, beats });
+}
+
+/**
+ * Add a caption line. Text is CONTENT — it rides the judge harness before any
+ * cut carrying it can be approved (ADR 0010), which is exactly why adding one
+ * is safe to offer here: the gate binds at the approve door, not at the
+ * keystroke. The plate inherits the previous line's placement so a new line
+ * lands where the last one was rather than at the frame origin.
+ */
+export function insertCaptionLine(edl: Edl, afterIndex: number, text: string): Edl {
+  if (!edl.captions) return edl;
+  const lines = edl.captions.lines;
+  const at = Math.max(-1, Math.min(afterIndex, lines.length - 1));
+  const near = lines[Math.max(0, at)];
+  const duration = edl.output.duration;
+  const fadeIn = near ? Math.min(near.fadeOut, duration) : 0;
+  const line: CaptionLine = near
+    ? { ...near, text, fadeIn, fadeOut: Math.min(fadeIn + (near.fadeOut - near.fadeIn), duration) }
+    : { text, x: Math.round(edl.output.width / 2), y: Math.round(edl.output.height * 0.8), fadeIn: 0, fadeOut: Math.min(3, duration), ramp: 0.4 };
+  const next = [...lines];
+  next.splice(at + 1, 0, line);
+  return { ...edl, captions: { ...edl.captions, lines: next } };
+}
+
+/** Delete one caption line. Unlike beats, emptying the lane is legal — a cut with no captions is a cut. */
+export function deleteCaptionLine(edl: Edl, index: number): Edl {
+  if (!edl.captions || index < 0 || index >= edl.captions.lines.length) return edl;
+  return {
+    ...edl,
+    captions: { ...edl.captions, lines: edl.captions.lines.filter((_, i) => i !== index) },
+  };
+}
+
 /** The overlay tail's trim boundary (`at`) — where the prior timeline freezes for the endcard fade. */
 export function setOverlayAt(edl: Edl, at: number): Edl {
   const lane = splitLane(edl);

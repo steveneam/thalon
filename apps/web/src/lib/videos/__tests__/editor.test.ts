@@ -2,6 +2,10 @@ import { edlSchema } from "@thalon/contracts";
 import { describe, expect, it } from "vitest";
 import {
   auditionVolume,
+  deleteBeat,
+  deleteCaptionLine,
+  insertBeat,
+  insertCaptionLine,
   laneDuration,
   nextVersionFor,
   patchCaptionLine,
@@ -154,6 +158,83 @@ function take(overrides: Partial<TakeView>): TakeView {
     ...overrides,
   };
 }
+
+/*
+ * THE MISSING VERBS (s80). The lane could be reordered, trimmed and
+ * source-swapped, but never CHANGED — of the 27 operator jobs the s78 walk
+ * scored, "drop a beat / add one from the takes pool" and "add a caption line
+ * or delete one the generator wrote" both had no affordance at all.
+ */
+describe("deleteBeat / insertBeat", () => {
+  it("drops the named beat and leaves the overlay tail alone", () => {
+    const next = deleteBeat(fixture(), 1);
+    const lane = splitLane(next);
+    expect(lane.beats.map((b) => b.name)).toEqual(["b1", "b3"]);
+    expect(lane.overlay?.name).toBe("endcard");
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("never leaves position 0 carrying a transition", () => {
+    // b1 out means b2 leads — and a lane whose first clip fades in from
+    // nothing is not compiler-valid.
+    const lane = splitLane(deleteBeat(fixture(), 0));
+    expect(lane.beats[0].name).toBe("b2");
+    expect(lane.beats[0].transitionIn).toBeUndefined();
+  });
+
+  it("refuses to empty the lane — a cut with no beats is broken, not shorter", () => {
+    let edl = deleteBeat(fixture(), 0);
+    edl = deleteBeat(edl, 0);
+    expect(splitLane(edl).beats).toHaveLength(1);
+    const last = deleteBeat(edl, 0);
+    expect(splitLane(last).beats).toHaveLength(1);
+    expect(last).toBe(edl);
+  });
+
+  it("inserts after the index, copying the neighbour's source KIND and duration", () => {
+    const next = insertBeat(fixture(), 0, "motion/keepers/beat-09.mp4");
+    const lane = splitLane(next);
+    expect(lane.beats.map((b) => b.name)).toEqual(["b1", "b1-insert", "b2", "b3"]);
+    expect(lane.beats[1].source).toEqual({ kind: "take", ref: "motion/keepers/beat-09.mp4" });
+    expect(lane.beats[1].duration).toBe(5);
+    expect(lane.beats[1].in).toBe(0);
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+});
+
+describe("insertCaptionLine / deleteCaptionLine", () => {
+  it("adds a line after the index, inheriting the neighbour's placement", () => {
+    const next = insertCaptionLine(fixture(), 0, "line two");
+    const lines = next.captions?.lines ?? [];
+    expect(lines.map((l) => l.text)).toEqual(["line one", "line two"]);
+    // Placement is inherited so a new plate lands where the last one was.
+    expect(lines[1].x).toBe(640);
+    expect(lines[1].y).toBe(600);
+    // It starts where the previous plate left, never overlapping it.
+    expect(lines[1].fadeIn).toBe(4);
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("clamps a new plate's fade window to the cut's duration", () => {
+    const edl = fixture();
+    const long = patchCaptionLine(edl, 0, { fadeIn: 14, fadeOut: 16 });
+    const lines = insertCaptionLine(long, 0, "tail").captions?.lines ?? [];
+    expect(lines[1].fadeIn).toBeLessThanOrEqual(edl.output.duration);
+    expect(lines[1].fadeOut).toBeLessThanOrEqual(edl.output.duration);
+  });
+
+  it("deletes a line, and emptying the caption lane is legal", () => {
+    const next = deleteCaptionLine(fixture(), 0);
+    expect(next.captions?.lines).toEqual([]);
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("ignores an out-of-range index rather than corrupting the lane", () => {
+    const edl = fixture();
+    expect(deleteCaptionLine(edl, 9)).toBe(edl);
+    expect(deleteCaptionLine(edl, -1)).toBe(edl);
+  });
+});
 
 describe("swapCandidatesFor", () => {
   const takes: TakeView[] = [

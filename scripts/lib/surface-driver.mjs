@@ -124,7 +124,23 @@ export function watchConsole(page) {
     problems.push({ kind: "pageerror", text: String(err.message || err).slice(0, 300) });
   });
   page.on("requestfailed", (req) => {
-    problems.push({ kind: "requestfailed", text: `${req.method()} ${req.url().slice(0, 120)} — ${req.failure()?.errorText ?? "failed"}` });
+    const why = req.failure()?.errorText ?? "failed";
+    /*
+     * A CANCELLATION IS NOT A FAILURE (s80).
+     *
+     * `net::ERR_ABORTED` is the browser dropping work nobody needs any more —
+     * a <video preload="metadata"> whose element left the DOM when the
+     * inspector closed, a fetch superseded by a newer one. The editor selects
+     * and deselects a beat on every interaction, so this fired on four
+     * otherwise-clean jobs and would have made "console clean" mean "nothing
+     * was ever cancelled", which no interactive surface can satisfy.
+     *
+     * Narrow on purpose: every other failure still counts — ERR_FAILED,
+     * ERR_CONNECTION_*, DNS, and the 5xx/4xx responses caught below. This
+     * drops the one errorText that means "on purpose", not the class.
+     */
+    if (/ERR_ABORTED/.test(why)) return;
+    problems.push({ kind: "requestfailed", text: `${req.method()} ${req.url().slice(0, 120)} — ${why}` });
   });
   page.on("response", (res) => {
     if (res.status() >= 500) problems.push({ kind: "http", text: `${res.status()} ${res.url().slice(0, 120)}` });
