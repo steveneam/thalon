@@ -14,7 +14,7 @@
 
 **MAIN WENT RED FOUR SEPARATE TIMES THIS SESSION AND EVERY ONE WAS CAUGHT BY A GATE:** (1) at boot — both s78 guards of mine (the dead-link guard flagging kickoffs' own future wraps; the worktree ratchet false-redding inside the lanes it protects, now `--git-common-dir`-anchored); (2) a flaky intel j/k test (the suite's only raw `fireEvent.keyDown(window,…)` — now userEvent like its nine siblings); (3) my `vitest … | grep && git commit` gating on grep's exit — the rule said `tail`, so grep felt safe; now **gate on the exit code, never pipe into anything**; (4) 4 lint errors from undeclared browser globals — linted before adding the test, not after. Plus: a NUL byte made a 12KB test file BINARY to git and it merged with no reviewable diff — lane 3 caught it post-merge, cherry-picked after blob-identity check, and the class (second occurrence) is now `tests/no-nul-in-source.test.ts`. **And the tried-and-reverted one:** the absolute-`THALON_DATA_DIR` refusal (founder-approved) threw on a healthy dev server because `readEnv()` doesn't see `.env.local` at every call site — reverted within minutes of his "console and recoverable error"; the pollution fix that mattered shipped as hermetic test data dirs for engine+eval (`tests/setup/hermetic-data-dir.ts`).
 
-**FOUNDER RULINGS THIS SESSION, all homed in NEEDS-STEVEN:** video editor = **FULL BUILD-OUT, its own session — s80, planned below** · YouTube ration = CLOSED, the arithmetic that kept it open was wrong (cadence is 180 min; already fits) · transcription = **NOT a Thalon feature** — his own knowledge-ingestion tool ("get transcripts about system/building stuff to teach you"), free/deterministic by default, an AI button beside Ingest on demand, no second artifact (my two-artifact invariant withdrawn with its premise) · data-dir = his (b), tried, reverted, safe landing queued · stage artifacts = his call open, now with mechanics facts (their verb is **advance**, not approve; (a) fix counts + (c) archive dogfood = the clean sweep).
+**FOUNDER RULINGS THIS SESSION, all homed in NEEDS-STEVEN:** video editor = **FULL BUILD-OUT, its own session — s80, planned below** · YouTube ration = CLOSED, the arithmetic that kept it open was wrong (cadence is 180 min; already fits) · transcription = **NOT a Thalon feature** — his own knowledge-ingestion tool ("get transcripts about system/building stuff to teach you"), free/deterministic by default, an AI button beside Ingest on demand, no second artifact (my two-artifact invariant withdrawn with its premise) · data-dir = his (b), tried, reverted, safe landing queued-and-confirmed · stage artifacts = **RULED at the close** (*"i'll follow your recommendation"*): (a) fix the counts + (c) archive the dogfood rows — their verb was always **advance**, not approve; execution = s80's pre-flight.
 
 ## Resume prompt (session 80, syd4 — "gogogo" boots this)
 
@@ -34,8 +34,19 @@ page), and the render gate against it DOES NOT MATCH — unquantified.
 **Do these in this order:**
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
-   `git status` + this stamp. Restate the two open founder calls
-   (stage-artifact counting · data-dir safe landing) — neither blocks.
+   `git status` + this stamp. **No open founder calls — all three were RULED at
+   the s79 close** ("i'll follow your recommendation"); see NEEDS-STEVEN.
+0.5. **PRE-FLIGHT, lead-direct, ~30 min: execute the two ruled items.**
+   (a) stage artifacts (`direction_doc`/`storyboard`) leave the `needsYou`
+   derivation — a queue only counts what the operator can act on; expect the
+   rail/pulse/Board to drop from 25 to ~14 and lane-4's honest-gap copy plus
+   any count-pinned tests to need the same-change update. (c) archive the
+   Jul-19–25 dogfood stage DRAFTS (the video PROJECTS the editor drives
+   against are untouched — verify FK edges: approvals/verdicts rows, before
+   deleting). Full verify GATED ON THE EXIT CODE before the editor work
+   starts — the session should not stare at a dishonest count all day, and
+   the stale dogfood rows are exactly the fixtures the editor would trip
+   over.
 1. **AUTHOR THE 27 JOBS FIRST** — port the audit's jobs table into
    `scripts/lib/surface-jobs.mjs` as an `editor` job set against
    `/app/videos/<projectId>/edit`, driving what exists TODAY. That baseline is
@@ -59,9 +70,14 @@ page), and the render gate against it DOES NOT MATCH — unquantified.
    (d) the 36 findings folded in where they touch the same code; (e) the four
    copilot chips that spend a metered call to be refused — either wire them or
    make them honest.
-4. **Founder checkpoint at the pre-plan** — parallel lanes (worktrees are
-   cheap, the file set is `components/videos/editor*.tsx` + the `/edit` route)
-   need his fresh approval, per named run, if the plan wants them.
+4. **Founder checkpoint at the pre-plan** — and the honest default is
+   **LEAD-DIRECT, not lanes**: the editor is ONE tightly-coupled file set
+   (`components/videos/editor*.tsx` + the `/edit` route), the work is
+   design-heavy (the Fable-5 doctrine's home turf), and two lanes in one
+   component tree buy conflicts, not speed. Propose a lane ONLY if the
+   pre-plan surfaces a genuinely disjoint engine seam (e.g. pure EDL
+   operations / the undo model as a lib with its own tests) — and any lane
+   still needs his fresh approval, per named run.
 5. **Merge-gate = the s79 ritual**: rebase · verify on merged main GATED ON
    THE EXIT CODE · drive the editor's 27 jobs · measure the render · read the
    screenshots.
@@ -73,7 +89,7 @@ sequencing).
 
 ▎ ▸ **Read first:** CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md` → `docs/research/mock-sheets/Videos.dc.html` + the sheets README → `docs/research/jobs-table-s79.md` → `.claude/skills/thalon-check/SKILL.md` → COORDINATION.md → NEEDS-STEVEN.md.
 ▎ ▸ **State:** main = origin, all pushed · verify **2392 passed / 9 skipped, 0 lint errors** · budget 2M · balance 584.12 · **zero spend s79** · dev transcript shim = hand-started `.context/tools/transcript-shim.py` on 127.0.0.1:8787, NOT a unit — it dies with the session and only transcription ingest needs it.
-▎ ▸ ⛔ **THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until all the walks are verified and fixed."* No publish path, no platform call, no token-spending generation without his GO. The editor session's copilot chips SPEND — reachability checks only until he says otherwise.
+▎ ▸ ⛔ **THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until all the walks are verified and fixed."* No publish path, no platform call, no token-spending generation without his GO. The editor session's copilot chips SPEND (metered gateway calls) — reachability checks only until he says otherwise. **But draw the line where the money is, not wider:** the working-copy PREVIEW is a LOCAL render (hyperframes driver + the ffmpeg now in the image — compute, not credits, not a platform call), so building and exercising it is inside scope; treating local rendering as gated spend would hollow out the honest-player build, which is the safety core's whole point.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant · **every lane/subagent launch needs fresh founder approval** · **GATE ON THE SUITE'S EXIT CODE — never pipe it into anything** · **vitest does NOT typecheck and does not lint** (five catches on record) · verify-on-merged-main = THE gate, plus a MEASURED render, plus DRIVE the surface, plus **watch the console** (the driver does now) · a LANE CANNOT SCREENSHOT OR DRIVE ITS OWN WORK (both enforced) · never full-verify while lane fan-outs are live · wrap = verify+commit+push+restamp.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin; tmux back to `dev` + `agent`.
 
@@ -85,4 +101,4 @@ CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md` → `docs/
 
 s78 was part 1: the keyed-by-entity sweep (7 instances, one spelling), lanes 1+2 (23 findings, 20 fixed), the founder finding the calendar could not plan, the planner built, the 15th surface walked (the editor — s80's whole spec), and the harness gap named that s79 closed.
 
-## Next action — s80 (boot on the founder's model default, Fable 5 as of the s79 close): self-check · restate the two open calls · author the editor's 27-job baseline and measure the sheet drift · pre-plan the build (safety core → keyboard blocker → missing verbs → findings → copilot honesty) · founder checkpoint · build.
+## Next action — s80 (boot on the founder's model default, Fable 5 as of the s79 close): self-check · PRE-FLIGHT the two ruled items (honest counts + dogfood archive, verified) · author the editor's 27-job baseline and measure the sheet drift · pre-plan the build (safety core → keyboard blocker → missing verbs → findings → copilot honesty) · founder checkpoint · build.
