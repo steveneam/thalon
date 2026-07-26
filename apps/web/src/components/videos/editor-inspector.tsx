@@ -5,6 +5,7 @@ import type { Crop, Edl } from "@thalon/contracts";
 import type { Selection } from "@/components/videos/editor-timeline";
 import { mediaUrl } from "@/lib/videos/client";
 import {
+  auditionVolume,
   patchCaptionLine,
   patchMusic,
   reorderBeat,
@@ -294,6 +295,7 @@ function MusicFields({
           <Waveform
             src={mediaUrl(projectId, cue.source.ref)}
             offset={cue.offset}
+            gainDb={cue.gainDb}
             onOffset={(offset) => onEdl((current) => patchMusic(current, { offset }))}
           />
         </div>
@@ -366,7 +368,11 @@ function MusicFields({
 /** The wavesurfer surface this lane uses (v7); dynamic-imported so the editor bundle stays lean. */
 interface WaveSurferHandle {
   destroy(): void;
-  playPause(): Promise<void> | void;
+  play(): Promise<void> | void;
+  pause(): void;
+  isPlaying(): boolean;
+  setTime(seconds: number): void;
+  setVolume(volume: number): void;
   on(event: "interaction" | "ready", cb: (value: number) => void): void;
 }
 
@@ -374,19 +380,27 @@ interface WaveSurferHandle {
  * The measured-alignment keeper (s44 method): clicking the waveform sets the
  * in-point AND auditions from it — one gesture, measured, never estimated.
  * The amber marker shows where the cut enters the track.
+ *
+ * B-audio.1 piece 2: the audition is now the CUE's audition. Playback starts
+ * at the cue's real offset and plays at the cue's real gain, so what the
+ * operator hears is what the mux will write. A waveform that plays from zero
+ * at full level is a drawing of a track, not a preview of a cut.
  */
 function Waveform({
   src,
   offset,
+  gainDb,
   onOffset,
 }: {
   src: string;
   offset: number;
+  gainDb: number;
   onOffset: (seconds: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const wsRef = useRef<WaveSurferHandle | null>(null);
   const [trackDuration, setTrackDuration] = useState(0);
+  const volume = auditionVolume(gainDb);
 
   useEffect(() => {
     let cancelled = false;
@@ -413,6 +427,12 @@ function Waveform({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-create only when the source changes; onOffset is stable enough per render
   }, [src]);
 
+  // The level follows the knob live: turn the gain down mid-audition and the
+  // audition turns down with it.
+  useEffect(() => {
+    wsRef.current?.setVolume(volume);
+  }, [volume]);
+
   return (
     <div className="wave">
       <div className="wave-stage">
@@ -427,13 +447,26 @@ function Waveform({
       </div>
       <div className="inspector-row">
         <span className="t-label">
-          Click the waveform to set where the track enters; playback auditions from the click.
+          Click the waveform to set where the track enters; playback auditions from the cue&rsquo;s
+          offset at its gain
+          {gainDb > 0 ? " (a boost cannot be auditioned — heard at full scale)" : ""}.
         </span>
         <div style={{ flex: 1 }} />
         <button
           type="button"
           className="btn btn-quiet btn-sm"
-          onClick={() => void wsRef.current?.playPause()}
+          onClick={() => {
+            const ws = wsRef.current;
+            if (!ws) return;
+            if (ws.isPlaying()) {
+              ws.pause();
+              return;
+            }
+            // Audition the CUT, not the file: enter where the cue enters.
+            ws.setTime(Math.max(0, offset));
+            ws.setVolume(volume);
+            void ws.play();
+          }}
         >
           Play / pause
         </button>

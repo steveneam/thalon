@@ -10,7 +10,9 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "theme:build": "astryx theme build src/theme/thalon.theme.ts -o src/theme/thalon-theme.css",
-    "videos:import": "tsx scripts/import-video-project.ts"
+    "videos:import": "tsx scripts/import-video-project.ts",
+    "videos:posters": "tsx scripts/derive-take-posters.ts",
+    "videos:bed": "tsx scripts/set-audio-bed.ts"
   },
   "dependencies": {
     "@astryxdesign/core": "0.1.8",

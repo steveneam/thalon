@@ -39,6 +39,9 @@ import { youTubeOEmbedTitleFetcher, type VideoTitleFetcher } from "./video-title
  * `meta.title` (YouTube oEmbed, keyless/quota-free; the URL on any
  * failure), `meta.thumbnailUrl` (same oEmbed call — the Source-Link Rule's
  * visual identity; absent when the platform offers none),
+ * `meta.thumbnailWidth`/`meta.thumbnailHeight` (B-media.0 s77 — the SAME
+ * oEmbed reply carried them all along; they let the resolver derive
+ * orientation, and they ride together or not at all),
  * `meta.tags` (operator-set, stored verbatim),
  * `meta.areaRelevance` (the transcript's chunk-embedding centroid scored
  * against the tenant's active monitored areas via the B6.4 ranker's
@@ -130,14 +133,24 @@ export async function ingestVideoUrl(
   // embeddings.
   let fetchedTitle: string | null;
   let fetchedThumbnail: string | null;
+  let fetchedThumbnailWidth: number | null;
+  let fetchedThumbnailHeight: number | null;
   try {
     const oembed = await (deps.titleFetcher ?? youTubeOEmbedTitleFetcher()).fetchMeta(request.url);
     fetchedTitle = oembed.title;
     fetchedThumbnail = oembed.thumbnailUrl;
+    fetchedThumbnailWidth = oembed.thumbnailWidth;
+    fetchedThumbnailHeight = oembed.thumbnailHeight;
   } catch {
     fetchedTitle = null;
     fetchedThumbnail = null;
+    fetchedThumbnailWidth = null;
+    fetchedThumbnailHeight = null;
   }
+  // The dimensions ride together or not at all (the contract helper enforces
+  // the same rule on the read side) — and never without the URL they measure.
+  const measuredThumbnail =
+    fetchedThumbnail !== null && fetchedThumbnailWidth !== null && fetchedThumbnailHeight !== null;
   const areaRelevance = await scoreAreaRelevance(
     ctx,
     repos,
@@ -155,6 +168,9 @@ export async function ingestVideoUrl(
       segmentCount: segments.length,
       title: fetchedTitle ?? request.url,
       ...(fetchedThumbnail ? { thumbnailUrl: fetchedThumbnail } : {}),
+      ...(measuredThumbnail
+        ? { thumbnailWidth: fetchedThumbnailWidth, thumbnailHeight: fetchedThumbnailHeight }
+        : {}),
       ...(request.tags?.length ? { tags: request.tags } : {}),
       ...(areaRelevance ? { areaRelevance } : {}),
       ...request.meta,

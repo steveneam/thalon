@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { tenantCtx, type TenantCtx } from "@thalon/contracts";
+import { deriveOrientation, sourceThumbnailEnvelope, tenantCtx, type TenantCtx } from "@thalon/contracts";
 import { openTestDb, type DbHandle, type Repos } from "@thalon/db";
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
@@ -37,8 +37,19 @@ function fakeProvider(): TranscriptProvider {
   };
 }
 
-function fixedTitleFetcher(title: string | null, thumbnailUrl: string | null = null): VideoTitleFetcher {
-  return { fetchMeta: async () => ({ title, thumbnailUrl }) };
+function fixedTitleFetcher(
+  title: string | null,
+  thumbnailUrl: string | null = null,
+  dimensions: { width: number; height: number } | null = null,
+): VideoTitleFetcher {
+  return {
+    fetchMeta: async () => ({
+      title,
+      thumbnailUrl,
+      thumbnailWidth: dimensions?.width ?? null,
+      thumbnailHeight: dimensions?.height ?? null,
+    }),
+  };
 }
 
 async function setup(): Promise<{ ctx: TenantCtx; repos: Repos; objectStore: LocalObjectStore }> {
@@ -70,6 +81,7 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
         titleFetcher: fixedTitleFetcher(
           "Deterministic pipelines, explained",
           "https://img.platform.test/v1/hq.jpg",
+          { width: 480, height: 360 },
         ),
         embedder: createFakeEmbeddingDriver(1536),
         objectStore,
@@ -80,6 +92,8 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
     const meta = (await repos.sources.get(ctx, result.sourceId))!.meta as Record<string, unknown>;
     expect(meta.title).toBe("Deterministic pipelines, explained");
     expect(meta.thumbnailUrl).toBe("https://img.platform.test/v1/hq.jpg");
+    expect(meta.thumbnailWidth).toBe(480);
+    expect(meta.thumbnailHeight).toBe(360);
     expect(meta.tags).toEqual(["tooling", "video"]);
 
     const relevance = meta.areaRelevance as AreaRelevance[];
@@ -118,8 +132,75 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
     const meta = (await repos.sources.get(ctx, result.sourceId))!.meta as Record<string, unknown>;
     expect(meta.title).toBe(url);
     expect("thumbnailUrl" in meta).toBe(false);
+    expect("thumbnailWidth" in meta).toBe(false);
+    expect("thumbnailHeight" in meta).toBe(false);
     expect("tags" in meta).toBe(false);
     expect("areaRelevance" in meta).toBe(false);
+  });
+
+  it("writes the dimensions only as a PAIR — a lone width never reaches the row", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const result = await ingestVideoUrl(
+      ctx,
+      repos,
+      { url: "https://platform.test/watch?v=4" },
+      {
+        transcriptProvider: fakeProvider(),
+        // A platform that reported a width and no height: half a measurement.
+        titleFetcher: {
+          fetchMeta: async () => ({
+            title: "Half measured",
+            thumbnailUrl: "https://img.platform.test/v4/hq.jpg",
+            thumbnailWidth: 480,
+            thumbnailHeight: null,
+          }),
+        },
+        embedder: createFakeEmbeddingDriver(1536),
+        objectStore,
+        capTokens: 1_000_000,
+      },
+    );
+
+    const meta = (await repos.sources.get(ctx, result.sourceId))!.meta as Record<string, unknown>;
+    expect(meta.thumbnailUrl).toBe("https://img.platform.test/v4/hq.jpg");
+    expect("thumbnailWidth" in meta).toBe(false);
+    expect("thumbnailHeight" in meta).toBe(false);
+    // The reader still resolves the thumbnail — just without an orientation.
+    const envelope = sourceThumbnailEnvelope(meta)!;
+    expect(envelope.ref).toEqual({ kind: "external", url: "https://img.platform.test/v4/hq.jpg" });
+    expect(deriveOrientation(envelope.ref.width, envelope.ref.height)).toBe("unknown");
+  });
+
+  it("what the writer stamps is what the contract's reader reads (the mini-contract, both ends)", async () => {
+    const { ctx, repos, objectStore } = await setup();
+    const result = await ingestVideoUrl(
+      ctx,
+      repos,
+      { url: "https://platform.test/watch?v=5" },
+      {
+        transcriptProvider: fakeProvider(),
+        // A 9:16 Short — the exact case the portrait crop-vs-contain call needs.
+        titleFetcher: fixedTitleFetcher("A Short", "https://img.platform.test/v5/hq.jpg", {
+          width: 1080,
+          height: 1920,
+        }),
+        embedder: createFakeEmbeddingDriver(1536),
+        objectStore,
+        capTokens: 1_000_000,
+      },
+    );
+
+    const row = (await repos.sources.get(ctx, result.sourceId))!;
+    const envelope = sourceThumbnailEnvelope(row.meta, row.createdAt);
+    expect(envelope).not.toBeNull();
+    expect(envelope!.provenance).toBe("captured");
+    expect(envelope!.ref).toMatchObject({
+      kind: "external",
+      url: "https://img.platform.test/v5/hq.jpg",
+      width: 1080,
+      height: 1920,
+    });
+    expect(deriveOrientation(envelope!.ref.width, envelope!.ref.height)).toBe("portrait");
   });
 
   it("a throwing title fetcher never blocks ingest", async () => {
@@ -146,38 +227,98 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
   });
 });
 
+const NO_META = {
+  title: null,
+  thumbnailUrl: null,
+  thumbnailWidth: null,
+  thumbnailHeight: null,
+};
+
 describe("youTubeOEmbedTitleFetcher (injected fetch — networkless)", () => {
-  it("asks oEmbed only for YouTube hosts and returns title + thumbnail from the one call", async () => {
+  it("asks oEmbed only for YouTube hosts and returns title + thumbnail + dimensions from the ONE call", async () => {
     const requested: string[] = [];
     const fetcher = youTubeOEmbedTitleFetcher(async (url) => {
       requested.push(url);
       return {
         ok: true,
-        json: async () => ({ title: "A real title", thumbnail_url: "https://i.ytimg.test/vi/x/hq.jpg" }),
+        json: async () => ({
+          title: "A real title",
+          thumbnail_url: "https://i.ytimg.test/vi/x/hq.jpg",
+          // The two keys the fetcher discarded until s77 — same reply, zero quota.
+          thumbnail_width: 480,
+          thumbnail_height: 360,
+        }),
       };
     });
     expect(await fetcher.fetchMeta("https://www.youtube.com/watch?v=tZQ9SNw4TYQ")).toEqual({
       title: "A real title",
       thumbnailUrl: "https://i.ytimg.test/vi/x/hq.jpg",
+      thumbnailWidth: 480,
+      thumbnailHeight: 360,
     });
     expect(requested[0]).toBe(
       `https://www.youtube.com/oembed?url=${encodeURIComponent("https://www.youtube.com/watch?v=tZQ9SNw4TYQ")}&format=json`,
     );
-    expect(await fetcher.fetchMeta("https://vimeo.com/123")).toEqual({ title: null, thumbnailUrl: null });
+    expect(await fetcher.fetchMeta("https://vimeo.com/123")).toEqual(NO_META);
     expect(requested).toHaveLength(1); // non-YouTube host never hits the network
+  });
+
+  it("the pair rides together: a lone dimension, a fractional one, or one without a URL is dropped whole", async () => {
+    const reply = (body: Record<string, unknown>) =>
+      youTubeOEmbedTitleFetcher(async () => ({ ok: true, json: async () => body })).fetchMeta(
+        "https://youtu.be/x",
+      );
+
+    // Height missing → neither dimension survives.
+    expect(
+      await reply({ title: "t", thumbnail_url: "https://i.ytimg.test/a.jpg", thumbnail_width: 480 }),
+    ).toEqual({
+      title: "t",
+      thumbnailUrl: "https://i.ytimg.test/a.jpg",
+      thumbnailWidth: null,
+      thumbnailHeight: null,
+    });
+    // A fractional or zero pixel count is not a measurement.
+    expect(
+      await reply({
+        title: "t",
+        thumbnail_url: "https://i.ytimg.test/a.jpg",
+        thumbnail_width: 480.5,
+        thumbnail_height: 360,
+      }),
+    ).toMatchObject({ thumbnailWidth: null, thumbnailHeight: null });
+    expect(
+      await reply({
+        title: "t",
+        thumbnail_url: "https://i.ytimg.test/a.jpg",
+        thumbnail_width: 0,
+        thumbnail_height: 0,
+      }),
+    ).toMatchObject({ thumbnailWidth: null, thumbnailHeight: null });
+    // Dimensions of a thumbnail we do not have measure nothing.
+    expect(await reply({ title: "t", thumbnail_width: 480, thumbnail_height: 360 })).toEqual({
+      title: "t",
+      thumbnailUrl: null,
+      thumbnailWidth: null,
+      thumbnailHeight: null,
+    });
   });
 
   it("degrades field-by-field: non-https thumbnail dropped, blank title dropped", async () => {
     expect(
       await youTubeOEmbedTitleFetcher(async () => ({
         ok: true,
-        json: async () => ({ title: "  ", thumbnail_url: "http://insecure.test/t.jpg" }),
+        json: async () => ({
+          title: "  ",
+          thumbnail_url: "http://insecure.test/t.jpg",
+          thumbnail_width: 480,
+          thumbnail_height: 360,
+        }),
       })).fetchMeta("https://youtu.be/x"),
-    ).toEqual({ title: null, thumbnailUrl: null });
+    ).toEqual(NO_META);
   });
 
   it("returns nulls on HTTP failure, junk JSON, and thrown fetches — never throws", async () => {
-    const NO_META = { title: null, thumbnailUrl: null };
     expect(
       await youTubeOEmbedTitleFetcher(async () => ({ ok: false, json: async () => ({}) })).fetchMeta(
         "https://youtu.be/x",

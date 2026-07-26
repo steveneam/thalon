@@ -183,7 +183,15 @@ function assertPositiveInt(name: string, value: number): void {
 }
 
 const COMPOSITION_ID_PATTERN = /^[a-z][a-z0-9-]{0,40}$/;
-const AUDIO_FILE_NAME_PATTERN = /^audio\/[a-z0-9][a-z0-9-]*\.wav$/;
+/**
+ * Audio file names are template slots, so they carry their own character
+ * policy. The extension list widened at B-audio.1 (s77) from `.wav` alone to
+ * the contract's audio family: narration is synthesized WAV and always will
+ * be, but an operator's music bed arrives as whatever they licensed, and
+ * re-encoding someone's master to satisfy a regex would be the render lying
+ * about the bytes it was given.
+ */
+const AUDIO_FILE_NAME_PATTERN = /^audio\/[a-z0-9][a-z0-9-]*\.(?:wav|mp3|m4a)$/;
 
 /**
  * Every value the template interpolates OUTSIDE an HTML-escaped text slot

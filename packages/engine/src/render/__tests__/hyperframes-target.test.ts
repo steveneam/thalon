@@ -7,6 +7,7 @@ import { openTestDb, type DbHandle, type Draft, type Repos } from "@thalon/db";
 import { LocalObjectStore } from "@thalon/platform";
 import { afterEach, describe, expect, it } from "vitest";
 import { pillarScriptDraftMetaSchema, type PillarScriptDraftMeta } from "../../origination/schemas";
+import { resolveProjectBed, storeAudioBed, withMusicBed } from "../audio-bed";
 import { compositionSpecFromPillarManifest } from "../composition";
 import { renderCompositionProject } from "../composition-project";
 import { CompositionLintError, type CompositionLinter } from "../composition-lint";
@@ -147,13 +148,78 @@ describe("createHyperframesRenderTarget (browser-free: fake producer module behi
     const root = await readFile(path.join(projectDir, "index.html"), "utf8");
     expect(root).toContain(`<audio id="narration-0" src="audio/cue-0.wav"`);
     expect(root).toContain(`<audio id="sfx-1" src="audio/sfx-1.wav"`);
-    expect(root).not.toContain("music-bed"); // the bed seam stays honestly empty
+    expect(root).not.toContain("music-bed"); // no bed in this bundle — a normal, stated state
     expect((await readFile(path.join(projectDir, "audio", "sfx-1.wav"))).toString("utf8")).toBe("SFX");
     const wav0 = await readFile(path.join(projectDir, "audio", "cue-0.wav"));
     expect(wav0.toString("ascii", 0, 4)).toBe("RIFF");
     // Real word timings reached the karaoke layer of the scene file.
     const scene0 = await readFile(path.join(projectDir, "compositions", "scene-0.html"), "utf8");
     expect(scene0).toContain(`class="cw"`);
+  });
+
+  it("B-audio.1 THE MUX: the operator's configured bed reaches the composition, bytes and tag", async () => {
+    const producer = fakeProducer();
+    const request = pillarRequest();
+    const store = new LocalObjectStore(tempDir("bed-store"));
+    // Synthesized, never a committed fixture: an ID3-labelled stub the
+    // operator "uploaded" — the bed is track DATA, and none lives in-tree.
+    const bytes = Buffer.concat([
+      Buffer.from("ID3\x03\x00\x00\x00\x00\x00\x00", "binary"),
+      Buffer.alloc(16),
+    ]);
+    const stored = await storeAudioBed(store, { bytes, ext: "mp3" });
+    const meta = {
+      audioBed: {
+        bed: stored.envelope,
+        license: {
+          license: "CC0 1.0",
+          source: "operator upload",
+          attestedBy: "steven",
+          attestedAt: "2026-07-26T04:00:00.000Z",
+        },
+      },
+    };
+
+    const omissions: string[] = [];
+    const target = createHyperframesRenderTarget({
+      producer: async () => producer.mod,
+      linter: passLinter,
+      workDir: tempDir("bed"),
+      audio: withMusicBed(null, () => resolveProjectBed(store, meta, { gainDb: -6 }), {
+        onOmitted: (why) => omissions.push(why),
+      }),
+    });
+    await target.render(request);
+
+    const projectDir = producer.executeCalls[0].projectDir;
+    const root = await readFile(path.join(projectDir, "index.html"), "utf8");
+    expect(root).toContain(`<audio id="music-bed" src="audio/bed.mp3"`);
+    expect(root).toContain(`data-volume="0.5"`); // −6 dB, the cue's own level
+    // The operator's actual bytes — the extension is theirs, not re-encoded to satisfy a regex.
+    expect(await readFile(path.join(projectDir, "audio", "bed.mp3"))).toEqual(bytes);
+    expect(omissions).toEqual([]);
+  });
+
+  it("B-audio.1: a project with no bed renders silent and SAYS so — never a dropped configured bed", async () => {
+    const producer = fakeProducer();
+    const store = new LocalObjectStore(tempDir("bed-empty"));
+    const omissions: string[] = [];
+    const target = createHyperframesRenderTarget({
+      producer: async () => producer.mod,
+      linter: passLinter,
+      workDir: tempDir("bed-empty-work"),
+      audio: withMusicBed(null, () => resolveProjectBed(store, {}), {
+        onOmitted: (why) => omissions.push(why),
+      }),
+    });
+    await target.render(pillarRequest());
+
+    const root = await readFile(
+      path.join(producer.executeCalls[0].projectDir, "index.html"),
+      "utf8",
+    );
+    expect(root).not.toContain("music-bed");
+    expect(omissions).toEqual(["none-configured"]);
   });
 
   it("refuses a misaligned audio bundle before any producer spend", async () => {

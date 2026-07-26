@@ -8,7 +8,7 @@
  *     --root /abs/path/to/project --name "my film" \
  *     [--description "…"] [--reasons reasons.json] [--provenance prov.json] \
  *     [--cuts cuts.json] [--exclude experiments]… [--default-reason "…"] \
- *     [--allow-missing-reasons] [--dry-run]
+ *     [--allow-missing-reasons] [--dry-run] [--no-posters]
  *
  * Sidecars are ref-keyed JSON (operator/box data, never committed):
  *   reasons.json     { "<ref>": "why rejected", … }
@@ -26,7 +26,8 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { tenantCtx, type VideoCutInput, type VideoCutStatus } from "@thalon/contracts";
 import { openDb } from "@thalon/db";
-import { readEnv } from "@thalon/platform";
+import { backfillTakePosters } from "@thalon/engine";
+import { getObjectStore, readEnv } from "@thalon/platform";
 import { classifyProjectTree } from "../src/lib/videos/import";
 
 async function readJson<T>(file: string): Promise<T> {
@@ -55,6 +56,7 @@ async function main(): Promise<number> {
       "default-reason": { type: "string" },
       "allow-missing-reasons": { type: "boolean", default: false },
       "dry-run": { type: "boolean", default: false },
+      "no-posters": { type: "boolean", default: false },
     },
   });
   if (!values.root || !path.isAbsolute(values.root) || !values.name) {
@@ -125,6 +127,21 @@ async function main(): Promise<number> {
       } else replayed += 1;
     }
     console.log(`takes: ${takesCreated} created · ${replayed} replayed · ${redisposed} re-disposed`);
+
+    // B-media.0 write moment 2: the bytes have just landed, so derive the
+    // posters HERE rather than leaving the dossier blank until someone
+    // remembers the backfill. Idempotent (a take with a poster is skipped) and
+    // gated (no ffmpeg on this box = "poster pending", never a failed import).
+    if (!values["no-posters"]) {
+      const posters = await backfillTakePosters(ctx, handle.repos, project.id, {
+        mediaRoot: values.root,
+        store: getObjectStore(),
+        derivedAt: new Date().toISOString(),
+      });
+      console.log(
+        `posters: ${posters.derived} derived · ${posters.already} already on record · ${posters.pending} pending`,
+      );
+    }
 
     for (const entry of cutsManifest) {
       const edl =

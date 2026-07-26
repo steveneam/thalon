@@ -1,5 +1,7 @@
 import {
+  audioRefEnvelopeSchema,
   videoProjectInputSchema,
+  type AudioRefEnvelope,
   type TenantCtx,
   type VideoProjectInput,
 } from "@thalon/contracts";
@@ -95,6 +97,58 @@ export function videoProjectsRepo(db: Db) {
           entityId: id,
           event: "video_project.media_root_set",
           payload: { mediaRoot },
+        });
+        return row;
+      });
+    },
+
+    /**
+     * B-audio.1 (s77): point the project at its operator-licensed music bed —
+     * `meta.audioBed = { bed, license }`, merging the rest of meta untouched
+     * (the `setMediaRoot` shape, jsonb, no table change).
+     *
+     * The REF is validated by the frozen `audioRefEnvelopeSchema`, which makes
+     * a bed structurally stored-only: you cannot license bytes you do not
+     * hold. The LICENCE rides in the same write because a bed whose right-to-
+     * use nobody stated is precisely what the gate exists to stop; its richer
+     * shape is validated at the engine door (`render/audio-bed.ts`, the
+     * pre-window home `assetProvenanceSchema` used), and this door holds the
+     * floor: a non-empty licence and a non-empty source, always.
+     */
+    async setAudioBed(
+      ctx: TenantCtx,
+      id: string,
+      input: { bed: AudioRefEnvelope; license: Record<string, unknown> },
+    ): Promise<VideoProject> {
+      const bed = audioRefEnvelopeSchema.parse(input.bed);
+      const license = input.license;
+      const stated = (key: string): boolean =>
+        typeof license?.[key] === "string" && (license[key] as string).trim().length > 0;
+      if (!stated("license") || !stated("source")) {
+        throw new Error(
+          "an audio bed must arrive with its licence and its source stated — licensing is attested, never assumed",
+        );
+      }
+      return db.transaction(async (tx) => {
+        const [existing] = await tx
+          .select()
+          .from(videoProjects)
+          .where(and(eq(videoProjects.id, id), eq(videoProjects.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!existing) {
+          throw new Error(`video project ${id} not found for this tenant`);
+        }
+        const meta = { ...(existing.meta as Record<string, unknown>), audioBed: { bed, license } };
+        const [row] = await tx
+          .update(videoProjects)
+          .set({ meta })
+          .where(and(eq(videoProjects.id, id), eq(videoProjects.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_project",
+          entityId: id,
+          event: "video_project.audio_bed_set",
+          payload: { sha256: bed.ref.sha256, ext: bed.ref.ext, license: license.license },
         });
         return row;
       });

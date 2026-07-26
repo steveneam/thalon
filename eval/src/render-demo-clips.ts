@@ -3,7 +3,13 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
-import { DIRECTION_MOTIONS, brandProfileConfigSchema, pillarBeatSchema } from "@thalon/contracts";
+import {
+  DIRECTION_MOTIONS,
+  MEDIA_AUDIO_EXTS,
+  brandProfileConfigSchema,
+  pillarBeatSchema,
+  type MediaAudioExt,
+} from "@thalon/contracts";
 import {
   COMPOSITION_TRANSITIONS,
   DEFAULT_TTS_VOICE,
@@ -19,6 +25,7 @@ import {
   type NarrationDriver,
   type PillarRenderManifest,
   type PillarTimeline,
+  type RenderAudioBed,
   type RenderAudioBundle,
   type RenderTarget,
 } from "@thalon/engine";
@@ -43,9 +50,9 @@ import { TENANT_ZERO, type DogfoodInput } from "./dogfood";
  * durations" — and the content-addressed cache makes the render pass free
  * after the timing pass. SFX accents resolve from an OPERATOR pack outside
  * the repo (`SFX_PACK_DIR`); a missing pack skips the accent honestly,
- * never fails the render. The music bed stays an empty seam: `bed` exists
- * as an input, nothing in-tree supplies it (engaging-clips §6,
- * founder-ratified).
+ * never fails the render. The music bed is an OPERATOR input and stays one:
+ * `bed` points at a licensed track on the box, and nothing in-tree ever
+ * supplies it (engaging-clips §6, founder-ratified) — `main()` never sets it.
  */
 
 export const demoClipBeatSchema = pillarBeatSchema.extend({
@@ -250,6 +257,23 @@ async function resolveSfx(
   return { buffers, skipped };
 }
 
+/**
+ * The operator's bed file → render-ready bytes. The CONTAINER IS THEIRS: the
+ * target names the file from this extension and writes the bytes verbatim, so
+ * a licensed master is never re-encoded to satisfy a naming rule (B-audio.1).
+ * An extension the contract does not know refuses here, loudly, rather than
+ * inside chromium.
+ */
+async function readOperatorBed(bed: { file: string; volume: number }): Promise<RenderAudioBed> {
+  const ext = path.extname(bed.file).slice(1).toLowerCase();
+  if (!(MEDIA_AUDIO_EXTS as readonly string[]).includes(ext)) {
+    throw new Error(
+      `music bed "${bed.file}" is not an audio container the contract knows (${MEDIA_AUDIO_EXTS.join(", ")})`,
+    );
+  }
+  return { bytes: await readFile(bed.file), ext: ext as MediaAudioExt, volume: bed.volume };
+}
+
 export async function renderDemoClips(deps: RenderDemoClipsDeps = {}): Promise<DemoClipOutcome[]> {
   const outDir = deps.outDir ?? DEFAULT_OUT_DIR;
   const driver = deps.narration ?? null;
@@ -274,7 +298,7 @@ export async function renderDemoClips(deps: RenderDemoClipsDeps = {}): Promise<D
       ? {
           narration: narrations.map((a) => ({ wav: a.wav, durationMs: a.durationMs, words: a.words })),
           sfx: sfx.buffers,
-          bed: deps.bed ? { wav: await readFile(deps.bed.file), volume: deps.bed.volume } : null,
+          bed: deps.bed ? await readOperatorBed(deps.bed) : null,
         }
       : null;
 

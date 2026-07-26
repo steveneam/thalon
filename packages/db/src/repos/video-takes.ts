@@ -1,11 +1,14 @@
 import {
+  videoTakePosterSchema,
   videoTakeSchema,
   type TenantCtx,
   type VideoTakeDisposition,
   type VideoTakeInput,
+  type VideoTakePoster,
 } from "@thalon/contracts";
 import { and, eq } from "drizzle-orm";
 import { NotFoundError } from "../errors";
+import { stableStringify } from "../hash";
 import { videoProjects, videoTakes } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
@@ -108,6 +111,56 @@ export function videoTakesRepo(db: Db) {
             ...(filter?.disposition ? [eq(videoTakes.disposition, filter.disposition)] : []),
           ),
         );
+    },
+
+    /**
+     * B-media.0 (s77): stamp the take's derived poster onto `meta.posterRef`
+     * — write moment 2 of the media framework, validated at this single door
+     * by the frozen `videoTakePosterSchema` (the `meta.lineage` pattern; jsonb,
+     * no table change).
+     *
+     * Idempotent on the VALUE, not on presence: re-stamping the identical
+     * envelope is a silent no-op (`stamped: false`), so a re-run of the
+     * backfill door costs one read. A DIFFERENT poster replaces the old one
+     * rather than refusing — unlike lineage, a poster is a choice of frame,
+     * and the future import door lets an operator pick a better one.
+     */
+    async setPoster(
+      ctx: TenantCtx,
+      id: string,
+      poster: VideoTakePoster,
+    ): Promise<{ take: VideoTakeRow; stamped: boolean }> {
+      const parsed = videoTakePosterSchema.parse(poster);
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(videoTakes)
+          .where(and(eq(videoTakes.id, id), eq(videoTakes.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("video_take", id);
+        const meta = current.meta as Record<string, unknown>;
+        const existing = videoTakePosterSchema.safeParse(meta.posterRef);
+        if (existing.success && stableStringify(existing.data) === stableStringify(parsed)) {
+          return { take: current, stamped: false };
+        }
+        const [row] = await tx
+          .update(videoTakes)
+          .set({ meta: { ...meta, posterRef: parsed }, updatedAt: new Date() })
+          .where(and(eq(videoTakes.id, id), eq(videoTakes.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_take",
+          entityId: row.id,
+          event: "video_take.poster_stamped",
+          payload: {
+            sha256: parsed.ref.sha256,
+            ext: parsed.ref.ext,
+            provenance: parsed.provenance,
+            replaced: existing.success,
+          },
+        });
+        return { take: row, stamped: true };
+      });
     },
 
     /**
