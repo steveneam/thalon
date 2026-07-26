@@ -83,7 +83,7 @@ const videosResponseSchema = z.object({
  * every read is guarded and an unreadable body degrades to the empty string,
  * leaving the caller's message exactly as loud as it was before.
  */
-async function failureReason(response: Response): Promise<string> {
+async function failureReason(response: { text(): Promise<string> }): Promise<string> {
   let body = "";
   try {
     body = await response.text();
