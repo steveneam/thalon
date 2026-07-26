@@ -156,6 +156,62 @@ Settings → Integrations, now that the vault core exists:
 
 Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between sessions.
 
+### s76 FOUNDER POLISH PASS — five directives, lead-owned, GATED ON WAVE 3 FINISHING
+
+Founder, s76, live, with an explicit timing instruction: *"do it when the
+rest of the lanes have completed as to not compete for CPU"*. All five are
+lead work (no lane), and (1) is inside `leadboard-wire`'s file set so it
+could not start earlier regardless. Verbatim source: *"the Leads metrics
+could use the same treatment as the intel in terms of simplification. the
+vertical length of the Needs me in the dashbard should match the week
+calendar vertical length. changing from week to day in calendar dashboard
+shouldnt change it's vertical length but remain, as changing from week to
+day should show the current day with the time along the y-axis, and red line
+across, same as the main calendar. clicking on the thalon logo should take us
+to the landing page, not the dashboard. we should put the logo back in soon,
+since the redesign is near completion on all fronts."*
+
+1. **Leads metrics — simplify the way Intel was.** The precedent is s74's
+   Intel rebuild, which folded its capture doors and demo/cadence honesty
+   into the sheet's OWN stamp band instead of adding extra bands. Apply that
+   grammar to the Leads metrics. Files: `components/leads/**` — **must wait
+   for `leadboard-wire` to merge.**
+2. **Dashboard: `NeedsYouCard` height must match `WeekCard` height.** Files:
+   `components/dashboard/needs-you-card.tsx` + `week-card.tsx`.
+3. **Dashboard week↔day toggle must not change the card's vertical length**,
+   and the day view must render the current day with **time down the y-axis
+   and the red now-line across**, same as the main calendar. **This is reuse,
+   not a rebuild:** `calendar-surface.tsx` already has `NowLine` (its own
+   component), plus `gutterHours(win)` and `yOf(hour, win)` for the axis —
+   lift the shared pieces rather than drawing a second time grammar. Note the
+   dashboard card's toggle is `"today" | "week"` (week-card.tsx), so "day" =
+   its Today view; the main calendar's own densities are week/month/agenda
+   and have no day density to copy wholesale.
+4. **Thalon logo → the landing page, not the dashboard.**
+   `components/workspace/workspace-rail.tsx:44` currently reads
+   `<Link href="/app" aria-label="Workspace home">`. **GOTCHA, caught before
+   implementing:** `next.config.ts` redirects `/` → `/app` in DEVELOPMENT
+   ONLY (founder direction s50), with `/?landing` as the documented escape
+   hatch — so a bare `href="/"` bounces straight back to the dashboard on the
+   dev box and looks broken to the person testing it. Production is
+   unaffected. Recommended: compute the target once —
+   `process.env.NODE_ENV === "development" ? "/?landing" : "/"` — so it is
+   correct in both. Also re-point the `aria-label`, which currently says
+   "Workspace home" and would become a lie.
+5. **Put the real logo back in** ("the redesign is near completion on all
+   fronts"). The rail renders `<span className="rail-mark" />`, a pure CSS
+   gradient square (`workspace.css:81`, `--brand-hi`/`--brand-lo`) — a
+   placeholder, not the mark. Restoring the real asset must respect the
+   standing token rule: `--color-brand-hi/lo` are MARK-ONLY, never status and
+   never interactive.
+
+**Also queued in the same pass (lead-found, not founder-directed):** the
+`leadboard-wire` lane left `components/intel/heat-grade.tsx` (HeatGrade, not
+`heatBand`) and `components/workspace/bulk-bar.tsx` imported by NOTHING after
+it deleted the legacy board. It correctly declined to touch files outside its
+set. Deleting both burns three more ratchet pins to zero — verify the orphan
+claim independently first, the way that lane did.
+
 ### Content origination (the loops)
 - Pillar #1 mint + render — **[founder GO]** — Phase 2 above.
 - Post loop live per platform — **✅ LIVE s69 on LinkedIn + Facebook (the meme
