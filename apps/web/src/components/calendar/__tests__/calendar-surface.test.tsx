@@ -321,31 +321,53 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     );
   });
 
+  /*
+   * THE CLOCK IS PINNED HERE, and it has to be (s80).
+   *
+   * This test seeded `nextSweepAt` two hours from the REAL now and asserted a
+   * tick projects. But the grid's window is 06:00–21:00 (calendar-model.ts) and
+   * `projectSweepTicks` clips to it — so whenever the suite ran after ~19:00
+   * local, the only tick landed outside the window, zero projected, and the
+   * assertion failed. It passed all day and turned main red every evening; it
+   * was found at 20:06 UTC on a run that had been green five times earlier the
+   * same session. A test whose verdict depends on what time somebody runs it is
+   * not measuring the product.
+   *
+   * `shouldAdvanceTime` keeps the timers moving so testing-library's async
+   * finds still resolve — a frozen clock would hang them.
+   */
   it("projects the engine's next sweep, and nothing at all from an overdue pointer", async () => {
-    seedPlan({
-      sweep: {
-        lastSweptAt: today(6, 30).toISOString(),
-        nextSweepAt: new Date(Date.now() + 2 * 3_600_000).toISOString(),
-        intervalMs: 8 * 3_600_000,
-        source: "bluesky",
-      },
-    });
-    const { unmount } = render(<CalendarSurface />);
-    // The pointer projects a tick every interval to the end of the week.
-    expect((await screen.findAllByText("Sweep · engine")).length).toBeGreaterThan(0);
-    unmount();
+    const nineAm = today(9, 0);
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(nineAm);
+    try {
+      seedPlan({
+        sweep: {
+          lastSweptAt: today(6, 30).toISOString(),
+          nextSweepAt: new Date(Date.now() + 2 * 3_600_000).toISOString(),
+          intervalMs: 8 * 3_600_000,
+          source: "bluesky",
+        },
+      });
+      const { unmount } = render(<CalendarSurface />);
+      // The pointer projects a tick every interval to the end of the week.
+      expect((await screen.findAllByText("Sweep · engine")).length).toBeGreaterThan(0);
+      unmount();
 
-    seedPlan({
-      sweep: {
-        lastSweptAt: hoursAgo(72),
-        nextSweepAt: hoursAgo(48),
-        intervalMs: 8 * 3_600_000,
-        source: "bluesky",
-      },
-    });
-    render(<CalendarSurface />);
-    await screen.findByText("0 planned");
-    expect(screen.queryByText("Sweep · engine")).not.toBeInTheDocument();
+      seedPlan({
+        sweep: {
+          lastSweptAt: hoursAgo(72),
+          nextSweepAt: hoursAgo(48),
+          intervalMs: 8 * 3_600_000,
+          source: "bluesky",
+        },
+      });
+      render(<CalendarSurface />);
+      await screen.findByText("0 planned");
+      expect(screen.queryByText("Sweep · engine")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("a failed read says so and offers retry — never a quiet week", async () => {

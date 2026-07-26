@@ -26,6 +26,8 @@ All **29 jobs on the other eight surfaces re-driven and still green** — neithe
 
 **ONE GATE WAS DELIBERATELY NARROWED, flagged rather than slipped in:** the driver counted every `requestfailed`, including `net::ERR_ABORTED` — a *cancellation* (a `<video preload="metadata">` whose element left the DOM when the inspector closed), not a failure. The editor selects and deselects on every interaction, so it fired on four otherwise-clean jobs, and treating it as an error would make "console clean" mean "nothing was ever cancelled", which no interactive surface can satisfy. **Only that one errorText is dropped**; ERR_FAILED, connection/DNS failures and every 4xx/5xx response still count.
 
+**MAIN-RED #5, CAUGHT AT THE WRAP BY RUNNING THE GATE ON A DOCS-ONLY CHANGE.** The final verify — on two markdown edits — came back **exit 1**. Not the docs: `calendar-surface.test.tsx` seeded `nextSweepAt` two hours from the REAL now and asserted a sweep tick projects, but the grid's window is 06:00–21:00 and `projectSweepTicks` clips to it. **After ~19:00 local the only tick falls outside the window, zero project, and the test fails.** It had passed five times earlier in this same session and failed at 20:06 UTC. So it was a latent bomb that turned main red every evening and green every morning, and it was found only because the rule says run the gate even for a docs commit (the s78 dead-link guard is why that rule exists). Fixed by PINNING the clock for that test (`vi.useFakeTimers({shouldAdvanceTime: true})` + `setSystemTime(09:00)` — advancing, because a frozen clock hangs testing-library's async finds). **A test whose verdict depends on what time somebody runs it is not measuring the product.** Swept for siblings: the only other `Date.now() + N` test seeds are intel's sweep pointer and a queue-admissions timestamp, neither window-clipped, both green in the same 20:05 run.
+
 **NEW TOOL OF RECORD: `scripts/measure-sheet.mjs`** — the render gate as a NUMBER. `shoot-surface.mjs` produces two IMAGES, and two images need a human to decide whether they match, which is the judgement that goes soft after a session staring at one surface. It prints MISSING (the sheet draws it, the app renders it nowhere — the gap no pixel diff names), DRIFT (with the delta) and EXTRA (so an app adaptation is a decision, not an accident). Two methodology bugs were fixed before its number was believed: SVG `className` is an `SVGAnimatedString` that split into junk class names, and whole-document scope compared the app's first `.btn` (the rail's theme toggle) against the sheet's (the topbar's Create button) and called 937px between two different controls a drift.
 
 **THE GATE FOUND THE SINGLE ROOT CAUSE UNDER THE AUDIT'S SCATTERED RHYTHM FINDINGS:** `.copilot` renders **60px against the sheet's 79** (its wrapping `.cop-box` became a single-line `<input>`, 57 → 38), and **every band below it is shifted by exactly −19px** — player top y=188 vs the sheet's 207. **Roughly twenty of the 38 drift rows are that one defect.** `.strip` is the other named one: 110px reserved in the sheet, 39 in the app (which is also the "selecting a beat jumps the page 260px" finding).
@@ -35,6 +37,14 @@ All **29 jobs on the other eight surfaces re-driven and still green** — neithe
 **Resume · Thalon** — s81 = **FINISH THE EDITOR BUILD-OUT.** Three slices merged;
 the remaining work is (c)-tail, (d) and (e), and it is all measured. Boot model =
 the founder's default (he set **Opus 5 (1M)** at the s80 boot).
+
+**⚑ THE ORDER BELOW IS RATIFIED, NOT PROPOSED.** The founder closed s80 with
+*"i'll follow your recommendations"* — that covers **slice (d) going FIRST**
+(the copilot band's 19px is ~20 of the 38 drift rows, so the layout work leads
+rather than trails), the **music swap taking the `music-candidates/` route and
+NOT the stored-bed sha bridge** (so no contract window opens), and the
+**working-copy preview counting as local compute inside the sequence gate**.
+Do not re-open these at boot; start executing step 1.
 
 **Read first:** CLAUDE.md → this file → `docs/research/video-editor-PREPLAN-s80.md`
 (the plan of record, incl. the contract-window ruling) →
