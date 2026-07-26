@@ -29,6 +29,24 @@ Workflow({ name: "be-check", args: { mode: "built", area: "packages/engine/src/s
 
 ---
 
+## Two process rules, learned the expensive way (s77)
+
+**1. Audit the whole region, not the part you touched.** Twice in one session
+the lead checked exactly what it had changed, declared it clean, and the
+founder immediately found what had been scoped out — a scrollbar measured only
+on `.pick-row` while the hook row sat outside that class; a fix verified on one
+card while the other three carried the bug. When you script a DOM audit, walk
+every child of the region and classify each one. A selector that matches only
+what you edited will always tell you what you edited is fine.
+
+**2. State that survives a prop change is a bug until proven otherwise.** Any
+component holding a selection, an index, a draft or a failure flag must be
+keyed by the entity it renders, or it will show one entity's state on the
+next. The two live cases this session: `DossierCard` had no `key`, so a title
+pick carried across cards and went out of range on a smaller one; `SourceThumb`
+needed an explicit reset so one dead poster did not poison the next row. Both
+were invisible on the surface being tested and obvious one card over.
+
 ## The rule that governs every check below
 
 **An honest refusal is CORRECT and is never a finding.** A disabled control
@@ -65,6 +83,24 @@ Every change has a way back. Watch for: a selection with no path to
 clear; a destructive action with no confirm and no undo.
 *Proven s77: Intel's angle picks were optional by their own comment and could
 never be un-picked.*
+
+**And the sharper half — STATE THAT OUTLIVES ITS ENTITY.** Open one item, make
+a pick, open a different item: the pick must be gone. Check that the index is
+still in range for the new entity, and that anything the control feeds
+downstream carries the NEW entity's value. *Proven s77: a title pick survived
+the card switch, and on a card with fewer titles it rendered nothing checked
+under a label promising one always rides, while the payload carried an index
+that card never had.*
+
+### Every row explains itself
+A group of rows that look alike but behave differently must SAY so. Watch for:
+two selection groups run together with only colour or a text prefix to separate
+them (colour is never the only channel, and a prefix is not a heading); one row
+in a list missing an affordance its neighbours have, with no stated reason; a
+required choice and an optional one presented identically. *Proven s77 — the
+founder asked, in order: "why is there 2 selections? whats the difference?" and
+"why does some sentences have copy button next to it and some dont?" Both had
+real answers the UI never gave.*
 
 ### D — Discoverable
 Interactive things must look interactive, and capabilities must be findable.
@@ -162,7 +198,12 @@ credential in a tracked file, and none in a logged error.
    sessions). Note that `vitest` does **not** typecheck — a green suite with a
    broken build is a real outcome here, twice on record.
 2. The render gate above, for anything visual.
-3. Leave a ratchet **in the same change**, as high up the ladder as it goes:
+3. **A test fixture asserted absent must be long enough to mean it.** *Proven
+   s77: an OAuth test asserted the signed header does not leak the consumer
+   secret — correct — but the fixture secret was the 2-character string `"cs"`,
+   checked against a random base64 signature. It failed whenever the nonce
+   produced a signature containing those two characters.*
+4. Leave a ratchet **in the same change**, as high up the ladder as it goes:
    executable (test · CI check · constraint) > structural (seam · type ·
    schema) > configuration > documentary. Tag it **invariant** (safety, never
    loosened) or **opinion** (convention, freely revised).
