@@ -88,6 +88,19 @@ now; READ BEFORE TRUSTING A VERDICT).
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units
    (`XDG_RUNTIME_DIR=/run/user/$(id -u)` or systemctl cannot see the bus) ·
    dev 3111 · `git status` + this stamp.
+0b. **MOBBIN MCP (installed s82 close, founder-directed): authenticate, then
+   research.** `mobbin` is in USER config (`https://api.mobbin.com/mcp`,
+   deliberately NOT the tracked `.mcp.json`) and shows *Needs authentication* —
+   run `/mcp` → mobbin at boot; the lead drives the browser leg (no-clipboard
+   doctrine), the founder supplies credentials/verification (HE HAS NO MOBBIN
+   ACCOUNT YET — account creation is his leg). Then a BOUNDED pattern sweep of
+   comparable interfaces: social schedulers/distributors (composer · queue ·
+   calendar) · workspace shells · video editors · settings/connect-account
+   flows. Two payoffs, in order: the s83 connect-flow UI (Settings →
+   Integrations gains the generic connect door — Mobbin's connect-account
+   patterns are directly on point) and the D4 design wave (Analytics ·
+   Calendar→Schedule · composer band · Channels sheets). Findings land as a
+   tracked reference memo under `docs/research/`, not as chat.
 1. **The seam, per plan §4:** ONE `SocialConnector` contract in
    `packages/contracts` (identifier · scopes · capabilities, merging with W1's
    matrix · per-platform settings schema · `generateAuthUrl` / `exchangeCode` /
