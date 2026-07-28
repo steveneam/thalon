@@ -103,18 +103,25 @@ during a render (the s80 red-by-night lesson).
 
 ## Resume prompt (session 82, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s82 = **EXECUTE THE THREE-LANE PLAN**, gated on the
-founder's GO (his four calls are the top entry in NEEDS-STEVEN; call #1 IS the
-launch gate). Plan of record: **`docs/research/s82-PREPLAN.md`** — written s81
-second half on his direction ("plan the next phases … look at Postiz … address
-medium/lows … maybe parallel workstreams"), lanes queued on COORDINATION.md.
+**Resume · Thalon** — s82 = **EXECUTE THE THREE-LANE PLAN. THE LAUNCH IS
+ALREADY APPROVED** — the founder took the lead's recommendations on all four
+calls at the s81 close ("I'll go with your recommendations"), and call #1 was
+the named-lane approval, so the boot goes STRAIGHT to pre-flight + launch, no
+re-ask. Plan of record: **`docs/research/s82-PREPLAN.md`** (§3 records the
+decisions). ALSO ON THE TABLE AT THE OPENER, not blocking the lanes: the
+**B-dist DISTRIBUTION CHARTER** he directed is drafted awaiting ratification —
+`docs/research/distribution-charter.md` (full Postiz plan: connector seam s83 ·
+closed-loop analytics · composer parity · REDESIGN PHASE 4/5's four sheets ·
+the §5 ratification bundle is in NEEDS-STEVEN 2026-07-28c).
 
 **Read first:** CLAUDE.md → this file → `docs/research/s82-PREPLAN.md` →
 COORDINATION.md §s82 → `docs/research/jobs-table-s79.md` (the harness ledger —
 eight wrong selectors on record; READ BEFORE TRUSTING A VERDICT).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
-   `git status` + this stamp. Then surface the four calls and take his GO.
+   `git status` + this stamp. Surface the charter-ratification bundle
+   (NEEDS-STEVEN 2026-07-28c) but do NOT block the lanes on it — they carry
+   their own s81 approval.
 1. **PRE-FLIGHT, lead-direct, FREEZE FIRST:** W1 = the small contract window
    (`publishQueue` repo over the existing dormant table · `videoCuts.remove`
    with the call-#2 refusals · platform capability matrix in contracts) via the
@@ -173,4 +180,4 @@ timeline blocks), and the missing verbs (insert/delete a beat and a caption). It
 ruled the contract window NO on evidence, built `measure-sheet.mjs`, and caught
 main-red #5: a calendar test that was green by day and red after ~19:00 local.
 
-## Next action — s82: surface the four NEEDS-STEVEN calls (recommendations attached, 2026-07-28b entry) · founder GO · W1 window + W2 seam (lead, freeze first) · launch editor-verbs + editor-polish + sched-spine · lead-owned merge gates.
+## Next action — s82: boot straight to W1 window + W2 seam (lead, freeze first) · launch the three APPROVED lanes (editor-verbs + editor-polish + sched-spine) · lead-owned merge gates · surface the B-dist ratification bundle at the opener without blocking the lanes.

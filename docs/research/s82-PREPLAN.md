@@ -222,7 +222,12 @@ gates are Approve/Calendar jobs + be-check on the engine seam). Lead extends the
 jobs tables at each merge — new jobs: compare · named save · delete + its
 refusals · resume-poll · audition ×2 · schedule verb · fit line.
 
-## 3. Founder calls — WITH the lead's recommendations (asked for s81 second half; mirrored in NEEDS-STEVEN; nothing launches without #1)
+## 3. Founder calls — ALL FOUR DECIDED s81 ("I'll go with your recommendations on the four calls"), recommendations kept below as the record of what was decided
+
+**Standing result: the three lanes are APPROVED for the s82 launch (call #1 =
+the named-lane approval the standing rule requires — no re-ask at boot), the
+delete default is ratified, the preview ships as a keeper-state, and the
+disarmed posture is confirmed.**
 
 1. **Lane GO** — the three named lanes + W1/W2 pre-flight, per the standing
    fresh-approval rule. **Recommend: launch all three.** The file sets are

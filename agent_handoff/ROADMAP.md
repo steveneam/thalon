@@ -248,6 +248,17 @@ Settings → Integrations, now that the vault core exists:
 
 ## Full open backlog (everything that needs doing)
 
+**B-dist — THE DISTRIBUTION SUITE (charter drafted s81, awaiting ratification
+— `docs/research/distribution-charter.md`).** The founder-directed full Postiz
+plan: D0 queue spine (= the approved s82 lanes) · D1 connector seam
+(s83 rec; Reddit+Bluesky proof) · D2 own-post analytics CLOSED-LOOP into
+B-learn (publication_metrics window + per-connector postAnalytics + Analytics
+surface) · D3 composer parity + judge-gated evergreen + RSS-as-fan-out-input ·
+D4 workspace REDESIGN PHASE 4/5 (Analytics · Calendar→Schedule · composer
+band · Channels sheets; mock→verdict→build) · D5 Thalon-MCP/public API
+(triggers: external users) · D6 explicit rejects. Reference repo is AGPL —
+patterns only, re-implemented.
+
 Grouped by stream. Each item: **[owner/gate]**. Nothing here is lost between sessions.
 
 ### s76 FOUNDER POLISH PASS — ✅ 1–4 SHIPPED s76 (`61e3434`, `c945faa`); 5 BLOCKED ON THE FOUNDER
