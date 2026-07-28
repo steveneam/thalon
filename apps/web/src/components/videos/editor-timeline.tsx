@@ -41,6 +41,14 @@ const EDGE_FRACTION = 0.18;
 /** Snap threshold: 8px of an ~800px track, expressed in the sheet's own proportion. */
 const SNAP_FRACTION = 0.01;
 
+/** One frozen empty set, so an unwired optional mark prop is not a new object per render. */
+const EMPTY_SET: ReadonlySet<number> = new Set();
+
+/** The sheet's block label — "01", "02", … — and the beats rail's own grammar. */
+function ordinal(index: number): string {
+  return String(index + 1).padStart(2, "0");
+}
+
 export type Selection =
   | { kind: "beat"; index: number }
   | { kind: "caption"; index: number }
@@ -91,6 +99,7 @@ export function EditorTimeline({
   propBeats,
   propCaptions,
   propMusic,
+  refusedCaptions = EMPTY_SET,
 }: {
   edl: Edl;
   selection: Selection;
@@ -104,6 +113,20 @@ export function EditorTimeline({
   propBeats: ReadonlySet<number>;
   propCaptions: ReadonlySet<number>;
   propMusic: boolean;
+  /**
+   * Caption lines the JUDGE REFUSED at the approve door (s82 B3). A refusal
+   * used to be announced only in the notice band — "line 2 was refused" — while
+   * the plate it names carried no mark at all, so finding it meant counting
+   * plates by eye. Distinct from `propCaptions`: a proposal is an offer to
+   * change (warn), a refusal is a gate verdict on what is there now (err), and
+   * one plate can carry both.
+   *
+   * Optional because the set is assembled from the approve response, which
+   * lives in the editor's own state (editor.tsx — a different lane's file this
+   * session). Defaulted rather than required so the mark is dead-simple to
+   * wire and cannot half-render.
+   */
+  refusedCaptions?: ReadonlySet<number>;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<Drag | null>(null);
@@ -286,6 +309,16 @@ export function EditorTimeline({
                       className={marks === "" ? "blk" : `blk ${marks}`}
                       style={{ width: `${widths[i]}%` }}
                       aria-pressed={selection?.kind === "beat" && selection.index === i}
+                      /*
+                       * The NAME is the accessible name, whatever the pixels do
+                       * (s82 B10). The visible label degrades to an ellipsis on
+                       * a narrow block; an accessible name never clips, so the
+                       * identity, the duration and the proposal all live here
+                       * where truncation cannot reach them.
+                       */
+                      aria-label={`Beat ${ordinal(i)} · ${clip.name} · ${clip.duration}s${
+                        propBeats.has(i) ? " · proposed change" : ""
+                      }`}
                       title={`${clip.name} · ${clip.duration}s · ${clip.source.ref}`}
                       /*
                        * KEYBOARD ACTIVATION (s80 blocker fix). Enter/Space on a
@@ -318,19 +351,61 @@ export function EditorTimeline({
                         }
                       }}
                     >
-                      {clip.name}
+                      {/*
+                        THE SHEET'S OWN LABEL, and the proposal out of the text
+                        flow (s82 B10, a `high`).
+
+                        The block used to print the whole `clip.name` inside a
+                        `overflow:hidden; white-space:nowrap` box with computed
+                        `text-overflow: clip`: on the real 9-beat cut "beat-09"
+                        rendered as "beat-" — mid-token, with no cue that
+                        anything was missing. Worse, the `.prop-tag` was appended
+                        INSIDE that same box, so injecting it measured 0px
+                        visible and the amber border became the only channel
+                        saying "the agent proposes here", on the surface whose
+                        stated promise is "never a silent change".
+
+                        So: the sheet's ordinal leads and never shrinks, the name
+                        follows in a span that ellipsises (a visible truncation
+                        cue, and the beats rail beside this states the same name
+                        in full anyway), and the proposal word is a corner mark
+                        positioned out of the flow, where a long label cannot eat
+                        it. `title` keeps the full name; `aria-label` above keeps
+                        every fact.
+                      */}
+                      <span className="blk-ord">{ordinal(i)}</span>
+                      <span className="blk-lbl">· {clip.name}</span>
                       {propBeats.has(i) && <span className="prop-tag">proposed</span>}
                     </button>
                   );
                 })
               )}
               {overlay !== null && duration > 0 && (
+                /*
+                  THE FREEZE FACT IS DRAWN, NOT TOOLTIPPED (s82 B7).
+
+                  This marker carried its whole fact — where the freeze lands and
+                  that the prior timeline holds under it — in a `title`, on an
+                  element `editor.css` gives `pointer-events: none`. An element
+                  that receives no pointer events is never hovered, so that title
+                  could never be displayed by any browser: the fact was
+                  unreachable at rest and stated nowhere else until a selection
+                  opened the inspector.
+
+                  `pointer-events: none` STAYS. The marker spans from its freeze
+                  boundary to the end of the lane, over the beats underneath it,
+                  so making it hoverable would make it swallow their selections
+                  and drags. The fix is therefore to move the fact into the
+                  marker's own text — freeze first, because the marker is as
+                  narrow as the tail it covers and the name is the part that can
+                  afford to ellipsise.
+                */
                 <span
                   className="blk-overlay"
                   style={{ left: `${Math.min(100, ((overlay.at ?? 0) / duration) * 100)}%` }}
-                  title={`${overlay.name} · endcard freeze at ${overlay.at ?? 0}s — the prior timeline holds under it`}
                 >
-                  {overlay.name}
+                  <span className="blk-overlay-fact">endcard · freeze {overlay.at ?? 0}s</span>
+                  <span className="blk-lbl">· {overlay.name}</span>
                 </span>
               )}
             </div>
@@ -366,11 +441,39 @@ export function EditorTimeline({
                     "blk-music",
                     selection?.kind === "music" ? "on" : "",
                     propMusic ? "prop" : "",
+                    /*
+                      SELECTABLE, NOT DRAGGABLE (s82 B6). `button.blk-music` is
+                      `cursor: grab` for every cue, but the pointer-down handler
+                      returns immediately for a stream-copied one — so the block
+                      advertised a drag it refuses to perform, and the honest
+                      explanation lived only in a `title` the operator reads
+                      AFTER grabbing and watching nothing move. The mode is now
+                      ON the element, so the cursor can tell the truth before the
+                      gesture instead of after it.
+                    */
+                    cue.mode === "copy" ? "copy" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                   style={{ width: "100%" }}
                   aria-pressed={selection?.kind === "music"}
+                  /*
+                    The block has no text of its own, so before this its whole
+                    accessible name was its `title` — and a pending proposal on
+                    it was signalled by border hue alone (s82 B2). Per
+                    `proposalMarks`, music-align is one of the commonest ops in
+                    the diff vocabulary, so that was colour-as-sole-channel on
+                    one of the most likely proposals to arrive.
+                  */
+                  aria-label={[
+                    `Music bed ${cue.source.ref}`,
+                    cue.mode === "copy"
+                      ? "stream-copied verbatim — no knobs by contract"
+                      : `offset ${cue.offset}s · gain ${cue.gainDb}dB`,
+                    propMusic ? "proposed change" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
                   title={
                     cue.mode === "copy"
                       ? `${cue.source.ref} · stream-copied verbatim — no knobs by contract`
@@ -391,7 +494,20 @@ export function EditorTimeline({
                       event,
                     );
                   }}
-                />
+                >
+                  {/*
+                    The two facts that were hover-only, drawn. They ride an
+                    overlay rather than the block's own flow so the sheet's
+                    waveform geometry is untouched, and `pointer-events: none`
+                    keeps the drag surface whole underneath them.
+                  */}
+                  {(propMusic || cue.mode === "copy") && (
+                    <span className="blk-tags">
+                      {propMusic && <span className="prop-tag">proposed</span>}
+                      {cue.mode === "copy" && <span className="mode-tag">no knobs</span>}
+                    </span>
+                  )}
+                </button>
               )}
             </div>
           </div>
@@ -399,7 +515,28 @@ export function EditorTimeline({
           <div className="lane">
             <div className="lane-hd">
               Captions
-              <small>plates · fades</small>
+              {/*
+                A PLATE IS TOO SMALL FOR A WORD, SO THE LANE CARRIES IT (s82
+                B2/B3). A caption plate is 22px tall and as narrow as its fade
+                window — a 7% plate is about 50px — so the word that a beat block
+                can hold does not fit inside one. The mark on the plate is
+                therefore a corner dot, and the WORD lives here, once per lane:
+                a proposal and a judge refusal are different facts in different
+                channels (warn vs err), and neither is left to hue alone.
+
+                It REPLACES the decorative subtitle rather than adding a third
+                line — the subtitle only restates the lane's own name, while a
+                third line would grow the 74px header and push this lane's
+                geometry off the sheet for as long as a proposal is pending.
+              */}
+              {propCaptions.size > 0 || refusedCaptions.size > 0 ? (
+                <small className="lane-marks">
+                  {propCaptions.size > 0 && <span className="prop-tag">proposed</span>}
+                  {refusedCaptions.size > 0 && <span className="refused-tag">refused</span>}
+                </small>
+              ) : (
+                <small>plates · fades</small>
+              )}
             </div>
             <div className="lane-tr" style={{ alignItems: "center" }}>
               {plates.length === 0 ? (
@@ -407,9 +544,12 @@ export function EditorTimeline({
               ) : (
                 plates.map((plate, i) => {
                   const line = edl.captions?.lines[i];
+                  const proposed = propCaptions.has(i);
+                  const refused = refusedCaptions.has(i);
                   const marks = [
                     selection?.kind === "caption" && selection.index === i ? "on" : "",
-                    propCaptions.has(i) ? "prop" : "",
+                    proposed ? "prop" : "",
+                    refused ? "refused" : "",
                   ]
                     .filter(Boolean)
                     .join(" ");
@@ -419,7 +559,19 @@ export function EditorTimeline({
                       type="button"
                       className={marks === "" ? "blk-cap" : `blk-cap ${marks}`}
                       style={{ width: `${plate.width}%`, marginLeft: `${plate.gap}%` }}
-                      aria-label={`Caption ${i + 1}: ${line?.text ?? ""}`}
+                      /*
+                        The plate's state in its accessible NAME, not just its
+                        border: `aria-pressed` encodes selection and says nothing
+                        about a proposal or a refusal, and the plate has no text
+                        of its own to carry either.
+                      */
+                      aria-label={[
+                        `Caption ${i + 1}: ${line?.text ?? ""}`,
+                        proposed ? "proposed change" : "",
+                        refused ? "refused by the judge" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                       aria-pressed={selection?.kind === "caption" && selection.index === i}
                       title={`${line?.text ?? ""} · ${line?.fadeIn ?? 0}s → ${line?.fadeOut ?? 0}s`}
                       // Keyboard activation — see the beat block above. This is
@@ -439,7 +591,14 @@ export function EditorTimeline({
                           event,
                         );
                       }}
-                    />
+                    >
+                      {/* The per-plate mark: out of the flow, so a 20px plate
+                          still shows it. The word is in the lane header and in
+                          this plate's accessible name — never the hue alone. */}
+                      {(proposed || refused) && (
+                        <span className={refused ? "cap-mark refused" : "cap-mark"} aria-hidden="true" />
+                      )}
+                    </button>
                   );
                 })
               )}

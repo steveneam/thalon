@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Crop, Edl } from "@thalon/contracts";
+import type { AudioCue, Crop, Edl } from "@thalon/contracts";
+import { TakeAudition } from "@/components/media/take-audition";
 import { takeCaption } from "@/components/videos/editor-model";
 import type { Selection } from "@/components/videos/editor-timeline";
 import { mediaUrl } from "@/lib/videos/client";
@@ -30,6 +31,15 @@ import {
   panModeOf,
   setCropAxisMode,
 } from "@/lib/videos/frame";
+
+/**
+ * The cue's tail-easing pair. Derived from the contract rather than restated,
+ * so a schema change reaches this file as a type error instead of a drift.
+ */
+type AudioFade = NonNullable<AudioCue["fadeOut"]>;
+
+/** A pan axis's measured endpoints, as the crop contract carries them. */
+type PanPair = { from: number; to: number };
 
 /**
  * The selection inspector — the B-ve.3 knobs and the B-ve.5/7 reframe,
@@ -357,10 +367,12 @@ function CaptionFields({
  * project ships seven candidate beds; nothing on the surface could reach them.
  */
 function BedPicker({
+  projectId,
   takes,
   currentRef,
   onEdl,
 }: {
+  projectId: string;
   takes: TakeView[];
   currentRef: string | null;
   onEdl: (fn: (edl: Edl) => Edl) => void;
@@ -388,31 +400,62 @@ function BedPicker({
         {candidates.map((take) => {
           const on = take.ref === currentRef;
           return (
-            <button
-              key={take.id}
-              type="button"
-              className={on ? "take on" : "take"}
-              aria-pressed={on}
-              disabled={on}
-              /*
-                The VERB is in the accessible name, not only in a title. A tile
-                whose name is just the file tells a screen-reader user what the
-                thing is called and nothing about what pressing it does — the
-                audit's "the strip's only verb is stated only in a title".
-              */
-              aria-label={
-                on
-                  ? `${bedName(take.ref)} — already the music bed on this cut`
-                  : `Swap the music bed to ${bedName(take.ref)}`
-              }
-              title={on ? `${take.ref} — already the bed on this cut` : `swap the bed to ${take.ref}`}
-              onClick={() => onEdl((current) => setMusicSource(current, take.ref, take.kind === "audio" ? "audio" : "take"))}
-            >
-              <div className="thumb-md">
-                <span>{on ? "in the cut" : bedName(take.ref)}</span>
-              </div>
-              <span className="take-cap">{on ? bedName(take.ref) : takeCaption(take)}</span>
-            </button>
+            /*
+              A BED IS CHOSEN BY EAR (s82 B9, consuming the W2 seam).
+
+              s81 shipped this picker addressing nine candidates by FILENAME —
+              "pick one of nine beds by name" is not a decision anyone can
+              actually make, and the reject reasons underneath say why the last
+              operator passed on one, not what it sounds like. `<TakeAudition>`
+              is the shared seam for exactly this (the editor's takes strip is
+              its other consumer) and it guarantees one audition at a time, so
+              nine beds cannot play over each other.
+
+              It sits BESIDE the tile, not inside it: the tile is a button, and a
+              button inside a button is invalid markup that swallows the inner
+              click. A `still` gets no control at all — there is nothing in it to
+              hear — rather than a player with no time in it.
+            */
+            <div className="bed-slot" key={take.id}>
+              <button
+                type="button"
+                className={on ? "take on" : "take"}
+                aria-pressed={on}
+                disabled={on}
+                /*
+                  The VERB is in the accessible name, not only in a title. A tile
+                  whose name is just the file tells a screen-reader user what the
+                  thing is called and nothing about what pressing it does — the
+                  audit's "the strip's only verb is stated only in a title".
+                */
+                aria-label={
+                  on
+                    ? `${bedName(take.ref)} — already the music bed on this cut`
+                    : `Swap the music bed to ${bedName(take.ref)}`
+                }
+                title={
+                  on ? `${take.ref} — already the bed on this cut` : `swap the bed to ${take.ref}`
+                }
+                onClick={() =>
+                  onEdl((current) =>
+                    setMusicSource(current, take.ref, take.kind === "audio" ? "audio" : "take"),
+                  )
+                }
+              >
+                <div className="thumb-md">
+                  <span>{on ? "in the cut" : bedName(take.ref)}</span>
+                </div>
+                <span className="take-cap">{on ? bedName(take.ref) : takeCaption(take)}</span>
+              </button>
+              {take.kind !== "still" && (
+                <TakeAudition
+                  projectId={projectId}
+                  refPath={take.ref}
+                  kind={take.kind === "audio" ? "audio" : "motion"}
+                  label={bedName(take.ref)}
+                />
+              )}
+            </div>
           );
         })}
       </div>
@@ -444,6 +487,23 @@ function MusicFields({
   playable: boolean;
   onEdl: (fn: (edl: Edl) => Edl) => void;
 }) {
+  /*
+   * THE REMOVED TAIL IS HELD, NOT DESTROYED (s82 B1, `medium` R-lens).
+   *
+   * "Remove easing" discarded the cue's measured `start` and `duration`, and the
+   * apparent inverse — "Add tail easing" — wrote FABRICATED defaults
+   * (`duration - 2`, 1.5s). So an operator who measured a tail at 9.4s over 2.6s
+   * and clicked Remove by mistake got 1.5s at duration−2 back, silently, with no
+   * indication the numbers had changed, and with no global undo the measured
+   * pair was gone from the session entirely. The inspector's own copy below
+   * ("never a manufactured ending") made the fabricated re-add the more jarring,
+   * since it IS manufactured.
+   *
+   * Held in component state rather than the EDL on purpose: a removed cue is not
+   * part of the cut, and writing it back into the EDL to remember it would make
+   * the working copy dirty with something the operator just took out.
+   */
+  const [lastFadeOut, setLastFadeOut] = useState<AudioFade | null>(null);
   const cue = edl.audio[0];
   if (!cue) {
     return (
@@ -451,7 +511,7 @@ function MusicFields({
         <div className="inspector-row">
           <span className="t-label">This cut is silent — no music cue on its EDL.</span>
         </div>
-        <BedPicker takes={takes} currentRef={null} onEdl={onEdl} />
+        <BedPicker projectId={projectId} takes={takes} currentRef={null} onEdl={onEdl} />
       </>
     );
   }
@@ -464,7 +524,7 @@ function MusicFields({
             Stream-copied verbatim from the source — no knobs, by contract.
           </span>
         </div>
-        <BedPicker takes={takes} currentRef={cue.source.ref} onEdl={onEdl} />
+        <BedPicker projectId={projectId} takes={takes} currentRef={cue.source.ref} onEdl={onEdl} />
       </>
     );
   }
@@ -474,7 +534,7 @@ function MusicFields({
       <div className="inspector-row">
         <span className="t-data inspector-ref">{cue.source.ref}</span>
       </div>
-      <BedPicker takes={takes} currentRef={cue.source.ref} onEdl={onEdl} />
+      <BedPicker projectId={projectId} takes={takes} currentRef={cue.source.ref} onEdl={onEdl} />
       {playable && (
         <div className="inspector-row">
           <Waveform
@@ -519,7 +579,11 @@ function MusicFields({
             <button
               type="button"
               className="btn btn-quiet btn-sm"
-              onClick={() => onEdl((current) => patchMusic(current, { fadeOut: undefined }))}
+              title={`Remove the tail easing — its ${fadeOut.duration}s at ${fadeOut.start}s is held, and “Restore tail easing” brings it back verbatim`}
+              onClick={() => {
+                setLastFadeOut(fadeOut);
+                onEdl((current) => patchMusic(current, { fadeOut: undefined }));
+              }}
             >
               Remove easing
             </button>
@@ -528,15 +592,29 @@ function MusicFields({
           <button
             type="button"
             className="btn btn-ghost btn-sm"
+            /*
+              The verb says which of the two things it does, and the title states
+              the fabricated numbers when there is nothing to restore — the
+              defaults are honest, but they were arriving unannounced.
+            */
+            title={
+              lastFadeOut === null
+                ? "Add tail easing — 1.5s, starting 2s before the end"
+                : `Restore the tail easing you removed — ${lastFadeOut.duration}s at ${lastFadeOut.start}s, verbatim`
+            }
             onClick={() =>
               onEdl((current) =>
                 patchMusic(current, {
-                  fadeOut: { start: Math.max(0, current.output.duration - 2), duration: 1.5 },
+                  fadeOut:
+                    lastFadeOut ?? {
+                      start: Math.max(0, current.output.duration - 2),
+                      duration: 1.5,
+                    },
                 }),
               )
             }
           >
-            Add tail easing
+            {lastFadeOut === null ? "Add tail easing" : "Restore tail easing"}
           </button>
         )}
       </div>
@@ -684,6 +762,24 @@ function Reframe({
   const [dims, setDims] = useState<{ width: number; height: number } | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<{ which: "start" | "end"; x: number; y: number; crop: Crop } | null>(null);
+  /*
+   * THE FLATTENED PAN IS HELD FOR THE RETURN TRIP (s82 B5, `low` R-lens).
+   *
+   * "x: pan → static" calls `setCropAxisMode`, which returns `{ ...crop, x:
+   * pan.from }` — the measured `to` endpoint is discarded. Toggling straight back
+   * produced `{ from: value, to: value }`: a dead pan with both endpoints
+   * collapsed onto the start, so the operator's measured pan DESTINATION was
+   * unrecoverable after one stray click on a button that reads as a mode switch
+   * rather than a delete.
+   *
+   * Per axis, because the two axes flatten independently (today only x has a
+   * toggle; y is flattened through the numbers, and a y toggle would inherit this
+   * for free).
+   */
+  const [heldPan, setHeldPan] = useState<{ x: PanPair | null; y: PanPair | null }>({
+    x: null,
+    y: null,
+  });
 
   const xMode = panModeOf(crop.x);
   const yMode = panModeOf(crop.y);
@@ -730,6 +826,37 @@ function Reframe({
       );
     }
     onPatch(next);
+  };
+
+  /**
+   * pan ⇄ static, without losing the destination (B5). Flattening banks the
+   * measured pair; switching back restores the banked DESTINATION while keeping
+   * whatever `from` is current — the operator may have moved the static window
+   * meanwhile, and their newer edit is the truer one. Restored endpoints are
+   * clamped against the current window and the measured source, so a width
+   * change since the flatten cannot reintroduce an out-of-bounds crop.
+   */
+  const toggleAxis = (axis: "x" | "y"): Crop => {
+    const value = crop[axis];
+    const mode = panModeOf(value);
+    if (mode === "expression") return crop;
+    if (mode === "pan") {
+      if (typeof value === "object" && "from" in value) {
+        setHeldPan((held) => ({ ...held, [axis]: { from: value.from, to: value.to } }));
+      }
+      return setCropAxisMode(crop, axis, "static");
+    }
+    const held = heldPan[axis];
+    if (held === null) return setCropAxisMode(crop, axis, "pan");
+    const size = axis === "x" ? crop.width : crop.height;
+    const bound = dims ? (axis === "x" ? dims.width : dims.height) : Number.MAX_SAFE_INTEGER;
+    return {
+      ...crop,
+      [axis]: {
+        from: clampOrigin(panEndpoint(value, "start") ?? 0, size, bound),
+        to: clampOrigin(held.to, size, bound),
+      },
+    };
   };
 
   const commitAxis = (axis: "x" | "y", which: "start" | "end") => (value: number) => {
@@ -852,9 +979,14 @@ function Reframe({
             <button
               type="button"
               className="btn btn-ghost btn-sm"
-              onClick={() =>
-                onPatch(setCropAxisMode(crop, "x", xMode === "static" ? "pan" : "static"))
+              title={
+                xMode === "pan"
+                  ? `x: pan → static — the destination (x to ${panEndpoint(crop.x, "end") ?? 0}) is held, and switching back restores it`
+                  : heldPan.x === null
+                    ? "x: static → pan — seeds both endpoints at the current x"
+                    : `x: static → pan — restores the destination you flattened (x to ${heldPan.x.to})`
               }
+              onClick={() => onPatch(toggleAxis("x"))}
             >
               {xMode === "static" ? "x: static → pan" : "x: pan → static"}
             </button>

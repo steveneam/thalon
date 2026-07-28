@@ -68,6 +68,42 @@
 .dossier-surface .ver-strip { overflow-x: auto; }
 .dossier-surface .strip { overflow-x: auto; }
 
+/*
+ * THE PLAYER PLATE IS A FIXED-REGISTER ISLAND (s82 B8) — and this half of the
+ * change is why the finding was raised on this file too.
+ *
+ * `.player` hardcodes `oklch(0.1 0.008 262)`, correctly near-black in BOTH
+ * registers because a video letterbox is not a ramp value; everything drawn on
+ * it used ramp tokens that flip with the theme, so in light mode the play
+ * triangle (`--n-1000`) was near-black on near-black at about 1.9:1 and the
+ * scrub/rest text sat at `--n-900` ≈ 3.5:1 at 11.5px.
+ *
+ * The ramp ALIASES are pinned on the plate to their DARK-register values: dark
+ * mode is byte-identical, and light mode stops fighting the letterbox. Pinning
+ * the aliases (rather than only adding a plate-local ink token) is what reaches
+ * the INLINE `color: var(--n-1000)` on the scrub's current-time span in
+ * dossier.tsx — an inline style beats any stylesheet rule but still resolves the
+ * custom property against this element.
+ *
+ * THE BLOCK BELOW IS BYTE-IDENTICAL TO editor.css's, in the same change, on the
+ * audit's own condition: the two videos surfaces draw the same plate, so a
+ * one-sided fix leaves them disagreeing in light mode for no stated reason. Both
+ * copies are pinned to the theme's dark register by
+ * components/videos/__tests__/editor-polish-s82-css.test.ts.
+ */
+.dossier-surface .player {
+  --n-100: oklch(0.188 0.010 260);
+  --n-200: oklch(0.215 0.011 258);
+  --n-300: oklch(0.245 0.012 256);
+  --n-400: oklch(0.305 0.012 256);
+  --n-500: oklch(0.365 0.013 255);
+  --n-600: oklch(0.445 0.013 254);
+  --n-700: oklch(0.560 0.014 254);
+  --n-800: oklch(0.680 0.014 254);
+  --n-900: oklch(0.735 0.014 255);
+  --n-1000: oklch(0.935 0.006 255);
+}
+
 .dossier-surface .player-video { width: 100%; height: 100%; border-radius: var(--r-card); object-fit: contain; background: oklch(0.1 0.008 262); }
 .dossier-surface .player-rest { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 24px; text-align: center; }
 .dossier-surface button.play-btn:disabled { cursor: not-allowed; opacity: 0.5; }

@@ -209,6 +209,131 @@
 .editor-surface button.take:disabled { cursor: default; }
 .editor-surface button.take:hover:not(:disabled) .thumb-md { border-color: var(--act); }
 
+/*
+ * ── s82 · the polish tail (the s78 medium/low findings that live in this
+ * sheet, plus the two `high` remnants). Each rule below carries the finding
+ * it closes; none of them exist at rest on a cut with no proposal, no
+ * refusal, no stream-copied cue and no endcard. ──
+ */
+
+/*
+ * B10 (`high`) — THE LABEL CLIPPED MID-TOKEN AND THE PROPOSAL CLIPPED TO 0px.
+ *
+ * `.blk` is `overflow: hidden; white-space: nowrap` with computed
+ * `text-overflow: clip`, and it printed the whole clip name: measured on the
+ * real 9-beat cut the last block was 33px wide against 52px of content, so
+ * "beat-09" rendered "beat-" with no cue that anything was cut. The `.prop-tag`
+ * sat INSIDE that same box, 17px past the clip edge — 0px visible — leaving the
+ * amber border as the only channel for "the agent proposes here".
+ *
+ * The ordinal never shrinks (it is the sheet's own label, and two characters),
+ * the name ellipsises so a truncation is VISIBLE, and the proposal word leaves
+ * the text flow entirely: a corner mark cannot be pushed out by a long label.
+ * `text-overflow` belongs on the text-bearing child, not on the flex container
+ * the audit named — on `.blk` itself it would be inert.
+ */
+/* The gap is the space either side of the sheet's middot ("02 · take 1"):
+   whitespace BETWEEN flex items collapses away, so it has to be drawn. */
+.editor-surface .blk { position: relative; gap: 3px; }
+.editor-surface .blk-ord { flex: none; }
+.editor-surface .blk-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.editor-surface .blk .prop-tag { position: absolute; top: 1px; right: 3px; margin: 0; }
+
+/*
+ * B2/B3 (`medium` ×2) — a proposal on the caption lane was border-colour alone,
+ * and a judge refusal marked NOTHING: the notice band said "line 2 was refused"
+ * and the operator counted plates by eye. A plate is 22px tall and as narrow as
+ * its fade window, so the mark on it is a diamond in the sheet's own `.cresc`
+ * grammar (warn = proposed, err = the gate refused) and the WORD is in the lane
+ * header and in each plate's accessible name.
+ */
+.editor-surface .blk-cap { position: relative; }
+.editor-surface .cap-mark { position: absolute; top: -4px; right: -3px; width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); background: var(--warn); }
+.editor-surface .cap-mark.refused { background: var(--err); }
+.editor-surface .blk-cap.refused { border-color: var(--err); box-shadow: 0 0 0 1px var(--err); }
+.editor-surface .lane-marks { display: flex; align-items: center; gap: 6px; }
+.editor-surface .refused-tag { font-family: var(--font-data); font-size: 9px; color: var(--err); }
+
+/*
+ * B6 (`low` ×2) — the music block advertised a drag it refuses to perform for a
+ * stream-copied cue (`onPointerDown` returns early), and its "no knobs by
+ * contract" reason lived only in a `title`. The cursor now says
+ * selectable-not-draggable BEFORE the gesture, and the constraint is drawn.
+ * The tags ride an overlay so the sheet's waveform geometry is untouched.
+ */
+.editor-surface .blk-music.copy { cursor: pointer; }
+.editor-surface .blk-tags { position: absolute; left: 6px; top: 0; bottom: 0; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+.editor-surface .blk-tags .prop-tag { margin: 0; }
+.editor-surface .mode-tag { font-family: var(--font-data); font-size: 9px; color: var(--n-900); }
+
+/* B7 (`low`) — the endcard's freeze second leads the marker and never shrinks;
+   the overlay's name ellipsises behind it (see the component for why the
+   marker itself must stay `pointer-events: none`). */
+.editor-surface .blk-overlay { gap: 3px; }
+.editor-surface .blk-overlay-fact { flex: none; }
+
+/*
+ * B9 (s81 gap) — the bed picker auditions. The audition control is a BUTTON, so
+ * it cannot live inside the tile's own button; the slot holds the two side by
+ * side and owns the tile column the strip used to own directly.
+ */
+/* `flex-start`, not the default stretch: the audition's own player is wider than
+   a 118px tile, and stretching the tile button to match would grow a click
+   target 100px past the thumb it appears to be. The slot widens while a bed is
+   auditioning and returns when it stops — one at a time, by the seam's own
+   guarantee, and the strip it sits in already scrolls sideways. */
+.editor-surface .bed-slot { display: flex; flex-direction: column; gap: 5px; flex: none; align-items: flex-start; }
+
+/*
+ * B4 (`medium`) — `.numfield input { width: 100px }` FLATTENED the two free-text
+ * fields' `flex: 1`. `.numfield` does two jobs: `Field()` renders
+ * `type="number"`, for which 100px is right, while the proposal-rejection reason
+ * and the caption text render no type and were pinned to 100px anyway — because
+ * `.numfield` is a flex COLUMN, so `flex: 1` grew the label and the input never
+ * followed it. The reason field is the sharp one: the surface asks for the
+ * sentence that becomes an eval row and gave it a 100px viewport.
+ */
+.editor-surface .numfield input:not([type="number"]) { width: 100%; }
+
+/*
+ * B8 (`low`) — THE PLAYER PLATE IS A FIXED-REGISTER ISLAND.
+ *
+ * `.player` hardcodes `oklch(0.1 0.008 262)` — a raw non-token value, correctly
+ * near-black in BOTH registers, because a video letterbox is not a ramp value.
+ * Everything drawn ON it used ramp tokens that flip with the theme, so in light
+ * mode `.play-tri` (`--n-1000` → oklch(0.24 …)) was a near-black triangle on
+ * near-black at about 1.9:1, and the scrub and player-rest text sat at
+ * `--n-900` ≈ 3.5:1 at 11.5px.
+ *
+ * The fix pins the ramp ALIASES on the plate to their DARK-register values, so
+ * dark mode is byte-identical and light mode stops fighting the letterbox. It
+ * pins the aliases rather than introducing a plate-local ink token alone
+ * deliberately: the scrub's current-time span carries an INLINE
+ * `color: var(--n-1000)` (editor.tsx / dossier.tsx — neither of them this
+ * sheet's file), and an inline style beats any stylesheet rule but still
+ * resolves the custom property against this element. Pinning the token is what
+ * makes the fix reach it.
+ *
+ * `dossier.css` carries the byte-identical block, in the same change, because
+ * the two videos surfaces draw the same plate and a one-sided fix makes them
+ * disagree in light mode for no stated reason (the audit's own condition).
+ * `components/videos/__tests__/editor-polish-s82-css.test.ts` pins both copies
+ * to the theme's dark register, so neither can drift and neither can be fixed
+ * alone.
+ */
+.editor-surface .player {
+  --n-100: oklch(0.188 0.010 260);
+  --n-200: oklch(0.215 0.011 258);
+  --n-300: oklch(0.245 0.012 256);
+  --n-400: oklch(0.305 0.012 256);
+  --n-500: oklch(0.365 0.013 255);
+  --n-600: oklch(0.445 0.013 254);
+  --n-700: oklch(0.560 0.014 254);
+  --n-800: oklch(0.680 0.014 254);
+  --n-900: oklch(0.735 0.014 255);
+  --n-1000: oklch(0.935 0.006 255);
+}
+
 .editor-surface .beats-scroll { flex: 1; min-height: 0; overflow-y: auto; }
 .editor-surface button.beat-row { width: 100%; font: inherit; color: inherit; background: transparent; border: none; border-top: 1px solid var(--n-400); text-align: left; cursor: pointer; }
 .editor-surface button.beat-row:first-child { border-top: none; }
