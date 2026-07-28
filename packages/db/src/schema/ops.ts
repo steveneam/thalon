@@ -1,3 +1,4 @@
+import { PUBLISH_QUEUE_STATUSES } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   bigint,
@@ -18,10 +19,17 @@ import { drafts } from "./content";
 import { tenantIsolation } from "./rls";
 import { tenants } from "./tenancy";
 
+/** Status words come from contracts, so the vocabulary and its check constraint stay one source of truth (the `content.ts` convention). */
+const inList = (values: readonly string[]) => values.map((v) => `'${v}'`).join(", ");
+
 /**
- * Schema lands at B0.3 per the charter; the worker is Sprint 3+ and NO
- * publish path is wired anywhere in Sprints 0–2 — there is deliberately no
- * repository for this table yet.
+ * Schema landed at B0.3 per the charter, and stayed DORMANT through
+ * Sprints 0–7: a queue with neither end wired (no repo, no producer, no
+ * consumer). The s82 window (W1) gives it its repository — `repos/
+ * publish-queue.ts` — for the Schedule verb and the disarmed consumer tick.
+ * The columns below are the B0.3 originals plus two additive s82 fields; the
+ * status vocabulary now comes from contracts (`inList`), so the words and the
+ * constraint cannot drift apart.
  */
 export const publishQueue = pgTable(
   "publish_queue",
@@ -34,12 +42,35 @@ export const publishQueue = pgTable(
       .notNull()
       .references(() => drafts.id),
     platform: text("platform").notNull(),
+    /**
+     * Nullable since B0.3 and deliberately left so — a dormant column is not
+     * tightened outside a mandate. The write door requires a time
+     * (`publishQueueEnqueueSchema`), and `listDue` treats a NULL as due
+     * immediately, so no row can hide from the consumer.
+     */
     scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
     status: text("status").notNull().default("pending"),
     idempotencyKey: text("idempotency_key").notNull().unique(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    /**
+     * s82 (additive): stamped by every state transition. This is what makes a
+     * stale claim recoverable — a consumer that dies mid-tick leaves its row
+     * in `processing`, and without a claim clock that row is stranded
+     * forever (the `missing.post` recovery pattern, carried from day one).
+     */
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * s82 (additive): why a row failed, verbatim, where the operator reads
+     * the queue. The event spine carries the same reason — this is the
+     * current-state projection, so a failed-rows view needs no per-row events
+     * query. It differs deliberately from `sweepSchedules.markFailed`, which
+     * is event-only: a sweep failure has no durable failed STATE (the tenant
+     * stays due and retries), whereas a failed queue row is terminal and must
+     * say why on its face.
+     */
+    lastError: text("last_error"),
   },
   (t) => [
     index("publish_queue_tenant_platform_scheduled_idx").on(
@@ -49,7 +80,7 @@ export const publishQueue = pgTable(
     ),
     check(
       "publish_queue_status_check",
-      sql.raw(`status in ('pending', 'processing', 'published', 'failed', 'cancelled')`),
+      sql.raw(`status in (${inList(PUBLISH_QUEUE_STATUSES)})`),
     ),
     tenantIsolation(),
   ],

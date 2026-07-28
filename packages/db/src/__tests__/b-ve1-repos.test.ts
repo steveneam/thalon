@@ -308,7 +308,7 @@ describe("video cuts repo (B-ve.1)", () => {
     expect(events.map((e) => e.event)).toEqual(["video_cut.created", "video_cut.rendered"]);
   });
 
-  it("repo surface is pinned — approve landed at B-ve.4, stampLineage at B-ve.5; nothing else has crept in", async () => {
+  it("repo surface is pinned — approve landed at B-ve.4, stampLineage at B-ve.5, remove at the s82 window; nothing else has crept in", async () => {
     const { repos } = await setup();
     expect(Object.keys(repos.videoCuts).sort()).toEqual([
       "approve",
@@ -316,6 +316,10 @@ describe("video cuts repo (B-ve.1)", () => {
       "get",
       "list",
       "recordRender",
+      // s82 window (W1): the editor's delete verb, with the three
+      // founder-ratified refusals. Its behavior is pinned in
+      // s82-window-repos.test.ts — this list only guards the surface.
+      "remove",
       "stampLineage",
     ]);
   });

@@ -15,6 +15,7 @@ import { leadsRepo, type LeadsRepo } from "./leads";
 import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
 import { outreachSendsRepo, type OutreachSendsRepo } from "./outreach-sends";
 import { plannedSlotsRepo, type PlannedSlotsRepo } from "./planned-slots";
+import { publishQueueRepo, type PublishQueueRepo } from "./publish-queue";
 import { savedViewsRepo, type SavedViewsRepo } from "./saved-views";
 import { socialPublicationsRepo, type SocialPublicationsRepo } from "./social-publications";
 import { sweepSchedulesRepo, type SweepSchedulesRepo } from "./sweep-schedules";
@@ -69,8 +70,13 @@ export interface Repos {
   entitlements: EntitlementsRepo;
   socialPublications: SocialPublicationsRepo;
   sweepSchedules: SweepSchedulesRepo;
-  // publish_queue deliberately has no repository: no publish path is wired
-  // anywhere in Sprints 0–2 (charter standing discipline).
+  /**
+   * s82 window (W1): `publish_queue` has its repository at last — the table
+   * shipped dormant at B0.3 and stayed a queue with neither end wired. It is
+   * still not a publish path: rows are intents, and the consumer that walks
+   * them to the publish door ships DISARMED behind the standing sequence gate.
+   */
+  publishQueue: PublishQueueRepo;
 }
 
 export function createRepos(db: Db): Repos {
@@ -109,5 +115,6 @@ export function createRepos(db: Db): Repos {
     entitlements: entitlementsRepo(db),
     socialPublications: socialPublicationsRepo(db),
     sweepSchedules: sweepSchedulesRepo(db),
+    publishQueue: publishQueueRepo(db),
   };
 }

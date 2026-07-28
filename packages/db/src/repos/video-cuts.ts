@@ -8,7 +8,7 @@ import {
   type VideoCutStatus,
 } from "@thalon/contracts";
 import { and, eq } from "drizzle-orm";
-import { NotFoundError } from "../errors";
+import { InvalidStateError, NotFoundError } from "../errors";
 import { videoCuts, videoProjects } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
@@ -242,6 +242,92 @@ export function videoCutsRepo(db: Db) {
           payload: { lineage: { ...parsed } },
         });
         return { cut: row, stamped: true };
+      });
+    },
+
+    /**
+     * s82 window (W1): delete a version — the editor's A3 verb, for the
+     * abandoned derived cut and the mis-saved variant. A HARD delete of the
+     * row; the rendered FILE is the caller's to remove, which is why the
+     * deleted row's `outputRef` comes back (a repo cannot reach the object
+     * store, and a delete that silently orphaned a render would be the
+     * quieter bug).
+     *
+     * Three refusals, ratified by the founder at the s81 close (plan §3 call
+     * #2). Each is a typed `InvalidStateError` naming what stands in the way,
+     * because a verb that refuses without saying why is the dead door this
+     * session exists to stop shipping:
+     *
+     *   a. **an approved cut** — approval is a judge receipt (ADR 0010);
+     *      deleting one deletes the evidence that the gate passed.
+     *   b. **a lineage parent of a living derived cut** — the child's
+     *      provenance points here, and provenance that dangles is worse than
+     *      provenance absent.
+     *   c. **the project's last cut** — a project with zero cuts has no
+     *      recoverable state in the editor; deleting the project is a
+     *      different, deliberate act.
+     *
+     * Rejected-proposal eval rows live in their own table and are untouched:
+     * what the judge refused stays on the record whatever happens to the cut.
+     */
+    async remove(ctx: TenantCtx, id: string): Promise<{ removed: VideoCutRow }> {
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(videoCuts)
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("video_cut", id);
+
+        if (current.status === "approved") {
+          throw new InvalidStateError(
+            `video cut "${current.name}" v${current.version} is approved — an approved cut carries its judge receipt and cannot be deleted`,
+          );
+        }
+
+        const siblings = await tx
+          .select({ id: videoCuts.id, name: videoCuts.name, version: videoCuts.version, meta: videoCuts.meta })
+          .from(videoCuts)
+          .where(
+            and(
+              eq(videoCuts.tenantId, ctx.tenantId),
+              eq(videoCuts.projectId, current.projectId),
+            ),
+          );
+
+        if (siblings.length <= 1) {
+          throw new InvalidStateError(
+            `video cut "${current.name}" v${current.version} is this project's only cut — deleting it would leave the project with nothing to open`,
+          );
+        }
+
+        const child = siblings.find((row) => {
+          if (row.id === current.id) return false;
+          const lineage = (row.meta as { lineage?: { parentCutId?: string } }).lineage;
+          return lineage?.parentCutId === current.id;
+        });
+        if (child) {
+          throw new InvalidStateError(
+            `video cut "${current.name}" v${current.version} is the lineage parent of "${child.name}" v${child.version} — delete the derived cut first, or its provenance would dangle`,
+          );
+        }
+
+        const [removed] = await tx
+          .delete(videoCuts)
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_cut",
+          entityId: removed.id,
+          event: "video_cut.removed",
+          payload: {
+            name: removed.name,
+            version: removed.version,
+            status: removed.status,
+            outputRef: removed.outputRef,
+          },
+        });
+        return { removed };
       });
     },
   };
