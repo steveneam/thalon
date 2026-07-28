@@ -198,4 +198,4 @@ polish tail), found two harness lies, wired B3 at the gate, and measured the
 box's three-suite ceiling. Its close recommended D1 as the s83 headline; s83
 delivered it.
 
-## Next action — s84: the founder picks (a) the D4 design wave (four sheets in claude-design, Mobbin memo as raw material), (b) D2 pre-work, or (c) the deferred smalls. If his Reddit app values are in social-logins.md, step 1 wires + live-drives the dance first (still zero posts).
+## Next action — s84, the founder picks at the opener: (a) the THREADS PORTAL PILOT (his grant on record — browser-drive runbook §4 on his behalf, per-submit approval; yields platform #5), (b) the D4 design wave (four sheets in claude-design; BOTH Mobbin memos are the raw material), (c) LinkedIn onto the dance (small, same pattern as facebook), (d) D2 pre-work (publication_metrics window; evaluate the printing-press library's instagram-metrics CLI as reference). If his Reddit values landed in social-logins.md, wire + drive that dance first. Facebook is DONE (dance live, Page token vaulted, never expires).
