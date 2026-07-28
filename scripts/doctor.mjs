@@ -39,7 +39,6 @@ import {
   parseFfmpegVersion,
   parseHyperframesDoctor,
   parsePythonVersion,
-  parseVercelVersion,
   readiness,
   renderTable,
   seamRow,
