@@ -112,16 +112,93 @@ since the migration. It is `pwsh` now, and was executed verbatim afterwards.
 
 | lane | bucket | scope (files) | status |
 |---|---|---|---|
-| editor-verbs | Version management — 4 of the editor's 5 open no-affordance rows (compare versions · save as NAMED variant · delete w/ refusals · render survives leaving) + takes-strip audition + editor.tsx s78 tail (player failure state · busy→action identity · timecode everywhere) | components/videos/editor.tsx + its tests · lib/videos/* · app/api/videos/** (NO css — sheet classes only) | **LAUNCHED s82** (`agent/<lane>`, worktree prepped, Opus 5[1m] pin) |
-| editor-polish | The s78 medium/low tail in the inspector/timeline/css (10 items, B1–B10 in the plan incl. bed-picker audition and the light-mode player plate on BOTH videos surfaces) | components/videos/editor-inspector.tsx · editor-timeline.tsx · editor.css · dossier.css (B8 only) · NEW editor-polish-s82.test.tsx | **LAUNCHED s82** (`agent/<lane>`, worktree prepped, Opus 5[1m] pin) |
-| sched-spine | The Postiz take: platform capability matrix + deterministic pre-publish validator · Approve's Schedule verb → publish_queue producer · queue consumer tick (mirrors sweep-scheduler; **ships DISARMED**, zero live calls) · platform-true preview (gated on founder call #3) | packages/engine/src/social/** · app/api/social/** · components/approve/** · components/calendar/** (contracts/db FROZEN by W1) | **LAUNCHED s82** (`agent/<lane>`, worktree prepped, Opus 5[1m] pin) |
+| editor-verbs | Version management — 4 of the editor's 5 open no-affordance rows (compare versions · save as NAMED variant · delete w/ refusals · render survives leaving) + takes-strip audition + editor.tsx s78 tail (player failure state · busy→action identity · timecode everywhere) | components/videos/editor.tsx + its tests · lib/videos/* · app/api/videos/** (NO css — sheet classes only) | **MERGED s82** |
+| editor-polish | The s78 medium/low tail in the inspector/timeline/css (10 items, B1–B10 in the plan incl. bed-picker audition and the light-mode player plate on BOTH videos surfaces) | components/videos/editor-inspector.tsx · editor-timeline.tsx · editor.css · dossier.css (B8 only) · NEW editor-polish-s82.test.tsx | **MERGED s82** |
+| sched-spine | The Postiz take: platform capability matrix + deterministic pre-publish validator · Approve's Schedule verb → publish_queue producer · queue consumer tick (mirrors sweep-scheduler; **ships DISARMED**, zero live calls) · platform-true preview (gated on founder call #3) | packages/engine/src/social/** · app/api/social/** · components/approve/** · components/calendar/** (contracts/db FROZEN by W1) | **MERGED s82** |
 
 Merge order A→B→C by default; lead gates every merge (verify-on-merged-main by
 exit code · drive the jobs · measure the render · screenshots); the lead extends
 the jobs tables with the new verbs at each merge — a lane cannot drive its own
 work. ⛔ The sequence gate is untouched: nothing posts, nothing spends.
 
+**ALL THREE MERGED, ZERO CONFLICTS — the disjoint file sets held.** C landed
+first (`a95b6d8`, its files disjoint from both editor lanes), then A
+(`843a063`), then B (`3b151ed`). Verify green by exit code at every merge;
+final **2694 passed / 9 skipped, 0 lint errors** (2439 at the s81 close).
+⛔ Zero live platform calls, zero spend, all session.
+
+**The editor gate closed its version-management theme: 25 works · 0 dead doors
+· 0 no-affordance · 2 undriven**, from 21 · 0 · 5 · 1. Render measurement is
+flat (8 missing · 31 drifted · 9 within ±2px), the six newly-listed classes all
+being lane B's own new elements, which the sheet predates. Nothing fell out of
+tolerance.
+
+**TWO OF THE FIVE "GAPS" WERE NEVER GAPS.** The audition and resume rows were
+harness lies — wrong verdicts (9) and (10), now in the ledger. (9) demanded
+markup HTML forbids (a play control nested inside `button.take`); (10) asserted
+a render was reported without first checking one was running. The lead settled
+both by driving the live DOM and by firing a real render (local ffmpeg, 0
+credits) — the surface says *"Rendering…"* on return, so A4 is proven, not
+assumed. **Three sessions running, the harness has pinned markup where it should
+have named the role.**
+
+**B3 SHIPPED DEAD, and the split is why.** Lane B built and tested the
+timeline's refusal marks; lane A owned the file that had to pass them, and
+neither could see the seam. It rendered as nothing until the lead wired it at
+the gate (`27b4ba4`) — with the refusal band's own half: it printed the raw
+0-based `line 0` while the inspector called that plate "Caption 1". **A shared
+seam needs an owner for the JOIN, not just for each half.**
+
+**The box has a measured ceiling: three concurrent full verify suites exceed
+16 GiB.** The kernel OOM-killed next-server, chrome and python3 at once; two
+lanes had verify runs killed rather than failed; `--maxWorkers=2` fit. Stated
+now by `launch-lane.sh` when it makes lane #3, along with the fact that
+`pkill -f vitest` is a cross-lane weapon (s82: a lane killed a neighbour's
+suite and disclosed it). The s64 "stagger retired" note measured lanes doing
+ordinary work, never three full suites at once.
+
 ## Work queue (open items + their gates)
+
+**[s82] THE FOUR THE LANES SURFACED AND THE FOUNDER DEFERRED TO s83.** He
+triaged the s82 lane reports live and took three fixes this session (B3's
+wiring, the 409 fold-in, the box ceiling); these four he ruled next-session.
+None is broken today — each is a trap or a decision, stated so it is neither
+rediscovered nor forgotten:
+
+1. **C3's last third — the arming pieces, deliberately unbuilt** (outside lane
+   C's file set): `SOCIAL_QUEUE_ARMED` in the packages/platform env schema ·
+   `scripts/run-publish-queue.ts` · a systemd user unit. This is the B-pub.1
+   posture — door built, no armed production caller — and it stays disarmed
+   under the sequence gate regardless. The engine exports
+   `SOCIAL_QUEUE_ARM_KEY`/`publishQueueArmed(env)` and the tick route's
+   docstring lists the three pieces in order. **Gate: founder GO, per platform.**
+2. **No cadence pre-check at the queue producer.** A row can be committed and
+   then meet the publish door's daily cap and fail terminally. Related:
+   `cadenceBreaches` (the ⚑) still reads planned slots only, so a committed
+   queue row breaking cadence is unflagged. Needs design, not a patch.
+3. **A media hole, currently unreachable.** W1's ratchet pins
+   `matrix.maxImages ≥ 1` but not the reverse: a draft carrying 2 refs would
+   pass the fit check (X allows 4) and then hit `mediaRefsSchema.max(1)` at the
+   door. Nothing writes >1 ref today. Closing it properly means the publish
+   door exporting its own cap.
+4. **The `scheduled` draft status is a trap.** `DRAFT_TRANSITIONS` carries
+   `approved → scheduled → published`, written by nothing. Lane C correctly
+   left the draft `approved` and put the scheduled fact on the queue row — the
+   publish door's rung (a) opens only for exactly `approved`, and a lane may
+   not modify that door. Pinned by a test so a future change is a decision.
+   **Contracts-side reconciliation = a later window.**
+
+▸ Architectural note, no action: **the capability validator cannot run
+client-side.** Approve is a client component and must not pull `@thalon/engine`
+(playwright, ai, drizzle) into the browser, and contracts is frozen — so fit
+crosses the wire via `GET /api/social/fit`. Worth knowing BEFORE anyone plans
+the D4 composer/Approve sheet amendment.
+
+▸ Ledger near-miss worth keeping (lane B caught it by reading the harness
+first): B10's audit-proposed fix — a bare positional ordinal on `.blk` — would
+have broken the reorder job, which detects "a mistake was made" by diffing
+`.blk` textContent across a drag; a positional ordinal is identical after a
+reorder. Keeping the name in an ellipsising span preserved both.
 
 **[s81] B-dist — THE DISTRIBUTION SUITE CHARTER, drafted awaiting ratification.**
 `docs/research/distribution-charter.md` — the founder-directed full Postiz plan
