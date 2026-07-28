@@ -130,9 +130,12 @@ eight wrong selectors on record; READ BEFORE TRUSTING A VERDICT).
    save · delete + refusals · resume-poll · audition ×2 · schedule · fit line) ·
    measure the render · read the screenshots. A lane cannot drive its own work.
 
-▎ ▸ **Postiz, one line:** AGPL-3.0 — patterns re-implemented, never code; the
-take is finishing OUR half-built queue (table exists, both ends missing), not
-importing theirs. Full study in the plan §1.
+▎ ▸ **Postiz, two lines:** AGPL-3.0 — patterns re-implemented, never code; the
+s82 take is finishing OUR half-built queue (table exists, both ends missing).
+The founder-directed DEEP DIG (s81 second half) is plan §1b — the integration
+secret is one provider interface + one hardened base + one generic OAuth dance,
+NOT the auth folder — and §4 is the recommended s83 headline: the CONNECTOR
+SEAM, proven by adding Reddit + Bluesky (no review wall on either).
 ▎ ▸ **Editor state after s81:** jobs 21 works · 0 dead doors · 5 no-affordance ·
 1 undriven(metered); render 9 missing · 30 drifted · 9 within ±2px, all
 explained (≈10 rows = the proposal band, needs a metered call). The five open
@@ -170,4 +173,4 @@ timeline blocks), and the missing verbs (insert/delete a beat and a caption). It
 ruled the contract window NO on evidence, built `measure-sheet.mjs`, and caught
 main-red #5: a calendar test that was green by day and red after ~19:00 local.
 
-## Next action — s82: surface the four NEEDS-STEVEN calls · founder GO · W1 window + W2 seam (lead, freeze first) · launch editor-verbs + editor-polish + sched-spine · lead-owned merge gates.
+## Next action — s82: surface the four NEEDS-STEVEN calls (recommendations attached, 2026-07-28b entry) · founder GO · W1 window + W2 seam (lead, freeze first) · launch editor-verbs + editor-polish + sched-spine · lead-owned merge gates.
