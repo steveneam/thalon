@@ -103,65 +103,56 @@ during a render (the s80 red-by-night lesson).
 
 ## Resume prompt (session 82, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — the editor is DONE to its ratified scope. s82 is the
-founder's call; the strongest candidates are below, none of them started.
+**Resume · Thalon** — s82 = **EXECUTE THE THREE-LANE PLAN**, gated on the
+founder's GO (his four calls are the top entry in NEEDS-STEVEN; call #1 IS the
+launch gate). Plan of record: **`docs/research/s82-PREPLAN.md`** — written s81
+second half on his direction ("plan the next phases … look at Postiz … address
+medium/lows … maybe parallel workstreams"), lanes queued on COORDINATION.md.
 
-**Read first:** CLAUDE.md → this file → `docs/research/video-editor-audit-s78.md`
-(the 36 findings; the remaining ones are `medium`/`low` and named below) →
-`docs/research/jobs-table-s79.md` (the harness's own bug ledger — READ BEFORE
-TRUSTING A VERDICT; it now records **eight** wrong selectors, two added by s81).
+**Read first:** CLAUDE.md → this file → `docs/research/s82-PREPLAN.md` →
+COORDINATION.md §s82 → `docs/research/jobs-table-s79.md` (the harness ledger —
+eight wrong selectors on record; READ BEFORE TRUSTING A VERDICT).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
-   `git status` + this stamp. **No open founder calls.**
+   `git status` + this stamp. Then surface the four calls and take his GO.
+1. **PRE-FLIGHT, lead-direct, FREEZE FIRST:** W1 = the small contract window
+   (`publishQueue` repo over the existing dormant table · `videoCuts.remove`
+   with the call-#2 refusals · platform capability matrix in contracts) via the
+   contract-window skill; W2 = the shared `TakeAudition` component with its own
+   namespaced stylesheet. Both merged green before any lane launches.
+2. **LAUNCH the approved lanes** (Mode B, `scripts/launch-lane.sh`, strongest-
+   tier pin, kickoffs name file ownership verbatim from the plan):
+   **editor-verbs** (version management + editor.tsx tail) ·
+   **editor-polish** (the s78 medium/low tail B1–B10) ·
+   **sched-spine** (capability matrix + queue producer/consumer, DISARMED).
+3. **Merge gates, unchanged and lead-owned:** verify-on-merged-main BY EXIT
+   CODE · drive the jobs (extend the tables with the new verbs: compare · named
+   save · delete + refusals · resume-poll · audition ×2 · schedule · fit line) ·
+   measure the render · read the screenshots. A lane cannot drive its own work.
 
-**THE FIVE NO-AFFORDANCE ROWS THAT REMAIN**, in the harness's own words. Four of
-the five are one theme — VERSION MANAGEMENT — and would make a coherent slice:
-- **compare two versions** to see what changed between v6 and v7 (`Cut history →`
-  leads to a version strip with authorship, not a diff)
-- **save as a NAMED variant** instead of the next version of the same name (the
-  primary button hard-codes `cut.name`)
-- **delete a bad version** or an abandoned derived cut
-- **check on a render after coming back** — the job poll starts fresh, so a
-  render running when you navigate away is invisible when you return
-- **tell candidate takes apart and watch one before swapping** — they now NAME
-  their file (s81) but still cannot be previewed before you commit the swap
-
-**ALSO OPEN, smaller:** the s78 `medium`/`low` tail not folded in this session —
-"Remove easing" destroys tail values with no undo · a proposal on the caption or
-music lane is marked by border colour alone · judge refusals name caption lines
-that carry no timeline mark · the player has no failure state and no way out of
-it · one shared `busy` flag makes two unrelated controls both claim to be
-running · raw float duration prints where the sheet reserved 8 characters.
-
-▎ ▸ **The render gate's remaining 30 drift rows are EXPLAINED, not unexamined.**
-About ten are the sheet's `.prop-row` band, which the app renders only when a
-proposal is pending — a **metered** call the sequence gate forbids, so it cannot
-be driven; roughly ten more are topbar rows where the app carries real names and
-counts wider than the fixture's; the rest are the named ruler/scroll adaptation
-and real caption timings. `.cresc` stays deliberately undrawn: nothing measures
-crescendos and drawing them would be an invented fact.
-▎ ▸ **Known-and-stated gaps, unchanged:** the browser BACK button is not guarded
-(a history pop cannot be cancelled without a decoy entry that corrupts the back
-stack); `lib/workspace/pipeline.ts`'s `kanbanColumns` is still an orphan, left
-visible per the s75 precedent.
-▎ ▸ **Three design-hook findings on `editor.css` remain FALSE POSITIVES, no
-suppression added (same verdict as s80):** `.play-tri` and `.playhead::before`
-are the CSS border-triangle technique drawing the play glyph and the playhead
-arrow — geometry, not card accents — and they are byte-true sheet values.
+▎ ▸ **Postiz, one line:** AGPL-3.0 — patterns re-implemented, never code; the
+take is finishing OUR half-built queue (table exists, both ends missing), not
+importing theirs. Full study in the plan §1.
+▎ ▸ **Editor state after s81:** jobs 21 works · 0 dead doors · 5 no-affordance ·
+1 undriven(metered); render 9 missing · 30 drifted · 9 within ±2px, all
+explained (≈10 rows = the proposal band, needs a metered call). The five open
+rows are exactly what lane editor-verbs + the audition seam close.
+▎ ▸ **Known-and-stated gaps, unchanged:** browser BACK unguarded · `kanbanColumns`
+orphan stands · the three editor.css design-hook findings remain FALSE POSITIVES
+(border-triangle technique, byte-true sheet values).
 ▎ ▸ **State:** main = origin, all pushed · verify **2439 passed / 9 skipped, 0
 lint errors** · budget 2M · balance 584.12 · **zero spend s81**.
 ▎ ▸ ⛔ **THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until
 all the walks are verified and fixed."* No publish path, no platform call, no
-token-spending generation without his GO. The copilot's Propose and the judge
-behind Send-cut-to-Approve SPEND — the jobs measure reachability and say so.
-**The working-copy preview is LOCAL compute and was built inside that line.**
+token-spending generation without his GO. sched-spine ships DISARMED — queue
+rows sit pending; arming + per-platform GO + per-post GO all still his.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
-**every lane/subagent launch needs fresh founder approval** · **GATE ON THE
-SUITE'S EXIT CODE — never pipe it into anything** (it earned its keep again: a
-green-looking run exited 2 on a typecheck error and 1 on a lint error) ·
+**every lane/subagent launch needs fresh founder approval** (his call #1 covers
+exactly the named lanes) · **GATE ON THE SUITE'S EXIT CODE — never pipe it** ·
 **vitest does NOT typecheck and does not lint** · verify-on-merged-main = THE
-gate, plus a MEASURED render, plus DRIVE the surface, plus watch the console ·
-a LANE CANNOT SCREENSHOT OR DRIVE ITS OWN WORK · wrap = verify+commit+push+restamp.
+gate + MEASURED render + DRIVE the surface + watch the console · a LANE CANNOT
+SCREENSHOT OR DRIVE ITS OWN WORK · **no AGPL code embedded, ever** — Postiz is
+reference-only · wrap = verify+commit+push+restamp.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with origin.
 
 ## Pointer
@@ -179,4 +170,4 @@ timeline blocks), and the missing verbs (insert/delete a beat and a caption). It
 ruled the contract window NO on evidence, built `measure-sheet.mjs`, and caught
 main-red #5: a calendar test that was green by day and red after ~19:00 local.
 
-## Next action — s82: founder's call. Strongest candidate is the VERSION-MANAGEMENT slice (compare · name a variant · delete a version), which is four of the five remaining no-affordance rows in one coherent piece.
+## Next action — s82: surface the four NEEDS-STEVEN calls · founder GO · W1 window + W2 seam (lead, freeze first) · launch editor-verbs + editor-polish + sched-spine · lead-owned merge gates.
