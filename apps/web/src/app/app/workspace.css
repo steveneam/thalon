@@ -96,6 +96,11 @@
 .nav-ico { width: 16px; height: 16px; flex: none; opacity: 0.85; }
 .nav-sep { height: 1px; background: var(--n-400); margin: 10px 10px; }
 .nav-count { margin-left: auto; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: var(--r-pill); background: var(--warn-subtle); color: var(--warn); font-variant-numeric: tabular-nums; }
+/* The way out of the workspace (s84). It wears the nav vocabulary so it does
+   not shout, but a step quieter than a surface row — it LEAVES the workspace
+   rather than switching within it, and it can never be the active row. */
+.nav-item-out, .screen a.nav-item-out { color: var(--n-800); }
+.nav-out-arrow { margin-left: auto; font-size: 11px; opacity: 0.75; }
 
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 .topbar { height: 52px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 24px; border-bottom: 1px solid var(--n-400); }

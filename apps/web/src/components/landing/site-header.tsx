@@ -26,10 +26,18 @@ export function SiteHeader() {
           <Link href="/blog" className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline">
             Blog
           </Link>
-          {/* The site ↔ workspace seam the founder found missing (s70c): the
-              operator's way in, quiet next to the visitor CTA. Real auth
-              replaces the bare link when the auth bucket lands. */}
-          <Link href="/app" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          {/* The site → workspace door (s70c seam; s84 made it VISIBLE —
+              founder: "there is no button on the landing page that goes to
+              the workspace"). It was grey text among four other grey nav
+              items beside an amber CTA, so it read as fine print. Now it
+              carries a button's outline: unmistakably a door, still visually
+              subordinate to the visitor CTA beside it, which is the one that
+              must win the eye. Real auth replaces the bare link when the auth
+              bucket lands. */}
+          <Link
+            href="/app"
+            className="rounded-lg border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-foreground/30 hover:bg-foreground/5"
+          >
             Workspace
           </Link>
           <Link

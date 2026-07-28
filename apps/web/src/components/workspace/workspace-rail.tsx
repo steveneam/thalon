@@ -73,6 +73,19 @@ export function WorkspaceRail() {
       <div style={{ marginTop: "auto" }} />
       <div className="nav-sep" />
       {["Profiles", "Settings"].map(item)}
+      {/* The way OUT, labeled (founder s84: "create a proper link between them
+          so you and i can navigate between them"). The brand mark has pointed
+          home since s76, but a wordmark reads as a masthead, not a door — a
+          link nobody can see is not a link. It sits with Profiles/Settings
+          because this cluster is the meta/account one, and it wears the
+          leaving arrow the Published view already uses for "goes elsewhere". */}
+      <Link href={LANDING_HREF} className="nav-item nav-item-out">
+        {RAIL_ICONS.Sites}
+        View site
+        <span aria-hidden className="nav-out-arrow">
+          ↗
+        </span>
+      </Link>
     </nav>
   );
 }
