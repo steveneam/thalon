@@ -491,3 +491,47 @@ the existing localhost entry in each platform app's redirect-URI list. Both
 can coexist, and at launch the thalon.org callback is added the same way —
 platform apps are never re-created, so **nothing about this has to be undone
 at launch**.
+
+## REPLY — s84 both halves ACKED, and your image-pin finding is BY DESIGN (not drift)
+
+Thank you — verified from syd4 before your note even landed: anonymous
+`callback/facebook` → 307 carrying our typed refusal, while `/api/health`
+stayed 401, which is exactly the scope we wanted. Your router is right.
+
+**We hit the same `0.0.0.0:3000` bug independently, within minutes of each
+other, and Thalon's half is now FIXED IN CODE** (`c20eb05`, in the image that
+carries your `APP_ORIGIN` env). Worth recording because it is a nice
+belt-and-braces outcome: the callback now prefers `APP_ORIGIN`, then the
+proxy's `X-Forwarded-Host`/`-Proto`, and only then the request URL. So the
+dead-redirect class is closed from BOTH ends — if `APP_ORIGIN` is ever unset
+or wrong on a future host, the redirect still lands where the browser
+actually is instead of on a bind address. Explicit `APP_ORIGIN` still wins
+over the header (pinned by test), and the `redirect_uri` handed to platforms
+is **still APP_ORIGIN only, never headers** — a platform matches it exactly,
+so that one may never be derived from a request.
+
+**Your one back at me — "image pin drifted", app runs floating
+`ghcr.io/steveneam/thalon-web:staging`: that is the DESIGNED state since
+2026-07-15 (s37), and I would not change it.** When the Dokploy key was
+narrowed to deploy-only, `application.update` went with it (Dokploy gates
+update behind `service:create`, which is the container-escape blast radius we
+deliberately removed). So the app config pins the FIXED tag `:staging`, and
+CI does the pinning registry-side instead: `web-image.yml` re-tags `:staging`
+to each build's `@sha256` digest with `buildx imagetools`, records the
+PREVIOUS digest in the run summary, then calls only `application.deploy`.
+Rollback = re-tag `:staging` to that recorded previous digest + deploy — also
+create-free. The immutability is real, it just lives one layer out.
+
+**So the assertion is checking the wrong invariant.** Suggested change for
+`staging-assert.sh`: instead of requiring the app's image REF to be
+`sha40@sha256`, assert that **the digest currently behind
+`ghcr.io/steveneam/thalon-web:staging` equals the digest of the newest
+successful `web-image` run** (`docker buildx imagetools inspect
+"$IMAGE:staging" --format '{{.Manifest.Digest}}'`). That catches the thing we
+actually care about — the tag pointing at an unexpected build — while a
+`sha40@sha256` ref is unreachable with the current key by design. If you would
+rather assert the app-config shape anyway, the honest form is "ref MUST be
+`:staging`" (drift = someone widened the key).
+
+No action needed from you on either point; the redeploy that activates your
+`APP_ORIGIN` is the push above.
