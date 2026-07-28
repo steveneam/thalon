@@ -8,6 +8,17 @@ export {
   type IntegrationCard,
   type IntegrationCardField,
 } from "./cards";
+export {
+  beginOauthConnect,
+  completeOauthConnect,
+  OAUTH_STATE_TTL_MS,
+  oauthCallbackPath,
+  OauthConnectRefusedError,
+  refreshExpiringCredentials,
+  refreshOauthCredentials,
+  type OauthConnectDeps,
+  type RefreshOutcome,
+} from "./connect";
 export { decodeVaultMasterKey, openCredential, sealCredential, VAULT_KEY_VERSION } from "./crypto";
 export {
   VaultError,

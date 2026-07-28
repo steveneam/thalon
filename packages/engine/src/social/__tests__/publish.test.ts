@@ -328,8 +328,15 @@ describe("publishApprovedDraft — the happy path", () => {
     expect(publication.bodyHash).toBe(draft.bodyHash);
     expect(publication.publishedAt.getTime()).toBe(NOW.getTime());
 
+    // The door hands the driver the platform's cadence block too (D1 settings
+    // pass-through) — the platform call's full input, pinned.
     expect((publisher as FakeSocialPublisher).calls).toEqual([
-      { draftId: draft.id, text: POST_BODY },
+      {
+        draftId: draft.id,
+        text: POST_BODY,
+        media: undefined,
+        settings: { maxPostsPerDay: 2 },
+      },
     ]);
     expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toHaveLength(1);
 

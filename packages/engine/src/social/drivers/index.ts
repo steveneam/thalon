@@ -1,12 +1,21 @@
 import type { SocialPlatform } from "@thalon/contracts";
 import type { EnvSource, ThalonEnv } from "@thalon/platform";
 import { resolveSocialPublisher, type SocialDriverFactory, type SocialPublisher } from "../registry";
+import { createBlueskyDriver } from "./bluesky";
 import { createFacebookDriver } from "./facebook";
 import { createInstagramDriver } from "./instagram";
 import { createLinkedInDriver } from "./linkedin";
+import { createRedditDriver } from "./reddit";
 import { createXDriver } from "./x";
 
-export { responseDetail, responseJson, SocialDriverApiError } from "./errors";
+export {
+  hardenedPlatformFetch,
+  responseDetail,
+  responseJson,
+  SocialDriverApiError,
+  SocialTokenExpiredError,
+} from "./errors";
+export { blueskyLinkFacets, createBlueskyDriver, type BlueskyDriverConfig } from "./bluesky";
 export { createFacebookDriver, FACEBOOK_GRAPH_VERSION, type FacebookDriverConfig } from "./facebook";
 export {
   createInstagramDriver,
@@ -14,6 +23,12 @@ export {
   type InstagramDriverConfig,
 } from "./instagram";
 export { createLinkedInDriver, LINKEDIN_VERSION, type LinkedInDriverConfig } from "./linkedin";
+export {
+  createRedditDriver,
+  redditTitleSplit,
+  RedditMediaUnsupportedError,
+  type RedditDriverConfig,
+} from "./reddit";
 export { createXDriver, type XDriverConfig } from "./x";
 
 /**
@@ -57,6 +72,17 @@ export function productionSocialDrivers(
   if (igUserId) {
     drivers.instagram = ({ accessToken }) => createInstagramDriver({ accessToken, igUserId });
   }
+  // D1 (s83): reddit is token-only (the target derives from /api/v1/me or
+  // the tenant's settings pass-through); bluesky mirrors the facebook shape —
+  // no identifier extra, no factory, and the arming ladder names it. The
+  // bluesky ACCESS_TOKEN seat carries the app password by declaration
+  // (platform env schema): the seat holds the platform's own secret shape.
+  drivers.reddit = ({ accessToken }) => createRedditDriver({ accessToken });
+  const blueskyIdentifier = env.SOCIAL_BLUESKY_IDENTIFIER;
+  if (blueskyIdentifier) {
+    drivers.bluesky = ({ accessToken }) =>
+      createBlueskyDriver({ appPassword: accessToken, identifier: blueskyIdentifier });
+  }
   return drivers;
 }
 
@@ -85,6 +111,10 @@ export function productionSocialPublisherResolver(
     SOCIAL_INSTAGRAM_ARMED: env.SOCIAL_INSTAGRAM_ARMED,
     SOCIAL_TIKTOK_ACCESS_TOKEN: env.SOCIAL_TIKTOK_ACCESS_TOKEN,
     SOCIAL_TIKTOK_ARMED: env.SOCIAL_TIKTOK_ARMED,
+    SOCIAL_REDDIT_ACCESS_TOKEN: env.SOCIAL_REDDIT_ACCESS_TOKEN,
+    SOCIAL_REDDIT_ARMED: env.SOCIAL_REDDIT_ARMED,
+    SOCIAL_BLUESKY_ACCESS_TOKEN: env.SOCIAL_BLUESKY_ACCESS_TOKEN,
+    SOCIAL_BLUESKY_ARMED: env.SOCIAL_BLUESKY_ARMED,
   };
   return (platform) => resolveSocialPublisher(platform, source, drivers);
 }

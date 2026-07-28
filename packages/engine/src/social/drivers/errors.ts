@@ -48,3 +48,88 @@ export async function responseJson(response: DriverResponse): Promise<unknown> {
     return undefined;
   }
 }
+
+/**
+ * D1 (s83): a 401-shaped platform answer, as its own class — the REFRESH
+ * signal. Distinct from SocialDriverApiError so a caller holding a refresh
+ * token (the refresh tick, a future retrying consumer) can distinguish "the
+ * token aged out" from "the platform refused this post" without string
+ * matching. Everything else about the convention holds: platform words in
+ * `detail`, never credential material.
+ */
+export class SocialTokenExpiredError extends Error {
+  constructor(
+    public readonly platform: SocialPlatform,
+    public readonly status: number,
+    detail: string,
+  ) {
+    super(
+      `${platform} refused the credential (HTTP ${status}): ${detail} — the token needs a refresh or a reconnect, not a retry`,
+    );
+    this.name = "SocialTokenExpiredError";
+  }
+}
+
+/** Injectable pause so retry behavior is deterministic under test. */
+export type Sleeper = (ms: number) => Promise<void>;
+
+const RETRY_LIMIT = 2;
+const RETRY_FALLBACK_MS = 2_000;
+const RETRY_CAP_MS = 30_000;
+
+/**
+ * D1 (s83): the hardened platform fetch — one refusal classification every
+ * NEW driver calls through (the reference pattern's abstract base,
+ * re-imagined as a function; the four live-proven drivers keep their own
+ * handling until their own reviewed re-shape):
+ *   - 429 → honor Retry-After (seconds or HTTP-date, capped) and retry, at
+ *     most RETRY_LIMIT times, then surface the platform's words;
+ *   - 401 → typed SocialTokenExpiredError (the refresh signal — never
+ *     retried here: retrying a dead token is how rate limits are earned);
+ *   - any other non-ok → SocialDriverApiError with the platform's verbatim
+ *     body (truncated to triage size).
+ * Returns the OK response for the driver to parse.
+ */
+export async function hardenedPlatformFetch<Init>(
+  platform: SocialPlatform,
+  fetchImpl: (url: string, init?: Init) => Promise<DriverResponse>,
+  url: string,
+  init: Init,
+  opts: { sleep?: Sleeper } = {},
+): Promise<DriverResponse> {
+  const sleep = opts.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  let lastDetail = "";
+  for (let attempt = 0; attempt <= RETRY_LIMIT; attempt++) {
+    const response = await fetchImpl(url, init);
+    if (response.ok) return response;
+    if (response.status === 401) {
+      throw new SocialTokenExpiredError(platform, response.status, await responseDetail(response));
+    }
+    if (response.status !== 429) {
+      throw new SocialDriverApiError(platform, response.status, await responseDetail(response));
+    }
+    lastDetail = await responseDetail(response);
+    if (attempt < RETRY_LIMIT) {
+      await sleep(retryAfterMs(response.headers.get("retry-after")));
+    }
+  }
+  throw new SocialDriverApiError(
+    platform,
+    429,
+    `still rate-limited after ${RETRY_LIMIT} retries: ${lastDetail}`,
+  );
+}
+
+/** Retry-After → milliseconds: seconds form or HTTP-date form, floored at 1s, capped so a hostile header cannot park the tick. */
+function retryAfterMs(header: string | null): number {
+  if (!header) return RETRY_FALLBACK_MS;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds)) {
+    return Math.min(Math.max(seconds * 1000, 1_000), RETRY_CAP_MS);
+  }
+  const date = Date.parse(header);
+  if (!Number.isNaN(date)) {
+    return Math.min(Math.max(date - Date.now(), 1_000), RETRY_CAP_MS);
+  }
+  return RETRY_FALLBACK_MS;
+}

@@ -235,3 +235,47 @@ describe("socialArmed — the one arming answer (s78)", () => {
     expect(socialArmed(typo, "instagram", { connected: true, configured: true }).armed).toBe(false);
   });
 });
+
+describe("D1 (s83): the proof pair arms through the same one ratchet", () => {
+  it("bluesky: a vaulted pair + configured tenant fills BOTH seats (password on the token seat, identifier on the extra) and resolves a live driver", async () => {
+    await connectDestination(deps(), {
+      destination: "bluesky",
+      credentials: { identifier: "steve.bsky.social", appPassword: "app-pw" },
+    });
+    await configureSocial({ bluesky: { maxPostsPerDay: 1 } });
+    const view = await vaultSocialEnvView(deps());
+    expect(view.SOCIAL_BLUESKY_ACCESS_TOKEN).toBe("app-pw");
+    expect(view.SOCIAL_BLUESKY_IDENTIFIER).toBe("steve.bsky.social");
+    expect(view.SOCIAL_BLUESKY_ARMED).toBe("true");
+    const resolve = await vaultSocialPublisherResolver(deps());
+    const publisher = resolve("bluesky");
+    expect(isRefusingSocialPublisher(publisher)).toBe(false);
+    expect(publisher.name).toBe("bluesky-post");
+  });
+
+  it("reddit: the vaulted dance yield fills the access-token seat (refresh token deliberately NOT a seat) and resolves a live driver", async () => {
+    await connectDestination(deps(), {
+      destination: "reddit",
+      credentials: { accessToken: "at_vault", refreshToken: "rt_vault" },
+    });
+    await configureSocial({ reddit: { maxPostsPerDay: 1 } });
+    const view = await vaultSocialEnvView(deps());
+    expect(view.SOCIAL_REDDIT_ACCESS_TOKEN).toBe("at_vault");
+    expect(view.SOCIAL_REDDIT_ARMED).toBe("true");
+    expect(Object.values(view)).not.toContain("rt_vault");
+    const resolve = await vaultSocialPublisherResolver(deps());
+    const publisher = resolve("reddit");
+    expect(isRefusingSocialPublisher(publisher)).toBe(false);
+    expect(publisher.name).toBe("reddit-submit");
+  });
+
+  it("an unconfigured proof platform stays a refusing publisher naming its missing arms — connecting is not arming", async () => {
+    await connectDestination(deps(), {
+      destination: "bluesky",
+      credentials: { identifier: "steve.bsky.social", appPassword: "app-pw" },
+    });
+    const resolve = await vaultSocialPublisherResolver(deps());
+    const publisher = resolve("bluesky");
+    expect(isRefusingSocialPublisher(publisher)).toBe(true);
+  });
+});

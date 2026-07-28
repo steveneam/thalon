@@ -143,7 +143,14 @@ export async function publishApprovedDraft(
   // what actually went out (external id + judged-body hash) at post time;
   // a raced duplicate surfaces the repo's DuplicatePublicationError LOUD.
   const media = await loadDraftMedia(deps, draft);
-  const receipt = await publisher.publish({ draftId: draft.id, text: draft.body, media });
+  const receipt = await publisher.publish({
+    draftId: draft.id,
+    text: draft.body,
+    media,
+    // The platform's own cadence block rides along (D1): per-tenant posting
+    // settings reach the driver without a second config read.
+    settings: cadence,
+  });
   const publication = await repos.socialPublications.record(ctx, {
     draftId: draft.id,
     platform,

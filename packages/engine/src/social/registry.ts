@@ -48,6 +48,14 @@ export interface SocialPostInput {
   text: string;
   /** Attached media, when the draft carries `meta.mediaRefs` (B-pub.3: one image; absent = the text-only path, byte-identical to B-pub.2). */
   media?: SocialPostMedia[];
+  /**
+   * D1 (s83): the tenant's cadence block for the target platform, passed
+   * through by the door (rung c already reads it) — how a driver receives
+   * per-tenant posting settings (Reddit's subreddit). Drivers parse their
+   * own slice and ignore the rest; the D3 settings schemas will ride this
+   * same seam.
+   */
+  settings?: Record<string, unknown>;
 }
 
 /** A platform-ACCEPTED result — official-API semantics only (ADR 0002): the id is the platform's, never invented. */
@@ -153,7 +161,7 @@ export function resolveSocialPublisher(
   const factory = drivers[platform];
   if (!factory) {
     missing.push(
-      `${platform} driver (none assembled — productionSocialDrivers registers linkedin/x always, facebook only with SOCIAL_FACEBOOK_PAGE_ID, instagram only with SOCIAL_INSTAGRAM_USER_ID; tiktok ships no driver)`,
+      `${platform} driver (none assembled — productionSocialDrivers registers linkedin/x/reddit always, facebook only with SOCIAL_FACEBOOK_PAGE_ID, instagram only with SOCIAL_INSTAGRAM_USER_ID, bluesky only with SOCIAL_BLUESKY_IDENTIFIER; tiktok ships no driver)`,
     );
   }
   if (!token || !factory || missing.length > 0) {

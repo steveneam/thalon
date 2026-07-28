@@ -25,8 +25,10 @@
 // lanes junction node_modules to the main checkout, so the package name would
 // resolve to main's copy — the relative path always runs THIS checkout's code.
 import { pathToFileURL } from "node:url";
+import { tenantCtx } from "../packages/contracts/src/index";
 import { openDb } from "../packages/db/src/index";
-import { runDueSweeps } from "../packages/engine/src/index";
+import { refreshExpiringCredentials, runDueSweeps } from "../packages/engine/src/index";
+import { readEnv } from "../packages/platform/src/index";
 
 const MINUTE_MS = 60_000;
 const MIN_TICK_MS = 1 * MINUTE_MS;
@@ -68,11 +70,43 @@ function stamp(): string {
   return new Date().toISOString();
 }
 
+/**
+ * D1 (s83): the OAuth refresh horizon — a token expiring inside this window
+ * gets renewed on the pass. 45 minutes clears Reddit's 1-hour access tokens
+ * with headroom at the 15-minute tick floor; longer-lived flavors (LinkedIn
+ * at B-int.4) ride the same knob when they become oauth2-flavored.
+ */
+const REFRESH_HORIZON_MS = 45 * MINUTE_MS;
+
+/**
+ * The credential-refresh half of the pass (D1): every tenant, every
+ * CONNECTED oauth2 destination inside the horizon. Quiet when idle, one
+ * line per outcome otherwise; a per-destination refusal flips that card to
+ * needs_reauth inside the engine verb and never blocks another tenant. A
+ * missing master key with rows present throws loud (box misconfiguration).
+ */
+async function refreshPass(repos: Awaited<ReturnType<typeof openDb>>["repos"]): Promise<void> {
+  const env = readEnv(process.env);
+  const tenants = await repos.tenants.list();
+  for (const tenant of tenants) {
+    const outcomes = await refreshExpiringCredentials(
+      { repos, ctx: tenantCtx(tenant.id), env },
+      { now: new Date(), horizonMs: REFRESH_HORIZON_MS },
+    );
+    for (const o of outcomes) {
+      if (o.outcome === "skipped") continue;
+      const log = o.outcome === "refreshed" ? console.log : console.error;
+      log(`[${stamp()}] token refresh tenant=${tenant.id} ${o.destination}: ${o.outcome} — ${o.detail}`);
+    }
+  }
+}
+
 async function pass(repos: Awaited<ReturnType<typeof openDb>>["repos"]): Promise<{
   failed: number;
   tickMs: number;
   cadenceMs: number;
 }> {
+  await refreshPass(repos);
   const result = await runDueSweeps({ repos }, new Date());
   const sweptNote = result.swept
     .map((s) => `${s.tenantId} (${s.cards} cards / ${s.polled} polled / ${s.admitted} admitted)`)

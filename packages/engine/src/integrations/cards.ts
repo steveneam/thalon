@@ -1,6 +1,8 @@
 import {
   DESTINATION_KEYS,
   DESTINATIONS,
+  type ConnectFlavor,
+  type DestinationDef,
   type CredentialCardState,
   type DestinationClass,
   type DestinationKey,
@@ -103,6 +105,13 @@ export interface IntegrationCard {
   armed: boolean | null;
   /** Why armed reads as it does, in the operator's words. `null` alongside `armed: null`. */
   armedReason: string | null;
+  /**
+   * D1 (s83): how this destination CONNECTS — "oauth2" cards offer the
+   * consent-redirect dance (one click, no paste), "app_password" and
+   * "manual" keep the schema-derived guided paste. From the registry's
+   * connect field; absent = manual, the pre-D1 behavior.
+   */
+  connectFlavor: ConnectFlavor;
   fields: IntegrationCardField[];
 }
 
@@ -164,7 +173,9 @@ export async function listIntegrationCards(
   const byDestination = new Map(stored.map((card) => [card.destination, card]));
   const now = opts.now ?? new Date();
   return DESTINATION_KEYS.map((destination) => {
-    const def = DESTINATIONS[destination];
+    // Widened through the interface: `as const` entries without a `connect`
+    // field have no such property in their literal type.
+    const def: DestinationDef = DESTINATIONS[destination];
     const row = byDestination.get(destination) ?? null;
     const feature = CLASS_ENTITLEMENT[def.class];
     const entitled = feature === null ? true : opts.features[feature];
@@ -190,6 +201,7 @@ export async function listIntegrationCards(
       envOverride: envOverridesDestination(deps.env, destination),
       armed: arming?.armed ?? null,
       armedReason: arming?.reason ?? null,
+      connectFlavor: def.connect?.flavor ?? "manual",
       fields: pasteFields(destination),
     };
   });

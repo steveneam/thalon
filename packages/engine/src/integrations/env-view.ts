@@ -32,6 +32,9 @@ type VaultSeatEnvKey =
   | "SOCIAL_FACEBOOK_PAGE_ID"
   | "SOCIAL_INSTAGRAM_ACCESS_TOKEN"
   | "SOCIAL_INSTAGRAM_USER_ID"
+  | "SOCIAL_REDDIT_ACCESS_TOKEN"
+  | "SOCIAL_BLUESKY_ACCESS_TOKEN"
+  | "SOCIAL_BLUESKY_IDENTIFIER"
   | "RESEND_API_KEY"
   | "YOUTUBE_API_KEY"
   | "BLUESKY_IDENTIFIER"
@@ -49,6 +52,16 @@ export const VAULT_ENV_SEATS = {
   instagram: {
     accessToken: "SOCIAL_INSTAGRAM_ACCESS_TOKEN",
     igUserId: "SOCIAL_INSTAGRAM_USER_ID",
+  },
+  // D1 (s83): reddit's refreshToken is deliberately NOT a seat — the merged
+  // view feeds POSTING, and posting needs the access token only; refresh
+  // opens the vault row itself (integrations/connect.ts).
+  reddit: { accessToken: "SOCIAL_REDDIT_ACCESS_TOKEN" },
+  // The bluesky ACCESS_TOKEN seat carries the app password by declaration
+  // (platform env schema note) — the seat holds the platform's secret shape.
+  bluesky: {
+    appPassword: "SOCIAL_BLUESKY_ACCESS_TOKEN",
+    identifier: "SOCIAL_BLUESKY_IDENTIFIER",
   },
   newsletter_resend: { apiKey: "RESEND_API_KEY" },
   intel_youtube: { apiKey: "YOUTUBE_API_KEY" },

@@ -32,7 +32,7 @@ import type { VaultDeps, VaultRepos } from "./vault";
  */
 
 /** The social destinations ↔ platform seats (same strings by design; tiktok has no destination — review-gated, no driver). */
-const SOCIAL_VAULT_DESTINATIONS = ["linkedin", "x", "facebook", "instagram"] as const;
+const SOCIAL_VAULT_DESTINATIONS = ["linkedin", "x", "facebook", "instagram", "reddit", "bluesky"] as const;
 export type SocialVaultDestination = (typeof SOCIAL_VAULT_DESTINATIONS)[number];
 
 /** Whether a destination key is a social publish seat at all — website/intel/newsletter never post. */
@@ -46,6 +46,8 @@ const SOCIAL_ARMED_SEATS = {
   x: "SOCIAL_X_ARMED",
   facebook: "SOCIAL_FACEBOOK_ARMED",
   instagram: "SOCIAL_INSTAGRAM_ARMED",
+  reddit: "SOCIAL_REDDIT_ARMED",
+  bluesky: "SOCIAL_BLUESKY_ARMED",
 } as const satisfies Record<SocialVaultDestination, keyof ThalonEnv>;
 
 export interface SocialArmingVerdict {

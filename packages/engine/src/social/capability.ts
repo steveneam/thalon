@@ -333,6 +333,8 @@ const PLATFORM_LABELS: Readonly<Record<SocialPlatform, string>> = {
   facebook: "Facebook",
   instagram: "Instagram",
   tiktok: "TikTok",
+  reddit: "Reddit",
+  bluesky: "Bluesky",
 };
 
 /** The label map, for callers rendering a refusal the validator produced. */

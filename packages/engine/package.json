@@ -20,6 +20,7 @@
     "@thalon/judge": "*",
     "@thalon/platform": "*",
     "ai": "^5.0.209",
+    "arctic": "^3.7.0",
     "playwright": "^1.55.0",
     "zod": "^4.1.0"
   },
