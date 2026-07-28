@@ -1,5 +1,9 @@
-import { InvalidTransitionError, InvalidVideoCutTransitionError } from "@thalon/contracts";
-import { InvariantViolationError, NotFoundError } from "@thalon/db";
+import {
+  InvalidPublishQueueTransitionError,
+  InvalidTransitionError,
+  InvalidVideoCutTransitionError,
+} from "@thalon/contracts";
+import { InvalidStateError, InvariantViolationError, NotFoundError } from "@thalon/db";
 import {
   PublishRefusedError,
   VaultKeyInvalidError,
@@ -32,6 +36,14 @@ export function toErrorResponse(err: unknown): NextResponse {
   if (
     err instanceof InvalidTransitionError ||
     err instanceof InvalidVideoCutTransitionError ||
+    // s82: the publish queue's rulebook, and the repos' state refusals. Both
+    // were missing while their `InvalidTransitionError` sibling was already
+    // here, so a row refusing on its STATE ("this cut is approved", "that row
+    // is already published") fell through to the 400 below and told the caller
+    // it had sent a bad request. Every s82 route that could hit these caught
+    // them locally; this is the fold-in, so the next one need not remember.
+    err instanceof InvalidPublishQueueTransitionError ||
+    err instanceof InvalidStateError ||
     err instanceof InvariantViolationError ||
     // The social publish door's typed refusal ladder — a state conflict
     // (disarmed / unconfigured / capped / duplicate), never a bad request.

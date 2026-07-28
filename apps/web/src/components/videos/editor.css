@@ -154,6 +154,26 @@
 .editor-surface .notice-band { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; }
 .editor-surface .notice-band.refused { border-color: var(--err); background: var(--err-subtle); }
 .editor-surface .notice-band .t-label { color: var(--n-1000); }
+/*
+ * s82 B3: a refusal row is a DOOR to the plate it refused, so it is a real
+ * button — but it must still read as the band's own line of text, not as a
+ * control bolted into a notice. Everything the browser adds is stripped and
+ * only the affordances are kept: a pointer, an underline on hover, and a focus
+ * ring, because a door reachable only by mouse is the defect this session has
+ * been closing all day.
+ */
+.editor-surface .notice-band .refusal-row {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.editor-surface .notice-band .refusal-row:hover { text-decoration: underline; }
+.editor-surface .notice-band .refusal-row:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
 
 .editor-surface .diff-panel { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--n-400); background: var(--n-bg); font-size: 12.5px; }
 .editor-surface .diff-op { display: flex; align-items: center; gap: 10px; width: 100%; }

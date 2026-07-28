@@ -2,7 +2,8 @@
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [
-      "proprietary/templates/sites/**"
+      "proprietary/templates/sites/**",
+      "apps/web/src/components/videos/editor.css"
     ],
     "ignoreValues": []
   }

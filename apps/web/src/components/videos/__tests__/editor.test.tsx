@@ -903,3 +903,81 @@ describe("VideoEditor — the takes strip and the beats rail agree with the reco
     expect(within(row as HTMLElement).getByTitle(/no take row/)).toBeInTheDocument();
   });
 });
+
+/**
+ * s82 B3 — a judge refusal reaches the TIMELINE, not just the notice band.
+ *
+ * The receiving half shipped in editor-timeline.tsx (built, tested, defaulted
+ * to an empty set) while this file never passed `refusedCaptions`, so the whole
+ * feature rendered as nothing: a mark that existed in the code and never on
+ * screen. Two lanes each owned one half and neither could see the seam. These
+ * pin the seam itself.
+ */
+describe("VideoEditor — a judge refusal marks the plate it refused (s82 B3)", () => {
+  /** The approve door's 409: the gate refused caption line 0 (0-based, its own index). */
+  function refuseFirstCaption() {
+    server.use(
+      http.post("/api/videos/p1/cuts/c1/approve", () =>
+        HttpResponse.json(
+          {
+            error: "judge gate g1-captions refused 1 of 2 caption line(s)",
+            failures: [{ line: 0, text: "one prompt", matches: ["one prompt"] }],
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+  }
+
+  it("marks the refused plate on the caption lane, and only that one", async () => {
+    // The approve verb exists only on a RENDERED cut — that is the door the
+    // judge gate sits behind.
+    serve(DETAIL, { ...CUT, status: "rendered", outputRef: "cuts/out.mp4" });
+    refuseFirstCaption();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    // Nothing is refused until the gate says so.
+    expect(container.querySelectorAll(".blk-cap.refused")).toHaveLength(0);
+
+    await user.click((await screen.findAllByRole("button", { name: "Send cut to Approve" }))[0]);
+    await screen.findByText(/refused 1 of 2 caption line/);
+
+    // `refusal.line` is the 0-based index into captions.lines — the same basis
+    // the plates are keyed on. An off-by-one here would mark the WRONG caption,
+    // which is worse than marking none, so the count AND the position are both
+    // pinned.
+    const plates = container.querySelectorAll(".blk-cap");
+    expect(plates).toHaveLength(2);
+    expect(plates[0].className).toContain("refused");
+    expect(plates[1].className).not.toContain("refused");
+    // The lane says the word, not just a colour (the audit's own condition).
+    expect(await screen.findByText("refused")).toBeInTheDocument();
+  });
+
+  it("names the refusal in the surface's own numbering, and is a door to the plate", async () => {
+    serve(DETAIL, { ...CUT, status: "rendered", outputRef: "cuts/out.mp4" });
+    refuseFirstCaption();
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    await user.click((await screen.findAllByRole("button", { name: "Send cut to Approve" }))[0]);
+
+    // It printed the raw 0-based index — the judge refused "line 0" while the
+    // inspector beside it called the same plate "Caption 1", so the operator
+    // had to know the off-by-one to act on their own gate result.
+    const row = await screen.findByRole("button", {
+      name: /Select Caption 1, refused by the judge/,
+    });
+    expect(row).toHaveTextContent(/Caption 1 .one prompt./);
+    expect(screen.queryByText(/line 0/)).not.toBeInTheDocument();
+
+    // And it is a way TO the text, not merely a note about it: pressing the
+    // refusal selects that plate, so the inspector opens on the very caption
+    // the judge objected to.
+    await user.click(row);
+    const inspector = await screen.findByText("Caption 1", { selector: ".inspector-head .t-title" });
+    expect(inspector).toBeInTheDocument();
+  });
+});

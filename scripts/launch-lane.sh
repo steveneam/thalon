@@ -39,6 +39,25 @@ fi
 ABS_WT="$(cd "$WORKTREE" && pwd)"
 KICKOFF_REL="${KICKOFF#"$WORKTREE"/}"
 
+# Box capacity, measured s82 and stated where the decision is made. Three lanes
+# each running `npm run verify` with an unbounded vitest pool exceeded 16 GiB:
+# the kernel OOM-killed next-server, chrome and python3 at once, swap sat at
+# 5/6 GB under load 25-30, and two lanes had their own verify runs killed (143)
+# rather than failed. `--maxWorkers=2` fit.
+#
+# This does NOT refuse — three lanes is a legitimate call, and s82 shipped all
+# three. It makes the constraint impossible to rediscover by surprise, which is
+# what the s64 note ("stagger retired") failed to do: that measurement was
+# lanes doing ordinary work, never three full suites at once.
+LANE_WINDOWS="$(tmux list-windows -t "$SESSION" -F '#{window_name}' | grep -cvE '^(dev|agent)$' || true)"
+if [ "${LANE_WINDOWS:-0}" -ge 2 ]; then
+  echo "── NOTE: this makes lane #$((LANE_WINDOWS + 1)) on a 16 GiB box."
+  echo "   Three concurrent FULL verify suites OOM this machine (measured s82)."
+  echo "   Tell the lane to gate with 'vitest run --maxWorkers=2', and never"
+  echo "   'pkill -f vitest' while lanes are parallel — it matches every"
+  echo "   worktree and kills its neighbours' suites (s82: it did)."
+fi
+
 # Detached: the founder's (and lead's) current view stays put.
 # LANE_CLAUDE_ARGS: extra claude flags, e.g. the strongest-tier model pin
 # design lanes REQUIRE (design-on-Fable-5 rule): --model claude-fable-5.

@@ -474,6 +474,15 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     [proposal],
   );
   /**
+   * s82 B3 — which caption plates the judge refused, as plate indices. A new
+   * Set per render would re-trigger the timeline's memo every keystroke, so it
+   * is derived once per refusal set.
+   */
+  const refusedLines = useMemo(
+    () => new Set(refusals.map((refusal) => refusal.line)),
+    [refusals],
+  );
+  /**
    * A1 — the comparison itself. WHAT IS ON SCREEN is the "after" side on
    * purpose: mid-edit the question is "what have I changed since v5", and on a
    * clean copy that is exactly v6 against v5. Pure and cheap, so it recomputes
@@ -1179,10 +1188,28 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       {(notice !== null || refusals.length > 0) && (
         <div className={refusals.length > 0 ? "card notice-band refused" : "card notice-band"} role="status">
           {notice !== null && <span className="t-label">{notice}</span>}
+          {/*
+            s82 B3 (the third part): a refusal NAMES the line it refused, in the
+            surface's own numbering, and is a door to it.
+
+            It printed `line {refusal.line}` — the raw 0-based index into
+            `captions.lines` — while the inspector calls the same plate
+            "Caption {index + 1}". So the judge refused "line 0" and the panel
+            beside it discussed "Caption 1": the operator had to know the
+            off-by-one to act on their own gate result. Now it reads Caption N
+            like everything else, and pressing it selects that plate, so the
+            refusal is a way to the text rather than a note about it.
+          */}
           {refusals.map((refusal) => (
-            <span key={refusal.line} className="t-label">
-              line {refusal.line} “{refusal.text}” — {refusal.matches.join("; ")}
-            </span>
+            <button
+              key={refusal.line}
+              type="button"
+              className="t-label refusal-row"
+              onClick={() => setSelection({ kind: "caption", index: refusal.line })}
+              aria-label={`Select Caption ${refusal.line + 1}, refused by the judge`}
+            >
+              Caption {refusal.line + 1} “{refusal.text}” — {refusal.matches.join("; ")}
+            </button>
           ))}
           {job?.status === "error" && <span className="t-label">Render failed: {job.error}</span>}
         </div>
@@ -1412,6 +1439,18 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               propBeats={marks.beats}
               propCaptions={marks.captions}
               propMusic={marks.music}
+              /*
+               * s82 B3: the timeline's refusal marks, finally fed. Lane B built
+               * and tested the receiving half; this prop is the sending half,
+               * and without it the whole feature rendered as nothing — a mark
+               * that exists in the code and never on screen.
+               *
+               * `refusal.line` is the 0-based index into `captions.lines` (the
+               * gate's own `layers.forEach((text, line) => …)`), which is the
+               * same basis the plates are keyed on, so no adjustment belongs
+               * here. The +1 is display only, where a human reads it.
+               */
+              refusedCaptions={refusedLines}
             />
 
             {selection !== null && (
