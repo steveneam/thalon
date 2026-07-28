@@ -198,4 +198,17 @@ polish tail), found two harness lies, wired B3 at the gate, and measured the
 box's three-suite ceiling. Its close recommended D1 as the s83 headline; s83
 delivered it.
 
+**INSTAGRAM ROLLED UP TO s84 (his close ask):** CONNECT is buildable in ~an
+hour — instagram joins the dance on the SAME Meta app (provider = facebook's
+plus one hop: `/{page-id}?fields=instagram_business_account` → igUserId; new
+consent adds instagram_basic + instagram_content_publish; refuse honestly if
+the Page has no linked IG). **His prereq first** (s65 runbook §3, never done —
+both IG env seats are empty): IG app → switch to a PROFESSIONAL account →
+link it to the MacTechDish Page. **POSTING stays honestly walled after
+connecting:** IG accepts only media posts by URL Meta's servers can fetch —
+the s71 public `/assets/<sha256>` door needs a REACHABLE origin (staging
+edge-auth exemption for /assets = a founder/swordfish deploy call, not code);
+the card's capability note stays true until that lands, then a real IG driver
+(media → media_publish) replaces the typed refusal.
+
 ## Next action — s84, the founder picks at the opener: (a) the THREADS PORTAL PILOT (his grant on record — browser-drive runbook §4 on his behalf, per-submit approval; yields platform #5), (b) the D4 design wave (four sheets in claude-design; BOTH Mobbin memos are the raw material), (c) LinkedIn onto the dance (small, same pattern as facebook), (d) D2 pre-work (publication_metrics window; evaluate the printing-press library's instagram-metrics CLI as reference). If his Reddit values landed in social-logins.md, wire + drive that dance first. Facebook is DONE (dance live, Page token vaulted, never expires).
