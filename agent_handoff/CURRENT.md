@@ -2,186 +2,133 @@
 
 ## Stamp
 
-2026-07-28 (session 83, syd4 — **zero credit spend**; Fable 5, set with
-`/model` before "gogogo"). **THE CONNECTOR SEAM (charter D1) SHIPPED
-LEAD-DIRECT, RESEARCH-FIRST, IN ONE SESSION:** the founder-ratified Mobbin
-sweep and the rule-10 prior-art pass ran BEFORE the plan hardened, he answered
-two questions mid-boot ("you have a Bluesky account already" — TRUE, the soak's
-env pair; "Postiz connects without me?" — only their HOSTED product, because
-Postiz-the-company registered its own platform apps once), gave GO, and the
-whole D1 stack landed: window → engine seam → connect flow → live Bluesky
-proof. Final verify on main: **2740 passed / 9 skipped, 0 lint errors** (2694
-at the s82 close). Tree clean, pushed. ⛔ One live
-platform call all session: Bluesky's read-only validate ping on connect (the
-s70 precedent); zero posts, zero spend.
+2026-07-28 (session 84, syd4 — **zero credit spend**; Fable 5). **TWO PLATFORMS
+JOINED THE DANCE AND ONE MANUAL STEP WAS DELETED RATHER THAN DELEGATED — but
+the session's real lesson is a founder catch.** Final verify on main: **2756
+passed / 9 skipped, 0 lint errors** (2740 at the s83 close). Tree clean,
+pushed (`2aadac1`). Zero posts; the sequence gate is untouched.
 
-**RESEARCH FIRST, AND IT CHANGED THE PLAN.** `mobbin-patterns-s83.md` (8
-categories, verdict-tagged, links-never-assets) + `prior-art-connector-seam-
-s83.md`. Three findings altered the build: (1) **Bluesky's connect is NOT the
-OAuth dance** — app passwords are the platform's own designed paste, so the
-mode-2 grammar STAYS for that flavor and the contract's `connect.flavor` field
-says which is which; (2) **arctic (MIT, npm-verified) owns the OAuth quirks**
-— Reddit's Basic-auth exchange and `duration=permanent` live in the dependency,
-inside the connector file, never as the seam; (3) **@atproto/api was TAKEN
-then deliberately NOT USED** — the SDK owns its transport and would bury the
-injectable-fetch seam every driver test rides; raw XRPC + deterministic
-UTF-8-byte link facets shipped instead, SDK recorded as the swap path when D3
-wants mentions. Reddit's commercial API contract = a flagged launch gate
-(free non-commercial 100 q/min covers all dogfood).
+**THE FOUNDER CATCH, first because it reshapes the grant.** I opened on the
+s83 Threads portal pilot and drove his Meta login from the box — straight
+into endless reCAPTCHA image grids, three rounds, headless then headed under
+Xvfb then a real VNC desktop. He stopped it: *"didnt i say to use your
+research skills before asking me to do manual work?"* — the exact rule-10 /
+ADR-0012 defect, caught by him. The memo that should have run first is now
+`docs/research/prior-art-portal-automation-s84.md`: **(a)** developer-app
+registration is NOT automatable on Meta/LinkedIn/TikTok/Reddit — no API, CLI
+or Terraform provider, dashboard-only BY POLICY (the class exists at
+Entra/Okta/Auth0, so the absence is deliberate); **(b)** every product in the
+category (Buffer, Ayrshare, Blotato, self-hosted Postiz/Mixpost) registers ONE
+app per platform centrally — app creation never scales with tenants, so the
+cost is N platforms × 1 app FOREVER; **(c)** the captcha loop's root cause is
+**datacenter IP reputation**, not fingerprint — patchright / rebrowser-patches
+/ undetected-chromedriver fix the wrong layer and residential proxies are an
+arms race, ToS-adverse, absurd for a one-time bootstrap → **REJECTED on ROI**;
+**(d)** the boring path wins: he does the ~10-min portal session in his OWN
+browser (his IP, no captcha) while the lead dictates every field live. The
+[[founder-portal-setup-grant]] memory is amended accordingly — the grant
+stands, only the LOGIN step moves back to him. **Never re-attempt an automated
+platform login from the box.**
 
-**THE WINDOW (0021_s83_d1_window):** SOCIAL_PLATFORMS += reddit + bluesky
-(matrix rows, config schemas — reddit's cadence block carries `subreddit`,
-absent = the account's own profile) · DESTINATIONS += both + the
-`connect.flavor` vocabulary (manual | oauth2 | app_password; pre-D1 entries
-untouched = manual) · `oauth_states` (single-use consume = DELETE‑RETURNING
-inside the tenant wall; expired refuses with the instant on its face; a
-stranger's probe is indistinguishable from no flight) · env: SOCIAL_REDDIT_* /
-SOCIAL_BLUESKY_* seats + the REDDIT client pair + **APP_ORIGIN** (a redirect
-URI must match the registered app EXACTLY — never derived from headers) ·
-**deferred item 4 CLOSED**: `scheduled` is no longer a draft status (nothing
-ever wrote it, re-verified; approved → published is the edge, I2 guard
-intact; scheduling is a queue-ROW fact). Completeness ratchets caught the new
-table twice (COPY_ORDER + the tenancy set) — they work.
+**HIS better-auth ASK, answered:** REJECT for the connector seam (MIT, healthy,
+but it authenticates YOUR OWN app's users; we need session-free per-tenant
+POSTING tokens for a background queue, with quirks arctic + connect.ts already
+own and storage the AAD-bound vault already does better — adopting it means
+taking its whole user/session schema for a worse fit). Parked **LATER** for
+workspace end-user auth when multi-user tenant logins exist.
 
-**THE SEAM:** `hardenedPlatformFetch` (429 → Retry-After capped ×2 · 401 →
-typed `SocialTokenExpiredError`, never retried · else verbatim body) — the
-four live-proven drivers were deliberately NOT re-shaped onto it (s69 receipts
-outrank tidiness); the two NEW drivers ride it. Reddit driver: self posts via
-`/api/submit`, title = first line clamped ≤300 with the FULL body preserved,
-target = configured subreddit else `u_<username>` from `/api/v1/me`, media =
-typed refusal (upload-lease flow is its own reviewed change). Bluesky driver:
-createSession per publish (stateless), uploadBlob → embed, link facets by
-UTF-8 byte offset. The door passes the platform's cadence block through as
-`settings` (the D3 settings seam, born small). `integrations/connect.ts`: ONE
-begin door + ONE complete door + refresh verbs behind `OAUTH_PROVIDERS` — a
-new oauth2 platform ≈ one provider entry + one env pair + one registry row.
-Refusals typed and named (`not_oauth2` · `missing_client_pair` ·
-`missing_origin` · `state_mismatch` · `no_refresh_token` — a pair with no
-refresh token REFUSES TO STORE: that is a connection built to die silently).
-The refresh tick rides the ONE periodic runner (`run-sweep-scheduler.ts`,
-45-min horizon; a vault row that will not OPEN throws loud — box misconfig is
-never laundered into needs_reauth).
+**INSTAGRAM JOINED THE DANCE — zero portal work.** It rides the SAME Meta app
+as facebook; the consent gains instagram_basic + instagram_content_publish and
+the exchange takes one extra Graph hop
+(`/{page-id}?fields=instagram_business_account`) to derive igUserId beside the
+Page token. **Verified live against his graph:** Page *MacTechDish* resolves
+`@maxbrenner_123` — his mid-session note that the IG test account has a
+DIFFERENT login than his Facebook identity turned out to be a non-issue and
+worth stating plainly: the Graph API reaches an IG account THROUGH the Page
+that admins it, never through IG credentials. The s65 prereq the s83 rollup
+called "never done" is in fact DONE — he did it. A Page with no linked
+professional account refuses honestly and names the fix; nothing stores.
+Posting stays walled behind the typed text-only refusal until a publicly
+reachable assets origin exists — connecting and posting are different gates.
 
-**THE FLOW + THE PROOF.** One dynamic callback route serves every oauth2
-destination; its refusals REDIRECT with the reason in the query (a browser
-mid-consent must never strand on JSON). Cards gained `connectFlavor`; the
-panel switches: oauth2 = "Continue to Reddit ↗" (no paste fields at all),
-app_password/manual = the guided paste unchanged. Disconnect confirm now
-COUNTS the platform's pending queue rows ("N scheduled posts will fail
-closed") — the Mobbin finding nobody ships. **Bluesky is CONNECTED FOR REAL:**
-the soak's env pair went through the actual connect door, validate ping green,
-card reads *Connected · Posting as @steveneam.bsky.social · Not armed — the
-active profile's social block has no "bluesky" entry*. That card IS the
-sequence gate rendered honestly. Reddit is one founder step from the same
-(`.context/developer-apps.md` §6, ~5 min, once ever). 33 new tests (16 driver
-· 10 connect · 7 route) + 3 arming proofs + the window probes; render gate
-shot both modes and READ; inventory driven.
+**THE MANUAL STEP THAT WAS DELETED, NOT DELEGATED.** Platforms match redirect
+URIs exactly, so instagram would have cost a SECOND callback registration in
+the same Meta app — a founder-manual step, which rule 10 calls a defect. A
+provider may now declare **`callbackAs`**: instagram comes back on facebook's
+already-registered URI. The safety does not move — `completeOauthConnect`
+resolves the true destination from the SINGLE-USE state row (tenant-walled,
+TTL'd) and refuses when that flight's callback destination is not the path it
+landed on, so a bluesky flight still cannot cross facebook's callback (pinned
+by test). The path only says which registered URL the platform used; the ROW
+says what is being connected. The route redirects with the CARD's destination
+for the same reason.
 
-**s83 SECOND HALF (his mid-session directives): THE FIRST FULLY-AUTOMATED
-LIVE POST, END TO END.** His grants verbatim: *"you can arm bluesky, since i
-hardly use it anyway so you can use it for testing"* + the micro-UX research
-ask. Executed: bluesky ARMED (profile v5's social block, his GO on record) ·
-`proprietary/profiles/bluesky.v1.json` (280 budget under the 300 ceiling) ·
-a real brief → fan-out → judge (first take FAILED THE FIT at 470 chars — the
-deterministic gate doing its job; regenerated at 247) → operator approve →
-Schedule verb → queue row → **deferred item 1's arming pieces built**
-(`SOCIAL_QUEUE_ARMED` env key · `scripts/run-publish-queue.ts --once`; the
-systemd timer deliberately NOT created — arm-per-run posture, and the key
-sits EMPTY in .env.local after the test) → one ARMED pass: **1 due, 1
-published, 0 failed** →
-`at://did:plc:qfixzityfrgjbhfan2yresmv/app.bsky.feed.post/3mrpt2iqawv2o`,
-publicly live on @steveneam.bsky.social, queue row `published`, ledger row
-4th in the Published view. The permalink gap it exposed is fixed (at:// →
-bsky.app web URL, tested). Also: his Reddit app creation hit Reddit's
-policy-wall UX — guidance given (checkbox / old.reddit / the API-access
-inquiry as the fallback; NOT Devvit); his values may arrive any session.
-Plus the second research memo: `docs/research/mobbin-patterns-s83b-microux.md`
-(chips · empty states · loading · palette hints · copy affordances — three
-standing copy grammars, one cheap discoverability fix, one doctrine
-validation).
+**LINKEDIN JOINED THE DANCE.** Its yield is the member token it already posts
+with; only HOW it arrives changes (one click instead of the OAuth-tools
+paste). Refresh tokens are partner-gated, so `refresh()` throws BY DESIGN:
+near expiry the tick flips the card to needs_reauth, where renewal is the same
+one-click dance. The 60-day chore becomes a click, never a silent mid-queue
+death. Env pair wired from the existing app values.
 
-**s83 THIRD ACT (founder-directed, same session): FACEBOOK JOINED THE DANCE
-AND HE DROVE IT LIVE.** Reddit's app creation stayed walled by Reddit's own
-inquiry funnel (parked; values whenever), so he asked for Meta — and the
-answer mattered: **dev-mode apps need NO App Review for their own admin's
-Page**, so the self-tenant rides the dance today (the B-int.4 wall is about
-OTHER tenants, untouched). Built (`2ec59b1`): providers now return the
-destination's OWN credentials shape (platforms disagree about what a
-connection IS); facebook's provider = arctic consent → fb_exchange_token
-long-lived → `/me/accounts` → the derived **PAGE token + page id** (the
-B-int.0 shape, verbatim) — no expiry, so the refresh tick never touches it;
-Page choice refuses to guess (env pin wins · one page decides itself ·
-several are NAMED in the refusal). **PROVEN LIVE by the founder's own
-browser** (VS Code port-forward 3111): consent → callback → card
-*Connected · Verified as MacTechDish*. The 60-day Facebook token chore is
-dead. D1 now has all three flavors proven: oauth2 (facebook LIVE · reddit
-built, awaiting his app values), app_password (bluesky LIVE + the automated
-post), manual (the originals). LinkedIn onto the dance = an s84 small
-(same pattern; 60-day tokens remain but renewal becomes one click).
+**Also:** main-RED #5 fixed (CURRENT.md lost its trailing newline at the s83
+docs close — the board-hygiene ratchet caught it) · MEMORY.md compacted 23.4KB
+→ 10.7KB (the s60–s83 session ledger moved INTO
+`higgsfield-kompozy-assignment.md` where it belongs) · three memories written
+(portal-automation verdict · never-scrub-logins · the amended grant) · a
+founder-viewport relay + noVNC bridge were built during the captcha fight and
+are kept at `.context/portal/` (gitignored) — **code-server serves ports at
+`/proxy/<port>/`, which is why plain port-forwarding read "socket hang up"**.
 
-## Resume prompt (session 84, syd4 — "gogogo" boots this)
+## Resume prompt (session 85, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s83 shipped D1 (connector seam + connect flow + Bluesky
-connected live; Reddit waits only on his 5-min app step). **s84 candidates, his
-call at the opener:** (a) **D4 DESIGN WAVE** (ratified to start "after s82"):
-four sheets mocked in claude-design — Analytics · Calendar→Schedule · composer
-band · Channels — **Fable 5 authors directly (standing rule)**, citing
-`mobbin-patterns-s83.md` §"What this changes about D4" rather than re-deriving;
-founder verdict makes a sheet law; (b) **D2 pre-work** (publication_metrics
-window + postAnalytics verb) — honest note: thin value until posting is
-routine; (c) the two open s82 deferred items (cadence pre-check design ·
-media-cap export) as a lead-direct small.
+**Resume · Thalon** — s84 put instagram + linkedin on the D1 dance (both
+code-complete, tested, each one click away from connected) and settled the
+portal question with research. **s85 candidates, his call at the opener:**
+(a) **D4 DESIGN WAVE** — four sheets mocked in claude-design (Analytics ·
+Calendar→Schedule · composer band · Channels), **Fable 5 authors directly**
+(standing rule), citing BOTH Mobbin memos rather than re-deriving; founder
+verdict makes a sheet law; (b) **connect IG + LinkedIn for real** — one click
+each in his browser, then the cards read Connected (IG's capability note stays
+honest about posting); (c) **THREADS via the amended grant** — ~10 min in HIS
+browser with the lead dictating fields; (d) **D2 pre-work**
+(publication_metrics window + postAnalytics verb).
 
-**s84 candidate ADDED at the s83 close (founder-directed): PORTAL-SETUP
-DRIVING.** His ruling on record: the lead browser-drives platform developer-
-portal setup on his behalf — setup only, never scraping; per-submit approval;
-CAPTCHAs handed to him; review walls respected. No printing-press CLI needed
-(chrome-devtools MCP + Playwright already on the box). Pilot order: THREADS
-app (runbook §4, same Meta account, dev-mode, no review → platform #5) →
-TikTok portal → a Reddit re-attempt. Memory: founder-portal-setup-grant.
-
-**Read first:** CLAUDE.md → this file → `docs/research/mobbin-patterns-s83.md`
-→ `docs/research/distribution-charter.md` (D2–D4) → COORDINATION §Work queue →
-`docs/research/jobs-table-s79.md` (the harness ledger — TEN wrong verdicts;
-READ BEFORE TRUSTING A VERDICT).
+**Read first:** CLAUDE.md → this file →
+`docs/research/prior-art-portal-automation-s84.md` (the portal verdict —
+READ BEFORE ANY PORTAL WORK) → `docs/research/mobbin-patterns-s83.md` →
+`docs/research/distribution-charter.md` (D2–D4) → COORDINATION §Work queue →
+`docs/research/jobs-table-s79.md` (the harness ledger — TEN wrong verdicts).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units
    (`XDG_RUNTIME_DIR=/run/user/$(id -u)`) · dev 3111 · `git status` + this
    stamp.
-1. **If his Reddit values landed in `social-logins.md`:** wire
-   SOCIAL_REDDIT_CLIENT_ID/SECRET + APP_ORIGIN=http://localhost:3111 into
-   `.env.local`, restart the sweeper (units capture env at start — s72
-   lesson), then drive the REAL dance in the browser: Settings → Integrations
-   → Reddit → Continue → approve → the card must come back "Connected as
-   u/…". Still zero posts (sequence gate).
-2. **Bluesky is ARMED with a standing test grant** (his words s83: "you can
-   use it for testing") — profile v5 social block carries it, maxPostsPerDay
-   2. Test posts ride the FULL loop (brief → judge → approve → schedule →
-   `SOCIAL_QUEUE_ARMED=true npx tsx scripts/run-publish-queue.ts --once`);
-   the queue key stays EMPTY at rest, armed per run. Every OTHER platform's
-   posting stays behind his per-platform + per-post GO exactly as before.
+1. **⛔ NEVER drive a platform LOGIN from the box** (s84 lesson, memo above).
+   Portal work = his browser, lead dictates. Reddit's app values may still
+   arrive in `social-logins.md` any session; if they do, wire
+   SOCIAL_REDDIT_CLIENT_ID/SECRET, restart the sweeper (units capture env at
+   start), and drive the dance.
+2. **Bluesky keeps its standing test grant** (s83: "you can use it for
+   testing"); every OTHER platform's posting stays behind his per-platform +
+   per-post GO.
 
-▎ ▸ **s83 shipped:** research memos `6e66d62` · window + seam + flow + proof
-(commits at this push) · Mobbin claude.ai connector live, box-local fallback
-REMOVED (one registration) · `.context/developer-apps.md` §6 = the Reddit
-click-path.
+▎ ▸ **s84 shipped:** `dc7ca88` (instagram + linkedin providers) · `2aadac1`
+(the shared-callback change + the prior-art memo).
 ▎ ▸ **Deferred items now:** #1 arming pieces (his per-platform GO) · #2
-cadence pre-check (needs design) · #3 media-cap export (still open — the
-driver re-shape that would have carried it deliberately didn't happen) · #4 ✅
-CLOSED (this window).
-▎ ▸ **⛔ THE SEQUENCE GATE — amended by his s83 grant for ONE platform:**
-Bluesky is armed for testing on his recorded words; everything else holds
-verbatim (*"we're not posting anything yet…"*). The queue consumer's key
-rests EMPTY; the tick route stays structurally disarmed; per-platform +
-per-post GO for every other platform stays his.
+cadence pre-check (needs design) · #3 media-cap export (still open) · #4 ✅
+CLOSED (s83 window).
+▎ ▸ **⛔ THE SEQUENCE GATE:** unchanged — bluesky armed for testing on his
+recorded words; everything else holds verbatim. The queue consumer's key rests
+EMPTY; per-platform + per-post GO stays his.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
 every lane/subagent launch needs fresh founder approval · GATE ON THE SUITE'S
 EXIT CODE — never pipe it · vitest does NOT typecheck · verify-on-merged-main
-= THE gate + MEASURED render + DRIVE the surface · research before build (rule
-10) · no AGPL code embedded, ever · wrap = verify+commit+push+restamp.
+= THE gate · **research before build (rule 10) — s84 proved the cost of
+skipping it** · no AGPL code embedded, ever · **platform logins live durably
+in `.context`, never scrubbed** (his s84 ruling) · wrap =
+verify+commit+push+restamp.
 ▎ ▸ **State:** main = origin, pushed · budget 2M · balance 584.12 · zero
-credit spend s83 · live platform calls: one validate ping + ONE real Bluesky
-post, both on his recorded grants.
+credit spend s84 · live platform calls: read-only Graph reads on his own Page
+only; zero posts.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with
 origin.
 
