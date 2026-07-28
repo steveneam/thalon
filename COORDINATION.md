@@ -110,9 +110,9 @@ the merge steers the fan-out) · D3 = composer/evergreen/RSS-as-brain-input
 parity · D4 = REDESIGN PHASE 4/5 (four new/updated sheets: Analytics ·
 Calendar→Schedule · composer band · Channels; mock→verdict→exact-build, the
 era's own doctrine) · D5 = Thalon-MCP/public API, parked on triggers · D6 =
-explicit rejects (marketplace, cookie-extension, Temporal). **Gate: founder
-ratification** (his §5 bundle: ratify/amend · D4 design-wave GO · the
-D2-value-vs-posting-volume sequencing note · short-link domain = stealth call).
+explicit rejects (marketplace, cookie-extension, Temporal). **RATIFIED s81 same session → ADR 0012** ("ratify the charter, and go with your
+recommendations on the rest"): D4 design wave starts after s82 · D1→D2 order
+stands · short links = seam until the founder's stealth call · execution s82+.
 
 
 **[s77, FOUND BY BUILDING] `MediaRef` has no kind for same-origin app-served media — the Sites adapter cannot be written against the frozen contract.** The plan's §2 table said Sites was "already an envelope in spirit; adapter maps it into `MediaResolution`". It is not, and the lead found this by trying to migrate the dossier mint strip: `lib/sites/preview.ts` deliberately returns a SAME-ORIGIN path (`/api/sites/preview/<path>`, the s76 fix for the `127.0.0.1` bug), which is neither `external` (https-only, by the serializer's own rule — a relative path is refused) nor `stored` (no sha256; the manifest carries a `hashTail` only). **The lead did NOT edit the contract**: the window is frozen and `media-lane-b` is live against it, which is precisely the case the mid-flight rule forbids. Options for the next window, in preference order: (a) a third kind `{ kind: "app"; path: string }` for media OUR app serves from a route we control — honest, and the site preview is a real second caller after nothing else; (b) relax `external` to accept same-origin paths, which weakens a rule that exists to stop mixed content; (c) catalog-time poster capture into the content store, which makes Sites `stored` and would also feed B-media.0 — most work, best end state. **Gate:** the next contract window. Sites' mint strip keeps its working hand-rolled `<img>` until then (it renders correctly today; it simply lacks the `broken` state).

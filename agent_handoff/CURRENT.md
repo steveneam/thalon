@@ -108,20 +108,20 @@ ALREADY APPROVED** — the founder took the lead's recommendations on all four
 calls at the s81 close ("I'll go with your recommendations"), and call #1 was
 the named-lane approval, so the boot goes STRAIGHT to pre-flight + launch, no
 re-ask. Plan of record: **`docs/research/s82-PREPLAN.md`** (§3 records the
-decisions). ALSO ON THE TABLE AT THE OPENER, not blocking the lanes: the
-**B-dist DISTRIBUTION CHARTER** he directed is drafted awaiting ratification —
-`docs/research/distribution-charter.md` (full Postiz plan: connector seam s83 ·
-closed-loop analytics · composer parity · REDESIGN PHASE 4/5's four sheets ·
-the §5 ratification bundle is in NEEDS-STEVEN 2026-07-28c).
+decisions). The **B-dist DISTRIBUTION CHARTER is RATIFIED → ADR 0012**
+(`docs/research/distribution-charter.md`; founder s81: "ratify the charter,
+and go with your recommendations on the rest") — connector seam s83 ·
+closed-loop analytics · composer parity · REDESIGN PHASE 4/5's four sheets
+(design wave starts AFTER s82, his adopted recommendation). NOTHING is open
+for him at the boot — all calls decided; "gogogo" goes straight to work.
 
 **Read first:** CLAUDE.md → this file → `docs/research/s82-PREPLAN.md` →
 COORDINATION.md §s82 → `docs/research/jobs-table-s79.md` (the harness ledger —
 eight wrong selectors on record; READ BEFORE TRUSTING A VERDICT).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
-   `git status` + this stamp. Surface the charter-ratification bundle
-   (NEEDS-STEVEN 2026-07-28c) but do NOT block the lanes on it — they carry
-   their own s81 approval.
+   `git status` + this stamp. **No open founder calls** — the four s82 calls
+   AND the charter ratification all closed s81 (NEEDS-STEVEN 2026-07-28d).
 1. **PRE-FLIGHT, lead-direct, FREEZE FIRST:** W1 = the small contract window
    (`publishQueue` repo over the existing dormant table · `videoCuts.remove`
    with the call-#2 refusals · platform capability matrix in contracts) via the
@@ -156,6 +156,11 @@ lint errors** · budget 2M · balance 584.12 · **zero spend s81**.
 all the walks are verified and fixed."* No publish path, no platform call, no
 token-spending generation without his GO. sched-spine ships DISARMED — queue
 rows sit pending; arming + per-platform GO + per-post GO all still his.
+▎ ▸ **NEW STANDING RULE (founder s81, ratcheted): RESEARCH BEFORE BUILD.**
+Before any capability charter/plan and before ANY plan assigning the founder
+manual work, run the box `prior-art` skill (`~/.claude/skills/prior-art/`) —
+AGENTS.md build rule 10; ADR 0012 carries the record; a founder-manual step in
+a plan is a DEFECT until research proves no better path exists.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
 **every lane/subagent launch needs fresh founder approval** (his call #1 covers
 exactly the named lanes) · **GATE ON THE SUITE'S EXIT CODE — never pipe it** ·
@@ -180,4 +185,4 @@ timeline blocks), and the missing verbs (insert/delete a beat and a caption). It
 ruled the contract window NO on evidence, built `measure-sheet.mjs`, and caught
 main-red #5: a calendar test that was green by day and red after ~19:00 local.
 
-## Next action — s82: boot straight to W1 window + W2 seam (lead, freeze first) · launch the three APPROVED lanes (editor-verbs + editor-polish + sched-spine) · lead-owned merge gates · surface the B-dist ratification bundle at the opener without blocking the lanes.
+## Next action — s82: boot straight to W1 window + W2 seam (lead, freeze first) · launch the three APPROVED lanes (editor-verbs + editor-polish + sched-spine) · lead-owned merge gates. Charter ratified (ADR 0012); D4 design wave queues after this session's wrap; D1 connector seam = the s83 headline.
