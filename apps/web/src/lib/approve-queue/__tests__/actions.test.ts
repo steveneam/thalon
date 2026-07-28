@@ -313,7 +313,11 @@ describe("approve-queue actions", () => {
       new Date(1_751_900_000_000),
       () => fake,
     );
-    expect(fake.calls).toEqual([{ draftId: draft.id, text: draft.body }]);
+    // The door hands the driver the tenant's cadence block too (D1 settings
+    // pass-through) — the platform call's full input, pinned.
+    expect(fake.calls).toEqual([
+      { draftId: draft.id, text: draft.body, media: undefined, settings: { maxPostsPerDay: 2 } },
+    ]);
     expect(publication).toMatchObject({
       draftId: draft.id,
       platform: "linkedin",

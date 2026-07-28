@@ -20,6 +20,7 @@ function card(overrides: Partial<WireIntegrationCard>): WireIntegrationCard {
     envOverride: false,
     armed: null,
     armedReason: null,
+    connectFlavor: "manual",
     fields: [{ key: "accessToken", optional: false }],
     ...overrides,
   };

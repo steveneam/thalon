@@ -31,6 +31,8 @@ export interface WireIntegrationCard {
   armed: boolean | null;
   /** Why armed reads as it does, in the operator's words. */
   armedReason: string | null;
+  /** D1: "oauth2" cards connect via consent redirect; "app_password"/"manual" keep the guided paste. */
+  connectFlavor: "manual" | "oauth2" | "app_password";
   fields: Array<{ key: string; optional: boolean }>;
 }
 
@@ -98,4 +100,24 @@ export async function disconnectIntegration(destination: string): Promise<void> 
   await asJson<{ ok: boolean }>(
     await fetch(`/api/integrations/${destination}`, { method: "DELETE" }),
   );
+}
+
+/** D1: begin the OAuth dance — the server mints the single-use state and hands back the consent URL. */
+export async function beginOauthIntegration(destination: string): Promise<{ authorizeUrl: string }> {
+  return asJson<{ authorizeUrl: string }>(
+    await fetch(`/api/integrations/${destination}/oauth`, { method: "POST" }),
+  );
+}
+
+/** D1 (disconnect honesty): how many pending queue rows would fail closed if this platform disconnects. */
+export async function fetchPendingQueueCount(platform: string): Promise<number | null> {
+  try {
+    const { rows } = await asJson<{ rows: unknown[] }>(
+      await fetch(`/api/social/queue?status=pending&platform=${encodeURIComponent(platform)}`),
+    );
+    return rows.length;
+  } catch {
+    // The count is a courtesy fact — a read failure must not block disconnect.
+    return null;
+  }
 }

@@ -25,6 +25,8 @@ const GLYPHS: Readonly<Record<string, string>> = {
   x: "𝕏",
   facebook: "f",
   instagram: "ig",
+  reddit: "rd",
+  bluesky: "bs",
   website_hosted: "bl",
   website_wordpress: "wp",
   website_ghost: "gh",
@@ -179,7 +181,11 @@ export function subLine(card: WireIntegrationCard, now: number = Date.now()): st
         parts.push("Waiting on the platform's app review — nothing to do here yet");
         break;
       case "not_connected":
-        parts.push("Not connected — guided setup is a paste and a read-only ping");
+        parts.push(
+          card.connectFlavor === "oauth2"
+            ? "Not connected — connecting is a click-through consent, no tokens to paste"
+            : "Not connected — guided setup is a paste and a read-only ping",
+        );
         break;
     }
   }
@@ -337,6 +343,15 @@ export const GUIDED_STEPS: Readonly<Record<string, string[]>> = {
     "Connect the account to a Page in the platform's developer portal.",
     "Grant the content-publishing permission and generate an access token.",
     "Paste the token and the account ID below.",
+  ],
+  reddit: [
+    "Continue to the platform — you'll approve access in your own browser session.",
+    "The permissions asked for: read your identity, submit posts. Nothing else.",
+    "Approving brings you straight back here; the tokens land sealed in the vault and refresh themselves.",
+  ],
+  bluesky: [
+    "In the platform's settings, create an app password (never your account password).",
+    "Paste your handle and the app password below — a read-only ping verifies them.",
   ],
   website_hosted: [
     "No credentials needed — connecting is your opt-in to the hosted blog. Approved articles can then publish to it.",

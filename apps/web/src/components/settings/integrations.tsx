@@ -17,9 +17,11 @@ import {
   subLine,
 } from "@/components/settings/integrations-model";
 import {
+  beginOauthIntegration,
   connectIntegration,
   disconnectIntegration,
   fetchIntegrationCards,
+  fetchPendingQueueCount,
   fetchPublishedView,
   validateIntegration,
   type WireIntegrationCard,
@@ -67,6 +69,28 @@ export function Integrations() {
   const [busy, setBusy] = useState<string | null>(null);
   const [probes, setProbes] = useState<Record<string, WireProbeOutcome>>({});
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
+  /** Pending queue rows per destination, for the disconnect confirm (absent/null = count unavailable). Keyed by entity — a resolve landing after the confirm moved on must not show one card's count under another (the s77 keyed-state rule). */
+  const [pendingCounts, setPendingCounts] = useState<Record<string, number | null>>({});
+  /** The OAuth callback's outcome, read once from the return-redirect's query. */
+  const [callbackBanner, setCallbackBanner] = useState<
+    { tone: "ok" | "bad"; text: string; destination?: string } | null
+  >(null);
+
+  useEffect(() => {
+    // The dynamic callback route lands the browser back here with the
+    // outcome in the query — read it once, show it as a banner, and clear
+    // the URL so a reload doesn't replay a stale verdict.
+    const query = new URLSearchParams(window.location.search);
+    const connected = query.get("connected");
+    const failed = query.get("connect_error");
+    if (!connected && !failed) return;
+    setCallbackBanner(
+      connected
+        ? { tone: "ok", text: `Connected — the card below now shows who it posts as.`, destination: connected }
+        : { tone: "bad", text: failed ?? "The connect failed." },
+    );
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   /** A probe verdict belongs to the credential it ran on — it leaves with it. */
   const clearProbe = useCallback((destination: string) => {
@@ -167,6 +191,32 @@ export function Integrations() {
             : `Published ${publishedOpen ? "↑" : "→"}`}
         </button>
       </div>
+
+      {callbackBanner && (
+        <div className="card">
+          <div className="row" role={callbackBanner.tone === "bad" ? "alert" : "status"}>
+            <span
+              className="int-sub"
+              style={{
+                flex: 1,
+                color: callbackBanner.tone === "bad" ? "var(--err)" : undefined,
+              }}
+            >
+              {callbackBanner.text}
+            </span>
+            {callbackBanner.tone === "bad" && (
+              <span className="t-label">nothing was stored — connect again below</span>
+            )}
+            <button
+              type="button"
+              className="btn btn-quiet btn-sm"
+              onClick={() => setCallbackBanner(null)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {publishedOpen && (
         <div className="card">
@@ -346,7 +396,16 @@ export function Integrations() {
                           disabled={busy === card.destination}
                           onClick={() => {
                             if (action.key === "validate") void runValidate(card);
-                            if (action.key === "disconnect") setConfirming(card.destination);
+                            if (action.key === "disconnect") {
+                              setConfirming(card.destination);
+                              // The confirm must count what disconnecting
+                              // strands: this platform's pending queue rows.
+                              if (card.class === "social") {
+                                void fetchPendingQueueCount(card.destination).then((count) =>
+                                  setPendingCounts((c) => ({ ...c, [card.destination]: count })),
+                                );
+                              }
+                            }
                             if (action.key === "connect") {
                               setConnecting(card.destination);
                               clearProbe(card.destination);
@@ -364,6 +423,9 @@ export function Integrations() {
                     <span className="int-sub">
                       Disconnect {card.label}? The sealed credential is deleted; the ledger
                       remembers what already went out.
+                      {(pendingCounts[card.destination] ?? 0) > 0
+                        ? ` ${pendingCounts[card.destination]} scheduled post${pendingCounts[card.destination] === 1 ? "" : "s"} in the queue will fail closed without it.`
+                        : ""}
                     </span>
                     <button
                       type="button"
@@ -481,6 +543,7 @@ function ConnectPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const steps = GUIDED_STEPS[card.destination] ?? [];
+  const oauth = card.connectFlavor === "oauth2";
   const ready = card.fields
     .filter((f) => !f.optional)
     .every((f) => (values[f.key] ?? "").trim() !== "");
@@ -501,6 +564,20 @@ function ConnectPanel({
     }
   }
 
+  async function beginDance() {
+    setBusy(true);
+    setError(null);
+    try {
+      const { authorizeUrl } = await beginOauthIntegration(card.destination);
+      // The platform's consent page takes over; its callback returns to
+      // Settings with the outcome in the query. Busy stays on until we leave.
+      window.location.assign(authorizeUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not start the connect.");
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="card">
       <div className="card-head">
@@ -516,13 +593,13 @@ function ConnectPanel({
             <li key={step}>{step}</li>
           ))}
         </ol>
-        {card.class === "social" && (
+        {card.class === "social" && !oauth && card.connectFlavor !== "app_password" && (
           <span className="int-sub">
             One-click connect arrives when the partner app clears this platform’s review — until
             then, this guided setup is the honest path.
           </span>
         )}
-        {card.fields.length > 0 && (
+        {!oauth && card.fields.length > 0 && (
           <div className="connect-fields">
             {card.fields.map((field) => {
               const id = `${card.destination}-${field.key}`;
@@ -550,14 +627,25 @@ function ConnectPanel({
           </span>
         )}
         <div className="int-actions">
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            disabled={!ready || busy}
-            onClick={() => void submit()}
-          >
-            {busy ? "Connecting…" : "Connect"}
-          </button>
+          {oauth ? (
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={busy}
+              onClick={() => void beginDance()}
+            >
+              {busy ? "Opening the platform…" : `Continue to ${card.label} ↗`}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={!ready || busy}
+              onClick={() => void submit()}
+            >
+              {busy ? "Connecting…" : "Connect"}
+            </button>
+          )}
           <button type="button" className="btn btn-quiet btn-sm" disabled={busy} onClick={onCancel}>
             Cancel
           </button>
