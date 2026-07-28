@@ -132,6 +132,14 @@ window + postAnalytics verb) — honest note: thin value until posting is
 routine; (c) the two open s82 deferred items (cadence pre-check design ·
 media-cap export) as a lead-direct small.
 
+**s84 candidate ADDED at the s83 close (founder-directed): PORTAL-SETUP
+DRIVING.** His ruling on record: the lead browser-drives platform developer-
+portal setup on his behalf — setup only, never scraping; per-submit approval;
+CAPTCHAs handed to him; review walls respected. No printing-press CLI needed
+(chrome-devtools MCP + Playwright already on the box). Pilot order: THREADS
+app (runbook §4, same Meta account, dev-mode, no review → platform #5) →
+TikTok portal → a Reddit re-attempt. Memory: founder-portal-setup-grant.
+
 **Read first:** CLAUDE.md → this file → `docs/research/mobbin-patterns-s83.md`
 → `docs/research/distribution-charter.md` (D2–D4) → COORDINATION §Work queue →
 `docs/research/jobs-table-s79.md` (the harness ledger — TEN wrong verdicts;
