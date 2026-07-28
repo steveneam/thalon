@@ -35,6 +35,9 @@ import type { Db } from "./types";
  */
 const COPY_ORDER: PgTable[] = [
   schema.tenants,
+  // oauth_states references only tenants; rows are short-TTL scaffolding but
+  // the copy stays total — completeness beats cleverness here.
+  schema.oauthStates,
   schema.brandProfiles,
   schema.sources,
   schema.sourceChunks,

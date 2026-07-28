@@ -31,6 +31,7 @@ export type { TrendSnapshot } from "./repos/trend-snapshots";
 export type { VideoCutRow } from "./repos/video-cuts";
 export type { IntelCaptureRow } from "./repos/intel-captures";
 export type { TenantCredential } from "./repos/tenant-credentials";
+export type { OauthStateRow } from "./repos/oauth-states";
 export type { PlannedSlotRow } from "./repos/planned-slots";
 export type { PublishQueueRow } from "./repos/publish-queue";
 export type { SavedViewRow } from "./repos/saved-views";

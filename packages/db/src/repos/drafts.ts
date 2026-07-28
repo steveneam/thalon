@@ -25,7 +25,7 @@ export interface TransitionOpts {
 }
 
 /** B7.a: statuses that still consume a cadence slot — past the judge, not dead. */
-const CADENCE_LIVE_STATUSES: DraftStatus[] = ["queued", "approved", "scheduled", "published"];
+const CADENCE_LIVE_STATUSES: DraftStatus[] = ["queued", "approved", "published"];
 
 export async function getDraftScoped(
   ex: Executor,
@@ -219,7 +219,7 @@ export function draftsRepo(db: Db) {
     /**
      * B7.a cadence reads: each draft's LATEST `→ queued` admission on one
      * platform since `since`, for drafts still in the live band (queued /
-     * approved / scheduled / published — a blocked or rejected draft no
+     * approved / published — a blocked or rejected draft no
      * longer consumes a cadence slot). Read-only over the I4 events audit
      * spine (every transition appends exactly one events row
      * in-transaction), so admission times are exact — no new schema, no new

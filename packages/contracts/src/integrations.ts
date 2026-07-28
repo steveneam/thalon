@@ -59,11 +59,28 @@ export const credentialEnvelopeSchema = z.object({
 export type CredentialEnvelope = z.infer<typeof credentialEnvelopeSchema>;
 
 /**
- * One destination the product can connect. `credentials` is the mode-2
- * guided-paste payload the connect flow collects — validated at the vault
- * write door BEFORE encryption (B-int.1), so a malformed paste fails loud
- * and nothing stores. Labels are generic product copy, never platform
- * marketing names beyond the platform's own noun.
+ * How a destination's credential ARRIVES (D1, s83) — the connect flow's
+ * vocabulary. Every flavor lands in the same vault through the same write
+ * door; the flavor only decides which door the card offers:
+ *  - "manual": mode-2 guided paste of schema-derived fields (the B-int.2
+ *    default — every pre-D1 destination).
+ *  - "oauth2": the generic authorization-code dance — one connect door, one
+ *    dynamic callback route, single-use state rows; the exchange writes the
+ *    vault, never the operator.
+ *  - "app_password": the platform's own designed paste (an app-scoped
+ *    secret the user mints in the platform's settings) — a paste by DESIGN,
+ *    not a workaround, so it stays a paste with validate-on-connect.
+ */
+export const CONNECT_FLAVORS = ["manual", "oauth2", "app_password"] as const;
+export type ConnectFlavor = (typeof CONNECT_FLAVORS)[number];
+
+/**
+ * One destination the product can connect. `credentials` is the payload the
+ * connect flow stores — for "manual"/"app_password" flavors the guided-paste
+ * fields, for "oauth2" the token material the exchange yields — validated at
+ * the vault write door BEFORE encryption (B-int.1), so a malformed payload
+ * fails loud and nothing stores. Labels are generic product copy, never
+ * platform marketing names beyond the platform's own noun.
  */
 export interface DestinationDef<Shape extends z.ZodTypeAny = z.ZodTypeAny> {
   class: DestinationClass;
@@ -71,6 +88,8 @@ export interface DestinationDef<Shape extends z.ZodTypeAny = z.ZodTypeAny> {
   driver: string;
   label: string;
   credentials: Shape;
+  /** Connect-flow flavor + platform scopes. Absent = "manual" (every pre-D1 entry, unchanged). */
+  connect?: { flavor: ConnectFlavor; scopes?: readonly string[] };
 }
 
 const accessToken = z.object({ accessToken: z.string().min(1) });
@@ -108,6 +127,25 @@ export const DESTINATIONS = {
     driver: "instagram-text-refusal",
     label: "Instagram",
     credentials: z.object({ accessToken: z.string().min(1), igUserId: z.string().min(1) }),
+  },
+  reddit: {
+    class: "social",
+    driver: "reddit-submit",
+    label: "Reddit",
+    // The oauth2 dance's yield: the exchange writes these, never a paste.
+    // expiresAt rides the vault row's own column; the refresh tick renews.
+    credentials: z.object({ accessToken: z.string().min(1), refreshToken: z.string().min(1) }),
+    connect: { flavor: "oauth2", scopes: ["identity", "submit"] },
+  },
+  bluesky: {
+    class: "social",
+    driver: "bluesky-post",
+    label: "Bluesky",
+    // The platform's designed app-password pair — same shape as intel_bluesky
+    // on purpose (one account can feed both seats), separate destination
+    // because posting and intel are different consents.
+    credentials: z.object({ identifier: z.string().min(1), appPassword: z.string().min(1) }),
+    connect: { flavor: "app_password" },
   },
   website_hosted: {
     class: "website",

@@ -144,7 +144,7 @@ describe("draft state machine against the database (SPINE §1.1)", () => {
     expect(draft.body).toBe("We shipped a thing today.");
   });
 
-  it("I2: no publish path exists — approved → scheduled is open, scheduled → published is shut", async () => {
+  it("I2: approved → published stays shut without a G5 disclosure verdict (there is no scheduled waypoint — s83 window)", async () => {
     fx = await fixture();
     const { repos } = fx.handle;
     await repos.drafts.transition(fx.ctx, fx.draft.id, "judging");
@@ -155,7 +155,12 @@ describe("draft state machine against the database (SPINE §1.1)", () => {
       actor: "operator",
       action: "approve",
     });
-    await repos.drafts.transition(fx.ctx, fx.draft.id, "scheduled");
+    // (approvals.record already moved the draft queued → approved.)
+    // "scheduled" is no longer a status at all — the fact lives on a
+    // publish_queue row; the rulebook refuses the word itself.
+    await expect(
+      repos.drafts.transition(fx.ctx, fx.draft.id, "scheduled" as never),
+    ).rejects.toThrow(InvalidTransitionError);
     // Approval exists, but no G5 disclosure verdict can exist in Sprints 0–2.
     await expect(
       repos.drafts.transition(fx.ctx, fx.draft.id, "published"),

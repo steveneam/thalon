@@ -149,6 +149,34 @@ export const PLATFORM_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformCapa
     hashtags: { max: null },
     verifiedOn: VERIFIED_ON,
   },
+  reddit: {
+    platform: "reddit",
+    // The self-post BODY ceiling. Reddit also demands a TITLE (≤300 chars) —
+    // a separate required field the driver derives, outside this body fact.
+    text: { maxChars: 40000, urlWeight: null },
+    media: {
+      required: false,
+      // The gallery ceiling; single-image posts are the 1 case of the same fact.
+      maxImages: 20,
+      imageContentTypes: ["image/jpeg", "image/png", "image/gif"],
+    },
+    hashtags: { max: null },
+    verifiedOn: VERIFIED_ON,
+  },
+  bluesky: {
+    platform: "bluesky",
+    // 300 GRAPHEMES by the platform's own counting — the validator counts
+    // code points, which only ever over-counts (refuses early, never lets a
+    // too-long post reach the API), the matrix's stated conservative bias.
+    text: { maxChars: 300, urlWeight: null },
+    media: {
+      required: false,
+      maxImages: 4,
+      imageContentTypes: ["image/jpeg", "image/png", "image/webp"],
+    },
+    hashtags: { max: null },
+    verifiedOn: VERIFIED_ON,
+  },
 };
 
 /**

@@ -8,6 +8,7 @@ import {
   DESTINATIONS,
   destinationKeySchema,
   resolveDestination,
+  type DestinationDef,
 } from "../integrations";
 
 /** B-int.0 window pins: registry integrity + the stored/derived state split + the envelope shape. */
@@ -50,6 +51,46 @@ describe("DESTINATIONS registry (B-int.0)", () => {
 
   it("resolveDestination throws loudly on an unknown key, naming the vocabulary", () => {
     expect(() => resolveDestination("myspace")).toThrow(/unknown destination "myspace"/);
+  });
+});
+
+describe("connect flavors (D1, s83 window)", () => {
+  it("reddit is the oauth2 proof: dance-yielded token pair, scopes stated", () => {
+    expect(DESTINATIONS.reddit.connect).toEqual({
+      flavor: "oauth2",
+      scopes: ["identity", "submit"],
+    });
+    expect(
+      DESTINATIONS.reddit.credentials.safeParse({ accessToken: "a", refreshToken: "r" }).success,
+    ).toBe(true);
+    // The dance yields BOTH tokens — an access token alone cannot refresh and must not store.
+    expect(DESTINATIONS.reddit.credentials.safeParse({ accessToken: "a" }).success).toBe(false);
+  });
+
+  it("bluesky is the app_password proof: the platform's own designed paste pair", () => {
+    expect(DESTINATIONS.bluesky.connect).toEqual({ flavor: "app_password" });
+    expect(
+      DESTINATIONS.bluesky.credentials.safeParse({
+        identifier: "who.bsky.social",
+        appPassword: "xxxx-xxxx",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("every oauth2-flavored destination states its scopes — a dance without scopes cannot build a consent URL", () => {
+    // Widened through the interface: `as const` entries without `connect`
+    // have no such property in their literal type.
+    for (const def of Object.values(DESTINATIONS) as DestinationDef[]) {
+      if (def.connect?.flavor === "oauth2") {
+        expect(def.connect.scopes?.length ?? 0).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("pre-D1 entries carry NO connect field (= manual guided paste, unchanged behavior)", () => {
+    for (const key of ["linkedin", "x", "facebook", "instagram"] as const) {
+      expect((DESTINATIONS[key] as DestinationDef).connect).toBeUndefined();
+    }
   });
 });
 

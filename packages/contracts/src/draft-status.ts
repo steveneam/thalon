@@ -5,13 +5,22 @@
  * (an edit is new content, so it re-judges); `queued → judging` is
  * approve-with-edit for the same reason. `published` and `rejected` are
  * terminal.
+ *
+ * There is deliberately NO "scheduled" status (removed at the s83 window —
+ * the s82 ruling made executable): scheduling is a fact about a
+ * `publish_queue` ROW, never about the draft, because one draft can be
+ * committed to several platforms with several instants at once. The publish
+ * door opens for exactly "approved", and a scheduled-then-cancelled plan
+ * leaves the draft untouched. History: statuses written before this window
+ * were only ever generated/judging/queued/approved/blocked/rejected —
+ * nothing ever wrote "scheduled" (verified s82, re-verified s83), so the
+ * shrink strands no row.
  */
 export const DRAFT_STATUSES = [
   "generated",
   "judging",
   "queued",
   "approved",
-  "scheduled",
   "published",
   "blocked",
   "rejected",
@@ -26,8 +35,7 @@ export const DRAFT_TRANSITIONS: Readonly<
   judging: ["queued", "blocked"],
   queued: ["approved", "rejected", "judging"],
   blocked: ["judging"],
-  approved: ["scheduled"],
-  scheduled: ["published"],
+  approved: ["published"],
   published: [],
   rejected: [],
 };

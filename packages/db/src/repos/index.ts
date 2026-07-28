@@ -13,6 +13,7 @@ import { leadScoresRepo, type LeadScoresRepo } from "./lead-scores";
 import { leadWeightStatesRepo, type LeadWeightStatesRepo } from "./lead-weight-states";
 import { leadsRepo, type LeadsRepo } from "./leads";
 import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
+import { oauthStatesRepo, type OauthStatesRepo } from "./oauth-states";
 import { outreachSendsRepo, type OutreachSendsRepo } from "./outreach-sends";
 import { plannedSlotsRepo, type PlannedSlotsRepo } from "./planned-slots";
 import { publishQueueRepo, type PublishQueueRepo } from "./publish-queue";
@@ -38,6 +39,7 @@ import { watchlistsRepo, type WatchlistsRepo } from "./watchlists";
 export interface Repos {
   tenants: TenantsRepo;
   tenantCredentials: TenantCredentialsRepo;
+  oauthStates: OauthStatesRepo;
   brandProfiles: BrandProfilesRepo;
   sources: SourcesRepo;
   sourceChunks: SourceChunksRepo;
@@ -83,6 +85,7 @@ export function createRepos(db: Db): Repos {
   return {
     tenants: tenantsRepo(db),
     tenantCredentials: tenantCredentialsRepo(db),
+    oauthStates: oauthStatesRepo(db),
     brandProfiles: brandProfilesRepo(db),
     sources: sourcesRepo(db),
     sourceChunks: sourceChunksRepo(db),

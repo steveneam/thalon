@@ -30,6 +30,7 @@ describe("tenancy ratchet", () => {
         "leads",
         "llm_cache",
         "monitored_areas",
+        "oauth_states",
         "outreach_sends",
         "planned_slots",
         "publish_queue",

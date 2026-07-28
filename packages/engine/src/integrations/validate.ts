@@ -41,6 +41,14 @@ type Probe<K extends DestinationKey> = (
 
 const PROBE_TIMEOUT_MS = 10_000;
 
+/**
+ * Reddit's API rules require a descriptive User-Agent naming the app —
+ * requests without one are aggressively rate-limited. One string, shared by
+ * the probe and the driver (the LINKEDIN_VERSION convention, reversed:
+ * this constant is born here because the probe landed first).
+ */
+export const REDDIT_USER_AGENT = "web:thalon-engine:v1 (content scheduler)";
+
 function init(headers: Record<string, string>, extra: RequestInit = {}): RequestInit {
   return { headers, signal: AbortSignal.timeout(PROBE_TIMEOUT_MS), ...extra };
 }
@@ -164,6 +172,37 @@ export const VALIDATE_PROBES: { [K in DestinationKey]: Probe<K> } = {
     const body = await bodyOf(res);
     const username = str(body?.username);
     return { outcome: "validated", connectedAs: username ? `@${username}` : undefined };
+  },
+
+  reddit: async (creds, { fetchImpl }) => {
+    // The cheapest identity read on the OAuth resource host (D1, s83).
+    const res = await fetchImpl(
+      "https://oauth.reddit.com/api/v1/me",
+      init({ Authorization: `Bearer ${creds.accessToken}`, "User-Agent": REDDIT_USER_AGENT }),
+    );
+    if (!res.ok) return refusal(res.status, [401, 403]);
+    const body = await bodyOf(res);
+    const name = str(body?.name);
+    return { outcome: "validated", connectedAs: name ? `u/${name}` : undefined };
+  },
+
+  bluesky: async (creds, { fetchImpl }) => {
+    // The intel_bluesky probe verbatim — same platform, same designed auth
+    // check; a separate entry because posting and intel are different consents.
+    const res = await fetchImpl(
+      "https://bsky.social/xrpc/com.atproto.server.createSession",
+      init(
+        { "Content-Type": "application/json" },
+        {
+          method: "POST",
+          body: JSON.stringify({ identifier: creds.identifier, password: creds.appPassword }),
+        },
+      ),
+    );
+    if (!res.ok) return refusal(res.status, [400, 401, 403]);
+    const body = await bodyOf(res);
+    const handle = str(body?.handle);
+    return { outcome: "validated", connectedAs: handle ? `@${handle}` : undefined };
   },
 
   website_hosted: async () => ({

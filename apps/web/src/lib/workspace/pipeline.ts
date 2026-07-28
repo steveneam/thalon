@@ -119,7 +119,7 @@ export function kanbanColumns(assets: PipelineAsset[]): { columns: KanbanColumn[
       { key: "drafting", label: "Drafting", needsYou: false, assets: by(["generated", "judging"]) },
       { key: "blocked", label: "Needs your edit", needsYou: true, assets: by(["blocked"]) },
       { key: "queued", label: "Your review", needsYou: true, assets: by(["queued"]) },
-      { key: "done", label: "Approved", needsYou: false, assets: by(["approved", "scheduled", "published"]) },
+      { key: "done", label: "Approved", needsYou: false, assets: by(["approved", "published"]) },
     ],
     rejected: assets.filter((a) => a.status === "rejected").length,
   };

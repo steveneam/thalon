@@ -22,8 +22,9 @@ const EXPECTED_EDGES: ReadonlyArray<readonly [DraftStatus, DraftStatus]> = [
   ["queued", "rejected"],
   ["queued", "judging"], // approve-with-edit ⇒ edited body re-judges first
   ["blocked", "judging"], // operator triage exit
-  ["approved", "scheduled"],
-  ["scheduled", "published"],
+  // s83 window: NO "scheduled" edge — scheduling is a publish_queue ROW
+  // fact (the s82 ruling); the draft goes approved → published directly.
+  ["approved", "published"],
 ];
 
 const edgeSet = new Set(EXPECTED_EDGES.map(([f, t]) => `${f}->${t}`));
@@ -59,7 +60,9 @@ describe("draft state machine (SPINE §1.1)", () => {
     expect(canTransition("generated", "queued")).toBe(false);
     expect(canTransition("generated", "published")).toBe(false);
     expect(canTransition("queued", "published")).toBe(false);
-    expect(canTransition("approved", "published")).toBe(false);
+    // approved → published IS the edge since the s83 window (no scheduled
+    // waypoint); the I2 disclosure guard polices it at the repo layer.
+    expect(canTransition("approved", "published")).toBe(true);
   });
 
   it("guards the status vocabulary", () => {

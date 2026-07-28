@@ -8,8 +8,21 @@ import { z } from "zod";
  * the outreach door's two-key pattern — never stored here).
  */
 
-/** Platform keys — the founder's test-account order (LinkedIn first, TikTok last). */
-export const SOCIAL_PLATFORMS = ["linkedin", "x", "facebook", "instagram", "tiktok"] as const;
+/**
+ * Platform keys — the founder's test-account order (LinkedIn first, TikTok
+ * last), then the D1 proof pair (s83): reddit + bluesky, chosen because both
+ * have instant developer-app creation and no posting-scope review wall, so
+ * the connector seam proves end to end without waiting on a partner filing.
+ */
+export const SOCIAL_PLATFORMS = [
+  "linkedin",
+  "x",
+  "facebook",
+  "instagram",
+  "tiktok",
+  "reddit",
+  "bluesky",
+] as const;
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 export const socialPlatformSchema = z.enum(SOCIAL_PLATFORMS);
 
@@ -34,6 +47,22 @@ export const socialCadenceSchema = z.object({
 export type SocialCadence = z.infer<typeof socialCadenceSchema>;
 
 /**
+ * Reddit's cadence block carries the one platform-specific posting setting
+ * the driver needs: WHERE to submit. Absent = the connected account's own
+ * profile (`u_<username>` — every account has one, so a fresh connection
+ * posts without configuration). A community subreddit is a deliberate
+ * per-tenant choice; bare name, no "r/" prefix.
+ */
+export const socialRedditCadenceSchema = socialCadenceSchema.extend({
+  subreddit: z
+    .string()
+    .min(1)
+    .regex(/^[A-Za-z0-9_]+$/, "bare subreddit name — no r/ prefix, no slashes")
+    .optional(),
+});
+export type SocialRedditCadence = z.infer<typeof socialRedditCadenceSchema>;
+
+/**
  * The tenant's social publishing config block — explicit optional field per
  * platform (never a record-over-enum: zod 4's exhaustive-record semantics
  * would demand every platform configured at once). An absent platform =
@@ -45,5 +74,7 @@ export const socialPublishConfigSchema = z.object({
   facebook: socialCadenceSchema.optional(),
   instagram: socialCadenceSchema.optional(),
   tiktok: socialCadenceSchema.optional(),
+  reddit: socialRedditCadenceSchema.optional(),
+  bluesky: socialCadenceSchema.optional(),
 });
 export type SocialPublishConfig = z.infer<typeof socialPublishConfigSchema>;

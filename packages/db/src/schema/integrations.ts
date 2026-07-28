@@ -2,6 +2,7 @@ import { CREDENTIAL_STORED_STATES, DESTINATION_KEYS } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
+  index,
   integer,
   pgTable,
   text,
@@ -64,6 +65,46 @@ export const tenantCredentials = pgTable(
     check(
       "tenant_credentials_status_check",
       sql.raw(`status in (${inList(CREDENTIAL_STORED_STATES)})`),
+    ),
+    tenantIsolation(),
+  ],
+);
+
+/**
+ * D1 (s83 window): single-use state rows for the generic OAuth connect
+ * dance — the honest Postgres equivalent of the reference pattern's Redis
+ * TTL entries (we run no Redis). One row = one in-flight authorization: the
+ * connect door writes it, the platform round-trips the `state` value, and
+ * the callback CONSUMES it (delete-returning) exactly once. Expiry is a
+ * fact on the row; the consume verb refuses a row past it, and anything
+ * left behind (abandoned consents) is swept by the purge verb. Never
+ * secret material: the verifier is a per-flight random challenge, dead the
+ * moment the row is consumed or expired.
+ */
+export const oauthStates = pgTable(
+  "oauth_states",
+  {
+    /** The `state` value itself (random, base64url) — the PK because it IS the callback's lookup key. */
+    state: text("state").primaryKey(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    /** contracts DESTINATIONS registry key this flight connects. */
+    destination: text("destination").notNull(),
+    /** PKCE code_verifier when the provider's dance uses one; null otherwise. */
+    codeVerifier: text("code_verifier"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    /** Hard TTL — consume refuses past this instant (single-use AND short-lived). */
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index("oauth_states_tenant_idx").on(t.tenantId),
+    index("oauth_states_expires_idx").on(t.expiresAt),
+    check(
+      "oauth_states_destination_check",
+      sql.raw(`destination in (${inList(DESTINATION_KEYS)})`),
     ),
     tenantIsolation(),
   ],

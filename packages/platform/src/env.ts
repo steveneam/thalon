@@ -116,6 +116,11 @@ const envSchema = z.object({
   SOCIAL_INSTAGRAM_ARMED: z.string().optional(),
   SOCIAL_TIKTOK_ACCESS_TOKEN: z.string().optional(),
   SOCIAL_TIKTOK_ARMED: z.string().optional(),
+  SOCIAL_REDDIT_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_REDDIT_ARMED: z.string().optional(),
+  /** Bluesky's credential seat carries the APP PASSWORD (the X-1.0a precedent: the seat holds the platform's own secret shape); the identifier rides the extra below. */
+  SOCIAL_BLUESKY_ACCESS_TOKEN: z.string().optional(),
+  SOCIAL_BLUESKY_ARMED: z.string().optional(),
   /**
    * B-pub.2 driver extras (the window-2 comment's reserved lane additions).
    * Facebook: the target Page id — the ACCESS_TOKEN slot carries the PAGE
@@ -126,6 +131,27 @@ const envSchema = z.object({
    */
   SOCIAL_FACEBOOK_PAGE_ID: z.string().optional(),
   SOCIAL_INSTAGRAM_USER_ID: z.string().optional(),
+  /** Bluesky driver extra: the account identifier (handle or DID) — the app password rides the ACCESS_TOKEN seat. */
+  SOCIAL_BLUESKY_IDENTIFIER: z.string().optional(),
+
+  /**
+   * D1 (s83): the Reddit developer-app pair — OPERATOR-level facts (the app
+   * is Thalon's, registered once), consumed by the OAuth connect dance and
+   * the refresh tick, never stored per tenant. Tenant token material lands
+   * in the vault via the dance.
+   */
+  SOCIAL_REDDIT_CLIENT_ID: z.string().optional(),
+  SOCIAL_REDDIT_CLIENT_SECRET: z.string().optional(),
+
+  /**
+   * D1 (s83): the app's own public origin (e.g. https://app.example.com) —
+   * the OAuth callback URL is built from it, because a redirect URI must
+   * match what the platform app registered EXACTLY; deriving it from request
+   * headers would make the dance depend on whatever host a proxy forwarded.
+   * Dev default: http://localhost:3111 (readEnv leaves it optional; the
+   * connect door refuses to build an authorize URL without an origin).
+   */
+  APP_ORIGIN: z.string().optional(),
 
   /**
    * B-pub.3: the X OAuth 1.0a seats — the app consumer pair + the

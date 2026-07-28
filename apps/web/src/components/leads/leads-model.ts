@@ -326,7 +326,6 @@ export function judgePill(status: string): { text: string; className: string } {
     case "queued":
       return { text: "judge passed", className: "pill pill-ok" };
     case "approved":
-    case "scheduled":
     case "published":
       return { text: `judge passed · ${status}`, className: "pill pill-ok" };
     case "blocked":
