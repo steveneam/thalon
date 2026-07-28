@@ -88,19 +88,22 @@ now; READ BEFORE TRUSTING A VERDICT).
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units
    (`XDG_RUNTIME_DIR=/run/user/$(id -u)` or systemctl cannot see the bus) ·
    dev 3111 · `git status` + this stamp.
-0b. **MOBBIN MCP (installed s82 close, founder-directed): authenticate, then
-   research.** `mobbin` is in USER config (`https://api.mobbin.com/mcp`,
-   deliberately NOT the tracked `.mcp.json`) and shows *Needs authentication* —
-   run `/mcp` → mobbin at boot; the lead drives the browser leg (no-clipboard
-   doctrine), the founder supplies credentials/verification (HE HAS NO MOBBIN
-   ACCOUNT YET — account creation is his leg). Then a BOUNDED pattern sweep of
-   comparable interfaces: social schedulers/distributors (composer · queue ·
-   calendar) · workspace shells · video editors · settings/connect-account
-   flows. Two payoffs, in order: the s83 connect-flow UI (Settings →
-   Integrations gains the generic connect door — Mobbin's connect-account
-   patterns are directly on point) and the D4 design wave (Analytics ·
-   Calendar→Schedule · composer band · Channels sheets). Findings land as a
-   tracked reference memo under `docs/research/`, not as chat.
+0b. **MOBBIN (founder-directed, s82 close): expect it as a claude.ai
+   CONNECTOR, then research.** His Mobbin account exists (his claude.ai email)
+   and the ruled route is claude.ai → Settings → Connectors — same MCP server,
+   his browser does the OAuth, and it arrives in sessions as `claude_ai_Mobbin`
+   tools exactly like Higgsfield/Gmail do. **Once those tools appear, REMOVE
+   the box-local fallback** (`claude mcp remove --scope user mobbin` — it sits
+   unauthenticated in user config, never the tracked `.mcp.json`) so there is
+   one registration, not two. If the connector did NOT arrive, the fallback's
+   `/mcp` auth is the plan B. Then a BOUNDED pattern sweep of comparable
+   interfaces: social schedulers/distributors (composer · queue · calendar) ·
+   workspace shells · video editors · settings/connect-account flows. Two
+   payoffs, in order: the s83 connect-flow UI (Settings → Integrations gains
+   the generic connect door — Mobbin's connect-account patterns are directly
+   on point) and the D4 design wave (Analytics · Calendar→Schedule · composer
+   band · Channels sheets). Findings land as a tracked reference memo under
+   `docs/research/`, not as chat.
 1. **The seam, per plan §4:** ONE `SocialConnector` contract in
    `packages/contracts` (identifier · scopes · capabilities, merging with W1's
    matrix · per-platform settings schema · `generateAuthUrl` / `exchangeCode` /
