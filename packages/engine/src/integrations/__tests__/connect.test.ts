@@ -363,7 +363,7 @@ describe("the facebook provider (s83b: the dance yields the PAGE, not the user)"
     );
     const card = await completeOauthConnect(
       deps({ fetchImpl: igFetch }),
-      "instagram",
+      "facebook",
       { code: "c", state },
       NOW,
     );
@@ -373,6 +373,48 @@ describe("the facebook provider (s83b: the dance yields the PAGE, not the user)"
       accessToken: "page_tok_111",
       igUserId: "1784100",
     });
+  });
+
+  it("instagram rides FACEBOOK's registered callback (s84) — no second portal registration, and the flight still decides what connects", async () => {
+    env = fbEnv({ SOCIAL_FACEBOOK_PAGE_ID: "111" });
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const igFetch: typeof fetch = (async (url: unknown) => {
+      const u = String(url);
+      if (u.includes("instagram_business_account")) {
+        return new Response(
+          JSON.stringify({ instagram_business_account: { id: "1784100", username: "maxbrenner_123" } }),
+          { status: 200 },
+        );
+      }
+      return fbFetch(PAGES)(u as string);
+    }) as typeof fetch;
+    // The consent's redirect_uri is facebook's — the URI Meta already knows.
+    const { authorizeUrl, state } = await beginOauthConnect(deps(), "instagram", NOW);
+    expect(new URL(authorizeUrl).searchParams.get("redirect_uri")).toBe(
+      "https://app.example.com/api/integrations/callback/facebook",
+    );
+    // …and the callback arrives on that path, yet connects INSTAGRAM.
+    const card = await completeOauthConnect(
+      deps({ fetchImpl: igFetch }),
+      "facebook",
+      { code: "c", state },
+      NOW,
+    );
+    expect(card.destination).toBe("instagram");
+    expect(card.connectedAs).toBe("@maxbrenner_123");
+    expect(await handle.repos.tenantCredentials.get(ctx, "facebook")).toBeNull();
+  });
+
+  it("sharing a callback does NOT let unrelated flights cross it", async () => {
+    env = fbEnv();
+    const row = await handle.repos.oauthStates.create(ctx, {
+      state: "st-bsky",
+      destination: "bluesky",
+      expiresAt: new Date(NOW.getTime() + 60_000),
+    });
+    await expect(
+      completeOauthConnect(deps(), "facebook", { code: "c", state: row.state }, NOW),
+    ).rejects.toThrow(/belongs to a "bluesky" flight/);
   });
 
   it("a Page with no linked IG professional account refuses honestly, naming the fix — nothing stores", async () => {
@@ -387,7 +429,7 @@ describe("the facebook provider (s83b: the dance yields the PAGE, not the user)"
     }) as typeof fetch;
     const { state } = await beginOauthConnect(deps(), "instagram", NOW);
     await expect(
-      completeOauthConnect(deps({ fetchImpl: noIgFetch }), "instagram", { code: "c", state }, NOW),
+      completeOauthConnect(deps({ fetchImpl: noIgFetch }), "facebook", { code: "c", state }, NOW),
     ).rejects.toThrow(/no linked Instagram professional account.*reconnect/);
     expect(await handle.repos.tenantCredentials.get(ctx, "instagram")).toBeNull();
   });

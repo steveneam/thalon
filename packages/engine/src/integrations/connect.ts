@@ -57,6 +57,15 @@ export class OauthConnectRefusedError extends Error {
 interface OauthProvider {
   /** Env keys holding the operator's app pair — named in refusals so the missing arm is actionable. */
   clientEnvKeys: { id: keyof ThalonEnv & string; secret: keyof ThalonEnv & string };
+  /**
+   * Ride ANOTHER destination's registered callback URL (s84). A platform
+   * matches redirect URIs exactly, so a destination sharing an app with
+   * another — instagram on facebook's Meta app — would otherwise cost the
+   * operator a second portal registration for nothing. The flight's true
+   * destination is never guessed from the path: it rides the single-use
+   * state row.
+   */
+  callbackAs?: DestinationKey;
   authorizationUrl(env: ThalonEnv, redirectUri: string, state: string): URL;
   /** Code → the destination's credentials + card facts. Throws OauthConnectRefusedError for provider-specific refusals (reddit: a yield with no refresh token must not store). */
   exchange(
@@ -286,6 +295,9 @@ const OAUTH_PROVIDERS: Partial<Record<DestinationKey, OauthProvider>> = {
    */
   instagram: {
     clientEnvKeys: { id: "SOCIAL_FACEBOOK_CLIENT_ID", secret: "SOCIAL_FACEBOOK_CLIENT_SECRET" },
+    // Same Meta app, so the same registered redirect URI — connecting
+    // Instagram costs the operator no second portal visit.
+    callbackAs: "facebook",
     authorizationUrl(env, redirectUri, state) {
       const scopes = resolveDestination("instagram").connect?.scopes ?? [];
       return facebookClient(env, redirectUri).createAuthorizationURL(state, [...scopes]);
@@ -420,6 +432,15 @@ function providerFor(destination: DestinationKey, env: ThalonEnv): OauthProvider
   return provider;
 }
 
+/**
+ * Which destination's callback URL a flight comes back to — itself, unless
+ * it rides another's registered URI (s84). The platform app registers this
+ * one; the flight's own identity travels in the state row.
+ */
+export function oauthCallbackDestination(destination: DestinationKey): DestinationKey {
+  return OAUTH_PROVIDERS[destination]?.callbackAs ?? destination;
+}
+
 function appOrigin(env: ThalonEnv): string {
   const origin = env.APP_ORIGIN;
   if (!origin) {
@@ -443,7 +464,7 @@ export async function beginOauthConnect(
   now: Date,
 ): Promise<{ authorizeUrl: string; state: string }> {
   const provider = providerFor(destination, deps.env);
-  const redirectUri = `${appOrigin(deps.env)}${oauthCallbackPath(destination)}`;
+  const redirectUri = `${appOrigin(deps.env)}${oauthCallbackPath(oauthCallbackDestination(destination))}`;
   const state = randomBytes(32).toString("base64url");
   await deps.repos.oauthStates.create(deps.ctx, {
     state,
@@ -461,20 +482,24 @@ export async function beginOauthConnect(
  */
 export async function completeOauthConnect(
   deps: OauthConnectDeps,
-  destination: DestinationKey,
+  callbackDestination: DestinationKey,
   input: { code: string; state: string },
   now: Date,
 ): Promise<CredentialCard> {
-  const provider = providerFor(destination, deps.env);
   const stateRow = await deps.repos.oauthStates.consume(deps.ctx, input.state, now);
-  if (stateRow.destination !== destination) {
+  // The FLIGHT decides what is being connected, not the URL it landed on:
+  // destinations may share a registered callback (instagram on facebook's
+  // Meta app), and the state row is single-use, TTL'd and tenant-walled.
+  const destination = stateRow.destination as DestinationKey;
+  if (oauthCallbackDestination(destination) !== callbackDestination) {
     throw new OauthConnectRefusedError(
-      destination,
+      callbackDestination,
       "state_mismatch",
       `the state row belongs to a "${stateRow.destination}" flight — a callback cannot be replayed across destinations`,
     );
   }
-  const redirectUri = `${appOrigin(deps.env)}${oauthCallbackPath(destination)}`;
+  const provider = providerFor(destination, deps.env);
+  const redirectUri = `${appOrigin(deps.env)}${oauthCallbackPath(callbackDestination)}`;
   const fetchImpl = deps.fetchImpl ?? fetch;
   let yielded: Awaited<ReturnType<OauthProvider["exchange"]>>;
   try {

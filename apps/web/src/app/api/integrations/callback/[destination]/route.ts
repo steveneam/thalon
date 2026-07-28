@@ -63,13 +63,16 @@ export async function GET(
     return backTo(origin, { connect_error: "Set up your workspace profile first." });
   }
   try {
-    await completeOauthConnect(
+    const card = await completeOauthConnect(
       { repos, ctx, env },
       destination.data,
       { code, state },
       new Date(),
     );
-    return backTo(origin, { connected: destination.data });
+    // The CARD names what was connected — destinations may share a
+    // registered callback URL (s84: instagram rides facebook's), so the path
+    // is not the flight.
+    return backTo(origin, { connected: card.destination });
   } catch (err) {
     // Error messages here are safe by module discipline (the vault/connect
     // layers never put secret material in an error) and flattening them
