@@ -2,15 +2,18 @@ import { edlSchema } from "@thalon/contracts";
 import { describe, expect, it } from "vitest";
 import {
   auditionVolume,
+  defaultCutFor,
   deleteBeat,
   deleteCaptionLine,
   insertBeat,
   insertCaptionLine,
   laneDuration,
+  musicCandidatesFor,
   nextVersionFor,
   patchCaptionLine,
   patchMusic,
   reorderBeat,
+  setMusicSource,
   setOutputDuration,
   setOverlayAt,
   splitLane,
@@ -269,5 +272,148 @@ describe("nextVersionFor", () => {
     ];
     expect(nextVersionFor(cuts, "film-16x9")).toBe(7);
     expect(nextVersionFor(cuts, "brand-new")).toBe(1);
+  });
+});
+
+describe("setMusicSource / musicCandidatesFor", () => {
+  const bed = (id: string, ref: string, disposition: "keeper" | "reject" = "keeper"): TakeView => ({
+    id,
+    slot: null,
+    kind: "motion",
+    disposition,
+    ref,
+    reason: disposition === "reject" ? "muddy low end" : null,
+    provenance: {},
+    createdAt: "2026-07-17T10:00:00.000Z",
+  });
+
+  it("candidates are the IMPORT-MARKED beds and audio takes, keepers first", () => {
+    const takes = [
+      { ...bed("a", "cuts/music-candidates/candidate-B.mp4") },
+      { ...bed("b", "cuts/music-candidates/candidate-A.mp4", "reject") },
+      { ...bed("c", "music/bed.mp3"), kind: "audio" as const },
+      { ...bed("d", "motion/keepers/beat-01.mp4"), slot: "beat-01" },
+    ];
+    expect(musicCandidatesFor(takes).map((t) => t.id)).toEqual(["a", "c", "b"]);
+  });
+
+  it("a SLOTLESS video experiment is not a music bed", () => {
+    /*
+     * The bug driving this verb actually found. Filtering on `!slot` offered
+     * `motion/experiments/seedance-assembly-experiment-s43.mp4` — a silent
+     * video experiment — as a bed, because lacking a beat slot and being music
+     * are different facts that happened to coincide on the fixtures.
+     */
+    const takes = [
+      { ...bed("experiment", "motion/experiments/seedance-assembly-s43.mp4") },
+      { ...bed("real", "cuts/music-candidates/candidate-A.mp4") },
+    ];
+    expect(musicCandidatesFor(takes).map((t) => t.id)).toEqual(["real"]);
+  });
+
+  it("does not match a directory that merely CONTAINS the marker as a substring", () => {
+    const takes = [{ ...bed("x", "motion/music-candidates-old-rejects/thing.mp4") }];
+    expect(musicCandidatesFor(takes)).toEqual([]);
+  });
+
+  it("a silent cut ACQUIRES a cue — the verb patchMusic never had", () => {
+    const silent = { ...fixture(), audio: [] };
+    const next = setMusicSource(silent, "cuts/music-candidates/candidate-A.mp4");
+    expect(next.audio).toHaveLength(1);
+    expect(next.audio[0].source).toEqual({
+      kind: "take",
+      ref: "cuts/music-candidates/candidate-A.mp4",
+    });
+    expect(next.audio[0].mode).toBe("encode");
+    // Still a valid EDL — a verb that produces an uncompilable cut fails here,
+    // not at render time.
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("a copy cue becomes an ENCODE cue, so the knobs the inspector hides come alive", () => {
+    const copied = {
+      ...fixture(),
+      audio: [{ source: { kind: "cut" as const, ref: "cuts/master.mp4" }, offset: 0, gainDb: 0, mode: "copy" as const }],
+    };
+    const next = setMusicSource(copied, "cuts/music-candidates/candidate-A.mp4");
+    expect(next.audio[0].mode).toBe("encode");
+    // patchMusic refuses a copy cue by contract; after the swap it does not.
+    expect(patchMusic(next, { gainDb: -6 }).audio[0].gainDb).toBe(-6);
+  });
+
+  it("the offset RESETS but gain and tail easing carry — level is a fact about the cut, offset is a fact about the file", () => {
+    const scored = {
+      ...fixture(),
+      audio: [
+        {
+          source: { kind: "take" as const, ref: "cuts/music-candidates/candidate-A.mp4" },
+          offset: 12.5,
+          gainDb: -6,
+          fadeOut: { start: 14, duration: 1.5 },
+          mode: "encode" as const,
+        },
+      ],
+    };
+    const next = setMusicSource(scored, "cuts/music-candidates/candidate-B.mp4");
+    expect(next.audio[0].offset).toBe(0);
+    expect(next.audio[0].gainDb).toBe(-6);
+    expect(next.audio[0].fadeOut).toEqual({ start: 14, duration: 1.5 });
+  });
+
+  it("never grows a second cue — the compiler accepts at most one", () => {
+    const once = setMusicSource({ ...fixture(), audio: [] }, "cuts/music-candidates/candidate-A.mp4");
+    const twice = setMusicSource(once, "cuts/music-candidates/candidate-B.mp4");
+    expect(twice.audio).toHaveLength(1);
+    expect(twice.audio[0].source.ref).toBe("cuts/music-candidates/candidate-B.mp4");
+  });
+
+  it("an mp3 bed is addressed as an audio source, not a take", () => {
+    const next = setMusicSource({ ...fixture(), audio: [] }, "music/bed.mp3", "audio");
+    expect(next.audio[0].source.kind).toBe("audio");
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+});
+
+describe("defaultCutFor", () => {
+  const cut = (
+    id: string,
+    version: number,
+    beats: number,
+    captionLines: number,
+    audio: "silent" | "copy" | "encode" = "silent",
+  ) => ({ id, version, edl: { beats, captionLines, audio } });
+
+  it("opens the richest cut, not whatever the query returned first", () => {
+    // The concept film's real shape: the scored master sorts FIRST out of the
+    // query and is the emptiest thing in the project.
+    const cuts = [
+      cut("scored", 1, 1, 0, "encode"),
+      cut("wide", 8, 2, 9),
+      cut("vertical", 1, 10, 9, "encode"),
+    ];
+    expect(defaultCutFor(cuts)?.id).toBe("vertical");
+  });
+
+  it("does NOT key on music first — a scored 1-beat master loses to a fuller silent cut", () => {
+    // The defect this rule replaces. Ranking music above content would open
+    // the master with nothing in it, which is what the harness had to work
+    // around; music is a term in the weight, never the sort key.
+    const cuts = [cut("scored", 1, 1, 0, "encode"), cut("wide", 3, 8, 6)];
+    expect(defaultCutFor(cuts)?.id).toBe("wide");
+  });
+
+  it("music breaks a tie between cuts carrying the same amount of picture and text", () => {
+    const cuts = [cut("silent", 1, 4, 2), cut("scored", 1, 4, 2, "encode")];
+    expect(defaultCutFor(cuts)?.id).toBe("scored");
+  });
+
+  it("ties go to the higher version, then stably by id — the same data opens the same cut", () => {
+    const cuts = [cut("b", 2, 4, 2), cut("a", 5, 4, 2), cut("c", 5, 4, 2)];
+    expect(defaultCutFor(cuts)?.id).toBe("a");
+    expect(defaultCutFor([...cuts].reverse())?.id).toBe("a");
+  });
+
+  it("a project with no cuts has no default", () => {
+    expect(defaultCutFor([])).toBeNull();
   });
 });

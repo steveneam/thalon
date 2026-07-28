@@ -16,6 +16,7 @@ import {
   fetchProjectDetail,
   fetchRenderJob,
   mediaUrl,
+  previewCut,
   proposeDiff,
   rejectProposal,
   saveCut,
@@ -23,14 +24,32 @@ import {
   type CaptionRefusal,
   type DiffProposal,
 } from "@/lib/videos/client";
-import { nextVersionFor, splitLane, swapBeatSource, swapCandidatesFor } from "@/lib/videos/editor";
+import { defaultCutFor, nextVersionFor, splitLane, swapBeatSource, swapCandidatesFor } from "@/lib/videos/editor";
 import type { CutDetail, ProjectDetail, RenderJobView } from "@/lib/videos/types";
 import { useListKeys } from "@/lib/workspace/keyboard";
 
 type ReadStatus = "loading" | "error" | "missing" | "ready";
 
-/** The sheet's copilot chips, as asks the propose door actually receives. */
-const CHIPS = ["Tighten to 30s", "Recut 9:16", "Swap music", "Retake a beat"];
+/**
+ * The sheet's four copilot chips — and WHICH OF THEM THE SURFACE CAN NOW DO
+ * ITSELF (slice (e), "wire them or say so").
+ *
+ * Two of these stopped needing the agent this session. "Swap music" is a local
+ * verb over the project's own candidate beds, and "Recut 9:16" is the aspect
+ * lens's own derive — both free, both instant, both already on this screen.
+ * Sending either through the copilot would spend a metered gateway call to ask
+ * an agent to propose something the operator could simply have done, which is
+ * the definition of a chip that is decoration.
+ *
+ * The other two are genuine asks: re-timing a cut to 30s and re-briefing a beat
+ * are judgement, not a transform, and they say so.
+ */
+const CHIPS: { label: string; local: "music" | "9:16" | null }[] = [
+  { label: "Tighten to 30s", local: null },
+  { label: "Recut 9:16", local: "9:16" },
+  { label: "Swap music", local: "music" },
+  { label: "Retake a beat", local: null },
+];
 
 /**
  * Video editor — STEP 2 of the two-step rebuild: the byte-true port of
@@ -73,6 +92,22 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   const [notice, setNotice] = useState<string | null>(null);
   const [refusals, setRefusals] = useState<CaptionRefusal[]>([]);
   const [job, setJob] = useState<RenderJobView | null>(null);
+  /*
+   * THE WORKING-COPY PREVIEW, and the one thing that makes it honest.
+   *
+   * `preview` remembers the EDL it was rendered FROM, not just the file. The
+   * player only shows it while `preview.edl === edl` by reference — and since
+   * every transform in lib/videos/editor.ts returns a NEW object, the next
+   * edit of any kind invalidates it automatically. There is no "remember to
+   * clear the preview" line to forget in a future verb, which is exactly the
+   * class of bug that produced the stale-render problem this verb fixes.
+   * Undoing back to the previewed EDL restores that same reference, so the
+   * preview correctly becomes valid again.
+   */
+  const [previewJob, setPreviewJob] = useState<{ job: RenderJobView; edl: Edl; ref: string } | null>(
+    null,
+  );
+  const [preview, setPreview] = useState<{ edl: Edl; ref: string } | null>(null);
   const [selection, setSelection] = useState<Selection>(null);
   const [playhead, setPlayhead] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -117,7 +152,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             return;
           }
           setDetail(project);
-          const target = cutId ?? project.cuts[0]?.id ?? null;
+          const target = cutId ?? defaultCutFor(project.cuts)?.id ?? null;
           if (target === null) {
             setCut(null);
             setStatus("ready");
@@ -158,6 +193,24 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     }, 4000);
     return () => clearInterval(timer);
   }, [job, projectId]);
+
+  /*
+   * The preview's own poll. Deliberately NOT folded into the render poll above:
+   * that one flips the cut to `rendered` and adopts the output as the cut's
+   * outputRef, which is exactly what a preview must never do — an unsaved EDL
+   * has no business in the version history.
+   */
+  useEffect(() => {
+    if (previewJob === null || previewJob.job.status !== "running") return;
+    const timer = setInterval(() => {
+      void fetchRenderJob(projectId, previewJob.job.id).then((next) => {
+        if (next === null) return;
+        setPreviewJob((current) => (current ? { ...current, job: next } : current));
+        if (next.status === "done") setPreview({ edl: previewJob.edl, ref: previewJob.ref });
+      });
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [previewJob, projectId]);
 
   /**
    * The ONE manual edit funnel — one dirty bit, one working copy, and now one
@@ -347,6 +400,21 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     });
   }
 
+  /**
+   * PREVIEW THE WORKING COPY. Fires the same local ffmpeg the render door
+   * uses, against the unsaved EDL, writing to an overwritable preview file
+   * that never touches the version history. Compute, not credits.
+   */
+  function onPreview() {
+    if (cut === null || edl === null) return;
+    const previewed = edl;
+    run(async () => {
+      const { job: fired, outputRef } = await previewCut(projectId, cut.id, previewed);
+      setPreviewJob({ job: fired, edl: previewed, ref: outputRef });
+      return "Previewing your unsaved edit locally (0 credits) — nothing is saved by this.";
+    });
+  }
+
   function onApprove() {
     if (cut === null) return;
     run(async () => {
@@ -458,6 +526,39 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
 
   const currentAspect = aspectOf(edl.output.width, edl.output.height);
   const nextVersion = nextVersionFor(detail.cuts, cut.name);
+  /*
+   * A preview is only shown while it is a preview OF WHAT IS ON SCREEN.
+   * Reference equality against the working copy: any edit produces a new EDL
+   * object and this goes false on its own.
+   */
+  const previewFresh = preview !== null && preview.edl === edl;
+  const shownRef = previewFresh ? preview.ref : cut.outputRef;
+  /**
+   * The way back to the 16:9 master. A derived cut pins its parent in
+   * `lineage.parentCutId`; a cut with no lineage was never derived from
+   * anything, and saying so is a better answer than a control that looks live
+   * and does nothing.
+   */
+  const masterDoor: { refusal: string | null; go: () => void } = (() => {
+    const parentId = cut.lineage?.parentCutId ?? null;
+    if (currentAspect === "16:9") return { refusal: "This IS the 16:9 master.", go: () => {} };
+    if (dirty) {
+      return {
+        refusal: "Save first — leaving this cut with unsaved edits would throw them away.",
+        go: () => {},
+      };
+    }
+    if (parentId === null) {
+      return {
+        refusal: `This ${currentAspect} cut has no 16:9 master on record — it was not derived from one.`,
+        go: () => {},
+      };
+    }
+    return {
+      refusal: null,
+      go: () => router.push(`/app/videos/${projectId}/edit?cut=${parentId}`),
+    };
+  })();
   const selectedClip = selection?.kind === "beat" ? beats[selection.index] : undefined;
   const candidates =
     selectedClip === undefined
@@ -504,27 +605,59 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           <span className="pill pill-warn">agent proposal applied</span>
         )}
         <div style={{ flex: 1 }} />
+        {/*
+          THE ASPECT LENS — both of the surface's remaining dead doors lived here.
+
+          (1) 16:9 was a <span aria-hidden> between two real buttons: it took the
+          hover, ate the click and was invisible to assistive tech, so a derived
+          cut had no way back to the master it came from. It is a button now,
+          and it routes to `lineage.parentCutId` — the master IS the parent.
+
+          (2) Every refusal here lived only in `title`. A disabled control fires
+          no tooltip and screen readers skip it, so "why can't I press this?"
+          had no answer by any route. So refusals no longer DISABLE: the control
+          stays focusable, says `aria-disabled` so AT announces the state, and
+          answers with its reason in the notice band when pressed. Refusing is
+          fine; refusing silently is not.
+        */}
         <div className="seg" role="group" aria-label="Aspect">
-          <span className={currentAspect === "16:9" ? "seg-opt on" : "seg-opt"} aria-hidden>
+          <button
+            type="button"
+            className={currentAspect === "16:9" ? "seg-opt on" : "seg-opt"}
+            aria-pressed={currentAspect === "16:9"}
+            aria-disabled={masterDoor.refusal !== null || undefined}
+            disabled={busy}
+            title={masterDoor.refusal ?? "Back to the 16:9 master this cut was derived from"}
+            onClick={() =>
+              masterDoor.refusal !== null ? setNotice(masterDoor.refusal) : masterDoor.go()
+            }
+          >
             16:9
-          </span>
-          {VIDEO_DERIVE_ASPECTS.map((aspect) => (
-            <button
-              key={aspect}
-              type="button"
-              className={currentAspect === aspect ? "seg-opt on" : "seg-opt"}
-              aria-pressed={currentAspect === aspect}
-              disabled={dirty || busy || currentAspect === aspect}
-              title={
-                dirty
-                  ? "Save first — a derive reads the stored EDL"
-                  : `Switch to the ${aspect} cut, or derive one (measured seeds, 0 credits)`
-              }
-              onClick={() => onAspect(aspect)}
-            >
-              {aspect}
-            </button>
-          ))}
+          </button>
+          {VIDEO_DERIVE_ASPECTS.map((aspect) => {
+            const refusal =
+              currentAspect === aspect
+                ? `You are already editing the ${aspect} cut.`
+                : dirty
+                  ? "Save first — a derive reads the STORED EDL, so it cannot see your unsaved edits."
+                  : null;
+            return (
+              <button
+                key={aspect}
+                type="button"
+                className={currentAspect === aspect ? "seg-opt on" : "seg-opt"}
+                aria-pressed={currentAspect === aspect}
+                aria-disabled={refusal !== null || undefined}
+                disabled={busy}
+                title={
+                  refusal ?? `Switch to the ${aspect} cut, or derive one (measured seeds, 0 credits)`
+                }
+                onClick={() => (refusal !== null ? setNotice(refusal) : onAspect(aspect))}
+              >
+                {aspect}
+              </button>
+            );
+          })}
         </div>
         {/*
           Undo is bound to ⌘/Ctrl+Z, but a keyboard-only undo is an invisible
@@ -580,25 +713,86 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       </div>
 
       <div className="copilot">
-        <input
-          ref={askRef}
-          className="cop-box"
-          value={ask}
-          aria-label="Direct the edit"
-          placeholder="Direct the edit — “clear the second caption off the falcon, land the tail easing on the close” — the agent answers with a proposal on the timeline, never a silent change."
-          onChange={(event) => setAsk(event.target.value)}
-        />
+        {/*
+          THE VOW IS NOT A PLACEHOLDER. "the agent answers with a proposal on
+          the timeline, never a silent change" is the surface's provenance
+          promise (ui-overhaul-plan §5), and as placeholder text it vanished the
+          moment the operator typed — the one moment it is load-bearing — and
+          was truncated by the input's width even before that. So the box holds
+          both: the EXAMPLE stays a placeholder (a prompt, fairly ephemeral) and
+          the PROMISE is visible text that nothing dismisses.
+        */}
+        <div className="cop-box">
+          <input
+            ref={askRef}
+            className="cop-ask"
+            value={ask}
+            aria-label="Direct the edit"
+            placeholder="Direct the edit — “land the tail easing on the close”"
+            onChange={(event) => setAsk(event.target.value)}
+          />
+          <span className="cop-vow">
+            The agent answers with a proposal on the timeline — <em>never a silent change</em>.
+          </span>
+        </div>
         {CHIPS.map((chip) => (
-          <button key={chip} type="button" className="chipbtn" onClick={() => setAsk(chip)}>
-            {chip}
+          <button
+            key={chip.label}
+            type="button"
+            className="chipbtn"
+            title={
+              chip.local === "music"
+                ? "Opens the music lane's bed picker — local, instant, 0 credits"
+                : chip.local === "9:16"
+                  ? "Uses the aspect lens's own derive — measured seeds, 0 credits"
+                  : "Fills the ask — Propose then spends a metered agent call"
+            }
+            onClick={() => {
+              if (chip.local === "music") {
+                setSelection({ kind: "music" });
+                return;
+              }
+              if (chip.local === "9:16") {
+                onAspect("9:16");
+                return;
+              }
+              /*
+                APPEND, never overwrite. These chips sit immediately right of
+                the box the operator has just typed into and read as additive
+                suggestions; `setAsk(chip)` threw a composed directive away with
+                no undo and no re-entry path.
+              */
+              setAsk((current) => (current.trim() === "" ? chip.label : `${current.trim()}; ${chip.label}`));
+              askRef.current?.focus();
+            }}
+          >
+            {chip.label}
           </button>
         ))}
+        {/*
+          The second half of the title-only refusal (the aspect lens was the
+          first): Propose went disabled while dirty with its reason reachable
+          only by hovering a control that, being disabled, fires no tooltip.
+          Same remedy — it stays focusable, announces `aria-disabled`, and says
+          why in the notice band when pressed.
+        */}
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          disabled={busy || dirty}
-          title={dirty ? "Save your manual edits first — the agent proposes against the stored cut" : undefined}
-          onClick={onPropose}
+          disabled={busy}
+          aria-disabled={dirty || undefined}
+          title={
+            dirty
+              ? "Save your manual edits first — the agent proposes against the stored cut"
+              : "The agent answers with a proposal on the timeline — this spends a metered call"
+          }
+          onClick={() =>
+            dirty
+              ? setNotice(
+                  "Save your manual edits first — the agent proposes against the STORED cut, so it cannot see them.",
+                )
+              : onPropose()
+          }
         >
           {busy ? "Proposing…" : "Propose"}
         </button>
@@ -677,14 +871,27 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       <div className="ed-grid">
         <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
           <div className="player">
-            {playing && cut.outputRef !== null ? (
+            {playing && shownRef !== null ? (
               <video
                 ref={videoRef}
                 className="player-video"
                 controls
                 autoPlay
                 preload="metadata"
-                src={mediaUrl(projectId, cut.outputRef)}
+                src={mediaUrl(projectId, shownRef)}
+                /*
+                  PLAYBACK DRIVES THE PLAYHEAD. The seek direction was already
+                  wired — clicking the ruler moves the marker AND the video —
+                  but the return path was not, so watching the cut left the
+                  timeline dead: nothing said where you were, and there was no
+                  moment to stop at. The marker and the scrub bar both read
+                  this one fraction.
+                */
+                onTimeUpdate={(event) => {
+                  const el = event.currentTarget;
+                  if (!Number.isFinite(el.duration) || el.duration <= 0) return;
+                  setPlayhead(Math.min(1, el.currentTime / el.duration));
+                }}
               />
             ) : (
               <>
@@ -692,31 +899,55 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                   <button
                     type="button"
                     className="play-btn"
-                    aria-label={`Play ${cut.name} v${cut.version}`}
-                    disabled={!detail.playable || cut.outputRef === null}
+                    aria-label={
+                      previewFresh
+                        ? "Play the preview of your unsaved edits"
+                        : `Play ${cut.name} v${cut.version}`
+                    }
+                    disabled={!detail.playable || shownRef === null}
                     onClick={() => setPlaying(true)}
                   >
                     <div className="play-tri" />
                   </button>
-                  {(cut.outputRef === null || !detail.playable) && (
+                  {(shownRef === null || !detail.playable) && (
                     <span className="t-data">
-                      {cut.outputRef === null
+                      {shownRef === null
                         ? `no render yet for v${cut.version} — the primary button renders it, locally, 0 credits`
                         : "no media root configured on this box — refs on record, playback off"}
                     </span>
                   )}
                   {/*
-                    THE HONEST PLAYER. While the working copy is dirty this
-                    plate still shows the PREVIOUS render — the only cue was an
-                    "unsaved" pill 200px away in the header, so the operator
-                    reads their own edit into a video that does not contain it.
-                    Empty and broken must never look alike; neither must
-                    "your edit" and "the last render of a different EDL".
+                    THE HONEST PLAYER, now with the verb it was missing. Saying
+                    "your edits are not in this" was the truth and half an
+                    answer; the other half is being able to SEE them. Three
+                    states, each named rather than implied: the stored render,
+                    the stored render WHILE dirty, and a preview of the exact
+                    working copy on screen.
                   */}
-                  {dirty && cut.outputRef !== null && (
+                  {previewFresh && (
+                    <span className="t-data">
+                      showing a preview of your unsaved edits — nothing is saved until you save
+                    </span>
+                  )}
+                  {dirty && !previewFresh && cut.outputRef !== null && (
                     <span className="t-data">
                       showing the render of v{cut.version} — your unsaved edits are not in it
                     </span>
+                  )}
+                  {dirty && !previewFresh && detail.playable && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      disabled={busy || previewJob?.job.status === "running"}
+                      onClick={onPreview}
+                    >
+                      {previewJob?.job.status === "running"
+                        ? "Rendering preview…"
+                        : "Preview this edit — local, 0 credits"}
+                    </button>
+                  )}
+                  {previewJob?.job.status === "error" && (
+                    <span className="t-data">Preview failed: {previewJob.job.error}</span>
                   )}
                 </div>
                 <div className="scrub">
@@ -833,6 +1064,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               <EditorInspector
                 projectId={projectId}
                 edl={edl}
+                takes={detail.takes}
                 selection={selection}
                 playable={detail.playable}
                 onEdl={apply}
@@ -888,6 +1120,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                       key={take.id}
                       type="button"
                       className="take"
+                      /*
+                        The verb and the file BOTH belong in the accessible
+                        name. "swap this beat to <ref>" lived only in a title,
+                        where AT skips it, and the tile itself named neither the
+                        take nor what pressing it would do.
+                      */
+                      aria-label={`Swap this beat to take ${takeName(take.ref)} — ${takeCaption(take)}`}
                       title={`swap this beat to ${take.ref}`}
                       onClick={() =>
                         apply((current) =>
@@ -898,6 +1137,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                       <div className="thumb-md">
                         <span>{take.disposition}</span>
                       </div>
+                      <span className="take-cap">{takeName(take.ref)}</span>
                       <span className="take-cap">{takeCaption(take)}</span>
                     </button>
                   ))}
@@ -959,6 +1199,17 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       </div>
     </div>
   );
+}
+
+/**
+ * A take's FILE NAME — visible in the tile so candidates can be told apart at
+ * all, and so it joins the accessible name rather than hiding in a `title` no
+ * screen reader reads. The extension stays: these tiles are how an operator
+ * identifies one asset among eight near-identical siblings, and half a filename
+ * is a worse answer than the whole one.
+ */
+function takeName(ref: string): string {
+  return ref.split("/").pop() ?? ref;
 }
 
 /** What the beat's CURRENT source is, in the takes strip's own caption slot. */

@@ -1,4 +1,4 @@
-import type { AudioCue, CaptionLine, Edl, EdlClip } from "@thalon/contracts";
+import type { AudioCue, CaptionLine, Edl, EdlClip, VideoSourceKind } from "@thalon/contracts";
 import type { TakeView } from "./types";
 
 /**
@@ -218,6 +218,70 @@ export function patchMusic(
 }
 
 /**
+ * THE BEDS THIS PROJECT OFFERS.
+ *
+ * A candidate is a take the IMPORT marked as one — anything under a
+ * `music-candidates/` segment, which is the exact rule import.ts applies — or
+ * any take of kind `audio`, since an `music/*.mp3` is a bed by its nature.
+ *
+ * NOT "every slotless take", which is what this filtered on first and is
+ * wrong: a slot binds a take to one beat, and plenty of takes lack one for
+ * reasons that have nothing to do with music. Driving it surfaced
+ * `motion/experiments/seedance-assembly-experiment-s43.mp4` — a silent video
+ * experiment — being offered as a music bed. Slotlessness is a consequence of
+ * being a candidate, never the definition of one.
+ *
+ * Keepers before rejects, then stable by ref: the same grammar the beat picker
+ * uses, because a reject carries its reason and that reason is learning
+ * material.
+ */
+export function musicCandidatesFor(takes: TakeView[]): TakeView[] {
+  return takes
+    .filter((t) => t.kind === "audio" || t.ref.split("/").includes("music-candidates"))
+    .sort((a, b) =>
+      a.disposition !== b.disposition
+        ? a.disposition === "keeper"
+          ? -1
+          : 1
+        : a.ref.localeCompare(b.ref),
+    );
+}
+
+/**
+ * SWAP THE MUSIC TRACK — the verb the copilot chip has been offering and the
+ * surface could not perform.
+ *
+ * `patchMusic` only ever PATCHED an existing cue, which is why a cut with no
+ * music could never acquire any and a cut with the wrong bed could never
+ * change it. This is the missing half: ADD a cue where there is none, REPLACE
+ * the source where there is one. Per the pre-plan's contract ruling, the bed is
+ * addressed as a PROJECT-RELATIVE ref against `audioCueSchema`, which already
+ * accepts exactly this — so no window opens. (Pointing a cue at a *stored* bed,
+ * addressed by sha, is the bridge that would need one, and is not this route.)
+ *
+ * Two decisions the swap makes on the operator's behalf, both stated rather
+ * than silent:
+ *
+ *  - MODE BECOMES `encode`. `copy` means "stream-copy this source verbatim",
+ *    and by contract it has no knobs — the inspector correctly refuses to draw
+ *    offset, gain and tail for it. Choosing a bed and then finding every
+ *    control inert is the dead door this verb exists to close, so a chosen bed
+ *    is always an encoded one.
+ *  - OFFSET RESETS TO 0. An offset is measured seconds INTO a particular file;
+ *    carried onto a different track it silently starts the new bed somewhere
+ *    arbitrary. Gain and tail easing DO carry: a level and a fade-out at
+ *    0:38 are facts about the cut, not about which file is under them.
+ */
+export function setMusicSource(edl: Edl, ref: string, kind: VideoSourceKind = "take"): Edl {
+  const source = { kind, ref };
+  const [cue, ...rest] = edl.audio;
+  if (!cue) {
+    return { ...edl, audio: [{ source, offset: 0, gainDb: 0, mode: "encode" }] };
+  }
+  return { ...edl, audio: [{ ...cue, source, offset: 0, mode: "encode" }, ...rest] };
+}
+
+/**
  * B-audio.1 piece 2 (AUDITION): the music lane's static gain, in dB, as a
  * player volume. The drawn waveform has been silent-by-omission since s44 —
  * clicking it set the in-point but playback ignored both the in-point and the
@@ -261,4 +325,44 @@ export function swapCandidatesFor(takes: TakeView[], currentRef: string): TakeVi
 /** A re-edit is a NEW VERSION: the next version number for a cut name (1 for a fresh name). */
 export function nextVersionFor(cuts: { name: string; version: number }[], name: string): number {
   return cuts.reduce((max, c) => (c.name === name ? Math.max(max, c.version) : max), 0) + 1;
+}
+
+/** What the default-cut rule ranks on — the browse summary the project detail already carries. */
+export interface RankableCut {
+  id: string;
+  version: number;
+  edl: { beats: number; captionLines: number; audio: "silent" | "copy" | "encode" };
+}
+
+/**
+ * WHICH CUT THE EDITOR OPENS — a stated rule, replacing `project.cuts[0]`.
+ *
+ * The old default was whatever the detail query returned first: not the master,
+ * not the latest, not the furthest along. On the concept film that is a 1-beat
+ * scored master with no captions — the emptiest cut in the project — so the
+ * editor opened on the one cut with almost nothing to edit. The founder's call
+ * (s80) was "can make the one with the music the default"; the drive harness
+ * honoured it by ranking cuts explicitly, and this is the same rule moved into
+ * the PRODUCT, where it belongs.
+ *
+ * The rule: OPEN THE RICHEST CUT — the one carrying the most work, counting
+ * beats, caption lines and a music cue as one more. Music is a term rather than
+ * the first sort key on purpose: keying on it would open that same 1-beat
+ * scored master ahead of a ten-beat captioned cut, which is the exact defect
+ * this replaces. Ties go to the higher version, then to a stable id compare so
+ * the same data always opens the same cut.
+ *
+ * Deliberately NOT ranked on: `createdAt`, which on imported projects is the
+ * seeding timestamp rather than when anyone last worked on the cut, and
+ * `status`, because every cut here is already rendered or approved — a re-edit
+ * always lands as a new version regardless of which one it starts from.
+ */
+export function defaultCutFor<T extends RankableCut>(cuts: readonly T[]): T | null {
+  const weight = (c: RankableCut) =>
+    c.edl.beats + c.edl.captionLines + (c.edl.audio === "silent" ? 0 : 1);
+  return (
+    [...cuts].sort(
+      (a, b) => weight(b) - weight(a) || b.version - a.version || a.id.localeCompare(b.id),
+    )[0] ?? null
+  );
 }

@@ -343,7 +343,22 @@ export function EditorTimeline({
             </div>
             <div className="lane-tr">
               {cue === undefined ? (
-                <span className="t-label">Silent cut — no music lane on this EDL.</span>
+                /*
+                  A SILENT CUT IS A CHOICE, NOT A VERDICT. This said "Silent
+                  cut — no music lane on this EDL" as flat text: true, and a
+                  dead end, on a project that ships seven candidate beds. It is
+                  now the way into the picker, which is the same door a scored
+                  cut uses to change its bed.
+                */
+                <button
+                  type="button"
+                  className="as-text-btn"
+                  aria-pressed={selection?.kind === "music"}
+                  title="This cut has no music — choose a bed from the project's candidates"
+                  onClick={() => onSelect({ kind: "music" })}
+                >
+                  Silent cut — choose a music bed →
+                </button>
               ) : (
                 <button
                   type="button"

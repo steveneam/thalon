@@ -1008,8 +1008,15 @@ export const JOBS = {
           if (!chip) throw new NoAffordance("no copilot chips on the surface");
           const label = await page.evaluate((el) => el.textContent.trim(), chip);
           await press(page, chip, `the "${label}" chip`);
+          // The ask field BY ROLE, not by class. s80 pinned `input.cop-box`;
+          // s81 moved the box back to the sheet's wrapper (the vow is visible
+          // text again, not a placeholder) and the input inside it, which would
+          // have read as "the chip has no ask field" — a PRODUCT defect
+          // reported for a markup change. The seventh wrong selector this
+          // harness has produced, and the same lesson: name the thing the job
+          // is about.
           const ask = await page.evaluate(
-            () => (document.querySelector("input.cop-box") || {}).value ?? null,
+            () => (document.querySelector(".copilot input") || {}).value ?? null,
           );
           if (ask === null) throw new DeadDoor("the chip has no ask field to fill");
           // The chip states an edit; the only control that could perform it is
@@ -1231,10 +1238,19 @@ export const JOBS = {
            * the verb. Look only where the verb would live: the inspector the
            * music block opens.
            */
+          /*
+           * ACCESSIBLE NAME, not textContent (s81). This swept `textContent`
+           * only, which measures what a sighted mouse user sees and nothing
+           * else — a control whose verb lives in `aria-label` reads as absent,
+           * and a control whose verb lives only in a `title` reads as present
+           * to nobody. The operator's actual name for a control is its
+           * accessible name, so that is what the job asks for. Tightening, not
+           * loosening: a tile named only by its filename still fails here.
+           */
           const verbs = await page.evaluate(() =>
             Array.from(document.querySelectorAll("button"))
               .filter((b) => !b.classList.contains("chipbtn") && !b.closest(".copilot"))
-              .map((b) => (b.textContent || "").trim())
+              .map((b) => (b.getAttribute("aria-label") || b.textContent || "").trim())
               .filter((t) => /(swap|change|replace|choose|browse).*(track|music|bed)/i.test(t)),
           );
           if (verbs.length === 0) {

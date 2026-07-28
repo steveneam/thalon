@@ -34,6 +34,38 @@ describe("render job registry (fire-and-poll, single-flight per cut)", () => {
     expect(getRenderJob(job.id)?.finishedAt).not.toBeNull();
   });
 
+  it("a PREVIEW and a render of the same cut never join each other", async () => {
+    /*
+     * s81: single-flight is keyed separately from the cut id. They render
+     * different EDLs (stored vs working copy) to different files, so answering
+     * one with the other's job would show the operator a video that is not the
+     * one they asked for — the exact confusion the honest player prevents.
+     */
+    const render = deferred();
+    const preview = deferred();
+    const first = startRenderJob(META, () => render.promise);
+    const second = startRenderJob({ ...META, key: "c1:preview" }, () => preview.promise);
+    expect(second.started).toBe(true);
+    expect(second.job.id).not.toBe(first.job.id);
+    render.resolve("cuts/film-v7.mp4");
+    preview.resolve("cuts/previews/c1.mp4");
+    await Promise.all([render.promise, preview.promise]);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(getRenderJob(first.job.id)?.outputRef).toBe("cuts/film-v7.mp4");
+    expect(getRenderJob(second.job.id)?.outputRef).toBe("cuts/previews/c1.mp4");
+  });
+
+  it("two previews of the same cut DO still single-flight", async () => {
+    const work = deferred();
+    const meta = { ...META, key: "c1:preview" };
+    const first = startRenderJob(meta, () => work.promise);
+    const second = startRenderJob(meta, () => Promise.resolve("never-runs.mp4"));
+    expect(second.started).toBe(false);
+    expect(second.job.id).toBe(first.job.id);
+    work.resolve("cuts/previews/c1.mp4");
+    await work.promise;
+  });
+
   it("firing a cut that is already rendering JOINS the running job (never a second ffmpeg race)", async () => {
     const work = deferred();
     const first = startRenderJob(META, () => work.promise);

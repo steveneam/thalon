@@ -374,11 +374,51 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     await user.type(duration, "3");
     await user.tab();
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "9:16" })).toBeDisabled());
-    expect(screen.getByRole("button", { name: "9:16" })).toHaveAttribute(
-      "title",
-      "Save first — a derive reads the stored EDL",
+    /*
+     * s81: the refusal is ANNOUNCED, not just dimmed. This used to assert
+     * `disabled` + a `title`, which is precisely the dead door the audit found:
+     * a disabled control fires no tooltip and assistive tech skips it, so the
+     * reason was unreachable by every route. The control now stays focusable,
+     * says aria-disabled, and ANSWERS when pressed.
+     */
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "9:16" })).toHaveAttribute("aria-disabled", "true"),
     );
+    await user.click(screen.getByRole("button", { name: "9:16" }));
+    expect(
+      await screen.findByText(/Save first — a derive reads the STORED EDL/),
+    ).toBeInTheDocument();
+  });
+
+  it("the 16:9 option is a real door back to the master, not an aria-hidden span", async () => {
+    // A derived cut pins its parent; 16:9 is the way back to it.
+    serve(DETAIL, {
+      ...CUT,
+      edl: { ...CUT.edl, output: { ...CUT.edl.output, width: 1080, height: 1920 } },
+      lineage: { parentCutId: "master-1", aspect: "9:16", parentName: "film-16x9", parentVersion: 6, parentLatestVersion: 6 },
+    });
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const master = screen.getByRole("button", { name: "16:9" });
+    expect(master).not.toHaveAttribute("aria-disabled");
+    await user.click(master);
+    expect(push).toHaveBeenCalledWith("/app/videos/p1/edit?cut=master-1");
+  });
+
+  it("a cut with no master says so instead of offering a door to nowhere", async () => {
+    serve(DETAIL, {
+      ...CUT,
+      edl: { ...CUT.edl, output: { ...CUT.edl.output, width: 1080, height: 1920 } },
+      lineage: null,
+    });
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "16:9" }));
+    expect(await screen.findByText(/has no 16:9 master on record/)).toBeInTheDocument();
   });
 
   it("says there is no cut to edit rather than drawing an empty timeline", async () => {

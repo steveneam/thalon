@@ -92,7 +92,33 @@
    it overlaps. Its freeze boundary is editable in the inspector. */
 .editor-surface .blk-overlay { position: absolute; top: -2px; right: 0; height: 38px; border: 1px dashed var(--warn); border-radius: 5px; display: flex; align-items: center; padding: 0 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--warn); pointer-events: none; white-space: nowrap; overflow: hidden; }
 
-.editor-surface .playhead { left: calc(84px + (100% - 100px) * var(--playhead, 0)); }
+/*
+ * THE PLAYHEAD INDEXES THE TRACK, NOT THE BODY'S PADDING EDGE.
+ *
+ * The sheet's own rule is `84px + (100% - 100px) * 0.34` — 84px being the lane
+ * header plus its gap. But `left` on an absolutely-positioned element resolves
+ * against the containing block's PADDING box, and `.tl-body` carries 16px of
+ * horizontal padding, so 84px lands 16px SHORT of where the lane track actually
+ * starts. In the sheet that never showed: 0.34 is a hardcoded fixture position
+ * with no real time behind it. Driven by playback it is a marker that points at
+ * the wrong second, which is worse than no marker at all.
+ *
+ * The track starts 100px from the padding edge (16 padding + 74 header + 10
+ * gap) and ends 16px before its right edge, so it is `100% - 116px` wide. Zoom
+ * scales `.tl-body`'s width, so both terms follow it. `secAt()` reads the
+ * track's real rect for the reverse direction, and this is the same geometry —
+ * the marker and the seek now agree by construction.
+ */
+.editor-surface .playhead { left: calc(100px + (100% - 116px) * var(--playhead, 0)); }
+/*
+ * The track is a flex item, so its default `min-width: auto` let a cut with
+ * more beats than the fixture's eight push it WIDER than the lane containing
+ * it — measured 762px inside an 808px lane, overflowing by 38px and putting
+ * the far beats under the scroller's edge at "fit", where nothing is supposed
+ * to scroll. It also broke the playhead arithmetic above, whose track width is
+ * only correct while the track fills its lane.
+ */
+.editor-surface .lane-tr { min-width: 0; }
 .editor-surface .tl-scroll { overflow-x: auto; }
 .editor-surface .tl-ruler { display: flex; align-items: center; justify-content: flex-end; height: 18px; margin-left: 84px; cursor: col-resize; border-top: 1px solid var(--n-400); padding-top: 2px; }
 .editor-surface .tl-ruler:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
@@ -102,8 +128,23 @@
 .editor-surface .snap-pill.on { background: var(--act-subtle); color: var(--act); }
 .editor-surface .as-text-btn { background: none; border: none; padding: 0; font: inherit; color: var(--act); cursor: pointer; }
 
-.editor-surface input.cop-box { font-family: inherit; min-width: 0; }
-.editor-surface input.cop-box::placeholder { color: var(--n-800); }
+/*
+ * The copilot box holds an ASK and a VOW, where the sheet draws one static
+ * line. The sheet's `.cop-box` is a div of doctrine text; the first port made
+ * it a single-line <input> and pushed that text into the placeholder, which
+ * cost two things: the provenance promise vanished the moment the operator
+ * typed, and the band collapsed 79px → 60, shifting every band below it by
+ * exactly 19px (about twenty rows of the render gate's drift). So the box is
+ * the sheet's box again, and the input lives inside it above the vow.
+ */
+.editor-surface .cop-box { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.editor-surface .cop-box:focus-within { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); }
+.editor-surface .cop-ask { width: 100%; background: transparent; border: none; padding: 0; font: inherit; color: var(--n-1000); }
+.editor-surface .cop-ask::placeholder { color: var(--n-800); }
+/* The box wears the focus ring for the input it contains, so a second ring on
+   the input itself would draw a rectangle inside a rectangle. */
+.editor-surface .cop-ask:focus-visible { outline: none; }
+.editor-surface .cop-vow { font-size: 13px; line-height: 1.3; color: var(--n-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .editor-surface button.chipbtn { font-family: inherit; }
 
 .editor-surface .player-video { width: 100%; height: 100%; border-radius: var(--r-card); object-fit: contain; background: oklch(0.1 0.008 262); }
@@ -135,6 +176,38 @@
 .editor-surface button.take { font: inherit; color: inherit; background: transparent; border: none; padding: 0; text-align: left; }
 .editor-surface .take:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
 .editor-surface .take-cap { max-width: 118px; }
+/*
+ * The strip RESERVES its band whether or not a beat is selected. The sheet
+ * draws 110px of take tiles; the app drew 39px of "Nothing selected." and then
+ * grew by 71px the instant a selection filled it, shoving everything below —
+ * the audit's "selecting a beat jumps the page". An empty strip and an absent
+ * strip are different things, and only one of them tells the operator that
+ * picking a beat is what fills it. `flex-start` keeps the tiles at their own
+ * height inside the reserved band instead of stretching them into the slack.
+ */
+.editor-surface .strip { min-height: 110px; align-items: flex-start; overflow-x: auto; }
+.editor-surface .strip > .t-label { align-self: center; }
+/*
+ * The Bounded-List Rule's sideways twin, which the sibling dossier surface
+ * already carries (dossier.css:69) and this one inherited `overflow: hidden`
+ * from the sheet's fixture instead. The card-head counts the candidates ("7
+ * other takes · every reject carries its reason") while the tiles past the
+ * fifth were clipped dead — no scrollbar, no fade, no keyboard route — so the
+ * count and the reachable set disagreed, and the REJECTS, whose reasons are the
+ * learning material the strip exists to show, are the ones that fell off the
+ * end. The music bed picker renders into this same strip and this project ships
+ * eight candidates, so without this it would ship clipped on day one.
+ */
+
+/*
+ * Refusals are announced, not just dimmed. These controls carry `aria-disabled`
+ * rather than `disabled` so they stay focusable and can ANSWER when pressed
+ * (the reason lands in the notice band); the styling has to say "refused" on
+ * its own, since the native disabled look no longer applies.
+ */
+.editor-surface .seg-opt[aria-disabled="true"] { cursor: not-allowed; opacity: 0.55; }
+.editor-surface button.take:disabled { cursor: default; }
+.editor-surface button.take:hover:not(:disabled) .thumb-md { border-color: var(--act); }
 
 .editor-surface .beats-scroll { flex: 1; min-height: 0; overflow-y: auto; }
 .editor-surface button.beat-row { width: 100%; font: inherit; color: inherit; background: transparent; border: none; border-top: 1px solid var(--n-400); text-align: left; cursor: pointer; }

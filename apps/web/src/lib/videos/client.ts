@@ -139,6 +139,24 @@ export async function startRender(
   return asJson<{ job: RenderJobView; started: boolean }>(res);
 }
 
+/**
+ * Fire a LOCAL preview render of the working copy (202). The EDL travels in the
+ * body because it has not been saved — that is the whole point of the verb.
+ * Polls through the render door's own job endpoint.
+ */
+export async function previewCut(
+  projectId: string,
+  cutId: string,
+  edl: Edl,
+): Promise<{ job: RenderJobView; started: boolean; outputRef: string }> {
+  const res = await fetch(`/api/videos/${projectId}/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cutId, edl }),
+  });
+  return asJson<{ job: RenderJobView; started: boolean; outputRef: string }>(res);
+}
+
 export async function fetchRenderJob(
   projectId: string,
   jobId: string,

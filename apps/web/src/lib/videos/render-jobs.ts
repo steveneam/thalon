@@ -29,10 +29,18 @@ export function getRenderJob(id: string): RenderJobView | null {
  * operator reads the actual ffmpeg refusal, not a euphemism.
  */
 export function startRenderJob(
-  meta: { projectId: string; cutId: string },
+  meta: { projectId: string; cutId: string; key?: string },
   run: () => Promise<string>,
 ): { job: RenderJobView; started: boolean } {
-  const inFlight = inFlightByCut.get(meta.cutId);
+  /*
+   * Single-flight is keyed SEPARATELY from the cut id so a working-copy
+   * preview and a real render of the same cut cannot join each other's job.
+   * They render different EDLs to different files, and answering a preview
+   * with a render's job (or the reverse) would show the operator a video that
+   * is not the one they asked for — the exact confusion the honest player
+   * exists to prevent. Same cut, two lanes.
+   */
+  const inFlight = inFlightByCut.get(meta.key ?? meta.cutId);
   if (inFlight) {
     const existing = jobs.get(inFlight);
     if (existing && existing.status === "running") {
@@ -50,7 +58,7 @@ export function startRenderJob(
     finishedAt: null,
   };
   jobs.set(job.id, job);
-  inFlightByCut.set(meta.cutId, job.id);
+  inFlightByCut.set(meta.key ?? meta.cutId, job.id);
   run()
     .then(
       (outputRef) => {
@@ -64,7 +72,8 @@ export function startRenderJob(
     )
     .finally(() => {
       job.finishedAt = new Date().toISOString();
-      if (inFlightByCut.get(meta.cutId) === job.id) inFlightByCut.delete(meta.cutId);
+      const key = meta.key ?? meta.cutId;
+      if (inFlightByCut.get(key) === job.id) inFlightByCut.delete(key);
     });
   return { job: { ...job }, started: true };
 }

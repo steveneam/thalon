@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Crop, Edl } from "@thalon/contracts";
+import { takeCaption } from "@/components/videos/editor-model";
 import type { Selection } from "@/components/videos/editor-timeline";
 import { mediaUrl } from "@/lib/videos/client";
 import {
@@ -10,14 +11,17 @@ import {
   deleteCaptionLine,
   insertBeat,
   insertCaptionLine,
+  musicCandidatesFor,
   patchCaptionLine,
   patchMusic,
   reorderBeat,
+  setMusicSource,
   setOutputDuration,
   setOverlayAt,
   splitLane,
   trimBeat,
 } from "@/lib/videos/editor";
+import type { TakeView } from "@/lib/videos/types";
 import {
   clampOrigin,
   displayToSource,
@@ -41,6 +45,7 @@ import {
 export function EditorInspector({
   projectId,
   edl,
+  takes,
   selection,
   playable,
   onEdl,
@@ -49,6 +54,8 @@ export function EditorInspector({
 }: {
   projectId: string;
   edl: Edl;
+  /** The project's takes — the beat picker's slots and the music lane's candidate beds. */
+  takes: TakeView[];
   selection: Exclude<Selection, null>;
   playable: boolean;
   onEdl: (fn: (edl: Edl) => Edl) => void;
@@ -92,7 +99,13 @@ export function EditorInspector({
         <CaptionFields edl={edl} index={selection.index} onEdl={onEdl} onSelect={onSelect} />
       )}
       {selection.kind === "music" && (
-        <MusicFields projectId={projectId} edl={edl} playable={playable} onEdl={onEdl} />
+        <MusicFields
+          projectId={projectId}
+          edl={edl}
+          takes={takes}
+          playable={playable}
+          onEdl={onEdl}
+        />
       )}
 
       {overlay !== null && (
@@ -335,27 +348,124 @@ function CaptionFields({
   );
 }
 
+/**
+ * THE BED PICKER — the "Swap music" verb, over the project's own candidates.
+ *
+ * It renders for a silent cut as well as a scored one, because the two are the
+ * same act: a silent cut's music lane used to say "Silent cut — no music lane
+ * on this EDL" as flat text, which is a true statement and a dead end. The
+ * project ships seven candidate beds; nothing on the surface could reach them.
+ */
+function BedPicker({
+  takes,
+  currentRef,
+  onEdl,
+}: {
+  takes: TakeView[];
+  currentRef: string | null;
+  onEdl: (fn: (edl: Edl) => Edl) => void;
+}) {
+  const candidates = musicCandidatesFor(takes);
+  if (candidates.length === 0) {
+    return (
+      <div className="inspector-row">
+        <span className="t-label">
+          This project ships no music candidates — import beds under
+          <code> music-candidates/</code> and they become choices here.
+        </span>
+      </div>
+    );
+  }
+  return (
+    <>
+      <div className="inspector-row">
+        <span className="t-label">
+          {currentRef === null ? "Choose a bed" : "Swap the bed"} — {candidates.length} candidate
+          {candidates.length === 1 ? "" : "s"} in this project
+        </span>
+      </div>
+      <div className="strip">
+        {candidates.map((take) => {
+          const on = take.ref === currentRef;
+          return (
+            <button
+              key={take.id}
+              type="button"
+              className={on ? "take on" : "take"}
+              aria-pressed={on}
+              disabled={on}
+              /*
+                The VERB is in the accessible name, not only in a title. A tile
+                whose name is just the file tells a screen-reader user what the
+                thing is called and nothing about what pressing it does — the
+                audit's "the strip's only verb is stated only in a title".
+              */
+              aria-label={
+                on
+                  ? `${bedName(take.ref)} — already the music bed on this cut`
+                  : `Swap the music bed to ${bedName(take.ref)}`
+              }
+              title={on ? `${take.ref} — already the bed on this cut` : `swap the bed to ${take.ref}`}
+              onClick={() => onEdl((current) => setMusicSource(current, take.ref, take.kind === "audio" ? "audio" : "take"))}
+            >
+              <div className="thumb-md">
+                <span>{on ? "in the cut" : bedName(take.ref)}</span>
+              </div>
+              <span className="take-cap">{on ? bedName(take.ref) : takeCaption(take)}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="inspector-row">
+        <span className="t-label">
+          A swapped bed is encoded, not stream-copied, so its offset, gain and tail easing become
+          editable — and the offset resets, because seconds into one track mean nothing in another.
+        </span>
+      </div>
+    </>
+  );
+}
+
+/** The candidate's FILE NAME — the whole one, so eight cello takes can be told apart. */
+function bedName(ref: string): string {
+  return ref.split("/").pop() ?? ref;
+}
+
 function MusicFields({
   projectId,
   edl,
+  takes,
   playable,
   onEdl,
 }: {
   projectId: string;
   edl: Edl;
+  takes: TakeView[];
   playable: boolean;
   onEdl: (fn: (edl: Edl) => Edl) => void;
 }) {
   const cue = edl.audio[0];
-  if (!cue) return null;
+  if (!cue) {
+    return (
+      <>
+        <div className="inspector-row">
+          <span className="t-label">This cut is silent — no music cue on its EDL.</span>
+        </div>
+        <BedPicker takes={takes} currentRef={null} onEdl={onEdl} />
+      </>
+    );
+  }
   if (cue.mode === "copy") {
     return (
-      <div className="inspector-row">
-        <span className="t-data inspector-ref">{cue.source.ref}</span>
-        <span className="t-label">
-          Stream-copied verbatim from the source — no knobs, by contract.
-        </span>
-      </div>
+      <>
+        <div className="inspector-row">
+          <span className="t-data inspector-ref">{cue.source.ref}</span>
+          <span className="t-label">
+            Stream-copied verbatim from the source — no knobs, by contract.
+          </span>
+        </div>
+        <BedPicker takes={takes} currentRef={cue.source.ref} onEdl={onEdl} />
+      </>
     );
   }
   const fadeOut = cue.fadeOut;
@@ -364,6 +474,7 @@ function MusicFields({
       <div className="inspector-row">
         <span className="t-data inspector-ref">{cue.source.ref}</span>
       </div>
+      <BedPicker takes={takes} currentRef={cue.source.ref} onEdl={onEdl} />
       {playable && (
         <div className="inspector-row">
           <Waveform
