@@ -187,4 +187,35 @@ describe("shoot-surface refuses to run from a git worktree", () => {
     expect(src).toContain("failed inside the HARNESS, not the product");
     expect(src).toMatch(/process\.exit\(1\)/);
   });
+
+  /**
+   * A SHEET MUST BE SHOOTABLE WITH NO ROUTE (s85, the D4 wave).
+   *
+   * `--route` was required, which quietly made the gate unrunnable at the one
+   * moment a design wave needs it most: a NEW sheet is authored BEFORE its route
+   * exists, so "shoot it and read the render before presenting" — the pre-plan's
+   * own method step — had no way to run. The sheet-rendering loop already stood
+   * alone; only the arg guard blocked it.
+   *
+   * Pinned because the failure mode is silent in the worst way. Re-tightening the
+   * guard to `routes.length === 0` does not break any existing route-shooting
+   * call, so nothing else in the suite would notice, and the next design wave
+   * would go back to eyeballing sheets in a browser by hand — which is precisely
+   * the un-run, un-ratcheted state rule 8 exists to prevent.
+   */
+  it("accepts a SHEET with no --route, so a new sheet can be read before its route exists", () => {
+    const result = runScript(fakeRepo("dir"), ["--sheet", "Dashboard.dc.html"]);
+    // Proof it got PAST the arg guard rather than merely failing quietly: the
+    // next thing the script does is read the sheets' own theme.css for the
+    // viewport, which the fake repo does not carry. Reaching that error is only
+    // possible on the far side of the guard — and it costs no browser launch.
+    expect(result.stderr).not.toContain("usage: node scripts/shoot-surface.mjs");
+    expect(result.stderr).toContain("theme.css");
+  });
+
+  it("still refuses when given NEITHER a route nor a sheet, and says so in one line", () => {
+    const result = runScript(fakeRepo("dir"), []);
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("at least one --route or one --sheet is required");
+  });
 });

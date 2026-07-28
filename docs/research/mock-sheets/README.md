@@ -122,6 +122,45 @@ question. They are drawn in the sheets' language and live on the same
 canvas, but **no lane may port one until the founder has ruled on it** —
 they carry open questions on purpose.
 
+### The D4 wave — four sheets, authored s85 (`Analytics` · `Schedule` · `Composer` · `Channels`)
+
+Brief: `../d4-PREPLAN.md`. Raw material: `../mobbin-patterns-s83.md` +
+`../mobbin-patterns-s83b-microux.md`. Authored lead-direct per the standing
+founder rule; each carries **its own OPEN CALLS in its file header** — the
+questions the mock asks him rather than answers for him. **His verdict makes a
+sheet law; no build lane opens on any of them before that.**
+
+- **`Analytics.dc.html`** — a NEW surface. Per-post table with honest per-platform
+  N/A (LinkedIn reach/engagement read "partner-gated", Bluesky reach reads
+  "no impressions" while its engagement is real), every number carrying its
+  as-of, an end-of-data line, and a **"Feeds back" column** making the D2 closed
+  loop visible per post. Engagement-by-hour is drawn as a RESERVED BOX that says
+  it has no data and names what it waits on, never a fabricated curve.
+- **`Schedule.dc.html`** — the Calendar surface's successor. Organizing idea is the
+  **three-fact split** (planned / queued / published) as three distinct objects
+  with a legend that names them. Carries the answer to **deferred item #2**: the
+  schedule modal shows CADENCE PRESSURE BEFORE THE COMMIT, so a cadence-illegal
+  slot is refused with its next legal instant instead of failing terminally after.
+- **`Composer.dc.html`** — the Create/Approve per-platform band. The fit line is a
+  **counter with refusal reasons**, and a platform that refuses outright says so
+  in words rather than showing a green count that lies. The judge is visible in
+  the band ("would block", the denylist hit named and located) and the doctrine
+  is stated on the surface: *it gates — it never rewrites*. Closes the s70c gap by
+  giving target terms / discoverability a visible home on the social path.
+- **`Channels.dc.html`** — Settings › Integrations, renamed. Drawn from LIFE: every
+  state is the shipped `CREDENTIAL_CARD_STATES` vocabulary, and the destinations,
+  labels and connect flavors are the live registry's. Adds `connectedAs` +
+  `connectedAt` + `lastValidatedAt` per card, the disconnect confirm that COUNTS
+  the queue rows it would strand (shipped s83), and the connect dance drawn as all
+  four of its real states so none of them is a blank screen.
+
+**Two cross-cutting proposals ride this wave and need their own verdict**, because
+they change the rail on every future sheet: **Calendar is renamed `Schedule`**, and
+**`Analytics` joins the rail** directly under it — placed there so the rail reads as
+the loop it is (Intel measures the market → Create → Approve → Schedule → Analytics
+measures us). All four D4 sheets draw the rail that way; the 16 verdicted sheets
+still say "Calendar" and would need a sweep if he takes the rename.
+
 - ~~**`Source Media.dc.html`**~~ — **VERDICTED s76, MOVED OUT OF THIS SECTION.
   The founder ruled it worth doing** (*"my verdict on b-media is that its
   worth doing right? maybe next session"*), so the do-not-port bar is LIFTED

@@ -1,0 +1,280 @@
+<!doctype html>
+<!-- MOCK SHEET — 'Composer' (the Create/Approve per-platform band) — D4 wave, authored
+     s85 against docs/research/d4-PREPLAN.md §"Sheet 3". NOT YET VERDICTED: a PROPOSAL
+     until the founder rules (README §Proposals). Chrome + theme.css identical to the
+     verdicted sheets.
+
+     WHAT THIS BAND IS FOR. One body, many destinations, each with its own rules. Buffer's
+     grammar: the per-platform settings live UNDER the body, generated from the D3 schemas,
+     so the operator never leaves the draft to find out a platform will refuse it.
+
+     THE MOAT IS VISIBLE HERE, AND IT IS THE POINT. The ratified doctrine is
+     "the judge gates — it never rewrites." So the band shows WHAT WOULD BLOCK AND WHY
+     BEFORE the operator spends a click: the denylist hit is named and located, the
+     grounding count is stated, and the verdict says "would block" in words. Nothing in
+     this band edits the operator's text. Not one control here rewrites.
+
+     THE FIT LINE IS A COUNTER WITH REFUSAL REASONS, never a bare count. "312 / 280" is
+     useless on its own; "over by 32 — the last sentence will be cut" is actionable. A
+     platform that refuses the post OUTRIGHT (Instagram, text-only) says so in words and
+     names the fix, rather than showing a green count that lies.
+
+     THE OPEN CALLS THIS SHEET PUTS TO THE FOUNDER (it asks; it does not answer):
+       (a) PER-PLATFORM TABS vs ONE STACKED COLUMN for the fit line. Drawn as TABS —
+           five stacked platform blocks would push the body off the screen. The tension
+           tabs create (detail for one platform, blindness to the other four) is answered
+           by putting a STATUS DOT ON EVERY TAB: at-a-glance for all five, detail for the
+           active one. If he wants all five expanded, the dots become the section heads
+           and the band scrolls.
+       (b) WHERE THE DISCOVERABILITY LENS SITS. Drawn BESIDE the judge verdict, in its own
+           card, deliberately NOT inside it — a missing target term warns, it never blocks,
+           and folding it into the judge card would blur a gate with a hint. This closes
+           the s70c gap: target terms / SEO coverage have had no visible home on the
+           social path at all. His call whether it earns its own strip instead.
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .cmp-grid { flex: 1; display: grid; grid-template-columns: 1fr 402px; gap: 14px; align-items: stretch; min-height: 0; }
+          .cmp-left { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+          /* The editor takes the free space; the band sits under it at its own
+             height. That is the Buffer grammar and it is also why this column
+             never grows a dead gap between the body and the settings. */
+          .body-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 15px 16px; font-size: 14.5px; line-height: 1.62; color: var(--n-1000); flex: 1; min-height: 0; }
+          .body-box .hit { background: var(--err-subtle); border-bottom: 1.5px solid var(--err); border-radius: 2px; padding: 0 1px; }
+
+          /* Platform tabs — a status dot on every tab is what makes tabs honest. */
+          .ptabs { display: flex; gap: 2px; padding: 3px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: var(--r-ctl); }
+          .ptab { display: flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 5px; font-size: 12.5px; font-weight: 500; color: var(--n-900); cursor: pointer; }
+          .ptab:hover { color: var(--n-1000); }
+          .ptab.on { background: var(--n-300); color: var(--n-1000); }
+
+          .band { flex: none; display: flex; flex-direction: column; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; }
+          .fld { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-top: 1px solid var(--n-400); font-size: 13px; }
+          .fld:first-of-type { border-top: none; }
+          .fld dt { color: var(--n-900); width: 128px; flex: none; font-size: 12.5px; }
+          .fld dd { flex: 1; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; min-width: 0; }
+          .ctl { display: inline-flex; align-items: center; gap: 7px; height: 27px; padding: 0 10px; border: 1px solid var(--n-500); border-radius: var(--r-ctl); background: var(--n-200); font-size: 12.5px; }
+          .ctl.ghosted { opacity: 0.5; }
+          .toggle { width: 30px; height: 17px; border-radius: var(--r-pill); background: var(--act); position: relative; flex: none; }
+          .toggle::after { content: ""; position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--act-text); }
+          .toggle.off { background: var(--n-500); }
+          .toggle.off::after { right: auto; left: 2px; background: var(--n-800); }
+
+          /* The fit line: a counter WITH its refusal reason. */
+          .fitline { display: flex; align-items: center; gap: 11px; padding: 10px 16px; border-top: 1px solid var(--n-400); background: var(--n-bg); }
+          .fit-count { font-family: var(--font-data); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--n-1000); flex: none; }
+          .fit-why { font-size: 12px; color: var(--n-900); }
+          .fit-bar { width: 108px; flex: none; }
+
+          /* Right column. */
+          .cmp-right { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+          .jrow { display: flex; align-items: flex-start; gap: 9px; padding: 9px 14px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
+          .jrow:first-of-type { border-top: none; }
+          .jmark { width: 16px; flex: none; text-align: center; font-size: 12px; margin-top: 1px; }
+          .term-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border: 1px solid var(--n-500); border-radius: var(--r-pill); font-size: 11.5px; color: var(--n-1000); background: var(--n-200); }
+          .term-chip.primary { border-color: var(--act); background: var(--act-subtle); }
+          .term-chip.miss { border-color: var(--warn); color: var(--warn); background: var(--warn-subtle); }
+
+          /* Preview with the REAL truncation point drawn. */
+          .pv { border: 1px solid var(--n-500); border-radius: 9px; background: var(--n-bg); padding: 12px 13px; display: flex; flex-direction: column; gap: 8px; }
+          .pv-head { display: flex; align-items: center; gap: 8px; }
+          .pv-av { width: 30px; height: 30px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); flex: none; }
+          .pv-body { font-size: 12.5px; line-height: 1.55; color: var(--n-1000); }
+          .pv-cut { border-top: 1px dashed var(--warn); margin: 2px 0 0; padding-top: 6px; display: flex; align-items: center; gap: 7px; }
+          .pv-fade { color: var(--n-800); }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Composer">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Schedule</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 13.2V9.6M6.6 13.2V5.4M10.4 13.2v-5M14.2 13.2V3.2"></path></svg>Analytics</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content" style="gap:12px">
+
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="t-label">Create ›</span>
+              <h1 class="t-headline">Launch film — 5 destinations</h1>
+              <span class="pill pill-warn">would block · 1</span>
+              <div style="flex:1"></div>
+              <div class="btn btn-ghost btn-sm">Save draft</div>
+              <div class="btn btn-ghost btn-sm">Re-judge</div>
+              <div class="btn btn-primary btn-sm">Send to Approve</div>
+            </div>
+
+            <div class="cmp-grid">
+              <!-- ── left: one body, then the per-platform band ── -->
+              <div class="cmp-left">
+                <div class="body-box">
+                  Deterministic video changed what we can promise. Every beat is a build step, so the same prompt renders the same film twice — and a failed take names the beat that failed instead of the whole render. Nothing here is <span class="hit">guaranteed</span> to be faster on the first pass, but the second pass is free.
+                </div>
+
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="ptabs">
+                    <span class="ptab on"><span class="dot" style="background:var(--warn)"></span>LinkedIn</span>
+                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Facebook</span>
+                    <span class="ptab"><span class="dot" style="background:var(--err)"></span>Instagram</span>
+                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Bluesky</span>
+                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Blog</span>
+                  </div>
+                  <div style="flex:1"></div>
+                  <span class="t-label">settings come from each platform's schema — 1 refuses, 1 needs a trim</span>
+                </div>
+
+                <div class="band">
+                  <div class="fld"><dt>Post as</dt><dd><span class="ctl">Steven · member</span><span class="t-label">the only seat this token grants</span></dd></div>
+                  <div class="fld"><dt>Visibility</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
+                  <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label">off — links in the body do not cost reach on this platform</span></dd></div>
+                  <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="t-label">40s cut · native upload</span></dd></div>
+                  <div class="fld"><dt>Link</dt><dd><span class="ctl">thalon.example/build-step-video</span><span class="ctl ghosted">preview card ▾</span></dd></div>
+                  <div class="fld"><dt>Alt text</dt><dd><span class="ctl">“A build step renders a beat”</span><span class="t-label">travels with the video on every destination that accepts it</span></dd></div>
+                  <div class="fld"><dt>Who can comment</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
+                  <div class="fitline">
+                    <span class="fit-count">2,412 / 3,000</span>
+                    <div class="fit-bar bar-trough"><div class="bar-fill" style="width:80%;background:var(--ok)"></div></div>
+                    <span class="fit-why">Fits. The body posts whole — no cut.</span>
+                    <div style="flex:1"></div>
+                    <span class="t-data">LinkedIn</span>
+                  </div>
+                  <div class="fitline">
+                    <span class="fit-count">2,412 / 63,206</span>
+                    <div class="fit-bar bar-trough"><div class="bar-fill" style="width:6%;background:var(--ok)"></div></div>
+                    <span class="fit-why">Fits, with room to spare. Native video upload.</span>
+                    <div style="flex:1"></div>
+                    <span class="t-data">Facebook</span>
+                  </div>
+                  <div class="fitline" style="background:var(--err-subtle)">
+                    <span class="fit-count" style="color:var(--err)">refuses</span>
+                    <span class="fit-why" style="color:var(--err)">Instagram takes no text-only post. Attach an image or video, or drop Instagram from this run.</span>
+                    <div style="flex:1"></div>
+                    <span class="t-data">Instagram</span>
+                  </div>
+                  <div class="fitline" style="background:var(--warn-subtle)">
+                    <span class="fit-count" style="color:var(--warn)">312 / 300</span>
+                    <div class="fit-bar bar-trough"><div class="bar-fill" style="width:100%;background:var(--warn)"></div></div>
+                    <span class="fit-why" style="color:var(--warn)">Over by 12. The last sentence is what gets cut — trim it here, not on the platform.</span>
+                    <div style="flex:1"></div>
+                    <span class="t-data">Bluesky</span>
+                  </div>
+                  <div class="fitline">
+                    <span class="fit-count">no limit</span>
+                    <span class="fit-why">Your own site. The body becomes the article; the film becomes the hero.</span>
+                    <div style="flex:1"></div>
+                    <span class="t-data">Blog</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── right: the gate, the hint, and an honest preview ── -->
+              <div class="cmp-right">
+                <div class="card">
+                  <div class="card-head">
+                    <span class="t-title">Judge</span>
+                    <span class="pill pill-err">would block</span>
+                    <div style="flex:1"></div>
+                    <span class="t-label">before you spend a click</span>
+                  </div>
+                  <div class="jrow">
+                    <span class="jmark" style="color:var(--err)">✕</span>
+                    <div style="min-width:0">
+                      <div style="font-weight:500">Denylist · 1 hit</div>
+                      <div class="excerpt" style="white-space:normal">“guaranteed” is on your denylist. It appears once, in the last sentence — marked in the body.</div>
+                    </div>
+                  </div>
+                  <div class="jrow">
+                    <span class="jmark" style="color:var(--ok)">✓</span>
+                    <div style="min-width:0">
+                      <div style="font-weight:500">Grounding · 2 of 2</div>
+                      <div class="excerpt" style="white-space:normal">Every factual claim ties to a provided source. <a href="#">View sources</a></div>
+                    </div>
+                  </div>
+                  <div class="jrow">
+                    <span class="jmark" style="color:var(--ok)">✓</span>
+                    <div style="min-width:0">
+                      <div style="font-weight:500">Voice · within profile v4</div>
+                      <div class="excerpt" style="white-space:normal">Concrete, no hype. No claim beyond the sources.</div>
+                    </div>
+                  </div>
+                  <div class="jrow" style="background:var(--n-bg)">
+                    <span class="jmark" style="color:var(--n-800)">·</span>
+                    <span class="t-label" style="font-size:11.5px">It gates — it never rewrites. Nothing on this screen edits your words.</span>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-head">
+                    <span class="t-title">Discoverability</span>
+                    <span class="pill pill-warn">3 of 4</span>
+                    <div style="flex:1"></div>
+                    <span class="t-label">warns — never blocks</span>
+                  </div>
+                  <div style="padding:11px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+                    <span class="term-chip primary">AI</span>
+                    <span class="term-chip">content automation</span>
+                    <span class="term-chip">build-step video</span>
+                    <span class="term-chip miss">deterministic video · missing</span>
+                    <span class="t-label" style="width:100%;margin-top:2px;font-size:11.5px">One target term never appears. The judge does not care; the search index will.</span>
+                  </div>
+                </div>
+
+                <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0">
+                  <div class="card-head">
+                    <span class="t-title">Preview · LinkedIn</span>
+                    <div style="flex:1"></div>
+                    <a class="card-link" href="#">Bluesky →</a>
+                  </div>
+                  <div style="padding:11px 14px 12px;display:flex;flex-direction:column;gap:8px;min-height:0">
+                    <div class="pv">
+                      <div class="pv-head">
+                        <div class="pv-av"></div>
+                        <div style="min-width:0">
+                          <div style="font-size:12.5px;font-weight:600">Steven</div>
+                          <div class="t-data">now · Anyone</div>
+                        </div>
+                      </div>
+                      <div class="pv-body">Deterministic video changed what we can promise. Every beat is a build step, so the same prompt renders the same film twice<span class="pv-fade"> — and a failed take names…</span></div>
+                      <div class="pv-cut">
+                        <span class="t-label" style="font-size:11px;color:var(--warn)">…see more</span>
+                        <span class="t-label" style="font-size:10.5px">feed cuts here · 210 characters</span>
+                      </div>
+                      <div class="thumb-md" style="width:100%;height:64px"><span>clip frame · 40s</span></div>
+                    </div>
+                    <span class="t-label" style="font-size:11px">Drawn from the platform's documented rules, not a live render. The real post can differ — treat the cut point as close, not exact.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

@@ -94,9 +94,14 @@ for (let i = 0; i < argv.length; i++) {
 
 refuseInsideWorktree(base, iAmTheLead);
 
-if (routes.length === 0) {
+// A route OR a sheet is enough. Sheet-only is not a convenience: a design wave
+// authors its sheets BEFORE any route exists (D4, s85), so requiring --route
+// made the gate unrunnable at exactly the moment the sheet needs reading. The
+// sheet loop below already stands alone; only this guard blocked it.
+if (routes.length === 0 && sheets.length === 0) {
   console.error(
-    "usage: node scripts/shoot-surface.mjs --route <path> [--sheet <Name.dc.html>] [--mode dark|light|both]",
+    "usage: node scripts/shoot-surface.mjs [--route <path>] [--sheet <Name.dc.html>] [--mode dark|light|both]\n" +
+      "       at least one --route or one --sheet is required",
   );
   process.exit(2);
 }
