@@ -19,7 +19,14 @@ import { activeSurface, NAV_SURFACES } from "@/lib/workspace/nav";
  * production. Resolving it per environment makes the mark mean the same
  * thing in both.
  */
-const LANDING_HREF = process.env.NODE_ENV === "development" ? "/?landing" : "/";
+/**
+ * s84: the flag needs a VALUE. Next's `missing` query matcher treats an
+ * empty-valued key as absent, so a bare `/?landing` still matched the rule
+ * and bounced to `/app?landing=` — the way home was a redirect LOOP, which
+ * is what the founder felt as "there is no proper link between them".
+ * Pinned by test.
+ */
+const LANDING_HREF = process.env.NODE_ENV === "development" ? "/?landing=1" : "/";
 
 /**
  * The side rail, rebuilt exactly from the mock sheets (DOCTRINE 0): brand

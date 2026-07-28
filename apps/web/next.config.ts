@@ -46,7 +46,9 @@ const nextConfig: NextConfig = {
   // the workspace — the operator's daily door is /app, not the marketing
   // landing. Non-permanent and development-gated: production keeps the
   // landing at / (stealth posture unchanged). Escape hatch for design work:
-  // `/?landing` still serves the landing page in dev.
+  // `/?landing=1` serves the landing page in dev — the flag needs a VALUE,
+  // because Next's `missing` matcher counts an empty-valued key as absent, so
+  // a bare `/?landing` matches this rule and loops back to /app (s84).
   async redirects() {
     if (process.env.NODE_ENV !== "development") return [];
     return [
