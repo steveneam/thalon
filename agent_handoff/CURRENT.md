@@ -96,14 +96,16 @@ now; READ BEFORE TRUSTING A VERDICT).
    the box-local fallback** (`claude mcp remove --scope user mobbin` — it sits
    unauthenticated in user config, never the tracked `.mcp.json`) so there is
    one registration, not two. If the connector did NOT arrive, the fallback's
-   `/mcp` auth is the plan B. Then a BOUNDED pattern sweep of comparable
-   interfaces: social schedulers/distributors (composer · queue · calendar) ·
-   workspace shells · video editors · settings/connect-account flows. Two
-   payoffs, in order: the s83 connect-flow UI (Settings → Integrations gains
-   the generic connect door — Mobbin's connect-account patterns are directly
-   on point) and the D4 design wave (Analytics · Calendar→Schedule · composer
-   band · Channels sheets). Findings land as a tracked reference memo under
-   `docs/research/`, not as chat.
+   `/mcp` auth is the plan B. **The connector is CONFIRMED ADDED (founder,
+   s82 close) and he is a Mobbin PRO user (3 months) — full access, use it.**
+   Then run the sweep to the founder-ratified brief:
+   **`docs/research/mobbin-brief-s83.md`** — bounded (~half a session, hard
+   stop), eight categories in priority order (connect flows FIRST — s83
+   builds that UI), flows over screens, every finding verdict-tagged and tied
+   to the Thalon decision it changes, NO Mobbin asset ever committed.
+   Deliverable = `docs/research/mobbin-patterns-s83.md`. Downstream pipeline
+   unchanged: memo → **claude-design mocks (Fable 5 authors design directly,
+   standing rule)** → founder verdict → exact-mock build.
 1. **The seam, per plan §4:** ONE `SocialConnector` contract in
    `packages/contracts` (identifier · scopes · capabilities, merging with W1's
    matrix · per-platform settings schema · `generateAuthUrl` / `exchangeCode` /
