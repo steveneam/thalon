@@ -118,6 +118,52 @@ export class SocialDailyCapReachedError extends PublishRefusedError {
   }
 }
 
+/**
+ * C1/C2 (s82): the SCHEDULE door's fit rung — the platform will bounce this
+ * post as written, so the queue refuses to commit it. Deterministic and
+ * spend-free: every reason comes from the frozen capability matrix
+ * (`validateForPlatform`), never from a platform call that had to fail to
+ * find out. The reasons land VERBATIM (the B1.5 lesson) and ALL of them at
+ * once — an operator fixing a post should see the whole bill.
+ *
+ * Not a publish-door rung: the door's ladder a→f is untouched. This refuses
+ * earlier, at the moment of commitment, which is the only moment at which
+ * the fix is free.
+ */
+export class SocialPostDoesNotFitError extends PublishRefusedError {
+  readonly refusal = "platform_fit";
+  constructor(
+    public readonly platform: SocialPlatform,
+    public readonly problems: readonly { code: string; message: string }[],
+  ) {
+    super(
+      `this draft does not fit "${platform}": ${problems.map((p) => p.message).join(" ")} — the capability matrix is the platform's ceiling, not a style budget; edit the draft and the judge re-runs.`,
+    );
+    this.name = "SocialPostDoesNotFitError";
+  }
+}
+
+/**
+ * C2 (s82): a queue row's `scheduledAt` must be in the FUTURE. A row
+ * scheduled at a past instant is due the moment it is written — which makes
+ * "schedule" mean "publish now" without the operator ever saying so, and
+ * `listDue` would hand it to the very next tick. Under the standing sequence
+ * gate that is not a commitment anyone has consented to, so the door refuses
+ * and names both instants.
+ */
+export class SocialScheduleInPastError extends PublishRefusedError {
+  readonly refusal = "schedule_in_past";
+  constructor(
+    public readonly scheduledAt: Date,
+    public readonly now: Date,
+  ) {
+    super(
+      `a queue row must be scheduled in the future: ${scheduledAt.toISOString()} has already passed (now ${now.toISOString()}) — a past slot is due immediately, which is "publish now" wearing a schedule's clothes. Pick a later instant.`,
+    );
+    this.name = "SocialScheduleInPastError";
+  }
+}
+
 /** Rung e: this draft already went to this platform — a draft posts to a platform at most once, ever (cross-posting to a DIFFERENT platform stays legal by the ledger's key design). */
 export class DraftAlreadyPublishedError extends PublishRefusedError {
   readonly refusal = "draft_already_published";

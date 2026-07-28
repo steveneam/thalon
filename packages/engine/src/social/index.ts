@@ -5,9 +5,44 @@ export {
   SocialDailyCapReachedError,
   SocialDraftNotApprovedError,
   SocialFormatNotPublishableError,
+  SocialPostDoesNotFitError,
   SocialPublishDisarmedError,
   SocialPublisherDisarmedError,
+  SocialScheduleInPastError,
 } from "./errors";
+export {
+  PLATFORM_FIT_CODES,
+  platformFitLabel,
+  platformFitStamp,
+  readDraftFitMedia,
+  segmentBody,
+  validateForPlatform,
+  type PlatformFit,
+  type PlatformFitCode,
+  type PlatformFitInput,
+  type PlatformFitMedia,
+  type PlatformFitProblem,
+  type PlatformFitStamp,
+  type PlatformTextMeasure,
+  type PlatformTextSegment,
+} from "./capability";
+export {
+  scheduleApprovedDraft,
+  suggestNextSlot,
+  type ScheduleApprovedDraftDeps,
+  type ScheduleApprovedDraftInput,
+  type ScheduleApprovedDraftResult,
+  type SuggestSlotInput,
+} from "./schedule";
+export {
+  publishQueueArmed,
+  runDuePublishes,
+  SOCIAL_QUEUE_ARM_KEY,
+  type DuePublishFailure,
+  type DuePublishItem,
+  type RunDuePublishesDeps,
+  type RunDuePublishesResult,
+} from "./queue-consumer";
 export {
   createFakeSocialPublisher,
   isRefusingSocialPublisher,

@@ -123,6 +123,45 @@ export function resetSavedViewsTestState(): void {
 
 /** Fetch-boundary mock seam for component development/tests — zero dependency on the engine/judge lanes (SPINE §5 lane map). The staged handlers wrap the SAME fake-driver store the /api/staged routes serve in dev, so tests and dev see one world. */
 export const handlers = [
+  /**
+   * s82 C1/C2 — the publish queue's two reads, so every surface that renders
+   * a draft card has a world to read from. Deliberately EMPTY and honest:
+   * no queue rows, and a fit the engine would have measured. A test that
+   * cares about either registers its own `server.use(...)` over these.
+   *
+   * These exist because the alternative is worse: `onUnhandledRequest:
+   * "error"` would make every Approve-surface test emit an unhandled-request
+   * error and render the card's "couldn't measure" state, which is not the
+   * state those tests mean to be exercising.
+   */
+  http.get("/api/social/queue", () => HttpResponse.json({ rows: [] })),
+  http.get("/api/social/fit", () =>
+    HttpResponse.json({
+      supported: true,
+      bodyHash: "fixture-body-hash",
+      fit: {
+        platform: "linkedin",
+        fits: true,
+        problems: [],
+        text: {
+          rawChars: 42,
+          billedChars: 42,
+          maxChars: 3000,
+          overBy: 0,
+          cutIndex: 42,
+          urlWeight: null,
+          links: [],
+          hashtags: [],
+          maxHashtags: null,
+          segments: [],
+        },
+        media: { count: 0, required: false, maxImages: 9, imageContentTypes: ["image/jpeg"] },
+        capability: { verifiedOn: "2026-07-28" },
+      },
+      suggestedAt: "2026-07-29T09:00:00.000Z",
+    }),
+  ),
+
   // Saved views (Phase-I window): list + idempotent upsert-by-(surface,name).
   http.get("/api/views", ({ request }) => {
     const surface = new URL(request.url).searchParams.get("surface") ?? "";

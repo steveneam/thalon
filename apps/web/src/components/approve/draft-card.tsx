@@ -16,6 +16,12 @@ import {
   versionStrip,
 } from "@/components/approve/approve-model";
 import { FormatDetail } from "@/components/approve/format-detail";
+import {
+  FitLine,
+  PlatformPreview,
+  ScheduleControl,
+  usePlatformFit,
+} from "@/components/approve/platform-fit";
 import { isTypingTarget } from "@/lib/workspace/keyboard";
 import { timeAgo } from "@/lib/workspace/format";
 import type { FeedRun, GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
@@ -73,6 +79,13 @@ export function DraftCard({
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
   const [reasonsOpen, setReasonsOpen] = useState(false);
+  // s82 C4: the platform-true preview is a keeper-STATE behind the checks
+  // band's own "→" grammar (founder call #3 — the sheet stays law), so it
+  // rests closed exactly as the reasons panel does.
+  const [previewOpen, setPreviewOpen] = useState(false);
+  // Fit + queue rows for THIS draft. Called before the state branches below,
+  // because a hook may not be conditional; it no-ops on a null draft.
+  const fitState = usePlatformFit(draft);
 
   // Keyboard triage (B6.2 [+]): 'e' opens the editor (edit state lives
   // here); Escape cancels it — allowed even FROM the textarea, so the
@@ -309,6 +322,18 @@ export function DraftCard({
           </div>
         )}
 
+        {/* The FIT line (C1 wiring #2) — the judge's sibling, and its own
+            line rather than a mark in the checks band: the judge gates what
+            a post CLAIMS, this gates whether it FITS, and blurring them
+            would put a platform's character ceiling among the grounding
+            verdicts. Absent for a format with no capability row. */}
+        <FitLine
+          state={fitState}
+          previewOpen={previewOpen}
+          onTogglePreview={() => setPreviewOpen((open) => !open)}
+        />
+        {previewOpen && fitState.fit?.supported && <PlatformPreview fit={fitState.fit.fit} />}
+
         <FormatDetail draft={draft} />
 
         <div className="src-line">
@@ -349,6 +374,11 @@ export function DraftCard({
         )}
       </div>
 
+      {/* The commitment band (C2/C4): present ONLY when this draft has a
+          commitment to show or make. A queued or blocked draft — the Approve
+          queue's main case — renders nothing here, so the sheet's resting
+          footer is unchanged. */}
+      <ScheduleControl draft={draft} state={fitState} disabled={busy || editing} />
       <div
         style={{
           display: "flex",

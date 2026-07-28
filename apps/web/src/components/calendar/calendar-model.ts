@@ -55,6 +55,9 @@ export function gutterHours(win: TimeWindow = DAY_WINDOW): number[] {
 /**
  * The sheet's whole event vocabulary:
  *  - `plan`   — a planned slot (dashed, gripped): a PLAN, never an upload;
+ *  - `queued` — a COMMITTED publish-queue row (s82): solid, ungripped. See
+ *               `queueEvents` for why this is a different kind and not a
+ *               dressed-up plan;
  *  - `done`   — work that completed successfully (dimmed green: published);
  *  - `closed` — work that reached a decided end without publishing
  *               (dimmed, neutral — approved/rejected are not successes to brag about);
@@ -63,7 +66,7 @@ export function gutterHours(win: TimeWindow = DAY_WINDOW): number[] {
  *               (the all-day row), never the time grid: waiting is a present
  *               state, not something that happens at 14:30.
  */
-export type EventKind = "plan" | "done" | "closed" | "engine" | "you";
+export type EventKind = "plan" | "queued" | "done" | "closed" | "engine" | "you";
 
 export interface CalEvent {
   id: string;
@@ -89,6 +92,10 @@ export interface CalEvent {
   hours?: number;
   /** Waiting events only: true when it started waiting before the visible week. */
   carried?: boolean;
+  /** Queued events only: the publish_queue row — the subject of Cancel schedule (s82). */
+  queueRowId?: string;
+  /** Queued events only: the row's status word, so a failed commitment is not drawn as a live one. */
+  queueStatus?: string;
 }
 
 /** The sheet's own heights: a gripped plan is 42px, everything else 38px. */
@@ -131,6 +138,58 @@ export function planEvents(
       flagReason: reason,
     };
   });
+}
+
+/**
+ * s82 C4: COMMITTED queue rows as events — the other half of the calendar's
+ * one hard distinction.
+ *
+ * A `planned_slot` is the operator thinking "Tuesday-ish". A `publish_queue`
+ * row is a commitment with an idempotency key behind it and a consumer that
+ * will act on it the moment the platform is armed. Drawing them the same
+ * would make "I was thinking Tuesday" and "this goes out at 09:30" the same
+ * fact, so they are different kinds with different dress: a plan is dashed
+ * and draggable, a queue row is solid and is moved by cancelling and
+ * re-scheduling — which is what a commitment should cost.
+ *
+ * Only LIVE rows (pending/processing) are drawn on the grid: a published row
+ * already has its own `done` event from the publication, and cancelled or
+ * failed rows are history rather than a future instant.
+ */
+export function queueEvents(
+  rows: ReadonlyArray<{
+    id: string;
+    draftId: string;
+    platform: string;
+    scheduledAt: string | null;
+    status: string;
+  }>,
+  assets: PipelineAsset[],
+): CalEvent[] {
+  const byDraft = new Map(assets.map((a) => [a.draftId, a]));
+  return rows
+    .filter((row) => (row.status === "pending" || row.status === "processing") && row.scheduledAt)
+    .map((row) => {
+      const at = new Date(row.scheduledAt as string);
+      const asset = byDraft.get(row.draftId);
+      return {
+        id: `queue-${row.id}`,
+        kind: "queued" as const,
+        draftId: row.draftId,
+        queueRowId: row.id,
+        queueStatus: row.status,
+        at,
+        day: dayKey(at),
+        lead: `Scheduled · ${platformLabel(row.platform)}`,
+        meta: `${clockLabel(at)} · ${
+          row.status === "processing" ? "publishing now" : "committed — the publisher is disarmed"
+        }`,
+        href: asset ? approveHref(asset) : null,
+        excerpt: asset?.excerpt ?? "",
+        flagged: false,
+        flagReason: "",
+      };
+    });
 }
 
 /**
@@ -495,10 +554,13 @@ export function monthCells(anchor: Date, now: Date): MonthCell[] {
  */
 const MARK_RANK: Record<EventKind, number> = {
   you: 0,
-  plan: 1,
-  done: 2,
-  closed: 3,
-  engine: 4,
+  // A commitment outranks an intention: what WILL go out matters more in a
+  // three-mark cell than what someone was thinking of.
+  queued: 1,
+  plan: 2,
+  done: 3,
+  closed: 4,
+  engine: 5,
 };
 
 export function byMarkPriority(a: CalEvent, b: CalEvent): number {

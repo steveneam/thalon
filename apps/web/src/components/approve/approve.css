@@ -107,6 +107,39 @@
 .approve-surface .fmt-ref { font-family: var(--font-data); font-size: 11.5px; color: var(--n-900); overflow-wrap: anywhere; }
 .approve-surface .fmt-stale { font-size: 12px; font-style: italic; color: var(--n-900); }
 
+/*
+ * s82 C4 — the platform-fit line, its preview state, and the commitment
+ * band. All THREE are app adaptations, named: the sheet's fixture has no
+ * capability matrix and no queue, so it draws neither. Founder call #3
+ * ruled these ship as keeper-STATES behind the sheet's existing chrome, so
+ * every rule below reuses the sheet's own atomics (`.check`, `.reasons-
+ * panel`, `.as-text-btn`, the `.t-label` register) rather than inventing a
+ * band with its own dress.
+ */
+.approve-surface .fit-line { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+/* The preview panel is the reasons panel's twin — same inset, same register:
+   two "→" doors on one card that looked different would read as two
+   different kinds of thing. */
+.approve-surface .preview-panel { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+/* The post as the PLATFORM reads it: the body's own type, wrapped, so what
+   is on screen is what would go out. */
+.approve-surface .fit-preview-body { font-size: 14px; line-height: 1.65; max-width: 62ch; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.approve-surface .fit-link { color: var(--act); text-decoration: underline; text-underline-offset: 2px; }
+.approve-surface .fit-tag { color: var(--act); }
+/* Where the ceiling falls, drawn as a rule the eye can land on — the one
+   fact a plain body rendering can never show. */
+.approve-surface .fit-cut { display: inline-block; width: 100%; height: 0; border-top: 2px dashed var(--err); margin: 6px 0; }
+/* Past the cut: still legible (the operator has to edit it) but visibly not
+   going out. */
+.approve-surface .fit-over { color: var(--n-800); text-decoration: line-through; text-decoration-color: var(--err); }
+
+/* The commitment band, above the action rail. Absent entirely unless the
+   draft has a commitment to show or make. */
+.approve-surface .sched-block { display: flex; flex-direction: column; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--n-400); }
+.approve-surface .sched-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.approve-surface .sched-form .input { max-width: 230px; }
+.approve-surface .sched-history { display: flex; flex-direction: column; gap: 4px; }
+
 /* The keyboard legend's off state — a key the current selection cannot run
    must not read as live (s79 A2: a staged row disabled a/r/e while the
    legend still advertised all five). Scoped, additive; `.kbd` itself stays

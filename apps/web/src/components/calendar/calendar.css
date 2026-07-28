@@ -164,6 +164,30 @@
   border-style: solid;
   box-shadow: 0 0 0 1px var(--act);
 }
+/*
+ * s82 (app adaptation, named): the COMMITTED queue row. The sheet's fixture
+ * has no publish queue, so it draws no such box — but the calendar's one
+ * hard job here is to say which is which, and it says it structurally:
+ *
+ *   dashed, neutral      = a plan      (an intention; draggable, gripped)
+ *   solid, ok-tinted     = scheduled   (a commitment; withdrawn, never dragged)
+ *   ok-FILLED and dimmed = published   (`.ev-ok.done` — it already happened)
+ *
+ * It borrows `.ev-ok`'s own border idiom rather than introducing a new
+ * treatment: a queue row is on its way out, so it belongs to that channel —
+ * outlined while it is still ahead, filled and faded once it is past.
+ */
+.calendar-surface .ev-queued {
+  background: var(--n-100);
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--ok) 45%, var(--n-500));
+}
+/* The month cell's mark, matching: `.mark-plan` is dashed, this is not. */
+.calendar-surface .mark-queued {
+  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--ok) 45%, var(--n-500));
+  color: var(--n-900);
+}
 .calendar-surface .flag { color: var(--warn); font-size: 10px; }
 .calendar-surface .nowline {
   position: absolute;

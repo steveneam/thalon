@@ -21,6 +21,7 @@ import {
   planEmptyReason,
   planEvents,
   plannableAssets,
+  queueEvents,
   sweepEvents,
   waitingEvents,
   weekRangeLabel,
@@ -34,6 +35,11 @@ import {
   type PlanEmptyReason,
   type Scope,
 } from "@/components/calendar/calendar-model";
+import {
+  cancelQueueRow,
+  fetchQueueRows,
+  type QueueRowWire,
+} from "@/components/approve/queue-client";
 import { platformLabel } from "@/lib/workspace/format";
 import { fetchViews, putView } from "@/lib/views/client";
 import { useListKeys } from "@/lib/workspace/keyboard";
@@ -109,6 +115,8 @@ export function CalendarSurface() {
   const router = useRouter();
   const [status, setStatus] = useState<ReadState>("loading");
   const [plan, setPlan] = useState<PlanPayload | null>(null);
+  /** s82: this tenant's publish-queue rows — commitments, kept distinct from plans. */
+  const [queueRows, setQueueRows] = useState<QueueRowWire[]>([]);
   const [now, setNow] = useState<Date | null>(null);
   const [anchor, setAnchor] = useState<Date | null>(null);
   const [density, setDensity] = useState<Density>(DEFAULT_VIEW.density);
@@ -148,9 +156,19 @@ export function CalendarSurface() {
   const load = useCallback(
     () =>
       fetchPlan()
-      .then((payload) => {
+      .then(async (payload) => {
+        // s82: the committed queue rides alongside the plan, best-effort.
+        // A queue read failure must never blank the calendar — the week's
+        // plans and records are true whether or not the queue answers, so a
+        // failure leaves the scheduled boxes absent rather than the surface
+        // in its error state.
+        const rows = await fetchQueueRows().catch(() => [] as QueueRowWire[]);
+        return { payload, rows };
+      })
+      .then(({ payload, rows }) => {
         const loaded = new Date();
         setPlan(payload);
+        setQueueRows(rows);
         setNow(loaded);
         setAnchor(
           (current) => current ?? new Date(loaded.getFullYear(), loaded.getMonth(), loaded.getDate()),
@@ -266,11 +284,12 @@ export function CalendarSurface() {
     if (!plan || !now || rangeDays.length === 0) return [];
     return [
       ...planEvents(plan.plannedSlots, plan.assets, breaches),
+      ...queueEvents(queueRows, plan.assets),
       ...assetEvents(plan.assets),
       ...sweepEvents(plan.sweep, now, rangeDays),
       ...waitingEvents(plan.assets, rangeDays, now),
     ];
-  }, [plan, now, rangeDays, breaches]);
+  }, [plan, now, rangeDays, breaches, queueRows]);
 
   const rangeKeys = useMemo(() => new Set(rangeDays.map((d) => d.key)), [rangeDays]);
   const visible = useMemo(
@@ -286,6 +305,8 @@ export function CalendarSurface() {
   const monthByDay = useMemo(() => groupByKey(visible), [visible]);
 
   const plannedInView = visible.filter((e) => e.kind === "plan").length;
+  /** Commitments in view — counted separately, because they are a different fact. */
+  const scheduledInView = visible.filter((e) => e.kind === "queued").length;
   const hidden = outsideWindow(
     visible.filter((e) => e.kind !== "you"),
     win,
@@ -439,6 +460,28 @@ export function CalendarSurface() {
     }
   }
 
+  /**
+   * s82: withdraw a COMMITMENT. Unlike removing a plan, this cancels a
+   * publish-queue row — and only a row nothing has claimed yet can be
+   * withdrawn. Mid-flight the repo refuses and says so, which is the honest
+   * answer rather than a cancellation that quietly did not happen.
+   */
+  async function cancelSchedule(queueRowId: string) {
+    setSlotBusy(true);
+    setSlotError(null);
+    try {
+      await cancelQueueRow(queueRowId);
+      setSelectedId(null);
+      await load();
+    } catch (err) {
+      setSlotError(
+        err instanceof Error ? err.message : "Couldn’t cancel the schedule — nothing changed.",
+      );
+    } finally {
+      setSlotBusy(false);
+    }
+  }
+
   function navigate(direction: 1 | -1) {
     setSelectedId(null);
     setAnchor((current) => {
@@ -544,6 +587,13 @@ export function CalendarSurface() {
         <span className="pill pill-idle">
           {status === "success" ? `${plannedInView} planned` : "– planned"}
         </span>
+        {/* Absent at rest: the count only exists once something is actually
+            committed, so a workspace with no queue looks exactly as it did. */}
+        {status === "success" && scheduledInView > 0 && (
+          <span className="pill pill-ok" title="committed publish-queue rows — a plan is only an intention">
+            {`${scheduledInView} scheduled`}
+          </span>
+        )}
         <span className="t-label">{headerNote}</span>
       </div>
 
@@ -765,6 +815,7 @@ export function CalendarSurface() {
                 onClose={() => setSelectedId(null)}
                 onReschedule={reschedule}
                 onRemove={removePlan}
+                onCancelSchedule={cancelSchedule}
                 busy={slotBusy}
                 error={slotError}
               />
@@ -869,7 +920,11 @@ export function CalendarSurface() {
       <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
         <span className="t-label">{plan ? cadenceLine(plan.cadence) : "Cadence — reading…"}</span>
         <div style={{ flex: 1 }} />
-        <span className="t-label">Plans, not uploads — each platform’s door arms on your GO.</span>
+        <span className="t-label">
+          {scheduledInView > 0
+            ? "Dashed is a plan (an intention); solid is scheduled (a committed queue row). Neither has published — the publisher is disarmed and each platform’s door arms on your GO."
+            : "Plans, not uploads — each platform’s door arms on your GO."}
+        </span>
       </div>
     </div>
   );
@@ -892,6 +947,11 @@ function NowLine({
 
 const EVENT_CLASS: Record<CalEvent["kind"], string> = {
   plan: "ev ev-plan",
+  // Solid where a plan is dashed: a commitment reads as decided, an
+  // intention as provisional. Deliberately not draggable — moving a queue
+  // row means cancelling it and scheduling again, which is what changing
+  // your mind about a commitment should cost.
+  queued: "ev ev-queued",
   done: "ev done ev-ok",
   closed: "ev done",
   engine: "ev",
@@ -962,7 +1022,13 @@ function EventBox({
 
 function MonthMark({ event }: { event: CalEvent }) {
   const className =
-    event.kind === "plan" ? "mark mark-plan" : event.kind === "you" ? "mark mark-you" : "mark";
+    event.kind === "plan"
+      ? "mark mark-plan"
+      : event.kind === "queued"
+        ? "mark mark-queued"
+        : event.kind === "you"
+          ? "mark mark-you"
+          : "mark";
   // Same carried-row gap as the agenda: a clock from another day, printed in
   // today's cell, is a time this cell never held. The hours waited is the
   // fact that IS true of a carried item.
@@ -1013,6 +1079,9 @@ function AgendaRow({ event }: { event: CalEvent }) {
         </div>
       </div>
       {event.kind === "plan" && <span className="pill pill-idle">plan</span>}
+      {/* The two words the calendar must never blur: an intention, and a
+          commitment with an idempotency key behind it. */}
+      {event.kind === "queued" && <span className="pill pill-ok">scheduled</span>}
       {event.kind === "you" && <span className="pill pill-warn">needs you</span>}
     </>
   );
@@ -1224,6 +1293,7 @@ function DetailCard({
   onClose,
   onReschedule,
   onRemove,
+  onCancelSchedule,
   busy,
   error,
 }: {
@@ -1233,6 +1303,8 @@ function DetailCard({
   onClose: () => void;
   onReschedule: (draftId: string, at: Date) => void;
   onRemove: (draftId: string) => void;
+  /** s82: withdraw a committed queue row (queued events only). */
+  onCancelSchedule: (queueRowId: string) => void;
   busy: boolean;
   error: string | null;
 }) {
@@ -1274,10 +1346,65 @@ function DetailCard({
       )}
       {event.href && (
         <Link className="card-link" href={event.href} style={{ whiteSpace: "nowrap" }}>
-          {event.kind === "you" || event.kind === "plan" || event.kind === "done" || event.kind === "closed"
+          {event.kind === "you" ||
+          event.kind === "plan" ||
+          event.kind === "queued" ||
+          event.kind === "done" ||
+          event.kind === "closed"
             ? "Open draft →"
             : "Open Intel →"}
         </Link>
+      )}
+      {/* s82: a COMMITMENT is withdrawn, never dragged. Moving it means
+          cancelling and scheduling again — the cost of changing your mind
+          about a commitment, and the reason a queue box carries no grip. */}
+      {event.kind === "queued" && event.queueRowId && (
+        <>
+          {mode === "idle" && (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm"
+              style={{ padding: "0 7px" }}
+              disabled={busy}
+              onClick={() => setMode("remove")}
+            >
+              Cancel schedule
+            </button>
+          )}
+          {mode === "remove" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span className="t-label">
+                Cancel this schedule? The draft stays approved — only the commitment goes, and you
+                can schedule it again.
+              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  style={{ flex: 1, padding: "0 6px" }}
+                  disabled={busy}
+                  onClick={() => onCancelSchedule(event.queueRowId as string)}
+                >
+                  {busy ? "Cancelling…" : "Cancel it"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm"
+                  style={{ padding: "0 7px" }}
+                  disabled={busy}
+                  onClick={() => setMode("idle")}
+                >
+                  Keep it
+                </button>
+              </div>
+            </div>
+          )}
+          {error && (
+            <span className="t-label" role="alert" style={{ color: "var(--err)" }}>
+              {error}
+            </span>
+          )}
+        </>
       )}
       {event.kind === "plan" && event.draftId && (
         <>
@@ -1387,7 +1514,9 @@ function DetailCard({
           ? event.flagReason
           : event.kind === "plan"
             ? "cadence-legal — checked against your own rules"
-            : "a record of what happened — nothing here reschedules"}
+            : event.kind === "queued"
+              ? "a commitment, not a publish — the publisher is disarmed and each platform’s door still arms on your GO"
+              : "a record of what happened — nothing here reschedules"}
       </span>
     </div>
   );

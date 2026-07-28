@@ -2,6 +2,7 @@ import {
   brandIdentitySchema,
   platformProfileSchema,
   renderBrandIdentity,
+  socialPlatformSchema,
   type PlatformProfile,
   type TenantCtx,
 } from "@thalon/contracts";
@@ -15,6 +16,7 @@ import {
 import { modelTiers, readEnv, withGatewayGuard, type ObjectStore } from "@thalon/platform";
 import { retrieveExemplarContext, runExemplarOverlapGate, type ExemplarContext } from "../exemplar";
 import type { EmbeddingDriver } from "../ingest";
+import { platformFitStamp, validateForPlatform } from "../social/capability";
 import { loadPlatformProfile } from "./profiles";
 import { resolveRoutedPlatforms } from "./routing";
 import { deriveTargetTerms, normalizeTermList } from "./target-terms";
@@ -376,6 +378,24 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
     profileTopics: spec.profileTopics,
   });
 
+  // s82 C1, wiring #1 — the capability matrix, beside `targetTerms`: the
+  // draft records whether the body it was just given FITS the platform's
+  // published ceiling. Provenance only; it blocks nothing and retries
+  // nothing (the queue producer is where a misfit is refused, and the
+  // Approve fit line re-measures the live body). Only platforms the matrix
+  // covers get a stamp — a fan-out platform outside the social enum (blog,
+  // web) has no ceiling to measure against, and inventing one would be the
+  // "no limits" answer the matrix exists to prevent. The stamp carries the
+  // body hash it was measured on, so an operator edit can never leave a
+  // stale verdict reading as current.
+  const socialPlatform = socialPlatformSchema.safeParse(spec.platform);
+  const fitStamp = socialPlatform.success
+    ? platformFitStamp(
+        validateForPlatform({ platform: socialPlatform.data, body: result.output.body }),
+        sha256Hex(result.output.body),
+      )
+    : null;
+
   const draft = await guard.repos.drafts.create(guard.ctx, {
     fanoutRunId: spec.runId,
     sourceId: spec.sourceId,
@@ -390,6 +410,7 @@ async function generatePlatformDraft(guard: GuardCtx, spec: DraftSpec): Promise<
       ...(spec.identityBlock ? { identityPromptVersion: identityPromptVersion() } : {}),
       ...(spec.exemplarContext ? { exemplarIds: spec.exemplarContext.exemplarIds } : {}),
       ...(targetTerms.length > 0 ? { targetTerms } : {}),
+      ...(fitStamp ? { platformFit: fitStamp } : {}),
     },
   });
 
