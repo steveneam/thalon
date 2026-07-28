@@ -323,7 +323,10 @@ export function swapCandidatesFor(takes: TakeView[], currentRef: string): TakeVi
 }
 
 /** A re-edit is a NEW VERSION: the next version number for a cut name (1 for a fresh name). */
-export function nextVersionFor(cuts: { name: string; version: number }[], name: string): number {
+export function nextVersionFor(
+  cuts: readonly { name: string; version: number }[],
+  name: string,
+): number {
   return cuts.reduce((max, c) => (c.name === name ? Math.max(max, c.version) : max), 0) + 1;
 }
 

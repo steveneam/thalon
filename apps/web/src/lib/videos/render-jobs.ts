@@ -24,12 +24,35 @@ export function getRenderJob(id: string): RenderJobView | null {
 }
 
 /**
+ * s82 A4: WHAT IS STILL RUNNING FOR A PROJECT — so a render survives the
+ * operator leaving the page.
+ *
+ * The registry is in-process and holds the only trace of a running ffmpeg;
+ * before this, a reload or a walk to another surface lost the job id and the
+ * editor came back looking idle while the render went on for minutes. This is
+ * a read of what the process already knows — no schema, no persistence, and
+ * nothing about the honest posture changes: a job lost to a restart is still
+ * lost, and re-firing it is still free (a render is a deterministic replay of
+ * a stored EDL).
+ *
+ * Done and failed jobs are deliberately NOT returned. A finished job is the
+ * cut's own state (`outputRef`, `status`) and the surface reads it there; a
+ * registry that answered with yesterday's completions would have the surface
+ * announcing renders nobody is waiting for.
+ */
+export function listRunning(projectId: string): RenderJobView[] {
+  return [...jobs.values()]
+    .filter((job) => job.projectId === projectId && job.status === "running")
+    .map((job) => ({ ...job }));
+}
+
+/**
  * Start (or join) the render for a cut. `run` resolves to the outputRef it
  * recorded; its failure message is surfaced VERBATIM on the job — the
  * operator reads the actual ffmpeg refusal, not a euphemism.
  */
 export function startRenderJob(
-  meta: { projectId: string; cutId: string; key?: string },
+  meta: { projectId: string; cutId: string; kind: "render" | "preview"; key?: string },
   run: () => Promise<string>,
 ): { job: RenderJobView; started: boolean } {
   /*
@@ -51,6 +74,7 @@ export function startRenderJob(
     id: randomUUID(),
     projectId: meta.projectId,
     cutId: meta.cutId,
+    kind: meta.kind,
     status: "running",
     outputRef: null,
     error: null,

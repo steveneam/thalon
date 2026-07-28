@@ -39,8 +39,9 @@ export async function POST(
     // The EDL is parsed inside prepareCutPreview, at the boundary — a
     // working copy arriving from a browser is never trusted for shape.
     const prepared = await prepareCutPreview(repos, ctx, projectId, cutId, edl);
-    const { job, started } = startRenderJob({ projectId, cutId, key: `${cutId}:preview` }, () =>
-      runCutPreview(prepared),
+    const { job, started } = startRenderJob(
+      { projectId, cutId, kind: "preview", key: `${cutId}:preview` },
+      () => runCutPreview(prepared),
     );
     return NextResponse.json({ job, started, outputRef: prepared.outputRef }, { status: 202 });
   } catch (err) {

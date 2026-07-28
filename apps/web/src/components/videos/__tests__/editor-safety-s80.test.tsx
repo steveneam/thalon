@@ -102,6 +102,8 @@ function serve() {
   server.use(
     http.get("/api/videos/p1", () => HttpResponse.json(DETAIL)),
     http.get("/api/videos/p1/cuts/c1", () => HttpResponse.json(CUT)),
+    // s82 A4: the editor asks what is still rendering as part of every load.
+    http.get("/api/videos/p1/render", () => HttpResponse.json({ jobs: [] })),
   );
 }
 
@@ -161,7 +163,7 @@ describe("the editor's safety core", () => {
 
     await waitFor(() => expect(widths(container)).toEqual(before));
     // Dirty is cleared: the pill returns to the cut's real status.
-    expect(screen.getByText("rendered · 12s")).toBeInTheDocument();
+    expect(screen.getByText("rendered · 0:12.0")).toBeInTheDocument();
   });
 
   it("intercepts an exit while dirty and offers save, discard or stay", async () => {

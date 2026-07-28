@@ -5,16 +5,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VIDEO_DERIVE_ASPECTS, type Edl, type VideoCutAttribution, type VideoDeriveAspect } from "@thalon/contracts";
+import { TakeAudition, type AuditionKind } from "@/components/media/take-audition";
 import { EditorInspector } from "@/components/videos/editor-inspector";
 import { EditorTimeline, type Selection } from "@/components/videos/editor-timeline";
 import { aspectOf, proposalMarks, takeCaption } from "@/components/videos/editor-model";
 import { attributionLine, staleAgainstParent, timecode } from "@/components/videos/videos-model";
 import {
   approveCut,
+  deleteCut,
   deriveCut,
   fetchCutDetail,
   fetchProjectDetail,
   fetchRenderJob,
+  fetchRunningJobs,
   mediaUrl,
   previewCut,
   proposeDiff,
@@ -24,11 +27,65 @@ import {
   type CaptionRefusal,
   type DiffProposal,
 } from "@/lib/videos/client";
+import { compareEdls } from "@/lib/videos/compare";
 import { defaultCutFor, nextVersionFor, splitLane, swapBeatSource, swapCandidatesFor } from "@/lib/videos/editor";
-import type { CutDetail, ProjectDetail, RenderJobView } from "@/lib/videos/types";
+import type { CutDetail, CutView, ProjectDetail, RenderJobView } from "@/lib/videos/types";
+import {
+  adoptableRender,
+  deleteRefusalFor,
+  inFlightLine,
+  variantSaveNote,
+} from "@/lib/videos/versions";
 import { useListKeys } from "@/lib/workspace/keyboard";
 
 type ReadStatus = "loading" | "error" | "missing" | "ready";
+
+/**
+ * WHICH VERB IS RUNNING — s78's "one spinner disables the whole surface".
+ *
+ * `busy` was a single boolean, so firing any door greyed out every other one:
+ * a render that takes minutes locked the aspect lens, the copilot and the
+ * proposal panel behind it, and the surface said "Working…" without saying at
+ * what. Naming the verb costs nothing and lets each control speak for itself —
+ * two doors that genuinely do not conflict (proposing while a render runs) now
+ * do not pretend to.
+ */
+type EditorVerb =
+  | "save"
+  | "render"
+  | "preview"
+  | "approve"
+  | "derive"
+  | "propose"
+  | "dismiss"
+  | "delete";
+
+/**
+ * A cut being compared against, once its full EDL is in hand. The project
+ * detail carries only EDL SUMMARIES, so a comparison is one extra read of the
+ * other version — deliberately on demand, not on load.
+ */
+type CompareState =
+  | { againstId: string; status: "loading" }
+  | { againstId: string; status: "error"; message: string }
+  | { againstId: string; status: "ready"; against: CutDetail };
+
+/**
+ * What a verb says WHILE IT RUNS. The old single `busy` flag put "Working…" on
+ * the primary button whatever was happening, which is the least informative
+ * true sentence available: a minutes-long render and a half-second save looked
+ * identical.
+ */
+const WORKING: Record<EditorVerb, string> = {
+  save: "Saving…",
+  render: "Rendering…",
+  preview: "Rendering preview…",
+  approve: "Sending to Approve…",
+  derive: "Deriving…",
+  propose: "Proposing…",
+  dismiss: "Recording…",
+  delete: "Deleting…",
+};
 
 /**
  * The sheet's four copilot chips — and WHICH OF THEM THE SURFACE CAN NOW DO
@@ -88,10 +145,29 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   const [cut, setCut] = useState<CutDetail | null>(null);
   const [edl, setEdl] = useState<Edl | null>(null);
   const [dirty, setDirty] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [running, setRunning] = useState<EditorVerb | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [refusals, setRefusals] = useState<CaptionRefusal[]>([]);
   const [job, setJob] = useState<RenderJobView | null>(null);
+  /*
+   * A4 — WHAT WAS ALREADY RENDERING WHEN THIS SURFACE LOADED.
+   *
+   * The render registry is in-process and the job id lived only in this
+   * component's state, so walking to another surface (or reloading) lost it:
+   * the editor came back looking idle while ffmpeg ground on for minutes, and
+   * the operator's only signal that anything had happened was the file
+   * appearing later. The list is read once on load and kept true while
+   * anything in it is still running.
+   */
+  const [inFlight, setInFlight] = useState<RenderJobView[]>([]);
+  /** A6 — the player refused to play what it was given; stated, not swallowed. */
+  const [playerError, setPlayerError] = useState<string | null>(null);
+  /** A1 — the compare state, opened from the versioning band. Null = closed. */
+  const [compare, setCompare] = useState<CompareState | null>(null);
+  /** A2 — the variant name being typed. Null = the band is closed. */
+  const [variantName, setVariantName] = useState<string | null>(null);
+  /** A3 — the delete confirmation is open (a destructive verb asks first). */
+  const [confirmDelete, setConfirmDelete] = useState(false);
   /*
    * THE WORKING-COPY PREVIEW, and the one thing that makes it honest.
    *
@@ -158,6 +234,17 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             setStatus("missing");
             return;
           }
+          /*
+           * Every state the version verbs opened belongs to the cut that was
+           * on screen when it was opened. Carried across a load they become
+           * quiet lies: a comparison against a version that is now THIS one, a
+           * delete confirmation re-labelled to a cut nobody asked about, a
+           * playback failure from a file that is no longer being shown.
+           */
+          setCompare(null);
+          setVariantName(null);
+          setConfirmDelete(false);
+          setPlayerError(null);
           setDetail(project);
           // Pinned HERE, in the load's own resolution, rather than in the
           // effect body: setting state synchronously in an effect cascades a
@@ -179,6 +266,22 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             setFuture([]);
             setDirty(false);
             setStatus("ready");
+            /*
+             * A4 — pick the render back up. Fired OUTSIDE the load chain and
+             * with its own catch: not knowing about a running job is exactly
+             * where this surface stood before, and it must never be the reason
+             * a perfectly readable cut renders as an error.
+             */
+            void fetchRunningJobs(projectId)
+              .then((jobs) => {
+                setInFlight(jobs);
+                const resumed = found === null ? null : adoptableRender(jobs, found.id);
+                // Only a RENDER is adopted. A preview renders an unsaved EDL
+                // that a reload has already lost, so adopting one would land
+                // an unreproducible output on the cut as its version.
+                if (resumed !== null) setJob(resumed);
+              })
+              .catch(() => undefined);
           });
         })
         .catch(() => setStatus("error")),
@@ -205,6 +308,24 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     }, 4000);
     return () => clearInterval(timer);
   }, [job, projectId]);
+
+  /*
+   * A4's other half: keep the RESUMED picture true. The jobs read at load
+   * belong to renders this sitting did not fire — the poll above only follows
+   * the one job this component holds — so without a re-read the surface would
+   * go on announcing a render that finished ten minutes ago. A claim about
+   * work in flight has to expire on its own.
+   */
+  const watchingInFlight = inFlight.length > 0;
+  useEffect(() => {
+    if (!watchingInFlight) return;
+    const timer = setInterval(() => {
+      void fetchRunningJobs(projectId)
+        .then(setInFlight)
+        .catch(() => undefined);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [watchingInFlight, projectId]);
 
   /*
    * The preview's own poll. Deliberately NOT folded into the render poll above:
@@ -352,6 +473,17 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     () => proposalMarks(proposal?.diff ?? null),
     [proposal],
   );
+  /**
+   * A1 — the comparison itself. WHAT IS ON SCREEN is the "after" side on
+   * purpose: mid-edit the question is "what have I changed since v5", and on a
+   * clean copy that is exactly v6 against v5. Pure and cheap, so it recomputes
+   * with the working copy rather than being cached behind a button.
+   */
+  const comparison = useMemo(
+    () =>
+      compare?.status === "ready" && edl !== null ? compareEdls(compare.against.edl, edl) : null,
+    [compare, edl],
+  );
 
   // j/k walk the beat lane — the one list keyboard grammar, on the surface's
   // own list (the beats rail is that list here).
@@ -365,21 +497,35 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   };
   useListKeys({ enabled: status === "ready" && edl !== null, bindings: { j: move(1), k: move(-1) } });
 
-  function run(work: () => Promise<string | null>) {
-    setBusy(true);
+  /**
+   * The one door funnel — now naming WHICH verb is in flight. Only the control
+   * that fired goes busy; a render no longer disables the copilot, and
+   * "Working…" no longer stands in for a sentence about what is happening.
+   */
+  function run(verb: EditorVerb, work: () => Promise<string | null>) {
+    setRunning(verb);
     setNotice(null);
     setRefusals([]);
     work()
       .then((message) => setNotice(message))
       .catch((err: unknown) => setNotice(err instanceof Error ? err.message : "that door refused"))
-      .finally(() => setBusy(false));
+      // Scoped to this verb: with two doors legitimately in flight at once, a
+      // blind clear would hand the other one's control back early.
+      .finally(() => setRunning((current) => (current === verb ? null : current)));
   }
 
-  function onSave() {
+  /**
+   * A2 — SAVE, optionally under another NAME. The save door already derives
+   * the version from the name it is given (`planCutSave` → `nextVersionFor`),
+   * so a named variant needed no door change at all: the same name is the next
+   * version (the unchanged default), a new name starts a variant at v1.
+   */
+  function onSave(saveAs?: string) {
     if (cut === null || edl === null) return;
-    run(async () => {
+    const name = saveAs?.trim() ? saveAs.trim() : cut.name;
+    run("save", async () => {
       const { cut: saved } = await saveCut(projectId, {
-        name: cut.name,
+        name,
         edl,
         ...(pending ? { attribution: pending } : {}),
         // A derived cut's new versions carry the parent pin forward.
@@ -397,15 +543,73 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       setDirty(false);
       setJob(null);
       setPending(null);
+      setVariantName(null);
+      // A comparison against a version of the OLD name is still a valid
+      // comparison, but it was picked to answer a question about a cut that is
+      // no longer on screen — closing it beats re-diffing behind the operator.
+      setCompare(null);
       router.replace(`/app/videos/${projectId}/edit?cut=${saved.id}`, { scroll: false });
       void fetchProjectDetail(projectId).then((p) => p && setDetail(p));
-      return `Saved as ${saved.name} v${saved.version} — the previous version is untouched.`;
+      return name === cut.name
+        ? `Saved as ${saved.name} v${saved.version} — the previous version is untouched.`
+        : `Saved as a new variant: ${saved.name} v${saved.version} — ${cut.name} v${cut.version} is untouched and still on record.`;
     });
+  }
+
+  /**
+   * A3 — DELETE THIS VERSION. The refusals are the repo's (and the surface
+   * states them before the press, from the same rule); this only runs once the
+   * operator has confirmed. The route removes the rendered file, so nothing is
+   * left on disk that the product can no longer name.
+   */
+  function onDelete() {
+    if (cut === null || detail === null) return;
+    const doomed = cut;
+    setConfirmDelete(false);
+    run("delete", async () => {
+      const outcome = await deleteCut(projectId, doomed.id);
+      // A refusal arrives as the door's own sentence — it goes in the notice
+      // band verbatim, never as "that door refused".
+      if (!outcome.ok) return outcome.error;
+      const remaining = detail.cuts.filter((c) => c.id !== doomed.id);
+      const next = defaultCutFor(remaining);
+      void fetchProjectDetail(projectId).then((p) => p && setDetail(p));
+      if (next === null) router.replace(`/app/videos/${projectId}`);
+      else router.replace(`/app/videos/${projectId}/edit?cut=${next.id}`, { scroll: false });
+      const file = outcome.file.removed
+        ? ` Its render went with it (${outcome.file.ref}).`
+        : ` ${outcome.file.reason ?? "Nothing was removed from disk."}`;
+      return `Deleted ${outcome.removed.name} v${outcome.removed.version}.${file}`;
+    });
+  }
+
+  /**
+   * A1 — read the other version's FULL EDL. The project detail carries only
+   * summaries (beats/lines/audio counts), which is enough to list versions and
+   * nowhere near enough to diff them.
+   */
+  function pickCompare(againstId: string) {
+    setCompare({ againstId, status: "loading" });
+    void fetchCutDetail(projectId, againstId)
+      .then((against) => {
+        setCompare(
+          against === null
+            ? { againstId, status: "error", message: "that version is no longer on record" }
+            : { againstId, status: "ready", against },
+        );
+      })
+      .catch((err: unknown) => {
+        setCompare({
+          againstId,
+          status: "error",
+          message: err instanceof Error ? err.message : "could not read that version",
+        });
+      });
   }
 
   function onRender() {
     if (cut === null) return;
-    run(async () => {
+    run("render", async () => {
       const { job: fired } = await startRender(projectId, cut.id);
       setJob(fired);
       return "Rendering locally (0 credits) — minutes of x264; this page polls until it lands.";
@@ -420,7 +624,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   function onPreview() {
     if (cut === null || edl === null) return;
     const previewed = edl;
-    run(async () => {
+    run("preview", async () => {
       const { job: fired, outputRef } = await previewCut(projectId, cut.id, previewed);
       setPreviewJob({ job: fired, edl: previewed, ref: outputRef });
       return "Previewing your unsaved edit locally (0 credits) — nothing is saved by this.";
@@ -429,7 +633,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
 
   function onApprove() {
     if (cut === null) return;
-    run(async () => {
+    run("approve", async () => {
       const outcome = await approveCut(projectId, cut.id);
       if (outcome.ok) {
         setCut(outcome.cut);
@@ -447,7 +651,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       router.push(`/app/videos/${projectId}/edit?cut=${existing.id}`);
       return;
     }
-    run(async () => {
+    run("derive", async () => {
       const { cut: derived } = await deriveCut(projectId, cut.id, aspect);
       router.push(`/app/videos/${projectId}/edit?cut=${derived.id}`);
       return `Derived ${derived.name} for ${aspect} — measured seeds, 0 credits.`;
@@ -459,7 +663,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     setProposal(null);
     setDiffOpen(false);
     setRejectReason(null);
-    run(async () => {
+    run("propose", async () => {
       setProposal(await proposeDiff(projectId, cut.id, ask));
       return null;
     });
@@ -467,7 +671,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
 
   function onDismissProposal() {
     if (cut === null || proposal === null || rejectReason === null || rejectReason.trim() === "") return;
-    run(async () => {
+    run("dismiss", async () => {
       await rejectProposal(projectId, cut.id, {
         diff: proposal.diff,
         reason: rejectReason.trim(),
@@ -578,6 +782,19 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       : swapCandidatesFor(detail.takes, selectedClip.source.ref).filter(
           (take) => take.ref !== selectedClip.source.ref,
         );
+  /**
+   * What the beat is riding NOW, as something to audition. The take row is the
+   * better source (it knows whether the file is motion, a still or audio); a
+   * source with no take row — a cut layer, an unregistered file — falls back to
+   * the clip's own declared kind rather than going silent.
+   */
+  const inCutAudition: AuditionKind | null =
+    selectedClip === undefined
+      ? null
+      : auditionKindFor(
+          detail.takes.find((t) => t.ref === selectedClip.source.ref)?.kind ??
+            (selectedClip.source.kind === "still" ? "still" : "motion"),
+        );
   const keeperRefs = new Set(
     detail.takes.filter((t) => t.disposition === "keeper").map((t) => t.ref),
   );
@@ -585,18 +802,67 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     detail.takes.filter((t) => t.disposition === "reject").map((t) => t.ref),
   );
 
-  /** The sheet draws ONE primary button; this is it, in the state the cut is actually in. */
-  const primary = dirty
-    ? { label: `Save as v${nextVersion}`, onClick: onSave, disabled: false }
-    : cut.status === "draft"
-      ? {
-          label: job?.status === "running" ? "Rendering…" : "Render",
-          onClick: onRender,
-          disabled: job?.status === "running",
-        }
-      : cut.status === "rendered"
-        ? { label: "Send cut to Approve", onClick: onApprove, disabled: false }
-        : { label: "Approved", onClick: () => {}, disabled: true };
+  /**
+   * The sheet draws ONE primary button; this is it, in the state the cut is
+   * actually in — and it now carries WHICH verb it fires, so only its own work
+   * puts it in a working state.
+   */
+  const primary: { label: string; verb: EditorVerb | null; onClick: () => void; disabled: boolean } =
+    dirty
+      ? { label: `Save as v${nextVersion}`, verb: "save", onClick: () => onSave(), disabled: false }
+      : cut.status === "draft"
+        ? {
+            label: job?.status === "running" ? "Rendering…" : "Render",
+            verb: "render",
+            onClick: onRender,
+            disabled: job?.status === "running",
+          }
+        : cut.status === "rendered"
+          ? {
+              label: "Send cut to Approve",
+              verb: "approve",
+              onClick: onApprove,
+              disabled: false,
+            }
+          : { label: "Approved", verb: null, onClick: () => {}, disabled: true };
+
+  /*
+   * THE VERSIONING BAND's three verbs (A1/A2/A3) — everything they need to
+   * know, decided here in one place rather than inline in the markup.
+   */
+
+  /** Every other version this cut can be compared against: its own name first, newest first. */
+  const comparable: CutView[] = detail.cuts
+    .filter((c) => c.id !== cut.id)
+    .sort(
+      (a, b) =>
+        Number(b.name === cut.name) - Number(a.name === cut.name) ||
+        a.name.localeCompare(b.name) ||
+        b.version - a.version,
+    );
+  /** The default pick: the version immediately before this one, which is the question usually being asked. */
+  const previousVersion =
+    detail.cuts
+      .filter((c) => c.name === cut.name && c.version < cut.version)
+      .sort((a, b) => b.version - a.version)[0] ?? comparable[0];
+  const compareLabel = (c: CutView) => (c.name === cut.name ? `v${c.version}` : `${c.name} v${c.version}`);
+  const comparedAgainst =
+    compare === null ? null : (detail.cuts.find((c) => c.id === compare.againstId) ?? null);
+  const compareAgainstLabel =
+    comparedAgainst === null ? "that version" : compareLabel(comparedAgainst);
+
+  /**
+   * A3's refusal, said BEFORE the press. The three ratified ones are mirrored
+   * from the repo; the fourth is this surface's own, because deleting the
+   * version you are holding unsaved edits to throws the edits away with it and
+   * no server can see that from a row.
+   */
+  const deleteRefusal = dirty
+    ? `Save or discard your unsaved edits first — deleting ${cut.name} v${cut.version} now would throw those edits away with it.`
+    : deleteRefusalFor(cut, detail.cuts);
+
+  /** A4 — what is still rendering, in versions rather than job ids. */
+  const inFlightNote = inFlightLine(inFlight, detail.cuts, cut.id);
 
   return (
     <div className="content editor-surface" style={{ gap: 12 }}>
@@ -608,7 +874,15 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           {cut.name} v{cut.version}
         </h1>
         <span className="pill pill-idle">
-          {dirty ? `unsaved · ${edl.output.duration}s` : `${cut.status} · ${edl.output.duration}s`}
+          {/*
+            A6: every duration on this surface reads in the sheet's own m:ss.t,
+            the same grammar the scrub under the player uses. The mixed
+            "12s"/"0:12.0" the audit found made the header and the player look
+            like they were describing different cuts.
+          */}
+          {dirty
+            ? `unsaved · ${timecode(edl.output.duration)}`
+            : `${cut.status} · ${timecode(edl.output.duration)}`}
         </span>
         <span className="pill pill-ok">
           {detail.takes.length} take{detail.takes.length === 1 ? "" : "s"} on record
@@ -638,7 +912,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             className={currentAspect === "16:9" ? "seg-opt on" : "seg-opt"}
             aria-pressed={currentAspect === "16:9"}
             aria-disabled={masterDoor.refusal !== null || undefined}
-            disabled={busy}
+            disabled={running === "derive"}
             title={masterDoor.refusal ?? "Back to the 16:9 master this cut was derived from"}
             onClick={() =>
               masterDoor.refusal !== null ? setNotice(masterDoor.refusal) : masterDoor.go()
@@ -660,7 +934,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 className={currentAspect === aspect ? "seg-opt on" : "seg-opt"}
                 aria-pressed={currentAspect === aspect}
                 aria-disabled={refusal !== null || undefined}
-                disabled={busy}
+                disabled={running === "derive"}
                 title={
                   refusal ?? `Switch to the ${aspect} cut, or derive one (measured seeds, 0 credits)`
                 }
@@ -717,10 +991,12 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          disabled={busy || primary.disabled}
+          disabled={(primary.verb !== null && running === primary.verb) || primary.disabled}
           onClick={primary.onClick}
         >
-          {busy ? "Working…" : primary.label}
+          {primary.verb !== null && running === primary.verb
+            ? WORKING[primary.verb]
+            : primary.label}
         </button>
       </div>
 
@@ -791,7 +1067,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          disabled={busy}
+          disabled={running === "propose"}
           aria-disabled={dirty || undefined}
           title={
             dirty
@@ -806,7 +1082,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               : onPropose()
           }
         >
-          {busy ? "Proposing…" : "Propose"}
+          {running === "propose" ? "Proposing…" : "Propose"}
         </button>
       </div>
 
@@ -825,13 +1101,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              disabled={busy}
+              disabled={running === "save"}
               onClick={() => {
                 const to = exitTo;
                 setExitTo(null);
                 // Save first, then leave — onSave clears `dirty`, so the guard
                 // will not re-arm and swallow this navigation a second time.
-                run(async () => {
+                run("save", async () => {
                   const { cut: saved } = await saveCut(projectId, {
                     name: cut.name,
                     edl,
@@ -863,6 +1139,38 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             </button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setExitTo(null)}>
               Stay here
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/*
+        A3 — THE DELETE CONFIRMATION. A hard delete of a row and its rendered
+        file has no undo behind it, so it asks first, in the exit guard's own
+        grammar: it names exactly what goes, says what survives, and the way out
+        is the plainer of the two answers.
+      */}
+      {confirmDelete && (
+        <div className="card notice-band refused" role="alertdialog" aria-label="Delete this version">
+          <span className="t-label">
+            Delete {cut.name} v{cut.version}? Its EDL and its rendered file go with it and cannot be
+            recovered. Every other version of this project stays exactly as it is.
+          </span>
+          <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={running === "delete"}
+              onClick={onDelete}
+            >
+              {running === "delete" ? WORKING.delete : `Delete v${cut.version} permanently`}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setConfirmDelete(false)}
+            >
+              Keep it
             </button>
           </div>
         </div>
@@ -904,6 +1212,23 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                   if (!Number.isFinite(el.duration) || el.duration <= 0) return;
                   setPlayhead(Math.min(1, el.currentTime / el.duration));
                 }}
+                /*
+                  A6 — WHEN THE FILE WILL NOT PLAY. The player had no failure
+                  state at all: a moved render, a codec the browser refuses, a
+                  media root that has gone away, and the element simply sat
+                  black with the surface still claiming it was playing. The way
+                  OUT is the point — it falls back to the rest state, which is
+                  where every fact about this cut and every verb that could fix
+                  it already live, and says what happened on the way.
+                */
+                onError={() => {
+                  setPlaying(false);
+                  setPlayerError(
+                    previewFresh
+                      ? "That preview would not play — the file is on this box but the browser refused it. Re-render the preview, or play the stored version."
+                      : `${shownRef} would not play — the render is on record but this box could not stream it.`,
+                  );
+                }}
               />
             ) : (
               <>
@@ -917,10 +1242,27 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                         : `Play ${cut.name} v${cut.version}`
                     }
                     disabled={!detail.playable || shownRef === null}
-                    onClick={() => setPlaying(true)}
+                    onClick={() => {
+                      // A fresh attempt starts from a clean slate: a stale
+                      // failure line beside a playing video is its own dead end.
+                      setPlayerError(null);
+                      setPlaying(true);
+                    }}
                   >
                     <div className="play-tri" />
                   </button>
+                  {playerError !== null && (
+                    <span className="t-data" role="status">
+                      {playerError}
+                    </span>
+                  )}
+                  {/*
+                    A4 — a render that was already running when this surface
+                    loaded. Without this the player sat at rest looking idle
+                    while ffmpeg worked, and the only honest reading of the
+                    screen was "nothing is happening".
+                  */}
+                  {inFlightNote !== null && <span className="t-data">{inFlightNote}</span>}
                   {(shownRef === null || !detail.playable) && (
                     <span className="t-data">
                       {shownRef === null
@@ -950,7 +1292,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                     <button
                       type="button"
                       className="btn btn-ghost btn-sm"
-                      disabled={busy || previewJob?.job.status === "running"}
+                      disabled={running === "preview" || previewJob?.job.status === "running"}
                       onClick={onPreview}
                     >
                       {previewJob?.job.status === "running"
@@ -1046,7 +1388,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
-                  disabled={busy || rejectReason.trim() === ""}
+                  disabled={running === "dismiss" || rejectReason.trim() === ""}
                   onClick={onDismissProposal}
                 >
                   Record the correction
@@ -1138,6 +1480,173 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 v{cut.version} · {attributionLine(cut, readAt)} →
               </Link>
             </div>
+
+            {/*
+              THE VERSIONING BAND (s82 A1/A2/A3) — the three verbs the walk
+              found no affordance for at all, in the one place on this surface
+              that is already about versions.
+
+              They are resting chrome rather than a disclosure, deliberately:
+              four of the editor's five open jobs were version management, and
+              a verb hidden behind a menu is a verb the operator has to already
+              know exists. What each one OPENS is a state, which is the doctrine
+              the surface keeps — nothing below is drawn until it is asked for.
+            */}
+            <div className="tl-foot">
+              <button
+                type="button"
+                className="btn btn-quiet btn-sm"
+                aria-expanded={compare !== null}
+                title={
+                  comparable.length === 0
+                    ? "This project has no other version to compare against"
+                    : "See exactly what changed between this cut and another version"
+                }
+                aria-disabled={comparable.length === 0 || undefined}
+                onClick={() => {
+                  if (comparable.length === 0) {
+                    setNotice(
+                      `${cut.name} v${cut.version} is the only version on this project — there is nothing to compare it against yet.`,
+                    );
+                    return;
+                  }
+                  if (compare !== null) setCompare(null);
+                  else pickCompare(previousVersion.id);
+                }}
+              >
+                Compare with another version
+              </button>
+              <button
+                type="button"
+                className="btn btn-quiet btn-sm"
+                aria-expanded={variantName !== null}
+                title="Save this working copy under a NEW name — a variant that starts at v1 and leaves this cut alone"
+                onClick={() => setVariantName(variantName === null ? `${cut.name}-alt` : null)}
+              >
+                Save as a new variant…
+              </button>
+              <div style={{ flex: 1 }} />
+              {/*
+                The refusal does NOT disable the control (s81's standing
+                lesson): it stays focusable, announces `aria-disabled`, and
+                answers with its reason in the notice band when pressed.
+              */}
+              <button
+                type="button"
+                className="btn btn-quiet btn-sm"
+                aria-disabled={deleteRefusal !== null || undefined}
+                title={
+                  deleteRefusal ??
+                  `Delete ${cut.name} v${cut.version} and the file it rendered — permanently`
+                }
+                onClick={() =>
+                  deleteRefusal !== null ? setNotice(deleteRefusal) : setConfirmDelete(true)
+                }
+              >
+                Delete this version
+              </button>
+            </div>
+
+            {/*
+              A1 — THE COMPARISON, in the proposal panel's own grammar. A diff
+              of two stored versions and a diff proposed by the agent are the
+              same shape of fact, so they are drawn by the same rules; what
+              differs is that this one is structural, deterministic and free.
+            */}
+            {compare !== null && (
+              <div className="diff-panel">
+                <span className="pill pill-idle">compare</span>
+                <span style={{ flex: 1 }}>
+                  {compareAgainstLabel} → {cut.name} v{cut.version}
+                  {dirty ? " with your unsaved edits" : ""}
+                </span>
+                <div className="seg" role="group" aria-label="Compare against">
+                  {comparable.map((other) => (
+                    <button
+                      key={other.id}
+                      type="button"
+                      className={compare.againstId === other.id ? "seg-opt on" : "seg-opt"}
+                      aria-pressed={compare.againstId === other.id}
+                      onClick={() => pickCompare(other.id)}
+                    >
+                      {compareLabel(other)}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="card-link as-text-btn"
+                  onClick={() => setCompare(null)}
+                >
+                  Hide the diff ←
+                </button>
+                {compare.status === "loading" && (
+                  <span className="t-data">reading that version’s EDL…</span>
+                )}
+                {compare.status === "error" && (
+                  <span className="t-data">couldn’t read it: {compare.message}</span>
+                )}
+                {comparison !== null && comparison.identical && (
+                  <div className="diff-op">
+                    <span className="pill pill-ok">identical</span>
+                    <span style={{ flex: 1 }}>
+                      Nothing separates these two — same beats, same captions, same music, same
+                      frame.
+                    </span>
+                  </div>
+                )}
+                {comparison?.rows.map((row, i) => (
+                  <div key={`${row.op}-${i}`} className="diff-op">
+                    <span className="pill pill-idle">{row.op}</span>
+                    <span style={{ flex: 1 }}>{row.what}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/*
+              A2 — the variant name. The note under it is the whole point: the
+              save door derives the version from the NAME, so an existing name
+              is the next version of that cut rather than a fork, and the
+              operator reads which of the two they are about to do before they
+              press.
+            */}
+            {variantName !== null && (
+              <div className="diff-panel">
+                <label className="numfield" style={{ flex: 1 }}>
+                  save this working copy as a new variant named
+                  <input
+                    value={variantName}
+                    autoFocus
+                    aria-label="variant name"
+                    onChange={(event) => setVariantName(event.target.value)}
+                  />
+                </label>
+                <span className="t-data" style={{ flex: 1 }}>
+                  {variantSaveNote(variantName, detail.cuts, cut.name)}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  disabled={running === "save" || variantName.trim() === ""}
+                  onClick={() => onSave(variantName)}
+                >
+                  {running === "save"
+                    ? WORKING.save
+                    : `Save as ${variantName.trim() || "…"} v${nextVersionFor(
+                        detail.cuts,
+                        variantName.trim(),
+                      )}`}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-quiet btn-sm"
+                  onClick={() => setVariantName(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="card">
@@ -1162,40 +1671,88 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 <span className="t-label">Nothing selected.</span>
               ) : (
                 <>
+                  {/*
+                    A5 — AUDITION BEFORE COMMITTING. Swapping a beat was the
+                    only way to find out what a candidate looked like, and the
+                    way back was an undo; the frozen <TakeAudition> seam (W2)
+                    plays the file in place instead, one at a time across both
+                    surfaces that consume it. Nothing here re-implements any of
+                    it — the tile is this surface's, the control is the seam's.
+
+                    The control sits OUTSIDE the swap button rather than in it:
+                    a button inside a button is not markup a browser will honour,
+                    and the audition is a different verb from the swap.
+                  */}
                   <div className="take on">
                     <div className="thumb-md">
                       <span>in the cut</span>
                     </div>
-                    <span className="take-cap">
+                    <span className="take-cap" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      {detail.playable && inCutAudition !== null && (
+                        <TakeAudition
+                          projectId={projectId}
+                          refPath={selectedClip.source.ref}
+                          kind={inCutAudition}
+                          label={`what is in the cut — ${takeName(selectedClip.source.ref)}`}
+                        />
+                      )}
                       {clipTakeCaption(selectedClip.source.ref, keeperRefs, rejectRefs)}
                     </span>
                   </div>
-                  {candidates.map((take) => (
-                    <button
-                      key={take.id}
-                      type="button"
-                      className="take"
-                      /*
-                        The verb and the file BOTH belong in the accessible
-                        name. "swap this beat to <ref>" lived only in a title,
-                        where AT skips it, and the tile itself named neither the
-                        take nor what pressing it would do.
-                      */
-                      aria-label={`Swap this beat to take ${takeName(take.ref)} — ${takeCaption(take)}`}
-                      title={`swap this beat to ${take.ref}`}
-                      onClick={() =>
-                        apply((current) =>
-                          swapBeatSource(current, selection?.kind === "beat" ? selection.index : 0, take.ref),
-                        )
-                      }
-                    >
-                      <div className="thumb-md">
-                        <span>{take.disposition}</span>
+                  {candidates.map((take) => {
+                    const audition = auditionKindFor(take.kind);
+                    return (
+                      <div key={take.id} className="take">
+                        <button
+                          type="button"
+                          className="take"
+                          /*
+                            The verb and the file BOTH belong in the accessible
+                            name. "swap this beat to <ref>" lived only in a
+                            title, where AT skips it, and the tile itself named
+                            neither the take nor what pressing it would do.
+                          */
+                          aria-label={`Swap this beat to take ${takeName(take.ref)} — ${takeCaption(take)}`}
+                          title={`swap this beat to ${take.ref}`}
+                          onClick={() =>
+                            apply((current) =>
+                              swapBeatSource(
+                                current,
+                                selection?.kind === "beat" ? selection.index : 0,
+                                take.ref,
+                              ),
+                            )
+                          }
+                        >
+                          <div className="thumb-md">
+                            <span>{take.disposition}</span>
+                          </div>
+                          <span className="take-cap">{takeName(take.ref)}</span>
+                        </button>
+                        <span
+                          className="take-cap"
+                          style={{ display: "flex", alignItems: "center", gap: 6 }}
+                        >
+                          {/*
+                            No audition where there is nothing to audition: a
+                            still has no time in it, and a project with no media
+                            root on this box would answer every play with a
+                            failure. Offering the control anyway would be the
+                            dead door this session exists to stop shipping.
+                          */}
+                          {detail.playable && audition !== null && (
+                            <TakeAudition
+                              projectId={projectId}
+                              refPath={take.ref}
+                              kind={audition}
+                              label={`take ${takeName(take.ref)}`}
+                            />
+                          )}
+                          {takeCaption(take)}
+                        </span>
                       </div>
-                      <span className="take-cap">{takeName(take.ref)}</span>
-                      <span className="take-cap">{takeCaption(take)}</span>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </>
               )}
             </div>
@@ -1206,7 +1763,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           <div className="card-head">
             <span className="t-title">Beats</span>
             <span className="t-label">
-              {beats.length} · {edl.output.duration}s planned
+              {beats.length} · {timecode(edl.output.duration)} planned
             </span>
           </div>
           <div className="beats-scroll">
@@ -1227,7 +1784,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                   <span style={{ flex: 1, minWidth: 0 }} className="beat-name">
                     {String(i + 1).padStart(2, "0")} · {clip.name}
                   </span>
-                  <span className="t-data">{clip.duration}s</span>
+                  <span className="t-data">{timecode(clip.duration)}</span>
                   <span
                     style={{ color: keeper ? "var(--ok)" : reject ? "var(--warn)" : "var(--n-700)" }}
                     title={
@@ -1254,6 +1811,20 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       </div>
     </div>
   );
+}
+
+/**
+ * WHAT A TILE CAN BE AUDITIONED AS — or that it cannot be.
+ *
+ * `<TakeAudition>` takes a narrower kind than a take carries, deliberately: a
+ * STILL has no time in it, and drawing a player over one would be a control
+ * that starts and never moves. Deciding that here, per tile, is the caller's
+ * job the seam asks for rather than something it guesses from a take's kind.
+ */
+function auditionKindFor(kind: string): AuditionKind | null {
+  if (kind === "audio") return "audio";
+  if (kind === "still") return null;
+  return "motion";
 }
 
 /**

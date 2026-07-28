@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import type { Edl } from "@thalon/contracts";
 import { VideoEditor } from "@/components/videos/editor";
 import { server } from "@/lib/testing/server";
-import type { CutDetail, ProjectDetail } from "@/lib/videos/types";
+import type { CutDetail, CutView, ProjectDetail, RenderJobView } from "@/lib/videos/types";
 
 const push = vi.fn();
 const replace = vi.fn();
@@ -128,11 +128,70 @@ const DETAIL: ProjectDetail = {
   ],
 };
 
-function serve(detail: ProjectDetail = DETAIL, cut: CutDetail = CUT) {
+function serve(
+  detail: ProjectDetail = DETAIL,
+  cut: CutDetail = CUT,
+  running: RenderJobView[] = [],
+) {
   server.use(
     http.get("/api/videos/p1", () => HttpResponse.json(detail)),
     http.get("/api/videos/p1/cuts/c1", () => HttpResponse.json(cut)),
+    /*
+     * s82 A4: the editor asks what is still rendering as part of every load,
+     * so every test serves that read — an unhandled one would leave each case
+     * quietly exercising the failure path instead of the one it is about.
+     */
+    http.get("/api/videos/p1/render", ({ request }) =>
+      new URL(request.url).searchParams.has("running")
+        ? HttpResponse.json({ jobs: running })
+        : new HttpResponse(null, { status: 404 }),
+    ),
   );
+}
+
+/** A version of the same cut, one edit back — what A1 compares against. */
+const V5: CutDetail = {
+  ...CUT,
+  id: "c0",
+  version: 5,
+  edl: {
+    ...EDL,
+    video: [{ ...EDL.video[0], duration: 4 }, EDL.video[1]],
+    captions: {
+      ...EDL.captions!,
+      lines: [EDL.captions!.lines[0], { ...EDL.captions!.lines[1], text: "a whole cut" }],
+    },
+  },
+};
+
+const V5_SUMMARY: CutView = {
+  id: "c0",
+  name: "film-16x9",
+  version: 5,
+  status: "rendered",
+  outputRef: "cuts/film-16x9-v5.mp4",
+  lineage: null,
+  attribution: null,
+  edl: { beats: 2, captionLines: 2, audio: "encode", width: 1280, height: 720, fps: 24, duration: 12 },
+  createdAt: "2026-07-19T00:00:00.000Z",
+};
+
+/** The project as it really is once a cut has history: two versions. */
+const TWO_VERSIONS: ProjectDetail = { ...DETAIL, cuts: [DETAIL.cuts[0], V5_SUMMARY] };
+
+function job(over: Partial<RenderJobView> = {}): RenderJobView {
+  return {
+    id: "j-resumed",
+    projectId: "p1",
+    cutId: "c1",
+    kind: "render",
+    status: "running",
+    outputRef: null,
+    error: null,
+    startedAt: "2026-07-28T10:00:00.000Z",
+    finishedAt: null,
+    ...over,
+  };
 }
 
 describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
@@ -142,7 +201,8 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
 
     expect(await screen.findByRole("heading", { name: "film-16x9 v6" })).toBeInTheDocument();
     expect(container.querySelector(".content.editor-surface")).not.toBeNull();
-    expect(screen.getByText("draft · 12s")).toHaveClass("pill", "pill-idle");
+    // A6: durations read in the sheet's own m:ss.t, the scrub's grammar.
+    expect(screen.getByText("draft · 0:12.0")).toHaveClass("pill", "pill-idle");
     expect(screen.getByText("3 takes on record")).toHaveClass("pill", "pill-ok");
 
     // Three lanes drawn from the EDL: two beats, one music cue, two plates.
@@ -210,7 +270,7 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
       ).toEqual([`${(3 / 9) * 100}%`, `${(6 / 9) * 100}%`]),
     );
     expect(screen.getByRole("button", { name: "Save as v7" })).toBeInTheDocument();
-    expect(screen.getByText("unsaved · 12s")).toBeInTheDocument();
+    expect(screen.getByText("unsaved · 0:12.0")).toBeInTheDocument();
   });
 
   it("shows the take swap with every reject's reason, and swaps on click", async () => {
@@ -272,7 +332,9 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     // The proposal lands ON THE TIMELINE — the second plate carries the mark.
     await waitFor(() => expect(container.querySelectorAll(".blk-cap.prop")).toHaveLength(1));
     // Nothing has been applied: the cut is still clean.
-    expect(screen.queryByRole("button", { name: /^Save as/ })).toBeNull();
+    // The PRIMARY save (the versioned one) — "Save as a new variant…" is a
+    // resting affordance and says nothing about the working copy being dirty.
+    expect(screen.queryByRole("button", { name: /^Save as v\d/ })).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Review diff →" }));
     expect(await screen.findByText("the falcon owns that corner")).toBeInTheDocument();
@@ -504,6 +566,322 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     expect(container.querySelector('[class*="text-muted-foreground"]')).toBeNull();
     expect(container.querySelector('[class*="bg-muted"]')).toBeNull();
     expect(container.querySelector('[class*="border-border"]')).toBeNull();
+  });
+});
+
+/**
+ * s82 lane A — VERSION MANAGEMENT (A1–A4) and the takes strip's audition (A5).
+ *
+ * Four of the editor's five remaining no-affordance jobs were one theme: an
+ * operator could make versions and could not compare them, name them, or throw
+ * one away. Each case below drives the JOB, not the control — the jobs table's
+ * own lesson is that a surface can pass every unit test and still offer nobody
+ * a way to do the thing.
+ */
+describe("VideoEditor — version management (s82 A1–A3)", () => {
+  it("compares this cut against another version and says what changed", async () => {
+    serve(TWO_VERSIONS);
+    server.use(http.get("/api/videos/p1/cuts/c0", () => HttpResponse.json(V5)));
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Compare with another version" }));
+
+    // The diff is structural and deterministic: no model, no metered call. It
+    // lands in the proposal panel's own grammar, which is why A1 needed no CSS.
+    expect(await screen.findByText(/beat-01 4s → 6s/)).toBeInTheDocument();
+    expect(screen.getByText(/“a whole cut” → “a full cut”/)).toBeInTheDocument();
+    expect(container.querySelectorAll(".diff-panel .diff-op").length).toBeGreaterThanOrEqual(2);
+    // It states WHICH two versions are being read, in both directions.
+    expect(screen.getByText(/v5 → film-16x9 v6/)).toBeInTheDocument();
+  });
+
+  it("compares against the WORKING COPY, so an unsaved edit is what you see", async () => {
+    serve(TWO_VERSIONS);
+    server.use(http.get("/api/videos/p1/cuts/c0", () => HttpResponse.json(V5)));
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(container.querySelectorAll(".lane-tr .blk")[0]);
+    const duration = await screen.findByLabelText("duration (s)");
+    await user.clear(duration);
+    await user.type(duration, "9");
+    await user.tab();
+    await user.click(screen.getByRole("button", { name: "Compare with another version" }));
+
+    expect(await screen.findByText(/beat-01 4s → 9s/)).toBeInTheDocument();
+    expect(screen.getByText(/with your unsaved edits/)).toBeInTheDocument();
+  });
+
+  it("says there is nothing to compare against rather than opening an empty panel", async () => {
+    serve(); // one version on the project
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const compare = screen.getByRole("button", { name: "Compare with another version" });
+    expect(compare).toHaveAttribute("aria-disabled", "true");
+    await user.click(compare);
+    expect(await screen.findByText(/is the only version on this project/)).toBeInTheDocument();
+  });
+
+  it("saves under a NEW NAME as a variant at v1, leaving this cut alone", async () => {
+    serve();
+    let saved: { name?: string } | null = null;
+    server.use(
+      http.post("/api/videos/p1/cuts", async ({ request }) => {
+        saved = (await request.json()) as { name?: string };
+        return HttpResponse.json({
+          cut: { ...CUT, id: "c2", name: "film-tight", version: 1 },
+          created: true,
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Save as a new variant…" }));
+    const field = await screen.findByLabelText("variant name");
+    await user.clear(field);
+    await user.type(field, "film-tight");
+    // The band says which of the two saves this is BEFORE the press.
+    expect(screen.getByText(/“film-tight” is a new variant — it starts at v1/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save as film-tight v1" }));
+    await waitFor(() => expect(saved).not.toBeNull());
+    expect(saved).toMatchObject({ name: "film-tight" });
+    expect(
+      await screen.findByText(/Saved as a new variant: film-tight v1 — film-16x9 v6 is untouched/),
+    ).toBeInTheDocument();
+  });
+
+  it("warns that an EXISTING name is that cut's next version, not a fork", async () => {
+    serve(TWO_VERSIONS);
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Save as a new variant…" }));
+    const field = await screen.findByLabelText("variant name");
+    await user.clear(field);
+    await user.type(field, "film-16x9");
+    expect(screen.getByText(/is this cut — this saves as v7/)).toBeInTheDocument();
+  });
+
+  it("deletes a version behind a confirmation, and takes its render with it", async () => {
+    serve(TWO_VERSIONS);
+    let deleted = false;
+    server.use(
+      http.delete("/api/videos/p1/cuts/c1", () => {
+        deleted = true;
+        return HttpResponse.json({
+          removed: { id: "c1", name: "film-16x9", version: 6, outputRef: "cuts/film-16x9-v6.mp4" },
+          file: { removed: true, ref: "cuts/film-16x9-v6.mp4" },
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    // A hard delete with no undo behind it asks first, and names what goes.
+    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    expect(
+      await screen.findByText(/Delete film-16x9 v6\?[\s\S]*cannot be recovered/),
+    ).toBeInTheDocument();
+    expect(deleted).toBe(false);
+
+    await user.click(screen.getByRole("button", { name: "Delete v6 permanently" }));
+    await waitFor(() => expect(deleted).toBe(true));
+    expect(await screen.findByText(/Deleted film-16x9 v6\. Its render went with it/)).toBeInTheDocument();
+    // And it lands on what is left, rather than on a cut that no longer exists.
+    expect(replace).toHaveBeenCalledWith("/app/videos/p1/edit?cut=c0", { scroll: false });
+  });
+
+  it("keeps the version when the confirmation is declined", async () => {
+    serve(TWO_VERSIONS);
+    let deleted = false;
+    server.use(
+      http.delete("/api/videos/p1/cuts/c1", () => {
+        deleted = true;
+        return HttpResponse.json({ removed: {}, file: { removed: false } });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    await user.click(await screen.findByRole("button", { name: "Keep it" }));
+    expect(deleted).toBe(false);
+    expect(screen.queryByRole("button", { name: "Delete v6 permanently" })).toBeNull();
+  });
+
+  it("REFUSES to delete an approved cut, out loud, without disabling the control", async () => {
+    /*
+     * s81's standing lesson, applied to the newest verb on the surface: a
+     * disabled button fires no tooltip and assistive tech skips it, so the
+     * reason would be unreachable by every route. It stays focusable, says
+     * aria-disabled, and answers when pressed.
+     */
+    serve(TWO_VERSIONS, { ...CUT, status: "approved" });
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const del = screen.getByRole("button", { name: "Delete this version" });
+    expect(del).toBeEnabled();
+    expect(del).toHaveAttribute("aria-disabled", "true");
+    await user.click(del);
+    expect(await screen.findByText(/approved — an approved cut carries its judge receipt/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /permanently/ })).toBeNull();
+  });
+
+  it("refuses to delete the version you are holding unsaved edits to", async () => {
+    serve(TWO_VERSIONS);
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(container.querySelectorAll(".lane-tr .blk")[0]);
+    const duration = await screen.findByLabelText("duration (s)");
+    await user.clear(duration);
+    await user.type(duration, "3");
+    await user.tab();
+
+    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    expect(await screen.findByText(/Save or discard your unsaved edits first/)).toBeInTheDocument();
+  });
+
+  it("carries the DOOR's refusal verbatim when the server is the one that says no", async () => {
+    // The surface mirrors the repo's rules to answer early; the repo is still
+    // the authority, and its sentence is what the operator reads.
+    serve(TWO_VERSIONS);
+    server.use(
+      http.delete("/api/videos/p1/cuts/c1", () =>
+        HttpResponse.json(
+          {
+            error:
+              'video cut "film-16x9" v6 is the lineage parent of "film-9x16" v1 — delete the derived cut first, or its provenance would dangle',
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    await user.click(await screen.findByRole("button", { name: "Delete v6 permanently" }));
+    expect(await screen.findByText(/is the lineage parent of "film-9x16" v1/)).toBeInTheDocument();
+  });
+});
+
+describe("VideoEditor — a render survives leaving the page (s82 A4)", () => {
+  it("picks a running render back up on load and says so where the player is", async () => {
+    serve(DETAIL, CUT, [job()]);
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    expect(
+      await screen.findByText(/a render is in flight for v6 — this page picked the job back up/),
+    ).toBeInTheDocument();
+    // Adopting the job is what makes the primary button honest again.
+    expect(await screen.findByRole("button", { name: "Rendering…" })).toBeInTheDocument();
+  });
+
+  it("names another cut's render rather than implying it is this one's", async () => {
+    serve(TWO_VERSIONS, CUT, [job({ id: "j2", cutId: "c0" })]);
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    expect(await screen.findByText(/a render is in flight for film-16x9 v5/)).toBeInTheDocument();
+    // And it is NOT adopted: this cut has no render running.
+    expect(screen.queryByRole("button", { name: "Rendering…" })).toBeNull();
+  });
+
+  it("never adopts a PREVIEW — its unsaved EDL is gone, and it says that instead", async () => {
+    serve(DETAIL, CUT, [job({ kind: "preview" })]);
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    expect(await screen.findByText(/belongs to an earlier working copy/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Rendering…" })).toBeNull();
+  });
+});
+
+describe("VideoEditor — the s78 tail (s82 A6)", () => {
+  it("one verb's work no longer disables every other verb", async () => {
+    // The old single `busy` flag: a render that takes minutes locked the
+    // copilot, the aspect lens and the proposal panel behind it.
+    serve();
+    server.use(http.post("/api/videos/p1/render", () => new Promise<never>(() => {})));
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Render" }));
+    expect(await screen.findByRole("button", { name: "Rendering…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Propose" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "9:16" })).toBeEnabled();
+  });
+
+  it("says so when the player cannot play the file, and hands back the way out", async () => {
+    serve({ ...DETAIL, playable: true }, { ...CUT, status: "rendered", outputRef: "cuts/v6.mp4" });
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(screen.getByRole("button", { name: "Play film-16x9 v6" }));
+    const video = container.querySelector("video.player-video");
+    expect(video).not.toBeNull();
+    fireEvent.error(video as HTMLVideoElement);
+
+    // Back to the rest state — where every fact about this cut and every verb
+    // that could fix it already live — with what happened stated on the way.
+    expect(await screen.findByText(/would not play — the render is on record/)).toBeInTheDocument();
+    expect(container.querySelector("video.player-video")).toBeNull();
+    expect(screen.getByRole("button", { name: "Play film-16x9 v6" })).toBeEnabled();
+  });
+});
+
+describe("VideoEditor — auditioning a candidate take (s82 A5)", () => {
+  it("offers the frozen audition seam on every candidate, named by what it plays", async () => {
+    serve({ ...DETAIL, playable: true });
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(container.querySelectorAll(".lane-tr .blk")[0]);
+    expect(await screen.findByText("Takes — beat-01")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Audition take beat-01-t2.mp4" }),
+    ).toBeInTheDocument();
+    // What is IN the cut is auditionable too — a comparison needs both sides.
+    expect(
+      screen.getByRole("button", { name: /Audition what is in the cut — beat-01.mp4/ }),
+    ).toBeInTheDocument();
+
+    // The swap is still the tile's own verb, and still one press.
+    await user.click(
+      screen.getByRole("button", { name: /Swap this beat to take beat-01-t2.mp4/ }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Save as v7" })).toBeInTheDocument(),
+    );
+  });
+
+  it("offers no audition where nothing can be played — a project with no media root on this box", async () => {
+    serve(); // DETAIL.playable is false
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(container.querySelectorAll(".lane-tr .blk")[0]);
+    expect(await screen.findByText("Takes — beat-01")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Audition/ })).toBeNull();
   });
 });
 

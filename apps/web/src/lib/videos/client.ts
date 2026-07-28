@@ -45,6 +45,48 @@ export async function saveCut(
   return asJson<{ cut: CutDetail; created: boolean }>(res);
 }
 
+export interface CutFileRemoval {
+  removed: boolean;
+  ref?: string;
+  reason?: string;
+}
+
+export interface RemovedCut {
+  id: string;
+  name: string;
+  version: number;
+  outputRef: string | null;
+}
+
+export type DeleteCutOutcome =
+  | { ok: true; removed: RemovedCut; file: CutFileRemoval }
+  | { ok: false; error: string };
+
+/**
+ * s82 A3 — delete a version. The three refusals are enforced in the repo and
+ * arrive here as a 409 carrying the reason VERBATIM, which the surface puts in
+ * the notice band: the operator reads why the door said no, not "that door
+ * refused". Shaped like `approveCut` rather than throwing, for the same
+ * reason — a refusal is an answer, not an exception.
+ */
+export async function deleteCut(projectId: string, cutId: string): Promise<DeleteCutOutcome> {
+  const res = await fetch(`/api/videos/${projectId}/cuts/${cutId}`, { method: "DELETE" });
+  const body: unknown = await res.json().catch(() => null);
+  if (res.ok) {
+    const parsed = (body ?? {}) as { removed?: RemovedCut; file?: CutFileRemoval };
+    return {
+      ok: true,
+      removed: parsed.removed ?? { id: cutId, name: "", version: 0, outputRef: null },
+      file: parsed.file ?? { removed: false, reason: "the door said nothing about the file" },
+    };
+  }
+  const parsed = (body ?? {}) as { error?: unknown };
+  return {
+    ok: false,
+    error: typeof parsed.error === "string" ? parsed.error : `request failed: ${res.status}`,
+  };
+}
+
 /* B-ve.5 — the aspect lens. */
 
 /** Derive a NEW cut for a target aspect: measured centered-window seeds over the parent's timeline, lineage stamped server-side. Own-engine recut, 0 credits. */
@@ -164,4 +206,21 @@ export async function fetchRenderJob(
   const res = await fetch(`/api/videos/${projectId}/render?jobId=${encodeURIComponent(jobId)}`);
   if (res.status === 404) return null;
   return asJson<RenderJobView>(res);
+}
+
+/**
+ * s82 A4 — what is still rendering for this project. Read once on load so a
+ * render survives the operator leaving the page: the job id is in-process
+ * registry state, and without this read a reload came back to a surface that
+ * looked idle while ffmpeg was minutes deep.
+ *
+ * A failed read answers with nothing rather than throwing: not knowing about a
+ * render is exactly where the surface stood before A4, and it must never turn
+ * a perfectly loadable editor into an error state.
+ */
+export async function fetchRunningJobs(projectId: string): Promise<RenderJobView[]> {
+  const res = await fetch(`/api/videos/${projectId}/render?running=1`);
+  if (!res.ok) return [];
+  const body = await asJson<{ jobs: RenderJobView[] }>(res);
+  return body.jobs;
 }

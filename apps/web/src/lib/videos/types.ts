@@ -105,6 +105,15 @@ export interface RenderJobView {
   id: string;
   projectId: string;
   cutId: string;
+  /**
+   * s82 A4: WHICH KIND of ffmpeg run this is. The registry has always held
+   * both — a render of the stored EDL and a preview of an unsaved working
+   * copy — keyed apart so they cannot join each other's job. Once a surface
+   * can pick a running job back up after a reload, the difference has to
+   * travel with the job: adopting a preview would land an unsaved EDL's
+   * output on the cut as its `outputRef`.
+   */
+  kind: "render" | "preview";
   status: "running" | "done" | "error";
   outputRef: string | null;
   error: string | null;

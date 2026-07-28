@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRepos } from "@/lib/repos";
 import { resolveTenantCtx } from "@/lib/tenant";
-import { getRenderJob, startRenderJob } from "@/lib/videos/render-jobs";
+import { getRenderJob, listRunning, startRenderJob } from "@/lib/videos/render-jobs";
 import { prepareCutRender, RenderRefusedError, runCutRender } from "@/lib/videos/render";
 
 /**
@@ -28,7 +28,7 @@ export async function POST(
   if (!cutId) return NextResponse.json({ error: "missing cutId" }, { status: 400 });
   try {
     const prepared = await prepareCutRender(repos, ctx, projectId, cutId);
-    const { job, started } = startRenderJob({ projectId, cutId }, () =>
+    const { job, started } = startRenderJob({ projectId, cutId, kind: "render" }, () =>
       runCutRender(repos, ctx, prepared),
     );
     return NextResponse.json({ job, started }, { status: 202 });
@@ -43,10 +43,35 @@ export async function POST(
   }
 }
 
-export async function GET(request: Request) {
-  const jobId = new URL(request.url).searchParams.get("jobId");
-  if (!jobId) return NextResponse.json({ error: "missing ?jobId" }, { status: 400 });
-  const job = getRenderJob(jobId);
-  if (!job) return NextResponse.json({ error: "render job not found" }, { status: 404 });
-  return NextResponse.json(job);
+/**
+ * The poll (`?jobId=`) and, since s82 A4, the RESUME (`?running=1`): what is
+ * still rendering for this project, so a surface that comes back after a
+ * reload can pick the job up instead of starting fresh and looking idle.
+ *
+ * The resume read is tenancy-walled through the project — a job view carries
+ * only ids and status, but "does this project exist for you" is not a question
+ * an unauthenticated caller gets to answer for free. The `?jobId` poll keeps
+ * its existing shape: an unguessable uuid, and 404 for anything else.
+ */
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ projectId: string }> },
+) {
+  const search = new URL(request.url).searchParams;
+  const jobId = search.get("jobId");
+  if (jobId) {
+    const job = getRenderJob(jobId);
+    if (!job) return NextResponse.json({ error: "render job not found" }, { status: 404 });
+    return NextResponse.json(job);
+  }
+  if (search.get("running") === null) {
+    return NextResponse.json({ error: "missing ?jobId or ?running" }, { status: 400 });
+  }
+  const { projectId } = await params;
+  const repos = await getRepos();
+  const ctx = await resolveTenantCtx(repos);
+  if (!ctx) return NextResponse.json({ error: "tenant not found" }, { status: 404 });
+  const project = await repos.videoProjects.get(ctx, projectId);
+  if (!project) return NextResponse.json({ error: "video project not found" }, { status: 404 });
+  return NextResponse.json({ jobs: listRunning(projectId) });
 }
