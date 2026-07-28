@@ -390,6 +390,75 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     ).toBeInTheDocument();
   });
 
+  it("names who authored the version being edited — an agent-authored cut is marked as such", async () => {
+    serve(DETAIL, {
+      ...CUT,
+      attribution: {
+        authoredBy: "agent",
+        // The contract REQUIRES an agent-authored cut to carry its whole
+        // replayable proposal — attribution without the record behind it is
+        // exactly what the schema refuses.
+        proposal: {
+          baseCutId: "c0",
+          model: "claude-x",
+          promptName: "editor/propose",
+          promptHash: "abc123",
+          ask: "tighten the middle",
+          diff: { version: 1 as const, summary: "trim beat 04", ops: [] },
+          decidedBy: "operator" as const,
+        },
+      },
+    });
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    // AI-authored content, marked, on the surface where it gets edited.
+    expect(await screen.findByText(/agent · claude-x · “tighten the middle”/)).toBeInTheDocument();
+  });
+
+  it("says a cut has no recorded author rather than guessing one", async () => {
+    serve(DETAIL, { ...CUT, attribution: null });
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    expect(await screen.findByText(/no attribution recorded/)).toBeInTheDocument();
+  });
+
+  it("says a derived cut has fallen behind its parent — the fact it computes and never auto-syncs", async () => {
+    serve(DETAIL, {
+      ...CUT,
+      lineage: {
+        parentCutId: "master-1",
+        aspect: "9:16",
+        parentName: "film-16x9",
+        parentVersion: 6,
+        parentLatestVersion: 8,
+      },
+    });
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    expect(await screen.findByText(/parent now v8 · no auto-sync/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /derived from film-16x9 v6/ })).toHaveAttribute(
+      "href",
+      "/app/videos/p1/edit?cut=master-1",
+    );
+  });
+
+  it("a cut level with its parent says it is derived and does NOT cry stale", async () => {
+    serve(DETAIL, {
+      ...CUT,
+      lineage: {
+        parentCutId: "master-1",
+        aspect: "9:16",
+        parentName: "film-16x9",
+        parentVersion: 8,
+        parentLatestVersion: 8,
+      },
+    });
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    expect(await screen.findByRole("link", { name: /derived from/ })).toBeInTheDocument();
+    expect(screen.queryByText(/no auto-sync/)).toBeNull();
+  });
+
   it("the 16:9 option is a real door back to the master, not an aria-hidden span", async () => {
     // A derived cut pins its parent; 16:9 is the way back to it.
     serve(DETAIL, {

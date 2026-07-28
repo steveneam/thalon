@@ -183,7 +183,7 @@ export function soleParentOf(cuts: CutView[], derived: CutView[]): CutView | nul
  * is no auto-sync by design (auto-apply does not exist), so the surface says
  * it rather than quietly resyncing.
  */
-export function staleAgainstParent(cut: CutView): boolean {
+export function staleAgainstParent(cut: Pick<CutView, "lineage">): boolean {
   const { lineage } = cut;
   return (
     lineage !== null &&
@@ -198,7 +198,14 @@ export function staleAgainstParent(cut: CutView): boolean {
  * what changed it". A cut written before the attributed save door existed
  * (the import's own rows) says so; it never gets an author guessed for it.
  */
-export function attributionLine(cut: CutView, now: number): string {
+export function attributionLine(
+  // Structural, not `CutView`: the EDITOR holds a `CutDetail` (the same cut,
+  // carrying its full EDL instead of a summary) and needs the same sentence.
+  // Provenance that only the browse surface can state is provenance the
+  // operator does not have where they act.
+  cut: Pick<CutView, "attribution" | "createdAt">,
+  now: number,
+): string {
   const when = cardDate(cut.createdAt, now);
   // Nullish, not `=== null`: a payload cached from a deploy before this
   // field existed arrives undefined, and an unknown author is still unknown.

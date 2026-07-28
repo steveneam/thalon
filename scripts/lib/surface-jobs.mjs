@@ -1353,26 +1353,78 @@ export const JOBS = {
               await page.waitForNetworkIdle({ idleTime: 500, timeout: 6_000 }).catch(() => {});
             }
           }
+          /*
+           * MEASURE THE MAPPING, NOT A FIXED POINT (s81, the eighth correction
+           * this harness has needed). This asserted the marker sits AT the lane
+           * origin, which was correct only while the playhead never moved: once
+           * playback drives it, being at the origin is true at t=0 and false a
+           * frame later, so the verdict depended on how far the video happened
+           * to get before the measurement — a FLAKY gate, which is worse than a
+           * failing one. It flipped between ✓ and DEAD DOOR on consecutive runs.
+           *
+           * What the job is actually about is whether the marker says WHERE YOU
+           * ARE. So compare it against the position the cut is genuinely at:
+           * laneX + (currentTime / duration) * laneWidth. This still catches the
+           * original defect — at t=0 the expected position IS the lane origin,
+           * so the 16px padding-edge bug fails exactly as it did — and it no
+           * longer depends on timing.
+           */
+          /*
+           * PAUSE AND SEEK TO A KNOWN POINT BEFORE MEASURING. While the video
+           * rolls, the marker is only as fresh as the last `timeupdate` (~4/s)
+           * whereas `currentTime` is read live, so the DOM legitimately lags
+           * reality — on this cut, up to ~3.6px, which is over tolerance and
+           * made the job flip verdicts run to run. Pausing stops the clock, and
+           * seeking to the MIDPOINT makes this a stronger check than t≈0 ever
+           * was: at the origin a wrong SCALE is invisible, halfway through it
+           * is not.
+           */
+          await page.evaluate(() => {
+            const v = document.querySelector("video");
+            if (!v || !Number.isFinite(v.duration) || v.duration <= 0) return;
+            v.pause();
+            v.currentTime = v.duration / 2;
+          });
+          await page
+            .waitForFunction(() => {
+              const v = document.querySelector("video");
+              return !v || (v.paused && !v.seeking);
+            }, { timeout: 3_000 })
+            .catch(() => {});
+          // One timeupdate interval for React to render the settled position.
+          await new Promise((r) => setTimeout(r, 400));
           const head = await page.evaluate(() => {
             const marker = document.querySelector(".playhead");
             const lane = document.querySelector(".lane-tr");
             if (!marker || !lane) return { marker: !!marker, lane: !!lane };
             const a = marker.getBoundingClientRect();
             const b = lane.getBoundingClientRect();
-            return { marker: true, lane: true, headX: Math.round(a.x), laneX: Math.round(b.x) };
+            const video = document.querySelector("video");
+            const fraction =
+              video && Number.isFinite(video.duration) && video.duration > 0
+                ? Math.min(1, video.currentTime / video.duration)
+                : 0;
+            return {
+              marker: true,
+              lane: true,
+              headX: Math.round(a.x),
+              laneX: Math.round(b.x),
+              expectedX: Math.round(b.x + fraction * b.width),
+              pct: Math.round(fraction * 1000) / 10,
+            };
           });
           if (!head.marker) {
             throw new NoAffordance(
               "the timeline draws no playhead marker — even with the render playing, nothing on the track says where you are, so there is no moment to stop at",
             );
           }
-          const drift = head.headX - head.laneX;
-          if (Math.abs(drift) > 2) {
+          const drift = head.headX - head.expectedX;
+          if (Math.abs(drift) > 3) {
             throw new DeadDoor(
-              `playhead sits ${drift}px from the lane origin (head x=${head.headX}, lane x=${head.laneX}) — it indexes a different origin than the ruler in its own card`,
+              `playhead sits ${drift}px from where the cut actually is (head x=${head.headX}, expected ${head.expectedX} at ${head.pct}% of the render) — it indexes a different origin than the track it is drawn over`,
             );
           }
-          return `playhead marker tracks the lane origin (x=${head.headX})`;
+          return `playhead marks the real position (x=${head.headX}, ${head.pct}% in)`;
         },
       },
       {

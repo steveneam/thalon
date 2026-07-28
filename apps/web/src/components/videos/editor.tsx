@@ -8,7 +8,7 @@ import { VIDEO_DERIVE_ASPECTS, type Edl, type VideoCutAttribution, type VideoDer
 import { EditorInspector } from "@/components/videos/editor-inspector";
 import { EditorTimeline, type Selection } from "@/components/videos/editor-timeline";
 import { aspectOf, proposalMarks, takeCaption } from "@/components/videos/editor-model";
-import { timecode } from "@/components/videos/videos-model";
+import { attributionLine, staleAgainstParent, timecode } from "@/components/videos/videos-model";
 import {
   approveCut,
   deriveCut,
@@ -108,6 +108,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     null,
   );
   const [preview, setPreview] = useState<{ edl: Edl; ref: string } | null>(null);
+  /*
+   * The clock is READ ONCE, at load, and pinned — the dossier's own pattern.
+   * Relative dates ("11 days ago") re-derived on every render would churn the
+   * header for no reason, and a component that reads the wall clock mid-render
+   * is the shape of bug that turned main red every evening in s80.
+   */
+  const [readAt, setReadAt] = useState(0);
   const [selection, setSelection] = useState<Selection>(null);
   const [playhead, setPlayhead] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -152,6 +159,11 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             return;
           }
           setDetail(project);
+          // Pinned HERE, in the load's own resolution, rather than in the
+          // effect body: setting state synchronously in an effect cascades a
+          // render (and eslint says so), and reading the clock during the first
+          // render would differ between the server pass and the client one.
+          setReadAt(Date.now());
           const target = cutId ?? defaultCutFor(project.cuts)?.id ?? null;
           if (target === null) {
             setCut(null);
@@ -1073,14 +1085,57 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               />
             )}
 
+            {/*
+              VISIBLE PROVENANCE (ui-overhaul-plan §5) belongs on the surface
+              where you act on it. `cut.attribution` was fetched and in hand all
+              along, and the only author signal the editor drew was an
+              in-session pill for a proposal applied in THIS sitting — so
+              re-opening an agent-authored v7 showed an unmarked version: AI
+              authorship unstated on the one screen where it gets edited.
+
+              It lands HERE rather than in the header, which is where the audit
+              suggested, because the header is already over-subscribed: adding a
+              line to it wrapped `.t-headline` onto three lines and pushed every
+              band below down 85px, measured. This band is the surface's own
+              versioning sentence with the Cut-history door already in it, so
+              the fact sits beside the promise it belongs to and costs no
+              geometry. A derived cut also states its parent and, when the
+              parent has moved, that it has fallen behind — `staleAgainstParent`
+              is deliberately computed and deliberately never auto-synced, so
+              the surface has to SAY it.
+            */}
             <div className="tl-foot">
+              {/*
+                Shortened when the provenance facts moved in beside it: the tail
+                ("cuts are versioned, so an edit never overwrites vN") asserted
+                in prose exactly what the version link to its right now states
+                as a fact with a door behind it. Keeping both crushed three
+                facts into three wrapped columns.
+              */}
               <span className="t-label">
-                Every edit is a recorded EDL change — the agent proposes, you approve · cuts are
-                versioned, so an edit never overwrites v{cut.version}
+                Every edit is a recorded EDL change — the agent proposes, you approve.
               </span>
               <div style={{ flex: 1 }} />
-              <Link className="card-link" href={`/app/videos/${projectId}`}>
-                Cut history →
+              {staleAgainstParent(cut) && (
+                <span className="pill pill-warn">
+                  parent now v{cut.lineage?.parentLatestVersion} · no auto-sync
+                </span>
+              )}
+              {cut.lineage !== null && (
+                <Link
+                  className="card-link"
+                  href={`/app/videos/${projectId}/edit?cut=${cut.lineage.parentCutId}`}
+                >
+                  derived from {cut.lineage.parentName ?? "its parent"}
+                  {cut.lineage.parentVersion !== null ? ` v${cut.lineage.parentVersion}` : ""} →
+                </Link>
+              )}
+              <Link
+                className="card-link"
+                href={`/app/videos/${projectId}`}
+                title="Every version and what changed it"
+              >
+                v{cut.version} · {attributionLine(cut, readAt)} →
               </Link>
             </div>
           </div>
