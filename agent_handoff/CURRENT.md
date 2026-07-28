@@ -83,6 +83,36 @@ healthy: `verify`, `worktree:setup` (Linux symlink path, s60 fix holds), the 7
 `tests/` ratchets. `npm run guard` in AGENTS.md is a historical citation, not
 a live command — correct as written.
 
+**s84 LAST ACT — THE PORTAL WALL IS DOWN (his paste, his instruction to stop
+there).** He found what I failed to research: **Meta ships a Developer Tools
+MCP** (`https://mcp.facebook.com/devtools`, OAuth, Streamable HTTP) — added to
+this project's MCP config as `meta_developer_tools`, status *needs
+authentication*. Its 10 `devtools_` tools are READ-ONLY except
+`devtools_webhook_manage`; Meta states plainly that nothing else "can alter a
+developer's app configuration", so it CANNOT write OAuth redirect URIs. What
+it does give: app settings + security config, **App Review status**,
+**compliance actions** (incl. the annual Data-Use-Checkup that silently
+disables an app), API usage/rate limits, docs search.
+
+**And the writes are unblocked too: his session cookies are transplanted and
+PROVEN.** He pasted a Copy-as-cURL from developers.facebook.com; cookies saved
+to `.context/portal/fb-session.json` (gitignored; **never scrub** — his s84
+ruling) and imported into the persistent profile at
+`~/.config/thalon-portal-chrome` via `.context/portal/import-session.mjs`.
+**The portal then loaded straight into "My Apps · All Apps (1) · Create App"
+— no login, no captcha** (screenshot: `.context/portal/session-check.png`).
+That is the whole s84 wall gone: the captcha only ever lived at LOGIN. Chrome
+was closed cleanly so the jar flushed to disk; the session should survive into
+s85.
+
+**⛔ HE STOPPED ME HERE ON PURPOSE** — *"no you save this and wait for me to
+start you next session"*. **No portal edits were made.** The queued portal
+work, all now unblocked and lead-drivable: add
+`https://preview.swordfish.cfd/api/integrations/callback/<destination>` beside
+the localhost entry in the Meta app (one entry covers facebook + instagram)
+and the LinkedIn app · the Threads app (runbook §4) · TikTok · auth the Meta
+MCP. Per-submit approval still stands (his s83 grant).
+
 ## Resume prompt (session 85, syd4 — "gogogo" boots this)
 
 **Resume · Thalon** — s84 made staging the real connect origin, put instagram
