@@ -100,6 +100,25 @@ Plus the second research memo: `docs/research/mobbin-patterns-s83b-microux.md`
 standing copy grammars, one cheap discoverability fix, one doctrine
 validation).
 
+**s83 THIRD ACT (founder-directed, same session): FACEBOOK JOINED THE DANCE
+AND HE DROVE IT LIVE.** Reddit's app creation stayed walled by Reddit's own
+inquiry funnel (parked; values whenever), so he asked for Meta — and the
+answer mattered: **dev-mode apps need NO App Review for their own admin's
+Page**, so the self-tenant rides the dance today (the B-int.4 wall is about
+OTHER tenants, untouched). Built (`2ec59b1`): providers now return the
+destination's OWN credentials shape (platforms disagree about what a
+connection IS); facebook's provider = arctic consent → fb_exchange_token
+long-lived → `/me/accounts` → the derived **PAGE token + page id** (the
+B-int.0 shape, verbatim) — no expiry, so the refresh tick never touches it;
+Page choice refuses to guess (env pin wins · one page decides itself ·
+several are NAMED in the refusal). **PROVEN LIVE by the founder's own
+browser** (VS Code port-forward 3111): consent → callback → card
+*Connected · Verified as MacTechDish*. The 60-day Facebook token chore is
+dead. D1 now has all three flavors proven: oauth2 (facebook LIVE · reddit
+built, awaiting his app values), app_password (bluesky LIVE + the automated
+post), manual (the originals). LinkedIn onto the dance = an s84 small
+(same pattern; 60-day tokens remain but renewal becomes one click).
+
 ## Resume prompt (session 84, syd4 — "gogogo" boots this)
 
 **Resume · Thalon** — s83 shipped D1 (connector seam + connect flow + Bluesky
