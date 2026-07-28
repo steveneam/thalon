@@ -118,6 +118,13 @@ const envSchema = z.object({
   SOCIAL_TIKTOK_ARMED: z.string().optional(),
   SOCIAL_REDDIT_ACCESS_TOKEN: z.string().optional(),
   SOCIAL_REDDIT_ARMED: z.string().optional(),
+  /**
+   * s83 (deferred item 1, founder Bluesky-GO): arms the publish-queue
+   * CONSUMER (scripts/run-publish-queue.ts). Exactly "true" = an armed pass;
+   * anything else = report-only. Every platform still sits behind its own
+   * per-platform arming underneath — this key only lets the tick write.
+   */
+  SOCIAL_QUEUE_ARMED: z.string().optional(),
   /** Bluesky's credential seat carries the APP PASSWORD (the X-1.0a precedent: the seat holds the platform's own secret shape); the identifier rides the extra below. */
   SOCIAL_BLUESKY_ACCESS_TOKEN: z.string().optional(),
   SOCIAL_BLUESKY_ARMED: z.string().optional(),

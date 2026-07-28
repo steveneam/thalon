@@ -66,6 +66,16 @@ export function socialPermalink(
       return `https://x.com/i/web/status/${externalPostId}`;
     case "facebook":
       return `https://www.facebook.com/${externalPostId}`;
+    case "bluesky": {
+      // at://<did>/app.bsky.feed.post/<rkey> → the public web URL. An id
+      // that is not that shape gets no invented link.
+      const match = /^at:\/\/([^/]+)\/app\.bsky\.feed\.post\/([^/]+)$/.exec(externalPostId);
+      return match ? `https://bsky.app/profile/${match[1]}/post/${match[2]}` : null;
+    }
+    case "reddit":
+      // The driver records the platform's own permalink in meta; a bare
+      // t3_ fullname has no canonical URL without a fetch — no invented link.
+      return null;
     default:
       return null;
   }

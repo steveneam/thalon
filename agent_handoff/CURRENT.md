@@ -77,6 +77,29 @@ sequence gate rendered honestly. Reddit is one founder step from the same
 · 10 connect · 7 route) + 3 arming proofs + the window probes; render gate
 shot both modes and READ; inventory driven.
 
+**s83 SECOND HALF (his mid-session directives): THE FIRST FULLY-AUTOMATED
+LIVE POST, END TO END.** His grants verbatim: *"you can arm bluesky, since i
+hardly use it anyway so you can use it for testing"* + the micro-UX research
+ask. Executed: bluesky ARMED (profile v5's social block, his GO on record) ·
+`proprietary/profiles/bluesky.v1.json` (280 budget under the 300 ceiling) ·
+a real brief → fan-out → judge (first take FAILED THE FIT at 470 chars — the
+deterministic gate doing its job; regenerated at 247) → operator approve →
+Schedule verb → queue row → **deferred item 1's arming pieces built**
+(`SOCIAL_QUEUE_ARMED` env key · `scripts/run-publish-queue.ts --once`; the
+systemd timer deliberately NOT created — arm-per-run posture, and the key
+sits EMPTY in .env.local after the test) → one ARMED pass: **1 due, 1
+published, 0 failed** →
+`at://did:plc:qfixzityfrgjbhfan2yresmv/app.bsky.feed.post/3mrpt2iqawv2o`,
+publicly live on @steveneam.bsky.social, queue row `published`, ledger row
+4th in the Published view. The permalink gap it exposed is fixed (at:// →
+bsky.app web URL, tested). Also: his Reddit app creation hit Reddit's
+policy-wall UX — guidance given (checkbox / old.reddit / the API-access
+inquiry as the fallback; NOT Devvit); his values may arrive any session.
+Plus the second research memo: `docs/research/mobbin-patterns-s83b-microux.md`
+(chips · empty states · loading · palette hints · copy affordances — three
+standing copy grammars, one cheap discoverability fix, one doctrine
+validation).
+
 ## Resume prompt (session 84, syd4 — "gogogo" boots this)
 
 **Resume · Thalon** — s83 shipped D1 (connector seam + connect flow + Bluesky
@@ -104,9 +127,12 @@ READ BEFORE TRUSTING A VERDICT).
    lesson), then drive the REAL dance in the browser: Settings → Integrations
    → Reddit → Continue → approve → the card must come back "Connected as
    u/…". Still zero posts (sequence gate).
-2. **Arming Bluesky** = adding `bluesky` to the active profile's social block
-   + his per-platform GO — HIS call, never yours; the card already names the
-   missing half.
+2. **Bluesky is ARMED with a standing test grant** (his words s83: "you can
+   use it for testing") — profile v5 social block carries it, maxPostsPerDay
+   2. Test posts ride the FULL loop (brief → judge → approve → schedule →
+   `SOCIAL_QUEUE_ARMED=true npx tsx scripts/run-publish-queue.ts --once`);
+   the queue key stays EMPTY at rest, armed per run. Every OTHER platform's
+   posting stays behind his per-platform + per-post GO exactly as before.
 
 ▎ ▸ **s83 shipped:** research memos `6e66d62` · window + seam + flow + proof
 (commits at this push) · Mobbin claude.ai connector live, box-local fallback
@@ -116,16 +142,19 @@ click-path.
 cadence pre-check (needs design) · #3 media-cap export (still open — the
 driver re-shape that would have carried it deliberately didn't happen) · #4 ✅
 CLOSED (this window).
-▎ ▸ **⛔ THE SEQUENCE GATE, unchanged:** *"we're not posting anything yet until
-all the walks are verified and fixed."* Queue consumer disarmed structurally;
-Bluesky connected-not-armed; arming + per-platform GO + per-post GO all his.
+▎ ▸ **⛔ THE SEQUENCE GATE — amended by his s83 grant for ONE platform:**
+Bluesky is armed for testing on his recorded words; everything else holds
+verbatim (*"we're not posting anything yet…"*). The queue consumer's key
+rests EMPTY; the tick route stays structurally disarmed; per-platform +
+per-post GO for every other platform stays his.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
 every lane/subagent launch needs fresh founder approval · GATE ON THE SUITE'S
 EXIT CODE — never pipe it · vitest does NOT typecheck · verify-on-merged-main
 = THE gate + MEASURED render + DRIVE the surface · research before build (rule
 10) · no AGPL code embedded, ever · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin, pushed · budget 2M · balance 584.12 · zero spend
-s83 (one read-only validate call).
+▎ ▸ **State:** main = origin, pushed · budget 2M · balance 584.12 · zero
+credit spend s83 · live platform calls: one validate ping + ONE real Bluesky
+post, both on his recorded grants.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with
 origin.
 

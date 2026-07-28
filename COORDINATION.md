@@ -165,13 +165,17 @@ wiring, the 409 fold-in, the box ceiling); these four he ruled next-session.
 None is broken today — each is a trap or a decision, stated so it is neither
 rediscovered nor forgotten:
 
-1. **C3's last third — the arming pieces, deliberately unbuilt** (outside lane
-   C's file set): `SOCIAL_QUEUE_ARMED` in the packages/platform env schema ·
-   `scripts/run-publish-queue.ts` · a systemd user unit. This is the B-pub.1
-   posture — door built, no armed production caller — and it stays disarmed
-   under the sequence gate regardless. The engine exports
-   `SOCIAL_QUEUE_ARM_KEY`/`publishQueueArmed(env)` and the tick route's
-   docstring lists the three pieces in order. **Gate: founder GO, per platform.**
+1. **C3's arming pieces — TWO OF THREE BUILT s83 under the founder's Bluesky
+   test grant** ("you can arm bluesky … use it for testing"):
+   `SOCIAL_QUEUE_ARMED` is in the platform env schema and
+   `scripts/run-publish-queue.ts --once` is the consumer driver — both proven
+   by the first fully-automated live post (bluesky, 1 due / 1 published / 0
+   failed). The key rests EMPTY in .env.local; arming is per-run. **The third
+   piece — the standing systemd timer — is deliberately NOT created**: a
+   timer means unattended posting cadence, which is a separate founder
+   decision when live cadence is actually wanted. Every platform still arms
+   independently underneath (bluesky = the only one granted; the rest = his
+   per-platform GO).
 2. **No cadence pre-check at the queue producer.** A row can be committed and
    then meet the publish door's daily cap and fail terminally. Related:
    `cadenceBreaches` (the ⚑) still reads planned slots only, so a committed

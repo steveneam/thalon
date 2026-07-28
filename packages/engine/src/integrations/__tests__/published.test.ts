@@ -76,7 +76,16 @@ describe("socialPermalink (the way back)", () => {
       "https://www.linkedin.com/feed/update/urn:li:share:9",
     );
     expect(socialPermalink("x", "123", {})).toBe("https://x.com/i/web/status/123");
+    // s83: the at:// record URI maps to the public web URL; anything else
+    // gets no invented link (the first live bluesky post proved this gap).
+    expect(
+      socialPermalink("bluesky", "at://did:plc:abc/app.bsky.feed.post/3k44", {}),
+    ).toBe("https://bsky.app/profile/did:plc:abc/post/3k44");
     expect(socialPermalink("bluesky", "abc", {})).toBeNull();
+    expect(socialPermalink("reddit", "t3_abc", {})).toBeNull();
+    expect(socialPermalink("reddit", "t3_abc", { permalink: "https://reddit.example/p" })).toBe(
+      "https://reddit.example/p",
+    );
   });
 });
 

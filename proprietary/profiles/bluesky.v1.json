@@ -1,0 +1,8 @@
+{
+  "platform": "bluesky",
+  "tone": "conversational, direct, no corporate gloss — the network reads like early Twitter",
+  "charLimit": 280,
+  "hashtagPolicy": "hashtags are uncommon on this network — none, or at most one",
+  "ctaPolicy": "no hard sell; a plain link when there is genuinely something to open",
+  "disclosure": "AI-assisted draft — review before publishing"
+}
