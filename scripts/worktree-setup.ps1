@@ -14,8 +14,8 @@
 # (exactly how the s60 no-op stayed invisible). Idempotent - safe to re-run.
 #
 # Usage (from the main checkout):
-#   npm run worktree:setup -- .claude\worktrees\<lane>
-#   powershell -ExecutionPolicy Bypass -File scripts\worktree-setup.ps1 .claude\worktrees\<lane>
+#   npm run worktree:setup -- .claude/worktrees/<lane>          (pwsh 7, both OSes)
+#   pwsh -ExecutionPolicy Bypass -File scripts/worktree-setup.ps1 .claude/worktrees/<lane>
 #
 # Standing rule this pairs with: NEVER run `npm install` inside a worktree -
 # npm v7+ deletes a linked node_modules and replaces it with a real folder.

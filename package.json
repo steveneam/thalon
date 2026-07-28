@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "preinstall": "node scripts/guard-worktree-install.mjs",
-    "worktree:setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/worktree-setup.ps1",
+    "worktree:setup": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/worktree-setup.ps1",
     "dev": "npm run dev -w @thalon/web",
     "build": "npm run build -w @thalon/web",
     "start": "npm run start -w @thalon/web",
