@@ -208,16 +208,41 @@ async function transcriptSeam() {
 }
 
 async function deploySeam() {
-  const vercel = await probe("vercel", ["--version"]);
-  const version = vercel.ok ? parseVercelVersion(vercel.output) : null;
-  if (version) {
+  // s84 PRUNE (rule 8: fix the stale neighbour as you find it). This probed
+  // for the Vercel CLI and told the operator to `npm i -g vercel` — an
+  // instruction for a path RETIRED at ADR-0007 (2026-07-08), when deploy
+  // re-chartered onto the Swordfish VPS. It had been reporting the live
+  // channel as "not-live-ready" ever since: a documented command that runs,
+  // exits 0, and lies. The real channel is CI → GHCR → Dokploy → the staging
+  // edge, so the honest local probe is whether THIS box can see it.
+  const origin = process.env.APP_ORIGIN ?? "https://preview.swordfish.cfd";
+  const workflow = path.join(repoRoot, ".github", "workflows", "web-image.yml");
+  if (!existsSync(workflow)) {
+    return seamRow(
+      "deploy",
+      "not-live-ready",
+      "the auto-deploy workflow (.github/workflows/web-image.yml) is missing — deploy rides CI, not a local CLI",
+      "restore the workflow, or deploy by hand per agent_handoff/ notes",
+    );
+  }
+  // The callback door is the one path the edge serves anonymously (s84), so
+  // it proves reachability WITHOUT needing the rotating basicauth pair.
+  const probeUrl = `${origin.replace(/\/$/, "")}/api/integrations/callback/facebook`;
+  const reach = await probe("curl", ["-s", "-o", "/dev/null", "-w", "%{http_code}", "--max-time", "15", probeUrl]);
+  const code = reach.ok ? reach.output.trim() : null;
+  if (code && code !== "000") {
     return seamRow(
       "deploy",
       "live-ready",
-      `Vercel CLI ${version} on PATH; DeployTarget driver still fake in pass 2 (real adapter = pass 3)`,
+      `auto-deploy via CI → GHCR → Dokploy (ADR-0007); ${origin} reachable from this box (callback door HTTP ${code})`,
     );
   }
-  return seamRow("deploy", "not-live-ready", "Vercel CLI not found on PATH", "npm i -g vercel");
+  return seamRow(
+    "deploy",
+    "not-live-ready",
+    `auto-deploy workflow present, but ${origin} did not answer from this box`,
+    "check the staging host is up; deploy itself runs in CI on push to main",
+  );
 }
 
 function trendSeam() {

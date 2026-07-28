@@ -157,6 +157,23 @@ now by `launch-lane.sh` when it makes lane #3, along with the fact that
 suite and disclosed it). The s64 "stagger retired" note measured lanes doing
 ordinary work, never three full suites at once.
 
+## Sprint 9 / s85 — proposed parallel lanes (FOUNDER APPROVAL NEEDED PER LANE)
+
+**Shape:** one lead-serial track he cannot delegate, plus three background
+lanes with disjoint file sets. All three lanes are dependency-independent —
+none blocks another, and none touches the sheets. Launch = Mode B via
+`scripts/launch-lane.sh` (the default since s64); **each needs his named GO.**
+
+| track | scope (files) | why it can run in parallel |
+|---|---|---|
+| **D4 sheets — LEAD-SERIAL, Fable 5, NOT a lane** | `docs/research/mock-sheets/` (4 new `.dc.html`) | Founder rule: design is authored directly, never delegated. Brief = `docs/research/d4-PREPLAN.md`. Ends at his verdict; no build follows until then. |
+| **lane ig-post** — Instagram posting driver | `packages/engine/src/social/drivers/instagram.ts` + tests | The typed text-only refusal becomes a real media driver (`/media` → `/media_publish`) now that `/assets/<sha256>` is edge-public and Meta can fetch it. Driver-local; no contract change. **Ships DISARMED** — posting still needs his per-platform GO. |
+| **lane d2-window** — publication_metrics contract window | `packages/contracts` + `packages/db` + migration | D2 pre-work: the metrics table + `postAnalytics` verb per connector. Contracts/db only; the Analytics SHEET stays lead-owned, so no surface collision. Honest note: thin value until posting is routine — it is groundwork, not a feature. |
+| **lane staging-dogfood** — move the operating origin to staging | env/ops + `agent_handoff/` + seeding scripts | Staging is now a real origin (s84). This lane makes it the tenant's actual home: seed tenant #0 there, verify the connect dance end-to-end at the real URL, re-point the dogfood loop. Touches no product code. |
+
+**Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
+the one with the weakest near-term payoff by its own charter.
+
 ## Work queue (open items + their gates)
 
 **[s82] THE FOUR THE LANES SURFACED AND THE FOUNDER DEFERRED TO s83.** He
