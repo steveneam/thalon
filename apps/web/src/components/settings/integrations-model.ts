@@ -334,10 +334,9 @@ export const GUIDED_STEPS: Readonly<Record<string, string[]>> = {
     "Paste it below — a read-only ping verifies it before anything can post.",
   ],
   facebook: [
-    "Create (or open) an app in the platform's developer portal and connect your Page.",
-    "Grant the Page posting and photo permissions.",
-    "Generate a long-lived Page access token.",
-    "Paste the token and your Page ID below.",
+    "Continue to the platform — you'll approve access in your own browser session.",
+    "The permissions asked for: manage and read your Pages. The connection stores your PAGE's token, never your account's.",
+    "Approving brings you straight back here; the Page token doesn't expire, so there is nothing to renew.",
   ],
   instagram: [
     "Connect the account to a Page in the platform's developer portal.",

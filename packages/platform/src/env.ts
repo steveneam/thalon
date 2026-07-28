@@ -142,13 +142,17 @@ const envSchema = z.object({
   SOCIAL_BLUESKY_IDENTIFIER: z.string().optional(),
 
   /**
-   * D1 (s83): the Reddit developer-app pair — OPERATOR-level facts (the app
-   * is Thalon's, registered once), consumed by the OAuth connect dance and
-   * the refresh tick, never stored per tenant. Tenant token material lands
-   * in the vault via the dance.
+   * D1 (s83): the operator's developer-app pairs — OPERATOR-level facts
+   * (each app is Thalon's, registered once), consumed by the OAuth connect
+   * dance and the refresh tick, never stored per tenant. Tenant token
+   * material lands in the vault via the dance. Facebook's pair is the Meta
+   * app id/secret (s83b: the dance derives the Page token; the app stays in
+   * Development mode, review-free for the self tenant).
    */
   SOCIAL_REDDIT_CLIENT_ID: z.string().optional(),
   SOCIAL_REDDIT_CLIENT_SECRET: z.string().optional(),
+  SOCIAL_FACEBOOK_CLIENT_ID: z.string().optional(),
+  SOCIAL_FACEBOOK_CLIENT_SECRET: z.string().optional(),
 
   /**
    * D1 (s83): the app's own public origin (e.g. https://app.example.com) —

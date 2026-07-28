@@ -87,8 +87,15 @@ describe("connect flavors (D1, s83 window)", () => {
     }
   });
 
-  it("pre-D1 entries carry NO connect field (= manual guided paste, unchanged behavior)", () => {
-    for (const key of ["linkedin", "x", "facebook", "instagram"] as const) {
+  it("facebook joined the dance (s83b, founder-directed): oauth2 with the Page scopes", () => {
+    expect(DESTINATIONS.facebook.connect).toEqual({
+      flavor: "oauth2",
+      scopes: ["pages_manage_posts", "pages_read_engagement", "pages_show_list"],
+    });
+  });
+
+  it("the remaining pre-D1 entries carry NO connect field (= manual guided paste, unchanged behavior)", () => {
+    for (const key of ["linkedin", "x", "instagram"] as const) {
       expect((DESTINATIONS[key] as DestinationDef).connect).toBeUndefined();
     }
   });

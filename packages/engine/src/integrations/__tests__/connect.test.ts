@@ -35,7 +35,7 @@ function deps(overrides: Partial<OauthConnectDeps> = {}): OauthConnectDeps {
   return { repos: handle.repos, ctx, env, ...overrides };
 }
 
-/** Stub the global fetch arctic uses for its token endpoint; whoAmI rides deps.fetchImpl instead. */
+/** Stub the global fetch arctic uses for its token endpoints; provider extras ride deps.fetchImpl instead. */
 function stubTokenEndpoint(body: Record<string, unknown> | (() => Response)) {
   vi.stubGlobal(
     "fetch",
@@ -43,7 +43,10 @@ function stubTokenEndpoint(body: Record<string, unknown> | (() => Response)) {
       // Arctic hands fetch a Request object, not a URL string.
       const url =
         typeof input === "string" ? input : ((input as { url?: unknown }).url ?? String(input));
-      if (String(url).includes("reddit.com/api/v1/access_token")) {
+      if (
+        String(url).includes("reddit.com/api/v1/access_token") ||
+        String(url).includes("graph.facebook.com")
+      ) {
         return typeof body === "function"
           ? body()
           : new Response(JSON.stringify(body), {
@@ -239,5 +242,114 @@ describe("refresh", () => {
       horizonMs: 10 * 60 * 1000,
     });
     expect(far[0].outcome).toBe("skipped");
+  });
+});
+
+describe("the facebook provider (s83b: the dance yields the PAGE, not the user)", () => {
+  const PAGES = [
+    { id: "111", name: "Grip Works", access_token: "page_tok_111" },
+    { id: "222", name: "Side Project", access_token: "page_tok_222" },
+  ];
+
+  function fbEnv(extra: Record<string, string> = {}) {
+    return readEnv({
+      THALON_VAULT_MASTER_KEY: MASTER_B64,
+      SOCIAL_FACEBOOK_CLIENT_ID: "fb_cid",
+      SOCIAL_FACEBOOK_CLIENT_SECRET: "fb_csecret",
+      APP_ORIGIN: "https://app.example.com",
+      ...extra,
+    });
+  }
+
+  function fbFetch(pages: unknown[]): typeof fetch {
+    return (async (url: unknown) => {
+      const u = String(url);
+      if (u.includes("fb_exchange_token")) {
+        return new Response(JSON.stringify({ access_token: "long_user_tok", expires_in: 5184000 }), {
+          status: 200,
+        });
+      }
+      if (u.includes("/me/accounts")) {
+        return new Response(JSON.stringify({ data: pages }), { status: 200 });
+      }
+      throw new Error(`unexpected provider fetch: ${u}`);
+    }) as typeof fetch;
+  }
+
+  it("begin builds the platform's dialog URL with the Page scopes", async () => {
+    env = fbEnv();
+    const { authorizeUrl } = await beginOauthConnect(deps(), "facebook", NOW);
+    const url = new URL(authorizeUrl);
+    expect(url.hostname).toBe("www.facebook.com");
+    expect(url.searchParams.get("scope")).toBe(
+      "pages_manage_posts pages_read_engagement pages_show_list",
+    );
+    expect(url.searchParams.get("redirect_uri")).toBe(
+      "https://app.example.com/api/integrations/callback/facebook",
+    );
+  });
+
+  it("the env-pinned Page wins among several; the vault stores the PAGE token + id, no expiry, named card", async () => {
+    env = fbEnv({ SOCIAL_FACEBOOK_PAGE_ID: "111" });
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer", expires_in: 3600 });
+    const { state } = await beginOauthConnect(deps(), "facebook", NOW);
+    const card = await completeOauthConnect(
+      deps({ fetchImpl: fbFetch(PAGES) }),
+      "facebook",
+      { code: "c", state },
+      NOW,
+    );
+    expect(card.connectedAs).toBe("Grip Works");
+    expect(card.expiresAt).toBeNull();
+    expect(await openDestinationCredentials(deps(), "facebook")).toEqual({
+      accessToken: "page_tok_111",
+      pageId: "111",
+    });
+  });
+
+  it("exactly one Page decides itself without a pin", async () => {
+    env = fbEnv();
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const { state } = await beginOauthConnect(deps(), "facebook", NOW);
+    const card = await completeOauthConnect(
+      deps({ fetchImpl: fbFetch([PAGES[0]]) }),
+      "facebook",
+      { code: "c", state },
+      NOW,
+    );
+    expect(card.connectedAs).toBe("Grip Works");
+  });
+
+  it("several Pages and no pin REFUSES and names them — a silent pick would connect the wrong identity", async () => {
+    env = fbEnv();
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const { state } = await beginOauthConnect(deps(), "facebook", NOW);
+    await expect(
+      completeOauthConnect(deps({ fetchImpl: fbFetch(PAGES) }), "facebook", { code: "c", state }, NOW),
+    ).rejects.toThrow(/2 Pages and none is pinned.*Grip Works \(111\), Side Project \(222\)/);
+    expect(await handle.repos.tenantCredentials.get(ctx, "facebook")).toBeNull();
+  });
+
+  it("no Pages at all refuses honestly — Facebook posting is Page posting", async () => {
+    env = fbEnv();
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const { state } = await beginOauthConnect(deps(), "facebook", NOW);
+    await expect(
+      completeOauthConnect(deps({ fetchImpl: fbFetch([]) }), "facebook", { code: "c", state }, NOW),
+    ).rejects.toThrow(/manages no Pages/);
+  });
+
+  it("the refresh tick never touches a facebook row — no expiry is recorded", async () => {
+    env = fbEnv({ SOCIAL_FACEBOOK_PAGE_ID: "111" });
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const { state } = await beginOauthConnect(deps(), "facebook", NOW);
+    await completeOauthConnect(deps({ fetchImpl: fbFetch(PAGES) }), "facebook", { code: "c", state }, NOW);
+    const outcomes = await refreshExpiringCredentials(deps(), {
+      now: NOW,
+      horizonMs: 365 * 24 * 60 * 60 * 1000,
+    });
+    expect(outcomes).toEqual([
+      { destination: "facebook", outcome: "skipped", detail: "no expiry recorded" },
+    ]);
   });
 });

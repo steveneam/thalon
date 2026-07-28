@@ -120,7 +120,15 @@ export const DESTINATIONS = {
     class: "social",
     driver: "facebook-page-feed",
     label: "Facebook Page",
+    // The dance's yield IS this shape: the derived PAGE token + page id
+    // (never the user token). s83b: oauth2 via the operator's own app in
+    // Development mode — review-free for the self tenant; the B-int.4
+    // App-Review wall concerns OTHER tenants and is untouched.
     credentials: z.object({ accessToken: z.string().min(1), pageId: z.string().min(1) }),
+    connect: {
+      flavor: "oauth2",
+      scopes: ["pages_manage_posts", "pages_read_engagement", "pages_show_list"],
+    },
   },
   instagram: {
     class: "social",
