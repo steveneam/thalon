@@ -86,11 +86,35 @@ is lead-direct and FREEZES FIRST:** W1 = a small additive contract window
 platform capability matrix in contracts), W2 = the shared `TakeAudition` seam,
 so no lane touches packages/db, packages/contracts, or another lane's files.
 
+**✅ BOTH WINDOWS FROZEN ON MAIN BEFORE THE LAUNCH.** W1 = `7fee14c`
+(migration purely additive — two ADD COLUMNs; the status check now draws its
+vocabulary from contracts via `inList` and generated NO SQL diff). W2 =
+`3513ef5`. Kickoffs + the worktree-prep fix = `104efcb`. Verify green by exit
+code at each: **2484 passed / 9 skipped, 0 lint errors** (2439 at the s81
+close). Two things worth carrying forward:
+
+- **The capability matrix is NOT `platformProfiles[platform].charLimit`.** That
+  number is an authoring BUDGET (a style opinion fed to generation — Facebook's
+  shipped budget is 5000 against a platform that accepts 63,206, and the gap is
+  the point); the matrix is the platform's CEILING. The invariant tying them —
+  no budget may exceed its ceiling — is executable in
+  `engine/src/fanout/__tests__/profiles.test.ts`, and was **watched failing**
+  (x bumped to 300 against 280) before it was trusted passing.
+- **W2's tests found a defect before either lane could inherit it.** The
+  one-at-a-time audition slot was keyed on the component alone, so re-pointing
+  an instance at a different candidate carried the playing state across — a
+  recycled tile began streaming a file nobody asked to hear. The slot now
+  records the ref it was started for.
+
+Also fixed en route: `npm run worktree:setup` invoked `powershell`, which does
+not exist on this box — the documented lane-prep command had been dead on Linux
+since the migration. It is `pwsh` now, and was executed verbatim afterwards.
+
 | lane | bucket | scope (files) | status |
 |---|---|---|---|
-| editor-verbs | Version management — 4 of the editor's 5 open no-affordance rows (compare versions · save as NAMED variant · delete w/ refusals · render survives leaving) + takes-strip audition + editor.tsx s78 tail (player failure state · busy→action identity · timecode everywhere) | components/videos/editor.tsx + its tests · lib/videos/* · app/api/videos/** (NO css — sheet classes only) | **approved s81 — launch s82 boot** |
-| editor-polish | The s78 medium/low tail in the inspector/timeline/css (10 items, B1–B10 in the plan incl. bed-picker audition and the light-mode player plate on BOTH videos surfaces) | components/videos/editor-inspector.tsx · editor-timeline.tsx · editor.css · dossier.css (B8 only) · NEW editor-polish-s82.test.tsx | **approved s81 — launch s82 boot** |
-| sched-spine | The Postiz take: platform capability matrix + deterministic pre-publish validator · Approve's Schedule verb → publish_queue producer · queue consumer tick (mirrors sweep-scheduler; **ships DISARMED**, zero live calls) · platform-true preview (gated on founder call #3) | packages/engine/src/social/** · app/api/social/** · components/approve/** · components/calendar/** (contracts/db FROZEN by W1) | **approved s81 — launch s82 boot** |
+| editor-verbs | Version management — 4 of the editor's 5 open no-affordance rows (compare versions · save as NAMED variant · delete w/ refusals · render survives leaving) + takes-strip audition + editor.tsx s78 tail (player failure state · busy→action identity · timecode everywhere) | components/videos/editor.tsx + its tests · lib/videos/* · app/api/videos/** (NO css — sheet classes only) | **LAUNCHED s82** (`agent/<lane>`, worktree prepped, Opus 5[1m] pin) |
+| editor-polish | The s78 medium/low tail in the inspector/timeline/css (10 items, B1–B10 in the plan incl. bed-picker audition and the light-mode player plate on BOTH videos surfaces) | components/videos/editor-inspector.tsx · editor-timeline.tsx · editor.css · dossier.css (B8 only) · NEW editor-polish-s82.test.tsx | **LAUNCHED s82** (`agent/<lane>`, worktree prepped, Opus 5[1m] pin) |
+| sched-spine | The Postiz take: platform capability matrix + deterministic pre-publish validator · Approve's Schedule verb → publish_queue producer · queue consumer tick (mirrors sweep-scheduler; **ships DISARMED**, zero live calls) · platform-true preview (gated on founder call #3) | packages/engine/src/social/** · app/api/social/** · components/approve/** · components/calendar/** (contracts/db FROZEN by W1) | **LAUNCHED s82** (`agent/<lane>`, worktree prepped, Opus 5[1m] pin) |
 
 Merge order A→B→C by default; lead gates every merge (verify-on-merged-main by
 exit code · drive the jobs · measure the render · screenshots); the lead extends
