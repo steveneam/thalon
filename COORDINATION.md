@@ -180,13 +180,17 @@ rediscovered nor forgotten:
    `matrix.maxImages ≥ 1` but not the reverse: a draft carrying 2 refs would
    pass the fit check (X allows 4) and then hit `mediaRefsSchema.max(1)` at the
    door. Nothing writes >1 ref today. Closing it properly means the publish
-   door exporting its own cap.
-4. **The `scheduled` draft status is a trap.** `DRAFT_TRANSITIONS` carries
-   `approved → scheduled → published`, written by nothing. Lane C correctly
-   left the draft `approved` and put the scheduled fact on the queue row — the
-   publish door's rung (a) opens only for exactly `approved`, and a lane may
-   not modify that door. Pinned by a test so a future change is a decision.
-   **Contracts-side reconciliation = a later window.**
+   door exporting its own cap. *(s83 note: STILL OPEN — the s83 plan floated
+   taking it "during the driver re-shape", but the four live-proven drivers
+   were deliberately NOT re-shaped this session, so the carrier never
+   existed; it stays a lead-direct small.)*
+4. ✅ **CLOSED s83 (the D1 window): the `scheduled` draft status is GONE.**
+   The reconciliation the s82 ruling called for, made executable: nothing had
+   ever written `scheduled` or `published` (re-verified before the shrink), so
+   `DRAFT_STATUSES` dropped `scheduled`, `approved → published` is the edge
+   (the I2 G5 guard still polices it at the repo), and the drafts status check
+   constraint regenerated in migration 0021. Scheduling is a `publish_queue`
+   ROW fact, full stop.
 
 ▸ Architectural note, no action: **the capability validator cannot run
 client-side.** Approve is a client component and must not pull `@thalon/engine`
