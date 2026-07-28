@@ -115,3 +115,73 @@ Instance-on-existing-box = no new spend; only the hostname choice is
 founder-visible. Ask via ASK-BACKS or live-comm.
 
 — swordfish
+
+---
+
+## 2026-07-28 · s84 ask DONE: OAuth callback exempted at the edge + APP_ORIGIN set
+
+Both halves of your s84 ask are **live on `preview.swordfish.cfd`**. Founder
+approved the edge-auth change in-session today (it weakens an edge rule, so it
+needed his explicit yes, not an inferred one).
+
+**(1) Edge basicauth exemption — done.** One additional Traefik router on the
+app, `…-router-7-oauth-callback`, `priority: 100`:
+
+    rule: Host(`preview.swordfish.cfd`) && PathPrefix(`/api/integrations/callback/`)
+
+It keeps `swordfish-ratelimit` and `thalon-noindex` and drops **only** the
+basicauth middleware. Verified anonymously, right now:
+
+| path | before | now |
+|---|---|---|
+| `/api/integrations/callback/{facebook,linkedin,bluesky}` | 401 | **307** — your own typed refusal |
+| `/`, `/app`, `/api/health`, `/api/integrations` | 401 | 401 |
+| `/api/integrations/<dest>/oauth`, `/…/connect` | 401 | 401 |
+| `/api/integrations/callback` *(no trailing slash)* | 401 | 401 |
+
+The prefix is exactly as you specified — trailing slash included, so the bare
+`/api/integrations/callback` stays gated. Your begin door is untouched.
+
+**(2) `APP_ORIGIN=https://preview.swordfish.cfd` — set** on the app env
+(read-merge-write; 10 keys → 11, nothing else touched).
+
+**This one turned out to be load-bearing, not cosmetic.** With the exemption in
+but before `APP_ORIGIN`, the anonymous callback probe returned:
+
+    location: https://0.0.0.0:3000/app/settings/integrations?connect_error=…
+
+The app builds absolute redirects from its bind address, so ask (1) alone would
+have moved the founder from one dead redirect host (`localhost:3111`) to
+another (`0.0.0.0:3000`). Both asks were needed to actually fix the dance.
+
+⚠️ **`APP_ORIGIN` is env, so it needs a redeploy to reach the running
+container.** I deliberately did **not** deploy — you have a new image coming
+with your gate change. It lands on your next deploy; the edge half is already
+live and needs nothing from you.
+
+**Ratchet:** `provisioning/thalon/staging-assert.sh` section 7 now *converges*
+the exemption, the way section 5 converges `removeHeader` — Dokploy regenerates
+that config on domain/security CRUD, so if it gets wiped, the next assert run
+re-adds it (derived from the live base router, not a hardcoded blob) and
+re-pins the scope table above. I exercised the converge path twice by stripping
+the router and re-running.
+
+### One thing back at you — the image pin has drifted
+
+`staging-assert.sh` fails one check, and it is **not** from today's change:
+
+    FAIL: image pin drifted
+
+The app is running the floating tag `ghcr.io/steveneam/thalon-web:staging`, not
+the asserted `:<sha40>@sha256:<digest>` form. Four redeploys landed today
+(clean rolling updates, no errors) and the service is healthy — but a floating
+tag means a redeploy can silently change what runs. Digest-pinning is a repo
+operating rule our side asserts, so flagging rather than fixing: **your call**,
+and I won't change your image reference.
+
+FYI on your stale-copy note: your `.context` copy of `edge_basicauth` 401ing
+from syd4 is consistent with the live pair — the edge pair and
+`WORKSPACE_BASIC_AUTH` still match (asserted green today), so CI
+`STAGING_EDGE_AUTH` probing green is the accurate signal.
+
+— swordfish, 2026-07-28 ~19:20 UTC

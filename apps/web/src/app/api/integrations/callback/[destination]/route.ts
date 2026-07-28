@@ -32,10 +32,21 @@ export async function GET(
   { params }: { params: Promise<{ destination: string }> },
 ) {
   const env = readEnv();
-  // The callback's own origin fallback: request URL. APP_ORIGIN governs what
-  // the platform app registered; for the redirect BACK into our own app the
-  // request's origin is the honest source.
-  const origin = env.APP_ORIGIN ?? new URL(request.url).origin;
+  // Two DIFFERENT origin needs, deliberately not one value:
+  //  · the redirect_uri handed to the platform must match its registered
+  //    entry EXACTLY — that is APP_ORIGIN only, never headers (see connect.ts).
+  //  · this redirect goes BACK into our own UI, so it must land on the origin
+  //    the operator's BROWSER actually used.
+  // Behind a reverse proxy `request.url` carries the container's BIND address
+  // (https://0.0.0.0:3000 — observed live on staging), which strands the
+  // browser exactly like the dead localhost redirects this door exists to
+  // end. The proxy's forwarded host is the honest source; only hostnames the
+  // proxy routes can reach us, so it cannot be steered elsewhere.
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedOrigin = forwardedHost
+    ? `${request.headers.get("x-forwarded-proto") ?? "https"}://${forwardedHost}`
+    : null;
+  const origin = env.APP_ORIGIN ?? forwardedOrigin ?? new URL(request.url).origin;
   const raw = (await params).destination;
   const destination = destinationKeySchema.safeParse(raw);
   if (!destination.success) {

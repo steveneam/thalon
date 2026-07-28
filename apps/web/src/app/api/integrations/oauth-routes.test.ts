@@ -166,4 +166,29 @@ describe("GET /api/integrations/callback/[destination]", () => {
     const location = new URL(res.headers.get("location")!);
     expect(location.searchParams.get("connect_error")).toContain("start the connect again");
   });
+
+  it("without APP_ORIGIN the redirect follows the PROXY's forwarded host — never the container's bind address", async () => {
+    // Observed live on staging (s84): APP_ORIGIN unset behind Traefik made
+    // `request.url` resolve to https://0.0.0.0:3000, so a SUCCESSFUL connect
+    // still stranded the operator's browser on an unreachable page — the very
+    // failure this door exists to end.
+    delete process.env.APP_ORIGIN;
+    const req = new Request("http://0.0.0.0:3000/api/integrations/callback/reddit", {
+      method: "GET",
+      headers: { "x-forwarded-host": "preview.example.cfd", "x-forwarded-proto": "https" },
+    });
+    const res = await CALLBACK(req, param("reddit"));
+    const location = new URL(res.headers.get("location")!);
+    expect(location.origin).toBe("https://preview.example.cfd");
+  });
+
+  it("APP_ORIGIN still WINS over the forwarded host — explicit config is never overridden by a header", async () => {
+    process.env.APP_ORIGIN = "https://app.example.com";
+    const req = new Request("http://0.0.0.0:3000/api/integrations/callback/reddit", {
+      method: "GET",
+      headers: { "x-forwarded-host": "someone-else.example", "x-forwarded-proto": "https" },
+    });
+    const res = await CALLBACK(req, param("reddit"));
+    expect(new URL(res.headers.get("location")!).origin).toBe("https://app.example.com");
+  });
 });
