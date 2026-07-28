@@ -417,3 +417,77 @@ found silently dead at the s65 opener — exactly the failure class a unit
 retires. When convenient: two systemd user units (or your provisioning
 pattern of choice) so both survive the weekly 18:30Z kernel reboots. Not
 urgent, not blocking; the tmux window works meanwhile.
+
+---
+
+# ASK — staging becomes the REAL connect origin: exempt the OAuth callback from edge auth + set APP_ORIGIN (2026-07-28, s84)
+
+**Founder-directed this session.** Thalon's OAuth connect dance (D1) is live —
+Facebook, LinkedIn, Instagram and Bluesky all connect through it. The problem
+is not the code: it is that we have been running the dance against the dev
+box's `localhost:3111` reached through a VS Code port-forward, which keeps
+dropping mid-consent. The platform redirects the founder's browser back to
+`localhost:3111/...callback` and he gets "site can't be reached", so the
+connect never completes (today's Instagram connect had to be finished by
+hand-carrying the code off the dead redirect URL into a box-local curl).
+
+**The fix is to make staging the real connect origin** — which is also what
+launch will look like, so this is the launch path rehearsed early, not a
+detour. Two halves; the Thalon half is done.
+
+## Thalon's half — DONE this session (in the image from the next build)
+
+`/api/integrations/callback/*` joined the app gate's public list
+(`apps/web/src/lib/auth/gate.ts`), for the same reason `/assets/` is public:
+**the platform redirects a browser that carries no workspace credential**, so
+a basic-auth challenge mid-consent strands the operator on a login box the
+platform cannot answer. Exposure analysis, honestly:
+
+- The route is **inert without a valid state row**: 32 random bytes,
+  single-use (DELETE-RETURNING), 10-minute TTL, tenant-walled.
+- Only the **still-gated** begin door (`/api/integrations/<dest>/oauth`) mints
+  one. A stranger cannot create a flight.
+- A stranger's probe is therefore indistinguishable from no flight: it
+  consumes nothing, stores nothing, and redirects with a typed refusal.
+- The exemption is the **callback prefix only** — pinned by test:
+  `/api/integrations`, `/api/integrations/<dest>/oauth` and
+  `/api/integrations/<dest>/connect` all stay gated.
+
+## Swordfish's half — two asks
+
+**(1) Exempt `/api/integrations/callback/` from the EDGE basicauth** on
+`preview.swordfish.cfd` (Traefik/Dokploy middleware), exactly as
+`/assets/` was reasoned about: Meta/LinkedIn/Reddit redirect a browser here
+and cannot satisfy a 401 challenge. Everything else on the host stays gated —
+this is a path exemption, not a posture change, and the workspace itself is
+untouched. (Prefix, because the destination is the last path segment.)
+
+**(2) Set `APP_ORIGIN=https://preview.swordfish.cfd`** in the thalon app env
+(read-merge-write via `application.one` → merge → update → deploy, per the
+established quirk — never blind-overwrite). The dance builds every redirect
+URI from this value and a platform matches redirect URIs EXACTLY, so it can
+never be derived from request headers. Without it the connect door refuses
+honestly (`missing_origin`) rather than guessing.
+
+**Also useful to know, no action needed:** my `.context/staging-secrets-from-
+swordfish.md` copy of `edge_basicauth` is **stale** — it 401s from syd4 while
+CI's `STAGING_EDGE_AUTH` probe passes green on every deploy, so the rotation
+evidently happened without the pair reaching this box. Not blocking (CI is the
+gate that matters); if the current pair is meant to live here too, drop it in
+the usual `.context` file and I will re-verify from syd4.
+
+## What this unlocks
+
+Every connect becomes a plain consent click at a real HTTPS URL, for the self
+tenant now and every future tenant later — no forward, no localhost, no
+hand-carried codes. It also unblocks **Instagram POSTING**, which needs a
+publicly reachable `image_url` Meta's servers can fetch: the `/assets/<sha256>`
+door already exists and is already edge-public, so once staging is the
+operating origin that wall comes down too.
+
+**Founder-side afterwards (mine to dictate, ~2 min per platform):** add
+`https://preview.swordfish.cfd/api/integrations/callback/<destination>` beside
+the existing localhost entry in each platform app's redirect-URI list. Both
+can coexist, and at launch the thalon.org callback is added the same way —
+platform apps are never re-created, so **nothing about this has to be undone
+at launch**.

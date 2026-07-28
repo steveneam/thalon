@@ -36,6 +36,16 @@ export function isPublicPath(pathname: string): boolean {
   // browsers and, later, IG/Threads fetching a public image_url. Basic auth
   // here would break every published image.
   if (pathname.startsWith("/assets/")) return true;
+  // The OAuth callback (D1): the platform redirects the operator's BROWSER
+  // here, and that browser carries no workspace credential — a basic-auth
+  // challenge mid-consent strands them on a login box the platform cannot
+  // answer, so every connect on a gated origin would fail. It belongs to the
+  // SELF_GATED class: the route is inert without a 32-byte single-use,
+  // TTL'd, tenant-walled state row that only the GATED begin door mints, so
+  // a stranger's probe is indistinguishable from no flight and stores
+  // nothing. A prefix rather than an exact entry because the destination is
+  // the last segment.
+  if (pathname.startsWith("/api/integrations/callback/")) return true;
   // The whole blog surface incl. /blog/rss.xml and engine-published slugs.
   return pathname === "/blog" || pathname.startsWith("/blog/");
 }
