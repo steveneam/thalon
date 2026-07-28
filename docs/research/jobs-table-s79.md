@@ -108,6 +108,43 @@ contradiction with someone who measured correctly, and the more confident output
 wins the argument. Five of this harness's selectors have now been wrong; three
 produced false passes.
 
+### Wrong verdicts 6–8 (s80 added three; s81 added two more)
+
+s80 added three to the tally, recorded beside each fix in the job set:
+`.playhead` measured against itself, the copilot CHIP counted as a music-swap
+verb, and a 1-beat cut with no captions chosen as "the cut with audio".
+
+**(7) A selector that pinned the MARKUP instead of the ROLE.** The copilot job
+read `input.cop-box`. s81 moved the box back to the sheet's wrapper — the vow is
+visible text again, not a placeholder — with the input inside it, and the job
+would have reported "the chip has no ask field": a **PRODUCT defect raised for a
+markup change**. Fixed to ask for the ask field by role (`.copilot input`).
+
+**(8) A FLAKY verdict, which is worse than a failing one.** The playhead job
+asserted the marker sits AT the lane origin. That was correct only while the
+playhead never moved; once playback drove it, being at the origin is true at
+t=0 and false a frame later — and the marker is only as fresh as the last
+`timeupdate` (~4/s) while `currentTime` is read live, so the DOM legitimately
+lags by ~3.6px on this cut, over tolerance. It **flipped between ✓ and DEAD DOOR
+on consecutive runs of the same code**. The job now pauses, seeks to the
+midpoint, and checks the marker against where the cut actually is. Four
+consecutive runs agree exactly. **Tightening, not loosening:** at the origin a
+wrong SCALE is invisible; halfway through it is not, and the original 16px
+origin bug still fails it.
+
+A third change was a widening rather than a wrong verdict: the music-swap job
+swept `textContent`, which measures what a sighted mouse user sees and nothing
+else. It now reads the **accessible name** — a verb living in `aria-label` had
+read as absent, and one living only in a `title` reads as present to nobody. A
+tile named only by its filename still fails it.
+
+**The eighth is the one to generalise from.** The first seven were selectors
+pointed at the wrong element; this one was a *correct* selector with an
+assertion that stopped being true when the product improved. When a job starts
+passing and failing on the same code, it is measuring a moment rather than a
+property — and the fix is to name the property (here: does the marker say where
+you are) rather than to widen the tolerance until the flake hides.
+
 ### Jobs deliberately not driven
 
 - **Anything that spends.** Generate is checked for *reachability* and never
@@ -119,3 +156,9 @@ produced false passes.
   session**, its own. It is the surface this harness pays off on most: the whole
   27-job table is exactly what it needs, and it is now something that RUNS
   rather than a report someone wrote once.
+  **Built out across s80–s81; the table closed at 21 works · 0 dead doors · 5
+  no-affordance · 1 undriven**, from 6 · 3 · 14 · 1 at the s80 boot. The five
+  that remain are real gaps, not harness noise, and four of them are one theme
+  (version management: compare, name a variant, delete). The `undriven` row
+  needs a pending agent proposal, which SPENDS — it stays undriven by the gate,
+  not by an oversight.
