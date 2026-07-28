@@ -1,0 +1,134 @@
+/*
+ * <TakeAudition>'s OWN atomics — the s82 W2 seam. A SHARED-COMPONENT sheet,
+ * not a surface sheet: two surfaces render it (the editor's takes strip and
+ * the inspector's bed picker), so it has no single surface root to scope
+ * under. It carries the other guarantee instead — every selector below owns
+ * the `take-audition` namespace, which nothing else uses. Registered in
+ * lib/__tests__/surface-css-scope.test.ts, where that is checked rather than
+ * assumed.
+ *
+ * Sizing is deliberately absent. Both hosts already own their tile geometry
+ * (the takes strip's 118×68 box, the inspector's bed rows), and a shared
+ * component that imposed a size would flatten one of them — the same lesson
+ * <SourceThumb> learned by rendering the shared box class rather than the
+ * sheet's own. This file styles the CONTROL and the player; the tile stays
+ * the host's.
+ *
+ * Every value is a token (rule: no raw hex, no arbitrary px beyond control
+ * geometry that has no token to draw from).
+ */
+
+.take-audition {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── the affordance ───────────────────────────────────────────────── */
+
+.take-audition-btn {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--n-400);
+  border-radius: 50%;
+  background: var(--n-100);
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.take-audition-btn:hover {
+  border-color: var(--n-600);
+  background: var(--n-200);
+}
+
+/*
+ * The focus ring is not decoration: this control is reachable by keyboard and
+ * lives inside tiles that are themselves buttons, so "where am I" has to be
+ * answerable without a pointer.
+ */
+.take-audition-btn:focus-visible {
+  outline: 2px solid var(--color-brand-hi);
+  outline-offset: 2px;
+}
+
+/* A right-pointing triangle drawn from borders — no glyph, no icon font. */
+.take-audition-play {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid var(--n-800);
+  /* The optical centre of a triangle sits left of its bounding box. */
+  margin-left: 2px;
+}
+
+.take-audition-stop {
+  width: 8px;
+  height: 8px;
+  background: var(--n-800);
+  border-radius: 1px;
+}
+
+/* ── unplayable: we had a ref and it will not stream ──────────────── */
+
+/*
+ * Quiet, not alarming. An unplayable candidate is a fact about the box (a
+ * file moved, a project with no media root here), not an error the operator
+ * caused — so it reads as a dimmed note in the same slot the control had,
+ * and the tile around it keeps its rhythm.
+ */
+.take-audition-dead {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: var(--n-600);
+  gap: 4px;
+}
+
+.take-audition-slash {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--n-500);
+  border-radius: 2px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.take-audition-slash::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 4px;
+  width: 14px;
+  height: 1px;
+  background: var(--n-500);
+  transform: rotate(-38deg);
+}
+
+/* ── the player, revealed only while auditioning ──────────────────── */
+
+.take-audition-player {
+  display: inline-flex;
+  align-items: center;
+}
+
+.take-audition-audio {
+  height: 28px;
+  max-width: 190px;
+}
+
+/*
+ * The audition is a glance, not a viewing: a candidate take is being compared
+ * against its siblings, so the frame stays small enough that the strip around
+ * it does not reflow out from under the operator mid-decision.
+ */
+.take-audition-video {
+  width: 190px;
+  max-height: 110px;
+  background: var(--n-1000);
+  border-radius: 3px;
+  display: block;
+}

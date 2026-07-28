@@ -52,6 +52,10 @@ const SCOPED = /^\.[a-z][\w-]*-surface\b/;
  */
 const SHARED_COMPONENT_SHEETS: Record<string, string> = {
   "media/source-thumb.css": "src-thumb",
+  // s82 W2: the audition seam — one component, two surfaces (the editor's
+  // takes strip and the inspector's bed picker), so it has no single surface
+  // root to scope under and takes the namespace guarantee instead.
+  "media/take-audition.css": "take-audition",
 };
 
 function surfaceStylesheets(): string[] {
