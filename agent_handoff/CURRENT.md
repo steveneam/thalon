@@ -2,135 +2,138 @@
 
 ## Stamp
 
-2026-07-28 (session 84, syd4 — **zero credit spend**; Fable 5). **TWO PLATFORMS
-JOINED THE DANCE AND ONE MANUAL STEP WAS DELETED RATHER THAN DELEGATED — but
-the session's real lesson is a founder catch.** Final verify on main: **2756
-passed / 9 skipped, 0 lint errors** (2740 at the s83 close). Tree clean,
-pushed (`2aadac1`). Zero posts; the sequence gate is untouched.
+2026-07-28 (session 84, syd4 — **zero credit spend**; Fable 5). **THE REAL
+ADDRESS IS LIVE, TWO PLATFORMS JOINED THE DANCE, AND THE FOUNDER CAUGHT THE
+SAME CLASS OF MISTAKE THREE TIMES.** Final verify on main: **2761 passed / 9
+skipped, 0 lint errors** (2740 at the s83 close). Tree clean, pushed. Zero
+posts.
 
-**THE FOUNDER CATCH, first because it reshapes the grant.** I opened on the
-s83 Threads portal pilot and drove his Meta login from the box — straight
-into endless reCAPTCHA image grids, three rounds, headless then headed under
-Xvfb then a real VNC desktop. He stopped it: *"didnt i say to use your
-research skills before asking me to do manual work?"* — the exact rule-10 /
-ADR-0012 defect, caught by him. The memo that should have run first is now
-`docs/research/prior-art-portal-automation-s84.md`: **(a)** developer-app
-registration is NOT automatable on Meta/LinkedIn/TikTok/Reddit — no API, CLI
-or Terraform provider, dashboard-only BY POLICY (the class exists at
-Entra/Okta/Auth0, so the absence is deliberate); **(b)** every product in the
-category (Buffer, Ayrshare, Blotato, self-hosted Postiz/Mixpost) registers ONE
-app per platform centrally — app creation never scales with tenants, so the
-cost is N platforms × 1 app FOREVER; **(c)** the captcha loop's root cause is
-**datacenter IP reputation**, not fingerprint — patchright / rebrowser-patches
-/ undetected-chromedriver fix the wrong layer and residential proxies are an
-arms race, ToS-adverse, absurd for a one-time bootstrap → **REJECTED on ROI**;
-**(d)** the boring path wins: he does the ~10-min portal session in his OWN
-browser (his IP, no captcha) while the lead dictates every field live. The
-[[founder-portal-setup-grant]] memory is amended accordingly — the grant
-stands, only the LOGIN step moves back to him. **Never re-attempt an automated
-platform login from the box.**
+**THE LESSON, first, because it cost him ~3 hours and it recurred.** I opened
+on the s83 handoff's "Threads portal pilot" and drove his Meta login from the
+box into three rounds of reCAPTCHA, escalating headless → headed-under-Xvfb →
+VNC desktop. He stopped it (*"didnt i say to use your research skills before
+asking me to do manual work?"*). The memo that should have run FIRST is
+`docs/research/prior-art-portal-automation-s84.md`: app registration is not
+automatable anywhere (dashboard-only BY POLICY); every product in the category
+registers ONE app per platform centrally; the captcha loop's cause is
+**datacenter IP reputation**, so the stealth-patch class fixes the wrong layer
+— REJECTED on ROI. **Then it happened twice more:** he had to ask *"dont you
+have a real web address?"* (we did — staging, all day, in my own memory) and
+*"you add those new callback redirects yourself"*. Root cause each time: I
+treated the ENVIRONMENT as fixed scenery instead of a variable I control.
+→ **AGENTS.md rule 11** now names the three tells (escalating the same
+approach · a blocker that is infra the product will not ship with · a
+comparable product doing it painlessly) and states that **inherited handoff
+plans are hypotheses to re-test at the opener, not instructions**.
 
-**HIS better-auth ASK, answered:** REJECT for the connector seam (MIT, healthy,
-but it authenticates YOUR OWN app's users; we need session-free per-tenant
-POSTING tokens for a background queue, with quirks arctic + connect.ts already
-own and storage the AAD-bound vault already does better — adopting it means
-taking its whole user/session schema for a worse fit). Parked **LATER** for
-workspace end-user auth when multi-user tenant logins exist.
+**THE REAL ADDRESS — DONE, both halves, verified.** Swordfish exempted
+`/api/integrations/callback/` from the edge basicauth (priority-100 Traefik
+router, keeps ratelimit+noindex; anon probe: callback 307, everything else
+401) and set `APP_ORIGIN=https://preview.swordfish.cfd`. Thalon's half: the
+callback joined the app gate's public list (same reasoning as `/assets/` —
+the platform redirects a CREDENTIAL-LESS browser, and the route is inert
+without a 32-byte single-use tenant-walled state row; the begin door stays
+gated, pinned by test). **We independently found the same bug within minutes
+of each other:** with APP_ORIGIN unset behind Traefik the callback 307'd to
+`https://0.0.0.0:3000`, so a SUCCESSFUL connect still stranded the browser.
+Closed from BOTH ends — his env, and my `c20eb05` (prefer APP_ORIGIN → the
+proxy's X-Forwarded-Host → request URL; the platform-facing `redirect_uri`
+stays APP_ORIGIN-only, never headers). **Live now:** the staging callback
+redirects to `preview.swordfish.cfd`. His one back at me — "image pin drifted"
+— is BY DESIGN (s37: deploy-only key cannot `application.update`, so CI pins
+registry-side by re-tagging `:staging` to each digest); answered in ASK-BACKS
+with a suggested assertion fix.
 
-**INSTAGRAM JOINED THE DANCE — zero portal work.** It rides the SAME Meta app
-as facebook; the consent gains instagram_basic + instagram_content_publish and
-the exchange takes one extra Graph hop
-(`/{page-id}?fields=instagram_business_account`) to derive igUserId beside the
-Page token. **Verified live against his graph:** Page *MacTechDish* resolves
-`@maxbrenner_123` — his mid-session note that the IG test account has a
-DIFFERENT login than his Facebook identity turned out to be a non-issue and
-worth stating plainly: the Graph API reaches an IG account THROUGH the Page
-that admins it, never through IG credentials. The s65 prereq the s83 rollup
-called "never done" is in fact DONE — he did it. A Page with no linked
-professional account refuses honestly and names the fix; nothing stores.
-Posting stays walled behind the typed text-only refusal until a publicly
-reachable assets origin exists — connecting and posting are different gates.
+**INSTAGRAM + LINKEDIN JOINED THE DANCE, NEITHER NEEDING PORTAL WORK.**
+Instagram rides the SAME Meta app, one extra Graph hop for `igUserId`.
+**CONNECTED LIVE: @maxbrenner_123.** His mid-session worry — the IG test
+account has a different login from his Facebook identity — is a non-issue and
+worth restating: the Graph API reaches an IG account THROUGH the Page that
+admins it, never through IG credentials. The connect had to be finished
+out-of-band (his port-forward kept dying mid-consent; I completed the exchange
+on the box from the dead redirect URL) — which is precisely what the real
+address now ends. **`callbackAs` deleted a manual step rather than delegating
+it:** instagram comes back on facebook's already-registered callback, and the
+FLIGHT (the state row) decides what connects, not the path — a bluesky flight
+still cannot cross facebook's callback (pinned). LinkedIn: one-click connect,
+`refresh()` throws BY DESIGN (partner-gated) so the card flips to
+needs_reauth near expiry — the 60-day chore becomes a click. **All four
+social channels connected: facebook · instagram · linkedin · bluesky.**
 
-**THE MANUAL STEP THAT WAS DELETED, NOT DELEGATED.** Platforms match redirect
-URIs exactly, so instagram would have cost a SECOND callback registration in
-the same Meta app — a founder-manual step, which rule 10 calls a defect. A
-provider may now declare **`callbackAs`**: instagram comes back on facebook's
-already-registered URI. The safety does not move — `completeOauthConnect`
-resolves the true destination from the SINGLE-USE state row (tenant-walled,
-TTL'd) and refuses when that flight's callback destination is not the path it
-landed on, so a bluesky flight still cannot cross facebook's callback (pinned
-by test). The path only says which registered URL the platform used; the ROW
-says what is being connected. The route redirects with the CARD's destination
-for the same reason.
+**THE SITE ↔ WORKSPACE DOORS — he was right, I was wrong, and I had asserted
+it from grep.** Both links existed in the DOM and NEITHER existed to a user:
+the landing's was grey text among four grey nav items beside an amber CTA;
+the workspace's was the bare wordmark, which reads as a masthead. Worse, the
+way home was a **redirect loop** — the rail pointed at `/?landing` and Next
+counts an empty-valued query key as ABSENT, so the escape hatch matched the
+very rule it escaped. Fixed both, **screenshotted and click-driven both
+directions**, pinned the loop with a regression test. New: an outlined
+`Workspace` button on the landing, a labeled `View site ↗` row in the rail.
 
-**LINKEDIN JOINED THE DANCE.** Its yield is the member token it already posts
-with; only HOW it arrives changes (one click instead of the OAuth-tools
-paste). Refresh tokens are partner-gated, so `refresh()` throws BY DESIGN:
-near expiry the tick flips the card to needs_reauth, where renewal is the same
-one-click dance. The 60-day chore becomes a click, never a silent mid-queue
-death. Env pair wired from the existing app values.
-
-**Also:** main-RED #5 fixed (CURRENT.md lost its trailing newline at the s83
-docs close — the board-hygiene ratchet caught it) · MEMORY.md compacted 23.4KB
-→ 10.7KB (the s60–s83 session ledger moved INTO
-`higgsfield-kompozy-assignment.md` where it belongs) · three memories written
-(portal-automation verdict · never-scrub-logins · the amended grant) · a
-founder-viewport relay + noVNC bridge were built during the captcha fight and
-are kept at `.context/portal/` (gitignored) — **code-server serves ports at
-`/proxy/<port>/`, which is why plain port-forwarding read "socket hang up"**.
+**RATCHET AUDIT (his ask — first one since the rule was written).** Ran every
+documented command verbatim. **Found a rotted executable ratchet:** `npm run
+doctor`'s deploy seam probed for the Vercel CLI and told the operator to
+install it — an instruction for a path retired at ADR-0007, ~3 weeks stale. It
+ran clean, exited 0, and lied. Repointed at the real channel (workflow present
++ staging reachable via the anon callback door — no rotating basicauth pair
+needed); now reads *live-ready*. **Root cause of the rot: `doctor` was never
+DOCUMENTED, so nothing ran it** — rule 8 now names both standing commands
+(`verify`, `doctor`) and carries this as its second worked example. Verified
+healthy: `verify`, `worktree:setup` (Linux symlink path, s60 fix holds), the 7
+`tests/` ratchets. `npm run guard` in AGENTS.md is a historical citation, not
+a live command — correct as written.
 
 ## Resume prompt (session 85, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s84 put instagram + linkedin on the D1 dance (both
-code-complete, tested, each one click away from connected) and settled the
-portal question with research. **s85 candidates, his call at the opener:**
-(a) **D4 DESIGN WAVE** — four sheets mocked in claude-design (Analytics ·
-Calendar→Schedule · composer band · Channels), **Fable 5 authors directly**
-(standing rule), citing BOTH Mobbin memos rather than re-deriving; founder
-verdict makes a sheet law; (b) **connect IG + LinkedIn for real** — one click
-each in his browser, then the cards read Connected (IG's capability note stays
-honest about posting); (c) **THREADS via the amended grant** — ~10 min in HIS
-browser with the lead dictating fields; (d) **D2 pre-work**
-(publication_metrics window + postAnalytics verb).
+**Resume · Thalon** — s84 made staging the real connect origin, put instagram
++ linkedin on the dance (all four channels connected), fixed the site↔workspace
+doors, and audited the ratchets. **s85 = THE D4 DESIGN WAVE + up to three
+parallel lanes.**
 
-**Read first:** CLAUDE.md → this file →
-`docs/research/prior-art-portal-automation-s84.md` (the portal verdict —
-READ BEFORE ANY PORTAL WORK) → `docs/research/mobbin-patterns-s83.md` →
-`docs/research/distribution-charter.md` (D2–D4) → COORDINATION §Work queue →
-`docs/research/jobs-table-s79.md` (the harness ledger — TEN wrong verdicts).
+**Lead-serial, cannot be delegated (founder rule): author the four D4 sheets**
+— brief is `docs/research/d4-PREPLAN.md` (written s84 so s85 DRAWS rather than
+re-derives; cites both Mobbin memos, names each sheet's OPEN CALLS). Analytics ·
+Calendar→Schedule · composer band · Channels. Shoot each with
+`scripts/shoot-surface.mjs` and READ the render before presenting. **His verdict
+makes each sheet law; no build lane opens before it.**
 
-0. **Self-check** — tmux `thalon` · `pg_isready` · both user units
-   (`XDG_RUNTIME_DIR=/run/user/$(id -u)`) · dev 3111 · `git status` + this
-   stamp.
-1. **⛔ NEVER drive a platform LOGIN from the box** (s84 lesson, memo above).
-   Portal work = his browser, lead dictates. Reddit's app values may still
-   arrive in `social-logins.md` any session; if they do, wire
-   SOCIAL_REDDIT_CLIENT_ID/SECRET, restart the sweeper (units capture env at
-   start), and drive the dance.
-2. **Bluesky keeps its standing test grant** (s83: "you can use it for
-   testing"); every OTHER platform's posting stays behind his per-platform +
-   per-post GO.
+**Three lanes proposed, EACH NEEDS HIS NAMED GO** (board: COORDINATION.md
+§Sprint 9 / s85): `ig-post` (real IG media driver — the assets origin is
+reachable now; ships DISARMED) · `d2-window` (publication_metrics + postAnalytics;
+weakest payoff, drop first if only two) · `staging-dogfood` (make staging the
+tenant's actual home: seed tenant #0, drive the connect dance at the real URL).
+Disjoint file sets; Mode B via `scripts/launch-lane.sh`.
 
-▎ ▸ **s84 shipped:** `dc7ca88` (instagram + linkedin providers) · `2aadac1`
-(the shared-callback change + the prior-art memo).
-▎ ▸ **Deferred items now:** #1 arming pieces (his per-platform GO) · #2
-cadence pre-check (needs design) · #3 media-cap export (still open) · #4 ✅
-CLOSED (s83 window).
-▎ ▸ **⛔ THE SEQUENCE GATE:** unchanged — bluesky armed for testing on his
-recorded words; everything else holds verbatim. The queue consumer's key rests
-EMPTY; per-platform + per-post GO stays his.
+**Read first:** CLAUDE.md → this file → `docs/research/d4-PREPLAN.md` →
+both Mobbin memos → `docs/research/prior-art-portal-automation-s84.md` (READ
+BEFORE ANY PORTAL WORK) → COORDINATION §Sprint 9 + §Work queue →
+`docs/research/jobs-table-s79.md` (harness ledger — TEN wrong verdicts).
+
+0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111
+   · `git status` + this stamp · **`npm run doctor`** (now honest).
+1. **⛔ NEVER drive a platform LOGIN from the box** (rule 11 + the memo).
+2. **Bluesky keeps its standing test grant**; every other platform's posting
+   stays behind his per-platform + per-post GO.
+
+▎ ▸ **s84 shipped:** `dc7ca88` providers · `2aadac1` callbackAs · `f0944ea`
+gate · `c20eb05` proxy-host · `d1b2e86` landing loop · `3355a64` the doors ·
+`ad82ab8` rule 11 · `ac2ce50` D4 pre-plan + lane board + doctor un-rot.
+▎ ▸ **Open, his call:** the **cookie transplant** (one 30-second export from
+his own browser → the box drives ALL portal work forever: staging callback
+URLs, Threads, TikTok, launch-time thalon.org). Reddit app values still
+welcome any session. Deferred items #2 (cadence pre-check — the Calendar
+sheet is where it gets designed) and #3 (media-cap export) still open.
+▎ ▸ **⛔ SEQUENCE GATE:** unchanged — bluesky armed for testing on his
+recorded words; the queue consumer's key rests EMPTY.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
-every lane/subagent launch needs fresh founder approval · GATE ON THE SUITE'S
-EXIT CODE — never pipe it · vitest does NOT typecheck · verify-on-merged-main
-= THE gate · **research before build (rule 10) — s84 proved the cost of
-skipping it** · no AGPL code embedded, ever · **platform logins live durably
-in `.context`, never scrubbed** (his s84 ruling) · wrap =
-verify+commit+push+restamp.
+every lane/subagent launch needs fresh founder approval · GATE ON EXIT CODE,
+never pipe the suite · vitest does NOT typecheck · verify-on-merged-main = THE
+gate · **research before build (rule 10)** · **check the ENVIRONMENT before
+his hands (rule 11)** · platform logins live durably in `.context`, never
+scrubbed · no AGPL embedded · wrap = verify+commit+push+restamp.
 ▎ ▸ **State:** main = origin, pushed · budget 2M · balance 584.12 · zero
-credit spend s84 · live platform calls: read-only Graph reads on his own Page
-only; zero posts.
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync with
-origin.
+credit spend s84 · four social channels connected · staging = the real origin.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync.
 
 ## Pointer
 
