@@ -108,6 +108,31 @@ contradiction with someone who measured correctly, and the more confident output
 wins the argument. Five of this harness's selectors have now been wrong; three
 produced false passes.
 
+### Wrong verdicts 9–10 (s82, both found at the lead's merge gate)
+
+**(9) A selector that demanded markup HTML forbids.** The audition job counted
+a preview control only if it sat INSIDE `button.take` — and interactive content
+cannot nest, so a play control beside the tile is the only shape available. It
+also matched `aria-label*='play'` while the seam names itself *Audition*. With
+the working control shipped and functioning, the job reported **NO AFFORDANCE**:
+a PRODUCT defect invented wholesale by the harness, on the surface this ledger
+was written for. The lane predicted it; the lead confirmed it by driving the
+live DOM (control present, not nested, and pressing it mounts media from
+`/api/videos/…` with `aria-pressed=true`) rather than taking either side's word.
+Now read by ROLE and ACCESSIBLE NAME. **This is the same lesson as (7) and (8),
+landing a third time — the harness keeps pinning markup, and the standing fix is
+always to name the property the operator experiences.**
+
+**(10) A verdict that could not tell "nothing to observe" from "the product
+cannot".** The resume-poll job asserted the surface names an in-flight render on
+return *without first establishing that a render was in flight* — so an idle
+project scored **NO AFFORDANCE**, which says the capability is missing. It was
+not: the lead fired a real render (local ffmpeg, 0 credits), and the surface
+said *"Rendering…"* on return, exactly as built. The job now asks the resume
+endpoint whether anything is running and reports **Undriven** when nothing is.
+The harness's own doctrine already separated those two verdicts; this job simply
+was not using it. A gap in the DRIVING must never read as a gap in the PRODUCT.
+
 ### Wrong verdicts 6–8 (s80 added three; s81 added two more)
 
 s80 added three to the tally, recorded beside each fix in the job set:
@@ -162,3 +187,14 @@ you are) rather than to widen the tolerance until the flake hides.
   (version management: compare, name a variant, delete). The `undriven` row
   needs a pending agent proposal, which SPENDS — it stays undriven by the gate,
   not by an oversight.
+
+  **s82 CLOSED THE VERSION-MANAGEMENT THEME: 25 works · 0 dead doors · 0
+  no-affordance · 2 undriven**, re-measured on merged main. Every one of the
+  five open rows is gone — compare, named save and delete shipped as verbs; the
+  audition and resume rows turned out to be wrong verdicts (9) and (10) above,
+  not gaps. Of the two remaining `undriven` rows, one needs a pending agent
+  proposal (SPENDS — out of scope by the gate) and the other needs a render in
+  flight, which the lead drove by hand at the merge gate and **passed**: the
+  surface says *"Rendering…"* on return. So the honest reading is **26 of 27
+  jobs demonstrated, one blocked by the sequence gate** — and note that two of
+  the five "gaps" this table reported at the s81 close were never gaps at all.

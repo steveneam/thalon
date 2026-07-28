@@ -1265,12 +1265,30 @@ export const JOBS = {
           const blk = await page.$(".blk");
           if (!blk) throw new Undriven("this cut has no beats, so no takes strip to fill");
           await press(page, blk, "a beat block");
+          /*
+           * WRONG-SELECTOR #9 (s82, found at the merge gate — the ledger in
+           * docs/research/jobs-table-s79.md). This counted an audition control
+           * only if it sat INSIDE `button.take`, which is markup that cannot
+           * exist: interactive content does not nest, so a play control beside
+           * the tile is the only shape available. It also matched
+           * `aria-label*='play'`, while the seam names itself "Audition". The
+           * job therefore reported NO AFFORDANCE against a working control —
+           * a PRODUCT defect invented by the harness, the exact class this
+           * ledger exists to stop.
+           *
+           * Read by ROLE and ACCESSIBLE NAME instead (the s81 lesson): what
+           * matters is that a candidate can be previewed before it is
+           * committed, not which element the control is parented to.
+           */
           const strip = await page.evaluate(() => {
             const tiles = Array.from(document.querySelectorAll("button.take"));
+            const auditions = Array.from(
+              document.querySelectorAll("button[aria-label*='udition' i], button[aria-label*='preview' i]"),
+            );
             return {
               tiles: tiles.length,
               named: tiles.filter((t) => /\.(mp4|mov|png|jpg|webm)/i.test(t.textContent || "")).length,
-              playable: tiles.filter((t) => t.querySelector("video, .play-btn, [aria-label*='play' i]")).length,
+              playable: auditions.length,
             };
           });
           if (strip.tiles === 0) throw new Undriven("this beat has no candidate takes to choose between");
@@ -1453,6 +1471,36 @@ export const JOBS = {
         name: "check on a render after reloading the page or coming back from another surface",
         async run(page, { base }) {
           const url = await urlNow(page);
+          /*
+           * WRONG-SELECTOR #10 (s82, found at the merge gate). This asserted
+           * the surface names an in-flight render on return WITHOUT first
+           * establishing that one is in flight — so with an idle project it
+           * reported NO AFFORDANCE, which says "the product cannot do this".
+           * The truth was "there was nothing to observe", and the harness's own
+           * doctrine separates those two verdicts precisely so a gap in the
+           * DRIVING never reads as a gap in the PRODUCT.
+           *
+           * Ask the surface's own resume endpoint (s82 A4) whether a render is
+           * actually running; if none is, the job is Undriven, not a finding.
+           */
+          const running = await page.evaluate(async (href) => {
+            const id = (href.match(/\/app\/videos\/([0-9a-f-]{36})/) || [])[1];
+            if (!id) return null;
+            const res = await fetch(`/api/videos/${id}/render?running=1`);
+            if (!res.ok) return null;
+            const body = await res.json();
+            return Array.isArray(body?.jobs) ? body.jobs.length : null;
+          }, url);
+          if (running === null) {
+            throw new Undriven(
+              "the resume endpoint did not answer — cannot tell whether a render is in flight, so nothing is proved either way",
+            );
+          }
+          if (running === 0) {
+            throw new Undriven(
+              "no render is in flight on this project, so there is nothing for the surface to report on return (fire a render first to drive this)",
+            );
+          }
           await goto(page, base, "/app/videos");
           await goto(page, base, url);
           const body = await text(page);
