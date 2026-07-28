@@ -94,8 +94,32 @@ describe("connect flavors (D1, s83 window)", () => {
     });
   });
 
+  it("linkedin joined the dance (s84): member-token scopes; credential shape unchanged from the live driver", () => {
+    expect(DESTINATIONS.linkedin.connect).toEqual({
+      flavor: "oauth2",
+      scopes: ["openid", "profile", "w_member_social"],
+    });
+    expect(DESTINATIONS.linkedin.credentials.safeParse({ accessToken: "a" }).success).toBe(true);
+  });
+
+  it("instagram joined the dance (s84): facebook's Page scopes plus the IG pair; the yield is Page token + igUserId", () => {
+    expect(DESTINATIONS.instagram.connect).toEqual({
+      flavor: "oauth2",
+      scopes: [
+        "pages_manage_posts",
+        "pages_read_engagement",
+        "pages_show_list",
+        "instagram_basic",
+        "instagram_content_publish",
+      ],
+    });
+    expect(
+      DESTINATIONS.instagram.credentials.safeParse({ accessToken: "a", igUserId: "17" }).success,
+    ).toBe(true);
+  });
+
   it("the remaining pre-D1 entries carry NO connect field (= manual guided paste, unchanged behavior)", () => {
-    for (const key of ["linkedin", "x", "instagram"] as const) {
+    for (const key of ["x"] as const) {
       expect((DESTINATIONS[key] as DestinationDef).connect).toBeUndefined();
     }
   });

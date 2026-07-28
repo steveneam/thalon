@@ -118,6 +118,82 @@ async function jsonOf(res: { text(): Promise<string> }): Promise<Record<string, 
   }
 }
 
+function facebookClient(env: ThalonEnv, redirectUri: string): arctic.Facebook {
+  return new arctic.Facebook(
+    env.SOCIAL_FACEBOOK_CLIENT_ID ?? "",
+    env.SOCIAL_FACEBOOK_CLIENT_SECRET ?? "",
+    redirectUri,
+  );
+}
+
+/**
+ * The Meta-side yield both facebook AND instagram dances share (s84): short
+ * code → fb_exchange_token long-lived user token → /me/accounts → the ONE
+ * Page (env pin wins · a single page decides itself · several are NAMED in
+ * the refusal). Page tokens derived from a long-lived user token do not
+ * expire. `destination` only labels the refusals — the mechanics are one.
+ */
+async function exchangeForPage(
+  destination: "facebook" | "instagram",
+  env: ThalonEnv,
+  redirectUri: string,
+  code: string,
+  fetchImpl: typeof fetch,
+): Promise<{ pageId: string; pageName: string | undefined; pageToken: string }> {
+  const graph = `https://graph.facebook.com/${FACEBOOK_GRAPH_VERSION}`;
+  const short = tokensOut(await facebookClient(env, redirectUri).validateAuthorizationCode(code));
+  // Long-lived exchange (~60 days) — the credentials travel as query
+  // params because that is the endpoint's own contract.
+  const longRes = await fetchImpl(
+    `${graph}/oauth/access_token?grant_type=fb_exchange_token` +
+      `&client_id=${encodeURIComponent(env.SOCIAL_FACEBOOK_CLIENT_ID ?? "")}` +
+      `&client_secret=${encodeURIComponent(env.SOCIAL_FACEBOOK_CLIENT_SECRET ?? "")}` +
+      `&fb_exchange_token=${encodeURIComponent(short.accessToken)}`,
+  );
+  const longBody = longRes.ok ? await jsonOf(longRes) : null;
+  const userToken =
+    typeof longBody?.access_token === "string" ? longBody.access_token : short.accessToken;
+  // The Page derivation: the account's pages, with their own tokens.
+  const pagesRes = await fetchImpl(`${graph}/me/accounts?fields=id,name,access_token`, {
+    headers: { Authorization: `Bearer ${userToken}` },
+  });
+  if (!pagesRes.ok) {
+    throw new OauthConnectRefusedError(
+      destination,
+      "exchange_failed",
+      `the Pages read failed (HTTP ${pagesRes.status}) — without a Page there is nothing to post as`,
+    );
+  }
+  const pages = (await jsonOf(pagesRes))?.data;
+  const list = Array.isArray(pages)
+    ? (pages as Array<{ id?: unknown; name?: unknown; access_token?: unknown }>).filter(
+        (p) => typeof p.id === "string" && typeof p.access_token === "string",
+      )
+    : [];
+  // Which Page? The env pin wins when set (the operator already chose);
+  // else exactly one page decides itself; else refuse and NAME them —
+  // picking silently would connect the wrong identity.
+  const pinned = env.SOCIAL_FACEBOOK_PAGE_ID;
+  const page =
+    (pinned ? list.find((p) => p.id === pinned) : undefined) ??
+    (list.length === 1 ? list[0] : undefined);
+  if (!page) {
+    const names = list.map((p) => `${String(p.name ?? "?")} (${String(p.id)})`).join(", ");
+    throw new OauthConnectRefusedError(
+      destination,
+      "exchange_failed",
+      list.length === 0
+        ? "the account manages no Pages — Facebook posting is Page posting, so there is nothing to connect"
+        : `the account manages ${list.length} Pages and none is pinned — set SOCIAL_FACEBOOK_PAGE_ID to one of: ${names}`,
+    );
+  }
+  return {
+    pageId: String(page.id),
+    pageName: typeof page.name === "string" ? page.name : undefined,
+    pageToken: String(page.access_token),
+  };
+}
+
 const OAUTH_PROVIDERS: Partial<Record<DestinationKey, OauthProvider>> = {
   reddit: {
     clientEnvKeys: { id: "SOCIAL_REDDIT_CLIENT_ID", secret: "SOCIAL_REDDIT_CLIENT_SECRET" },
@@ -182,77 +258,123 @@ const OAUTH_PROVIDERS: Partial<Record<DestinationKey, OauthProvider>> = {
     clientEnvKeys: { id: "SOCIAL_FACEBOOK_CLIENT_ID", secret: "SOCIAL_FACEBOOK_CLIENT_SECRET" },
     authorizationUrl(env, redirectUri, state) {
       const scopes = resolveDestination("facebook").connect?.scopes ?? [];
-      return new arctic.Facebook(
-        env.SOCIAL_FACEBOOK_CLIENT_ID ?? "",
-        env.SOCIAL_FACEBOOK_CLIENT_SECRET ?? "",
-        redirectUri,
-      ).createAuthorizationURL(state, [...scopes]);
+      return facebookClient(env, redirectUri).createAuthorizationURL(state, [...scopes]);
     },
     async exchange(env, redirectUri, code, fetchImpl) {
-      const graph = `https://graph.facebook.com/${FACEBOOK_GRAPH_VERSION}`;
-      const short = tokensOut(
-        await new arctic.Facebook(
-          env.SOCIAL_FACEBOOK_CLIENT_ID ?? "",
-          env.SOCIAL_FACEBOOK_CLIENT_SECRET ?? "",
-          redirectUri,
-        ).validateAuthorizationCode(code),
-      );
-      // Long-lived exchange (~60 days) — the credentials travel as query
-      // params because that is the endpoint's own contract.
-      const longRes = await fetchImpl(
-        `${graph}/oauth/access_token?grant_type=fb_exchange_token` +
-          `&client_id=${encodeURIComponent(env.SOCIAL_FACEBOOK_CLIENT_ID ?? "")}` +
-          `&client_secret=${encodeURIComponent(env.SOCIAL_FACEBOOK_CLIENT_SECRET ?? "")}` +
-          `&fb_exchange_token=${encodeURIComponent(short.accessToken)}`,
-      );
-      const longBody = longRes.ok ? await jsonOf(longRes) : null;
-      const userToken =
-        typeof longBody?.access_token === "string" ? longBody.access_token : short.accessToken;
-      // The Page derivation: the account's pages, with their own tokens.
-      const pagesRes = await fetchImpl(`${graph}/me/accounts?fields=id,name,access_token`, {
-        headers: { Authorization: `Bearer ${userToken}` },
-      });
-      if (!pagesRes.ok) {
-        throw new OauthConnectRefusedError(
-          "facebook",
-          "exchange_failed",
-          `the Pages read failed (HTTP ${pagesRes.status}) — without a Page there is nothing to post as`,
-        );
-      }
-      const pages = (await jsonOf(pagesRes))?.data;
-      const list = Array.isArray(pages)
-        ? (pages as Array<{ id?: unknown; name?: unknown; access_token?: unknown }>).filter(
-            (p) => typeof p.id === "string" && typeof p.access_token === "string",
-          )
-        : [];
-      // Which Page? The env pin wins when set (the operator already chose);
-      // else exactly one page decides itself; else refuse and NAME them —
-      // picking silently would connect the wrong identity.
-      const pinned = env.SOCIAL_FACEBOOK_PAGE_ID;
-      const page =
-        (pinned ? list.find((p) => p.id === pinned) : undefined) ??
-        (list.length === 1 ? list[0] : undefined);
-      if (!page) {
-        const names = list.map((p) => `${String(p.name ?? "?")} (${String(p.id)})`).join(", ");
-        throw new OauthConnectRefusedError(
-          "facebook",
-          "exchange_failed",
-          list.length === 0
-            ? "the account manages no Pages — Facebook posting is Page posting, so there is nothing to connect"
-            : `the account manages ${list.length} Pages and none is pinned — set SOCIAL_FACEBOOK_PAGE_ID to one of: ${names}`,
-        );
-      }
+      const page = await exchangeForPage("facebook", env, redirectUri, code, fetchImpl);
       return {
-        credentials: { accessToken: String(page.access_token), pageId: String(page.id) },
+        credentials: { accessToken: page.pageToken, pageId: page.pageId },
         // A Page token derived from a long-lived user token does not expire.
         expiresAt: null,
-        connectedAs: typeof page.name === "string" ? page.name : undefined,
+        connectedAs: page.pageName,
       };
     },
     async refresh(_env, credentials) {
       // Never reached in practice: the row stores no expiry, so the tick
       // skips it. Stated rather than left to be discovered.
       return { credentials, expiresAt: null };
+    },
+  },
+
+  /**
+   * s84: Instagram rides facebook's dance on the SAME Meta app — the consent
+   * adds the IG scopes, the yield is the PAGE token plus the Page's linked
+   * IG professional-account id (one extra Graph hop). Connecting and posting
+   * are different gates: the driver seat stays the typed text-only refusal
+   * until a publicly reachable assets origin exists, and the card keeps
+   * saying so.
+   */
+  instagram: {
+    clientEnvKeys: { id: "SOCIAL_FACEBOOK_CLIENT_ID", secret: "SOCIAL_FACEBOOK_CLIENT_SECRET" },
+    authorizationUrl(env, redirectUri, state) {
+      const scopes = resolveDestination("instagram").connect?.scopes ?? [];
+      return facebookClient(env, redirectUri).createAuthorizationURL(state, [...scopes]);
+    },
+    async exchange(env, redirectUri, code, fetchImpl) {
+      const page = await exchangeForPage("instagram", env, redirectUri, code, fetchImpl);
+      const graph = `https://graph.facebook.com/${FACEBOOK_GRAPH_VERSION}`;
+      const igRes = await fetchImpl(
+        `${graph}/${page.pageId}?fields=instagram_business_account{id,username}`,
+        { headers: { Authorization: `Bearer ${page.pageToken}` } },
+      );
+      const ig = igRes.ok
+        ? ((await jsonOf(igRes))?.instagram_business_account as
+            | { id?: unknown; username?: unknown }
+            | undefined)
+        : undefined;
+      if (!ig || typeof ig.id !== "string") {
+        throw new OauthConnectRefusedError(
+          "instagram",
+          "exchange_failed",
+          `the Page "${page.pageName ?? page.pageId}" has no linked Instagram professional account — switch the IG account to Professional, link it to the Page, then reconnect`,
+        );
+      }
+      return {
+        credentials: { accessToken: page.pageToken, igUserId: ig.id },
+        // Same Page-token derivation as facebook: no expiry to anticipate.
+        expiresAt: null,
+        connectedAs: typeof ig.username === "string" && ig.username !== "" ? `@${ig.username}` : undefined,
+      };
+    },
+    async refresh(_env, credentials) {
+      // Never reached in practice: the row stores no expiry, so the tick
+      // skips it. Stated rather than left to be discovered.
+      return { credentials, expiresAt: null };
+    },
+  },
+
+  /**
+   * s84: LinkedIn onto the dance — the s69-live driver keeps its token shape;
+   * only HOW the token arrives changes (one click instead of the OAuth-tools
+   * paste). The yield is the member token (~60 days). LinkedIn issues
+   * refresh tokens only to approved partners, so `refresh` throws by design:
+   * near expiry the tick flips the card to needs_reauth, where renewal is
+   * the same one-click dance — the 60-day chore becomes a click, never a
+   * silent mid-queue death.
+   */
+  linkedin: {
+    clientEnvKeys: { id: "SOCIAL_LINKEDIN_CLIENT_ID", secret: "SOCIAL_LINKEDIN_CLIENT_SECRET" },
+    authorizationUrl(env, redirectUri, state) {
+      const scopes = resolveDestination("linkedin").connect?.scopes ?? [];
+      return new arctic.LinkedIn(
+        env.SOCIAL_LINKEDIN_CLIENT_ID ?? "",
+        env.SOCIAL_LINKEDIN_CLIENT_SECRET ?? "",
+        redirectUri,
+      ).createAuthorizationURL(state, [...scopes]);
+    },
+    async exchange(env, redirectUri, code, fetchImpl) {
+      const tokens = tokensOut(
+        await new arctic.LinkedIn(
+          env.SOCIAL_LINKEDIN_CLIENT_ID ?? "",
+          env.SOCIAL_LINKEDIN_CLIENT_SECRET ?? "",
+          redirectUri,
+        ).validateAuthorizationCode(code),
+      );
+      // No refresh token is the platform's DESIGN for non-partner apps —
+      // reddit's no_refresh_token refusal does not apply; the expiry-driven
+      // needs_reauth flip is the honest lifecycle instead.
+      let connectedAs: string | undefined;
+      const res = await fetchImpl("https://api.linkedin.com/v2/userinfo", {
+        headers: { Authorization: `Bearer ${tokens.accessToken}` },
+      });
+      if (res.ok) {
+        const body = await jsonOf(res);
+        const name = body?.name ?? body?.sub;
+        connectedAs = typeof name === "string" && name !== "" ? name : undefined;
+      }
+      return {
+        credentials: { accessToken: tokens.accessToken },
+        expiresAt: tokens.expiresAt,
+        connectedAs,
+      };
+    },
+    async refresh() {
+      // Reached when the member token nears expiry: refresh tokens are
+      // partner-gated, so there is nothing to renew programmatically. Throw
+      // so the tick flips the card to needs_reauth — reconnect is one click.
+      throw new Error(
+        "linkedin member tokens cannot be renewed programmatically (refresh tokens are partner-gated) — reconnect via the one-click dance",
+      );
     },
   },
 };

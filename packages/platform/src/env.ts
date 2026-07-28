@@ -153,6 +153,10 @@ const envSchema = z.object({
   SOCIAL_REDDIT_CLIENT_SECRET: z.string().optional(),
   SOCIAL_FACEBOOK_CLIENT_ID: z.string().optional(),
   SOCIAL_FACEBOOK_CLIENT_SECRET: z.string().optional(),
+  // s84: LinkedIn's own developer-app pair. Instagram carries NO pair of its
+  // own — its dance rides the facebook (Meta) pair above, same app.
+  SOCIAL_LINKEDIN_CLIENT_ID: z.string().optional(),
+  SOCIAL_LINKEDIN_CLIENT_SECRET: z.string().optional(),
 
   /**
    * D1 (s83): the app's own public origin (e.g. https://app.example.com) —

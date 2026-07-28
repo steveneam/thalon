@@ -109,6 +109,14 @@ export const DESTINATIONS = {
     driver: "linkedin-rest-posts",
     label: "LinkedIn",
     credentials: accessToken,
+    // s84: onto the dance. The yield is the member token (w_member_social
+    // writes; ~60-day expiry). LinkedIn issues refresh tokens only to
+    // approved partners, so near expiry the card flips to needs_reauth and
+    // renewal is the SAME one-click dance — never a silent death.
+    connect: {
+      flavor: "oauth2",
+      scopes: ["openid", "profile", "w_member_social"],
+    },
   },
   x: {
     class: "social",
@@ -135,6 +143,21 @@ export const DESTINATIONS = {
     driver: "instagram-text-refusal",
     label: "Instagram",
     credentials: z.object({ accessToken: z.string().min(1), igUserId: z.string().min(1) }),
+    // s84: rides facebook's dance on the SAME Meta app — the yield is the
+    // PAGE token plus the Page's linked IG professional-account id (one
+    // extra Graph hop). Connecting and posting are different gates: the
+    // driver stays a typed text-only refusal until the public assets origin
+    // lands, and the card's capability note keeps saying so.
+    connect: {
+      flavor: "oauth2",
+      scopes: [
+        "pages_manage_posts",
+        "pages_read_engagement",
+        "pages_show_list",
+        "instagram_basic",
+        "instagram_content_publish",
+      ],
+    },
   },
   reddit: {
     class: "social",

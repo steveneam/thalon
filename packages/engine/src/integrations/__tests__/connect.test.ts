@@ -45,7 +45,8 @@ function stubTokenEndpoint(body: Record<string, unknown> | (() => Response)) {
         typeof input === "string" ? input : ((input as { url?: unknown }).url ?? String(input));
       if (
         String(url).includes("reddit.com/api/v1/access_token") ||
-        String(url).includes("graph.facebook.com")
+        String(url).includes("graph.facebook.com") ||
+        String(url).includes("linkedin.com/oauth")
       ) {
         return typeof body === "function"
           ? body()
@@ -339,6 +340,58 @@ describe("the facebook provider (s83b: the dance yields the PAGE, not the user)"
     ).rejects.toThrow(/manages no Pages/);
   });
 
+  it("instagram rides the same dance (s84): the extra hop derives igUserId; the vault stores Page token + IG id, no expiry", async () => {
+    env = fbEnv({ SOCIAL_FACEBOOK_PAGE_ID: "111" });
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const igFetch: typeof fetch = (async (url: unknown) => {
+      const u = String(url);
+      if (u.includes("instagram_business_account")) {
+        return new Response(
+          JSON.stringify({
+            instagram_business_account: { id: "1784100", username: "gripworks.co" },
+            id: "111",
+          }),
+          { status: 200 },
+        );
+      }
+      return fbFetch(PAGES)(u as string);
+    }) as typeof fetch;
+    const { authorizeUrl, state } = await beginOauthConnect(deps(), "instagram", NOW);
+    // The consent is facebook's dialog with the IG scopes appended.
+    expect(new URL(authorizeUrl).searchParams.get("scope")).toBe(
+      "pages_manage_posts pages_read_engagement pages_show_list instagram_basic instagram_content_publish",
+    );
+    const card = await completeOauthConnect(
+      deps({ fetchImpl: igFetch }),
+      "instagram",
+      { code: "c", state },
+      NOW,
+    );
+    expect(card.connectedAs).toBe("@gripworks.co");
+    expect(card.expiresAt).toBeNull();
+    expect(await openDestinationCredentials(deps(), "instagram")).toEqual({
+      accessToken: "page_tok_111",
+      igUserId: "1784100",
+    });
+  });
+
+  it("a Page with no linked IG professional account refuses honestly, naming the fix — nothing stores", async () => {
+    env = fbEnv({ SOCIAL_FACEBOOK_PAGE_ID: "111" });
+    stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
+    const noIgFetch: typeof fetch = (async (url: unknown) => {
+      const u = String(url);
+      if (u.includes("instagram_business_account")) {
+        return new Response(JSON.stringify({ id: "111" }), { status: 200 });
+      }
+      return fbFetch(PAGES)(u as string);
+    }) as typeof fetch;
+    const { state } = await beginOauthConnect(deps(), "instagram", NOW);
+    await expect(
+      completeOauthConnect(deps({ fetchImpl: noIgFetch }), "instagram", { code: "c", state }, NOW),
+    ).rejects.toThrow(/no linked Instagram professional account.*reconnect/);
+    expect(await handle.repos.tenantCredentials.get(ctx, "instagram")).toBeNull();
+  });
+
   it("the refresh tick never touches a facebook row — no expiry is recorded", async () => {
     env = fbEnv({ SOCIAL_FACEBOOK_PAGE_ID: "111" });
     stubTokenEndpoint({ access_token: "short_user_tok", token_type: "bearer" });
@@ -351,5 +404,73 @@ describe("the facebook provider (s83b: the dance yields the PAGE, not the user)"
     expect(outcomes).toEqual([
       { destination: "facebook", outcome: "skipped", detail: "no expiry recorded" },
     ]);
+  });
+});
+
+describe("the linkedin provider (s84: the 60-day chore becomes one click)", () => {
+  function liEnv() {
+    return readEnv({
+      THALON_VAULT_MASTER_KEY: MASTER_B64,
+      SOCIAL_LINKEDIN_CLIENT_ID: "li_cid",
+      SOCIAL_LINKEDIN_CLIENT_SECRET: "li_csecret",
+      APP_ORIGIN: "https://app.example.com",
+    });
+  }
+
+  const userinfoFetch: typeof fetch = (async (url: unknown) => {
+    if (String(url).endsWith("/v2/userinfo")) {
+      return new Response(JSON.stringify({ sub: "a1b2", name: "Steven E." }), { status: 200 });
+    }
+    throw new Error(`unexpected userinfo fetch: ${String(url)}`);
+  }) as typeof fetch;
+
+  it("begin builds the platform's consent URL with the member scopes", async () => {
+    env = liEnv();
+    const { authorizeUrl } = await beginOauthConnect(deps(), "linkedin", NOW);
+    const url = new URL(authorizeUrl);
+    expect(url.hostname).toBe("www.linkedin.com");
+    expect(url.searchParams.get("scope")).toBe("openid profile w_member_social");
+    expect(url.searchParams.get("redirect_uri")).toBe(
+      "https://app.example.com/api/integrations/callback/linkedin",
+    );
+  });
+
+  it("exchange lands the member token with its ~60-day expiry and the userinfo identity — no refresh token is NOT a refusal", async () => {
+    env = liEnv();
+    stubTokenEndpoint({ access_token: "li_member_tok", token_type: "Bearer", expires_in: 5184000 });
+    const { state } = await beginOauthConnect(deps(), "linkedin", NOW);
+    const card = await completeOauthConnect(
+      deps({ fetchImpl: userinfoFetch }),
+      "linkedin",
+      { code: "c", state },
+      NOW,
+    );
+    expect(card.connectedAs).toBe("Steven E.");
+    // The member token EXPIRES (unlike facebook's Page token) — the expiry
+    // must be recorded so the tick can flip the card near death.
+    expect(card.expiresAt).not.toBeNull();
+    expect(await openDestinationCredentials(deps(), "linkedin")).toEqual({
+      accessToken: "li_member_tok",
+    });
+  });
+
+  it("near expiry the tick flips linkedin to needs_reauth — refresh tokens are partner-gated, reconnect is the one-click dance", async () => {
+    env = liEnv();
+    stubTokenEndpoint({ access_token: "li_member_tok", token_type: "Bearer", expires_in: 3600 });
+    const { state } = await beginOauthConnect(deps(), "linkedin", NOW);
+    await completeOauthConnect(deps({ fetchImpl: userinfoFetch }), "linkedin", { code: "c", state }, NOW);
+    const outcomes = await refreshExpiringCredentials(deps(), {
+      now: NOW,
+      horizonMs: 365 * 24 * 60 * 60 * 1000,
+    });
+    expect(outcomes).toEqual([
+      {
+        destination: "linkedin",
+        outcome: "needs_reauth",
+        detail: expect.stringContaining("partner-gated") as unknown as string,
+      },
+    ]);
+    const row = await handle.repos.tenantCredentials.get(ctx, "linkedin");
+    expect(row?.status).toBe("needs_reauth");
   });
 });
