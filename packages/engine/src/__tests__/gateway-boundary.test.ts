@@ -31,6 +31,8 @@ const ALLOWED = new Set(
     "packages/engine/src/search/shell/expander.ts",
     "packages/engine/src/trend/shell/dossier.ts",
     "packages/engine/src/ingest/shell/embedder.ts",
+    "packages/engine/src/create/shell/describe-reference.ts",
+    "packages/engine/src/create/shell/ai-edit.ts",
     "proprietary/judge/src/shell/driver.ts",
     "packages/engine/src/__tests__/gateway-boundary.test.ts",
   ].map((p) => path.normalize(p)),

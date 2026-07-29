@@ -1,4 +1,4 @@
-import { outputEligible, type MediaRefEnvelope } from "@thalon/contracts";
+import { outputEligible, type MediaRef, type MediaRefEnvelope } from "@thalon/contracts";
 import { InvalidStateError } from "@thalon/db";
 import { describe, expect, it } from "vitest";
 import {
@@ -6,6 +6,7 @@ import {
   createFakeReferenceVisionDriver,
   describeReference,
   describeReferences,
+  referenceDescribability,
   renderReferenceBlock,
   type ReferenceVisionDriver,
 } from "../reference";
@@ -125,6 +126,78 @@ describe("renderReferenceBlock", () => {
     // THE LICENSING WALL: if a content address can reach the prompt, the
     // bytes behind it are one resolver away from a draft's media.
     expect(block).not.toContain(REFERENCE_SHA);
+  });
+});
+
+describe("referenceDescribability — what the describer will and will not look at", () => {
+  const stored = (ext: "jpg" | "png" | "webp" | "mp3" | "wav"): MediaRef => ({
+    kind: "stored",
+    sha256: REFERENCE_SHA,
+    ext,
+  });
+
+  it("describes stored images", () => {
+    for (const ext of ["jpg", "png", "webp"] as const) {
+      expect(referenceDescribability(stored(ext)).ok).toBe(true);
+    }
+  });
+
+  it("refuses EXTERNAL refs — a stranger's bytes are never fetched to feed a model", () => {
+    const result = referenceDescribability({ kind: "external", url: "https://example.com/a.jpg" });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    // Licensing texture, deliberately out of B-create.2's scope: the ref
+    // stays attached and honestly unanalysed rather than silently fetched.
+    expect(result.reason).toContain("never fetched");
+  });
+
+  it("refuses AUDIO refs in words rather than handing a sound file to a vision model", () => {
+    for (const ext of ["mp3", "wav"] as const) {
+      const result = referenceDescribability(stored(ext));
+      expect(result.ok).toBe(false);
+      if (result.ok) continue;
+      expect(result.reason).toContain("vision model");
+      expect(result.reason).toContain(ext);
+    }
+  });
+});
+
+describe("describeReference — the undescribable degrade before any spend", () => {
+  function refEnvelope(ref: MediaRef): MediaRefEnvelope {
+    return { ref, provenance: "operator", role: "reference" };
+  }
+
+  it("degrades honestly for an external ref WITHOUT calling the driver", async () => {
+    let calls = 0;
+    const counting: ReferenceVisionDriver = async (req) => {
+      calls += 1;
+      return createFakeReferenceVisionDriver()(req);
+    };
+    const result = await describeReference(
+      refEnvelope({ kind: "external", url: "https://example.com/a.jpg" }),
+      { driver: counting },
+    );
+    expect(result.status).toBe("not_analysed");
+    if (result.status !== "not_analysed") return;
+    expect(result.reason).toContain(REFERENCE_NOT_ANALYSED);
+    expect(result.reason).toContain("never fetched");
+    // The check sits BEFORE the driver and therefore before the guard: an
+    // undescribable reference costs neither a budget assertion nor a call.
+    expect(calls).toBe(0);
+  });
+
+  it("degrades honestly for an audio ref WITHOUT calling the driver", async () => {
+    let calls = 0;
+    const counting: ReferenceVisionDriver = async (req) => {
+      calls += 1;
+      return createFakeReferenceVisionDriver()(req);
+    };
+    const result = await describeReference(
+      refEnvelope({ kind: "stored", sha256: REFERENCE_SHA, ext: "mp3" }),
+      { driver: counting },
+    );
+    expect(result.status).toBe("not_analysed");
+    expect(calls).toBe(0);
   });
 });
 
