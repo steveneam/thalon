@@ -39,6 +39,19 @@ export interface SocialPostMedia {
   /** image/* MIME type (validated at the door before bytes load). */
   contentType: string;
   altText?: string;
+  /**
+   * B-ig.1: an ABSOLUTE URL this image is reachable at, anonymously, for
+   * the duration of the publish call — the Instagram shape, and only that.
+   * Every other driver uploads bytes; Instagram's `/media` container takes
+   * `image_url` and Meta's own servers fetch it, so for IG the address IS
+   * the payload and bytes alone cannot publish.
+   *
+   * Present ONLY when the publisher declared `needsPublicMediaUrl` AND the
+   * door's `admitPublicMedia` seam granted an admission (./publish.ts).
+   * Absence is the normal case and is never fatal here — a driver that
+   * needs the address refuses honestly rather than posting the text alone.
+   */
+  publicUrl?: string;
 }
 
 export interface SocialPostInput {
@@ -70,6 +83,15 @@ export interface SocialPublisher {
   readonly platform: SocialPlatform;
   /** Driver label for messages and tests ("fake" | "disarmed" | a driver name, B-pub.2+). */
   readonly name: string;
+  /**
+   * B-ig.1: this driver publishes media BY ADDRESS, not by upload — the
+   * door must obtain a public URL for each attached image before calling
+   * (see `SocialPostMedia.publicUrl`). Declaring it is what makes the door
+   * widen its public-asset gate at all, so it stays opt-in per driver:
+   * silence means "uploads bytes", and no image is ever made public for a
+   * driver that never needed the address.
+   */
+  readonly needsPublicMediaUrl?: boolean;
   /** One official-API call. Resolves ONLY on a platform-accepted post. */
   publish(input: SocialPostInput): Promise<SocialPublishReceipt>;
 }
