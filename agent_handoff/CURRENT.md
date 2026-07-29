@@ -99,17 +99,31 @@ six lead items) → the two APPROVED specs → `docs/research/ux-refinement-prog
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
-**The three candidates, with the honest case for each:**
-1. **Video sheets pass 1** (Overview + Dossier + editor thumbnails). References are
-   BANKED (s87) so this starts cold and cheap; it is the biggest remaining surface
-   area and it is design, which is lead-direct and never delegated. **Held at s87 on
-   BUDGET, not doubt.**
-2. **B-create.3 — the Create sheets** (home update + wizard + Composer run-scope).
-   The engine underneath them now exists, so the sheets would be drawing something
-   real rather than something proposed.
-3. **The Analytics surface** — D2 gives it real data, but **read lead item 1 first:
-   the sheet's Facebook fixture is wrong** (it shows reach under a metric Meta
-   retired). That has to be reconciled against the capability table before drawing.
+**THE PLAN — recommended, his to override:** **B-create.3, the Create sheets**
+(Create home update + the wizard sheet + Composer run-scope states) → his verdict →
+B-create.4. The reason is not that it is next on a list: **the Create engine shipped
+s87 and is currently unreachable — no route, no wizard, no Composer.** An engine with
+no door is the same orphan the Create spec was written to prevent, inverted. He also
+named Create the feature *"everything depends on it"*. Sheets are lead-direct, so this
+is the lead's own work and it is the gate to the surface build.
+
+**Proposed parallel lanes (BOTH need his fresh GO — approval covers named runs only):**
+- **`ve4-diffs`** — B-ve.4: AI-proposed EDL diffs through the judge gate. Engine-only,
+  already chartered, contract window exists, disjoint from `create/`. The video spec
+  wants it in hand before the pass-2 script-first gate.
+- **`analytics-honesty`** — apply `deferred` to X in the metrics registry (his s87
+  ruling) + Facebook comment/share counts, which the analytics lane named the cheapest
+  real follow-up on its list. Engine-only, `social/metrics/**`.
+
+**If budget is still tight at the opener** (the limit resets Jul 31 11pm UTC): do the
+cheap reconciliation debt FIRST — the Analytics sheet's wrong Facebook fixture, and
+the `deferred` word reaching the surface copy. Both are small, both are owed, and
+neither needs the headroom a full sheet pass does.
+
+**Not recommended first, with the reason:** the video sheets. Their references are
+banked and they will start cold, but the video arc's own engine buckets (B-ve.4/.5)
+are unbuilt — drawing those sheets now means drawing ahead of the engine again, which
+is the exact mistake the Composer orphan was. Create's engine exists today.
 
 ▎ ▸ **s87 shipped:** `308a94a`+`ff55f0f` the window · `737adbb` kickoffs got "THE
 WINDOW AS FROZEN" · `d8a323f` video references banked · `6b503e1` lane board ·
@@ -123,9 +137,14 @@ start cold. **Check headroom before drawing anything.**
 `post_impressions_unique` (2025-06-15) and `post_impressions*` (2025-11-15). Reach
 survives as `post_total_media_view_unique`. Read the capability table in
 `packages/engine/src/social/metrics/capability.ts`, not the mock's numbers.
-▎ ▸ **💸 X ANALYTICS COST MONEY** — metered pay-per-use, no free read tier.
-`NEEDS-STEVEN` 2026-07-29f. Nothing has spent: the tick needs `--armed`, rides no
-timer, and prints the bill before the pass. Every other platform reads free.
+▎ ▸ **✅ X SPEND — RULED AND CLOSED (s87):** *"X analytics and posting bill will
+only be paid once thalon is ready to launch, so towards the end."* Wider than the
+question asked — it covers POSTING too. The absence vocabulary gained a sixth word,
+`deferred`, plus `SocialMetricsDeferredError`, because every other word means "we
+can't" and this one means "we won't yet"; the ruling is quoted at the arming point in
+`capability.ts`. **The Analytics surface is NOT blocked by this** — Bluesky, Facebook
+and Instagram all read free, so it can be lit with real data while X reads "deferred"
+honestly. `NEEDS-STEVEN` 2026-07-29f → archive.
 ▎ ▸ **Six lead items** (Facebook fixture · X spend · `SOCIAL_METRICS_ARMED` when the
 tick earns a timer · four `fanout_runs` per four-destination Create run, deliberate ·
 no real vision driver yet · read-model is one query per publication) are written up
