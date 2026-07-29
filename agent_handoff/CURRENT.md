@@ -99,6 +99,19 @@ six lead items) → the two APPROVED specs → `docs/research/ux-refinement-prog
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
+**A SECOND RATCHET LANDED THE SAME EVENING — SPEC GROUND TRUTH (his directive:
+"include all the dependencies, exact paths, schemas … if it does [make it better]
+then ratchet that").** Three rungs: (1) EXECUTABLE —
+`packages/contracts/src/__tests__/spec-ground-truth.test.ts`: every unmarked
+path/schema cited in `docs/*/spec.md` or an unwrapped kickoff must exist;
+`(new)`/`(planned)` is the only way to cite the future; wrapped kickoffs are
+auto-historical. Red-checked — its first cut had a fallback that forgave missing
+files and was caught + tightened; it then flagged 3 real unmarked citations,
+fixed. (2) STRUCTURAL — the workspace spec §3b DEPENDENCY MAP: every surface's
+exact route/component/sheet/engine/db paths, all ~60 verified by the ratchet.
+(3) DOCUMENTARY — AGENTS.md rule 12 (CLAUDE.md re-synced). The half no test
+catches stays discipline: ground in the repo BEFORE speccing (the ve4 lesson).
+
 **⚠ SUPERSEDING DIRECTIVE (s87 late): THE WORKSPACE SPEC.** His ask, near-verbatim:
 use the last remaining usages to plan/spec/structure ALL the surfaces together, in
 the context of research, for coherence and to find what's missing — BEFORE more

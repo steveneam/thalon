@@ -204,6 +204,35 @@ sheet↔route mapping is broken in both directions. Resolution proposal in §5.
 Triage spine sheet** — the pre-doctrine mock; mark SUPERSEDED in its header at
 the next sheet commit (it is nobody's spec now).
 
+### 3b. THE DEPENDENCY MAP — ground truth per surface (founder directive, s87)
+
+His words: *"include all the dependencies, exact paths, schemas, and so on when
+planning/speccing … so we can keep track and design the flow, frontend and
+backend properly."* Exact paths; a `(planned)` mark is the ONLY way to cite what
+does not exist yet — **checked, not asked for**, by the spec-ground-truth ratchet
+(`packages/contracts/src/__tests__/spec-ground-truth.test.ts`), which fails this
+document on any unmarked dead citation and fails on citation rot forever after.
+
+| surface | route (frontend) | components / lib | sheet | backend truth (engine · db) |
+|---|---|---|---|---|
+| Dashboard | `apps/web/src/app/app/page.tsx` | `apps/web/src/components/dashboard/` | `docs/research/mock-sheets/Dashboard.dc.html` | `packages/db/src/repos/events.ts` · `packages/db/src/repos/approvals.ts` · `packages/db/src/repos/planned-slots.ts` · `packages/db/src/repos/create-runs.ts` |
+| Board | `apps/web/src/app/app/board/page.tsx` | `apps/web/src/components/board/` | `docs/research/mock-sheets/Board.dc.html` | same spine as Dashboard (a lens, §5.9) |
+| Runs | `apps/web/src/app/app/runs/page.tsx` | `apps/web/src/components/runs/` | `docs/research/mock-sheets/Runs.dc.html` | `packages/db/src/repos/fanout-runs.ts` · `packages/db/src/repos/create-runs.ts` (s87 — re-shape pending, §5.8) · `packages/db/src/repos/usage-ledger.ts` |
+| Intel | `apps/web/src/app/app/intel/page.tsx` | `apps/web/src/components/intel/` + `apps/web/src/lib/intel/types.ts` | `docs/research/mock-sheets/Intel.dc.html` | `packages/engine/src/trend/` · `packages/engine/src/search/` · `packages/db/src/repos/monitored-areas.ts` · `packages/db/src/repos/intel-captures.ts` |
+| Leads | `apps/web/src/app/app/leads/page.tsx` | `apps/web/src/components/leads/` | `docs/research/mock-sheets/Leads.dc.html` | `packages/engine/src/leads/` · `packages/engine/src/outreach/` · `packages/db/src/repos/leads.ts` · `packages/db/src/repos/outreach-sends.ts` |
+| Library / Transcription | `apps/web/src/app/app/library/page.tsx` **AND** `apps/web/src/app/app/transcription/page.tsx` (the §5.3 drift) | `apps/web/src/components/transcription/` + `apps/web/src/lib/library/` | `docs/research/mock-sheets/Library.dc.html` | `packages/engine/src/ingest/` · `packages/db/src/repos/sources.ts` · `packages/db/src/repos/source-chunks.ts` |
+| Source Media | no route — component family | `apps/web/src/components/media/` | Source Media sheet (s77, in `docs/research/mock-sheets/`) | `packages/platform/src/object-store.ts` · `packages/contracts/src/media.ts` (roles s87) |
+| Create home + wizard | `apps/web/src/app/app/create/page.tsx` · run route (planned — B-create.4) | `apps/web/src/components/create/` + `apps/web/src/lib/create/families.ts` | `docs/research/mock-sheets/Create.dc.html` · wizard sheet (planned — B-create.3) | `packages/engine/src/create/` · `packages/contracts/src/create-run.ts` · `packages/db/src/repos/create-runs.ts` |
+| Composer | `apps/web/src/app/app/create/run/` (planned — B-create.4) | (planned) | `docs/research/mock-sheets/Composer.dc.html` | `packages/engine/src/create/` (+ `packages/engine/src/create/edit.ts` (planned — create-shells lane)) · `packages/contracts/src/platform-settings.ts` |
+| Videos ×3 | `apps/web/src/app/app/videos/` | `apps/web/src/components/videos/` | Videos Overview · Video Dossier · Videos sheets (in `docs/research/mock-sheets/`) | `packages/engine/src/edl/` · `packages/engine/src/render/` · `packages/engine/src/direction/` · `packages/db/src/repos/video-cuts.ts` · `packages/db/src/repos/video-projects.ts` |
+| Sites | `apps/web/src/app/app/sites/page.tsx` | `apps/web/src/components/sites/` | `docs/research/mock-sheets/Sites.dc.html` | `packages/engine/src/webpage/` |
+| Approve | `apps/web/src/app/app/approve/page.tsx` | `apps/web/src/components/approve/` | `docs/research/mock-sheets/Approve.dc.html` | `packages/db/src/repos/drafts.ts` · `packages/db/src/repos/judge-results.ts` · `proprietary/judge/` |
+| Schedule | `apps/web/src/app/app/calendar/page.tsx` (rename pending, §5.5) | `apps/web/src/components/calendar/` | `docs/research/mock-sheets/Schedule.dc.html` | `packages/db/src/repos/planned-slots.ts` · `packages/db/src/repos/publish-queue.ts` · `packages/db/src/repos/social-publications.ts` |
+| Channels | (planned — D4 build) | (planned) | `docs/research/mock-sheets/Channels.dc.html` | `packages/engine/src/integrations/` · `packages/engine/src/social/registry.ts` · `packages/db/src/repos/tenant-credentials.ts` · `packages/contracts/src/platform-capability.ts` |
+| Analytics | (planned — after fixture reconciliation) | (planned) | `docs/research/mock-sheets/Analytics.dc.html` | `packages/engine/src/social/metrics/` · `packages/db/src/repos/publication-metrics.ts` |
+| Profiles | `apps/web/src/app/app/profiles/page.tsx` | `apps/web/src/components/profiles/` | `docs/research/mock-sheets/Profiles.dc.html` | `packages/db/src/repos/brand-profiles.ts` · `packages/contracts/src/brand-profile.ts` (incl. s87 `platformRouting`) |
+| Settings / Integrations | `apps/web/src/app/app/settings/page.tsx` | `apps/web/src/components/settings/` | `docs/research/mock-sheets/Integrations.dc.html` (mis-aimed, §5.4) · Settings sheet (planned — gap §5.2) | `scripts/doctor.mjs` · `packages/engine/src/integrations/` |
+
 ## 4. The flows (what "coherent" means, concretely)
 
 Named journeys, each crossing acts; pass 2 walks THESE, not surfaces:

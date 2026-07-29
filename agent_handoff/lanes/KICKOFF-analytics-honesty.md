@@ -86,7 +86,7 @@ earns a timer, per the spine's own wrap). Outside the set = STOP and report.
 
 ## Wrap
 
-`agent_handoff/lanes/WRAP-analytics-honesty.md`: the deferral seat AS BUILT (and
+`agent_handoff/lanes/WRAP-analytics-honesty.md` (new — you write it): the deferral seat AS BUILT (and
 the exact diff that lifts it at launch — name the file and the lines), the
 facebook capability rows before/after with doc citations, the batch verb shape +
 the read-model's query count before/after, what you deliberately did not build.

@@ -73,7 +73,7 @@ refused attempt itself recorded, and where?). **If the state machine lacks a
 transition you need, STOP and report — the transition function is not yours to
 edit.**
 
-Then build `packages/engine/src/create/edit.ts`:
+Then build `packages/engine/src/create/edit.ts` (new):
 
 - `aiEditDraft(ctx, repos, {draftId, instruction}, deps)` — shell rewrite under
   the NEW label **`"create.ai_edit"`** (second shell-inventory entry, same
@@ -117,7 +117,7 @@ sheets. Outside the set = STOP and report.
 
 ## Wrap
 
-`agent_handoff/lanes/WRAP-create-shells.md`: both reported decisions and what
+`agent_handoff/lanes/WRAP-create-shells.md` (new — you write it): both reported decisions and what
 survived contact with the code, the two shell entries as merged, the model-tier
 choice with its vision-capability check, the judge-refusal semantics AS
 test-pinned, any spec point you disagreed with (say it, don't substitute), what
