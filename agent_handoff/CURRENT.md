@@ -111,6 +111,18 @@ lanes next session so they can just start building"*):
   The Create engine's two chartered LLM shells: the real reference-describe driver
   + the R8 AI-edit verb, both judged, both new shell-inventory labels.
 
+**A FOUNDER RULING LANDED AFTER THE PREP, AND IT OUTRANKS EVERY STATUS WORD: THE
+DEFINITION OF DONE.** Verbatim: *"if a surface hasnt been touched by the postiz or
+mobbin-mcp research, then i dont consider it finished or ready."* (Full quote +
+consequences: programme file §THE DEFINITION OF DONE; memory updated.) The
+programme file now carries **THE COVERAGE LEDGER** — all 21 sheets as named rows:
+**9 of 20 live surfaces are research-touched, 11 are NOT and are therefore not
+ready**, including Approve, Intel, Dashboard, Profiles, Runs, Integrations. A
+design session that does not move a ledger row did not happen. Never describe an
+un-passed surface as finished — "functional" is not a finish line (the lead said
+exactly that about the ve4 frontend and was corrected; that exchange is why the
+block exists).
+
 **WHY create-shells REPLACED ve4-diffs: the ve4 lane DIED IN GROUNDING.** Git + the
 live surface prove **B-ve.1–.7 ALL shipped by s51** and survived the s72 rebuild
 (s78 audit marks proposal-review and 9:16 derive `present`; the shell inventory

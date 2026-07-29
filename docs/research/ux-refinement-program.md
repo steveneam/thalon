@@ -15,6 +15,32 @@
 > mock up but definitely record how you want to build it so you dont forget
 > between sessions."
 
+**THE DEFINITION OF DONE (founder ruling, 2026-07-29 s87 — this outranks every
+status word below):**
+
+> *"So now you have examples of how top design is done by the best companies, why
+> not change and use their design on everything, every feature, every button then?
+> why do you think im telling you to do a postiz and mobbin pass on everything.
+> if a surface hasnt been touched by the postiz or mobbin-mcp research, then i
+> dont consider it finished or ready."*
+
+Consequences, so nobody re-derives them softer:
+
+1. **"Functional" is not a finish line.** A surface can work end to end — zero
+   dead doors, every test green — and still be UNFINISHED if the research pass
+   has not touched it. The lead claimed exactly this about the video editor's
+   ve4 frontend at s87 and was corrected; that mistake is why this block exists.
+2. **The unit of coverage is every feature and every button, not "the screens".**
+   A pass that walks a surface but skips a control has not finished the surface.
+3. **The coverage ledger below is the record.** A surface not in the ledger, or
+   in it without a research-pass mark, is by his definition NOT READY — whatever
+   its code status. "Not started" rows are debts with names, never a bucket.
+4. Postiz = patterns only (AGPL, rule 6); Mobbin = the visual record. Both count
+   as "the research"; a surface needs whichever of the two has something to say,
+   and the reference library above records what was TAKEN and what was REJECTED
+   — a REJECTED pattern with a stated reason still counts as touched. Silence
+   does not.
+
 Plus two standing steers from the same day:
 
 - **"use visual stuff (thumbnails, graphs, images) as much as possible"**
@@ -151,7 +177,43 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 | Channels | `Channels.dc.html` | **DONE (s86)** | CURRENT · 6 / NOT CONNECTED · 3 grouping (Rox), nine real brand marks replacing nine two-letter boxes, account avatars (Postiz), a live line per connected card, icon-only Validate/Open/Disconnect. Honesty held where a number was tempting: "nothing published yet" not 0; X reads "not measured — no vault row to attribute to". **A not-connected channel is an OFFER, not an identity** — it loses the account block and the "door disarmed" line (which restated its own pill), and that subtraction is what got the connect dance back above the fold (992 → 925 → **914**). **No tooltip on this sheet, deliberately** — every card note is already a fact, not a rationale, and there is no free region; forcing one would have covered a card to demonstrate a pattern the sheet does not need. |
 | Rail sweep | all 15 with a rail | **DONE (2026-07-29)** | Calendar→Schedule + Analytics inserted. Rail-only match on the icon markup, so prose was never blind-replaced; `Profiles` cross-ref renamed by hand, `Calendar.dc.html` marked SUPERSEDED. Verified: 15 identical rails, zero rail overflow. |
 | **Transcription** (`Library.dc.html`) | `Library.dc.html` | **queued — has a live dependency** | The s86 `transcription-free` lane adds an AI-enhance toggle beside Ingest. Per rule 7 it ships in the sheet's existing grammar, NOT a fresh design; this pass is where that control gets designed properly. **Also carries a naming drift like Calendar/Schedule: the sheet's `data-screen-label` still says "Library" while the app calls the surface Transcription.** |
-| The other verdicted sheets | — | **not started** | Pass 1 only after the D4 four land; they are law until amended, so each change needs a stated reason. |
+| The other verdicted sheets | — | *(bucket row retired)* | Superseded by the coverage ledger below — his ruling forbids unnamed "others". |
+
+## THE COVERAGE LEDGER — every surface, by his definition of done
+
+All 21 sheets in `docs/research/mock-sheets/`, each a named row. **research** =
+has Postiz/Mobbin research been run against this surface (the definition of
+done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
+
+| # | surface (sheet) | research | p1 | p2 | p3 | note |
+|---|---|---|---|---|---|---|
+| 1 | Analytics | ✅ s85b | ✅ | — | — | reference library §Analytics |
+| 2 | Schedule | ✅ s86 | ✅ | — | — | §Schedule |
+| 3 | Composer | ✅ s86 + Create-spec Mobbin pass | ✅ | — | — | popout state = p3, drawn open |
+| 4 | Channels | ✅ s86 | ✅ | — | — | §Channels |
+| 5 | Create home | ✅ s86 (Create-spec pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·Leonardo) | — | — | — | sheets = B-create.3, s88 lead-serial |
+| 6 | Create wizard (new sheet) | ✅ s86 (same pass) | — | — | — | rides B-create.3 |
+| 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) | — | — | — | video build order 1 |
+| 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
+| 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
+| 10 | Approve | — | — | — | — | **untouched — not ready** |
+| 11 | Board | — | — | — | — | untouched — not ready |
+| 12 | Dashboard | — | — | — | — | untouched by RESEARCH (s73 shell re-true was exact-mock work, not a research pass) |
+| 13 | Integrations | — | — | — | — | untouched — not ready |
+| 14 | Intel | — | — | — | — | untouched — not ready |
+| 15 | Leads | — | — | — | — | untouched — not ready |
+| 16 | Library (Transcription) | — | — | — | — | queued row above; naming drift noted |
+| 17 | Profiles | — | — | — | — | untouched — not ready |
+| 18 | Runs | — | — | — | — | untouched — not ready; will gain create_runs rows (s87 window) |
+| 19 | Sites | — | — | — | — | untouched — not ready |
+| 20 | Source Media | — | — | — | — | verdicted sheet (s77) but pre-programme — no research pass on record |
+| 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
+| — | Calendar | *(superseded s85 — rail sweep; kept only as history)* | | | | |
+
+**The honest count: 9 of 20 live surfaces have been touched by the research; 11
+have not and are therefore not ready.** Every design session updates this table
+in the same commit as its sheets — a pass that does not move a row here did not
+happen.
 
 ### The VIDEO arc — its own 3 passes (founder ask, 2026-07-29)
 
