@@ -100,8 +100,17 @@ function citations(): { paths: Citation[]; schemas: Citation[] } {
 
 /** Resolve a cited path to something stat-able: strip glob tails, keep literal [dynamic] segments. */
 function checkablePath(token: string): string {
-  const hadGlob = token.includes("*");
-  let p = hadGlob ? token.slice(0, token.indexOf("*")) : token;
+  // `file.ts:65` / `file.ts:65-99` — the HOUSE citation form (CLAUDE.md: "Reference
+  // code as file_path:line_number — it's clickable"). The line suffix is stripped and
+  // the FILE is what must exist; line numbers are deliberately not verified because
+  // they shift under every edit and a ratchet that goes red on unrelated churn gets
+  // disabled. Added s88: the ratchet rejected its own repo's citation convention, so
+  // the only way to satisfy it was to cite LESS precisely — backwards for a check
+  // whose whole purpose is precise dependencies (found by the lane kickoff that
+  // cited `pipeline.ts:65`).
+  const t = token.replace(/:\d+(?:[-–]\d+)?$/, "");
+  const hadGlob = t.includes("*");
+  let p = hadGlob ? t.slice(0, t.indexOf("*")) : t;
   if (p.endsWith("/")) p = p.slice(0, -1);
   // ONLY a glob strip may fall back to the parent (`repos/publication-metrics*`
   // → the repos dir). A plain missing FILE must fail — forgiving any file whose

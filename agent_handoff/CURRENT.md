@@ -84,13 +84,33 @@ Schedule rename · the Composer POPOUT state · YouTube as a destination.
 
 **Resume · Thalon** — s88 merged `create-shells`, fixed an inherited red on
 `main`, and banked the founder's approval of the workspace spec. Nothing is in
-flight. **The next action is W1 research** (Approve · Dashboard · Runs +
-the onboarding/notifications questions) — his own deferral, to be taken up
-**after the Jul 31 11pm UTC budget reset**.
+flight. **s89 IS PLANNED IN FULL — `COORDINATION.md` §s89 is the plan of
+record**, written on his word *"wrap up and plan for next session. usage should
+be refreshed by then."*
 
-**Read first:** CLAUDE.md → this file → `docs/workspace/spec.md` (APPROVED —
-§6 waves, §3 contracts) → `docs/research/ux-refinement-program.md` (the
-coverage ledger) → COORDINATION.md §s88.
+**THE s89 SHAPE — the lead track is the point, the lanes run beside it:**
+
+1. **LEAD TRACK = W1**, the first wave of the now-approved programme: **Approve
+   · Dashboard · Runs**, + Board's retirement-as-a-route, + the
+   Runs↔`create_runs` re-shape, + onboarding/notifications as **research
+   questions only**. Wave shape (spec §6): research → contract updates in
+   `docs/workspace/spec.md` → sheet amendments → his verdict. **≤2 Mobbin
+   searches per surface; ledger row moves same-commit — a design session that
+   moves no ledger row did not happen.** Lead-direct, never delegated.
+2. **LANE `analytics-honesty`** — kickoff committed and current, **GO already on
+   record since s87**, first in line.
+3. **LANE `judge-candidate`** — kickoff written s88
+   (`agent_handoff/lanes/KICKOFF-judge-candidate.md`), **NEEDS HIS NAMED WORD**.
+   Closes the one place the shipped engine knowingly diverges from an APPROVED
+   spec (R8), and its consumer is the Composer that W2 draws.
+
+The two lanes are file-set disjoint (metrics vs judge+create). **Two lanes + the
+lead is the box's ceiling — three concurrent full verifies OOM this machine.**
+**Do not start W2's drawing before he rules on W1.**
+
+**Read first:** CLAUDE.md → this file → **COORDINATION.md §s89 (the plan)** →
+`docs/workspace/spec.md` (APPROVED — §6 waves, §3 contracts) →
+`docs/research/ux-refinement-program.md` (the coverage ledger).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
@@ -103,13 +123,16 @@ on his instruction: a wave is one full lead session by the spec's own
 definition, and starting it at this level risks stopping mid-wave — a
 half-researched surface with ledger rows half-moved is worse than an untouched
 one. **Check headroom before drawing or researching anything.**
-▎ ▸ **NEXT LANE WHEN BUDGET ALLOWS: `analytics-honesty`** — kickoff committed and
-current, GO still on record, nothing downstream blocked on it.
-▎ ▸ **QUEUED, WITH A HOME:** the candidate-judge entry in `proprietary/judge`
-(evaluate `{draft, candidateBody}`, return the verdict, append **no** hash-bound
-rows) closes the R8 deviation exactly; the heavier alternative is a staged-body
-column. The lane's warning worth keeping: the real risk is **copying** the gate
-ladder rather than sharing it.
+▎ ▸ **BOTH s89 LANES ARE PREPPED — see COORDINATION.md §s89.**
+`analytics-honesty` GO is on record; `judge-candidate` needs his named word.
+▎ ▸ **THE SPEC-GROUND-TRUTH RATCHET GOT A FIX (s88):** it rejected
+`file.ts:65` — the repo's OWN citation convention (CLAUDE.md: "Reference code as
+file_path:line_number") — so the only way to satisfy it was to cite LESS
+precisely, backwards for a check whose purpose is precise dependencies. It now
+strips a trailing `:NN`/`:NN-NN` and verifies the FILE; line numbers are
+deliberately unverified (they shift, and a ratchet that reddens on unrelated
+churn gets disabled). **Red-checked**: a missing file with a line suffix still
+fails.
 ▎ ▸ **Six lead items from s87** remain written up in COORDINATION.md §s87.
 ▎ ▸ **⚠️ THE ANALYTICS SHEET'S FACEBOOK FIXTURE IS STILL WRONG** — Meta retired
 `post_impressions_unique` (2025-06-15) and `post_impressions*` (2025-11-15).

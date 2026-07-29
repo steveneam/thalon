@@ -192,6 +192,55 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s89 — PLANNED (budget refreshes **Jul 31, 11pm UTC**; his word: *"usage should be refreshed by then"*)
+
+**The shape: the lead track is the point, and the lanes run beside it.** s88 was
+one lane + a thin lead track because budget forced it. s89 inverts that — the
+approved wave programme is now the critical path, and it is **lead-direct
+design work that cannot be delegated** (his standing rule).
+
+**LEAD TRACK — W1, the first wave of the approved programme.** Surfaces:
+**Approve · Dashboard · Runs**, plus the Board decision's consequence and the
+two research questions his verdict routed here. Per `docs/workspace/spec.md` §6
+a wave is **research → contract updates in that spec → sheet amendments →
+founder verdict**, and by the definition of done these three are the
+highest-stakes surfaces still marked NOT READY. Specifics this wave must carry:
+- **Board retires as a route** (his ruling) — it becomes a Dashboard toggle.
+  **Nothing is deleted before this wave draws the replacement.**
+- **The Runs↔`create_runs` re-shape** (spec §5 gap 8) — the s87 window made
+  Runs' current shape stale; Runs is a W1 surface, so it lands here.
+- **Onboarding + notifications** — research questions only. His ruling was
+  research-first and **no route gets scaffolded on the strength of it**.
+- Budget rule from the programme file: **≤2 Mobbin searches per surface**,
+  TAKEN/REJECTED recorded same-commit, **ledger row moved same-commit** — a
+  design session that moves no ledger row did not happen.
+
+**LANES — two, file-set disjoint, each needing his fresh named approval.**
+
+| lane | bucket | scope (files) | status |
+|---|---|---|---|
+| analytics-honesty | D2 follow-through — X `deferred` end to end, FB comment/share, batch read-model | `packages/engine/src/social/**` (metrics) | **kickoff committed + current, GO on record since s87** — first in line |
+| judge-candidate | close the R8 deviation — judge a candidate body before it lands | `proprietary/judge/src/**` · `packages/engine/src/create/edit.ts` + tests · `docs/create-engine/spec.md` (deviation-block deletion only) | **kickoff written s88, NEEDS his named word** |
+
+Disjoint by construction: metrics vs judge+create; neither touches
+`packages/db/**`, contracts, or sheets. **Two lanes + the lead is the box's
+comfortable ceiling — three concurrent full verifies OOM this machine
+(measured s82).** `analytics-honesty`'s GO is already on record from s87;
+`judge-candidate` is new and needs its own word.
+
+**Why `judge-candidate` is worth a slot now:** it closes the one place where
+the shipped engine knowingly diverges from an APPROVED spec, and its consumer
+is the Composer (B-create.4), which W2 draws. Closing it before W2 means the
+Composer is built against the spec's real semantics rather than around a
+documented gap. The kickoff carries the whole design, including the two traps:
+**share the gate ladder, never copy it** (a drifted judge is a safety
+divergence no test announces), and **the double judge is deliberate** — the
+post-land verdict is the only one I1 can honestly bind.
+
+**Sequencing note:** W2 (Create home + wizard sheets — his named priority, and
+the research is already banked) queues directly behind W1's verdict. Do not
+start W2's drawing before he rules on W1.
+
 ## Sprint 9 / s88 — **CLOSED: the one lane MERGED, and it found `main` red** (verify 3074/9, exit 0)
 
 | lane | bucket | scope (files) | status |
