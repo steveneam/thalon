@@ -154,12 +154,29 @@ sheet law; no build lane opens on any of them before that.**
   the queue rows it would strand (shipped s83), and the connect dance drawn as all
   four of its real states so none of them is a blank screen.
 
-**Two cross-cutting proposals ride this wave and need their own verdict**, because
-they change the rail on every future sheet: **Calendar is renamed `Schedule`**, and
-**`Analytics` joins the rail** directly under it — placed there so the rail reads as
-the loop it is (Intel measures the market → Create → Approve → Schedule → Analytics
-measures us). All four D4 sheets draw the rail that way; the 16 verdicted sheets
-still say "Calendar" and would need a sweep if he takes the rename.
+**The two cross-cutting proposals are RATIFIED and SWEPT (2026-07-29)** — founder:
+*"you can run the sweep when you have time."* **Calendar is renamed `Schedule`**, and
+**`Analytics` joins the rail** directly under it, so the rail reads as the loop it is
+(Intel measures the market → Create → Approve → Schedule → Analytics measures us).
+
+The sweep touched **15 sheets** and only the rail: the nav item was matched on its
+full icon markup, so the word "Calendar" in prose was never blind-replaced. Two
+mentions were then handled by hand, because a regex could not tell them apart:
+
+- `Profiles.dc.html` cross-referenced the surface **by name** ("Calendar — platform
+  cadence caps the fan-out plan") → renamed; it means the surface.
+- **`Calendar.dc.html` is now SUPERSEDED** by `Schedule.dc.html` and carries a banner
+  saying so. It is kept, not deleted: the shipped `/app/calendar` was built from it
+  and it stays that code's spec until the rebuild lands. Its rail was swept with
+  every other sheet (one canonical rail in this directory) while its own headline
+  still reads "Calendar", because that is what shipped. **Do not resolve that tension
+  by editing the file — resolve it by building Schedule.**
+
+Verified after the sweep: all 15 rails render identically to the D4 four, and the
+extra item causes **zero rail overflow** at the 1440×940 viewport.
+
+`Source Media.dc.html` and `Wave 0 - Triage spine.dc.html` were skipped correctly —
+neither draws a rail.
 
 - ~~**`Source Media.dc.html`**~~ — **VERDICTED s76, MOVED OUT OF THIS SECTION.
   The founder ruled it worth doing** (*"my verdict on b-media is that its
