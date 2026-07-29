@@ -214,6 +214,34 @@ For the editor craft itself the reference set is elsewhere. **Seeded 2026-07-29:
 blocks — that is the first visual fix, and it is the same "thumbnails everywhere"
 note the founder has now made three times.**
 
+#### Overview + Dossier references — BANKED s87 (the arc's last blank)
+
+The video spec called these "the only surfaces with zero banked references". They
+are no longer zero. Swept 2026-07-29 (s87), Mobbin MCP, web. **Do not re-search
+these; the editor set above is likewise banked.**
+
+**Videos Overview — the list.**
+- **[VEED · projects grid](https://mobbin.com/screens/f6dcf4e8-1233-4b22-b8a7-5dfc114d1750) — the closest match, and it answers V1/V7 directly.** Every card carries a **state badge on the thumb** (`● Draft` / `● Exported`) top-right and a **duration badge** bottom-right. Crucially, a project with no render yet draws **"No Preview Available"** as a real, deliberate tile — not a blank, not a borrowed frame. That is our render-state badge AND our honest-absence rule already drawn by someone else.
+- **[Riverside · projects](https://mobbin.com/screens/20933911-0b7c-4db0-9b95-71f0ae55b9fe)** — each card's meta line counts its own history: *"4 days ago · 2 Recordings · 5 Edits"*. **Version/take counts surfaced at LIST level**, which is the cheapest possible answer to "what happened to this project" before you open it. Also: a quick-action bar above the grid (Plan · Record · Upload · Edit · AI Voice), and un-rendered projects showing an icon placeholder rather than a fake thumbnail.
+- **[Loom · library](https://mobbin.com/screens/9e8909a2-43b5-4007-b72d-05475a8c0af4)** — duration badge on the thumb, a **share-state line** ("Not shared ▾") on the card, and a metrics triplet (views · comments · reactions) under each. **Ours must stay empty until `publication_metrics` has rows** (the s87 D2 window) — a Loom-shaped metrics row filled with zeros is precisely the rule-5 failure the Composer pass already cut once.
+- **[Arcade · library](https://mobbin.com/screens/02beed61-a42e-462c-a824-b61b0a9ce46c)** — Status + Tags filter chips, grid/list toggle, `Template` marker on a card, duration bottom-right.
+- **[ClickUp · clips](https://mobbin.com/screens/08a507a8-ddc8-42e4-a34b-5c3caec6a0be)** — per-card KIND label ("Video Clip · 39 mins ago"), and an item with no thumbnail drawn as an icon placeholder.
+
+**Video Dossier — the project page.**
+- **[Synthesia · video detail](https://mobbin.com/screens/86150fba-e1c2-4c00-8dc6-35dca70c6f0f) — the single best structural match we have for the Dossier.** The **version selector lives IN the breadcrumb** (`My videos › Product Demo › Version 2 ▾ › Edit`), and the dropdown lists each version with its age and a **`PUBLISHED` pill** on the one that shipped. Right rail = name, description, "Generated 1min ago", and **comments anchored to a timecode** ("Version 1 · at 00:05"). Top-right verbs: Analytics · Translate · Invite · Republish. Between the breadcrumb selector and the published pill, three of our five no-affordance jobs have a drawn home.
+- **[Adobe Express · version history](https://mobbin.com/screens/8e02843d-74a8-420a-b8b7-ea4f5630bf0f)** — a **"Marked versions"** group collapsed ABOVE the raw timestamp list, and a version carrying a typed name ("First Project V1 ✓"). That is **save-as-a-named-variant** exactly, and the marked/unmarked split is the honest answer to a list of forty autosaves where three matter.
+- **[Google AI Studio · app versions](https://mobbin.com/screens/26c8f8ba-2aaa-4028-8983-d41f4b71b784)** — versions as **radio rows** with a `● Current` pill and one "Restore version" action at the foot. Radio-select-then-act is the natural precursor to **compare two**: the same rows, two selectable slots.
+- **[Fibery · restore confirm](https://mobbin.com/screens/eb05e8be-4a16-47f0-94fe-08ad3da74171)** — *"Restore this version? Your current version will revert to version Jan 8, 2026 1:13 pm."* The confirm NAMES what you lose and when it was from. Our delete-a-version and restore rules land in this register — reversibility stated in words, per V1.
+- **[Sana AI](https://mobbin.com/screens/0d1c373e-876d-48f2-b460-54aa375f8b35)** + Fibery both carry a **"Highlight changes" / "Show changes" toggle** beside the history — the diff-on-demand idea B-ve.4's judged EDL diffs will need a home for.
+- **[Frame.io · asset detail](https://mobbin.com/screens/c11d1ed7-0776-4793-8f12-4132d25d11c3)** — a `Show all versions` switch inside a settings rail, plus per-asset metadata rows and a **Grid | Reel** layout toggle.
+
+**What the sweep changes about the plan:** the five no-affordance jobs do not need
+five new inventions. Version-compare, named variants, delete-with-a-real-confirm
+and published-state are all *one* well-drawn version rail (Synthesia's breadcrumb
+selector + Adobe's marked group + Fibery's naming confirm), and render-state on
+return is a badge on a card (VEED). Take audition is the one genuinely separate
+affordance. **Sheets are still lead-direct and still owed a founder verdict.**
+
 **Pass plan (same three lenses, video-scoped):**
 1. **Surface** — visual density and the render gate. The known drift is 30 rows;
    the s80 finding was that most of it was ONE defect (the copilot band's 19px).
@@ -222,8 +250,14 @@ note the founder has now made three times.**
 3. **State & button** — finish the 5 no-affordance jobs, and every control's
    refused/empty/loading state.
 
-**Status: NOT STARTED.** Queued behind the D4 pass-1 sheets (Schedule, Composer,
-Channels), because those are half-done and leaving them half-done is worse.
+**Status: REFERENCES BANKED (s87), SHEETS NOT STARTED.** The D4 pass-1 sheets are
+done (s86) and the Overview + Dossier sweep is done (above) — so the arc's blocker
+is no longer research, it is drawing time. **Held deliberately at the s87 boot on
+BUDGET, not on doubt:** the weekly limit read 87% used with two engine lanes live
+(resets Jul 31, 11pm UTC), and the sheet passes are the heaviest spend left in the
+programme. Banking the references first is what makes the hold cheap — the durable
+half is done and the sheets can start cold from this section whenever there is
+headroom.
 
 ## Open decisions (founder's, NOT closed by the blanket design approval)
 
