@@ -192,7 +192,75 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
-## Sprint 9 / s88 — ONE LANE ONLY (founder budget ruling, s87 late)
+## Sprint 9 / s88 — **CLOSED: the one lane MERGED, and it found `main` red** (verify 3074/9, exit 0)
+
+| lane | bucket | scope (files) | status |
+|---|---|---|---|
+| create-shells | B-create.2 follow-through — the two chartered LLM shells | `packages/engine/src/create/**` (+ `shell/`) · shell-inventory + gateway-boundary ratchets · SPINE §1 · platform env/gateway (vision var) · 2 prompt files | **merged** (`3581df2`) |
+
+**What shipped.** `create.describe_reference` — a gateway vision call over a
+reference's own bytes, metered from core; **stored images only**, read
+content-address-verified; external refs never fetched, audio refs refused in
+words, both **before** the budget guard so an undescribable reference costs
+neither an assertion nor a call. `create.ai_edit` — the R8 verb as
+**propose/apply**. Both labels landed in the shell-inventory ratchet + SPINE §1
+in the same change (the deliberate review-visible act that ratchet exists to
+force). 100 create tests, was 73.
+
+**THE LANE'S BEST WORK WAS A REFUSAL — it found a safety hole in its own
+kickoff.** The kickoff ordered *rewrite → judge the candidate → land on pass →
+on refusal keep the prior body byte-for-byte*. That is **unbuildable through
+the shared harness**: `runJudgePipeline` judges only a PERSISTED body and
+`judgeResults` binds every verdict to the draft's current `body_hash`, which
+I1 reads — so appending a verdict for candidate text would mint an
+**I1-valid passing verdict for content the judge never read**. It also killed
+the obvious workaround with the right argument: land-then-revert writes an
+`eval_cases` row asserting the operator wanted the old text back, and that
+corpus is **training data**. It reported instead of faking, and built the house
+`video.propose_edl_diff` shape — `aiEditDraft` writes NOTHING on any path
+(hash unchanged unconditionally, stronger than the spec asks; red-checked —
+making it land turned 8 of 14 tests red), `applyAiEdit` rides the existing
+`approvals.record` edit door and its re-judge, guarded on `priorBodyHash`.
+**Residue, named not discovered:** on judge refusal *at apply* the draft is
+`blocked` carrying the applied body — hand-edit semantics, not the spec's
+"keeps its prior body". Safety unaffected (I1 walls the Composer).
+**Recorded in the APPROVED spec** — `docs/create-engine/spec.md` §Error
+Behavior carries a dated deviation block flagged READ BEFORE B-create.4.
+
+**Lead ruled two lane deviations, both accepted.** (1) `MODEL_VISION` defaults
+to `anthropic/claude-sonnet-4.5`, NOT the kickoff's "default to the draft
+tier" — `MODEL_DRAFT` is `meta/llama-3.3-70b`, **text-only**, so the kickoff
+would have shipped a default that provably cannot do the job. No new vendor
+(already `MODEL_JUDGE_FINAL`'s default). The lane also added a wall nobody
+asked for: a `claude-cli/*` vision tier is refused by name, because that
+transport is text-only and would have described a picture it never saw.
+`seams.test.ts` now pins vision ≠ draft so a future "collapse the duplicate
+default" tidy-up cannot undo it. (2) File-set extension to
+`gateway-boundary.test.ts` (the allowlist sibling the kickoff named but did not
+license) — correct and reported.
+
+**⚠ IT ALSO CAUGHT `main` RED, INHERITED FROM s87 — fixed by the lead
+(`30b4614`).** `tests/no-nul-in-source.test.ts` failed on
+`tests/repo-hygiene.test.ts`: **two ratchets from the SAME s87 commit
+(`e7a46a8`) contradicting each other** — repo-hygiene used a raw `0x00` as a
+join separator, no-nul-in-source forbids raw NULs. The lane proved it inherited
+by stashing its own work and re-running on a clean tree, then left it alone
+(outside its file set — the same discipline as its R8 stop). Fix: the two-char
+escape `"\0"`, identical runtime string, nothing binary on disk. The guard's
+failure message now **names that fix**, because a guard that only says "you are
+wrong" invites the repair that guts it (dropping the separator, allowlisting the
+file). **Standing lesson, recorded in the guard's docblock: two ratchets can
+contradict each other and only a FULL `npm run verify` catches it — s87 added
+both and did not re-run the suite after its final commits.**
+
+**QUEUED FOLLOW-UP (not forgotten, has a home):** the candidate-judge entry in
+`proprietary/judge` — evaluate `{draft, candidateBody}`, return the verdict,
+append **no** hash-bound rows. It closes the R8 deviation exactly and is the
+smaller of the two options (the heavier being a staged-body column). Lane's own
+warning worth keeping: the real risk is **copying** the gate ladder rather than
+sharing it. Deliberately out of lane scope (moat refactor + budget).
+
+## Sprint 9 / s88 — the launch record (kept for context)
 
 **Founder, verbatim:** *"can we just do one lane next session since we're low on
 usage."* So s88 runs ONE lane beside a deliberately thin lead track. Both
