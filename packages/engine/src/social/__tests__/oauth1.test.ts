@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { oauth1Header } from "../drivers/oauth1";
 
@@ -54,5 +55,86 @@ describe("oauth1Header", () => {
     const a = oauth1Header("POST", "https://api.x.com/2/tweets", KEYS);
     const b = oauth1Header("POST", "https://api.x.com/2/tweets", KEYS);
     expect(a).not.toBe(b);
+  });
+});
+
+/**
+ * D2 (s87): the signer learned RFC 5849 §3.4.1 query handling, because the
+ * metrics read is a signed `GET /2/tweets?ids=…&tweet.fields=…`. Signing a
+ * query-bearing URL as if it had no query yields a 401 that looks exactly
+ * like a dead credential — a debugging trap worth an executable pin.
+ *
+ * These do NOT re-derive the expected signature with the code under test.
+ * The base string is assembled BY HAND from the spec and HMAC'd
+ * independently, so an implementation that agrees with itself but not with
+ * the RFC still fails here.
+ */
+describe("oauth1Header — query strings (RFC 5849 §3.4.1)", () => {
+  const pct = (v: string) =>
+    encodeURIComponent(v).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+
+  /** The signature the spec says a request must carry, computed from scratch. */
+  function expectedSignature(method: string, baseUri: string, params: Array<[string, string]>): string {
+    const encoded = params
+      .map(([k, v]) => [pct(k), pct(v)] as const)
+      .sort((a, b) => (a[0] === b[0] ? a[1].localeCompare(b[1]) : a[0].localeCompare(b[0])));
+    const paramString = encoded.map(([k, v]) => `${k}=${v}`).join("&");
+    const baseString = [method, pct(baseUri), pct(paramString)].join("&");
+    return createHmac("sha1", `${pct(KEYS.consumerSecret)}&${pct(KEYS.tokenSecret)}`)
+      .update(baseString)
+      .digest("base64");
+  }
+
+  const OAUTH_PARAMS: Array<[string, string]> = [
+    ["oauth_consumer_key", KEYS.consumerKey],
+    ["oauth_nonce", FIXED.nonce],
+    ["oauth_signature_method", "HMAC-SHA1"],
+    ["oauth_timestamp", String(FIXED.timestampSec)],
+    ["oauth_token", KEYS.token],
+    ["oauth_version", "1.0"],
+  ];
+
+  it("signs query parameters alongside the oauth_* set, against the query-LESS base URI", () => {
+    const url = "https://api.x.com/2/tweets?ids=1234567890&tweet.fields=public_metrics";
+    const header = oauth1Header("GET", url, KEYS, FIXED);
+    const expected = expectedSignature("GET", "https://api.x.com/2/tweets", [
+      ...OAUTH_PARAMS,
+      ["ids", "1234567890"],
+      ["tweet.fields", "public_metrics"],
+    ]);
+    expect(header).toContain(`oauth_signature="${pct(expected)}"`);
+  });
+
+  it("a URL-encoded query value is decoded once and re-encoded once (the classic double-encoding bug)", () => {
+    // `at://did:plc:me/x` — the shape a metrics read actually carries.
+    const raw = "at://did:plc:me/app.bsky.feed.post/abc";
+    const url = `https://api.example.com/read?uri=${encodeURIComponent(raw)}`;
+    const header = oauth1Header("GET", url, KEYS, FIXED);
+    const expected = expectedSignature("GET", "https://api.example.com/read", [
+      ...OAUTH_PARAMS,
+      ["uri", raw],
+    ]);
+    expect(header).toContain(`oauth_signature="${pct(expected)}"`);
+  });
+
+  it("changing ONLY a query value changes the signature — the query is genuinely bound", () => {
+    const sig = (h: string) => /oauth_signature="([^"]+)"/.exec(h)?.[1];
+    const a = oauth1Header("GET", "https://api.x.com/2/tweets?ids=1", KEYS, FIXED);
+    const b = oauth1Header("GET", "https://api.x.com/2/tweets?ids=2", KEYS, FIXED);
+    expect(sig(a)).not.toBe(sig(b));
+  });
+
+  it("a fragment never reaches the base string", () => {
+    const sig = (h: string) => /oauth_signature="([^"]+)"/.exec(h)?.[1];
+    const plain = oauth1Header("GET", "https://api.x.com/2/tweets?ids=1", KEYS, FIXED);
+    const fragmented = oauth1Header("GET", "https://api.x.com/2/tweets?ids=1#anchor", KEYS, FIXED);
+    expect(sig(fragmented)).toBe(sig(plain));
+  });
+
+  it("the POST-without-query path is byte-identical to before the widening", () => {
+    // The same golden as the pin above — the widening must not have moved it.
+    expect(oauth1Header("POST", "https://api.x.com/2/tweets", KEYS, FIXED)).toContain(
+      'oauth_signature="VqqX3SFcGRi3HW0%2Bi3vEQLYJt1U%3D"',
+    );
   });
 });

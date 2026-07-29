@@ -1,12 +1,17 @@
 import type { SocialPlatform } from "@thalon/contracts";
 import type { EnvSource, ThalonEnv } from "@thalon/platform";
+import {
+  resolveSocialMetricsReader,
+  type SocialMetricsReader,
+  type SocialMetricsReaderFactory,
+} from "../metrics/registry";
 import { resolveSocialPublisher, type SocialDriverFactory, type SocialPublisher } from "../registry";
-import { createBlueskyDriver } from "./bluesky";
-import { createFacebookDriver } from "./facebook";
-import { createInstagramDriver } from "./instagram";
+import { createBlueskyDriver, createBlueskyMetricsReader } from "./bluesky";
+import { createFacebookDriver, createFacebookMetricsReader } from "./facebook";
+import { createInstagramDriver, createInstagramMetricsReader } from "./instagram";
 import { createLinkedInDriver } from "./linkedin";
-import { createRedditDriver } from "./reddit";
-import { createXDriver } from "./x";
+import { createRedditDriver, createRedditMetricsReader } from "./reddit";
+import { createXDriver, createXMetricsReader } from "./x";
 
 export {
   hardenedPlatformFetch,
@@ -15,10 +20,21 @@ export {
   SocialDriverApiError,
   SocialTokenExpiredError,
 } from "./errors";
-export { blueskyLinkFacets, createBlueskyDriver, type BlueskyDriverConfig } from "./bluesky";
-export { createFacebookDriver, FACEBOOK_GRAPH_VERSION, type FacebookDriverConfig } from "./facebook";
+export {
+  blueskyLinkFacets,
+  createBlueskyDriver,
+  createBlueskyMetricsReader,
+  type BlueskyDriverConfig,
+} from "./bluesky";
+export {
+  createFacebookDriver,
+  createFacebookMetricsReader,
+  FACEBOOK_GRAPH_VERSION,
+  type FacebookDriverConfig,
+} from "./facebook";
 export {
   createInstagramDriver,
+  createInstagramMetricsReader,
   INSTAGRAM_GRAPH_VERSION,
   InstagramPublicMediaUrlRequiredError,
   InstagramTextOnlyUnsupportedError,
@@ -27,11 +43,12 @@ export {
 export { createLinkedInDriver, LINKEDIN_VERSION, type LinkedInDriverConfig } from "./linkedin";
 export {
   createRedditDriver,
+  createRedditMetricsReader,
   redditTitleSplit,
   RedditMediaUnsupportedError,
   type RedditDriverConfig,
 } from "./reddit";
-export { createXDriver, type XDriverConfig } from "./x";
+export { createXDriver, createXMetricsReader, type XDriverConfig } from "./x";
 
 /**
  * B-pub.2 (s65): the production driver map `resolveSocialPublisher` takes —
@@ -98,6 +115,81 @@ export function productionSocialDrivers(
  * founder-GO flag + an assembled driver, else a refusing publisher that
  * names its missing arms.
  */
+/**
+ * D2 (s87): the production METRICS READER map — `productionSocialDrivers`'
+ * sibling, assembled from the same env extras so a platform can never be
+ * measurable under one set of config and postable under another.
+ *
+ * The membership differs from the publisher map in exactly one place, and it
+ * is the point of the whole capability matrix: **LinkedIn has a publisher and
+ * no reader.** Both its analytics roads are gated (organization share
+ * statistics needs partner approval and describes organisation shares, which
+ * our member posts are not; member `socialActions` needs the Restricted
+ * `r_member_social_feed`), so no factory is registered and the ratchet
+ * refuses with the platform's own words rather than a credential complaint.
+ * TikTok is absent for the older reason: no driver, so no publications.
+ */
+export function productionSocialMetricsReaders(
+  env: ThalonEnv,
+): Partial<Record<SocialPlatform, SocialMetricsReaderFactory>> {
+  const readers: Partial<Record<SocialPlatform, SocialMetricsReaderFactory>> = {};
+  // X: the same 1.0a-or-Bearer decision the publisher makes, from the same
+  // seats — a signed GET now that oauth1Header handles query params.
+  const xApiKey = env.SOCIAL_X_API_KEY;
+  const xApiKeySecret = env.SOCIAL_X_API_KEY_SECRET;
+  const xTokenSecret = env.SOCIAL_X_ACCESS_TOKEN_SECRET;
+  if (xApiKey && xApiKeySecret && xTokenSecret) {
+    readers.x = ({ accessToken }) =>
+      createXMetricsReader({
+        accessToken,
+        oauth1: { apiKey: xApiKey, apiKeySecret: xApiKeySecret, accessTokenSecret: xTokenSecret },
+      });
+  } else {
+    readers.x = ({ accessToken }) => createXMetricsReader({ accessToken });
+  }
+  readers.reddit = ({ accessToken }) => createRedditMetricsReader({ accessToken });
+  const pageId = env.SOCIAL_FACEBOOK_PAGE_ID;
+  if (pageId) {
+    readers.facebook = ({ accessToken }) => createFacebookMetricsReader({ accessToken, pageId });
+  }
+  const igUserId = env.SOCIAL_INSTAGRAM_USER_ID;
+  if (igUserId) {
+    readers.instagram = ({ accessToken }) => createInstagramMetricsReader({ accessToken, igUserId });
+  }
+  const blueskyIdentifier = env.SOCIAL_BLUESKY_IDENTIFIER;
+  if (blueskyIdentifier) {
+    readers.bluesky = ({ accessToken }) =>
+      createBlueskyMetricsReader({ appPassword: accessToken, identifier: blueskyIdentifier });
+  }
+  return readers;
+}
+
+/**
+ * The metrics tick's production wiring — `productionSocialPublisherResolver`'s
+ * sibling, over the SAME rebuilt EnvSource so packages/platform stays the
+ * process environment's only reader.
+ *
+ * Note what it does NOT copy: the `SOCIAL_<P>_ARMED` seats. Measurement needs
+ * a credential, not the posting GO (the lane's seam decision) — so the ARMED
+ * pairs are absent from the view on purpose, and their absence changes
+ * nothing about what this resolver returns.
+ */
+export function productionSocialMetricsResolver(
+  env: ThalonEnv,
+): (platform: SocialPlatform) => SocialMetricsReader {
+  const readers = productionSocialMetricsReaders(env);
+  const source: EnvSource = {
+    SOCIAL_LINKEDIN_ACCESS_TOKEN: env.SOCIAL_LINKEDIN_ACCESS_TOKEN,
+    SOCIAL_X_ACCESS_TOKEN: env.SOCIAL_X_ACCESS_TOKEN,
+    SOCIAL_FACEBOOK_ACCESS_TOKEN: env.SOCIAL_FACEBOOK_ACCESS_TOKEN,
+    SOCIAL_INSTAGRAM_ACCESS_TOKEN: env.SOCIAL_INSTAGRAM_ACCESS_TOKEN,
+    SOCIAL_TIKTOK_ACCESS_TOKEN: env.SOCIAL_TIKTOK_ACCESS_TOKEN,
+    SOCIAL_REDDIT_ACCESS_TOKEN: env.SOCIAL_REDDIT_ACCESS_TOKEN,
+    SOCIAL_BLUESKY_ACCESS_TOKEN: env.SOCIAL_BLUESKY_ACCESS_TOKEN,
+  };
+  return (platform) => resolveSocialMetricsReader(platform, source, readers);
+}
+
 export function productionSocialPublisherResolver(
   env: ThalonEnv,
 ): (platform: SocialPlatform) => SocialPublisher {

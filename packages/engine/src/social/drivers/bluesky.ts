@@ -1,5 +1,13 @@
 import { z } from "zod";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
+import { metricCapability } from "../metrics/capability";
+import { SocialMetricsUnreadableError } from "../metrics/errors";
+import { collectSample } from "../metrics/parse";
+import type {
+  PostMetricSample,
+  PostMetricsReport,
+  SocialMetricsReader,
+} from "../metrics/registry";
 import {
   hardenedPlatformFetch,
   responseJson,
@@ -172,3 +180,101 @@ export function createBlueskyDriver(config: BlueskyDriverConfig): SocialPublishe
     },
   };
 }
+
+/**
+ * D2 (s87): Bluesky's METRICS reader — `app.bsky.feed.getPosts`, whose
+ * postView carries the engagement counts and nothing view-shaped.
+ *
+ * The honesty story here is the cleanest of the five and worth stating: the
+ * protocol computes NO impressions, for anyone, so Bluesky's audience cell is
+ * permanently empty and the capability matrix marks it `structural`. Its
+ * engagement counts, by contrast, are entirely real — which is exactly the
+ * split the Analytics sheet drew ("no impressions" in the reach column, a
+ * live number beside it).
+ *
+ * Every count field is OPTIONAL in the lexicon, and that is load-bearing: an
+ * AppView that omits `bookmarkCount` yields no bookmarks row rather than a
+ * zero, and a post with no likes yet answers `likeCount: 0`, which IS a
+ * measured zero and is recorded as one. The difference between "measured
+ * zero" and "not measured" survives because `collectSample` only ever reads
+ * a real number.
+ */
+export function createBlueskyMetricsReader(config: BlueskyDriverConfig): SocialMetricsReader {
+  const service = (config.service ?? SERVICE_DEFAULT).replace(/\/$/, "");
+  const fetchImpl = config.fetchImpl ?? fetch;
+  return {
+    platform: "bluesky",
+    name: "bluesky-getposts",
+    async fetchPostMetrics({ externalPostId }): Promise<PostMetricsReport> {
+      // The same short-lived app-password session the publisher opens — no
+      // stored session state, and a revoked app password surfaces as the
+      // hardened fetch's typed 401 (reconnect, not refresh).
+      const sessionRes = await hardenedPlatformFetch(
+        "bluesky",
+        fetchImpl,
+        `${service}/xrpc/com.atproto.server.createSession`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: config.identifier, password: config.appPassword }),
+        },
+        { sleep: config.sleep },
+      );
+      const session = sessionSchema.safeParse(await responseJson(sessionRes));
+      if (!session.success) {
+        throw new SocialMetricsUnreadableError(
+          "bluesky",
+          "createSession answered without accessJwt — cannot read the post",
+        );
+      }
+      const url = `${service}/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(externalPostId)}`;
+      const res = await hardenedPlatformFetch(
+        "bluesky",
+        fetchImpl,
+        url,
+        { headers: { Authorization: `Bearer ${session.data.accessJwt}` } },
+        { sleep: config.sleep },
+      );
+      const parsed = getPostsSchema.safeParse(await responseJson(res));
+      const post = parsed.success ? parsed.data.posts[0] : undefined;
+      if (!post) {
+        // A deleted post, or one this account can no longer see. Nothing to
+        // record — and nothing invented to fill the gap.
+        throw new SocialMetricsUnreadableError(
+          "bluesky",
+          `getPosts returned no post for "${externalPostId}" — deleted, or not visible to this account`,
+        );
+      }
+      const samples: PostMetricSample[] = [];
+      collectSample(samples, "bluesky", "likes", post.likeCount);
+      collectSample(samples, "bluesky", "reposts", post.repostCount);
+      collectSample(samples, "bluesky", "replies", post.replyCount);
+      collectSample(samples, "bluesky", "quotes", post.quoteCount);
+      collectSample(samples, "bluesky", "bookmarks", post.bookmarkCount);
+      return {
+        platform: "bluesky",
+        samples,
+        unavailable: metricCapability("bluesky").refuses.map((r) => ({
+          label: r.label,
+          reason: r.reason,
+        })),
+      };
+    },
+  };
+}
+
+/** getPosts' postView slice this reader reads — every count optional, exactly as the lexicon declares them. */
+const getPostsSchema = z.object({
+  posts: z.array(
+    z
+      .object({
+        uri: z.string().optional(),
+        likeCount: z.number().optional(),
+        repostCount: z.number().optional(),
+        replyCount: z.number().optional(),
+        quoteCount: z.number().optional(),
+        bookmarkCount: z.number().optional(),
+      })
+      .loose(),
+  ),
+});

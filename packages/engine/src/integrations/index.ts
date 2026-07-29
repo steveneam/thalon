@@ -47,6 +47,7 @@ export {
 } from "./published";
 export {
   vaultSocialEnvView,
+  vaultSocialMetricsResolver,
   vaultSocialPublisherResolver,
   type SocialArmingDeps,
   type SocialArmingRepos,
