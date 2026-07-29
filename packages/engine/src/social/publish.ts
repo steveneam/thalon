@@ -17,6 +17,12 @@ import {
   SocialPublishDisarmedError,
 } from "./errors";
 import {
+  admitPendingPublicAsset,
+  parsePendingPublicAssetRef,
+  publicAssetPath,
+  revokePendingPublicAsset,
+} from "../webpage/public-assets";
+import {
   isRefusingSocialPublisher,
   type SocialPostMedia,
   type SocialPublisher,
@@ -101,6 +107,79 @@ export interface PublicMediaAdmission {
    * the crash backstop, not this call.
    */
   revoke(): Promise<void>;
+}
+
+export interface PublicMediaAdmitterOptions {
+  /** Whose bundle the admission is written into — admission is always tenant-scoped. */
+  tenantId: string;
+  /**
+   * The deployment's own public origin, i.e. `APP_ORIGIN` (no new env key).
+   * A platform's servers fetch this address anonymously, so it must be the
+   * REAL registered origin — never derived from proxy headers, the same rule
+   * the OAuth dance follows for the same reason. Absent, blank or not an
+   * absolute http(s) origin → NO ADMITTER IS BUILT (undefined), which is
+   * exactly the un-wired seam: no address, no widened gate, and the driver's
+   * honest `public_media_url_unavailable` refusal.
+   */
+  appOrigin?: string;
+  /** Where the media bytes and the allowlist pointer live; defaults to the platform store. */
+  objectStore?: ObjectStore;
+  /** The publish's clock, passed IN — this module never reads one. */
+  now: Date;
+}
+
+/**
+ * B-ig.1: the production wiring of `admitPublicMedia` — the ONLY thing that
+ * ever writes a pending row, and the reason the widening is publish-scoped
+ * rather than a standing rule. Per admission it opens exactly one image, for
+ * one draft, on one platform, for five minutes, and hands back the revoke
+ * the door calls the instant the platform answers.
+ *
+ * Returns `undefined` when there is no usable origin: an un-buildable seam is
+ * a REFUSAL, never a fallback address. Callers pass the result straight into
+ * `PublishApprovedDraftDeps.admitPublicMedia`.
+ */
+export function createPublicMediaAdmitter(
+  options: PublicMediaAdmitterOptions,
+): PublishApprovedDraftDeps["admitPublicMedia"] | undefined {
+  const origin = normalizeOrigin(options.appOrigin);
+  if (!origin) return undefined;
+  const nowMs = options.now.getTime();
+
+  return async (request: AdmitPublicMediaRequest): Promise<PublicMediaAdmission | null> => {
+    // Fail-closed on the ref itself: a family outside the closed set, a
+    // malformed hash, or an extension the public door will not serve gets no
+    // address at all — better an honest refusal than a URL that 404s at Meta.
+    const source = parsePendingPublicAssetRef(request.ref);
+    if (!source) return null;
+    const store = options.objectStore ?? getObjectStore();
+    const scope = { draftId: request.draftId, platform: request.platform, ref: source.ref, nowMs };
+    await admitPendingPublicAsset(
+      options.tenantId,
+      { ...scope, family: source.family },
+      store,
+    );
+    return {
+      url: `${origin}${publicAssetPath(source.ref)}`,
+      async revoke() {
+        await revokePendingPublicAsset(options.tenantId, scope, store);
+      },
+    };
+  };
+}
+
+/** An origin we would hand to a platform, or nothing: absolute, http(s), no trailing slash. */
+function normalizeOrigin(raw: string | undefined): string | null {
+  const trimmed = raw?.trim();
+  if (!trimmed) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+  return trimmed.replace(/\/+$/, "");
 }
 
 /**
