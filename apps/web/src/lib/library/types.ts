@@ -44,6 +44,20 @@ export interface LibrarySourceRow {
   tags: string[];
   /** Relevance to monitored areas (sources.meta.areaRelevance) — empty until the engine scores it. */
   areaRelevance: AreaRelevance[];
+  /**
+   * Whether the operator asked to AI-enhance THIS ingest (sources.meta
+   * .aiEnhanced, written on both paths since s86 — free + deterministic by
+   * default, founder ruling s79).
+   *
+   * Three states, and the third is the point: `true` = embedded, scored, and
+   * semantically retrievable; `false` = ingested free, so an empty
+   * `areaRelevance` above is a CHOICE and the surface can say so in words;
+   * `undefined` = the row predates the key, and nothing is claimed about it.
+   * Without this, `areaRelevance: []` is ambiguous between "chose free", "no
+   * monitored areas" and "pre-rider row" — an absence with three causes that a
+   * surface can only report honestly by staying silent.
+   */
+  aiEnhanced?: boolean;
   /** Which TranscriptProvider fetched it (sources.meta.transcriptProvider). */
   provider: string | null;
   segmentCount: number | null;

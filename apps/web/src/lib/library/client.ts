@@ -9,6 +9,12 @@ export async function ingestVideo(input: {
   url: string;
   captions?: string;
   tags?: string[];
+  /**
+   * The operator's per-ingest AI-enhance choice (s79). Omitted ⇒ free: the
+   * default lives once, engine-side, so no client can accidentally become the
+   * thing that starts the spending.
+   */
+  aiEnhance?: boolean;
 }): Promise<IngestResponse> {
   const res = await fetch("/api/library/ingest", {
     method: "POST",

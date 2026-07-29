@@ -6,6 +6,7 @@ import {
   SHELF_SORT_WORDS,
   applyShelfFilters,
   dayStamp,
+  freeIngestNote,
   parseTags,
   shelfNarrowed,
   shelfTags,
@@ -57,11 +58,17 @@ export function Transcription() {
   const [url, setUrl] = useState("");
   const [captions, setCaptions] = useState("");
   const [tagsRaw, setTagsRaw] = useState("");
+  // Free + deterministic is the RESTING state, and it returns to it after every
+  // ingest (founder ruling s79: per-ingest, his choice each time — never a
+  // setting that quietly stays on).
+  const [aiEnhance, setAiEnhance] = useState(false);
   const [ingestOpen, setIngestOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   /** Neutral channel for what a dropped file did — refusals stay in actionError. */
   const [dropNote, setDropNote] = useState<string | null>(null);
+  /** Neutral channel for what the last INGEST did — the no-op re-ingest says so. */
+  const [ingestNote, setIngestNote] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptPayload | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   // The selection is a SOURCE, not a position. Ingest prepends and delete
@@ -131,18 +138,33 @@ export function Transcription() {
     event.preventDefault();
     await withBusy(async () => {
       const tags = parseTags(tagsRaw);
+      const enhanceAsked = aiEnhance;
       const result = await ingestVideo({
         url,
         captions: captions.trim() ? captions : undefined,
         tags: tags.length > 0 ? tags : undefined,
+        // Omitted unless asked: the free default lives engine-side, once.
+        aiEnhance: enhanceAsked ? true : undefined,
       });
       setPayload(await fetchLibrary());
       setTranscript(await fetchTranscript(result.sourceId));
       setUrl("");
       setCaptions("");
       setTagsRaw("");
+      setAiEnhance(false);
       setIngestOpen(false);
       setDropNote(null);
+      // A RE-INGEST RE-PROCESSES NOTHING. Content identity is the transcript,
+      // so pasting a video already on the shelf resolves to the existing row —
+      // and with the toggle on, that is a control the operator just used which
+      // had no effect. Silence there would read as "enhanced"; say it instead.
+      setIngestNote(
+        result.created
+          ? null
+          : `Already on the shelf — the same transcript was ingested before, so nothing was re-processed${
+              enhanceAsked ? " and AI-enhance did not apply to it" : ""
+            }.`,
+      );
       // A write must not land behind a filter: an ingest the operator cannot
       // see reads as a failed ingest. The narrowing clears (the sort, which
       // hides nothing, stays).
@@ -372,6 +394,29 @@ export function Transcription() {
             value={tagsRaw}
             onChange={(event) => setTagsRaw(event.target.value)}
           />
+          {/* THE AI-ENHANCE TOGGLE (founder ruling, s79). It joins the extras
+              that already unfold on engage rather than growing the resting
+              band, and it states its own consequence both ways round: an
+              operator choosing between free and metered can only choose
+              honestly if the surface says what free gives up BEFORE he
+              spends, not after. */}
+          <label
+            className="t-label"
+            style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+          >
+            <input
+              type="checkbox"
+              name="ai-enhance"
+              checked={aiEnhance}
+              onChange={(event) => setAiEnhance(event.target.checked)}
+            />
+            AI-enhance this ingest
+          </label>
+          <span className="t-label">
+            {aiEnhance
+              ? "This ingest embeds its chunks and scores them against your monitored areas — one metered call. It goes back to free for the next one."
+              : "Free and deterministic: the transcript is stored verbatim, with no relevance score and no semantic retrieval — you'll find it by title, URL and tag."}
+          </span>
           {seam && (
             <span className="t-label">
               transcript provider · <span className="t-data">{seam.selected}</span>
@@ -394,6 +439,12 @@ export function Transcription() {
       {dropNote && (
         <span className="t-label" role="status">
           {dropNote}
+        </span>
+      )}
+
+      {ingestNote && (
+        <span className="t-label" role="status">
+          {ingestNote}
         </span>
       )}
 
@@ -526,6 +577,7 @@ export function Transcription() {
           ) : (
             shown.map((row, index) => {
               const relevance = topRelevance(row);
+              const freeNote = freeIngestNote(row);
               const origin = webOrigin(row.uri);
               return (
                 <div
@@ -554,6 +606,10 @@ export function Transcription() {
                     <div className="excerpt" title={relevance?.reason}>
                       {sourceFacts(row)}
                       {relevance && ` · relevant to ${relevance.area}`}
+                      {/* …and where an enhanced row states its area, a free one
+                          states why it has none — same slot, same grammar, so
+                          the absence is never left to be read as a zero. */}
+                      {freeNote && ` · ${freeNote}`}
                       {origin && (
                         <>
                           {" · "}
@@ -672,10 +728,18 @@ export function Transcription() {
 
       {/* The sheet's footer is ONE label — unlike the Dashboard sheet, this
           one draws no j/k chips, so the keyboard grammar stays invisible
-          chrome here rather than growing the band. */}
+          chrome here rather than growing the band.
+
+          Its old wording ("chunked and embedded once") became a LIE the moment
+          free ingest landed: it asserted of the whole shelf a thing that is now
+          true only of the ingests the operator paid for. The shelf-wide honest
+          statement replaces it, so a row with no "relevant to …" clause reads
+          as a known free ingest rather than as an area that scored nothing. */}
       <div style={{ display: "flex" }}>
         <span className="t-label">
-          Sources are per-tenant, chunked and embedded once — drafts cite them; nothing generates
+          Sources are per-tenant and chunked once. AI-enhanced ingests are embedded too — scored
+          against your monitored areas and retrievable by meaning; free ingests are stored verbatim,
+          with no relevance score and no semantic retrieval. Drafts cite them; nothing generates
           ungrounded.
         </span>
       </div>

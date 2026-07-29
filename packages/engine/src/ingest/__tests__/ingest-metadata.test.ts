@@ -75,7 +75,9 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
     const result = await ingestVideoUrl(
       ctx,
       repos,
-      { url: "https://platform.test/watch?v=1", tags: ["tooling", "video"] },
+      // areaRelevance is an ENHANCED-path key — a free ingest has no vectors to
+      // score, so the rider only has anything to write when the operator asked.
+      { url: "https://platform.test/watch?v=1", tags: ["tooling", "video"], aiEnhance: true },
       {
         transcriptProvider: fakeProvider(),
         titleFetcher: fixedTitleFetcher(
@@ -119,7 +121,9 @@ describe("ingestVideoUrl B6.6 rider — Library metadata mini-contract (keyless 
     const result = await ingestVideoUrl(
       ctx,
       repos,
-      { url },
+      // Enhanced, so the missing areaRelevance is attributable to "no active
+      // areas" and not merely to the free path having no vectors.
+      { url, aiEnhance: true },
       {
         transcriptProvider: fakeProvider(),
         titleFetcher: fixedTitleFetcher(null),

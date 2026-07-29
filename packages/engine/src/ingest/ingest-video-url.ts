@@ -46,6 +46,25 @@ import { youTubeOEmbedTitleFetcher, type VideoTitleFetcher } from "./video-title
  * `meta.areaRelevance` (the transcript's chunk-embedding centroid scored
  * against the tenant's active monitored areas via the B6.4 ranker's
  * embedding path — ./area-relevance.ts).
+ *
+ * FREE + DETERMINISTIC BY DEFAULT (founder ruling, s79 — transcription is
+ * HIS knowledge tool): an ingest spends NOTHING unless the operator asks it
+ * to, per ingest. `request.aiEnhance` is that ask; absent/false means both
+ * metered passes are skipped — the chunk embed AND the area-relevance embed
+ * (turning off only the first leaves half the spend in place). There is no
+ * env var and no tenant setting behind this: it is the operator's choice
+ * each time, carried from the toggle beside Ingest.
+ *
+ * ONE ARTIFACT, never a verbatim-plus-enhanced pair (the founder declined
+ * that explicitly): both paths write the SAME `video_transcript` shape, keyed
+ * on the same transcript hash. Enhancing adds `chunks.embedding` and
+ * `meta.areaRelevance`; it never adds a second row. What a free source gives
+ * up is real and is recorded rather than hidden — `meta.aiEnhanced: false`
+ * says the operator chose free, so the surface can state the two consequences
+ * IN WORDS (no relevance score; not semantically retrievable — retrieval
+ * ranks on those vectors and `topKBySimilarity` skips null embeddings).
+ * Rows ingested before this key existed simply lack it: absent = unknown,
+ * which is the truth about them, and they keep working untouched.
  */
 
 export interface VideoUrlIngestRequest {
@@ -56,6 +75,12 @@ export interface VideoUrlIngestRequest {
   captionFormat?: CaptionFormat;
   /** Operator-set library tags — stored verbatim as `meta.tags` (session-19 mini-contract). */
   tags?: string[];
+  /**
+   * AI-enhance THIS ingest: embed the chunks and score them against the
+   * tenant's monitored areas. Off by default — the free path makes zero
+   * metered calls. Per-ingest and operator-set; never an env default.
+   */
+  aiEnhance?: boolean;
   meta?: Record<string, unknown>;
 }
 
@@ -76,6 +101,13 @@ export interface VideoUrlIngestResult {
   created: boolean;
   chunkCount: number;
   provider: string;
+  /**
+   * Whether the source this call resolved to actually carries embeddings —
+   * measured, not echoed back from the request. On the fast path that is the
+   * EXISTING row's state (the operator's toggle changed nothing), which is
+   * what the surface has to say instead of claiming the ask took effect.
+   */
+  enhanced: boolean;
 }
 
 export async function ingestVideoUrl(
@@ -101,7 +133,17 @@ export async function ingestVideoUrl(
   const existing = await repos.sources.getByContentHash(ctx, contentHash);
   if (existing) {
     const chunks = await repos.sourceChunks.listBySource(ctx, existing.id);
-    return { sourceId: existing.id, created: false, chunkCount: chunks.length, provider: provider.name };
+    // The fast path re-processes NOTHING, so an aiEnhance ask on a transcript
+    // already on the shelf is a no-op — report the row's real state (does it
+    // have vectors?) rather than the request, or the toggle becomes a control
+    // that silently does nothing.
+    return {
+      sourceId: existing.id,
+      created: false,
+      chunkCount: chunks.length,
+      provider: provider.name,
+      enhanced: chunks.some((chunk) => chunk.embedding != null),
+    };
   }
 
   const chunkConfig = deps.chunkConfig ?? DEFAULT_CHUNK_CONFIG;
@@ -110,19 +152,26 @@ export async function ingestVideoUrl(
   const model = modelTiers().embedding;
   const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
   const objectStore = deps.objectStore ?? getObjectStore();
+  const aiEnhance = request.aiEnhance === true;
 
-  const embedded: EmbeddedChunk[] = chunks.length
-    ? await embedChunks(
-        ctx,
-        repos,
-        { chunks, model, capTokens },
-        {
-          driver: deps.embedder ?? createGatewayEmbeddingDriver(model),
-          tracer: deps.tracer ?? getTracer(),
-          objectStore,
-        },
-      )
-    : [];
+  // The gate is the whole free path: not "inject a cheaper driver" but "do not
+  // embed". `createGatewayEmbeddingDriver` is never even CONSTRUCTED here on a
+  // free ingest — pinned by a test that spies on the constructor, because the
+  // driver's cost is deferred into `embed()` and a construction alone would
+  // otherwise look harmless.
+  const embedded: EmbeddedChunk[] =
+    aiEnhance && chunks.length
+      ? await embedChunks(
+          ctx,
+          repos,
+          { chunks, model, capTokens },
+          {
+            driver: deps.embedder ?? createGatewayEmbeddingDriver(model),
+            tracer: deps.tracer ?? getTracer(),
+            objectStore,
+          },
+        )
+      : [];
 
   const rawRef = objectKey("transcripts", contentHash, "json");
   await objectStore.put(rawRef, transcriptJson);
@@ -151,12 +200,19 @@ export async function ingestVideoUrl(
   // the same rule on the read side) — and never without the URL they measure.
   const measuredThumbnail =
     fetchedThumbnail !== null && fetchedThumbnailWidth !== null && fetchedThumbnailHeight !== null;
-  const areaRelevance = await scoreAreaRelevance(
-    ctx,
-    repos,
-    { vectors: embedded.map((e) => e.embedding), capTokens },
-    { embedder: deps.embedder, tracer: deps.tracer, objectStore },
-  );
+  // THE SECOND METERED PASS. Not calling it at all is the point: it embeds the
+  // tenant's area descriptions, so a free ingest that skipped only the chunk
+  // embed would still bill here. (It would also short-circuit on empty vectors
+  // — but that is incidental, and "free by default" must not rest on an
+  // accident one refactor away.)
+  const areaRelevance = aiEnhance
+    ? await scoreAreaRelevance(
+        ctx,
+        repos,
+        { vectors: embedded.map((e) => e.embedding), capTokens },
+        { embedder: deps.embedder, tracer: deps.tracer, objectStore },
+      )
+    : undefined;
 
   const { source, chunks: persisted } = await repos.sourceChunks.ingest(ctx, {
     kind: "video_transcript",
@@ -174,6 +230,17 @@ export async function ingestVideoUrl(
       ...(request.tags?.length ? { tags: request.tags } : {}),
       ...(areaRelevance ? { areaRelevance } : {}),
       ...request.meta,
+      // Written on BOTH paths, unlike the optional rider keys above: `false`
+      // here is not a measurement of nothing, it is the operator's recorded
+      // choice, and it is the only thing that tells a later reader the
+      // difference between "ingested free" and "scored, no area matched".
+      //
+      // LAST on purpose, after `request.meta` — every other key here is a
+      // caller-overridable default, but this one records what this function
+      // ACTUALLY DID. A caller that could stamp `aiEnhanced: true` onto an
+      // ingest that embedded nothing would make the surface lie about
+      // retrievability, which is the one thing this key exists to prevent.
+      aiEnhanced: aiEnhance,
     },
     chunks: chunks.map((chunk, i) => ({
       seq: chunk.seq,
@@ -191,5 +258,6 @@ export async function ingestVideoUrl(
     created: true,
     chunkCount: persisted.length,
     provider: provider.name,
+    enhanced: embedded.length > 0,
   };
 }
