@@ -77,6 +77,26 @@ Cite these rather than re-searching. Each entry is the PATTERN worth taking.
 - [Rox · integrations](https://mobbin.com/screens/2820d9c1-11bc-4134-9274-87035d73da60) — **CURRENT / NOT CONNECTED grouping**, connected cards carry a live activity line ("0 emails processed, last synced 2 min ago") and icon-only actions. *PENDING — this is the biggest Channels win.*
 - [Chatbase](https://mobbin.com/screens/9d24c903-7050-4e16-b34e-71da42107d2c) / [Notion](https://mobbin.com/screens/842d8ae9-059c-4ff3-8ca3-36428dc831eb) — every card leads with a real brand mark, never a text initial. **TAKEN on Analytics; PENDING on Channels.**
 
+**Tooltips — the answer to "less is more"** (founder: *"additional info can be hidden inside a tooltip or something, see how mobbin mcp does it"*)
+
+Two distinct patterns, and we use both:
+- **ⓘ on the label** — [Gorgias](https://mobbin.com/screens/e4248d94-917f-44e4-a0c3-4f76eea2e385) ("AGENTS ONLINE ⓘ", "Support Volume ⓘ"), [Medium](https://mobbin.com/screens/9084d2aa-ef18-4558-aae7-0c09b6e9c490) ("INTERNAL VIEWS ⓘ"), [Arcade](https://mobbin.com/screens/ffa76985-7fe5-4ae3-8a08-2337cae94c02) ("Performance ⓘ"). A small circled-i beside a metric label; the popover explains how the number is built.
+- **Values-at-a-point on hover** — [WRITER](https://mobbin.com/screens/c5c263e9-1ca3-4423-8419-ff09d2b70b13), [Exa](https://mobbin.com/screens/8439f27d-0396-4236-96e2-ce595af04b98), [Visitors](https://mobbin.com/screens/2c4470d3-5888-4f3f-b204-7a2dde003c8b). Crosshair + a dot per series + a card listing each series' value at that x.
+
+**THE RULE THIS GIVES US — write it on every sheet:**
+
+> **Fact on the surface, rationale behind ⓘ.** A signal that changes what the
+> operator does stays visible. The sentence explaining *why* collapses into a
+> tooltip. **A tooltip is never the only home of something that changes a
+> decision** — "partner-gated" stays in the cell; the paragraph about LinkedIn's
+> partner programme does not.
+
+Shared vocabulary now in `Analytics.dc.html`, reuse verbatim: `.info` (the glyph),
+`.tip` / `.tip-h` (the popover), `.crosshair`. **Draw exactly ONE tooltip open per
+sheet**, and never over the thing it explains — the first attempt opened two at once
+and together they hid the whole chart. Anchor with `right:100%; margin-right:9px`
+so it spills into the neighbouring column, which is what a real tooltip does.
+
 **Postiz** (from `docs/research/s82-PREPLAN.md` §1b/§4 + `distribution-charter.md`; patterns only, AGPL)
 - Their integration row stores `token/refresh/expiry/username/**avatar**` — connected channels render the **account's real profile picture**. *PENDING on Channels: our `.plat-ico` is a text initial.*
 - Per-platform settings tabs + per-channel preview before scheduling, generated from **28 settings DTOs**. **Validates our Composer tabs**; the schemas are D3.
@@ -86,10 +106,11 @@ Cite these rather than re-searching. Each entry is the PATTERN worth taking.
 
 | surface | sheet | status | what changed / what is queued |
 |---|---|---|---|
-| Analytics | `Analytics.dc.html` | **DONE (s85b)** | Post rendered in-row (avatar + body + media thumb) · sparkline on every tile AND every row · 28-day reach/engagement area chart · icon metric heads · real platform marks · hour-box gains Avg/Days/Heatmap and stays reserved. Two layout defects found by reading the render and fixed: ~300px dead space under the table (→ 10 rows) and a right column clipping the fold (measured: last row bottom 919 ≤ 940). |
+| Analytics | `Analytics.dc.html` | **DONE (s85b)** + tooltips | Post rendered in-row (avatar + body + media thumb) · sparkline on every tile AND every row · 28-day reach/engagement area chart · icon metric heads · real platform marks · hour-box gains Avg/Days/Heatmap and stays reserved. Two layout defects found by reading the render and fixed: ~300px dead space under the table (→ 10 rows) and a right column clipping the fold (measured: last row bottom 919 ≤ 940). |
 | Schedule | `Schedule.dc.html` | **queued** | Media thumbnails in event chips (Later) · platform glyph per event · keep the three-fact legend. |
 | Composer | `Composer.dc.html` | **queued** | Full-fidelity preview (large media, coloured hashtags, platform action row) · media control with icon toolbar · keep the caveat. |
 | Channels | `Channels.dc.html` | **queued** | CURRENT / NOT CONNECTED grouping (Rox) · real brand marks + **account avatars** (Postiz) · activity line per connected card · icon-only actions. |
+| Rail sweep | all 15 with a rail | **DONE (2026-07-29)** | Calendar→Schedule + Analytics inserted. Rail-only match on the icon markup, so prose was never blind-replaced; `Profiles` cross-ref renamed by hand, `Calendar.dc.html` marked SUPERSEDED. Verified: 15 identical rails, zero rail overflow. |
 | The 16 verdicted sheets | — | **not started** | Pass 1 only after the D4 four land; they are law until amended, so each change needs a stated reason. |
 
 ## Open decisions (founder's, NOT closed by the blanket design approval)

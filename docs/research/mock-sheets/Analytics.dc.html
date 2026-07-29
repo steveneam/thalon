@@ -121,6 +121,17 @@
           .lg2 { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--n-900); }
           .lg2 i { width: 12px; height: 2.5px; border-radius: 2px; display: block; }
 
+          /* ⓘ + tooltip. Mobbin's two patterns, and the rule they gave us: the
+             FACT stays on the surface, the RATIONALE hides behind the glyph.
+             (Gorgias/Medium/Arcade put ⓘ on the metric label; every charting
+             product in the sample shows values-at-a-point on hover.) A tooltip is
+             never the ONLY home of something that changes a decision — "partner-gated"
+             stays in the cell; the paragraph explaining it does not. */
+          .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+          .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+          .tip { position: absolute; z-index: 9; width: 236px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); }
+          .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
+          .crosshair { stroke: var(--n-700); stroke-width: 1; stroke-dasharray: 2 2; }
           .hour-box { height: 88px; border: 1px dashed var(--n-500); border-radius: 8px; background: var(--n-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0 16px; text-align: center; position: relative; overflow: hidden; }
           .ghost-area { position: absolute; inset: 0; opacity: 0.13; }
           .loop-row { display: flex; align-items: flex-start; gap: 9px; padding: 6px 13px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
@@ -380,9 +391,10 @@
 
               <!-- ── right column: the trend, the reserved box, the loop ── -->
               <div class="side">
-                <div class="card">
+                <div class="card" style="position:relative">
                   <div class="card-head">
                     <span class="t-title">Reach &amp; engagement</span>
+                    <span class="info">i</span>
                     <div style="flex:1"></div>
                     <span class="lg2"><i style="background:var(--act)"></i>Reach</span>
                     <span class="lg2"><i style="background:var(--ok)"></i>Engag.</span>
@@ -395,15 +407,22 @@
                       <path class="a-fill" d="M0,66 L45,71 L91,52 L137,58 L183,36 L228,42 L274,21 L320,16 L320,94 L0,94 Z"></path>
                       <path class="a-line" d="M0,66 L45,71 L91,52 L137,58 L183,36 L228,42 L274,21 L320,16"></path>
                       <path class="b-line" d="M0,78 L45,73 L91,79 L137,68 L183,71 L228,60 L274,64 L320,55"></path>
+                      <line class="crosshair" x1="137" y1="0" x2="137" y2="94"></line>
+                      <circle cx="137" cy="58" r="2.6" fill="var(--act)"></circle>
+                      <circle cx="137" cy="68" r="2.4" fill="var(--ok)"></circle>
                     </svg>
                     <div class="x-ax"><span>28 Jun</span><span>5 Jul</span><span>12 Jul</span><span>19 Jul</span><span>25 Jul</span></div>
-                    <span class="t-label" style="font-size:10.5px;display:block;margin-top:6px;line-height:1.4">3 of 5 platforms. LinkedIn and Bluesky report no reach.</span>
+                    <div class="tip" style="right:100%;margin-right:9px;top:26px">
+                      <span class="tip-h">how this line is built</span>
+                      Drawn over the 3 platforms that report reach. LinkedIn and Bluesky are not in it: averaging in what we cannot measure would flatter the number.
+                    </div>
                   </div>
                 </div>
 
                 <div class="card" style="display:flex;flex-direction:column">
                   <div class="card-head">
                     <span class="t-title">Engagement by hour</span>
+                    <span class="info">i</span>
                     <div style="flex:1"></div>
                     <div class="seg"><span class="seg-opt on">Avg</span><span class="seg-opt">Days</span><span class="seg-opt">Heatmap</span></div>
                   </div>
@@ -413,7 +432,7 @@
                         <path fill="var(--n-700)" d="M0,96 L25,80 L50,44 L75,66 L100,88 L125,74 L150,90 L175,58 L200,70 L225,30 L250,62 L275,84 L300,92 L300,118 L0,118 Z"></path>
                       </svg>
                       <span class="t-label" style="font-size:11.5px;color:var(--n-900);position:relative">No hourly data yet</span>
-                      <span class="t-label" style="font-size:10.5px;position:relative;line-height:1.4">Waiting on per-post snapshots (the D2 window). This shape is a placeholder, not your data.</span>
+                      <span class="t-label" style="font-size:10.5px;position:relative;line-height:1.4">This shape is a placeholder, not your data.</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;margin-top:9px">
                       <span class="t-data">arrives with publication_metrics</span>
