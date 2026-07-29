@@ -192,9 +192,28 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
-## Sprint 9 / s86 — TWO LANES, **founder GO on record** ("A + transcription-free")
+## Sprint 9 / s86 — TWO LANES, **BOTH MERGED** (founder GO on record: "A + transcription-free")
 
-**Launch at the s86 boot, NO re-ask.** Mode B via `scripts/launch-lane.sh`, Opus-5
+**CLOSED.** Launched at the s86 boot as approved, both wrapped, both merged through
+`main` on a green verify-on-merged-main: `ig-admission` (`0655801` → merge `16a77a4`,
+2812 passed / 9 skipped) and `transcription-free` (`b42cd24` → merge `337716a`,
+2840 passed / 9 skipped, 0 lint errors). Worktrees GC'd, windows killed.
+
+**Both stopped where they were told to.** `ig-admission` shipped the admission mechanism
+disarmed with the security bound stated and each clause test-pinned. `transcription-free`
+hit its file-set boundary (criterion 4's per-row half needed `lib/library/types.ts` +
+its serializer) and **asked instead of editing ad-hoc** — the lead approved the two-file
+extension after checking disjointness against the other live lane. It also refused the
+tempting fix when the B4.4 metering ratchet fired on a doc-comment: allowlisting the test
+file is the weakening the ratchet exists to prevent, so it reworded the comment.
+
+**Two things it surfaced, neither a defect:** there is **no re-ingest-to-enhance path**
+(content identity is the transcript hash, so a free-then-enhance is a no-op; the surface
+says so rather than letting the toggle look effective) — flagged as a charter candidate.
+And rows predating the flag stay silent, because absent is unknown, not a back-dated
+choice.
+
+*Original scope, kept for the record:* **Launch at the s86 boot, NO re-ask.** Mode B via `scripts/launch-lane.sh`, Opus-5
 pin, disjoint file sets, merge through `main` on a green verify-on-merged-main.
 
 **The shape, and the constraint that produced it:** design is LEAD-DIRECT (founder:
