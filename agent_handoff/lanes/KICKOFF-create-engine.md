@@ -67,3 +67,67 @@ never edit. Needing a file outside your set = STOP and report (re-plan, not ad-h
 built, any spec point you disagreed with (say it, don't silently substitute), what
 you deliberately did not build. Commit on your branch, push, stop. **The lead
 rebases/merges — you do not.**
+
+---
+
+## THE WINDOW AS FROZEN (s87 lead, merge `ff55f0f`) — read before you plan
+
+The contract window is **on main and frozen**. Consume it; never edit it.
+Several shapes differ from the spec's prose sketch — the differences are
+deliberate and grounded, so treat THIS section as the truth and do not stop
+to report these as surprises.
+
+**Contracts — `@thalon/contracts`, `src/create-run.ts`:**
+- `CREATE_FAMILIES` = `post | video | page | email` (closed; the dispatch key).
+  `CREATE_MODES` = `prompt | wizard`. `CREATE_RUN_STATUSES` = the same four
+  words as `FANOUT_RUN_STATUSES`, with the same "telemetry, never control
+  flow" doctrine.
+- `createBriefSchema` / `createPlanSchema` — parse at your boundaries; the
+  repo parses again at the write door.
+- **`platformPlanSchema` binds `admitted` and `refusal` to each other**: a
+  refused platform WITHOUT a reason is unstorable, and an admitted one WITH
+  a reason is too (`createPlanSchema.superRefine`). R10 is structural here,
+  so your derivation must always produce the sentence. `CREATE_REFUSAL_CODES`
+  = `unknown_platform | channel_not_connected | family_platform_mismatch |
+  media_required` — the codes your tests pin; messages stay free prose.
+- `costPreviewSchema.unestimated` is the honesty valve: when you cannot
+  price something, NAME why rather than emitting a 0.
+- **`CREATE_CHILD_KINDS` = `fanout_run | draft | video_project` — THREE, not
+  the four-way per-family set the spec sketched.** Ground truth: every
+  family lands through the shared single-draft spine or the fan-out, and
+  `drafts.fanout_run_id` is NOT NULL, so page and email produce a
+  `fanout_run` anchor + `draft` exactly like a post does
+  (`runWebPageGeneration`/`runOutreachEmail` both return `runId` + `draft`).
+  Only staged video additionally owns a `video_project`.
+- `platformRoutingSchema` + `DEFAULT_PLATFORM_ROUTING` — **family → default
+  destinations**, on `brand_profiles.config.platformRouting`. This is NOT
+  the existing `routing` field (bucket → platforms, read by `fanout/routing.ts`);
+  both may coexist. It is a `partialRecord`: `z.record()` over an enum key is
+  EXHAUSTIVE in zod 4 and refused every partial map — pinned by a test.
+  The demo default ships only reachable destinations; `page`/`email` are
+  absent on purpose and there is **no `youtube` key anywhere** (no platform
+  key, no capability row, no driver — see `SETTINGS_DEFERRED`).
+
+**Media roles — `src/media.ts`:**
+- `MEDIA_ROLES` = `use | reference`. Optional on `mediaRefEnvelopeSchema`
+  (pre-window media parses byte-identically; absent reads as `use` via
+  `mediaRole()`), and **REQUIRED** on `createBriefMediaSchema` — the attach
+  door demands the choice.
+- **Use `outputEligible()` for the licensing wall — do not hand-roll
+  `role !== "reference"`.** It is the one filter, so a future third role
+  cannot land on the publish side. Your criterion-4 test pins the engine
+  half: reference bytes never reach draft `mediaRefs`.
+
+**Storage — `@thalon/db`:**
+- `repos.createRuns`: `create` (idempotent by `generationKey` — a Create run
+  SPENDS, so a double-clicked Generate must return the first run),
+  `recordPlan`, `recordChildren` (**replaces the full set**, so a retried
+  dispatch converges instead of doubling), `recordLastError`, `setStatus`,
+  `get`, `getByGenerationKey`, `list`. Per-child failure rides
+  `children[].error` verbatim; run-level failure rides `lastError`.
+- `create_runs` deliberately holds no brand-profile id/version and no judge
+  state — the child fan-out row already carries that provenance.
+
+**D3 settings slice** (`src/platform-settings.ts`) ships in this window but
+has **no consumer in your lane** — it is the Composer's rail (B-create.3/.4)
+and the video arc's shared slice. Do not wire it.

@@ -66,3 +66,41 @@ per-platform capability table AS BUILT (metric × platform × available/refused-
 reason), what the Analytics surface can now show honestly vs what stays "not
 measured", what you deliberately did not build. Commit, push, stop. **The lead
 merges — you do not.**
+
+---
+
+## THE WINDOW AS FROZEN (s87 lead, merge `ff55f0f`) — read before you plan
+
+`publication_metrics` is **on main and frozen**. Consume it; never edit it.
+
+**`repos.publicationMetrics`** (`packages/db/src/repos/publication-metrics.ts`):
+- `append(ctx, {publicationId, metricLabel, metricValue, capturedAt})` →
+  `{row, created}`. **There is deliberately NO `platform` parameter**: the
+  repo reads it off the referenced publication under your tenant. That is
+  what keeps the denormalization honest (a metric can never claim a platform
+  its publication did not post to) and what walls the tenancy — a foreign or
+  unknown publication id throws `NotFoundError` rather than writing. Do not
+  try to pass one; do not add one.
+- **Idempotent on `(tenant, publication, metric_label, captured_at)`.** A tick
+  re-run inside the same window appends nothing and reports `created: false`.
+  Bucket your `capturedAt` deterministically — pass the clock in, never read
+  it in core — or you will write a new point on every tick.
+- Reads: `series(ctx, pubId, {metricLabel?})` (oldest first),
+  `latestPerLabel(ctx, pubId)`, `listForPlatform(ctx, platform, since)`.
+- **Metric appends emit NO events, by design** (the `source_metrics`
+  precedent — a measurement is not a state change the operator
+  reconstructs). Pinned by a test; do not add emissions.
+
+**The honesty rule is structural, and your drivers must hold it up:** there
+is no nullable `metric_value` and no "unavailable" flag. **A platform that
+cannot report a metric yields NO ROW for it** — absence is the entire way the
+Analytics surface says "not measured". Never append a 0 to mean "we could not
+ask"; that is the one lie this table could tell, and the schema is shaped so
+it stays unrepresentable. Your per-platform capability table in the wrap is
+what tells the surface which absences are permanent vs. permissioned.
+
+`platform` values are constrained to `SOCIAL_PLATFORMS` by a check
+constraint — there is no `youtube` key (no capability row, no driver).
+
+**Not yours in this window:** `create_runs` and everything in
+`packages/contracts/src/create-run.ts` belong to the `create-engine` lane.
