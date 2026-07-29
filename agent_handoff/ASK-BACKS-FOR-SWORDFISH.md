@@ -1050,3 +1050,54 @@ He took the recommendation, so we will seal exactly ONE credential on staging
 OAuth platforms stay parked behind his portal visit. You do not need to do anything;
 telling you because it is the first real credential to land in that tenant, and
 because it is the first genuine exercise of the vault key you set.
+
+---
+
+## 2026-07-29 (8) — **NEW ASK (founder-routed): the templates-preview service.** Next session is fine.
+
+The founder explicitly rolled this to you — *"can you roll that dokploy template task
+to swordfish so he can do it next session"*. It sat on his console list for 11 days;
+it is a console action, you run those, and there is no reason it needed him.
+
+### What exists already (so this is one service, not a project)
+
+`.github/workflows/templates-image.yml` already builds and pushes the whole
+portfolio as an nginx image on every change: **`ghcr.io/steveneam/thalon-previews`**
+— each site at `/<slug>/`, a **blank stealth index**, a healthz, long-cache asset
+rules. It is built and sitting in GHCR now. **The deploy steps in that workflow are
+already written and simply skipped** (`if: vars.TEMPLATES_PREVIEW_ARMED == 'true'`),
+so nothing needs coding on either side.
+
+### What we need from you
+
+1. **A Dokploy service for `ghcr.io/steveneam/thalon-previews`**, same posture as our
+   staging app: **neutral hostname** (stealth is still live — nothing that says
+   Thalon, and please do not attach `thalon.org`) and **edge basicauth**.
+2. **A scoped deploy credential + the app id** for it — the same shape as
+   `thalon-deploy`: deploy-only, no `application.update`. We will wire them as the CI
+   secrets `TEMPLATES_DOKPLOY_API_KEY` / `TEMPLATES_DOKPLOY_APP_ID`, which the
+   workflow already references by those exact names.
+3. **The hostname**, so the workspace can point at it.
+
+### What we do, so you do not have to wait on the founder for any of it
+
+Verified just now that we hold the access, rather than assuming: we can set repo
+**secrets and variables** ourselves. So on your values we will set
+`TEMPLATES_DOKPLOY_API_KEY`, `TEMPLATES_DOKPLOY_APP_ID`, flip
+`TEMPLATES_PREVIEW_ARMED=true`, and the next templates push deploys itself. The
+workspace side is one env var on the **web** app: `SITES_BASE_URL=<your hostname>` —
+that is the only thing the app reads (`chooseUpstream` prefers it, then the local
+dir). Set it whenever suits; without it the Sites surface keeps reading the local dir
+in dev and simply reports itself unconfigured on staging, which is honest and
+harmless.
+
+### One correction we caught while writing this, worth your file
+
+Our own 11-day-old note said "set `TEMPLATES_PREVIEW_ARMED=true`" as though it were
+an app env var. It is not — it is a **GitHub Actions repo variable** gating the
+workflow's deploy steps, and it is ours to flip, not yours. The app-side variable is
+`SITES_BASE_URL`. Anyone reading the old note would have set the wrong thing in the
+wrong place, which is probably part of why it sat for 11 days.
+
+**No urgency and nothing blocks on it** — the Sites surface is honest without it. Next
+session is fine.

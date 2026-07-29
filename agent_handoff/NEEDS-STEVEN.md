@@ -26,7 +26,3 @@
 
 - [2026-07-17] 💬 **B-crm.4 live outreach send — the door is built and deliberately disarmed, waiting on one stealth call.** Sending from a brand domain reveals the brand pre-launch. Three ways: accept that, use a neutral domain, or wait until launch. Whichever you pick also needs a Resend domain set up before the first send. Nothing degrades while this sits.
 - [2026-07-18] 🎬 **Wave 3 checkpoint is ripe — your sequencing.** The A+ animation candidates are queued: bloom-transition video · Orchard seasons-tree scroll · Wagtail scroll-dog. The visual arc HOLDS at 20 sites on your own call ("leave the landing pages at this for now"), so this is about whether the A+ family, B-sitegen, or THE LANDING goes next — not about fixing anything.
-
-## When you have ten minutes (optional, nothing depends on it)
-
-- [2026-07-18] 👀 **One console task left over from W-sites:** create the Dokploy templates-preview service (neutral hostname + edge auth) and set `TEMPLATES_PREVIEW_ARMED=true`. That gives the workspace Sites surface a live origin instead of reading the local dir in dev. The image already builds on every push, so this is the last mile. **Aged 11 days — say the word and I will ask swordfish to do it instead**, now that they run things on request.
