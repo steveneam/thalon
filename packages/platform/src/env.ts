@@ -40,6 +40,20 @@ const envSchema = z.object({
   MODEL_JUDGE_SCREEN: z.string().default("meta/llama-3.3-70b"),
   MODEL_JUDGE_FINAL: z.string().default("anthropic/claude-sonnet-4.5"),
   MODEL_EMBEDDING: z.string().default("openai/text-embedding-3-small"),
+  /**
+   * B-create.2 follow-through: the tier for `create.describe_reference` — the
+   * ONE call in this repo that hands a model an image. Deliberately NOT
+   * defaulted to `MODEL_DRAFT`: llama-3.3-70b is text-only (Meta's vision
+   * line at that generation is Llama 3.2 11B/90B Vision, a different id), so
+   * defaulting there would ship a default that provably cannot do the job
+   * and fail as an opaque provider error at describe time. The default is
+   * the model `MODEL_JUDGE_FINAL` already defaults to — vision-capable, and
+   * no new vendor enters the repo. Set it explicitly for a cheaper tier;
+   * whatever is set must accept an image content part, and a `claude-cli/*`
+   * alias never can (that transport is text-only and the driver refuses it
+   * in words rather than describing a picture it never saw).
+   */
+  MODEL_VISION: z.string().default("anthropic/claude-sonnet-4.5"),
   TENANT_DAILY_TOKEN_BUDGET: z.coerce.number().int().positive().default(2_000_000),
   /** Which tenant the dev web app operates as (slug). Real operator→tenant resolution (Clerk org mapping) is a later bucket; until then the operated-on tenant is runtime config, never code. */
   DEMO_TENANT_SLUG: z.string().default("self"),

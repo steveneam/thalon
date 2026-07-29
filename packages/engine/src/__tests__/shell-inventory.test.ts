@@ -48,6 +48,8 @@ const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"intel.dossier"', note: "B6.5 half-step — trend-card dossier (titles/angles/hook; G1 denylist gates before the wire; per-sweep ration TREND_DOSSIER_CARDS, default disarmed)" },
   { op: '"outreach.compose_email"', note: "B-crm.4 front half (s29) — draft-only outreach email from a lead brief; full judge gate downstream, NO send path" },
   { op: '"video.propose_edl_diff"', note: "B-ve.4 — agent-proposed EDL diff (measured ops only); core zod-validates + dry-applies, operator approves each op, apply rides the replay-verified save door" },
+  { op: '"create.describe_reference"', note: "B-create.2 — the reference-describe vision call (spec §Design/The engine): STORED image bytes → style/subject TEXT, so reference-role media informs generation without its bytes ever reaching a draft. The only call in this repo handed an image; MODEL_VISION tier. External + audio refs never reach it (core refuses before the guard)" },
+  { op: '"create.ai_edit"', note: "B-create.2 — the R8 AI edit (instruction → rewritten variant body). PROPOSES only: core writes nothing, the operator applies through the existing edit door, and the shared judge harness re-gates before the variant can leave the Composer" },
   { op: "`judge.${GATE_FOR_TIER[tier]}`", note: "B1.3 — G3 two-tier grounding (→ judge.g3_screen | judge.g3_final)" },
 ];
 
@@ -105,8 +107,8 @@ describe("shell inventory (B5.3 executable pin, SPINE §1)", () => {
 
   it("every withGatewayGuard call site carries a pinned operation (count matches — a new site with a reused label is still caught)", () => {
     const { ops, guardCallSites } = collectOperations();
-    // One guarded operation label per guarded call site: 12 string literals +
-    // the single judge template site = 13.
+    // One guarded operation label per guarded call site: 15 string literals +
+    // the single judge template site = 16.
     expect(guardCallSites).toBe(EXPECTED_SHELL_OPERATIONS.length);
     expect(ops.length).toBe(EXPECTED_SHELL_OPERATIONS.length);
   });

@@ -35,7 +35,10 @@ export function getGateway(): ReturnType<typeof createGateway> {
  * stronger model) is the FINAL gate; disagreement blocks the draft and queues
  * it for the operator. Never collapse the two onto one cheap model — the judge
  * is the safety mechanism (charter, ratified decision 2). `embedding` is B1.1's
- * tier (ingest's grounding-index embeddings).
+ * tier (ingest's grounding-index embeddings). `vision` is B-create.2's
+ * reference-describe tier — the only tier that must accept an image content
+ * part, which is why it is its own var rather than a reuse of `draft` (see
+ * MODEL_VISION's own note in env.ts).
  */
 export function modelTiers(env?: EnvSource) {
   const e = readEnv(env);
@@ -44,5 +47,6 @@ export function modelTiers(env?: EnvSource) {
     judgeScreen: e.MODEL_JUDGE_SCREEN,
     judgeFinal: e.MODEL_JUDGE_FINAL,
     embedding: e.MODEL_EMBEDDING,
+    vision: e.MODEL_VISION,
   };
 }

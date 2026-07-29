@@ -1,5 +1,11 @@
-import { isReferenceOnly, type MediaRef, type MediaRefEnvelope } from "@thalon/contracts";
-import { InvalidStateError } from "@thalon/db";
+import { isReferenceOnly, type MediaRef, type MediaRefEnvelope, type TenantCtx } from "@thalon/contracts";
+import { InvalidStateError, type Repos } from "@thalon/db";
+import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
+import { referenceDescribability } from "./reference-scope";
+import {
+  gatewayReferenceVisionDriver,
+  type ReferenceVisionCallDriver,
+} from "./shell/describe-reference";
 
 /**
  * B-create.2, the **reference-describe seam** (spec R4, §Design/The engine).
@@ -14,18 +20,23 @@ import { InvalidStateError } from "@thalon/db";
  * behind. Reference media reaching a draft's `mediaRefs`, the public-asset
  * door or a platform call is a licensing breach, not a cosmetic bug.
  *
- * **No gateway driver ships here, and that is structural rather than shy.**
- * The seam is an injectable `ReferenceVisionDriver` with a deterministic
- * fake; nothing in this lane can make a live vision call because nothing in
- * this lane constructs a real one. When the real driver lands it belongs in
- * a `shell/` folder, metered through `withGatewayGuard` under a NEW
- * operation label — which cannot merge without editing the shell-inventory
- * ratchet (`__tests__/shell-inventory.test.ts`). That edit is the deliberate,
- * review-visible act the ratchet exists to force, and it is not this lane's.
+ * **The real driver landed in `shell/describe-reference.ts`** (the lane this
+ * file's own predecessor named), metered from HERE — core meters the shell,
+ * as every other family does — under the operation label
+ * `create.describe_reference`, which is pinned in the shell-inventory
+ * ratchet (`__tests__/shell-inventory.test.ts`) and in SPINE §1.
  *
- * Until then a describe is honestly absent rather than faked: the run
- * proceeds, the reference stays attached, and the operator is told it was
- * not analysed (spec Error Behavior — degradation is non-blocking).
+ * The injectable `ReferenceVisionDriver` seam is UNCHANGED by that arrival,
+ * which is the point: a caller who hands over no driver still gets honest
+ * absence, and every test still injects the deterministic fake, so the suite
+ * stays keyless and networkless. A live call happens only when a caller
+ * explicitly builds `meteredReferenceVisionDriver` — and that constructor is
+ * the only thing in this module that can reach a gateway.
+ *
+ * A describe that cannot happen is honestly absent rather than faked: the
+ * run proceeds, the reference stays attached, and the operator is told it
+ * was not analysed WITH the reason (spec Error Behavior — degradation is
+ * non-blocking).
  */
 
 /* ------------------------------------------------------------------ */
@@ -70,6 +81,14 @@ export type ReferenceDescription =
 /** The sentence the surfaces show for an undescribed reference (spec Error Behavior, verbatim). */
 export const REFERENCE_NOT_ANALYSED = "reference attached, not yet analysed";
 
+/**
+ * The describability rule itself lives in `reference-scope.ts` — a pure
+ * module, because `plan.ts` counts against the same rule to price a run and
+ * must not import this file's gateway graph. Re-exported here so the seam's
+ * own consumers keep one import.
+ */
+export { referenceDescribability, type ReferenceDescribability } from "./reference-scope";
+
 /* ------------------------------------------------------------------ */
 /* Describing.                                                          */
 /* ------------------------------------------------------------------ */
@@ -97,6 +116,12 @@ export async function describeReference(
       status: "not_analysed",
       reason: `${REFERENCE_NOT_ANALYSED} — no vision driver is wired in this build`,
     };
+  }
+  // Before the driver, therefore before the guard: an undescribable ref
+  // costs nothing at all, not even a budget read.
+  const describable = referenceDescribability(media.ref);
+  if (!describable.ok) {
+    return { status: "not_analysed", reason: `${REFERENCE_NOT_ANALYSED} — ${describable.reason}` };
   }
   try {
     const output = await deps.driver({ ref: media.ref, ...(media.alt ? { alt: media.alt } : {}) });
@@ -158,6 +183,54 @@ export function renderReferenceBlock(
 ): string | undefined {
   const described = descriptions.flatMap((d) => (d.status === "described" ? [d.notes] : []));
   return described.length > 0 ? described.join("\n\n") : undefined;
+}
+
+/* ------------------------------------------------------------------ */
+/* Metering — core meters the shell (SPINE §1; amendment A2).           */
+/* ------------------------------------------------------------------ */
+
+export interface MeteredReferenceVisionDeps {
+  ctx: TenantCtx;
+  repos: Repos;
+  /** Overrides the tenant daily token budget cap (tests only; production reads TENANT_DAILY_TOKEN_BUDGET). */
+  capTokens?: number;
+  /** The raw call driver. Defaults to the live gateway one — pass a fake to exercise metering without a key. */
+  driver?: ReferenceVisionCallDriver;
+}
+
+/**
+ * Wraps a raw describe call in the ONE gateway choke point and hands back
+ * the plain `ReferenceVisionDriver` the seam above already takes: budget
+ * asserted before, usage recorded after, span traced — under the operation
+ * label **`create.describe_reference`**.
+ *
+ * This is the only constructor in the create module that can reach a
+ * gateway, and it is never called by `runCreate` itself: a caller wires it
+ * deliberately (`deps.reference.driver`), which is what keeps the whole
+ * suite keyless. Building it does NOT spend — `gatewayReferenceVisionDriver`
+ * resolves its model and store per call — so a caller may construct it once
+ * per run and describe zero references at no cost.
+ */
+export function meteredReferenceVisionDriver(
+  deps: MeteredReferenceVisionDeps,
+): ReferenceVisionDriver {
+  const raw = deps.driver ?? gatewayReferenceVisionDriver();
+  const capTokens = deps.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+  const model = modelTiers().vision;
+  return (request) =>
+    withGatewayGuard({
+      usage: {
+        assertWithinBudget: (o) => deps.repos.usageLedger.assertWithinBudget(deps.ctx, o),
+        recordUsage: (o) => deps.repos.usageLedger.record(deps.ctx, o),
+      },
+      capTokens,
+      model,
+      operation: "create.describe_reference",
+      call: async () => {
+        const out = await raw(request);
+        return { result: out.output, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
+      },
+    });
 }
 
 /**

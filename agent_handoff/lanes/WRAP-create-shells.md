@@ -170,7 +170,149 @@ through **one** function rather than two hand-rolled ones. `applyAiEdit`
 calls it when handed the run id (`createRunsRepo.recordPlan` is the existing
 write verb); without a run id it marks nothing and says so. No UI.
 
+**LEAD RULING (received mid-lane, both decisions APPROVED).** 1a: the
+`MODEL_VISION` deviation is accepted over the kickoff's literal wording —
+"the kickoff was wrong, since a default that provably cannot do the job is
+not a default"; keep `anthropic/claude-sonnet-4.5` and keep the `claude-cli/*`
+refusal wall. 1b: **ship the propose/apply subset as designed**, do NOT extend
+into `proprietary/judge` (moat file, outside the file set, weekly budget at
+90%). The lead is recording the Error-Behavior deviation in the APPROVED
+create-engine spec directly, naming option (a) as the closure path, so the
+spec and the code do not silently disagree. §3 and §5 below carry the two
+things the ruling asked me to state.
+
 ---
 
-*(§§2–5 — what shipped, the shell-inventory entries as merged, the
-judge-refusal semantics as test-pinned, gates — are written at lane close.)*
+## 2. What shipped
+
+| file | what |
+|---|---|
+| `create/shell/describe-reference.ts` *(new)* | The gateway vision driver. Reads STORED bytes content-address-verified, sends one `[image, text]` user message, returns `{style, subject}` + tokens. Three refusals before the gateway: `claude-cli/*` tier · non-stored ref · missing bytes; content-address mismatch is deliberately not caught. |
+| `create/shell/ai-edit.ts` *(new)* | The rewrite driver. Body + instruction + the platform's HARD ceiling → a new body, zod-validated at the boundary. Body is fenced from the instruction so a draft containing instruction-shaped text cannot read as the operator's ask. |
+| `create/shell/prompt-file.ts`, `create/shell/index.ts` *(new)* | The family's prompt reader (the house copy) and the shell barrel. |
+| `create/edit.ts` *(new)* | `aiEditDraft` (proposes, writes nothing) · `applyAiEdit` (lands through the existing edit door + re-judges) · `markVariantDiverged` (pure, R13). Second guard call site: `create.ai_edit`. |
+| `create/reference-scope.ts` *(new)* | `referenceDescribability` — ONE rule, its own module because its two callers may not share an import graph (see §4.2). |
+| `create/reference.ts` | The docblock its predecessor wrote for this lane, now true; the describability check before the driver; `meteredReferenceVisionDriver` — first guard call site, `create.describe_reference`. The injectable seam itself is UNCHANGED. |
+| `create/plan.ts` | `meteredCalls` now counts describe calls (spec's "plan-visible"). |
+| `platform/env.ts` + `gateway.ts` | The optional `MODEL_VISION` var and its `modelTiers()` entry — the one licensed exception, nothing more. |
+| `proprietary/prompts/create-{describe-reference,ai-edit}.v1.md` *(new)* | See §4.1 — a file-set extension, reported. |
+
+**Tests: 100 in `create/__tests__` (was 73), all keyless and networkless.**
+`plan` 37 · `run` 27 · `reference` 15 · `edit` 14 · `describe-reference` 7.
+
+## 3. The judge-refusal semantics AS TEST-PINNED *(lead ask i)*
+
+The propose half's guarantee is **stronger than the spec's and pinned
+unconditionally**, not only on the refusal branch. `edit.test.ts` carries a
+helper, `bodyHashUnchanged(fx, before)`, asserting both `body` and `bodyHash`
+against a re-read of the row, and it runs after EVERY `aiEditDraft` path:
+
+| path | assertion |
+|---|---|
+| a successful proposal | `bodyHashUnchanged` — the proposal exists only in the return value |
+| empty instruction | refused + `bodyHashUnchanged` |
+| shell declined (returned the body unchanged — the prompt file's own refusal convention) | refused, reason quotes the instruction back, + `bodyHashUnchanged` |
+| shell returned whitespace | refused + `bodyHashUnchanged` |
+| non-editable status | refused, **driver never called** (call count asserted `0`) + `bodyHashUnchanged` |
+
+**Red-checked, not assumed.** I made `aiEditDraft` land the edit through
+`approvals.record` and re-ran: **8 of 14 tests went red**, including every
+`bodyHashUnchanged` site. The probe was reverted. The shell-inventory ratchet
+was red-checked the same way (renamed one label → the set-drift test failed).
+
+The apply half is pinned as what it is: `applyAiEdit` swaps the body, writes
+one `edit_diffs` + one `eval_cases` row (`kind: "draft_edit"`, `origin:
+"edit_diff"` — an AI edit becomes an eval row by the same mechanism a hand
+edit does), re-judges through the shared harness, and re-queues. On a judge
+refusal it returns `blocked` with the reason verbatim (`"both g3 tiers
+failed"`) and **the applied body is on the draft** — the documented
+divergence from the spec's Error Behavior, carrying a comment at the
+assertion saying so, so it cannot drift back into looking intentional. Also
+pinned: the caller's judge drivers arrive intact (recording fakes, both tiers
+called exactly once — this module makes no judge call of its own); a stale
+proposal is refused rather than clobbering a newer hand edit; the edit is
+attributed to a non-human actor on the I4 events spine.
+
+## 4. Two file-set extensions, and one inherited red
+
+### 4.1 Files I touched outside the declared set — reported, each with cause
+
+1. **`proprietary/prompts/create-describe-reference.v1.md` + `create-ai-edit.v1.md` (NEW).** Every shell driver in this repo reads its prompt from `proprietary/prompts/` (SPINE §3.2: *prompts are data, never inline strings*) — there is no counter-example. Inlining two system prompts to stay inside the letter of the file set would break a documented invariant and skip the `prompt_version` convention. Both files are NEW and additive; the live lane is in `packages/engine/src/social/**`, so collision risk is nil.
+2. **`packages/engine/src/__tests__/gateway-boundary.test.ts`.** The shell-inventory ratchet's *sibling*, which the kickoff did not name: it allowlists which files may reach the gateway accessor, and it went red on my two new shell drivers — correctly, doing exactly its job. Adding them is the same deliberate, review-visible act the kickoff sent me to perform on the inventory list.
+3. **`packages/platform/src/__tests__/seams.test.ts`.** The direct test of `modelTiers()`, which I was licensed to change. Updated for the new `vision` key, plus one added assertion pinning that **the vision tier must not equal the draft tier** — so a future "collapse the duplicate default" tidy-up cannot quietly re-break 1a's whole point.
+
+### 4.2 A design note worth the lead's eye
+
+`referenceDescribability` lives in its own tiny module rather than in
+`reference.ts`, because `plan.ts` needs the same rule to price a run and
+`plan.ts` is pure by construction. Importing `reference.ts` would have pulled
+the gateway driver and `@thalon/db` into pure derivation's import graph;
+duplicating the predicate would let the cost preview drift from what the run
+actually does. One rule, one home, two importers.
+
+### 4.3 INHERITED RED — `npm run verify` cannot go green, and it is not this lane
+
+`tests/no-nul-in-source.test.ts` fails on `tests/repo-hygiene.test.ts`. **This
+is red on a clean tree** — I confirmed it by stashing every change in this
+lane and re-running. Two ratchets landed in the SAME commit (`e7a46a8`,
+s87 "the hygiene audit") contradict each other: `repo-hygiene.test.ts` uses a
+**raw NUL byte** as a join separator (`new Set(["AGENTS.md\0CLAUDE.md"])`, two
+sites), and `no-nul-in-source.test.ts` forbids NUL bytes in tracked source.
+
+The fix is one keystroke per site and provably behaviour-preserving: write the
+separator as the two-character **escape** `"\0"` instead of embedding the raw
+byte. The runtime string is identical; the file no longer contains byte 0x00.
+I did not apply it — `tests/` is outside my file set and this is the lead's
+call, per the same discipline as §1b.
+
+## 5. Queued follow-up — closing the Error-Behavior gap *(lead ask ii)*
+
+**Give the judge harness a way to grade a body that is not yet the draft's.**
+Today `runJudgePipeline` can only judge what is already persisted, and every
+verdict it writes is stamped with the draft's current `body_hash` — which is
+what makes I1 trustworthy and what makes "judge the candidate first"
+impossible from outside. The follow-up is a second, narrower entry beside it:
+hand it `{draft, candidateBody}`, get back the same pass/block verdict and
+reason, and write **no** `judge_results` row, because a verdict about text
+that is not on the draft has no honest hash to bind to.
+
+With that in place, `aiEditDraft` collapses back into the single call the
+spec describes: rewrite → grade the candidate → on a pass, land it through
+the existing edit door, whose own re-judge remains the I1 verdict of record;
+on a refusal, return the reason and touch nothing. The propose/apply split
+shipped here stays valid underneath it — apply becomes an internal step
+rather than a second call the Composer has to make — so this is an
+additive change, not a rewrite of what merged.
+
+Scope when it comes up: `proprietary/judge/src/pipeline.ts` (the new entry,
+sharing the gate sequence rather than copying it — a second copy of the gate
+ladder is the real risk here) and a handful of lines in `create/edit.ts`.
+
+## 6. What I deliberately did NOT build
+
+- **Any surface, route or Composer wiring** — B-create.3/.4, lead-gated.
+- **Media upload doors.**
+- **Persisting describe outcomes** beyond what `CreateRunResult` already
+  returns — a durable home is a window decision (create-engine wrap §6).
+- **Promoting `createVariantPlanSchema` into contracts** — window work.
+- **Anything in `social/**`** — the second lane is live there.
+- **Fetching external reference bytes.** Kickoff scope, and the licensing
+  decision behind it is not a lane's to make.
+- **The candidate-judge entry** — §5, on the lead's explicit ruling.
+
+## 7. Gates — recorded on exit code, in this worktree
+
+| gate | result |
+|---|---|
+| `npx vitest run --maxWorkers=2` (root, both lanes live) | **1 failed / 3073 passed / 9 skipped.** The single failure is §4.3's inherited NUL red, red on a clean tree. Every test in this lane's scope passes. |
+| `npm run typecheck` | **exit 0** (it caught two `totalForDay` signature errors vitest could not — the kickoff's warning earned its place) |
+| `npm run lint` | **exit 0** (8 pre-existing warnings, 0 errors) |
+
+`npm run verify` is `npm test && npm run typecheck && npm run lint`; its
+`npm test` is an unbounded vitest pool, which the kickoff bars while a second
+lane is live. The bounded run above is its exact equivalent. **It exits
+non-zero for one reason only: §4.3, which this lane did not cause and did not
+fix.** Never `pkill -f vitest`; never `npm install` in a worktree — neither
+was run.
+
+**The lead rebases/merges — this lane does not.**

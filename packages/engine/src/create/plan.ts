@@ -15,6 +15,7 @@ import {
   type PlatformRouting,
 } from "@thalon/contracts";
 import { z } from "zod";
+import { referenceDescribability } from "./reference-scope";
 
 /**
  * B-create.2, half one: **plan derivation — pure, and deliberately so.**
@@ -405,16 +406,25 @@ function deriveCostPreview(brief: CreateBrief, admittedCount: number): {
   meteredCalls: number;
   unestimated: string[];
 } {
-  const referenceCount = brief.media.filter((m) => m.role === "reference").length;
   // One generation call per admitted destination for a fan-out; the
   // single-draft families generate once whatever their destination count.
   const generationCalls = brief.family === "post" ? admittedCount : 1;
+  // "Plan-visible" (spec §Design/The engine) now that the describer is real:
+  // each DESCRIBABLE reference is exactly one metered
+  // `create.describe_reference` call, so it is a knowable number and must be
+  // stated rather than deferred to `unestimated`. Undescribable references
+  // (external — never fetched; audio — not a vision input) cost nothing at
+  // all: `referenceDescribability` refuses them before the guard, so
+  // counting them here would inflate the preview an operator budgets from.
+  const references = brief.media.filter((m) => m.role === "reference");
+  const describeCalls = references.filter((m) => referenceDescribability(m.ref).ok).length;
+  const undescribable = references.length - describeCalls;
   const unestimated = [
     "judge calls vary — a screen-tier refusal skips the final tier, so the gate costs one or two calls per draft",
   ];
-  if (referenceCount > 0) {
+  if (undescribable > 0) {
     unestimated.push(
-      `${referenceCount} reference image${referenceCount === 1 ? "" : "s"} to describe — priced by the vision driver, which is not wired in this build`,
+      `${undescribable} attached reference${undescribable === 1 ? " is" : "s are"} not describable (external references are never fetched; audio is not a vision input) — ${undescribable === 1 ? "it stays" : "they stay"} attached and unanalysed at no cost`,
     );
   }
   if (brief.family === "video") {
@@ -422,7 +432,7 @@ function deriveCostPreview(brief: CreateBrief, admittedCount: number): {
       "rendering the cut is a separate armed door and is not part of this run — its mint cost is not previewed here",
     );
   }
-  return { credits: 0, meteredCalls: generationCalls, unestimated };
+  return { credits: 0, meteredCalls: generationCalls + describeCalls, unestimated };
 }
 
 /** Every destination key an operator could legitimately name — the sentence in refusal #1 reads this. */

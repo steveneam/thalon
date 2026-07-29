@@ -350,7 +350,11 @@ describe("deriveCreatePlan — cost preview (R6)", () => {
     expect(plan.costPreview?.unestimated.some((line) => line.includes("render"))).toBe(true);
   });
 
-  it("names each reference it cannot price", () => {
+  it("COUNTS each describable reference — one describe call each, now that the describer is real", () => {
+    // "plan-visible" (spec §Design/The engine). Before the shell landed this
+    // was an `unestimated` line; a knowable number must be stated, and one
+    // metered `create.describe_reference` call per describable reference is
+    // knowable. One generation call (linkedin) + two describes = 3.
     const plan = deriveCreatePlan(
       brief({
         platforms: ["linkedin"],
@@ -360,11 +364,53 @@ describe("deriveCreatePlan — cost preview (R6)", () => {
             provenance: "operator",
             role: "reference",
           },
+          {
+            ref: { kind: "stored", sha256: "d".repeat(64), ext: "jpg" },
+            provenance: "operator",
+            role: "reference",
+          },
+          // `use` media rides the draft as itself and is never described.
+          {
+            ref: { kind: "stored", sha256: "e".repeat(64), ext: "jpg" },
+            provenance: "operator",
+            role: "use",
+          },
         ],
       }),
       CONNECTED,
     );
-    expect(plan.costPreview?.unestimated.some((line) => line.includes("reference"))).toBe(true);
+    expect(plan.costPreview?.meteredCalls).toBe(3);
+    expect(plan.costPreview?.unestimated.some((line) => line.includes("reference"))).toBe(false);
+  });
+
+  it("does NOT count references it will refuse to describe — the preview matches what the run spends", () => {
+    const plan = deriveCreatePlan(
+      brief({
+        platforms: ["linkedin"],
+        media: [
+          // External: never fetched. Audio: not a vision input. Both are
+          // refused before the guard, so both cost exactly nothing — counting
+          // them would inflate the number an operator budgets from.
+          {
+            ref: { kind: "external", url: "https://example.com/a.jpg" },
+            provenance: "operator",
+            role: "reference",
+          },
+          {
+            ref: { kind: "stored", sha256: "f".repeat(64), ext: "mp3" },
+            provenance: "operator",
+            role: "reference",
+          },
+        ],
+      }),
+      CONNECTED,
+    );
+    expect(plan.costPreview?.meteredCalls).toBe(1);
+    // Named, not silent: the operator attached two references and gets told
+    // why neither will be analysed (R10).
+    expect(
+      plan.costPreview?.unestimated.some((line) => line.includes("not describable")),
+    ).toBe(true);
   });
 });
 

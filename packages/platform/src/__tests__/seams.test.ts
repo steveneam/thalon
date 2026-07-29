@@ -72,10 +72,22 @@ describe("readEnv / modelTiers", () => {
       judgeScreen: "meta/llama-3.3-70b",
       judgeFinal: "anthropic/claude-sonnet-4.5",
       embedding: "openai/text-embedding-3-small",
+      vision: "anthropic/claude-sonnet-4.5",
     });
     expect(modelTiers({ MODEL_JUDGE_FINAL: "acme/strong-1" }).judgeFinal).toBe(
       "acme/strong-1",
     );
+    expect(modelTiers({ MODEL_VISION: "acme/sees-1" }).vision).toBe("acme/sees-1");
+  });
+
+  it("the vision tier does NOT default to the draft tier — the draft model is text-only", () => {
+    // B-create.2: `create.describe_reference` is the one call handed an
+    // image. Defaulting it to MODEL_DRAFT (llama-3.3-70b, text-only) would
+    // ship a default that provably cannot do the job and fail as an opaque
+    // provider error at describe time. Pinned so a future tidy-up that
+    // "collapses the duplicate default" cannot quietly re-break it.
+    const tiers = modelTiers({});
+    expect(tiers.vision).not.toBe(tiers.draft);
   });
 
   it("validates the per-tenant daily budget", () => {
