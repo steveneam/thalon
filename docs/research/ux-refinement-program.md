@@ -114,6 +114,71 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 | Rail sweep | all 15 with a rail | **DONE (2026-07-29)** | Calendar→Schedule + Analytics inserted. Rail-only match on the icon markup, so prose was never blind-replaced; `Profiles` cross-ref renamed by hand, `Calendar.dc.html` marked SUPERSEDED. Verified: 15 identical rails, zero rail overflow. |
 | The 16 verdicted sheets | — | **not started** | Pass 1 only after the D4 four land; they are law until amended, so each change needs a stated reason. |
 
+### The VIDEO arc — its own 3 passes (founder ask, 2026-07-29)
+
+> *"run the video / video feature / video dashboard / video editor pass the postiz
+> and mobbin mcp 3 times as well? i feel like the ux/ui and flow and visual of it
+> can be improved significantly, as well as the engine (see how postiz creates and
+> edits videos)"*
+
+**This is the biggest single surface area in the workspace and it gets its own
+track**, because it is four sheets plus an engine, not one surface:
+
+| piece | sheet / code | why it is here |
+|---|---|---|
+| Videos Overview | `Videos Overview.dc.html` | the list |
+| Video Dossier | `Video Dossier.dc.html` | the project page |
+| Video editor | `Videos.dc.html` (carries `data-screen-label="Video editor"`) | the 15th surface |
+| The engine | `packages/engine` video/render/EDL + `components/videos/editor*.tsx` (~1,900 lines) | **the founder named the ENGINE explicitly, not just the UI** |
+
+**Start from what is already known — do NOT re-audit from zero.** Two prior passes
+exist and their findings are still the baseline:
+- `docs/research/video-editor-audit-s78.md` — 36 confirmed findings, and the JOBS
+  table (of 27 jobs an operator would try: 8 worked, 4 dead doors, 15 no affordance).
+- s80/s81 moved it to **21 works · 0 dead doors · 5 no-affordance**, and the render
+  gate against `Videos.dc.html` from 38 drifted → 30 drifted / 9 within tolerance.
+- **5 jobs still have no affordance**, and 4 are one theme: compare two versions ·
+  save as a named variant · delete a version · check on a render after coming back.
+  The 5th is auditioning a take before swapping it.
+
+**The engine half — VERIFIED against their live API docs, 2026-07-29.** Postiz has
+**no video editor at all**: no timeline, no clip editing, no AI video generation,
+no Reels/Shorts-specific handling. It is a scheduler that posts a finished video.
+So "see how postiz creates and edits videos" cannot be answered by imitating an
+editor they do not have — **say that plainly in the memo instead of inventing one.**
+
+What they DO have is worth taking, and it is the *pipeline seam*, not the craft:
+**per-platform video settings as declared schema.** Their YouTube destination
+carries `title` · `thumbnail` · `tags` · `type` · `selfDeclaredMadeForKids`;
+TikTok carries `privacy_level` · `duet` · `stitch` · `comment` · `autoAddMusic` ·
+`brand_content_toggle`. That is exactly the shape the **Composer band** needs for a
+video destination, and it is the same D3 settings-schema idea we already took for
+text. **Concrete take: when Composer's pass runs, its per-platform band must have a
+VIDEO variant** — a cover/thumbnail control, a title distinct from the body, and
+the platform's own toggles — not just the character-fit line that suits text.
+
+For the editor craft itself the reference set is elsewhere. **Seeded 2026-07-29:**
+
+- [VEED · editor](https://mobbin.com/screens/98e80276-8843-4be7-af26-54759c2d7a98) — the closest structural match. Left icon rail (Media/Audio/Subtitles/Text/Elements/Transitions), player centre, **multi-track timeline colour-coded BY KIND** (video strip · Sound Wave · Subtitles · Voiceover · Image). Our editor has three plain blocks; this is the shape it should grow into.
+- [VEED · clip inspector](https://mobbin.com/screens/2717375a-b274-473b-970c-431596003769) — the selected clip's properties: Animations/Adjust, Speed (0.5–2× + Custom), volume, Fade Audio In/Out, then named "Magic Tools" each carrying a **credit badge**. That badge pattern matters for us: our copilot actions spend real metered calls, and a cost marker at the control is how an operator learns that before clicking, not after.
+- [Vimeo · editor](https://mobbin.com/screens/ef13a0bc-33a7-4740-90e3-e8f30b37cf54) + [presets](https://mobbin.com/screens/e2a78459-d055-482a-a3af-e24006b6f0ce) — timeline clips carry **frame thumbnails**; stock tiles carry duration badges; a minimal Split/Delete toolbar over the playhead.
+- **[Descript](https://mobbin.com/screens/edc52e73-c7dc-4275-b272-6de067e1e301) — THE IMPORTANT ONE, and it is a paradigm, not a widget.** Descript edits video **by editing its transcript**: the script is the primary surface, the timeline is secondary. **This maps onto Thalon better than any timeline reference does**, because our videos are GENERATED FROM BEATS — the beat text already is the script, and the render already follows it. An operator retiming a generated video by dragging pixels is fighting the model; editing the beat and re-rendering is the model. **Evaluate script-first as the editor's primary mode in pass 2**, with the timeline kept for the things text cannot express (music, exact cuts).
+
+**Every reference above puts frame thumbnails on its timeline clips. Ours are plain
+blocks — that is the first visual fix, and it is the same "thumbnails everywhere"
+note the founder has now made three times.**
+
+**Pass plan (same three lenses, video-scoped):**
+1. **Surface** — visual density and the render gate. The known drift is 30 rows;
+   the s80 finding was that most of it was ONE defect (the copilot band's 19px).
+2. **Flow** — Intel → Create → dossier → editor → Approve → Schedule. Where does a
+   video actually enter the publishing loop, and where does that path break?
+3. **State & button** — finish the 5 no-affordance jobs, and every control's
+   refused/empty/loading state.
+
+**Status: NOT STARTED.** Queued behind the D4 pass-1 sheets (Schedule, Composer,
+Channels), because those are half-done and leaving them half-done is worse.
+
 ## Open decisions (founder's, NOT closed by the blanket design approval)
 
 1. ~~Calendar → Schedule rename + Analytics joining the rail.~~ **RATIFIED and

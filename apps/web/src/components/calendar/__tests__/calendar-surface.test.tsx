@@ -2,7 +2,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CalendarSurface } from "@/components/calendar/calendar-surface";
 
 const push = vi.fn();
@@ -528,6 +528,27 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
    * carried waiting draft piled onto that fake day.
    */
   describe("today is the clock's, never the pager's", () => {
+    /**
+     * PIN THE CLOCK — the same disease, and the same fix, as the sweep-projection
+     * test above. These two assert on things that only exist at certain times of
+     * day: `.nowline` is drawn only when NOW falls inside the sheet's 06:00–21:00
+     * band, and the "+N more" carry count depends on which column is today. Run at
+     * 02:50 they both fail — which is exactly how they were found, on a merged-main
+     * verify that ran past midnight. Nothing about the product had changed.
+     *
+     * The block above already learned this ("a test whose verdict depends on what
+     * time somebody runs it is not measuring the product") and pinned itself; these
+     * two were left on the wall clock. `shouldAdvanceTime` keeps testing-library's
+     * async finds resolving.
+     */
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.setSystemTime(today(9, 0));
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     /** Three drafts that started waiting well before this week — the carry set. */
     const olderWaiting = [
       asset({ draftId: "w1", status: "queued", judgedAt: hoursAgo(24 * 20) }),
@@ -568,29 +589,45 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
    * s78 — "+N more" stated a quantity and did nothing. Its only disclosure
    * was a mouse-only `title`, so keyboard and touch had no route at all.
    */
+  /**
+   * PIN THE CLOCK — the fixtures below are 2–5 hours old, which only lands them all
+   * on ONE column when the run starts after ~05:00. Run at 02:52 they straddle
+   * yesterday and today, no column holds four, and the "+N more" control this test
+   * is about never renders. Found on a merged-main verify that ran past midnight;
+   * the product had not changed. Same fix as the two blocks above.
+   */
   it("+N more is a real control that opens the agenda at Needs-you scope", async () => {
-    seedPlan({
-      assets: [
-        asset({ draftId: "w1", status: "queued", judgedAt: hoursAgo(2) }),
-        asset({ draftId: "w2", status: "queued", judgedAt: hoursAgo(3) }),
-        asset({ draftId: "w3", status: "blocked", judgedAt: hoursAgo(4) }),
-        asset({ draftId: "w4", status: "queued", judgedAt: hoursAgo(5) }),
-      ],
-    });
-    const user = userEvent.setup();
-    render(<CalendarSurface />);
-    await screen.findByText("0 planned");
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(today(9, 0));
+    try {
+      seedPlan({
+        assets: [
+          asset({ draftId: "w1", status: "queued", judgedAt: hoursAgo(2) }),
+          asset({ draftId: "w2", status: "queued", judgedAt: hoursAgo(3) }),
+          asset({ draftId: "w3", status: "blocked", judgedAt: hoursAgo(4) }),
+          asset({ draftId: "w4", status: "queued", judgedAt: hoursAgo(5) }),
+        ],
+      });
+      const user = userEvent.setup();
+      render(<CalendarSurface />);
+      await screen.findByText("0 planned");
 
-    const more = screen.getByRole("button", { name: /Open all 4 waiting this week/ });
-    await user.click(more);
+      const more = screen.getByRole("button", { name: /Open all 4 waiting this week/ });
+      await user.click(more);
 
-    expect(screen.getByRole("button", { name: "Agenda" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Needs you" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    // All four are listed, not two plus a count.
-    expect(screen.getAllByText("needs you")).toHaveLength(4);
+      expect(screen.getByRole("button", { name: "Agenda" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: "Needs you" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      // All four are listed, not two plus a count.
+      expect(screen.getAllByText("needs you")).toHaveLength(4);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   /**
