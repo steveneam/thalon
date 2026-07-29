@@ -52,6 +52,34 @@
          placements each covered something that mattered (the band it explains, then
          the operator's own draft text); the third was measured, not eyeballed.
 
+     THE LAYOUT WAS REBUILT ON THE FOUNDER'S CALL (s86, mid-pass): "the preview needs
+     the bigger spot in the middle, and those information rows like visibility, first
+     comment etc can go to the right instead". He is right, and the reason is what the
+     operator is DOING: they write on the left, see the result in the middle, turn knobs
+     on the right. The preview had been the smallest of the three and it is the only one
+     that shows the thing being shipped. Three columns now: 330 / 522 / 300 at 1440, so
+     the preview is the widest object on the screen (measured: the post card is 494px,
+     within ~10% of LinkedIn's real feed width).
+       · THE JUDGE MOVED LEFT, beside the body. It names a denylist hit that is marked
+         IN the body — a gate that points at a word belongs next to the word.
+       · THE FIVE DESTINATIONS became a full-width band under the columns. "Will all
+         five take it?" is an at-a-glance question and it needed width more than any
+         single column did.
+       · EXPAND, on the preview head (his second message: "clicking on the preview
+         expands it into its own tab or large popout"). Both are right and they answer
+         different problems: the column gives the preview the biggest RESTING spot, and
+         the popout gives it TRUE platform width, which no column on a 1440 screen can.
+         The popout is drawn as its own state in pass 3 — one sheet shows one state, and
+         drawing it open here would hide the layout it is meant to sit inside.
+
+     STILL OPEN, AND IT IS A FLOW QUESTION, NOT A LAYOUT ONE (founder asked, s86: "i
+     assume that composer dashboard appears after you write in your prompt and click
+     generate right?"). Ground-truthed: TODAY the app runs Create → Generate → /app/approve
+     and there is NO composer route at all. So this sheet's "Create ›" breadcrumb asserts
+     a flow that is not built. Worse, a fan-out generates MANY drafts, so "the composer"
+     is ambiguous: one composer per draft opened from the Approve queue, or one straight
+     after Generate? That is a pass-2 decision and it is recorded, not quietly picked.
+
      MEASURED, not eyeballed: the right column overflowed by ~85px on the first cut —
      the action row AND the honesty caveat both sat below the 940 fold, i.e. the whole
      point of the pass was invisible. Judge copy went to single lines, the media to
@@ -69,8 +97,17 @@
       <helmet data-dc-atomics>
         <link rel="stylesheet" href="./theme.css" />
         <style>
-          .cmp-grid { flex: 1; display: grid; grid-template-columns: 1fr 402px; gap: 14px; align-items: stretch; min-height: 0; }
-          .cmp-left { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+          /* THREE COLUMNS (founder, s86: "the preview needs the bigger spot in the
+             middle, and those information rows like visibility, first comment etc can
+             go to the right instead"). He is right, and the reason is what the operator
+             is actually doing: they WRITE on the left, SEE the result in the middle,
+             and TURN KNOBS on the right. The preview was the smallest of the three and
+             it is the only one that shows the thing being shipped.
+             Measured at 1440: 330 + 12 + 438 + 12 + 300 = the content width, so the
+             preview column is the widest on the screen. */
+          .cmp-grid { flex: 1; display: grid; grid-template-columns: 330px 1fr 300px; gap: 12px; align-items: stretch; min-height: 0; }
+          .cmp-left { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+          .cmp-mid { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
           /* The editor takes the free space; the band sits under it at its own
              height. That is the Buffer grammar and it is also why this column
              never grows a dead gap between the body and the settings. */
@@ -84,10 +121,12 @@
           .ptab.on { background: var(--n-300); color: var(--n-1000); }
 
           .band { flex: none; display: flex; flex-direction: column; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; }
-          .fld { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-top: 1px solid var(--n-400); font-size: 13px; }
+          /* Stacked, because a 128px label column inside a 300px rail leaves 170px for
+             the control. Label above value costs one line and buys the whole width. */
+          .fld { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 7px 12px; border-top: 1px solid var(--n-400); font-size: 13px; }
           .fld:first-of-type { border-top: none; }
-          .fld dt { color: var(--n-900); width: 128px; flex: none; font-size: 12.5px; }
-          .fld dd { flex: 1; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; min-width: 0; }
+          .fld dt { color: var(--n-900); font-size: 11px; font-family: var(--font-data); }
+          .fld dd { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; max-width: 100%; }
           .ctl { display: inline-flex; align-items: center; gap: 7px; height: 27px; padding: 0 10px; border: 1px solid var(--n-500); border-radius: var(--r-ctl); background: var(--n-200); font-size: 12.5px; }
           .ctl.ghosted { opacity: 0.5; }
           .toggle { width: 30px; height: 17px; border-radius: var(--r-pill); background: var(--act); position: relative; flex: none; }
@@ -96,10 +135,16 @@
           .toggle.off::after { right: auto; left: 2px; background: var(--n-800); }
 
           /* The fit line: a counter WITH its refusal reason. */
-          .fitline { display: flex; align-items: center; gap: 11px; padding: 10px 16px; border-top: 1px solid var(--n-400); background: var(--n-bg); }
+          /* The five destinations, as ONE full-width band under the columns. Per-platform
+             detail lives on the active tab; this is the at-a-glance answer to "will all
+             five take it?", and it needs the width more than any single column does. */
+          .fitband { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; }
+          .fitline { display: flex; flex-direction: column; gap: 3px; padding: 8px 12px; border-left: 1px solid var(--n-400); background: var(--n-bg); }
+          .fitline:first-child { border-left: none; }
+          .fit-top { display: flex; align-items: center; gap: 7px; }
           .fit-count { font-family: var(--font-data); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--n-1000); flex: none; }
-          .fit-why { font-size: 12px; color: var(--n-900); }
-          .fit-bar { width: 108px; flex: none; }
+          .fit-why { font-size: 11px; color: var(--n-900); line-height: 1.35; }
+          .fit-bar { width: 100%; flex: none; }
 
           /* Right column. */
           .cmp-right { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
@@ -201,84 +246,15 @@
             </div>
 
             <div class="cmp-grid">
-              <!-- ── left: one body, then the per-platform band ── -->
+
+              <!-- ── LEFT: your words, and what is wrong with them. The judge sits HERE,
+                        beside the body, because the denylist hit it names is marked IN
+                        the body — a gate that points at a word belongs next to the word. ── -->
               <div class="cmp-left">
                 <div class="body-box">
                   Deterministic video changed what we can promise. Every beat is a build step, so the same prompt renders the same film twice — and a failed take names the beat that failed instead of the whole render. Nothing here is <span class="hit">guaranteed</span> to be faster on the first pass, but the second pass is free.
                 </div>
 
-                <div style="display:flex;align-items:center;gap:10px;position:relative">
-                  <div class="ptabs">
-                    <span class="ptab on"><span class="dot" style="background:var(--warn)"></span>LinkedIn</span>
-                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Facebook</span>
-                    <span class="ptab"><span class="dot" style="background:var(--err)"></span>Instagram</span>
-                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Bluesky</span>
-                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Blog</span>
-                  </div>
-                  <div style="flex:1"></div>
-                  <!-- THE SHEET'S ONE OPEN TOOLTIP. The fact stays on the surface (1
-                       refuses, 1 needs a trim — that changes the next click); the
-                       schema research behind it collapses into ⓘ. Opens LEFT so it
-                       never covers the tabs or the band it describes. -->
-                  <span class="t-label" style="display:inline-flex;align-items:center;gap:6px">settings come from each platform's schema · 1 refuses, 1 needs a trim <span class="info">i</span></span>
-                  <div class="tip" style="right:0;top:calc(100% + 8px)">
-                    <span class="tip-h">WHY THE BAND CHANGES PER TAB</span>
-                    Each platform declares its own settings, so the band is generated, never hand-written. A VIDEO destination declares more: YouTube wants a title, a thumbnail and a made-for-kids answer; TikTok wants privacy, duet and stitch. Those live on their own tabs.
-                  </div>
-                </div>
-
-                <div class="band">
-                  <div class="fld"><dt>Post as</dt><dd><span class="ctl">Steven · member</span><span class="t-label">the only seat this token grants</span></dd></div>
-                  <div class="fld"><dt>Visibility</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
-                  <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label">off — links in the body do not cost reach on this platform</span></dd></div>
-                  <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="mtools"><span class="mtool" title="Crop"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4.5 1.5v10h10"></path><path d="M1.5 4.5h10v10"></path></svg></span><span class="mtool" title="Alt text"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 6.4 3.5h1.2l3.4 9M4.6 9.6h5.2M13 3.5v9"></path></svg></span><span class="mtool" title="Replace"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5A5.5 5.5 0 0 1 12 4.2"></path><path d="M12.4 1.9v2.6H9.8"></path><path d="M13.5 9.5A5.5 5.5 0 0 1 4 11.8"></path><path d="M3.6 14.1v-2.6h2.6"></path></svg></span><span class="mtool danger" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 4.5h9M6.5 4.5V3h3v1.5M5 4.5l.6 8h4.8l.6-8"></path></svg></span></span><span class="t-label">40s cut · native upload</span></dd></div>
-                  <!-- VIDEO variant of the band (the Postiz settings-schema finding,
-                       applied where it is TRUE): a video destination declares more than
-                       a text one, and LinkedIn's video-specific setting is its cover
-                       frame. It is drawn as frames, because the cover is the only frame
-                       most of the feed will ever see. -->
-                  <div class="fld"><dt>Cover frame</dt><dd><span class="frames"><span class="frame on"><span>0:00</span></span><span class="frame"><span>0:12</span></span><span class="frame"><span>0:24</span></span><span class="frame"><span>0:36</span></span></span><span class="t-label">the frame the feed stops on</span></dd></div>
-                  <div class="fld"><dt>Link</dt><dd><span class="ctl">thalon.example/build-step-video</span><span class="ctl ghosted">preview card ▾</span></dd></div>
-                  <div class="fld"><dt>Alt text</dt><dd><span class="ctl">“A build step renders a beat”</span><span class="t-label">travels with the video on every destination that accepts it</span></dd></div>
-                  <div class="fld"><dt>Who can comment</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
-                  <div class="fitline">
-                    <span class="fit-count">2,412 / 3,000</span>
-                    <div class="fit-bar bar-trough"><div class="bar-fill" style="width:80%;background:var(--ok)"></div></div>
-                    <span class="fit-why">Fits. The body posts whole — no cut.</span>
-                    <div style="flex:1"></div>
-                    <span class="t-data">LinkedIn</span>
-                  </div>
-                  <div class="fitline">
-                    <span class="fit-count">2,412 / 63,206</span>
-                    <div class="fit-bar bar-trough"><div class="bar-fill" style="width:6%;background:var(--ok)"></div></div>
-                    <span class="fit-why">Fits, with room to spare. Native video upload.</span>
-                    <div style="flex:1"></div>
-                    <span class="t-data">Facebook</span>
-                  </div>
-                  <div class="fitline" style="background:var(--err-subtle)">
-                    <span class="fit-count" style="color:var(--err)">refuses</span>
-                    <span class="fit-why" style="color:var(--err)">Instagram takes no text-only post. Attach an image or video, or drop Instagram from this run.</span>
-                    <div style="flex:1"></div>
-                    <span class="t-data">Instagram</span>
-                  </div>
-                  <div class="fitline" style="background:var(--warn-subtle)">
-                    <span class="fit-count" style="color:var(--warn)">312 / 300</span>
-                    <div class="fit-bar bar-trough"><div class="bar-fill" style="width:100%;background:var(--warn)"></div></div>
-                    <span class="fit-why" style="color:var(--warn)">Over by 12. The last sentence is what gets cut — trim it here, not on the platform.</span>
-                    <div style="flex:1"></div>
-                    <span class="t-data">Bluesky</span>
-                  </div>
-                  <div class="fitline">
-                    <span class="fit-count">no limit</span>
-                    <span class="fit-why">Your own site. The body becomes the article; the film becomes the hero.</span>
-                    <div style="flex:1"></div>
-                    <span class="t-data">Blog</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- ── right: the gate, the hint, and an honest preview ── -->
-              <div class="cmp-right">
                 <div class="card">
                   <div class="card-head">
                     <span class="t-title">Judge</span>
@@ -297,19 +273,19 @@
                     <span class="jmark" style="color:var(--ok)">✓</span>
                     <div style="min-width:0">
                       <div style="font-weight:500">Grounding · 2 of 2</div>
-                      <div class="excerpt" style="white-space:normal">Every factual claim ties to a provided source. <a href="#">View sources</a></div>
+                      <div class="excerpt" style="white-space:normal">Every claim ties to a source. <a href="#">View</a></div>
                     </div>
                   </div>
                   <div class="jrow">
                     <span class="jmark" style="color:var(--ok)">✓</span>
                     <div style="min-width:0">
                       <div style="font-weight:500">Voice · within profile v4</div>
-                      <div class="excerpt" style="white-space:normal">Concrete, no hype. No claim beyond the sources.</div>
+                      <div class="excerpt" style="white-space:normal">Concrete, no hype.</div>
                     </div>
                   </div>
                   <div class="jrow" style="background:var(--n-bg)">
                     <span class="jmark" style="color:var(--n-800)">·</span>
-                    <span class="t-label" style="font-size:11.5px">It gates — it never rewrites. Nothing here edits your words.</span>
+                    <span class="t-label" style="font-size:11.5px">It gates — it never rewrites.</span>
                   </div>
                 </div>
 
@@ -318,24 +294,38 @@
                     <span class="t-title">Discoverability</span>
                     <span class="pill pill-warn">3 of 4</span>
                     <div style="flex:1"></div>
-                    <span class="t-label">warns — never blocks</span>
+                    <span class="t-label">warns</span>
                   </div>
-                  <div style="padding:11px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+                  <div style="padding:9px 12px;display:flex;flex-wrap:wrap;gap:5px;align-items:center">
                     <span class="term-chip primary">AI</span>
                     <span class="term-chip">content automation</span>
                     <span class="term-chip">build-step video</span>
                     <span class="term-chip miss">deterministic video · missing</span>
-                    <span class="t-label" style="width:100%;margin-top:2px;font-size:11.5px">The judge does not care; the search index will.</span>
                   </div>
                 </div>
+              </div>
+
+              <!-- ── CENTRE, AND THE BIGGEST COLUMN: what you are actually shipping.
+                        The tabs sit ON this column because switching a destination changes
+                        the PREVIEW first and the settings second. ── -->
+              <div class="cmp-mid">
+                  <div class="ptabs">
+                    <span class="ptab on"><span class="dot" style="background:var(--warn)"></span>LinkedIn</span>
+                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Facebook</span>
+                    <span class="ptab"><span class="dot" style="background:var(--err)"></span>Instagram</span>
+                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Bluesky</span>
+                    <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Blog</span>
+                  </div>
 
                 <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0">
                   <div class="card-head">
                     <span class="t-title">Preview · LinkedIn</span>
                     <div style="flex:1"></div>
-                    <a class="card-link" href="#">Bluesky →</a>
+                    <!-- Even the widest column is narrower than LinkedIn's real feed, so
+                         "exactly how it will look" lives one click away, at true width. -->
+                    <span class="btn btn-ghost btn-sm" style="gap:6px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5H13.5V6.5"></path><path d="M6.5 13.5H2.5V9.5"></path><path d="M13.5 2.5 9 7"></path><path d="M2.5 13.5 7 9"></path></svg>Expand</span>
                   </div>
-                  <div style="padding:11px 14px 12px;display:flex;flex-direction:column;gap:8px;min-height:0">
+                  <div style="padding:11px 13px 12px;display:flex;flex-direction:column;gap:8px;min-height:0">
                     <div class="pv">
                       <div class="pv-head">
                         <div class="pv-av"></div>
@@ -350,7 +340,7 @@
                         <span class="t-label" style="font-size:10.5px">feed cuts here · 210 characters</span>
                       </div>
                       <div style="font-size:12.5px;line-height:1.5"><span class="tag">#deterministicvideo</span> <span class="tag">#contentautomation</span></div>
-                      <div class="pv-media">
+                      <div class="pv-media" style="height:186px">
                         <span class="play"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 3.6v8.8L12.4 8z"></path></svg></span>
                         <span class="dur">0:40</span>
                       </div>
@@ -365,6 +355,64 @@
                   </div>
                 </div>
               </div>
+
+              <!-- ── RIGHT: the knobs for THIS destination, moved off the centre so the
+                        preview could have it (founder's call). ── -->
+              <div class="cmp-right" style="position:relative">
+                <div class="band">
+                  <div class="fld"><dt>Post as</dt><dd><span class="ctl">Steven · member</span></dd></div>
+                  <div class="fld"><dt>Visibility</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
+                  <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label" style="font-size:11px">off — links cost no reach here</span></dd></div>
+                  <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="mtools"><span class="mtool" title="Crop"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4.5 1.5v10h10"></path><path d="M1.5 4.5h10v10"></path></svg></span><span class="mtool" title="Alt text"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 6.4 3.5h1.2l3.4 9M4.6 9.6h5.2M13 3.5v9"></path></svg></span><span class="mtool" title="Replace"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5A5.5 5.5 0 0 1 12 4.2"></path><path d="M12.4 1.9v2.6H9.8"></path><path d="M13.5 9.5A5.5 5.5 0 0 1 4 11.8"></path><path d="M3.6 14.1v-2.6h2.6"></path></svg></span><span class="mtool danger" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 4.5h9M6.5 4.5V3h3v1.5M5 4.5l.6 8h4.8l.6-8"></path></svg></span></span></dd></div>
+                  <div class="fld"><dt>Cover frame</dt><dd><span class="frames"><span class="frame on"><span>0:00</span></span><span class="frame"><span>0:12</span></span><span class="frame"><span>0:24</span></span><span class="frame"><span>0:36</span></span></span></dd></div>
+                  <div class="fld"><dt>Link</dt><dd><span class="ctl">thalon.example/build-step-video</span></dd></div>
+                  <div class="fld"><dt>Alt text</dt><dd><span class="ctl">“A build step renders a beat”</span></dd></div>
+                  <div class="fld"><dt>Who can comment</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
+                </div>
+                <!-- The wrapper is what the tooltip anchors to. Anchoring it to the
+                     COLUMN instead put `top:100%` at the column's full height and threw
+                     the tooltip off the bottom of the screen — caught in the render. -->
+                <div style="display:flex;align-items:center;gap:6px;padding:0 2px;position:relative">
+                  <span class="t-label" style="font-size:11px">generated from this platform's schema</span>
+                  <span class="info">i</span>
+                <!-- THE SHEET'S ONE OPEN TOOLTIP, in the rail's own free space below the
+                     band — it covers nothing, which is the whole rule. -->
+                <div class="tip" style="right:0;top:calc(100% + 8px)">
+                  <span class="tip-h">WHY THIS RAIL CHANGES PER TAB</span>
+                  Each platform declares its own settings, so the rail is generated, never hand-written. A VIDEO destination declares more — YouTube wants a title, a thumbnail, a made-for-kids answer; TikTok wants privacy, duet, stitch — on their own tabs.
+                </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- All five destinations at a glance — the band needs the width more than
+                 any single column does. -->
+            <div class="fitband">
+                <div class="fitline">
+                  <div class="fit-top"><span class="fit-count">2,412 / 3,000</span><div style="flex:1"></div><span class="t-data">LinkedIn</span></div>
+                  <div class="fit-bar bar-trough"><div class="bar-fill" style="width:80%;background:var(--ok)"></div></div>
+                  <span class="fit-why">Fits. The body posts whole — no cut.</span>
+                </div>
+                <div class="fitline">
+                  <div class="fit-top"><span class="fit-count">2,412 / 63,206</span><div style="flex:1"></div><span class="t-data">Facebook</span></div>
+                  <div class="fit-bar bar-trough"><div class="bar-fill" style="width:6%;background:var(--ok)"></div></div>
+                  <span class="fit-why">Fits, with room to spare.</span>
+                </div>
+                <div class="fitline" style="background:var(--err-subtle)">
+                  <div class="fit-top"><span class="fit-count" style="color:var(--err)">refuses</span><div style="flex:1"></div><span class="t-data">Instagram</span></div>
+                  
+                  <span class="fit-why" style="color:var(--err)">No text-only post. Attach media, or drop it from this run.</span>
+                </div>
+                <div class="fitline" style="background:var(--warn-subtle)">
+                  <div class="fit-top"><span class="fit-count" style="color:var(--warn)">312 / 300</span><div style="flex:1"></div><span class="t-data">Bluesky</span></div>
+                  <div class="fit-bar bar-trough"><div class="bar-fill" style="width:100%;background:var(--warn)"></div></div>
+                  <span class="fit-why" style="color:var(--warn)">Over by 12. The last sentence gets cut — trim it here.</span>
+                </div>
+                <div class="fitline">
+                  <div class="fit-top"><span class="fit-count">no limit</span><div style="flex:1"></div><span class="t-data">Blog</span></div>
+                  
+                  <span class="fit-why">Your own site. The body becomes the article.</span>
+                </div>
             </div>
 
           </div>
