@@ -181,6 +181,11 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 
 ## THE COVERAGE LEDGER — every surface, by his definition of done
 
+> **Structure home: `docs/workspace/spec.md` (s87, DRAFT awaiting his verdict)** —
+> the acts, per-surface contracts, flows, gaps, and the four-wave passthrough
+> plan live THERE; this ledger stays the pass RECORD. A wave that moves no row
+> here did not happen.
+
 All 21 sheets in `docs/research/mock-sheets/`, each a named row. **research** =
 has Postiz/Mobbin research been run against this surface (the definition of
 done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.

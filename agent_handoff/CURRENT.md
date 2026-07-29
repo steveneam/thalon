@@ -99,6 +99,20 @@ six lead items) → the two APPROVED specs → `docs/research/ux-refinement-prog
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
+**⚠ SUPERSEDING DIRECTIVE (s87 late): THE WORKSPACE SPEC.** His ask, near-verbatim:
+use the last remaining usages to plan/spec/structure ALL the surfaces together, in
+the context of research, for coherence and to find what's missing — BEFORE more
+mock/build/wiring. **Delivered: `docs/workspace/spec.md` (DRAFT — his verdict is
+the s88 gate).** The acts · per-surface contracts (all 21 sheets vs 14 routes) ·
+8 named flows · **10 gaps found** (no onboarding owner · no Settings sheet ·
+Library/Transcription two-routes-one-idea · Channels/Integrations/Settings
+three-name overlap · the Calendar rename · notifications · global search · Runs
+stale vs create_runs · Board-as-route question · Wave-0 sheet retirement) · the
+four-wave Postiz+Mobbin passthrough plan · the verdict bundle (§8, six calls).
+**The s88 plan below still holds but now queues BEHIND his verdict + W1** —
+recommended: lanes HOLD until the Jul 31 reset; remaining budget goes to W1
+research (Approve · Dashboard · Runs — the highest-stakes unresearched surfaces).
+
 **THE s88 PLAN — prepared end to end on his word** (*"ok plan and spec for the work
 lanes next session so they can just start building"*):
 
