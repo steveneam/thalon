@@ -1,6 +1,6 @@
 # The Video arc — plan + spec (design passes × remaining engine)
 
-> **Status: DRAFT, awaiting founder verdict.** Authored s86 beside
+> **Status: APPROVED — founder, 2026-07-29 s86 close ("approve, wrap up and prepare for next session"). Both specs approved in the same word.** Authored s86 beside
 > `docs/create-engine/spec.md` on the founder's ask (*"did you do the same plan and
 > spec for the Video arc?"* — the answer was no, so this is it). It unifies what is
 > already built and audited into one flow map so the video sessions aren't lost.

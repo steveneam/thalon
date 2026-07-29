@@ -192,6 +192,27 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s87 — TWO LANES PROPOSED (specs APPROVED; launch needs the founder's one-word GO)
+
+**Both specs are APPROVED** (founder, s86 close: "approve, wrap up and prepare for
+next session"): `docs/create-engine/spec.md` + `docs/video-arc/spec.md`. The lane
+launches themselves still need his fresh GO at the s87 opener (lead-drives-lanes:
+approval covers exactly the named runs — the spec approval named the SPECS).
+
+**Boot order:** (0) self-check · (1) **lead runs ONE contract window** — `create_runs`
++ media `role` + `platform_routing` + D3 settings slice (incl. video variant) +
+`publication_metrics` — frozen, verified, pushed · (2) founder GO → launch both via
+`scripts/launch-lane.sh`, Opus-5 pin.
+
+| lane | kickoff | scope | disjointness |
+|---|---|---|---|
+| **create-engine** | `agent_handoff/lanes/KICKOFF-create-engine.md` | B-create.2: plan derivation + run orchestrator + reference-describe seam over the existing family engines. Zero UI, zero spend. | `packages/engine/src/create/**` (new) |
+| **analytics-spine** | `agent_handoff/lanes/KICKOFF-analytics-spine.md` | D2 spine: metrics verb (seam decision REPORTED first) + tick + `publication_metrics` repos + read-model. Honest per-platform gaps; tick not scheduled. | `packages/engine/src/social|integrations/**` + `db/repos/publication-metrics*` |
+
+Neither touches sheets (rule 7; both backend-only — nothing to design). Lead-serial
+track: Videos Overview + Dossier Mobbin sweep → video sheets pass 1 (video spec §Build
+order), Create sheets per his sequencing. Not-picked lanes + reasons: handoff s86 close.
+
 ## Sprint 9 / s86 — TWO LANES, **BOTH MERGED** (founder GO on record: "A + transcription-free")
 
 **CLOSED.** Launched at the s86 boot as approved, both wrapped, both merged through

@@ -1,6 +1,6 @@
 # B-create — the Create engine + Create dashboard
 
-> **Status: DRAFT, awaiting founder verdict.** Authored s86 on the founder's direct
+> **Status: APPROVED — founder, 2026-07-29 s86 close ("approve, wrap up and prepare for next session"). Both specs approved in the same word.** Authored s86 on the founder's direct
 > brief (2026-07-29): *"the Create needs its own feature and engine because everything
 > depends on it … try to have an idea of the structure, flow, UX/UI, engine, then run it
 > through mobbin-mcp … then have a rough spec on how you want it all to connect so that

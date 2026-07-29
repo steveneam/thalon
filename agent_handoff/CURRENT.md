@@ -2,9 +2,12 @@
 
 ## Stamp
 
-2026-07-29 (session 86, syd4 — **zero credit spend**; Opus 5). **PASS 1 OF THE UX
-PROGRAMME IS COMPLETE ON THE D4 FOUR, BOTH APPROVED LANES MERGED, AND ALL FOUR SHEETS
-ARE ON THE CANVAS BYTE-IDENTICAL.** Final verify on merged main: **2840 passed /
+2026-07-29 (session 86, syd4 — **zero credit spend**; Opus 5 → Fable 5 for the spec
+close). **BOTH SPECS APPROVED AT THE CLOSE** (founder: "approve, wrap up and prepare
+for next session") — **`docs/create-engine/spec.md` + `docs/video-arc/spec.md` are the
+charters of record** for the Create engine and the Video arc. Earlier the same
+session: **PASS 1 OF THE UX PROGRAMME COMPLETE ON THE D4 FOUR, BOTH s86 LANES MERGED,
+ALL FOUR SHEETS ON THE CANVAS BYTE-IDENTICAL.** Final verify on merged main: **2840 passed /
 9 skipped, 0 lint errors**. Tree clean, pushed. Zero posts.
 
 **THE FOUNDER STEERED THREE TIMES MID-SESSION AND ALL THREE LANDED.**
@@ -76,29 +79,22 @@ weakening the ratchet exists to prevent.
 
 ## Resume prompt (session 87, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s86 finished pass 1 on the D4 four, merged both approved lanes,
-and synced the canvas. **s87 = the VIDEO ARC, and the two build tasks pass 1 exposed.**
+**Resume · Thalon** — s86 finished pass 1 on the D4 four, merged both s86 lanes,
+synced the canvas, and closed with **BOTH SPECS APPROVED**: `docs/create-engine/spec.md`
+(Create engine · wizard · media roles · routing · the Composer un-orphaned as the
+run-scoped checkpoint, master+forks variant model, density doctrine) and
+`docs/video-arc/spec.md` (V1–V10 · script-first as a pass-2 GATE · the Create↔Video
+joins incl. `waterfall/` as Repurpose). **s87 = the boot sequence at the bottom of
+this file: contract window → founder GO → the two lanes → lead-serial video sweep.**
 
-**Read first:** CLAUDE.md → this file → **`docs/research/ux-refinement-program.md`**
-(the programme's memory: per-surface status, cited references, open decisions, the
-working loop) → `docs/research/mock-sheets/README.md` §Proposals.
+**Read first:** CLAUDE.md → this file → **the two APPROVED specs** →
+`docs/research/ux-refinement-program.md` (per-surface status, cited references, the
+working loop) → COORDINATION.md §s87.
 
-**Lead-serial, cannot be delegated (founder rule — design is lead-direct):**
-1. **THE VIDEO ARC** — his standing ask, four pieces (Videos Overview · Video Dossier ·
-   the editor · the ENGINE). Start from the s78 audit + s80/s81 results, **do NOT
-   re-audit**. Known: 5 jobs still have no affordance, 4 of them one theme (compare two
-   versions · save as a named variant · delete a version · check on a render after
-   coming back). **Postiz has no video editor** — take their per-platform video SETTINGS
-   schema, not an editor they do not have; craft references are VEED/Vimeo/**Descript**,
-   and Descript's script-first paradigm is the one that fits beat-generated video.
-2. **The Composer POPOUT state** (his ask, deferred by design): preview at true platform
-   width, drawn as its own state in pass 3.
-
-**Founder decisions waiting, both surfaced by this session's work:**
-- **Where does Composer live in the flow?** Per-draft from Approve, or one after
-  Generate? There is no composer route today at all. Programme file, open decision 3.
-- **The app-side rail rename** — the product still says Calendar while the spec says
-  Schedule. Build task, needs its own go.
+**Answered this session (do not reopen):** the Composer flow question — Create →
+Generate → Composer (run-scoped) → Approve, per-draft re-entry secondary; specced and
+approved. **Still open, founder's call when he wants:** the app-side Calendar →
+Schedule rename (build task, own go) · the Composer POPOUT state (pass 3, in spec).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run doctor` ·
@@ -175,7 +171,29 @@ he asked for (incorporated / deferred-with-trigger / rejected, per source).
 per his ruling, scoped (apps/web + landing keep the rule), re-arm trigger written into
 the programme file.
 
-## Next action — s87 RECOMMENDED PLAN (refined at the s86 close, founder-directed)
+## Next action — s87 BOOT SEQUENCE ("gogogo" runs this, in order)
+
+1. **Self-check** (tmux `thalon` · `pg_isready` · both user units w/
+   `XDG_RUNTIME_DIR=/run/user/$(id -u)` · `git status` + this stamp · `npm run
+   doctor` · needs-steven hygiene script).
+2. **Read first:** CLAUDE.md → this file → **`docs/create-engine/spec.md` +
+   `docs/video-arc/spec.md` (both APPROVED — the charters)** →
+   `docs/research/ux-refinement-program.md` → COORDINATION.md §s87.
+3. **Lead: the contract window** (one window, both lanes' schemas): `create_runs` +
+   media `role` + `platform_routing` + D3 settings slice (incl. video variant) +
+   `publication_metrics`. Verify, commit, push — frozen.
+4. **Founder GO for the lane launches** (the specs are approved; the RUNS still need
+   his word — lead-drives-lanes: approval covers exactly the named runs). **KICKOFFS
+   ARE WRITTEN AND COMMITTED:** `agent_handoff/lanes/KICKOFF-create-engine.md` +
+   `agent_handoff/lanes/KICKOFF-analytics-spine.md`. On GO: prep worktrees
+   (`worktree-setup.ps1 -WorktreePath …`), launch via `scripts/launch-lane.sh`.
+5. **Lead-serial while lanes run:** Videos Overview + Dossier Mobbin sweep → video
+   sheets pass 1 (video spec §Build order 1) — the only surfaces with zero banked
+   references. Create sheets follow his sequencing.
+6. **Budget:** weekly limit was 84% mid-s86 (resets Jul 31 11pm UTC) — the window +
+   launches are cheap; the design sweep is the heavier spend. Check headroom first.
+
+### The superseded s86-close plan (kept for context)
 
 **TWO SPECS await his verdict at the opener** (approve / edit / feedback each):
 `docs/create-engine/spec.md` + `docs/video-arc/spec.md`. Late s86 refinements already
