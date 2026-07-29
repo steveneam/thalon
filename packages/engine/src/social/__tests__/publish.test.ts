@@ -28,6 +28,7 @@ import {
   createInstagramDriver,
   createLinkedInDriver,
   createXDriver,
+  InstagramPublicMediaUrlRequiredError,
   InstagramTextOnlyUnsupportedError,
   SocialDriverApiError,
 } from "../drivers";
@@ -564,5 +565,230 @@ describe("rung f media (B-pub.3): mediaRefs load verified and travel to the driv
       NOW,
     );
     expect(publisher.calls[0].media).toBeUndefined();
+  });
+});
+
+describe("B-ig.1: the public-address leg — admitted narrowly, revoked immediately", () => {
+  const PUBLIC_URL = "https://site.example/assets/feed.jpg";
+
+  async function mediaDraft(f: Fixture, store: LocalObjectStore, key: string) {
+    const bytes = Buffer.from(`fake-jpeg-${key}`);
+    const ref = objectKey("social-media", sha256Hex(bytes), "jpg");
+    await store.put(ref, bytes);
+    const draft = await f.repos.drafts.create(f.ctx, {
+      fanoutRunId: f.runId,
+      sourceId: f.sourceId,
+      platform: "instagram",
+      body: POST_BODY,
+      format: "post",
+      generationKey: `${f.ctx.tenantId}:${key}`,
+      meta: { mediaRefs: [{ ref, contentType: "image/jpeg", altText: "A drawing" }] },
+    });
+    await approve(f.ctx, f.repos, draft);
+    return { draft, ref };
+  }
+
+  /** Records every admission and revocation so ordering is assertable. */
+  function admitter(opts: { grant?: boolean } = {}) {
+    const admitted: Array<{ draftId: string; platform: string; ref: string; contentType: string }> =
+      [];
+    const revoked: string[] = [];
+    return {
+      admitted,
+      revoked,
+      async admitPublicMedia(request: {
+        draftId: string;
+        platform: string;
+        ref: string;
+        contentType: string;
+      }) {
+        admitted.push(request);
+        if (opts.grant === false) return null;
+        return {
+          url: PUBLIC_URL,
+          async revoke() {
+            revoked.push(request.ref);
+          },
+        };
+      },
+    };
+  }
+
+  it("a URL-publishing driver gets the address, and it is revoked as soon as the call returns", async () => {
+    const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+    const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+    const store = new LocalObjectStore(root);
+    try {
+      const { draft, ref } = await mediaDraft(f, store, "ig-admit-1");
+      const seat = admitter();
+      const fetchImpl: typeof fetch = async (url) =>
+        new Response(
+          JSON.stringify({ id: String(url).endsWith("/media_publish") ? "media-9" : "container-1" }),
+          { status: 200 },
+        );
+      const driver = createInstagramDriver({
+        accessToken: "tok",
+        igUserId: "178414",
+        fetchImpl,
+      });
+
+      const { publication } = await publishApprovedDraft(
+        {
+          ctx: f.ctx,
+          repos: f.repos,
+          resolvePublisher: () => driver,
+          objectStore: store,
+          admitPublicMedia: seat.admitPublicMedia,
+        },
+        { draftId: draft.id, platform: "instagram" },
+        NOW,
+      );
+
+      // Admission is scoped to this draft, this platform, this ref.
+      expect(seat.admitted).toEqual([
+        { draftId: draft.id, platform: "instagram", ref, contentType: "image/jpeg" },
+      ]);
+      // …and it did not outlive the publish call.
+      expect(seat.revoked).toEqual([ref]);
+      expect(publication.externalPostId).toBe("media-9");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a FAILED publish still revokes — a refused post never leaves an image public", async () => {
+    const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+    const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+    const store = new LocalObjectStore(root);
+    try {
+      const { draft, ref } = await mediaDraft(f, store, "ig-admit-2");
+      const seat = admitter();
+      const fetchImpl: typeof fetch = async () =>
+        new Response(JSON.stringify({ error: { message: "unreachable image_url" } }), {
+          status: 400,
+        });
+      const driver = createInstagramDriver({ accessToken: "tok", igUserId: "178414", fetchImpl });
+
+      const rejection = await publishApprovedDraft(
+        {
+          ctx: f.ctx,
+          repos: f.repos,
+          resolvePublisher: () => driver,
+          objectStore: store,
+          admitPublicMedia: seat.admitPublicMedia,
+        },
+        { draftId: draft.id, platform: "instagram" },
+        NOW,
+      ).catch((err: Error) => err);
+
+      expect(rejection).toBeInstanceOf(SocialDriverApiError);
+      expect(seat.revoked).toEqual([ref]);
+      expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a byte-UPLOADING driver never widens the gate: the seam is not even consulted", async () => {
+    const f = await setup();
+    const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+    const store = new LocalObjectStore(root);
+    try {
+      const bytes = Buffer.from("fake-jpeg-linkedin");
+      const ref = objectKey("social-media", sha256Hex(bytes), "jpg");
+      await store.put(ref, bytes);
+      const draft = await f.repos.drafts.create(f.ctx, {
+        fanoutRunId: f.runId,
+        sourceId: f.sourceId,
+        platform: "linkedin",
+        body: POST_BODY,
+        format: "post",
+        generationKey: `${f.ctx.tenantId}:ig-admit-3`,
+        meta: { mediaRefs: [{ ref, contentType: "image/jpeg" }] },
+      });
+      await approve(f.ctx, f.repos, draft);
+      const seat = admitter();
+      // The fake publisher declares nothing — the default, i.e. "uploads bytes".
+      const publisher = createFakeSocialPublisher();
+
+      await publishApprovedDraft(
+        {
+          ctx: f.ctx,
+          repos: f.repos,
+          resolvePublisher: () => publisher,
+          objectStore: store,
+          admitPublicMedia: seat.admitPublicMedia,
+        },
+        { draftId: draft.id, platform: "linkedin" },
+        NOW,
+      );
+
+      expect(seat.admitted).toEqual([]);
+      expect(publisher.calls[0].media?.[0].publicUrl).toBeUndefined();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("an UNWIRED seam grants no address — the driver refuses honestly and nothing is recorded", async () => {
+    const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+    const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+    const store = new LocalObjectStore(root);
+    try {
+      const { draft } = await mediaDraft(f, store, "ig-admit-4");
+      // No admitPublicMedia dep at all — the un-defaulted-seam posture.
+      const driver = createInstagramDriver({
+        accessToken: "tok",
+        igUserId: "178414",
+        fetchImpl: async () => {
+          throw new Error("no network call may happen");
+        },
+      });
+
+      const rejection = await publishApprovedDraft(
+        { ctx: f.ctx, repos: f.repos, resolvePublisher: () => driver, objectStore: store },
+        { draftId: draft.id, platform: "instagram" },
+        NOW,
+      ).catch((err: Error) => err);
+
+      expect(rejection).toBeInstanceOf(InstagramPublicMediaUrlRequiredError);
+      expect(await f.repos.socialPublications.listForDraft(f.ctx, draft.id)).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a refused admission (null) is the same fail-closed answer as no seam at all", async () => {
+    const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+    const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+    const store = new LocalObjectStore(root);
+    try {
+      const { draft } = await mediaDraft(f, store, "ig-admit-5");
+      const seat = admitter({ grant: false });
+      const driver = createInstagramDriver({
+        accessToken: "tok",
+        igUserId: "178414",
+        fetchImpl: async () => {
+          throw new Error("no network call may happen");
+        },
+      });
+
+      const rejection = await publishApprovedDraft(
+        {
+          ctx: f.ctx,
+          repos: f.repos,
+          resolvePublisher: () => driver,
+          objectStore: store,
+          admitPublicMedia: seat.admitPublicMedia,
+        },
+        { draftId: draft.id, platform: "instagram" },
+        NOW,
+      ).catch((err: Error) => err);
+
+      expect(rejection).toBeInstanceOf(InstagramPublicMediaUrlRequiredError);
+      expect(seat.revoked).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

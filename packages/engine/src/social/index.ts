@@ -58,6 +58,8 @@ export {
 } from "./registry";
 export {
   publishApprovedDraft,
+  type AdmitPublicMediaRequest,
+  type PublicMediaAdmission,
   type PublishApprovedDraftDeps,
   type PublishApprovedDraftInput,
   type PublishApprovedDraftResult,
@@ -68,6 +70,8 @@ export {
   createLinkedInDriver,
   createXDriver,
   FACEBOOK_GRAPH_VERSION,
+  INSTAGRAM_GRAPH_VERSION,
+  InstagramPublicMediaUrlRequiredError,
   InstagramTextOnlyUnsupportedError,
   LINKEDIN_VERSION,
   productionSocialDrivers,

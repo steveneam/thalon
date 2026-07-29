@@ -61,6 +61,46 @@ export interface PublishApprovedDraftDeps {
   resolvePublisher(platform: SocialPlatform): SocialPublisher;
   /** Media bytes source (B-pub.3) — defaults to the platform store (the deploy.ts convention); tests inject. */
   objectStore?: ObjectStore;
+  /**
+   * B-ig.1: the PUBLIC-ADDRESS seam, for the one driver family that
+   * publishes media by URL instead of by upload (Instagram's `/media`
+   * container; see registry `needsPublicMediaUrl`). Given a draft's media
+   * ref, it makes those bytes reachable anonymously and hands back the
+   * absolute URL plus its revocation.
+   *
+   * Deliberately OPTIONAL and deliberately un-defaulted, exactly like
+   * `resolvePublisher`: an unwired seam grants no address, so the driver
+   * refuses honestly and NOTHING is ever made public by accident. It is
+   * called only when the resolved publisher declared the need, so a
+   * byte-uploading platform never widens the public-asset gate at all.
+   */
+  admitPublicMedia?(request: AdmitPublicMediaRequest): Promise<PublicMediaAdmission | null>;
+}
+
+/** What the door knows about one image when it asks for a public address. */
+export interface AdmitPublicMediaRequest {
+  /** The approved draft being published — the admission's audit key and its scope. */
+  draftId: string;
+  /** The platform the address is being opened for — admission is never platform-blind. */
+  platform: SocialPlatform;
+  /** The draft's content-addressed media ref, verbatim (`social-media/<sha256>.<ext>`). */
+  ref: string;
+  /** The ref's declared image/* type, as the draft carries it. */
+  contentType: string;
+}
+
+/** A granted address and the way to take it back. */
+export interface PublicMediaAdmission {
+  /** Absolute URL the platform's servers fetch anonymously. */
+  url: string;
+  /**
+   * Withdraw the admission. The door calls this the moment the platform
+   * call returns — success OR failure — so the address is public for one
+   * API call and no longer. Implementations MUST NOT reject: a revoke that
+   * throws would mask the publish outcome, so the mechanism's own expiry is
+   * the crash backstop, not this call.
+   */
+  revoke(): Promise<void>;
 }
 
 /**
@@ -142,15 +182,48 @@ export async function publishApprovedDraft(
   // (f) only now: platform call → ledger, exactly once. The row snapshots
   // what actually went out (external id + judged-body hash) at post time;
   // a raced duplicate surfaces the repo's DuplicatePublicationError LOUD.
-  const media = await loadDraftMedia(deps, draft);
-  const receipt = await publisher.publish({
-    draftId: draft.id,
-    text: draft.body,
-    media,
-    // The platform's own cadence block rides along (D1): per-tenant posting
-    // settings reach the driver without a second config read.
-    settings: cadence,
-  });
+  const loaded = await loadDraftMedia(deps, draft);
+  const media = loaded.length > 0 ? loaded.map((entry) => entry.media) : undefined;
+
+  // B-ig.1: the public-address leg, opened as late and as narrowly as it
+  // can be. Only a driver that DECLARED it publishes by URL gets here, only
+  // the refs this draft actually carries are admitted, and the admission is
+  // revoked the instant the platform call returns — the image is reachable
+  // for one API call, not for as long as the post exists.
+  const admissions: PublicMediaAdmission[] = [];
+  if (publisher.needsPublicMediaUrl && deps.admitPublicMedia) {
+    for (const entry of loaded) {
+      const admission = await deps.admitPublicMedia({
+        draftId: draft.id,
+        platform,
+        ref: entry.ref,
+        contentType: entry.media.contentType,
+      });
+      if (!admission) continue;
+      admissions.push(admission);
+      entry.media.publicUrl = admission.url;
+    }
+  }
+
+  let receipt;
+  try {
+    receipt = await publisher.publish({
+      draftId: draft.id,
+      text: draft.body,
+      media,
+      // The platform's own cadence block rides along (D1): per-tenant posting
+      // settings reach the driver without a second config read.
+      settings: cadence,
+    });
+  } finally {
+    // Always, on both paths — a refused publish must not leave an image
+    // public. Swallowed on purpose: a revoke failure must never replace the
+    // publish's own error (the operator needs THAT one), and the admission
+    // mechanism's expiry is what closes the gate if this call cannot.
+    for (const admission of admissions) {
+      await admission.revoke().catch(() => {});
+    }
+  }
   const publication = await repos.socialPublications.record(ctx, {
     draftId: draft.id,
     platform,
@@ -203,16 +276,28 @@ const mediaRefsSchema = z
   )
   .max(1);
 
+/**
+ * One loaded image, still paired with the REF it came from. B-ig.1 keeps the
+ * address the B-pub.3 loader used to drop: drivers still receive bytes only
+ * (they never touch the object store), but the door needs the ref to ask for
+ * a public URL on behalf of the one platform that publishes by address.
+ */
+interface LoadedDraftMedia {
+  /** The content-addressed ref, verbatim — the door's key into the public-asset seam. */
+  ref: string;
+  media: SocialPostMedia;
+}
+
 async function loadDraftMedia(
   deps: PublishApprovedDraftDeps,
   draft: Draft,
-): Promise<SocialPostMedia[] | undefined> {
+): Promise<LoadedDraftMedia[]> {
   const raw = (draft.meta as { mediaRefs?: unknown }).mediaRefs;
-  if (raw === undefined || raw === null) return undefined;
+  if (raw === undefined || raw === null) return [];
   const refs = mediaRefsSchema.parse(raw);
-  if (refs.length === 0) return undefined;
+  if (refs.length === 0) return [];
   const store = deps.objectStore ?? getObjectStore();
-  const media: SocialPostMedia[] = [];
+  const loaded: LoadedDraftMedia[] = [];
   for (const entry of refs) {
     const bytes = await getContentAddressed(store, entry.ref);
     if (!bytes) {
@@ -221,7 +306,10 @@ async function loadDraftMedia(
         `draft "${draft.id}" media artifact "${entry.ref}" is missing from the object store — a broken content-address invariant, never a silent text-only post`,
       );
     }
-    media.push({ bytes, contentType: entry.contentType, altText: entry.altText });
+    loaded.push({
+      ref: entry.ref,
+      media: { bytes, contentType: entry.contentType, altText: entry.altText },
+    });
   }
-  return media;
+  return loaded;
 }

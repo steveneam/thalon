@@ -19,6 +19,8 @@ export { blueskyLinkFacets, createBlueskyDriver, type BlueskyDriverConfig } from
 export { createFacebookDriver, FACEBOOK_GRAPH_VERSION, type FacebookDriverConfig } from "./facebook";
 export {
   createInstagramDriver,
+  INSTAGRAM_GRAPH_VERSION,
+  InstagramPublicMediaUrlRequiredError,
   InstagramTextOnlyUnsupportedError,
   type InstagramDriverConfig,
 } from "./instagram";

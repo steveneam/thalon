@@ -7,11 +7,14 @@ import {
   createLinkedInDriver,
   createXDriver,
   FACEBOOK_GRAPH_VERSION,
+  INSTAGRAM_GRAPH_VERSION,
+  InstagramPublicMediaUrlRequiredError,
   InstagramTextOnlyUnsupportedError,
   LINKEDIN_VERSION,
   productionSocialDrivers,
   productionSocialPublisherResolver,
   SocialDriverApiError,
+  SocialTokenExpiredError,
 } from "../drivers";
 import { isRefusingSocialPublisher, resolveSocialPublisher, type SocialPostInput } from "../registry";
 
@@ -248,11 +251,52 @@ describe("createFacebookDriver (Graph API Page feed post)", () => {
   });
 });
 
-describe("createInstagramDriver (the honesty case — text-only has no IG form)", () => {
-  it("publish refuses with the typed media-required error — a PublishRefusedError, never infrastructure failure", async () => {
-    const driver = createInstagramDriver({ accessToken: TOKEN, igUserId: "17841400000000000" });
+describe("createInstagramDriver (B-ig.1: the two-step container flow, and the refusals it did NOT delete)", () => {
+  const IG_USER_ID = "17841400000000000";
+  const PUBLIC_URL = "https://site.example/assets/" + "a".repeat(64) + ".jpg";
+  const IG_MEDIA_INPUT: SocialPostInput = {
+    ...INPUT,
+    media: [
+      {
+        bytes: Buffer.from("fake-jpeg-bytes"),
+        contentType: "image/jpeg",
+        altText: "Three-panel horse drawing",
+        publicUrl: PUBLIC_URL,
+      },
+    ],
+  };
+
+  function igDriver(routes: (url: string) => Response) {
+    const { seen, fetchImpl } = capture(routes);
+    return {
+      seen,
+      driver: createInstagramDriver({
+        accessToken: TOKEN,
+        igUserId: IG_USER_ID,
+        fetchImpl,
+        sleep: async () => {},
+      }),
+    };
+  }
+
+  /** The happy two-step: /media answers a container id, /media_publish answers the media id. */
+  function twoStep(url: string): Response {
+    if (url.endsWith("/media")) {
+      return new Response(JSON.stringify({ id: "container-1" }), { status: 200 });
+    }
+    if (url.endsWith("/media_publish")) {
+      return new Response(JSON.stringify({ id: "media-9" }), { status: 200 });
+    }
+    throw new Error(`unexpected endpoint: ${url}`);
+  }
+
+  it("the TEXT-ONLY refusal survives the media path — the platform constraint did not go away", async () => {
+    // This test is the honesty case's ratchet: deleting it is how a future
+    // change quietly starts posting captions with no picture.
+    const driver = createInstagramDriver({ accessToken: TOKEN, igUserId: IG_USER_ID });
     expect(driver.platform).toBe("instagram");
-    expect(driver.name).toBe("instagram-text-refusal");
+    expect(driver.name).toBe("instagram-media-publish");
+    expect(driver.needsPublicMediaUrl).toBe(true);
 
     const rejection = await driver.publish(INPUT).catch((err) => err);
     expect(rejection).toBeInstanceOf(InstagramTextOnlyUnsupportedError);
@@ -262,6 +306,109 @@ describe("createInstagramDriver (the honesty case — text-only has no IG form)"
     );
     expect((rejection as InstagramTextOnlyUnsupportedError).draftId).toBe(INPUT.draftId);
     expect((rejection as Error).message).toContain("requires image or video media");
+    expect((rejection as Error).message).not.toContain(TOKEN);
+  });
+
+  it("an image with NO public URL refuses too — never the caption alone, and never a network call", async () => {
+    const { seen, driver } = igDriver(() => {
+      throw new Error("no call may be made");
+    });
+    // MEDIA_INPUT carries bytes but no publicUrl — the door could not admit it.
+    const rejection = await driver.publish(MEDIA_INPUT).catch((err) => err);
+    expect(rejection).toBeInstanceOf(InstagramPublicMediaUrlRequiredError);
+    expect(rejection).toBeInstanceOf(PublishRefusedError);
+    expect((rejection as InstagramPublicMediaUrlRequiredError).refusal).toBe(
+      "public_media_url_unavailable",
+    );
+    expect((rejection as Error).message).toContain("never accepts uploaded bytes");
+    expect((rejection as Error).message).not.toContain(TOKEN);
+    expect(seen).toHaveLength(0);
+  });
+
+  it("publishes by ADDRESS: /media takes image_url + verbatim caption, /media_publish takes the creation_id", async () => {
+    const { seen, driver } = igDriver(twoStep);
+    const receipt = await driver.publish(IG_MEDIA_INPUT);
+
+    expect(seen).toHaveLength(2);
+    const [container, publish] = seen;
+    expect(container.url).toBe(
+      `https://graph.facebook.com/${INSTAGRAM_GRAPH_VERSION}/${IG_USER_ID}/media`,
+    );
+    const containerBody = new URLSearchParams(container.init.body as string);
+    // The address IS the payload — the bytes are never uploaded anywhere.
+    expect(containerBody.get("image_url")).toBe(PUBLIC_URL);
+    expect(containerBody.get("caption")).toBe(INPUT.text);
+    expect(containerBody.get("alt_text")).toBe("Three-panel horse drawing");
+    // The credential rides the Authorization header, never the URL or body.
+    expect(headersOf(container).Authorization).toBe(`Bearer ${TOKEN}`);
+    expect(container.url).not.toContain(TOKEN);
+    expect(container.init.body as string).not.toContain(TOKEN);
+
+    expect(publish.url).toBe(
+      `https://graph.facebook.com/${INSTAGRAM_GRAPH_VERSION}/${IG_USER_ID}/media_publish`,
+    );
+    expect(new URLSearchParams(publish.init.body as string).get("creation_id")).toBe("container-1");
+
+    // The id is the PLATFORM's — the published media id, not the container.
+    expect(receipt.externalPostId).toBe("media-9");
+    expect(receipt.meta).toMatchObject({
+      igUserId: IG_USER_ID,
+      creationId: "container-1",
+      apiVersion: INSTAGRAM_GRAPH_VERSION,
+    });
+    // No permalink is invented (ADR 0002) — IG returns one only from a separate GET.
+    expect(receipt.meta?.permalink).toBeUndefined();
+  });
+
+  it("altText absent → alt_text is simply not sent (never an empty string)", async () => {
+    const { seen, driver } = igDriver(twoStep);
+    await driver.publish({
+      ...IG_MEDIA_INPUT,
+      media: [{ ...IG_MEDIA_INPUT.media![0], altText: undefined }],
+    });
+    expect(new URLSearchParams(seen[0].init.body as string).has("alt_text")).toBe(false);
+  });
+
+  it("a container failure stops the flow — media_publish is never reached", async () => {
+    const { seen, driver } = igDriver((url) =>
+      url.endsWith("/media")
+        ? new Response(JSON.stringify({ error: { message: "The image_url is not reachable" } }), {
+            status: 400,
+          })
+        : twoStep(url),
+    );
+    const err = await apiError(driver.publish(IG_MEDIA_INPUT));
+    expect(err.status).toBe(400);
+    expect(err.message).toContain("not reachable");
+    expect(seen).toHaveLength(1);
+  });
+
+  it("a 2xx container without a creation id is refused rather than treated as posted", async () => {
+    const { seen, driver } = igDriver((url) =>
+      url.endsWith("/media") ? new Response(JSON.stringify({}), { status: 200 }) : twoStep(url),
+    );
+    const err = await apiError(driver.publish(IG_MEDIA_INPUT));
+    expect(err.message).toContain("without a creation id");
+    expect(seen).toHaveLength(1);
+  });
+
+  it("a 2xx publish without a media id is refused — and names the orphaned container for triage", async () => {
+    const { driver } = igDriver((url) =>
+      url.endsWith("/media_publish")
+        ? new Response(JSON.stringify({}), { status: 200 })
+        : twoStep(url),
+    );
+    const err = await apiError(driver.publish(IG_MEDIA_INPUT));
+    expect(err.message).toContain("without a media id");
+    expect(err.message).toContain("container-1");
+  });
+
+  it("a dead token surfaces as the typed refresh signal, not a post refusal", async () => {
+    const { driver } = igDriver(
+      () => new Response(JSON.stringify({ error: { message: "Session expired" } }), { status: 401 }),
+    );
+    const rejection = await driver.publish(IG_MEDIA_INPUT).catch((err) => err);
+    expect(rejection).toBeInstanceOf(SocialTokenExpiredError);
     expect((rejection as Error).message).not.toContain(TOKEN);
   });
 });
@@ -318,12 +465,12 @@ describe("productionSocialDrivers (assembly — extras decide which factories ex
     expect(resolveSocialPublisher("linkedin", env, drivers).name).toBe("linkedin-rest-posts");
     expect(resolveSocialPublisher("x", env, drivers).name).toBe("x-v2-create-post");
     expect(resolveSocialPublisher("facebook", env, drivers).name).toBe("facebook-page-feed");
-    expect(resolveSocialPublisher("instagram", env, drivers).name).toBe("instagram-text-refusal");
+    expect(resolveSocialPublisher("instagram", env, drivers).name).toBe("instagram-media-publish");
     // TikTok stays behind the ladder with no driver to resolve.
     expect(resolveSocialPublisher("tiktok", env, drivers).name).toBe("disarmed");
   });
 
-  it("an armed instagram is structurally armed yet still refuses every publish with the typed media error", async () => {
+  it("an armed instagram still refuses a TEXT-ONLY publish with the typed media error", async () => {
     const env = {
       ...FULL_EXTRAS,
       SOCIAL_INSTAGRAM_ACCESS_TOKEN: TOKEN,
