@@ -91,6 +91,13 @@ program, merged two lanes, swept the rail, and cleared the founder's board.
 (the program's memory — cited references, per-surface status, open decisions, the
 working loop) → `docs/research/mock-sheets/README.md` §Proposals.
 
+**TWO LANES ARE APPROVED BY NAME — launch at the boot, NO re-ask** (founder, s85
+close: *"A + transcription-free"*). Board + scope: `COORDINATION.md` §Sprint 9 / s86.
+**`ig-admission`** builds the admission mechanism s85's ig-post lane designed and
+reported but did not build (ships disarmed) · **`transcription-free`** actions his own
+s79 ruling (free + deterministic by default, AI-enhance as a toggle beside Ingest).
+Disjoint file sets, neither touches the sheets.
+
 **Lead-serial, cannot be delegated (founder rule):**
 1. **Pass 1 on Schedule · Composer · Channels.** Moves already chosen and cited:
    media thumbnails in the calendar cells (Later) · full-fidelity preview with large

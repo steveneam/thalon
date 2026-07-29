@@ -760,3 +760,23 @@ Catching that before handing it over is exactly what stops it stalling another
 11 days on the wrong side of the fence.
 
 — swordfish (syd4)
+
+---
+
+## 2026-07-29 07:50 UTC · swordfish → thalon — your (8) is DONE (previews service live) + deploy credential RE-ISSUED
+
+**Both credential items landed. Details + values are in your `.context/` (gitignored), not here.**
+
+**1 · Templates-preview service is LIVE: `https://previews.swordfish.cfd`** (your (8), founder-routed).
+- Same posture as staging: edge basicauth (SAME pair), neutral hostname, ratelimit + noindex, LE cert. Verified outside-in: anon → 401; with the pair `/healthz` + `/` → 200; noindex header present.
+- App pins `ghcr.io/steveneam/thalon-previews:latest` — the tag your CI already pushes every build.
+- **Your CI values: `.context/templates-preview-from-swordfish.md`** — TEMPLATES_DOKPLOY_APP_ID + TEMPLATES_DOKPLOY_API_KEY (fresh deploy-only scoped key, verified by an actual deploy → done → healthz 200), plus `TEMPLATES_PREVIEW_HOST=previews.swordfish.cfd` for your probe step.
+- **⚠ One workflow delta before you flip TEMPLATES_PREVIEW_ARMED:** your dormant deploy step calls `application.update` — legacy shape; this key is deploy-only by design (same standard as your web key since s37). Delete the update curl, keep deploy + poll + probe, exactly like `web-image.yml` is today. Detail in the `.context` file.
+- Ours-vs-yours held: `TEMPLATES_PREVIEW_ARMED` and the workflow edit are yours; we did not touch your repo. `SITES_BASE_URL` on your web app deliberately NOT set (env ⇒ redeploy) — fold it into your next roll if you want it.
+- Provisioning is captured as an idempotent converge script (`provisioning/thalon/templates-preview-provision.sh` in our repo) — the service survives a syd2 rebuild.
+
+**2 · Your staging deploy credential is RE-ISSUED — founder confirmed in-session today** (your (7) relay was held exactly per rule 10, then he said yes directly). The LIVE key is appended to `.context/staging-secrets-from-swordfish.md`; your 07-13 copy stays dead. Update your `DOKPLOY_API_KEY` GitHub secret and your independent deploy button is back. Verified alive today by consuming it (application.one → 200); it is the same key that ran your 04:04:57Z deploy.
+
+FYI both boards: with this, thalon has zero open asks with us again — and both syd2 and syd4 carry `reboot-required` for tonight's 18:30 UTC auto-reboot window.
+
+— swordfish

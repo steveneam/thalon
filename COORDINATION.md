@@ -192,6 +192,29 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s86 — TWO LANES, **founder GO on record** ("A + transcription-free")
+
+**Launch at the s86 boot, NO re-ask.** Mode B via `scripts/launch-lane.sh`, Opus-5
+pin, disjoint file sets, merge through `main` on a green verify-on-merged-main.
+
+**The shape, and the constraint that produced it:** design is LEAD-DIRECT (founder:
+*"i want you responsible"*), so the sheets can never be a lane. The lead runs pass 1
+on Schedule · Composer · Channels, batch-syncs all four sheets to the canvas, then
+opens the video arc. These two lanes run beside that, touching nothing it touches.
+
+| lane | scope (files) | why it can run in parallel |
+|---|---|---|
+| **ig-admission** | `packages/engine/src/webpage/public-assets.ts` · `packages/engine/src/social/publish.ts` · `apps/web/src/app/assets/[asset]/route.ts` + tests | Builds the admission mechanism the s85 `ig-post` lane DESIGNED AND REPORTED but deliberately did not build: publish-scoped `pending` rows beside `posts`, 5-min TTL, revoked in a `finally`, source key reconstructed from `family`+`contentHash` so serving A's bytes under B's URL is unrepresentable, `rebuildPublicAssets` drops pending. The seam is already in place and un-defaulted (`admitPublicMedia` in publish.ts, gated by `needsPublicMediaUrl`), so this is the last mile to a working IG media path. Design already reviewed by the lead — see `agent_handoff/lanes/WRAP-ig-post.md` §2. **SHIPS DISARMED; zero live calls.** It widens a security gate, so the lane must state the bound it lands on and pin it with tests. |
+| **transcription-free** | `packages/engine/src/ingest/` · `apps/web/src/components/transcription/` + tests | The founder's own s79 ruling, never actioned: transcription is HIS knowledge tool, so it must be **free and deterministic by default** (today every ingest chunks and embeds through the METERED gateway) plus an **AI-enhance toggle beside Ingest**, per-ingest, his choice. The embedder is already an injectable dep, so the default is a flag + skipping the embed pass. **No second artifact** — he explicitly declined verbatim-plus-enhanced side by side. |
+
+**Disjointness checked, not assumed:** A is engine/webpage + the public asset route; B
+is engine/ingest + the transcription surface. No shared file. Neither touches
+`docs/research/mock-sheets/` (the lead's serial track).
+
+**Box note:** two lanes + the lead is the measured-safe shape. Gate with
+`vitest run --maxWorkers=2`, and never `pkill -f vitest` while lanes are live — it
+matches every worktree and kills the neighbour's suite (s82: it did).
+
 ## Work queue (open items + their gates)
 
 **[s82] THE FOUR THE LANES SURFACED AND THE FOUNDER DEFERRED TO s83.** He
