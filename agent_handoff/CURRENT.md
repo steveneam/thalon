@@ -99,36 +99,33 @@ six lead items) → the two APPROVED specs → `docs/research/ux-refinement-prog
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
-**THE PLAN — recommended, his to override:** **B-create.3, the Create sheets**
-(Create home update + the wizard sheet + Composer run-scope states) → his verdict →
-B-create.4. The reason is not that it is next on a list: **the Create engine shipped
-s87 and is currently unreachable — no route, no wizard, no Composer.** An engine with
-no door is the same orphan the Create spec was written to prevent, inverted. He also
-named Create the feature *"everything depends on it"*. Sheets are lead-direct, so this
-is the lead's own work and it is the gate to the surface build.
+**THE s88 PLAN — prepared end to end on his word** (*"ok plan and spec for the work
+lanes next session so they can just start building"*):
 
-**Proposed parallel lanes (BOTH need his fresh GO — approval covers named runs only):**
-- **`ve4-diffs`** — B-ve.4: AI-proposed EDL diffs through the judge gate. Engine-only,
-  already chartered, contract window exists, disjoint from `create/`. The video spec
-  wants it in hand before the pass-2 script-first gate.
-- **`analytics-honesty`** — apply `deferred` to X in the metrics registry (his s87
-  ruling) + Facebook comment/share counts, which the analytics lane named the cheapest
-  real follow-up on its list. Engine-only, `social/metrics/**`.
+- **Lead-serial: B-create.3, the Create sheets** (home update · wizard · Composer
+  run-scope) → his verdict → B-create.4. His named priority; design lead-direct.
+- **Lane `analytics-honesty` — GO ON RECORD, launches at boot.** Kickoff committed.
+  X = `deferred` structurally (his ruling wired end to end) · Facebook
+  comment/share counts · batch read + single-query read-model.
+- **Lane `create-shells` — NEEDS HIS ONE WORD at the opener.** Kickoff committed.
+  The Create engine's two chartered LLM shells: the real reference-describe driver
+  + the R8 AI-edit verb, both judged, both new shell-inventory labels.
 
-**If budget is still tight at the opener** (the limit resets Jul 31 11pm UTC): do the
-cheap reconciliation debt FIRST — the Analytics sheet's wrong Facebook fixture, and
-the `deferred` word reaching the surface copy. Both are small, both are owed, and
-neither needs the headroom a full sheet pass does.
-
-**Not recommended first, with the reason:** the video sheets. Their references are
-banked and they will start cold, but the video arc's own engine buckets (B-ve.4/.5)
-are unbuilt — drawing those sheets now means drawing ahead of the engine again, which
-is the exact mistake the Composer orphan was. Create's engine exists today.
+**WHY create-shells REPLACED ve4-diffs: the ve4 lane DIED IN GROUNDING.** Git + the
+live surface prove **B-ve.1–.7 ALL shipped by s51** and survived the s72 rebuild
+(s78 audit marks proposal-review and 9:16 derive `present`; the shell inventory
+pins `"video.propose_edl_diff"` today). **The APPROVED video spec's "B-ve.4 and
+B-ve.5 remain" was FALSE — it now carries a dated correction block and a rewritten
+build order** (`docs/video-arc/spec.md`). The remaining video work is surface-side:
+V1's five affordances (sheets-first), V2 thumbnails/track colour, V4 credit badges,
+V3's pass-2 gate, V7/V9, pass-3 states.
 
 ▎ ▸ **s87 shipped:** `308a94a`+`ff55f0f` the window · `737adbb` kickoffs got "THE
 WINDOW AS FROZEN" · `d8a323f` video references banked · `6b503e1` lane board ·
 `5a579a4`+`bbe8131` create-engine · `783d10f` the platformRouting fix + its ratchet ·
-`35bbbc5`+`8b8e8f5` analytics-spine · `7bcd5b9` the series() determinism fix.
+`35bbbc5`+`8b8e8f5` analytics-spine · `7bcd5b9` the series() determinism fix ·
+`3188295` the X ruling + the `deferred` vocabulary · the video-spec CORRECTION +
+both s88 kickoffs (this wrap).
 ▎ ▸ **⚠️ BUDGET WAS THE LIVE CONSTRAINT ALL SESSION:** 87% of the weekly limit at
 lane launch, **resets Jul 31, 11pm UTC**. That is why the video sheets are held and
 why the references were banked first — the durable half is done and the drawing can
@@ -149,10 +146,10 @@ honestly. `NEEDS-STEVEN` 2026-07-29f → archive.
 tick earns a timer · four `fanout_runs` per four-destination Create run, deliberate ·
 no real vision driver yet · read-model is one query per publication) are written up
 in COORDINATION.md §s87 rather than repeated here.
-▎ ▸ **Still open, founder's call:** the app-side Calendar → Schedule rename · the
-Composer POPOUT state (pass 3, in spec) · YouTube as a destination (needs its own
-window — platform key + capability row + driver; recorded in `SETTINGS_DEFERRED` with
-a test that fires the day it becomes real).
+▎ ▸ **Still open, founder's call:** `create-shells` launch (ONE WORD at the s88
+opener — the kickoff is ready) · the app-side Calendar → Schedule rename · the
+Composer POPOUT state (pass 3, in spec) · YouTube as a destination (own window;
+`SETTINGS_DEFERRED` test fires the day it becomes real).
 ▎ ▸ **Waiting on ONE founder word, unchanged since s85:** the `thalon-deploy` +
 templates-preview credentials → `NEEDS-STEVEN` 2026-07-29e.
 ▎ ▸ **⛔ SEQUENCE GATE unchanged:** bluesky armed for testing on his recorded words;

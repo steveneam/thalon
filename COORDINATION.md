@@ -192,6 +192,41 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s88 — TWO LANES PREPARED (kickoffs committed; lead-serial = the Create sheets)
+
+**The founder's words, s87 late (on the presented plan):** *"ok plan and spec for
+the work lanes next session so they can just start building."* Reading, stated so it
+is auditable: that approves the PREPARATION and the named lane `analytics-honesty`
+(proposed to him by name, answered with "ok … so they can just start building" —
+launches at the s88 boot without re-ask, the s86 "A + transcription-free" precedent).
+**`create-shells` is a SUBSTITUTION he has not yet named** — see below — so it waits
+for his one word at the opener (lead-drives-lanes: approval covers exactly the named
+runs).
+
+**WHY THE SUBSTITUTION: the `ve4-diffs` lane DIED IN GROUNDING.** Preparing its
+kickoff, git + the live surface showed **B-ve.1–.7 all shipped and merged by s51**
+— B-ve.4's proposer/judge-gated approve door/eval rows (`f645548`), B-ve.5's aspect
+lens (PR #49) — and the s72 rebuild carried them (s78 audit: both jobs `present`;
+shell inventory pins `"video.propose_edl_diff"` today). The APPROVED video spec's
+"B-ve.4 and B-ve.5 remain" was false; **the spec now carries a dated correction
+block and a rewritten build order** (`docs/video-arc/spec.md`). A lane launched on
+the uncorrected spec would have spent the budget rebuilding a shipped feature.
+
+| lane | kickoff | scope | disjointness | launch state |
+|---|---|---|---|---|
+| **analytics-honesty** | `agent_handoff/lanes/KICKOFF-analytics-honesty.md` | X = `deferred` structurally (his s87 ruling wired: armed tick spends nothing on X, typed refusal, bill print, read-model word) · Facebook comment/share via the post-object road · batch read + single-query read-model. Seat + verb shapes REPORTED before building. | `social/metrics/**` + `drivers/facebook.ts` + `repos/publication-metrics.ts` + tick script | **GO on record** — launches at boot |
+| **create-shells** | `agent_handoff/lanes/KICKOFF-create-shells.md` | The Create engine's two chartered LLM shells: real reference-describe driver (`"create.describe_reference"`, stored refs only) + the R8 AI-edit verb (`"create.ai_edit"`, judge-refusal keeps prior body byte-for-byte). Both shell-inventory entries = the deliberate act, in its file set. Shapes REPORTED first. | `engine/src/create/**` + shell-inventory test + SPINE §1 (+ optional platform vision var, report-gated) | **needs his word** (replaces dead ve4-diffs) |
+
+**Lead-serial track (his named priority):** B-create.3 — the Create sheets (home
+update · wizard · Composer run-scope states), lead-direct, → his verdict →
+B-create.4. Budget check first (reset Jul 31 11pm UTC); if thin, the owed
+reconciliation debt instead (the Analytics sheet's wrong Facebook fixture · the
+`deferred` surface copy).
+
+**Boot order:** (0) self-check · (1) worktrees + `launch-lane.sh analytics-honesty`
+on the recorded GO · (2) present `create-shells` for his word, launch on it ·
+(3) sheets.
+
 ## Sprint 9 / s87 — TWO LANES, **BOTH MERGED** (specs APPROVED; founder GO on record)
 
 **CLOSED.** Both launched at the s87 boot as approved, both wrapped, both merged
