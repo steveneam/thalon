@@ -46,6 +46,35 @@ export class SocialMetricsUnavailableError extends SocialMetricsRefusedError {
 }
 
 /**
+ * The reader EXISTS AND WORKS; we are deliberately not running it yet, on
+ * cost. Not a capability fact about the platform at all — a standing founder
+ * decision about when we start paying.
+ *
+ * Its own class because every other refusal here means "we can't" and this
+ * one means "we won't yet", which has a completely different fix (a launch
+ * date, not a scope or an application). Collapsing it into
+ * `SocialMetricsUnavailableError` would send someone to build a reader that
+ * is already built and passing tests.
+ *
+ * Live instance: X, per the founder's s87 ruling — *"X analytics and posting
+ * bill will only be paid once thalon is ready to launch, so towards the
+ * end."* Lifting it is a founder act, not a config change.
+ */
+export class SocialMetricsDeferredError extends SocialMetricsRefusedError {
+  readonly refusal = "deferred_on_cost";
+  readonly permanence: MetricAbsence = "deferred";
+  constructor(
+    public readonly platform: SocialPlatform,
+    public readonly reason: string,
+  ) {
+    super(
+      `metrics for "${platform}" are deferred on cost, not unavailable — the reader is built and works. ${reason} Lifting this is a founder decision, not a configuration change.`,
+    );
+    this.name = "SocialMetricsDeferredError";
+  }
+}
+
+/**
  * The platform HAS the number and will not give it to us: access is granted
  * to selected partners, or behind a permission we cannot simply add.
  * LinkedIn is the whole reason this class exists — both its roads

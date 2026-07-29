@@ -98,8 +98,22 @@ export const METRIC_FAMILIES: Readonly<Record<MetricLabel, MetricFamily>> = {
  *    lacks the permission. A reconnect with the right scope fixes it (Meta
  *    insights permissions).
  *  - `no_driver` — we never built the road. Ours to fix, not the platform's.
+ *  - `deferred` — the road is BUILT and works; we are deliberately not
+ *    driving it yet, on cost. Added s87 for the founder's X ruling
+ *    (*"X analytics and posting bill will only be paid once thalon is ready
+ *    to launch"*). It needs its own word because every other absence answers
+ *    "we can't", and this one answers "we won't yet" — reporting it as
+ *    `no_driver` would send someone to build a reader that already exists,
+ *    and reporting it as "not collected yet" would invite the accidental
+ *    armed pass that spends the money the ruling defers.
  */
-export type MetricAbsence = "structural" | "retired" | "gated" | "permissioned" | "no_driver";
+export type MetricAbsence =
+  | "structural"
+  | "retired"
+  | "gated"
+  | "permissioned"
+  | "no_driver"
+  | "deferred";
 
 export interface MetricReported {
   label: MetricLabel;
@@ -197,6 +211,19 @@ export const METRIC_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformMetric
    * resource. That is not a reason to hide the capability — it is a reason
    * the tick reports it and the founder decides, which is what `metered`
    * carries up to the surface.
+   *
+   * **FOUNDER RULING, 2026-07-29 (s87): DEFERRED UNTIL LAUNCH.** Verbatim:
+   * *"X analytics and posting bill will only be paid once thalon is ready to
+   * launch, so towards the end."* So this reader stays BUILT and UNARMED,
+   * and the same ruling covers X posting, not just reads.
+   *
+   * That makes X's absence a fourth kind, and the distinction is the whole
+   * point of the permanence vocabulary: it is not `structural` (X does report
+   * the number), not `gated` (no application is pending), and not
+   * `permissioned` (the credential is fine). It is DEFERRED BY CHOICE, on
+   * cost, until launch — see `ABSENCE_DEFERRED` in `errors.ts`. Reporting it
+   * as "not collected yet" would invite exactly the accidental armed pass the
+   * ruling exists to prevent.
    *
    * organic_metrics / non_public_metrics (url_link_clicks,
    * user_profile_clicks, engagements) would add click data for our OWN
