@@ -25,6 +25,23 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
  * suite passed both times. Nothing else would have caught this: not lint, not
  * typecheck, not vitest, and not a human reading the diff, since there was none.
  *
+ *  - s88: the THIRD occurrence, and the first DELIBERATE one — a new sibling
+ *    ratchet (`repo-hygiene.test.ts`, same s87 commit `e7a46a8`) used a raw NUL
+ *    as a join separator, which is a legitimate idea expressed the one way this
+ *    guard forbids. So the two ratchets landed in ONE commit contradicting each
+ *    other, and `main` sat RED from s87's last commits until the s88
+ *    `create-shells` lane hit it and proved it inherited by stashing its own
+ *    work and re-running on a clean tree. **The separator was never the problem;
+ *    the raw byte was.** `"\0"` (backslash-zero, TWO characters in the file) is
+ *    the identical runtime string with no 0x00 on disk — this very file uses it
+ *    at `git ls-files -z` above. That is why the failure message below names the
+ *    fix: a guard that only says "you are wrong" invites the fix that guts the
+ *    guard (deleting the separator, or allowlisting the file).
+ *
+ * The standing lesson for the LEAD, not the guard: two ratchets can contradict
+ * each other, and only a FULL `npm run verify` catches it. s87 added both and
+ * did not re-run the suite after its final commits.
+ *
  * The extension list is a denylist of genuine binaries rather than an allowlist
  * of text, so a NEW text extension is covered the day it appears instead of
  * silently escaping the guard.
@@ -59,6 +76,13 @@ describe("tracked source carries no NUL bytes", () => {
         offenders.push(`${file}: NUL at byte ${at}, near ${near}`);
       }
     }
-    expect(offenders).toEqual([]);
+    expect(
+      offenders,
+      'NUL byte in tracked source — git will file the whole file as binary and its ' +
+        'diff becomes unreviewable. If you MEANT a NUL (a join separator is a fair ' +
+        'use), write it as the two-character escape "\\0" instead of embedding 0x00: ' +
+        'identical runtime string, nothing binary on disk. Do NOT fix this by dropping ' +
+        'the separator or allowlisting the file.',
+    ).toEqual([]);
   });
 });
