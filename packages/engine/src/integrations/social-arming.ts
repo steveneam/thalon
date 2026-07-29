@@ -5,7 +5,11 @@ import {
   type TenantCtx,
 } from "@thalon/contracts";
 import type { ThalonEnv } from "@thalon/platform";
-import { productionSocialPublisherResolver } from "../social/drivers";
+import {
+  productionSocialMetricsResolver,
+  productionSocialPublisherResolver,
+} from "../social/drivers";
+import type { SocialMetricsReader } from "../social/metrics/registry";
 import type { SocialPublisher } from "../social/registry";
 import { vaultEnvView } from "./env-view";
 import type { VaultDeps, VaultRepos } from "./vault";
@@ -143,4 +147,27 @@ export async function vaultSocialPublisherResolver(
   deps: SocialArmingDeps,
 ): Promise<(platform: SocialPlatform) => SocialPublisher> {
   return productionSocialPublisherResolver(await vaultSocialEnvView(deps));
+}
+
+/**
+ * D2 (s87): the same vault-first assembly for the METRICS tick — and the one
+ * deliberate difference in this whole file.
+ *
+ * It resolves over `vaultEnvView` DIRECTLY rather than `vaultSocialEnvView`,
+ * so the credential seats are filled and the `SOCIAL_<P>_ARMED` seats are
+ * NOT. That is not an oversight to tidy up later: measurement needs a
+ * connected credential, not the founder's per-platform POSTING GO. Routing it
+ * through the arming view would mean that disarming a platform — an ordinary,
+ * correct operator move, and the emergency override's entire purpose —
+ * silently stopped measuring every post that platform ever carried. The
+ * metrics ratchet (`resolveSocialMetricsReader`) has one seat by design, and
+ * this is the wiring that keeps it that way.
+ *
+ * Nothing here can post: a `SocialMetricsReader` has no publish verb.
+ */
+export async function vaultSocialMetricsResolver(
+  deps: SocialArmingDeps,
+): Promise<(platform: SocialPlatform) => SocialMetricsReader> {
+  const { view } = await vaultEnvView(deps, SOCIAL_VAULT_DESTINATIONS);
+  return productionSocialMetricsResolver(view);
 }

@@ -34,6 +34,7 @@ export {
   type ScheduleApprovedDraftResult,
   type SuggestSlotInput,
 } from "./schedule";
+export * from "./metrics";
 export {
   publishQueueArmed,
   runDuePublishes,
@@ -65,10 +66,17 @@ export {
   type PublishApprovedDraftResult,
 } from "./publish";
 export {
+  createBlueskyMetricsReader,
   createFacebookDriver,
+  createFacebookMetricsReader,
   createInstagramDriver,
+  createInstagramMetricsReader,
   createLinkedInDriver,
+  createRedditMetricsReader,
   createXDriver,
+  createXMetricsReader,
+  productionSocialMetricsReaders,
+  productionSocialMetricsResolver,
   FACEBOOK_GRAPH_VERSION,
   INSTAGRAM_GRAPH_VERSION,
   InstagramPublicMediaUrlRequiredError,

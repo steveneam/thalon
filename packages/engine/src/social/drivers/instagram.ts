@@ -1,5 +1,13 @@
 import { z } from "zod";
 import { PublishRefusedError } from "../errors";
+import { metricCapability } from "../metrics/capability";
+import { SocialMetricsUnreadableError } from "../metrics/errors";
+import { collectSample, reclassifyMetricsError } from "../metrics/parse";
+import type {
+  PostMetricSample,
+  PostMetricsReport,
+  SocialMetricsReader,
+} from "../metrics/registry";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
 import { hardenedPlatformFetch, responseJson, SocialDriverApiError, type Sleeper } from "./errors";
 
@@ -191,3 +199,104 @@ export function createInstagramDriver(config: InstagramDriverConfig): SocialPubl
     },
   };
 }
+
+/**
+ * D2 (s87): Instagram's METRICS reader — `GET /{ig-media-id}/insights?metric=…`
+ * on the same Graph host the publisher posts through, under `instagram_basic`
+ * + `instagram_manage_insights` + `pages_read_engagement`.
+ *
+ * The publisher's `externalPostId` IS the media id this endpoint keys on, so
+ * no extra lookup is needed. `impressions` and `video_views` were deprecated
+ * at Graph v22 in favour of `views`; the driver pins v23, so `views` is the
+ * only audience-family metric asked for and `reach` is the unique-audience
+ * answer — the one platform of the five where both a views figure and a real
+ * reach figure survive.
+ *
+ * Instagram answers an unavailable metric by failing the WHOLE request, not
+ * by omitting one entry — so an unsupported media kind (a metric that does
+ * not apply to this post type) surfaces as a refusal for the post rather
+ * than as a partial set. That is honest and is left alone: recording four of
+ * six metrics by retrying without the awkward ones would quietly change what
+ * the series means between ticks.
+ */
+export function createInstagramMetricsReader(config: InstagramDriverConfig): SocialMetricsReader {
+  const baseUrl = (config.baseUrl ?? "https://graph.facebook.com").replace(/\/$/, "");
+  const fetchImpl = config.fetchImpl ?? fetch;
+  const metrics = ["views", "reach", "likes", "comments", "saved", "shares"];
+  return {
+    platform: "instagram",
+    name: "instagram-media-insights",
+    async fetchPostMetrics({ externalPostId }): Promise<PostMetricsReport> {
+      const url =
+        `${baseUrl}/${INSTAGRAM_GRAPH_VERSION}/${encodeURIComponent(externalPostId)}/insights` +
+        `?metric=${encodeURIComponent(metrics.join(","))}`;
+      let response;
+      try {
+        response = await hardenedPlatformFetch(
+          "instagram",
+          fetchImpl,
+          url,
+          { headers: { Authorization: `Bearer ${config.accessToken}` } },
+          { sleep: config.sleep },
+        );
+      } catch (err) {
+        // Same Graph trap as the Facebook reader: a missing insights
+        // permission is a 400, invisible to the hardened fetch's ladder.
+        throw reclassifyMetricsError("instagram", err);
+      }
+      const parsed = mediaInsightsSchema.safeParse(await responseJson(response));
+      if (!parsed.success) {
+        throw new SocialMetricsUnreadableError(
+          "instagram",
+          `insights answered without a readable data array for media "${externalPostId}"`,
+        );
+      }
+      const samples: PostMetricSample[] = [];
+      for (const entry of parsed.data.data) {
+        const raw = entry.values?.[entry.values.length - 1]?.value;
+        switch (entry.name) {
+          case "views":
+            collectSample(samples, "instagram", "views", raw);
+            break;
+          case "reach":
+            collectSample(samples, "instagram", "reach", raw);
+            break;
+          case "likes":
+            collectSample(samples, "instagram", "likes", raw);
+            break;
+          case "comments":
+            collectSample(samples, "instagram", "comments", raw);
+            break;
+          case "saved":
+            collectSample(samples, "instagram", "saves", raw);
+            break;
+          case "shares":
+            collectSample(samples, "instagram", "shares", raw);
+            break;
+          default:
+            break;
+        }
+      }
+      return {
+        platform: "instagram",
+        samples,
+        unavailable: metricCapability("instagram").refuses.map((r) => ({
+          label: r.label,
+          reason: r.reason,
+        })),
+      };
+    },
+  };
+}
+
+/** The media-insights envelope — the same named-metric/values shape the Page insights use. */
+const mediaInsightsSchema = z.object({
+  data: z.array(
+    z
+      .object({
+        name: z.string(),
+        values: z.array(z.object({ value: z.unknown() }).loose()).optional(),
+      })
+      .loose(),
+  ),
+});

@@ -1,5 +1,13 @@
 import { z } from "zod";
 import { REDDIT_USER_AGENT } from "../../integrations/validate";
+import { metricCapability } from "../metrics/capability";
+import { SocialMetricsUnreadableError } from "../metrics/errors";
+import { collectSample } from "../metrics/parse";
+import type {
+  PostMetricSample,
+  PostMetricsReport,
+  SocialMetricsReader,
+} from "../metrics/registry";
 import type { SocialPostInput, SocialPublisher, SocialPublishReceipt } from "../registry";
 import {
   hardenedPlatformFetch,
@@ -183,3 +191,87 @@ export function createRedditDriver(config: RedditDriverConfig): SocialPublisher 
     },
   };
 }
+
+/**
+ * D2 (s87): Reddit's METRICS reader — `GET /api/info?id=t3_…` on the OAuth
+ * host under the `read` scope. The fullname the publisher already records as
+ * `externalPostId` is exactly this endpoint's key, so there is no lookup
+ * dance: the ledger row IS the query.
+ *
+ * What is deliberately NOT read: `view_count`. The field exists on the link
+ * object but Reddit populates it only for subreddit moderators — for an
+ * ordinary poster it is null, which would append nothing anyway. Refusing it
+ * in the capability matrix with that reason is worth more than a mystery gap
+ * the operator would otherwise attribute to a broken tick.
+ *
+ * `score` is NET votes (ups minus downs), and the matrix says so: a
+ * heavily-downvoted post genuinely pulls an engagement roll-up down, and
+ * silently flooring it at zero would be the same class of lie as recording a
+ * zero for "we could not ask". `upvote_ratio` is read too — real and useful —
+ * and lives in the `quality` family, where no sum can pick it up.
+ */
+export function createRedditMetricsReader(config: RedditDriverConfig): SocialMetricsReader {
+  const baseUrl = (config.baseUrl ?? "https://oauth.reddit.com").replace(/\/$/, "");
+  const fetchImpl = config.fetchImpl ?? fetch;
+  return {
+    platform: "reddit",
+    name: "reddit-info",
+    async fetchPostMetrics({ externalPostId }): Promise<PostMetricsReport> {
+      const res = await hardenedPlatformFetch(
+        "reddit",
+        fetchImpl,
+        `${baseUrl}/api/info?id=${encodeURIComponent(externalPostId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${config.accessToken}`,
+            "User-Agent": REDDIT_USER_AGENT,
+          },
+        },
+        { sleep: config.sleep },
+      );
+      const parsed = infoSchema.safeParse(await responseJson(res));
+      const link = parsed.success ? parsed.data.data.children[0]?.data : undefined;
+      if (!link) {
+        // A removed post, or one this credential cannot see: `/api/info`
+        // answers 200 with an EMPTY children array rather than a 404, so
+        // this is the only place the absence can be caught.
+        throw new SocialMetricsUnreadableError(
+          "reddit",
+          `/api/info returned no link for "${externalPostId}" — removed, or not visible to this account`,
+        );
+      }
+      const samples: PostMetricSample[] = [];
+      collectSample(samples, "reddit", "score", link.score);
+      collectSample(samples, "reddit", "comments", link.num_comments);
+      collectSample(samples, "reddit", "upvote_ratio", link.upvote_ratio);
+      return {
+        platform: "reddit",
+        samples,
+        unavailable: metricCapability("reddit").refuses.map((r) => ({
+          label: r.label,
+          reason: r.reason,
+        })),
+      };
+    },
+  };
+}
+
+/** The listing envelope `/api/info` answers with — every count optional, so a missing field is an absence. */
+const infoSchema = z.object({
+  data: z.object({
+    children: z.array(
+      z
+        .object({
+          data: z
+            .object({
+              score: z.number().optional(),
+              num_comments: z.number().optional(),
+              upvote_ratio: z.number().optional(),
+            })
+            .loose()
+            .optional(),
+        })
+        .loose(),
+    ),
+  }),
+});
