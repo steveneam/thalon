@@ -2,15 +2,26 @@
 
 ## Stamp
 
-2026-07-29 (session 87, syd4 — **zero credit spend**). **THE s87 BOOT SEQUENCE RAN
-END TO END: contract window BUILT · VERIFIED · MERGED · FROZEN, then BOTH LANES
-LAUNCHED on the founder's GO.** Verify-on-merged-main after the window: **2885
-passed / 9 skipped, 0 lint errors** (s86 closed at 2840 — the +45 are the window's
-own ratchets). Tree clean, pushed. Zero posts.
+2026-07-29 (session 87, syd4 — **zero credit spend, zero posts**). **THE WHOLE s87
+BOOT SEQUENCE RAN, AND BOTH LANES ARE MERGED.** Contract window built · verified ·
+frozen · merged; both approved lanes launched on the founder's GO, wrapped, and
+merged through main. Final verify-on-merged-main: **exit 0, 3037 passed / 9 skipped,
+0 lint errors** (s86 closed at 2840). Worktrees GC'd, branches deleted, tmux windows
+killed, tree clean at `7bcd5b9`, pushed.
 
-**HIS GO, VERBATIM, MID-TURN:** *"you also have my approval for lane-launch GO.
-i'll be away for a bit. so keep working."* That covers exactly the two named runs —
-`create-engine` and `analytics-spine`.
+**HIS GO, VERBATIM, MID-TURN:** *"you also have my approval for lane-launch GO. i'll
+be away for a bit. so keep working."*
+
+**THE SESSION'S REAL STORY: BOTH LANES FOUND DEFECTS IN THE LEAD'S OWN WINDOW, AND
+NEITHER TOUCHED IT.** `create-engine` found `platformRouting` accepted by the config
+schema with no column and no persist line — silently dropped for every tenant, and
+**the third time that identical gap has shipped** (the `outreach` docblock records it
+for `outreach`, then `social`). It reported it and pinned a ratchet built to go red
+the day the column landed. `analytics-spine` found `publicationMetrics.series()`
+breaking ties on a random uuid. Both fixed at merge; the routing one got the ratchet
+that should have existed after occurrence #1 — `brand-profile-config-blocks.test.ts`
+enumerates the blocks **from the contract**, so a fourth occurrence has to get past a
+test rather than past a reviewer. Red-checked by breaking the persist line.
 
 ## THE WINDOW — what landed, and the two ratchets that caught real defects
 
@@ -75,62 +86,78 @@ by someone else). **Take audition is the one genuinely separate affordance.**
 
 ## Resume prompt (session 88, syd4 — "gogogo" boots this)
 
-**Resume · Thalon** — s87 froze the contract window, launched both approved lanes on
-the founder's GO, and banked the video arc's last references. **The next action is
-whatever the lanes left: read their WRAPs, merge each through main on a green
-verify-on-merged-main, GC the worktrees, kill the windows.** Then the held work.
+**Resume · Thalon** — s87 froze the s87 contract window and shipped BOTH approved
+lanes end to end: **B-create.2 (the Create run engine)** and **D2 (the own-post
+analytics spine)**, merged on a green verify-on-merged-main. Nothing is in flight.
+**The next action is the founder's sequencing call**, because three good candidates
+are now unblocked and they are not equally urgent.
 
-**Read first:** CLAUDE.md → this file → COORDINATION.md §s87 → the two APPROVED specs
-(`docs/create-engine/spec.md`, `docs/video-arc/spec.md`) →
-`docs/research/ux-refinement-program.md`.
+**Read first:** CLAUDE.md → this file → COORDINATION.md §s87 (the lane record + the
+six lead items) → the two APPROVED specs → `docs/research/ux-refinement-program.md`.
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
-▎ ▸ **s87 shipped:** `308a94a` the window · `ff55f0f` window merged · `737adbb` both
-kickoffs gained "THE WINDOW AS FROZEN" · `d8a323f` video Overview+Dossier references
-· `6b503e1` lane board.
-▎ ▸ **⚠️ BUDGET IS THE LIVE CONSTRAINT:** the weekly limit read **87% used** at lane
-launch (was 84% at s86), **resets Jul 31, 11pm UTC**. Two lanes were consuming it in
-parallel. **The video sheet passes are HELD on this, not on doubt** — banking the
-references first is what made the hold cheap. Check headroom before drawing.
-▎ ▸ **IN FLIGHT AT THE STAMP:** both lanes running in tmux (`thalon:create-engine`,
-`thalon:analytics-spine`), worktrees at `.claude/worktrees/`. If a session resumes
-cold: `tmux capture-pane -t thalon:<lane> -p | tail -30` and check for
-`agent_handoff/lanes/WRAP-<lane>.md` on each branch. **The lead merges; lanes never
-do.** Dead-lane worktrees are salvageable — inspect status/log/stash before redoing.
-▎ ▸ **Each kickoff carries a "THE WINDOW AS FROZEN" section** naming the shapes that
-differ from the specs' prose, so neither lane stops on a false surprise. The two that
-matter: `CREATE_CHILD_KINDS` is **three** (`fanout_run | draft | video_project`) not
-the four-way per-family set — every family lands through the single-draft spine and
-`drafts.fanout_run_id` is NOT NULL; and `publicationMetrics.append` takes **no
-`platform` argument**.
-▎ ▸ **Still open, founder's call when he wants:** the app-side Calendar → Schedule
-rename (build task, own go) · the Composer POPOUT state (pass 3, in spec) · YouTube
-as a destination (needs its own window — platform key + capability row + driver).
-▎ ▸ **Waiting on ONE founder word, unchanged since s85:** swordfish correctly did NOT
-re-issue the `thalon-deploy` credential (a relayed approval is not an in-session
-confirmation). One 30-second confirm covers BOTH that and the templates-preview
-credential → `NEEDS-STEVEN` 2026-07-29e.
+**The three candidates, with the honest case for each:**
+1. **Video sheets pass 1** (Overview + Dossier + editor thumbnails). References are
+   BANKED (s87) so this starts cold and cheap; it is the biggest remaining surface
+   area and it is design, which is lead-direct and never delegated. **Held at s87 on
+   BUDGET, not doubt.**
+2. **B-create.3 — the Create sheets** (home update + wizard + Composer run-scope).
+   The engine underneath them now exists, so the sheets would be drawing something
+   real rather than something proposed.
+3. **The Analytics surface** — D2 gives it real data, but **read lead item 1 first:
+   the sheet's Facebook fixture is wrong** (it shows reach under a metric Meta
+   retired). That has to be reconciled against the capability table before drawing.
+
+▎ ▸ **s87 shipped:** `308a94a`+`ff55f0f` the window · `737adbb` kickoffs got "THE
+WINDOW AS FROZEN" · `d8a323f` video references banked · `6b503e1` lane board ·
+`5a579a4`+`bbe8131` create-engine · `783d10f` the platformRouting fix + its ratchet ·
+`35bbbc5`+`8b8e8f5` analytics-spine · `7bcd5b9` the series() determinism fix.
+▎ ▸ **⚠️ BUDGET WAS THE LIVE CONSTRAINT ALL SESSION:** 87% of the weekly limit at
+lane launch, **resets Jul 31, 11pm UTC**. That is why the video sheets are held and
+why the references were banked first — the durable half is done and the drawing can
+start cold. **Check headroom before drawing anything.**
+▎ ▸ **⚠️ THE ANALYTICS SHEET'S FACEBOOK FIXTURE IS WRONG** — Meta retired
+`post_impressions_unique` (2025-06-15) and `post_impressions*` (2025-11-15). Reach
+survives as `post_total_media_view_unique`. Read the capability table in
+`packages/engine/src/social/metrics/capability.ts`, not the mock's numbers.
+▎ ▸ **💸 X ANALYTICS COST MONEY** — metered pay-per-use, no free read tier.
+`NEEDS-STEVEN` 2026-07-29f. Nothing has spent: the tick needs `--armed`, rides no
+timer, and prints the bill before the pass. Every other platform reads free.
+▎ ▸ **Six lead items** (Facebook fixture · X spend · `SOCIAL_METRICS_ARMED` when the
+tick earns a timer · four `fanout_runs` per four-destination Create run, deliberate ·
+no real vision driver yet · read-model is one query per publication) are written up
+in COORDINATION.md §s87 rather than repeated here.
+▎ ▸ **Still open, founder's call:** the app-side Calendar → Schedule rename · the
+Composer POPOUT state (pass 3, in spec) · YouTube as a destination (needs its own
+window — platform key + capability row + driver; recorded in `SETTINGS_DEFERRED` with
+a test that fires the day it becomes real).
+▎ ▸ **Waiting on ONE founder word, unchanged since s85:** the `thalon-deploy` +
+templates-preview credentials → `NEEDS-STEVEN` 2026-07-29e.
 ▎ ▸ **⛔ SEQUENCE GATE unchanged:** bluesky armed for testing on his recorded words;
 every other platform is per-platform + per-post GO; the queue consumer's key rests
-EMPTY. Instagram's media path is BUILT end to end and **disarmed**. **Nothing was
-posted.**
+EMPTY. Instagram's media path is BUILT and **disarmed**. The D2 tick ships disarmed
+on its own separate flag. **Nothing was posted.**
 ▎ ▸ **`impeccable` still RELAXED on `docs/research/mock-sheets/**`** on his ruling —
-`apps/web/**` and landing pages are NOT covered. It expires: when pass 3 closes a
-surface, audit it, reconcile the ramp into `design.json`, drop the ignore.
+`apps/web/**` and landing pages are NOT covered; the re-arm trigger is in the
+programme file.
 ▎ ▸ **Traps worth keeping:** the Bash tool's working directory PERSISTS across calls
-(use `git -C` / absolute paths after any `cd`) · `npx vitest run -w <pkg>` is
-**`--watch`**, not a workspace filter — use `npm test -w <pkg>` · never
-`pkill -f vitest` while lanes are live · vitest does NOT typecheck.
+(use `git -C` / absolute paths) · `npx vitest run -w <pkg>` is **`--watch`**, not a
+workspace filter — use `npm test -w <pkg>` · never `pkill -f vitest` while lanes are
+live · vitest does NOT typecheck · zod 4's `z.record()` over an ENUM key is
+**exhaustive** (use `partialRecord`) — it refused every partial map in this window's
+first cut.
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · design is lead-direct, never
 delegated · every lane/subagent launch needs fresh founder approval · GATE ON EXIT
 CODE, never pipe the suite · **verify-on-merged-main = THE gate** · research before
 build (rule 10) · check the ENVIRONMENT before his hands (rule 11) · platform logins
 live durably in `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin, pushed at `6b503e1` · staging on s85 code + the OCI
+▎ ▸ **State:** main = origin at `7bcd5b9`, pushed · staging on s85 code + the OCI
 label · four social channels connected.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync; both lane
+worktrees GC'd, branches deleted, tmux windows killed.
 
 ## Pointer
 

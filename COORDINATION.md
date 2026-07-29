@@ -192,7 +192,65 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
-## Sprint 9 / s87 — TWO LANES **LAUNCHED** (specs APPROVED; founder GO on record)
+## Sprint 9 / s87 — TWO LANES, **BOTH MERGED** (specs APPROVED; founder GO on record)
+
+**CLOSED.** Both launched at the s87 boot as approved, both wrapped, both merged
+through `main` on a green verify-on-merged-main: **exit 0, 3037 passed / 9 skipped,
+0 lint errors** (s86 closed at 2840). Worktrees GC'd, branches deleted, tmux windows
+killed, tree clean at `7bcd5b9`.
+
+- **`create-engine`** (`5a579a4` → merge `bbe8131`) — B-create.2: `plan.ts`
+  (pure derivation, every refusal code pinned) · `dispatch.ts` (one arm per family
+  over the engines that already judge) · `run.ts` (`runCreate`) · `reference.ts`
+  (the describe seam, fake driver only). 73 tests. Stayed strictly inside
+  `packages/engine/src/create/**`.
+- **`analytics-spine`** (`35bbbc5` → merge `8b8e8f5`) — D2: `SocialMetricsReader`
+  as a **parallel reader seam**, reader factories beside their publishers, the tick,
+  the honest read-model, `scripts/run-metrics-tick.ts`.
+
+**BOTH LANES FOUND REAL DEFECTS IN THE LEAD'S OWN WINDOW, AND NEITHER PATCHED IT.**
+- `create-engine` found `platformRouting` accepted by `brandProfileConfigSchema` with
+  **no column and no persist line** — silently dropped for every tenant. **The third
+  occurrence of that exact gap** (the `outreach` docblock records it for `outreach`
+  and then `social`). Fixed at merge (`783d10f`): column + persist + migration 0023,
+  and — the part that matters — `brand-profile-config-blocks.test.ts`, which
+  enumerates blocks **from the contract** so the next one added without a column
+  fails a test rather than a review. Red-checked. The lane's own red-on-fix ratchet
+  did its job and was replaced by the positive assertion it stood in for.
+- `analytics-spine` found `publicationMetrics.series()` breaking capture-time ties on
+  a random uuid, so two labels in one bucket returned in arbitrary order. Fixed
+  (`7bcd5b9`) and pinned.
+
+**The seam decision, reported before building and approved by the lead:**
+`fetchPostMetrics` does NOT ride the publisher. A `SocialMetricsReader` with no
+publish verb makes the tick **structurally unable to post**, and its ratchet asks for
+a credential and deliberately **not** the per-platform posting GO — otherwise
+disarming a platform (an ordinary, correct operator move) would silently blind
+analytics on everything that platform ever carried.
+
+### Lead items the lanes surfaced — carry these forward
+
+1. **⚠️ The Analytics sheet's Facebook fixture is WRONG.** Meta retired
+   `post_impressions_unique` (2025-06-15) and `post_impressions*` (2025-11-15); the
+   sheet shows Facebook reporting reach under a metric that stopped existing. Reach
+   survives under `post_total_media_view_unique`. **Whoever builds the Analytics
+   surface reads the capability table, not the mock's numbers.**
+2. **X spends money** → `NEEDS-STEVEN` 2026-07-29f, founder call.
+3. **`SOCIAL_METRICS_ARMED` belongs in `packages/platform`'s env schema** beside
+   `SOCIAL_QUEUE_ARMED` — when, and only when, the tick earns a standing timer. The
+   arm is a CLI flag today because that schema was outside the lane's file set.
+4. **A four-destination post run leaves four `fanout_runs` rows**, so the Runs surface
+   shows four fan-outs behind one Create run. Deliberate: `runFanout` aborts its loop
+   on the first irrecoverable destination, so one call per destination is what honours
+   the spec's Error Behavior. **A surface concern for B-create.3/.4, not a defect.**
+5. **No real vision driver** for reference-describe: a gateway describe call needs a
+   new metering label, which cannot merge without editing `shell-inventory.test.ts` —
+   the deliberate act that ratchet exists to force. Until then a reference reads
+   "attached, not yet analysed", honestly.
+6. **The read-model is one query per publication** (bounded, ≤100 indexed reads). A
+   single-query version needs a batch repo method = a future contract window.
+
+## Sprint 9 / s87 — the launch record (kept for context)
 
 **Both specs are APPROVED** (founder, s86 close) and the **lane-launch GO landed at
 the s87 opener**, verbatim: *"you also have my approval for lane-launch GO. i'll be
