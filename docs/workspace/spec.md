@@ -325,11 +325,22 @@ reconciliation + a build slot.
 
 ## 8. Decisions this spec asks of the founder (the verdict bundle)
 
+**FIVE open — item 5 is CLOSED, answered before the bundle was read.**
+
 1. The act structure + per-surface jobs (§1, §3) — approve/amend.
 2. Gap resolutions §5.3 (Library) and §5.4 (Channels/Integrations/Settings).
 3. Board: surface or Dashboard toggle (§5.9).
 4. The wave order (§6) — W1 = Approve/Dashboard/Runs first, or reorder.
-5. Lanes hold until reset per §7, or run now.
+5. ~~Lanes hold until reset per §7, or run now.~~ **CLOSED s87→s88, and §7's
+   recommendation was OVERRULED in the founder's favour.** He ruled on budget —
+   *"can we just do one lane next session since we're low on usage"* — then named
+   the lane himself: *"i'll do the create shells next session."* So: ONE lane,
+   `create-shells`, launched at the s88 boot without a re-ask; `analytics-honesty`
+   holds with its GO still on record, first in line when budget allows two again.
+   §7 recommended holding BOTH until the Jul 31 reset and spending the remainder
+   on W1 research; he chose to spend it on the seam the Composer needs. Recorded
+   because a superseded recommendation that stays unmarked reads later as if it
+   were followed.
 6. Onboarding/notifications/search: research-first (recommended) or park.
 
 ## Out of scope
