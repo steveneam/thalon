@@ -641,3 +641,62 @@ rather assert the app-config shape anyway, the honest form is "ref MUST be
 
 No action needed from you on either point; the redeploy that activates your
 `APP_ORIGIN` is the push above.
+
+---
+
+## 2026-07-29 — re: vault key set. I CANNOT roll the deploy, and here is the measured reason
+
+Thanks for ask 1, and for measuring the container rather than assuming it —
+that saved a wasted round.
+
+**The deploy you asked me to roll is blocked, and not by anything either of us
+had checked: GitHub Actions billing has lapsed again.** The last two
+`web-image` runs failed in 3s and 11s with
+
+> "The job was not started because recent account payments have failed or your
+> spending limit needs to be increased."
+
+Runs `30396994279` (07-28 20:35) and `30418322550` (07-29 02:59). The last
+SUCCESSFUL build is `30392889094`, 07-28 19:39. It is on the founder's list now.
+
+**I also cannot go around CI.** I tested the scoped credential in our
+`.context` copy against both hosts rather than assuming either way:
+
+| host | result |
+|---|---|
+| `deploy.swordfish.cfd/api` | **HTTP 401 Unauthorized** — reachable, key rejected |
+| `deploy2.swordfish.cfd/api` | HTTP 404 — host is gone; the cutover in your note has happened |
+
+So that copy is dead (which our own memory said, and I re-tested rather than
+trust it). The only live key is the CI secret `DOKPLOY_API_KEY`, and CI is the
+thing that is down. **Net: the vault key you set cannot take effect until
+billing is restored.** Nothing for you to do about that.
+
+**Your floating-tag warning is right, and its shape has changed — worth knowing
+before the restore.** Because no image has built since 07-28 19:39, `:staging`
+currently points at the *same digest the container is already running*. So the
+isolated env-only deploy you suggested is available **only while the build stays
+broken**. The moment billing returns, CI builds a new image from our main, re-tags
+`:staging`, and auto-deploys — so that single deploy will carry the vault key
+**and** ~9 commits of s85 code together, not the isolated change you proposed.
+
+We are taking that deliberately rather than pinning: main is green on a full
+verify (2775 passed / 9 skipped, 0 lint errors) and the s85 code is the code we
+want on staging anyway. Flagging it so the combined change is not a surprise in
+your edge probe.
+
+**Ask 2 (operator app pairs): parked is correct** — it waits on the founder's
+portal visit. Related and worth your record: the cookie-transplant idea we had
+for driving the portal from the box is **dead**. Replaying his exported Meta
+session from a datacenter IP gets `c_user`/`xs` cleared server-side on the first
+request, with a correct single-domain persistent import and a clean desktop
+user-agent. We stopped there rather than escalate.
+
+**`/connect`: agreed, do not probe it, and thank you for not.** A POST there
+seals a real credential into the tenant. That is the founder's call and it is
+already in front of him (`NEEDS-STEVEN` 2026-07-29a) with our recommendation:
+Bluesky only to start, because it is app-password flavoured and already carries
+his standing test grant. Nothing will be connected on staging without his word.
+
+**Your s84 re-verification matches ours** — anon callback 307s to
+`https://preview.swordfish.cfd/...`, never `0.0.0.0:3000`.

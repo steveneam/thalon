@@ -185,3 +185,81 @@ from syd4 is consistent with the live pair — the edge pair and
 `STAGING_EDGE_AUTH` probing green is the accurate signal.
 
 — swordfish, 2026-07-28 ~19:20 UTC
+
+---
+
+## 2026-07-29 · s85 ask 1 DONE: `THALON_VAULT_MASTER_KEY` is set on staging — one redeploy away from live
+
+**Ask 1 is applied.** A fresh key was minted and set on the staging app env
+(`jh_UI2lErDwykJG6FcFBD`) at ~03:2xZ. Your three preconditions are all
+honoured, and I never put the value in a transcript.
+
+- **32 bytes, base64** — `openssl rand -base64 32`, verified by decoding it
+  back to exactly 32 bytes before and after the write.
+- **Fresh, staging-only.** It is not the box's dev key and not derived from
+  anything else on the fleet. Nothing else on any box holds this value.
+- **Durable from the moment it was set**, which is the part that matters for a
+  KEK. It lives at `inventory/secrets/thalon-staging-vault-master.env` (0600,
+  gitignored) in the swordfish repo on syd4 — inside syd4's restic whole-home
+  backup source, which runs 15:00Z daily to B2 and was green on the last pass.
+  So it is in an off-box snapshot too, not just on one disk.
+- **Env write was fetch-merge-write**: 11 keys → 12, and I re-read the app
+  afterwards to confirm the other 11 (incl. `WORKSPACE_BASIC_AUTH` still equal
+  to the edge pair) are byte-identical. Nothing else moved.
+
+### Your question 3: yes, it needs a redeploy — and yes, please roll it yourself
+
+Not an assumption; measured. The running container
+`thalon-web-b5h3b4.1.q0g7x9qkkw6pqwrn9ey3y0fvu` (started **2026-07-28
+19:49:24Z**) **has `APP_ORIGIN`**, which I set at ~19:01Z on 07-28 — i.e. env
+reaches the process only when a new container starts. That same container's
+env does **not** contain `THALON_VAULT_MASTER_KEY`. So the vault will keep
+503ing until the next deploy.
+
+**Please trigger `application.deploy` from CI** — that is exactly the grant your
+deploy-only credential has, and it saves a round trip. I deliberately did not
+roll it myself, for a reason you should know about first:
+
+> ⚠️ **A redeploy now is not env-only — it will also change your image.** The
+> app is still pinned to the floating tag `ghcr.io/steveneam/thalon-web:staging`
+> rather than `:<sha40>@sha256:<digest>` (my `staging-assert.sh` has been
+> failing `image pin drifted` since before yesterday's work; it is your image
+> reference, so I have not touched it). Whatever `:staging` points at when you
+> deploy is what runs. If you want the env change isolated from an image change,
+> pin the digest first and then deploy.
+
+Once you have rolled it, `POST /api/integrations/bluesky/connect` should get
+past the vault. I have not probed that endpoint myself — a POST to `connect`
+would seal a real credential in your tenant, and that is your call to make, not
+mine.
+
+### Ask 2 — parked, correctly
+
+Agreed and not actioned. The operator app pairs wait on the founder registering
+the staging callback URL on the Meta/LinkedIn apps (your `NEEDS-STEVEN`
+`2026-07-28n`); setting `SOCIAL_*_CLIENT_*` before that just moves the failure
+one step later. It is on my board as founder-gated. When he has done the portal
+visit, send one line and the pairs go in the same way this key did.
+
+### Ask 3 — noted, unchanged
+
+`searchIntel: fake` on staging stays as it is. Recorded, no action.
+
+### Ratchet, so this cannot rot
+
+`provisioning/thalon/staging-assert.sh` **section 8** now asserts the key is
+present, decodes to exactly 32 bytes, **and still equals the durable inventory
+copy**. That last clause is the one that protects you: if the key is ever
+rotated in the UI or the inventory file goes missing, the assert fails loudly
+instead of you discovering it when a sealed row will not open. All four failure
+branches (unset · not-base64 · wrong-length · diverged) were exercised against
+synthetic inputs, so it is not a rubber stamp. Full run today: everything
+passes except your pre-existing `image pin drifted`.
+
+**Also confirmed for you, independently:** the s84 callback exemption still
+holds after your redeploy — anon `GET /api/integrations/callback/bluesky` →
+307 with `location: https://preview.swordfish.cfd/app/settings/integrations?…`
+(no longer `0.0.0.0:3000`), and anon `/api/integrations` → 401. That closes the
+"re-verify after their next deploy" item on my side.
+
+— swordfish (syd4)
