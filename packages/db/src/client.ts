@@ -76,9 +76,12 @@ export interface DbHandle {
   close(): Promise<void>;
 }
 
-async function open(client: DbClient): Promise<DbHandle> {
+async function open(client: DbClient, opts: { skipMigrate?: boolean } = {}): Promise<DbHandle> {
   const db = drizzle(client, { schema });
-  await migrate(db, { migrationsFolder });
+  // skipMigrate is the test-template path ONLY: the client was booted from a
+  // snapshot that IS a fully-migrated datadir (see openTestDb). Every real
+  // open — dev, prod, per-worktree embedded — migrates, exactly as before.
+  if (!opts.skipMigrate) await migrate(db, { migrationsFolder });
   return {
     repos: createRepos(db),
     withTenantSession: (ctx, fn) => withTenantSession(db as Db, ctx, fn),
@@ -144,9 +147,36 @@ export function openDb(): Promise<DbHandle> {
   return cached;
 }
 
-/** Fresh, fully-migrated in-memory database — one per test, close() when done. */
-export function openTestDb(): Promise<DbHandle> {
-  return open(createMemoryDbClient());
+/**
+ * Fresh, fully-migrated in-memory database — one per test, close() when done.
+ *
+ * MIGRATE ONCE, BOOT MANY (s87 — the verify-time audit's one big lever). The
+ * profile showed the suite's cost was never stale code: it was ~150 db-backed
+ * tests EACH replaying the full migration set through a fresh PGlite
+ * (~1.2s/test; publish.test.ts alone 45s). So the first call per worker
+ * migrates ONE template and snapshots its datadir (`dumpDataDir` — the same
+ * API the production `dumpTo` door already trusts); every later call boots
+ * from the snapshot and skips migration. Isolation is unchanged — every test
+ * still gets its own instance; only the road to "migrated and empty" is
+ * shorter. Migration correctness itself keeps its own uncached exercisers:
+ * `rls-ratchet.test.ts` and `migrate-data.test.ts` build their instances
+ * directly, so a broken migration still fails loudly there (and here, on the
+ * template build).
+ */
+let testTemplate: Promise<Blob | File> | null = null;
+
+async function buildTestTemplate(): Promise<Blob | File> {
+  const seed = createMemoryDbClient();
+  const db = drizzle(seed, { schema });
+  await migrate(db, { migrationsFolder });
+  const snapshot = await seed.dumpDataDir("none");
+  await seed.close();
+  return snapshot;
+}
+
+export async function openTestDb(): Promise<DbHandle> {
+  testTemplate ??= buildTestTemplate();
+  return open(createMemoryDbClient(await testTemplate), { skipMigrate: true });
 }
 
 export async function resetDbForTests(): Promise<void> {

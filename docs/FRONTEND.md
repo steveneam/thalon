@@ -1,6 +1,13 @@
 # FRONTEND — landing page + workspace design (pass 3 / Sprint 6)
 
-> **Status note (s61):** partially superseded — the workspace sections predate the s58–60 Phase D redesign; the workspace design-of-record is `docs/research/workspace-phase-d-designs.md` + `DESIGN.md` §5. Landing-page sections remain live until the portfolio-end landing work.
+> **Status (s87 hygiene audit): SPLIT DOC — read this before citing.** The
+> **workspace half is ARCHIVED IN PLACE** — superseded TWICE (s58–60 Phase D,
+> then the s72 DOCTRINE-0 mock-sheets era; today's workspace spec of record is
+> `docs/research/mock-sheets/` + `docs/workspace/spec.md`). It stays in this
+> file only because ~23 live citations (landing components, CHARTER, ADRs,
+> schema docblocks) point here — a move would orphan them for zero gain. The
+> **landing half stays LIVE** until the portfolio-end landing work (founder
+> s38 deferral); landing components cite their sections here as spec.
 
 > Founder-directed 2026-07-06 (planning session); elaboration delegated to lead ("elaborate, imagine and integrate — I trust your best practice and creativity"). Decision record: `docs/adr/0005-pass3-recharter.md`. Charter buckets: Sprint 6, B6.1–B6.7. Reference material (founder-supplied brand mockups + 23 workspace screenshots) lives outside the repo in founder/vault space — described here, never copied in.
 

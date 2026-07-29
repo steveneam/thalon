@@ -99,6 +99,23 @@ six lead items) → the two APPROVED specs → `docs/research/ux-refinement-prog
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
+**THE HYGIENE AUDIT RAN LAST (his directive), AND ITS HEADLINE IS HONEST: the
+repo was largely CLEAN, and "verify is slow because it verifies retired code"
+was FALSE.** Full record: `docs/research/repo-hygiene-audit-s87.md`. What
+changed: **verify 342s → ~280s wall** (migrate-once-boot-many test template in
+`openTestDb` — the real cause was ~150 db tests each replaying all migrations,
+not stale code) · 2 orphaned components deleted (their bridge pins lowered —
+the bridge ratchet caught the deletion, ratchets policing ratchets) · 3
+gitignores → ONE (semantics `git check-ignore`-verified) · Wave-0 sheet
+SUPERSEDED + archived (`docs/research/mock-sheets/archive/`) · FRONTEND.md
+workspace half archived IN PLACE (23 live citations made a move wrong) ·
+duplication verdict: only AGENTS/CLAUDE (deliberate) + per-site fonts (by
+design). **Standing system per his follow-up: `tests/repo-hygiene.test.ts`**
+(ONE gitignore · no junk · no orphans · no undeclared dupes · archive
+contract), red-checked, ~2s, in every verify. Deliberately NOT done, queued on
+his verdicts: Calendar sheet archive (load-bearing until the rename) ·
+Library/Transcription collapse (§5.3) · settings bridge (burns with W3).
+
 **A SECOND RATCHET LANDED THE SAME EVENING — SPEC GROUND TRUTH (his directive:
 "include all the dependencies, exact paths, schemas … if it does [make it better]
 then ratchet that").** Three rungs: (1) EXECUTABLE —

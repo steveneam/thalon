@@ -17,7 +17,18 @@ export function createDbClient(opts: { dataDir: string }): DbClient {
   return new PGlite(dir, { extensions: { vector } });
 }
 
-/** Fresh in-memory database — one per test, no files to clean up. */
-export function createMemoryDbClient(): DbClient {
-  return new PGlite({ extensions: { vector } });
+/**
+ * Fresh in-memory database — one per test, no files to clean up.
+ *
+ * `loadFrom` boots the instance from a `dumpDataDir()` snapshot instead of
+ * empty — the s87 test-speed fix's seam: the db package migrates ONE template
+ * per worker and every subsequent test db is restored from it, skipping the
+ * 20+ migration replay that made each `fixture()` cost ~1.2s. Extensions must
+ * be passed again either way: the snapshot carries the extension's catalog
+ * state, but the wasm module is wired at construction.
+ */
+export function createMemoryDbClient(loadFrom?: Blob | File): DbClient {
+  return new PGlite(
+    loadFrom ? { loadDataDir: loadFrom, extensions: { vector } } : { extensions: { vector } },
+  );
 }

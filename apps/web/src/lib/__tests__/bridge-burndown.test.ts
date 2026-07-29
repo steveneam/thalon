@@ -78,7 +78,8 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["components/ui/badge.tsx", 28],
   ["components/ui/button.tsx", 36],
   ["components/ui/card.tsx", 4],
-  ["components/ui/skeleton.tsx", 1],
+  // components/ui/skeleton.tsx left the map at the s87 hygiene audit: the
+  // component was orphaned (zero imports repo-wide) and deleted outright.
   // The whole components/videos/ block left the map at the s76 exact-mock
   // rebuild: all three video surfaces were rebuilt from their sheets and the
   // old implementation (list, browser, cut-editor, track-view, assist-panel,
@@ -90,7 +91,8 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // bulk band from the sheet's chrome, leaving this shared component with no
   // caller anywhere. Its convention survives where it is actually used.
   ["components/workspace/command-palette.tsx", 13],
-  ["components/workspace/error-notice.tsx", 1],
+  // components/workspace/error-notice.tsx — same s87 audit deletion: orphaned,
+  // zero imports, removed rather than rebuilt.
 ]);
 
 const SCAN_ROOTS = ["app/app", "components"];

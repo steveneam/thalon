@@ -63,3 +63,27 @@ Thumbs.db
 
 # a SYMLINK named node_modules (worktree lane prep) is not matched by "node_modules/" — pin both forms
 node_modules
+
+# ---------------------------------------------------------------------------
+# Consolidated from apps/web/.gitignore + infra/.gitignore (s87 hygiene audit,
+# founder ask: ONE gitignore). Patterns are repo-wide; all were app-scoped.
+# ---------------------------------------------------------------------------
+# next.js dev-mode distDir (apps/web/next.config.ts sets distDir=.next-dev in dev)
+.next-dev/
+# test coverage output
+coverage/
+# typescript incremental state + Next's generated env types
+*.tsbuildinfo
+next-env.d.ts
+# local certs
+*.pem
+# yarn/pnp leftovers (scaffold hygiene; npm is the package manager of record)
+.pnp.*
+.yarn/
+# debug logs beyond *.log (npm/yarn/pnpm name variants)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+# CDK synth output (infra/)
+cdk.out/
