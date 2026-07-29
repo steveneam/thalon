@@ -199,13 +199,15 @@ usage."* So s88 runs ONE lane beside a deliberately thin lead track. Both
 kickoffs below stay committed and current; the one not run HOLDS, losing
 nothing.
 
-**Which lane: the founder's word decides at the opener; the DEFAULT is
-`analytics-honesty`** (it is the one with his GO already on record — "so they
-can just start building"). **The lead's recommendation is to swap to
-`create-shells`** — Create is his stated centre of gravity, the shells are
-B-create.4's prerequisite, and nothing downstream blocks on analytics-honesty
-this month — but that swap needs his one word, since he never named that run.
-Either answer launches immediately; no re-planning.
+**THE LANE IS `create-shells` — his word, verbatim: *"i'll do the create shells
+next session."*** That is the fresh named GO the run needed (lead-drives-lanes:
+approval covers exactly the named run), and it takes the lead's recommendation:
+Create is the stated centre of gravity and the two shells are B-create.4's
+prerequisite. **Launch it at the s88 boot with NO re-ask.**
+
+**`analytics-honesty` HOLDS, losing nothing** — its kickoff stays committed and
+current, its GO stays on record, and nothing downstream blocks on it this
+month. It is the obvious first lane whenever budget allows two again.
 
 **The thin lead track, cheapest-first:** (1) the workspace-spec §8 verdicts
 (near-free — his six words + small edits) · (2) W1 research (Approve ·

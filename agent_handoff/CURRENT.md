@@ -144,10 +144,12 @@ recommended: lanes HOLD until the Jul 31 reset; remaining budget goes to W1
 research (Approve · Dashboard · Runs — the highest-stakes unresearched surfaces).
 
 **⚠ s88 IS ONE LANE ONLY — founder budget ruling, verbatim:** *"can we just do
-one lane next session since we're low on usage."* **Default lane =
-`analytics-honesty` (his GO is on record); the lead recommends swapping to
-`create-shells` (Create's critical path) — his one word at the opener decides,
-either launches immediately.** The un-run kickoff HOLDS, losing nothing. Lead
+one lane next session since we're low on usage."* **THE LANE IS DECIDED: `create-shells`** — his
+word, verbatim: *"i'll do the create shells next session."* Launch it at the
+boot with NO re-ask (`scripts/launch-lane.sh create-shells …`, kickoff
+`agent_handoff/lanes/KICKOFF-create-shells.md`, worktree prep first).
+**`analytics-honesty` HOLDS** — kickoff committed and current, GO still on
+record, first in line whenever budget allows two lanes again. Lead
 track under low budget, cheapest-first: workspace-spec §8 verdicts → W1
 research only if headroom → sheets post-reset (Jul 31 11pm UTC). Portal tasks:
 his own time (Gmail draft + `.context/developer-apps.md` §CURRENT TASKS).
