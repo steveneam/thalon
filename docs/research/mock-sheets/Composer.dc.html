@@ -31,6 +31,31 @@
            and folding it into the judge card would blur a gate with a hint. This closes
            the s70c gap: target terms / SEO coverage have had no visible home on the
            social path at all. His call whether it earns its own strip instead.
+     PASS 1 (s86, the UX refinement programme — docs/research/ux-refinement-program.md).
+     Reference taken: HubSpot's create-social-post, whose preview runs at FULL FIDELITY.
+       · THE PREVIEW IS NOW THE POST, not a preview of its text. Media went from a 64px
+         strip at the bottom to the real thing; hashtags carry the platform's LINK
+         colour (they are links, and their colour is most of what makes a post read
+         busy or clean); LinkedIn's own action row is drawn underneath.
+       · MEDIA GAINED AN ICON TOOLBAR (crop · alt · replace · remove) instead of a
+         text row, and a COVER FRAME picker joins the band.
+       · The cover frame IS the Postiz finding applied where it is true: a video
+         destination declares more settings than a text one, so the generated band
+         differs per tab. YouTube's title/thumbnail/made-for-kids and TikTok's
+         privacy/duet/stitch belong on THEIR tabs — drawing them under LinkedIn would
+         have been a prettier lie. The ⓘ says so instead.
+       · A FABRICATED-DATA DEFECT WAS FOUND AND CUT: the first draft of the preview
+         carried "41 reactions · 6 comments · 2 reposts" on a post that has not been
+         published. That is precisely the rule-5 failure the programme forbids —
+         invented engagement reading as real — so the reaction row is gone entirely.
+       · ONE tooltip open, anchored into the band's empty right gutter. The first two
+         placements each covered something that mattered (the band it explains, then
+         the operator's own draft text); the third was measured, not eyeballed.
+
+     MEASURED, not eyeballed: the right column overflowed by ~85px on the first cut —
+     the action row AND the honesty caveat both sat below the 940 fold, i.e. the whole
+     point of the pass was invisible. Judge copy went to single lines, the media to
+     84px, the caveat to one line; preview now ends at 911 inside the card's 916.
      View: open this file with theme.css in the same dir; helmet ~= head. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
@@ -71,7 +96,7 @@
 
           /* Right column. */
           .cmp-right { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
-          .jrow { display: flex; align-items: flex-start; gap: 9px; padding: 9px 14px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
+          .jrow { display: flex; align-items: flex-start; gap: 9px; padding: 7px 14px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
           .jrow:first-of-type { border-top: none; }
           .jmark { width: 16px; flex: none; text-align: center; font-size: 12px; margin-top: 1px; }
           .term-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border: 1px solid var(--n-500); border-radius: var(--r-pill); font-size: 11.5px; color: var(--n-1000); background: var(--n-200); }
@@ -79,12 +104,50 @@
           .term-chip.miss { border-color: var(--warn); color: var(--warn); background: var(--warn-subtle); }
 
           /* Preview with the REAL truncation point drawn. */
-          .pv { border: 1px solid var(--n-500); border-radius: 9px; background: var(--n-bg); padding: 12px 13px; display: flex; flex-direction: column; gap: 8px; }
+          .pv { border: 1px solid var(--n-500); border-radius: 9px; background: var(--n-bg); padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
           .pv-head { display: flex; align-items: center; gap: 8px; }
           .pv-av { width: 30px; height: 30px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); flex: none; }
           .pv-body { font-size: 12.5px; line-height: 1.55; color: var(--n-1000); }
           .pv-cut { border-top: 1px dashed var(--warn); margin: 2px 0 0; padding-top: 6px; display: flex; align-items: center; gap: 7px; }
           .pv-fade { color: var(--n-800); }
+
+          /* ── PASS 1 (s86): FULL-FIDELITY PREVIEW — HubSpot's move. A preview that
+               shrinks the media to a strip is not a preview of the post, it is a
+               preview of the text. Media goes large, hashtags carry the platform's
+               LINK colour (they are links, and their colour is most of why a post
+               reads as busy or clean), and the platform's OWN action row is drawn so
+               the operator sees the object they are actually shipping.
+               Sprout ships the same honesty caveat we do — two independent products
+               landing on it is why ours stays. ── */
+          .pv-media { position: relative; width: 100%; height: 84px; border-radius: 7px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 8px, var(--n-100) 8px, var(--n-100) 16px); display: flex; align-items: center; justify-content: center; font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
+          .pv-media .dur { position: absolute; right: 7px; bottom: 7px; padding: 1px 6px; border-radius: var(--r-pill); background: var(--n-100); border: 1px solid var(--n-500); font-size: 9.5px; }
+          .pv-media .play { width: 32px; height: 32px; border-radius: 50%; background: var(--n-100); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; color: var(--n-1000); }
+          .tag { color: var(--act); }
+          .pv-react { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--n-800); border-top: 1px solid var(--n-400); padding-top: 7px; }
+          .pv-actions { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--n-400); padding-top: 7px; }
+          .pv-act { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--n-900); }
+
+          /* Media control: a thumbnail plus an ICON toolbar (HubSpot), not a text row. */
+          .mtools { display: inline-flex; align-items: center; gap: 2px; }
+          .mtool { width: 25px; height: 25px; border-radius: 6px; border: 1px solid var(--n-500); background: var(--n-200); display: flex; align-items: center; justify-content: center; color: var(--n-900); cursor: pointer; }
+          .mtool:hover { color: var(--n-1000); border-color: var(--n-700); }
+          .mtool.danger:hover { color: var(--err); border-color: var(--err); }
+
+          /* Cover-frame picker — every editor reference in the programme puts FRAME
+             THUMBNAILS on the thing being edited; a video's cover is the highest-value
+             one, because it is the only frame most of the feed will ever see. */
+          .frames { display: inline-flex; gap: 5px; }
+          .frame { width: 46px; height: 28px; border-radius: 5px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-300) 0 6px, var(--n-200) 6px 12px); display: flex; align-items: flex-end; justify-content: flex-end; padding: 2px; cursor: pointer; }
+          .frame span { font-family: var(--font-data); font-size: 8px; color: var(--n-800); }
+          .frame.on { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); }
+
+          /* ⓘ + tooltip — shared vocabulary, carried verbatim from Analytics.dc.html.
+             Copying the markup WITHOUT this block is what made Schedule's first render
+             spill its tooltip into the footer as body copy (s86). */
+          .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+          .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+          .tip { position: absolute; z-index: 9; width: 208px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); }
+          .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
           .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
         </style>
       </helmet>
@@ -137,7 +200,7 @@
                   Deterministic video changed what we can promise. Every beat is a build step, so the same prompt renders the same film twice — and a failed take names the beat that failed instead of the whole render. Nothing here is <span class="hit">guaranteed</span> to be faster on the first pass, but the second pass is free.
                 </div>
 
-                <div style="display:flex;align-items:center;gap:10px">
+                <div style="display:flex;align-items:center;gap:10px;position:relative">
                   <div class="ptabs">
                     <span class="ptab on"><span class="dot" style="background:var(--warn)"></span>LinkedIn</span>
                     <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Facebook</span>
@@ -146,14 +209,28 @@
                     <span class="ptab"><span class="dot" style="background:var(--ok)"></span>Blog</span>
                   </div>
                   <div style="flex:1"></div>
-                  <span class="t-label">settings come from each platform's schema — 1 refuses, 1 needs a trim</span>
+                  <!-- THE SHEET'S ONE OPEN TOOLTIP. The fact stays on the surface (1
+                       refuses, 1 needs a trim — that changes the next click); the
+                       schema research behind it collapses into ⓘ. Opens LEFT so it
+                       never covers the tabs or the band it describes. -->
+                  <span class="t-label" style="display:inline-flex;align-items:center;gap:6px">settings come from each platform's schema · 1 refuses, 1 needs a trim <span class="info">i</span></span>
+                  <div class="tip" style="right:0;top:calc(100% + 8px)">
+                    <span class="tip-h">WHY THE BAND CHANGES PER TAB</span>
+                    Each platform declares its own settings, so the band is generated, never hand-written. A VIDEO destination declares more: YouTube wants a title, a thumbnail and a made-for-kids answer; TikTok wants privacy, duet and stitch. Those live on their own tabs.
+                  </div>
                 </div>
 
                 <div class="band">
                   <div class="fld"><dt>Post as</dt><dd><span class="ctl">Steven · member</span><span class="t-label">the only seat this token grants</span></dd></div>
                   <div class="fld"><dt>Visibility</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
                   <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label">off — links in the body do not cost reach on this platform</span></dd></div>
-                  <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="t-label">40s cut · native upload</span></dd></div>
+                  <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="mtools"><span class="mtool" title="Crop"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4.5 1.5v10h10"></path><path d="M1.5 4.5h10v10"></path></svg></span><span class="mtool" title="Alt text"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 6.4 3.5h1.2l3.4 9M4.6 9.6h5.2M13 3.5v9"></path></svg></span><span class="mtool" title="Replace"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5A5.5 5.5 0 0 1 12 4.2"></path><path d="M12.4 1.9v2.6H9.8"></path><path d="M13.5 9.5A5.5 5.5 0 0 1 4 11.8"></path><path d="M3.6 14.1v-2.6h2.6"></path></svg></span><span class="mtool danger" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 4.5h9M6.5 4.5V3h3v1.5M5 4.5l.6 8h4.8l.6-8"></path></svg></span></span><span class="t-label">40s cut · native upload</span></dd></div>
+                  <!-- VIDEO variant of the band (the Postiz settings-schema finding,
+                       applied where it is TRUE): a video destination declares more than
+                       a text one, and LinkedIn's video-specific setting is its cover
+                       frame. It is drawn as frames, because the cover is the only frame
+                       most of the feed will ever see. -->
+                  <div class="fld"><dt>Cover frame</dt><dd><span class="frames"><span class="frame on"><span>0:00</span></span><span class="frame"><span>0:12</span></span><span class="frame"><span>0:24</span></span><span class="frame"><span>0:36</span></span></span><span class="t-label">the frame the feed stops on</span></dd></div>
                   <div class="fld"><dt>Link</dt><dd><span class="ctl">thalon.example/build-step-video</span><span class="ctl ghosted">preview card ▾</span></dd></div>
                   <div class="fld"><dt>Alt text</dt><dd><span class="ctl">“A build step renders a beat”</span><span class="t-label">travels with the video on every destination that accepts it</span></dd></div>
                   <div class="fld"><dt>Who can comment</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
@@ -206,7 +283,7 @@
                     <span class="jmark" style="color:var(--err)">✕</span>
                     <div style="min-width:0">
                       <div style="font-weight:500">Denylist · 1 hit</div>
-                      <div class="excerpt" style="white-space:normal">“guaranteed” is on your denylist. It appears once, in the last sentence — marked in the body.</div>
+                      <div class="excerpt" style="white-space:normal">“guaranteed” is on your denylist — marked in the body.</div>
                     </div>
                   </div>
                   <div class="jrow">
@@ -225,7 +302,7 @@
                   </div>
                   <div class="jrow" style="background:var(--n-bg)">
                     <span class="jmark" style="color:var(--n-800)">·</span>
-                    <span class="t-label" style="font-size:11.5px">It gates — it never rewrites. Nothing on this screen edits your words.</span>
+                    <span class="t-label" style="font-size:11.5px">It gates — it never rewrites. Nothing here edits your words.</span>
                   </div>
                 </div>
 
@@ -241,7 +318,7 @@
                     <span class="term-chip">content automation</span>
                     <span class="term-chip">build-step video</span>
                     <span class="term-chip miss">deterministic video · missing</span>
-                    <span class="t-label" style="width:100%;margin-top:2px;font-size:11.5px">One target term never appears. The judge does not care; the search index will.</span>
+                    <span class="t-label" style="width:100%;margin-top:2px;font-size:11.5px">The judge does not care; the search index will.</span>
                   </div>
                 </div>
 
@@ -265,9 +342,19 @@
                         <span class="t-label" style="font-size:11px;color:var(--warn)">…see more</span>
                         <span class="t-label" style="font-size:10.5px">feed cuts here · 210 characters</span>
                       </div>
-                      <div class="thumb-md" style="width:100%;height:64px"><span>clip frame · 40s</span></div>
+                      <div style="font-size:12.5px;line-height:1.5"><span class="tag">#deterministicvideo</span> <span class="tag">#contentautomation</span></div>
+                      <div class="pv-media">
+                        <span class="play"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 3.6v8.8L12.4 8z"></path></svg></span>
+                        <span class="dur">0:40</span>
+                      </div>
+                      <div class="pv-actions">
+                        <span class="pv-act"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7v6.5H2.5V7zM6 13.5h5.2c.7 0 1.3-.5 1.4-1.2l.8-4c.1-.7-.4-1.3-1.1-1.3H9.7l.5-2.4c.1-.8-.4-1.6-1.2-1.6-.4 0-.8.3-1 .7L6 7z"></path></svg>Like</span>
+                        <span class="pv-act"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M13.5 8c0 2.8-2.5 5-5.5 5-.9 0-1.7-.2-2.4-.5L2.5 13.5l1.1-2.8C2.9 9.9 2.5 9 2.5 8c0-2.8 2.5-5 5.5-5s5.5 2.2 5.5 5Z"></path></svg>Comment</span>
+                        <span class="pv-act"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5 5.2 4.2 7.4 6.5"></path><path d="M5.2 4.2v6.1c0 .8.7 1.5 1.5 1.5h4.8"></path><path d="M13 9.5 10.8 11.8 8.6 9.5"></path></svg>Repost</span>
+                        <span class="pv-act"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2 7.2 8.8"></path><path d="M14 2 9.7 14l-2.5-5.2L2 6.3z"></path></svg>Send</span>
+                      </div>
                     </div>
-                    <span class="t-label" style="font-size:11px">Drawn from the platform's documented rules, not a live render. The real post can differ — treat the cut point as close, not exact.</span>
+                    <span class="t-label" style="font-size:11px">Documented platform rules, not a live render — close, not exact.</span>
                   </div>
                 </div>
               </div>
