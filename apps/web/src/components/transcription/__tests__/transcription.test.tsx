@@ -47,7 +47,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
       "https://youtube.com/watch?v=abc",
     );
     expect(
-      screen.getByText(/Sources are per-tenant, chunked and embedded once/),
+      screen.getByText(/Sources are per-tenant and chunked once/),
     ).toBeInTheDocument();
   });
 

@@ -11,6 +11,10 @@ import { resolveTenantCtx } from "@/lib/tenant";
  * judge-runner precedent) → serialize. Provider failures surface VERBATIM
  * as the error body — "hosted-vendor is not configured — set
  * TRANSCRIPT_VENDOR_URL…" is the honest UI copy, not a translated one.
+ *
+ * Spend is opt-in per request (s79): the body's optional `aiEnhance` is the
+ * operator's toggle. A body without it — an old client, a curl — ingests
+ * free, because the route adds no default of its own.
  */
 export async function POST(request: Request) {
   const body: unknown = await request.json().catch(() => null);

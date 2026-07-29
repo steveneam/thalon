@@ -43,6 +43,10 @@ export function toLibraryRow(source: Source): LibrarySourceRow {
     media: resolveSourceMedia(source),
     tags: readTags(meta.tags),
     areaRelevance: readAreaRelevance(meta.areaRelevance),
+    // Only a real boolean survives: a row without the key (every row ingested
+    // before s86) stays undefined, and the surface says nothing about it rather
+    // than back-dating a choice its operator never made.
+    ...(typeof meta.aiEnhanced === "boolean" ? { aiEnhanced: meta.aiEnhanced } : {}),
     provider: typeof meta.transcriptProvider === "string" ? meta.transcriptProvider : null,
     segmentCount: typeof meta.segmentCount === "number" ? meta.segmentCount : null,
     createdAt: source.createdAt.toISOString(),

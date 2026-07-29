@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   dayStamp,
+  freeIngestNote,
   parseTags,
   sourceFacts,
   sourceLead,
@@ -88,5 +89,32 @@ describe("stamps", () => {
     // Plain-text ingest: no timings, so no invented duration.
     expect(transcriptStamp([{ text: "one" }])).toBe("1 segment");
     expect(transcriptStamp([])).toBe("0 segments");
+  });
+});
+
+describe("freeIngestNote (s86 — the absence a free ingest creates, in words)", () => {
+  it("speaks only for a row whose operator CHOSE free", () => {
+    expect(freeIngestNote(row({ aiEnhanced: false }))).toBe(
+      "free ingest — no relevance score, not semantically retrievable",
+    );
+  });
+
+  it("says nothing about an enhanced row, or about a row that predates the key", () => {
+    // Enhanced: its own relevance clause is the statement.
+    expect(freeIngestNote(row({ aiEnhanced: true }))).toBeNull();
+    // Pre-s86: absent is UNKNOWN, and unknown claims nothing — the same rule
+    // every other mini-contract key follows here.
+    expect(freeIngestNote(row())).toBeNull();
+  });
+
+  it("lets the DATA win over the flag: a row with real scores states them, never the note", () => {
+    expect(
+      freeIngestNote(
+        row({
+          aiEnhanced: false,
+          areaRelevance: [{ areaId: "a1", areaName: "ai tooling", score: 0.8, reason: "why" }],
+        }),
+      ),
+    ).toBeNull();
   });
 });
