@@ -1,4 +1,5 @@
 import type {
+  CreateFamily as ContractCreateFamily,
   MonitoredAreaConfig,
   MonitoredAreaStatus,
   SearchTargetOrigin,
@@ -150,8 +151,13 @@ export interface IntelCapture {
  * Create picker. `email` (B-crm.4 front half, session 29) is the lead-only
  * outreach family: it composes FROM a lead's context, so only lead cards
  * carry its exit and only a lead_promote context can arm its compose.
+ *
+ * s87 window: re-pointed at the contracts vocabulary (`CREATE_FAMILIES`)
+ * instead of the hand-copied union it used to be. The engine dispatches on
+ * this list; a second copy of it here could drift from the one that picks
+ * the engine, which is the mirror the format-registry docblock warns about.
  */
-export type CreateFamily = "post" | "video" | "page" | "email";
+export type CreateFamily = ContractCreateFamily;
 
 /**
  * The structured context object behind a capture id (wave-3 §3): what the

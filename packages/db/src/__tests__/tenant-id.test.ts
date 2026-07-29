@@ -18,6 +18,7 @@ describe("tenancy ratchet", () => {
       [
         "approvals",
         "brand_profiles",
+        "create_runs",
         "drafts",
         "edit_diffs",
         "eval_cases",
@@ -33,6 +34,7 @@ describe("tenancy ratchet", () => {
         "oauth_states",
         "outreach_sends",
         "planned_slots",
+        "publication_metrics",
         "publish_queue",
         "retrieval_cache",
         "saved_views",

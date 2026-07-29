@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { platformRoutingSchema } from "./create-run";
 import { icpSchema, outreachSequenceSchema } from "./leads";
 import { socialPublishConfigSchema } from "./social";
 
@@ -106,6 +107,18 @@ export const brandProfileConfigSchema = z.object({
    * pre-window config parses to a byte-identical object (test-pinned).
    */
   social: socialPublishConfigSchema.optional(),
+  /**
+   * s87 window (B-create.1): Create-family → default destinations, read by
+   * plan derivation to PREFILL the wizard's platform step
+   * (contracts/create-run.ts, whose docblock spells out why this is not the
+   * `routing` field three lines up — different key space, different
+   * consumer, different question).
+   *
+   * OPTIONAL like every post-charter block: absence disarms the prefill (the
+   * operator picks platforms themselves, today's behavior) and a pre-window
+   * config parses to a byte-identical object — test-pinned.
+   */
+  platformRouting: platformRoutingSchema.optional(),
 });
 
 export type PlatformProfile = z.infer<typeof platformProfileSchema>;

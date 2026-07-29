@@ -2,6 +2,7 @@ import type { Db } from "../types";
 import { approvalsRepo, type ApprovalsRepo } from "./approvals";
 import { brandProfilesRepo, type BrandProfilesRepo } from "./brand-profiles";
 import { cachesRepo, type CachesRepo } from "./caches";
+import { createRunsRepo, type CreateRunsRepo } from "./create-runs";
 import { draftsRepo, type DraftsRepo } from "./drafts";
 import { entitlementsRepo, type EntitlementsRepo } from "./entitlements";
 import { evalCasesRepo, type EvalCasesRepo } from "./eval-cases";
@@ -16,6 +17,7 @@ import { monitoredAreasRepo, type MonitoredAreasRepo } from "./monitored-areas";
 import { oauthStatesRepo, type OauthStatesRepo } from "./oauth-states";
 import { outreachSendsRepo, type OutreachSendsRepo } from "./outreach-sends";
 import { plannedSlotsRepo, type PlannedSlotsRepo } from "./planned-slots";
+import { publicationMetricsRepo, type PublicationMetricsRepo } from "./publication-metrics";
 import { publishQueueRepo, type PublishQueueRepo } from "./publish-queue";
 import { savedViewsRepo, type SavedViewsRepo } from "./saved-views";
 import { socialPublicationsRepo, type SocialPublicationsRepo } from "./social-publications";
@@ -45,6 +47,8 @@ export interface Repos {
   sourceChunks: SourceChunksRepo;
   sourceMetrics: SourceMetricsRepo;
   fanoutRuns: FanoutRunsRepo;
+  /** s87 window (B-create.1): the Create run ledger — brief, plan, children. */
+  createRuns: CreateRunsRepo;
   drafts: DraftsRepo;
   judgeResults: JudgeResultsRepo;
   approvals: ApprovalsRepo;
@@ -71,6 +75,8 @@ export interface Repos {
   savedViews: SavedViewsRepo;
   entitlements: EntitlementsRepo;
   socialPublications: SocialPublicationsRepo;
+  /** s87 window (D2): append-only own-post metrics. Absence means not measured — never 0. */
+  publicationMetrics: PublicationMetricsRepo;
   sweepSchedules: SweepSchedulesRepo;
   /**
    * s82 window (W1): `publish_queue` has its repository at last — the table
@@ -91,6 +97,7 @@ export function createRepos(db: Db): Repos {
     sourceChunks: sourceChunksRepo(db),
     sourceMetrics: sourceMetricsRepo(db),
     fanoutRuns: fanoutRunsRepo(db),
+    createRuns: createRunsRepo(db),
     drafts: draftsRepo(db),
     judgeResults: judgeResultsRepo(db),
     approvals: approvalsRepo(db),
@@ -117,6 +124,7 @@ export function createRepos(db: Db): Repos {
     savedViews: savedViewsRepo(db),
     entitlements: entitlementsRepo(db),
     socialPublications: socialPublicationsRepo(db),
+    publicationMetrics: publicationMetricsRepo(db),
     sweepSchedules: sweepSchedulesRepo(db),
     publishQueue: publishQueueRepo(db),
   };

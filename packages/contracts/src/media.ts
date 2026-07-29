@@ -154,9 +154,37 @@ export type AudioRef = z.infer<typeof audioRefSchema>;
 export const MEDIA_PROVENANCES = ["captured", "derived", "operator"] as const;
 export type MediaProvenance = (typeof MEDIA_PROVENANCES)[number];
 
+/**
+ * s87 window (B-create.1): WHAT THE MEDIA IS FOR — the licensing wall, as
+ * data.
+ *
+ * `use`       — mine; it rides the draft as the post's own media.
+ * `reference` — inspiration; it INFORMS generation and never enters output.
+ *
+ * These are not two flavours of the same thing. A reference is material we
+ * may have no right to publish: the operator brought it so the engine could
+ * describe its style or subject and write something *similar but different*
+ * (the template method's own doctrine). The moment reference bytes reach a
+ * draft's media, the public-asset door or a platform call, that distinction
+ * has been lost silently — which is why the engine-side rule is pinned by a
+ * test rather than remembered, and why `createBriefMediaSchema` makes the
+ * choice REQUIRED at the attach door (spec R4, Decision 4).
+ */
+export const MEDIA_ROLES = ["use", "reference"] as const;
+export type MediaRole = (typeof MEDIA_ROLES)[number];
+
 /** Envelope fields shared by every family; the `ref` is supplied per family below. */
 const envelopeFields = {
   provenance: z.enum(MEDIA_PROVENANCES),
+  /**
+   * OPTIONAL, and deliberately NOT `.default("use")`. Every media envelope
+   * written before this window predates the two-role model, and defaulting
+   * here would make each of them parse into a *different* object than it was
+   * stored as — additivity gone, for a value nobody chose. Absence means
+   * "written before roles existed, i.e. `use`", which `mediaRole()` is the
+   * single place to say.
+   */
+  role: z.enum(MEDIA_ROLES).optional(),
   /**
    * When the ref was WRITTEN — not when the underlying media was made.
    *
@@ -227,6 +255,34 @@ export function refOrientation(ref: MediaRef): MediaOrientation {
 
 function isMeasured(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Roles — the licensing wall, expressed once.                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * THE one reading of an envelope's role. Absent = `use`, because that is
+ * what every pre-window envelope in fact was — stated here so no call site
+ * re-derives the default and no two of them disagree about it.
+ */
+export function mediaRole(envelope: { role?: MediaRole }): MediaRole {
+  return envelope.role ?? "use";
+}
+
+/** True when this media must never reach a draft, the public-asset door or a platform call. */
+export function isReferenceOnly(envelope: { role?: MediaRole }): boolean {
+  return mediaRole(envelope) === "reference";
+}
+
+/**
+ * The licensing wall as a function: everything the run may PUBLISH, which is
+ * everything that is not a reference. Consumers filter with this rather than
+ * hand-rolling `role !== "reference"` — one wall, one place to test, and a
+ * future third role cannot quietly land on the publish side of it.
+ */
+export function outputEligible<T extends { role?: MediaRole }>(envelopes: readonly T[]): T[] {
+  return envelopes.filter((e) => !isReferenceOnly(e));
 }
 
 /** Narrowing helpers so consumers never re-derive the discriminant by hand. */

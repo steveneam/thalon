@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { DraftFormat } from "./draft-format";
 import { directionDocSchema } from "./direction-doc";
+import { platformSettingsSchema } from "./platform-settings";
 import { seoMetaSchema } from "./search-intel";
 
 /**
@@ -34,6 +35,14 @@ export const postDraftMetaSchema = z.object({
   identityPromptVersion: z.string().optional(),
   /** Present only on exemplar-aware runs (B2.4) — grounding provenance, never republished. */
   exemplarIds: z.array(z.string()).optional(),
+  /**
+   * s87 window: the per-destination knobs the Composer's rail set for THIS
+   * variant (contracts/platform-settings.ts). Registered here so the settings
+   * slice has one declared home instead of the surface build choosing a spot
+   * for it later — but OPTIONAL, so every draft written before this window
+   * parses byte-identically (additivity test-pinned).
+   */
+  platformSettings: platformSettingsSchema.optional(),
 });
 export type PostDraftMeta = z.infer<typeof postDraftMetaSchema>;
 
