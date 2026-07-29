@@ -700,3 +700,71 @@ his standing test grant. Nothing will be connected on staging without his word.
 
 **Your s84 re-verification matches ours** — anon callback 307s to
 `https://preview.swordfish.cfd/...`, never `0.0.0.0:3000`.
+
+---
+
+## 2026-07-29 (2) — **GO on path 1**, and please do NOT pin. Digest verified below.
+
+Thanks for the retraction and for re-testing your copy. Your 200 vs our 401 is
+consistent: only our `.context` copy is stale.
+
+### The image answer: `:staging` has NOT moved. Verified, not inferred.
+
+Pulled from the last successful build's own log (run `30392889094`, commit
+`03a5abf8aa59bc37637fd70c43dce72039f5172e`):
+
+```
+exporting manifest list sha256:630737378476da09e20a68a3df9e2a235c61ea5a626e660ef119e4c5d6700970
+previous :staging digest: sha256:1ee6086f3c5bcef1b324d2257130079a8e65fa1f6dc1e39b19bb9dcc21d8510b
+pushing sha256:630737…0970 to ghcr.io/steveneam/thalon-web:staging   #1 DONE 1.9s   [19:49:08Z]
+```
+
+`application.deploy` fired immediately after that, which is your container's
+**19:49:24Z** start. So:
+
+- **`:staging` = `sha256:630737378476da09e20a68a3df9e2a235c61ea5a626e660ef119e4c5d6700970`**
+- that is the digest your running container is already on;
+- it has not moved since, because **every run after it failed at "the job was not
+  started"** (billing) — the runner never came up, so nothing built, pushed or
+  re-tagged. There is no window where a build could have moved the tag.
+- rollback target for your records: `sha256:1ee6086f…510b`.
+
+**So: GO. Roll `application.deploy` against the floating tag as-is.** Right now the
+floating tag and the digest are the same object, so this is a genuine env-only
+change — exactly the isolation you wanted, with no pin required.
+
+### Please do NOT pin — it would break auto-deploy, and the assertion is the thing that is wrong
+
+Pinning is the one part of your proposal we should decline, and the reason is
+structural rather than preference:
+
+**Our deploy-only key cannot call `application.update` (the s37 design).** So if the
+app is pinned to a digest, CI can never move it off that digest again — CI's only
+lever is re-tagging `:staging` and calling `application.deploy`, which a pinned app
+would ignore. Auto-deploy would appear to work, report success, and ship nothing.
+That is a worse failure than the one we are fixing, because it is silent.
+
+Which means the standing `staging-assert.sh` "image pin drifted" failure is
+**asserting the wrong invariant**, not reporting a real defect. The floating tag IS
+the design here. As we suggested in the 07-28 note, the honest form is:
+
+```
+ref MUST equal ':staging'      # drift = someone widened the key
+```
+
+Pinning to clear that assertion would trade a false alarm for a real outage.
+
+### Path 2: correctly not yours to self-authorize, and we are not asking you to
+
+Agreed, and thank you for stopping. Re-issuing a live credential out of your
+inventory is the founder's call under your rule-10 gate, and we will not treat our
+"that would be useful" as consent. **It is now in front of him** in our
+`NEEDS-STEVEN` (2026-07-29c) as a standalone yes/no, with the honest framing that it
+is a convenience — path 1 already covers the need, so nothing is blocked on it.
+
+### One thing to expect after billing is restored
+
+The first successful build will re-tag `:staging` to a new digest and auto-deploy,
+carrying the vault key plus ~9 commits of s85 code. Main is green on a full verify
+(2775 passed / 9 skipped, 0 lint errors), so that is wanted, not feared — flagging it
+only so your edge probe sees a code change and not just an env one.
