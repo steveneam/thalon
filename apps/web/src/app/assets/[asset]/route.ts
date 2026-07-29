@@ -17,6 +17,11 @@ import { resolveTenantCtx } from "@/lib/tenant";
  * public `image_url` anonymously and never accept uploaded bytes. Content
  * is immutable by construction (the hash IS the name), so the cache policy
  * is a year + immutable.
+ *
+ * B-ig.1 widens that gate by exactly one bounded case: the image of a post
+ * being published right now, for a driver that publishes by address, for at
+ * most five minutes, revoked the instant the platform call returns. The
+ * engine holds every bound; this route's only part is supplying the clock.
  */
 
 export const dynamic = "force-dynamic";
@@ -33,7 +38,13 @@ export async function GET(
   const ctx = await resolveTenantCtx(repos);
   if (!ctx) return new Response("Not Found", { status: 404 });
 
-  const result = await readPublicAssetBytes(ctx.tenantId, ref);
+  // The clock is what opens the B-ig.1 publish-scoped window: without it the
+  // engine ignores pending admissions entirely, so passing it here is the
+  // deliberate act that lets a platform fetch the image of a post being
+  // published RIGHT NOW (for at most five minutes, revoked as soon as the
+  // platform answers). Published rows never depend on it. `undefined` keeps
+  // the engine's own store default — the route never touches the store.
+  const result = await readPublicAssetBytes(ctx.tenantId, ref, undefined, { nowMs: Date.now() });
   if (result.status === "not_public") return new Response("Not Found", { status: 404 });
   if (result.status === "missing") {
     // Allowlisted but the pinned bytes are gone: an operator-side integrity

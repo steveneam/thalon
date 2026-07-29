@@ -23,7 +23,12 @@ import {
   SocialPublishDisarmedError,
   SocialPublisherDisarmedError,
 } from "../errors";
-import { publishApprovedDraft } from "../publish";
+import { createPublicMediaAdmitter, publishApprovedDraft } from "../publish";
+import {
+  parsePublicAssetName,
+  readPublicAssetBytes,
+  readPublicAssets,
+} from "../../webpage/public-assets";
 import {
   createInstagramDriver,
   createLinkedInDriver,
@@ -790,5 +795,274 @@ describe("B-ig.1: the public-address leg — admitted narrowly, revoked immediat
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  /**
+   * The REAL seam (no fake seat): APP_ORIGIN + the object store → an address
+   * a platform could actually fetch, and nothing else. Still zero network —
+   * every Graph call is answered by an injected fake, and the "fetch" of the
+   * image_url is performed by the public door's own read function.
+   */
+  describe("createPublicMediaAdmitter (the production seam, wired end to end)", () => {
+    const ORIGIN = "https://preview.example";
+
+    it("hands Meta an address that RESOLVES, then takes it back — the whole loop, no network", async () => {
+      const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+      const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+      const store = new LocalObjectStore(root);
+      try {
+        const { draft, ref } = await mediaDraft(f, store, "ig-real-1");
+        const bytes = await store.get(ref);
+
+        // The fake Graph host does what Meta does: it dereferences image_url
+        // DURING the container call — through the real public door.
+        const dereferenced: Array<{ url: string; status: string; bytes?: Buffer }> = [];
+        const fetchImpl: typeof fetch = async (url, init) => {
+          if (String(url).endsWith("/media")) {
+            const fields = new URLSearchParams(String((init as RequestInit).body));
+            const imageUrl = new URL(fields.get("image_url") ?? "");
+            const parsed = parsePublicAssetName(imageUrl.pathname.replace(/^\/assets\//, ""));
+            const served = parsed
+              ? await readPublicAssetBytes(f.ctx.tenantId, parsed, store, { nowMs: NOW.getTime() })
+              : { status: "unparseable" as const };
+            dereferenced.push({
+              url: imageUrl.href,
+              status: served.status,
+              ...(served.status === "ok" ? { bytes: served.bytes } : {}),
+            });
+            return new Response(JSON.stringify({ id: "container-1" }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ id: "media-9" }), { status: 200 });
+        };
+
+        const { publication } = await publishApprovedDraft(
+          {
+            ctx: f.ctx,
+            repos: f.repos,
+            resolvePublisher: () =>
+              createInstagramDriver({ accessToken: "tok", igUserId: "178414", fetchImpl }),
+            objectStore: store,
+            admitPublicMedia: createPublicMediaAdmitter({
+              tenantId: f.ctx.tenantId,
+              appOrigin: `${ORIGIN}/`, // trailing slash tolerated, never doubled
+              objectStore: store,
+              now: NOW,
+            }),
+          },
+          { draftId: draft.id, platform: "instagram" },
+          NOW,
+        );
+
+        // The address is this deployment's origin + the content-addressed path…
+        const hash = ref.replace(/^social-media\//, "").replace(/\.jpg$/, "");
+        expect(dereferenced).toEqual([
+          { url: `${ORIGIN}/assets/${hash}.jpg`, status: "ok", bytes },
+        ]);
+        expect(publication.externalPostId).toBe("media-9");
+
+        // …and the moment the call returned, it stopped resolving.
+        expect(
+          await readPublicAssetBytes(
+            f.ctx.tenantId,
+            parsePublicAssetName(`${hash}.jpg`)!,
+            store,
+            { nowMs: NOW.getTime() },
+          ),
+        ).toEqual({ status: "not_public" });
+        expect((await readPublicAssets(f.ctx.tenantId, store))?.pending).toEqual([]);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it("a FAILED publish leaves nothing public — the image stops resolving either way", async () => {
+      const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+      const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+      const store = new LocalObjectStore(root);
+      try {
+        const { draft, ref } = await mediaDraft(f, store, "ig-real-2");
+        const rejection = await publishApprovedDraft(
+          {
+            ctx: f.ctx,
+            repos: f.repos,
+            resolvePublisher: () =>
+              createInstagramDriver({
+                accessToken: "tok",
+                igUserId: "178414",
+                fetchImpl: async () =>
+                  new Response(JSON.stringify({ error: { message: "bad request" } }), {
+                    status: 400,
+                  }),
+              }),
+            objectStore: store,
+            admitPublicMedia: createPublicMediaAdmitter({
+              tenantId: f.ctx.tenantId,
+              appOrigin: ORIGIN,
+              objectStore: store,
+              now: NOW,
+            }),
+          },
+          { draftId: draft.id, platform: "instagram" },
+          NOW,
+        ).catch((err: Error) => err);
+
+        expect(rejection).toBeInstanceOf(SocialDriverApiError);
+        const hash = ref.replace(/^social-media\//, "").replace(/\.jpg$/, "");
+        expect(
+          await readPublicAssetBytes(f.ctx.tenantId, { contentHash: hash, ext: "jpg" }, store, {
+            nowMs: NOW.getTime(),
+          }),
+        ).toEqual({ status: "not_public" });
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it.each([
+      ["", "unset"],
+      ["   ", "blank"],
+      ["localhost:3111", "not an absolute origin"],
+      ["ftp://files.example", "not http(s)"],
+    ])("NO usable APP_ORIGIN (%s: %s) → the seam is never built and IG refuses honestly", async (origin) => {
+      const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+      const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+      const store = new LocalObjectStore(root);
+      try {
+        const { draft } = await mediaDraft(f, store, `ig-origin-${origin.trim() || "empty"}`);
+        const admitter = createPublicMediaAdmitter({
+          tenantId: f.ctx.tenantId,
+          appOrigin: origin,
+          objectStore: store,
+          now: NOW,
+        });
+        expect(admitter).toBeUndefined();
+
+        const rejection = await publishApprovedDraft(
+          {
+            ctx: f.ctx,
+            repos: f.repos,
+            resolvePublisher: () =>
+              createInstagramDriver({
+                accessToken: "tok",
+                igUserId: "178414",
+                fetchImpl: async () => {
+                  throw new Error("no network call may happen");
+                },
+              }),
+            objectStore: store,
+            admitPublicMedia: admitter,
+          },
+          { draftId: draft.id, platform: "instagram" },
+          NOW,
+        ).catch((err: Error) => err);
+
+        expect(rejection).toBeInstanceOf(InstagramPublicMediaUrlRequiredError);
+        // Nothing was made public, and no bundle was even created.
+        expect(await readPublicAssets(f.ctx.tenantId, store)).toBeNull();
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it("a ref the door could never SERVE gets no address at all (closed ext grammar)", async () => {
+      const f = await setup({ social: { instagram: { maxPostsPerDay: 2 } } });
+      const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+      const store = new LocalObjectStore(root);
+      try {
+        const bytes = Buffer.from("<svg/>");
+        const ref = objectKey("social-media", sha256Hex(bytes), "svg");
+        await store.put(ref, bytes);
+        const draft = await f.repos.drafts.create(f.ctx, {
+          fanoutRunId: f.runId,
+          sourceId: f.sourceId,
+          platform: "instagram",
+          body: POST_BODY,
+          format: "post",
+          generationKey: `${f.ctx.tenantId}:ig-real-svg`,
+          meta: { mediaRefs: [{ ref, contentType: "image/svg+xml" }] },
+        });
+        await approve(f.ctx, f.repos, draft);
+
+        const rejection = await publishApprovedDraft(
+          {
+            ctx: f.ctx,
+            repos: f.repos,
+            resolvePublisher: () =>
+              createInstagramDriver({
+                accessToken: "tok",
+                igUserId: "178414",
+                fetchImpl: async () => {
+                  throw new Error("no network call may happen");
+                },
+              }),
+            objectStore: store,
+            admitPublicMedia: createPublicMediaAdmitter({
+              tenantId: f.ctx.tenantId,
+              appOrigin: ORIGIN,
+              objectStore: store,
+              now: NOW,
+            }),
+          },
+          { draftId: draft.id, platform: "instagram" },
+          NOW,
+        ).catch((err: Error) => err);
+
+        expect(rejection).toBeInstanceOf(InstagramPublicMediaUrlRequiredError);
+        expect(await readPublicAssets(f.ctx.tenantId, store)).toBeNull();
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it("a byte-UPLOADING driver writes no admission at all — the gate never widens for it", async () => {
+      const f = await setup();
+      const root = mkdtempSync(path.join(tmpdir(), "thalon-ig-"));
+      const store = new LocalObjectStore(root);
+      try {
+        const bytes = Buffer.from("fake-jpeg-uploader");
+        const ref = objectKey("social-media", sha256Hex(bytes), "jpg");
+        await store.put(ref, bytes);
+        const draft = await f.repos.drafts.create(f.ctx, {
+          fanoutRunId: f.runId,
+          sourceId: f.sourceId,
+          platform: "linkedin",
+          body: POST_BODY,
+          format: "post",
+          generationKey: `${f.ctx.tenantId}:ig-real-upload`,
+          meta: { mediaRefs: [{ ref, contentType: "image/jpeg" }] },
+        });
+        await approve(f.ctx, f.repos, draft);
+
+        await publishApprovedDraft(
+          {
+            ctx: f.ctx,
+            repos: f.repos,
+            resolvePublisher: () => createFakeSocialPublisher(),
+            objectStore: store,
+            admitPublicMedia: createPublicMediaAdmitter({
+              tenantId: f.ctx.tenantId,
+              appOrigin: ORIGIN,
+              objectStore: store,
+              now: NOW,
+            }),
+          },
+          { draftId: draft.id, platform: "linkedin" },
+          NOW,
+        );
+
+        // No bundle, no pending row, nothing publicly reachable.
+        expect(await readPublicAssets(f.ctx.tenantId, store)).toBeNull();
+        expect(
+          await readPublicAssetBytes(
+            f.ctx.tenantId,
+            { contentHash: sha256Hex(bytes), ext: "jpg" },
+            store,
+            { nowMs: NOW.getTime() },
+          ),
+        ).toEqual({ status: "not_public" });
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
   });
 });
