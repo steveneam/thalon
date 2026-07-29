@@ -226,18 +226,17 @@ Channels), because those are half-done and leaving them half-done is worse.
    product and the spec now disagree until the rebuild lands. That is a BUILD task,
    not a design one — it needs its own go.
 2. The four per-sheet OPEN CALLS in each sheet's own header remain open.
-3. **WHERE DOES COMPOSER ACTUALLY LIVE IN THE FLOW?** (founder asked, s86: *"i assume
-   that composer dashboard appears after you write in your prompt and click generate
-   right? just making sure you go the flow and workflow and UX/UI properly considered."*)
-   **Ground-truthed, and it does NOT confirm the assumption:** today the app runs
-   Create → Generate → `/app/approve`, and there is **no composer route at all** —
-   `apps/web/src/app/app/` has approve · board · calendar · create · intel · leads ·
-   library · profiles · runs · settings · sites · transcription · videos, and no
-   composer. So the sheet's `Create ›` breadcrumb asserts a flow that is not built.
-   The sharper question underneath: **a fan-out generates MANY drafts**, so "the
-   composer" is ambiguous — one composer per draft, opened from the Approve queue, or
-   one straight after Generate? **This is THE pass-2 question for this surface** and it
-   is recorded rather than quietly picked. It is also a build task with its own go.
+3. ~~WHERE DOES COMPOSER ACTUALLY LIVE IN THE FLOW?~~ **ANSWERED by the founder and
+   SPECCED, s86 close** (*"once it's generated we can have the Composer window appear
+   after to do some previews and checks … before approving"*). The flow of record:
+   **Create → Generate → Composer (run-scoped checkpoint) → Send to Approve → Approve
+   (human gate) → Schedule → publish**, with an "Open in Composer" re-entry per draft
+   group from the Approve queue. The whole Create arc — dashboard, wizard, media
+   roles, routing, engine, the Composer's position — is **`docs/create-engine/spec.md`**
+   (DRAFT, awaiting his verdict), including the reconciliation ledger of what research
+   was incorporated / deferred / rejected and why. **The Create sheets (home update +
+   wizard + Composer run states) are the programme's next design work after the video
+   arc — or before it, his sequencing call.**
 4. **Intel's live-vs-mock gap** (found 2026-07-29, and it is a product question,
    not a design one): on real Bluesky-only data, Velocity and Engagement are dark
    (no view counts) and nothing can reach "Hot", so live Intel reads far weaker

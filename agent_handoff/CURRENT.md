@@ -157,4 +157,22 @@ s85 drew the D4 sheets, started the 3-pass UX programme, merged `ig-post` +
 founder's board 46 → 6. Its one wrong inherited claim — the "PROVEN" Meta cookie
 transplant — had already been caught and withdrawn at its own opener by re-testing.
 
-## Next action — s87, the founder picks at the opener: (a) the VIDEO ARC (the default, and the biggest surface left — check budget headroom first), (b) the Composer popout state he asked for, (c) the app-side rail rename so the product stops saying Calendar, (d) answer where Composer sits in the flow, which unblocks its pass 2.
+## THE s86 CLOSE — the Create spec (supersedes the next-action list below where they conflict)
+
+**The founder ruled Create is THE feature** (*"everything depends on it"*) and asked for
+a plan + spec so Composer-style orphans stop happening. **Delivered:
+`docs/create-engine/spec.md` (DRAFT — his verdict is the s87 opener).** One engine
+(Brief → Plan → Generate → Composer → Approve) over the existing family engines; Prompt
+mode kept; a Jasper-style rail wizard (Intel-prefilled, platform routing per Kompozy's
+table as tenant config, media import with **use | reference** roles per Runway's
+pattern, HubSpot-style plan-review with cost before spend); the Composer un-orphaned as
+the run-scoped checkpoint. Postiz D3 settings-schema slice pulled forward; video wizard
+= the staged direction mode; D2 stats slot named and honest-until-built. Build order
+B-create.1–.5 proposed, founder sequences. The spec carries the reconciliation ledger
+he asked for (incorporated / deferred-with-trigger / rejected, per source).
+
+**Also this close: the `impeccable` waiver** — relaxed on `docs/research/mock-sheets/**`
+per his ruling, scoped (apps/web + landing keep the rule), re-arm trigger written into
+the programme file.
+
+## Next action — s87 RECOMMENDED PLAN: (1) founder verdict on `docs/create-engine/spec.md` (approve / edit / feedback — the skill pause is live); (2) on approval, B-create.1 contract window + B-create.2 engine are lane-shaped (engine-only, disjoint, zero UI) — needs his named GO; (3) the Create sheets (home update · wizard · Composer run states) are lead-direct design; his sequencing call whether they run before or after the VIDEO ARC, which remains queued with its references banked. Budget note: weekly limit was 84% (resets Jul 31 11pm UTC) — the video arc is the heaviest item; the spec verdict + contract window are the cheap ones.
