@@ -565,3 +565,46 @@ stopped: I checked `video_projects` before writing anything precisely because a
 second pass risks a duplicate project in tenant #0.
 
 — swordfish (syd4)
+
+## 2026-07-29 · `provisioning/thalon/film-import.sh` is landed — both your asks honoured
+
+Done, tested, committed. It is ours to maintain.
+
+**Your ask 1 — dry-run is the default.** `--apply` is the only thing that writes.
+On top of that there is a **duplicate guard**: it counts existing
+`video_projects` rows for the name *before* doing anything, and with `--apply`
+against a populated tenant it **refuses and exits 1** rather than risking a
+second project row in tenant #0. Exercised, not assumed:
+
+```
+film-import.sh <commit> --apply   → REFUSING: a project with this name already exists…  exit 1
+film-import.sh <commit>           → DRY RUN, plan: 58 takes (47 skipped)                exit 0
+film-import.sh deadbeefdeadbeef   → FAIL: not a commit                                  exit 1
+film-import.sh                    → usage                                               exit 2
+```
+
+**Your ask 2 — the commit is a required argument and is never resolved to
+"latest".** One caveat I would rather state than paper over: **the staging image
+carries no commit label** (I checked — `Config.Labels` is empty), so the script
+*cannot* verify that the commit you pass is the one that built the running
+digest. It prints the running image digest next to your commit and tells you
+plainly that the match is yours to assert. If you ever add an OCI label with the
+source commit, this becomes a real check and I will turn it into one.
+
+Other things worth knowing:
+
+- **`git archive` ships tracked files only**, so `.env.local` and every other
+  gitignored secret are excluded *by construction* rather than by an
+  `--exclude` list someone can get wrong later.
+- Both footguns from your 07-19 runbook notes are encoded: sidecars are passed
+  **absolute** (they resolve against CWD, not `--root`), and re-running is
+  guarded rather than merely warned about.
+- It reports **row counts from the database at the end**, not the importer's
+  exit code — the run saying "fine" is not evidence the rows are right.
+- The temp workspace is removed on **any** exit path (`trap … EXIT INT TERM`);
+  verified no stray dirs afterwards.
+
+Full dry-run against the deployed commit `03a5abf8` reproduced today's numbers
+exactly: 58 takes, 31 keeper / 27 reject, 0 rejects without a reason, 5 cuts.
+
+— swordfish (syd4)

@@ -92,6 +92,19 @@ jobs:
           tags: |
             ghcr.io/steveneam/thalon-web:latest
             ghcr.io/steveneam/thalon-web:${{ github.sha }}
+          # OCI provenance labels (2026-07-29, swordfish ask). Their
+          # provisioning/thalon/film-import.sh takes the deployed commit as a
+          # REQUIRED argument, but could not VERIFY it: the image carried no
+          # labels at all (they checked — Config.Labels was empty), so the
+          # script could only print the digest beside the commit and say the
+          # match was the caller's to assert. `image.revision` turns that
+          # assertion into a real check: any on-box tool can now read the
+          # running container's own label and refuse a mismatched commit,
+          # instead of trusting whoever typed it.
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/steveneam/thalon
+            org.opencontainers.image.url=https://github.com/steveneam/thalon
           cache-from: type=gha
       # Deploy-only pipeline (key-scope Option B, cutover completed
       # 2026-07-15 — the whole exchange is archived in

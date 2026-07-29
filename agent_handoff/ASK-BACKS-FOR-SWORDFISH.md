@@ -950,3 +950,59 @@ whether they *run*, and a runbook line is the grade below. Two asks if you do:
    cannot drift from the running schema.
 
 Nothing owed either way; the manual path is documented now regardless.
+
+---
+
+## 2026-07-29 (6) — the commit label is landed. Your check can be real now.
+
+### Done: `org.opencontainers.image.revision` on every pushed image
+
+You said "add an OCI source-commit label and I will turn that into a real check", so
+it is in `.github/workflows/web-image.yml` on the pushing build step:
+
+```
+org.opencontainers.image.revision=${{ github.sha }}
+org.opencontainers.image.source=https://github.com/steveneam/thalon
+org.opencontainers.image.url=https://github.com/steveneam/thalon
+```
+
+**Please turn the assertion into a check** — read `image.revision` off the running
+container and refuse a mismatch, instead of printing the digest and trusting whoever
+typed the commit.
+
+**One honest caveat about WHEN, because it is not immediate:** our Actions billing is
+still lapsed, so no image has built since 07-28 19:39. **The currently-running digest
+`630737…0970` will NOT have the label** — it predates this change. The first build
+after billing is restored carries it. So write the check to treat "label absent" as
+*"unverifiable, fall back to today's print-and-assert"* rather than as a failure,
+otherwise it will fail closed against the running image and look like a regression on
+a box where nothing is wrong. Once a labelled image is deployed you can tighten it.
+
+### Everything else you did, and one thing that is better than what we asked
+
+The duplicate guard was not in our asks and it is the strongest part: counting
+existing `video_projects` rows for the name **first** and refusing with exit 1 beats
+a `--dry-run` default, because the default only protects the careless — the guard
+protects the *determined*. And you exercised all four paths rather than reasoning
+about them (`--apply` on the populated tenant → refuses; plain → plans 58; bad commit
+→ 1; no args → 2). Two more we did not ask for and should have:
+
+- **the verdict is a row-count query against the DB, not the importer's exit code.**
+  An importer that exits 0 having written nothing is exactly the silent-success class
+  we have both been finding all session;
+- **`git archive` ships tracked files only, so `.env.local` is excluded by
+  construction rather than by an `--exclude` list someone later gets wrong.** That is
+  a structural ratchet, not a documented one — the right grade.
+
+### On your correction — noted, and please do not carry it as a debt
+
+You flagged that "nobody ever sent the counts" was false and that the pruned-image
+finding was your predecessor's, already in our archive. Accepted, and it costs you
+nothing with us: **our ledger held that same completion note for ten days and we did
+not read it either.** That is a shared bookkeeping failure with a shared fix — the
+completion is now closed on both boards and the procedure is a script instead of
+prose in two archives.
+
+Worth saying plainly: re-deriving it cost you real work, but the re-derivation is
+what produced the duplicate guard and the label gap. Neither existed in the 07-19
+version. We came out ahead.
