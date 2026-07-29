@@ -1,6 +1,15 @@
 # The Workspace spec — every surface, one system
 
-> **Status: DRAFT — the founder's verdict is the gate.** Commissioned s87, his
+> **Status: APPROVED — founder verdict s88 (2026-07-29), verbatim: *"yes to
+> all."*** All five open calls in the §8 bundle are ruled AS RECOMMENDED; §8
+> carries each ruling with its consequence, and the gaps in §5 carry theirs.
+> **What this unblocks:** the wave programme in §6 is now the surface plan of
+> record — W1 (Approve · Dashboard · Runs) is next, and no surface build starts
+> ahead of its wave. **What it does NOT cover:** the app-side Calendar → Schedule
+> rename, the Composer POPOUT state, and YouTube as a destination were never in
+> this bundle and remain his open calls.
+>
+> Commissioned s87, his
 > words: *"plan, spec and structure all the surfaces together, in the context of
 > research, so that they are coherent, have a flow and order and function to them,
 > before the mock and build and wiring … that ensures cohesion in terms of backend
@@ -259,25 +268,44 @@ Named journeys, each crossing acts; pass 2 walks THESE, not surfaces:
 
 ## 5. WHAT IS MISSING (the gaps only a structure pass could name)
 
-1. **Onboarding/first-run** — nothing owns journey 1. Research question, then
-   likely a thin guided state over existing surfaces, not a new surface.
+**Six of these ten were ruled by the founder s88 (*"yes to all"*, §8); the
+rulings are written in-place below.** The four unmarked ones are lead work or
+still his call — say which, never let a gap sit in an undefined state.
+
+1. **Onboarding/first-run** — nothing owns journey 1. **DECIDED s88:
+   research-first** — no route is scaffolded for it; W1's research decides the
+   shape, and the standing expectation is a thin guided state over existing
+   surfaces rather than a new surface.
 2. **A Settings sheet** — the route ships real function with no spec of record.
+   *(Lead work, now scoped by the §5.4 ruling: Settings = operator/seams/env.
+   Its sheet is drawn in W3 alongside the split.)*
 3. **Library/Transcription split** — two routes, one sheet, three names.
-   Proposal: ONE Library surface; transcription = an ingest kind + filter.
+   **DECIDED s88: ONE Library surface**; transcription becomes an ingest kind +
+   a filter, not a second route. Un-parks the collapse the s87 hygiene audit
+   left queued on this verdict. Lands in **W2**.
 4. **Channels vs Integrations vs Settings** — three overlapping names.
-   Proposal: **Channels** = social destinations (the D4 sheet, build it) ·
-   **Integrations** = AI seats + providers (its sheet re-aimed at exactly
-   that) · **Settings** = operator/seams/env. Founder picks the split.
+   **DECIDED s88, as proposed:** **Channels** = social destinations (the D4
+   sheet, build it) · **Integrations** = AI seats + providers (its sheet
+   re-aimed at exactly that) · **Settings** = operator/seams/env. Lands in
+   **W3**; unblocks the D4 Channels build.
 5. **Calendar→Schedule rename** — route, component and app copy still Calendar.
+   *(STILL HIS CALL — deliberately not in the §8 bundle, so "yes to all" did
+   NOT decide it. W3 does the build-prep either way.)*
 6. **Notifications/alerts** — needs-you counts exist; no alert center, no
-   "what changed since I left". Research question (P: their notification
-   model; M: activity-feed patterns) before inventing anything.
+   "what changed since I left". **DECIDED s88: research-first** (P: their
+   notification model; M: activity-feed patterns), riding W1's research.
+   Nothing is invented ahead of it.
 7. **Global search / command palette** — s74 built a Search tab inside Intel;
-   nothing global. Research question, not a commitment.
+   nothing global. **DECIDED s88: research-first, and it stays a question**
+   until a wave earns it — not a commitment.
 8. **The Runs↔create_runs re-shape** — the s87 window made Runs' current shape
-   stale (§3 ORIENT).
+   stale (§3 ORIENT). *(Lead work, inside W1 — Runs is a W1 surface.)*
 9. **Board's existence** as a route vs a Dashboard toggle (§3 ORIENT).
-10. **Wave-0 sheet retirement** (§3 Retired).
+   **DECIDED s88: a Dashboard toggle, not its own route** — it duplicates
+   Dashboard's job. The route retires in W1's ORIENT pass; nothing is deleted
+   before the wave draws its replacement.
+10. **Wave-0 sheet retirement** (§3 Retired). *(Lead work; the s87 hygiene audit
+    already SUPERSEDED + archived the wave-0 sheet.)*
 
 ## 6. The research passthrough — plan (his two halves, made concrete)
 
@@ -313,24 +341,44 @@ reconciliation + a build slot.
 ## 7. Sequencing against everything else
 
 - **Engine lanes are orthogonal and continue**: `analytics-honesty` (GO on
-  record) + `create-shells` (pending his word) build seams this spec's surfaces
-  will consume. **Recommend holding both until the Jul 31 budget reset**, and
-  spending what remains of this cycle on W1 research — his stated intent for
-  the "last remaining usages".
+  record, HOLDING for budget) + `create-shells` (**LAUNCHED s88** on his named
+  word) build seams this spec's surfaces will consume.
+  ~~Recommend holding both until the Jul 31 budget reset, and spending what
+  remains of this cycle on W1 research.~~ **OVERRULED s88 — he spent the cycle
+  on the lane instead**, then ruled the research half too: *"hold off on the W1
+  research, reassess after merge is done."* So **W1 research is NOT this
+  session's work**; it is reassessed once `create-shells` is merged, against
+  real headroom (90% of the weekly limit was already spent at launch; resets
+  Jul 31, 11pm UTC). This bullet is kept struck-through rather than deleted
+  because an unmarked superseded recommendation reads later as if it were
+  followed.
 - **No surface build starts ahead of its wave's verdict.** The D4 builds
   (Schedule rename · Channels · Analytics · Composer/B-create.4) queue behind
   their structure decisions (§5.4, fixture reconciliation, Create sheets).
 - The coverage ledger (programme file) stays the pass record; every wave moves
   its rows same-commit.
 
-## 8. Decisions this spec asks of the founder (the verdict bundle)
+## 8. Decisions this spec asks of the founder (the verdict bundle) — ALL RULED
 
-**FIVE open — item 5 is CLOSED, answered before the bundle was read.**
+**CLOSED s88. His verdict, verbatim: *"yes to all."*** Every call went as
+recommended; each is written below with the consequence it triggers, because a
+ruling recorded without its consequence is a ruling that gets re-litigated.
 
-1. The act structure + per-surface jobs (§1, §3) — approve/amend.
-2. Gap resolutions §5.3 (Library) and §5.4 (Channels/Integrations/Settings).
-3. Board: surface or Dashboard toggle (§5.9).
-4. The wave order (§6) — W1 = Approve/Dashboard/Runs first, or reorder.
+1. **The act structure + per-surface jobs (§1, §3) — APPROVED.** The acts are the
+   workspace's structure of record; per-surface contracts in §3 bind. A surface
+   that wants a job not in its contract amends this file first.
+2. **Gap resolutions §5.3 and §5.4 — APPROVED as proposed.** §5.3: **ONE Library
+   surface**; transcription becomes an ingest kind + a filter, not a second route
+   — this un-parks the Library/Transcription collapse the s87 hygiene audit
+   deliberately left queued on this verdict (W2). §5.4: **Channels** = social
+   destinations · **Integrations** = AI seats + providers · **Settings** =
+   operator/seams/env (W3, and it unblocks the D4 Channels build).
+3. **Board — APPROVED as a Dashboard toggle, not its own route** (§5.9). It
+   duplicates Dashboard's job. The route retires as part of W1's ORIENT pass;
+   nothing is deleted before its wave draws the replacement.
+4. **Wave order — APPROVED as written** (§6): **W1 = Approve · Dashboard · Runs**
+   (+ the Board decision, now made) first, because those are the highest-stakes
+   surfaces the definition-of-done ruling marks NOT READY.
 5. ~~Lanes hold until reset per §7, or run now.~~ **CLOSED s87→s88, and §7's
    recommendation was OVERRULED in the founder's favour.** He ruled on budget —
    *"can we just do one lane next session since we're low on usage"* — then named
@@ -341,7 +389,12 @@ reconciliation + a build slot.
    on W1 research; he chose to spend it on the seam the Composer needs. Recorded
    because a superseded recommendation that stays unmarked reads later as if it
    were followed.
-6. Onboarding/notifications/search: research-first (recommended) or park.
+6. **Onboarding / notifications / global search — APPROVED research-first.**
+   Nothing gets invented for these three: each is a research question before it
+   is a surface. Onboarding + notifications ride W1's research (§6); global
+   search stays a question until a wave earns it. **No new route is scaffolded
+   for any of the three on the strength of this ruling** — research-first means
+   the research decides the shape.
 
 ## Out of scope
 
