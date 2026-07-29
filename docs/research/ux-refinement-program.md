@@ -22,8 +22,9 @@ Plus two standing steers from the same day:
   does not. Every honesty signal survives the cut, in fewer words.
 
 **Approval on record:** *"whatever refined version you put up this version, it is
-approved."* That approves the DESIGN. It does not approve arming a publish path,
-changing a product invariant, or a 16-sheet rename sweep (see Open decisions).
+approved."* That approves the DESIGN. It does not approve arming a publish path or
+changing a product invariant. **The rail sweep was separately approved** on
+2026-07-29 (*"you can run the sweep when you have time"*) and is DONE.
 
 ## Rules this program inherits (do not relitigate)
 
@@ -115,10 +116,11 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 
 ## Open decisions (founder's, NOT closed by the blanket design approval)
 
-1. **Calendar → Schedule rename + Analytics joining the rail.** All four D4 sheets
-   draw the rail this way. The 16 verdicted sheets still say "Calendar". The
-   approval covers the sheets as drawn; it does not obviously authorise a
-   16-sheet + app-wide sweep. **Ask before sweeping.**
+1. ~~Calendar → Schedule rename + Analytics joining the rail.~~ **RATIFIED and
+   SWEPT 2026-07-29.** 15 sheets done. **Still open, and it is the app half:** the
+   shipped surface is still `/app/calendar` with a "Calendar" rail item, so the
+   product and the spec now disagree until the rebuild lands. That is a BUILD task,
+   not a design one — it needs its own go.
 2. The four per-sheet OPEN CALLS in each sheet's own header remain open.
 3. **Intel's live-vs-mock gap** (found 2026-07-29, and it is a product question,
    not a design one): on real Bluesky-only data, Velocity and Engagement are dark
