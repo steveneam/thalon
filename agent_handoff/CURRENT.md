@@ -114,12 +114,13 @@ checking headroom before opening the video arc, which is the biggest surface are
 ▎ ▸ **Canvas is CURRENT and byte-identical** to the repo on all four D4 sheets
 (Analytics 39341 · Schedule 36959 · Composer 36945 · Channels 33000), project
 `f5d304cb-cd0e-484d-8542-7b6561e1ef30`.
-▎ ▸ **A hook conflict to resolve once, his call:** the `impeccable` design hook grades
-the mock sheets against a `DESIGN.md` type ramp, but the sheets are their own design
-system (`theme.css`) and programme rule 4 makes matching the existing sheet's ramp
-mandatory. Several flagged lines are pre-existing sheet code. Left unchanged as
-contextually intentional; the clean fix is a scoped
-`/impeccable hooks ignore-file "docs/research/mock-sheets/…"`, which needs his word.
+▎ ▸ **`impeccable` RELAXED ON THE SHEETS, on his ruling** (*"since our designs and layout
+are based on mobbin.mcp, you can relax the impeccable rule a bit until the final pass,
+for consistencies and stuff and landing pages"*). `docs/research/mock-sheets/**` is now
+in `.impeccable/config.json` `ignoreFiles`. **`apps/web/**` and landing pages are NOT
+covered** — the shipped product and the public surface keep the rule. **It expires:** the
+re-arm trigger is written into the programme file (§The `impeccable` waiver) — when pass
+3 closes a surface, audit it, reconcile the ramp into `design.json`, drop the ignore.
 ▎ ▸ **A trap that cost real time, worth remembering:** the Bash tool's working directory
 PERSISTS across calls. A `cd` into a lane worktree left later relative-path edits landing
 in the LANE instead of main — caught by `git status`, reverted, redone. Use absolute

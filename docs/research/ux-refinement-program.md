@@ -58,6 +58,30 @@ changing a product invariant. **The rail sweep was separately approved** on
    Corollary: backend-only lanes need no design input at all — say so plainly
    rather than performing a pass over a surface that does not exist.
 
+## The `impeccable` waiver — SCOPED, and it expires
+
+**Founder ruling, 2026-07-29 (s86):** *"since our designs and layout are based on
+mobbin.mcp, you can relax the impeccable rule a bit until the final pass, for
+consistencies and stuff and landing pages."*
+
+`docs/research/mock-sheets/**` is in `.impeccable/config.json`'s `ignoreFiles`. The
+reason: the hook grades against `.impeccable/design.json`, while the sheets are their own
+design system (`theme.css`) with a deliberately denser ramp for 1440×940 workspace
+screens — and rule 4 below makes matching the existing sheet's ramp **mandatory**, so the
+hook and the programme were issuing opposite orders on the same line.
+
+**What the waiver does NOT cover, deliberately:** `apps/web/**` and any landing/marketing
+page. Those are the shipped product and the public surface, and that is exactly where he
+kept the rule live.
+
+> **RE-ARM TRIGGER — do not let this rot.** The waiver is *until the final pass*. When
+> pass 3 closes on a surface and its sheet stops changing, that sheet's tokens are no
+> longer a moving target: run `/impeccable audit` over the sheets, reconcile the ramp
+> into `design.json` (the sheets are the spec of record, so the design system should
+> learn from them, not the reverse), then **remove the ignore entry**. Whoever runs the
+> final pass owns this; it is listed here because a waiver with no expiry is just drift
+> with paperwork.
+
 ## The three passes
 
 | pass | question it answers | output |

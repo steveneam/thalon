@@ -3,7 +3,8 @@
     "ignoreRules": [],
     "ignoreFiles": [
       "proprietary/templates/sites/**",
-      "apps/web/src/components/videos/editor.css"
+      "apps/web/src/components/videos/editor.css",
+      "docs/research/mock-sheets/**"
     ],
     "ignoreValues": []
   }
