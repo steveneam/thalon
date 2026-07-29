@@ -192,13 +192,33 @@ describe("Dashboard — s79 verified fixes", () => {
     expect(screen.getByText(/Nothing is timed for today/)).toBeInTheDocument();
   });
 
+  /**
+   * PIN THE CLOCK — this asserts a chip lands on the visible time axis, and the
+   * axis only spans 06:00–21:00. `waitingPlan(2)` means "2 hours ago", so the
+   * chip is inside the axis only when the run starts after ~08:00: at 07:2x it
+   * resolves to ~05:2x, falls off the axis, and the chip this test is about is
+   * never rendered. Found by a wrap verify that happened to run at 07:21.
+   *
+   * Third instance of this class today (two in calendar-surface.test.tsx), so a
+   * repo-wide sweep for the same shape followed rather than a fourth one-off.
+   */
   it("D4: a draft that started waiting TODAY keeps its true place on the clock", async () => {
-    const user = userEvent.setup();
-    const { container } = render(<WeekCard status="success" plan={waitingPlan(2)} now={new Date()} />);
-    await user.click(screen.getByRole("button", { name: "Today" }));
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const noon = new Date();
+    noon.setHours(12, 0, 0, 0);
+    vi.setSystemTime(noon);
+    try {
+      const user = userEvent.setup();
+      const { container } = render(
+        <WeekCard status="success" plan={waitingPlan(2)} now={new Date()} />,
+      );
+      await user.click(screen.getByRole("button", { name: "Today" }));
 
-    expect(container.querySelector(".wd-wait")).toBeNull();
-    expect(container.querySelectorAll(".wd-ev.wd-you").length).toBeGreaterThan(0);
+      expect(container.querySelector(".wd-wait")).toBeNull();
+      expect(container.querySelectorAll(".wd-ev.wd-you").length).toBeGreaterThan(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   /* ── D5 [high] — the scope root the colour fix needs (rules: dashboard-css) ── */

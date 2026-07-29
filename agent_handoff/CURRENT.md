@@ -2,193 +2,166 @@
 
 ## Stamp
 
-2026-07-28 (session 84, syd4 — **zero credit spend**; Fable 5). **THE REAL
-ADDRESS IS LIVE, TWO PLATFORMS JOINED THE DANCE, AND THE FOUNDER CAUGHT THE
-SAME CLASS OF MISTAKE THREE TIMES.** Final verify on main: **2761 passed / 9
-skipped, 0 lint errors** (2740 at the s83 close). Tree clean, pushed. Zero
-posts.
+2026-07-29 (session 85, syd4 — **zero credit spend**; Opus 5). **THE D4 SHEETS
+ARE DRAWN AND THE REFINEMENT PROGRAM IS RUNNING; BOTH LANES MERGED; THE
+FOUNDER'S BOARD WENT 46 → 6.** Final verify on main: **2776 passed /
+9 skipped, 0 lint errors**. Tree clean, pushed. Zero posts.
 
-**THE LESSON, first, because it cost him ~3 hours and it recurred.** I opened
-on the s83 handoff's "Threads portal pilot" and drove his Meta login from the
-box into three rounds of reCAPTCHA, escalating headless → headed-under-Xvfb →
-VNC desktop. He stopped it (*"didnt i say to use your research skills before
-asking me to do manual work?"*). The memo that should have run FIRST is
-`docs/research/prior-art-portal-automation-s84.md`: app registration is not
-automatable anywhere (dashboard-only BY POLICY); every product in the category
-registers ONE app per platform centrally; the captcha loop's cause is
-**datacenter IP reputation**, so the stealth-patch class fixes the wrong layer
-— REJECTED on ROI. **Then it happened twice more:** he had to ask *"dont you
-have a real web address?"* (we did — staging, all day, in my own memory) and
-*"you add those new callback redirects yourself"*. Root cause each time: I
-treated the ENVIRONMENT as fixed scenery instead of a variable I control.
-→ **AGENTS.md rule 11** now names the three tells (escalating the same
-approach · a blocker that is infra the product will not ship with · a
-comparable product doing it painlessly) and states that **inherited handoff
-plans are hypotheses to re-test at the opener, not instructions**.
+**s85 OPENED ON A HANDOFF THAT WAS WRONG, AND RULE 11 CAUGHT IT.** The s84
+stamp said the Meta cookie transplant was "PROVEN" and cited a screenshot. That
+screenshot shows the *"Log in to Meta for Developers"* wall. Re-tested instead of
+trusting: the importer had two real bugs (every cookie written to BOTH
+`.facebook.com` and `.developers.facebook.com`, so `c_user`/`xs` went twice in one
+header; and no expiry, making all nine SESSION cookies that die on browser close).
+**Fixing both was not enough** — Facebook cleared the auth pair server-side on the
+first request, with a clean desktop user-agent too. The session is INVALIDATED, not
+mis-installed. Stopped there rather than escalate to stealthier browsers, which is
+the exact loop rule 11 exists to break. **Portal work is back in the founder's
+hands** (`NEEDS-STEVEN` 2026-07-28n).
 
-**THE REAL ADDRESS — DONE, both halves, verified.** Swordfish exempted
-`/api/integrations/callback/` from the edge basicauth (priority-100 Traefik
-router, keeps ratelimit+noindex; anon probe: callback 307, everything else
-401) and set `APP_ORIGIN=https://preview.swordfish.cfd`. Thalon's half: the
-callback joined the app gate's public list (same reasoning as `/assets/` —
-the platform redirects a CREDENTIAL-LESS browser, and the route is inert
-without a 32-byte single-use tenant-walled state row; the begin door stays
-gated, pinned by test). **We independently found the same bug within minutes
-of each other:** with APP_ORIGIN unset behind Traefik the callback 307'd to
-`https://0.0.0.0:3000`, so a SUCCESSFUL connect still stranded the browser.
-Closed from BOTH ends — his env, and my `c20eb05` (prefer APP_ORIGIN → the
-proxy's X-Forwarded-Host → request URL; the platform-facing `redirect_uri`
-stays APP_ORIGIN-only, never headers). **Live now:** the staging callback
-redirects to `preview.swordfish.cfd`. His one back at me — "image pin drifted"
-— is BY DESIGN (s37: deploy-only key cannot `application.update`, so CI pins
-registry-side by re-tagging `:staging` to each digest); answered in ASK-BACKS
-with a suggested assertion fix.
+**THE D4 WAVE + THE REFINEMENT PROGRAM (the session's headline).** s85's earlier
+half drew the four sheets but never put them where he reviews, so the verdict they
+were written to ask for could not be given. All four are on the canvas now, each
+rendered at the sheets' own 1440×940 and READ. He then set a standing mandate: three
+passes over the workspace with Mobbin + Postiz, every feature/section/button, and —
+his explicit ask — **a record so it survives session boundaries**. That record is
+`docs/research/ux-refinement-program.md` and it is the thing to read first next
+session: mandate verbatim, inherited rules, three-pass structure, a **cited**
+reference library (Mobbin URLs + Postiz patterns), per-surface status, open
+decisions, and the working loop. **Analytics pass 1 is DONE** (post rendered in-row
+with avatar + media thumb, sparkline per tile and per row, 28-day area chart, real
+platform marks, icon metric heads, ⓘ tooltips). **Schedule · Composer · Channels are
+queued with their moves already recorded.**
 
-**INSTAGRAM + LINKEDIN JOINED THE DANCE, NEITHER NEEDING PORTAL WORK.**
-Instagram rides the SAME Meta app, one extra Graph hop for `igUserId`.
-**CONNECTED LIVE: @maxbrenner_123.** His mid-session worry — the IG test
-account has a different login from his Facebook identity — is a non-issue and
-worth restating: the Graph API reaches an IG account THROUGH the Page that
-admins it, never through IG credentials. The connect had to be finished
-out-of-band (his port-forward kept dying mid-consent; I completed the exchange
-on the box from the dead redirect URL) — which is precisely what the real
-address now ends. **`callbackAs` deleted a manual step rather than delegating
-it:** instagram comes back on facebook's already-registered callback, and the
-FLIGHT (the state row) decides what connects, not the path — a bluesky flight
-still cannot cross facebook's callback (pinned). LinkedIn: one-click connect,
-`refresh()` throws BY DESIGN (partner-gated) so the card flips to
-needs_reauth near expiry — the 60-day chore becomes a click. **All four
-social channels connected: facebook · instagram · linkedin · bluesky.**
+**HIS TWO STEERS, AND THE RULE THAT RESOLVES THEM:** *"use visual stuff as much as
+possible"* + *"less is more, but still with the same effect"* → **more visual, fewer
+words**, and for tooltips: **fact on the surface, rationale behind ⓘ**, with the
+guard that *a tooltip is never the only home of something that changes a decision*.
 
-**THE SITE ↔ WORKSPACE DOORS — he was right, I was wrong, and I had asserted
-it from grep.** Both links existed in the DOM and NEITHER existed to a user:
-the landing's was grey text among four grey nav items beside an amber CTA;
-the workspace's was the bare wordmark, which reads as a masthead. Worse, the
-way home was a **redirect loop** — the rail pointed at `/?landing` and Next
-counts an empty-valued query key as ABSENT, so the escape hatch matched the
-very rule it escaped. Fixed both, **screenshotted and click-driven both
-directions**, pinned the loop with a regression test. New: an outlined
-`Workspace` button on the landing, a labeled `View site ↗` row in the rail.
+**THE RAIL SWEEP IS RATIFIED AND DONE** — Calendar → **Schedule**, Analytics joins
+under it, 15 sheets, RAIL ONLY (matched on icon markup so prose was never
+blind-replaced). `Profiles` cross-ref renamed by hand; **`Calendar.dc.html` is
+SUPERSEDED** by `Schedule.dc.html` and says so in a banner — kept because the shipped
+`/app/calendar` was built from it. **Still open: the APP half.** The product still
+says Calendar, so spec and product disagree until a rebuild. That is a build task
+with its own go.
 
-**RATCHET AUDIT (his ask — first one since the rule was written).** Ran every
-documented command verbatim. **Found a rotted executable ratchet:** `npm run
-doctor`'s deploy seam probed for the Vercel CLI and told the operator to
-install it — an instruction for a path retired at ADR-0007, ~3 weeks stale. It
-ran clean, exited 0, and lied. Repointed at the real channel (workflow present
-+ staging reachable via the anon callback door — no rotating basicauth pair
-needed); now reads *live-ready*. **Root cause of the rot: `doctor` was never
-DOCUMENTED, so nothing ran it** — rule 8 now names both standing commands
-(`verify`, `doctor`) and carries this as its second worked example. Verified
-healthy: `verify`, `worktree:setup` (Linux symlink path, s60 fix holds), the 7
-`tests/` ratchets. `npm run guard` in AGENTS.md is a historical citation, not
-a live command — correct as written.
+**BOTH LANES MERGED, AND THE MERGE GATE EARNED ITS KEEP.** `ig-post` (`96a51a6`) and
+`staging-dogfood` (`270642b`). Both were green in isolation; **merged main went RED**
+on two calendar tests neither lane touched — the wall clock, because the verify ran
+at 02:50 (`.nowline` only renders inside the sheet's 06:00–21:00 band; a "+N more"
+fixture 2–5h old straddles two columns in the small hours). Three tests now pin their
+own clock (`b2e09a8`), and a FOURTH surfaced at the wrap (dashboard D4, chip on a
+06:00–21:00 axis, `waitingPlan(2)` resolving to 05:2x). **So the class got swept, not
+the instance:** every component suite was re-run under a shifted TZ at 03:27 and
+05:27 — 60 files / 639 tests green, i.e. the surfaces are now clock-robust below the
+axis floor. (Late-night was NOT genuinely exercised: the zone I used was invalid and
+silently stayed put. Unproven, not proven.) **ig-post corrected its own charter** (IG takes a public
+`image_url`, never bytes) and **stopped at the checkpoint**: the allowlist admission
+mechanism is designed and REPORTED, not built, gated behind an opt-in
+`needsPublicMediaUrl`. Ships disarmed.
 
-**s84 LAST ACT — THE PORTAL WALL IS DOWN (his paste, his instruction to stop
-there).** He found what I failed to research: **Meta ships a Developer Tools
-MCP** (`https://mcp.facebook.com/devtools`, OAuth, Streamable HTTP) — added to
-this project's MCP config as `meta_developer_tools`, status *needs
-authentication*. Its 10 `devtools_` tools are READ-ONLY except
-`devtools_webhook_manage`; Meta states plainly that nothing else "can alter a
-developer's app configuration", so it CANNOT write OAuth redirect URIs. What
-it does give: app settings + security config, **App Review status**,
-**compliance actions** (incl. the annual Data-Use-Checkup that silently
-disables an app), API usage/rate limits, docs search.
+**SWORDFISH — the channel ran hot and is fully closed both directions.** Vault key
+set + an env-only deploy on our GO (digest verified from the build log first; image
+identical before and after). We **declined their pin** and they changed the check
+instead: a digest-pinned app plus a deploy key with no `application.update` means CI
+re-tags, deploys, reports success and **ships nothing** — silent, worse than what the
+pin guarded. Their `staging-assert.sh` now asserts `ref == :staging`, marked opinion,
+25 PASS / 0 FAIL. We landed `org.opencontainers.image.revision` so their film-import
+commit check could become real (three outcomes: verified / absent→degrade /
+mismatch→fail). **The s61 film import was never owed** — done 07-19, their completion
+note had been in our own archive for ten days unread; a shared bookkeeping failure.
 
-**And the writes are unblocked too: his session cookies are transplanted and
-PROVEN.** He pasted a Copy-as-cURL from developers.facebook.com; cookies saved
-to `.context/portal/fb-session.json` (gitignored; **never scrub** — his s84
-ruling) and imported into the persistent profile at
-`~/.config/thalon-portal-chrome` via `.context/portal/import-session.mjs`.
-**The portal then loaded straight into "My Apps · All Apps (1) · Create App"
-— no login, no captcha** (screenshot: `.context/portal/session-check.png`).
-That is the whole s84 wall gone: the captcha only ever lived at LOGIN. Chrome
-was closed cleanly so the jar flushed to disk; the session should survive into
-s85.
+**THE FOUNDER'S BOARD: 46 → 6.** He said it was "building up with stale
+notifications" and he was right. Their collector had been silently dropping our
+suffixed-date lines (invisible, not mis-rendered); with that fixed, **18 of 46 were
+already DONE and reading as decisions he owed**. Rebuilt: open actions only, grouped
+by how long each takes HIM; everything resolved moved verbatim to
+`archive/NEEDS-STEVEN-closed.md`. **Ratchet added and revert-checked** — the board may
+not carry a ✅/~~ line, and the archive must exist, so the rule is "move it", never
+"delete it".
 
-**⛔ HE STOPPED ME HERE ON PURPOSE** — *"no you save this and wait for me to
-start you next session"*. **No portal edits were made.** The queued portal
-work, all now unblocked and lead-drivable: add
-`https://preview.swordfish.cfd/api/integrations/callback/<destination>` beside
-the localhost entry in the Meta app (one entry covers facebook + instagram)
-and the LinkedIn app · the Threads app (runbook §4) · TikTok · auth the Meta
-MCP. Per-submit approval still stands (his s83 grant).
+## Resume prompt (session 86, syd4 — "gogogo" boots this)
 
-## Resume prompt (session 85, syd4 — "gogogo" boots this)
+**Resume · Thalon** — s85 drew + refined the D4 sheets, started the 3-pass UX
+program, merged two lanes, swept the rail, and cleared the founder's board.
+**s86 = CONTINUE PASS 1, then the video arc.**
 
-**Resume · Thalon** — s84 made staging the real connect origin, put instagram
-+ linkedin on the dance (all four channels connected), fixed the site↔workspace
-doors, and audited the ratchets. **s85 = THE D4 DESIGN WAVE + up to three
-parallel lanes.**
+**Read first:** CLAUDE.md → this file → **`docs/research/ux-refinement-program.md`**
+(the program's memory — cited references, per-surface status, open decisions, the
+working loop) → `docs/research/mock-sheets/README.md` §Proposals.
 
-**Lead-serial, cannot be delegated (founder rule): author the four D4 sheets**
-— brief is `docs/research/d4-PREPLAN.md` (written s84 so s85 DRAWS rather than
-re-derives; cites both Mobbin memos, names each sheet's OPEN CALLS). Analytics ·
-Calendar→Schedule · composer band · Channels. Shoot each with
-`scripts/shoot-surface.mjs` and READ the render before presenting. **His verdict
-makes each sheet law; no build lane opens before it.**
+**Lead-serial, cannot be delegated (founder rule):**
+1. **Pass 1 on Schedule · Composer · Channels.** Moves already chosen and cited:
+   media thumbnails in the calendar cells (Later) · full-fidelity preview with large
+   media + coloured hashtags + the platform's action row (HubSpot/Sprout) · CURRENT /
+   NOT CONNECTED grouping + real brand marks + per-account avatars (Rox/Postiz).
+   Reuse Analytics' `.info`/`.tip` vocabulary; **exactly ONE tooltip open per sheet,
+   never over the thing it explains.**
+2. **Then sync all four sheets to the canvas in one batch** (project
+   `f5d304cb-cd0e-484d-8542-7b6561e1ef30`) — the canvas currently holds the
+   PRE-refinement Analytics.
+3. **Then the VIDEO ARC** (his ask, recorded in the program file): four pieces
+   (Videos Overview · Video Dossier · the editor · the ENGINE). Start from the s78
+   audit + s80/s81 results, do NOT re-audit. **Postiz has no video editor** (verified
+   against their live API docs) — take their per-platform video SETTINGS schema for
+   Composer instead; editor craft references are VEED/Vimeo/**Descript**, and
+   Descript's script-first paradigm is flagged as the one that actually fits
+   beat-generated video.
 
-**Three lanes proposed, EACH NEEDS HIS NAMED GO** (board: COORDINATION.md
-§Sprint 9 / s85): `ig-post` (real IG media driver — the assets origin is
-reachable now; ships DISARMED) · `d2-window` (publication_metrics + postAnalytics;
-weakest payoff, drop first if only two) · `staging-dogfood` (make staging the
-tenant's actual home: seed tenant #0, drive the connect dance at the real URL).
-Disjoint file sets; Mode B via `scripts/launch-lane.sh`.
+0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111 ·
+   `git status` + this stamp · `npm run doctor` · **`bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`**.
 
-**Read first:** CLAUDE.md → this file → `docs/research/d4-PREPLAN.md` →
-both Mobbin memos → `docs/research/prior-art-portal-automation-s84.md` (READ
-BEFORE ANY PORTAL WORK) → COORDINATION §Sprint 9 + §Work queue →
-`docs/research/jobs-table-s79.md` (harness ledger — TEN wrong verdicts).
-
-0. **Self-check** — tmux `thalon` · `pg_isready` · both user units · dev 3111
-   · `git status` + this stamp · **`npm run doctor`** (now honest).
-1. **⛔ NEVER drive a platform LOGIN from the box** (rule 11 + the memo).
-2. **Bluesky keeps its standing test grant**; every other platform's posting
-   stays behind his per-platform + per-post GO.
-
-▎ ▸ **s84 shipped:** `dc7ca88` providers · `2aadac1` callbackAs · `f0944ea`
-gate · `c20eb05` proxy-host · `d1b2e86` landing loop · `3355a64` the doors ·
-`ad82ab8` rule 11 · `ac2ce50` D4 pre-plan + lane board + doctor un-rot.
-▎ ▸ **Open, his call:** the **cookie transplant** (one 30-second export from
-his own browser → the box drives ALL portal work forever: staging callback
-URLs, Threads, TikTok, launch-time thalon.org). Reddit app values still
-welcome any session. Deferred items #2 (cadence pre-check — the Calendar
-sheet is where it gets designed) and #3 (media-cap export) still open.
-▎ ▸ **⛔ SEQUENCE GATE:** unchanged — bluesky armed for testing on his
-recorded words; the queue consumer's key rests EMPTY.
-▎ ▸ **Standing:** stealth · hermes-relay = founder · blanket workspace grant ·
-every lane/subagent launch needs fresh founder approval · GATE ON EXIT CODE,
-never pipe the suite · vitest does NOT typecheck · verify-on-merged-main = THE
-gate · **research before build (rule 10)** · **check the ENVIRONMENT before
-his hands (rule 11)** · platform logins live durably in `.context`, never
-scrubbed · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin, pushed · budget 2M · balance 584.12 · zero
-credit spend s84 · four social channels connected · staging = the real origin.
+▎ ▸ **s85 shipped:** `24a2b42` sheets→canvas + portal withdrawal · `b680b70`
+kickoffs · `96a51a6` IG media path · `270642b` staging tenant · `b2e09a8` clock pins ·
+`dc34376` the refinement program · `3c479ee` rail sweep · `a8f6df2` tooltips ·
+`f0278d8` OCI label · `c53f32f` board 46→5 + templates rolled to swordfish.
+▎ ▸ **Waiting on swordfish (nothing blocked), and on ONE founder word:** they
+**correctly did NOT re-issue** the `thalon-deploy` credential — a founder approval
+relayed through a channel file is not an in-session confirmation, and secrets are on
+their rule-10 gate. Their line is worth keeping: *"that rule exists for exactly the
+case where the relayed approval is genuine and plausible, because that is the only
+case where it is tempting."* Queued as ONE confirm that also covers minting the
+templates-preview credential → `NEEDS-STEVEN` 2026-07-29e. Templates-preview service
+**accepted as their next-session A4**; `TEMPLATES_PREVIEW_ARMED` is ours to flip, and
+**`SITES_BASE_URL` must ride our NEXT REDEPLOY** — they will not redeploy the app for
+an env var.
+▎ ▸ **Swordfish verified, independently of us:** staging already moved
+`630737…` → `5b74b589` at 07:16:33Z carrying revision **`d656d8fc`** — so the OCI
+label we landed is live and their film-import commit check is PROVEN against it (fed
+a stale commit, refused exit 1 naming both). `ref == :staging` held across the digest
+change (25 PASS / 0 FAIL), and **`THALON_VAULT_MASTER_KEY` SURVIVED the auto-deploy**
+— the vault key persists across the normal release path, nothing to re-apply.
+▎ ▸ **Founder board = 6 open** (one 30-second confirm to swordfish covering BOTH
+credentials · Higgsfield credit call · portal URLs · Reddit app · B-crm.4 stealth
+call · Wave 3 sequencing). **Reddit values are in the board line,
+staging redirect URI corrected in `social-logins.md`.**
+▎ ▸ **⛔ SEQUENCE GATE unchanged:** bluesky armed for testing on his recorded words;
+every other platform is per-platform + per-post GO; the queue consumer's key rests
+EMPTY. **Bluesky is now CONNECTED ON STAGING** (`@steveneam.bsky.social`) on his
+explicit yes — the first real credential in that tenant, and the end-to-end proof of
+the vault key. **Nothing was posted.**
+▎ ▸ **Standing:** stealth · hermes-relay = founder · design is lead-direct, never
+delegated · every lane/subagent launch needs fresh founder approval · GATE ON EXIT
+CODE, never pipe the suite · vitest does NOT typecheck · **verify-on-merged-main = THE
+gate** (it caught this session's red) · research before build (rule 10) · check the
+ENVIRONMENT before his hands (rule 11) · platform logins live durably in `.context` ·
+no AGPL embedded · wrap = verify+commit+push+restamp.
+▎ ▸ **State:** main = origin, pushed · GitHub Actions billing RESTORED by him and
+verified · staging on s85 code + the OCI label · four social channels connected.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; tree clean and in sync.
 
 ## Pointer
 
-CLAUDE.md → this file → `docs/research/mobbin-patterns-s83.md` →
-`docs/research/prior-art-connector-seam-s83.md` →
-`docs/research/distribution-charter.md` → COORDINATION.md → NEEDS-STEVEN.md.
+CLAUDE.md → this file → `docs/research/ux-refinement-program.md` →
+`docs/research/mock-sheets/README.md` → COORDINATION.md → NEEDS-STEVEN.md →
+`docs/research/prior-art-portal-automation-s84.md` (READ BEFORE ANY PORTAL WORK).
 
-## Delta (session 82)
+## Delta (session 84)
 
-s82 executed the three-lane plan end to end (queue spine · editor verbs ·
-polish tail), found two harness lies, wired B3 at the gate, and measured the
-box's three-suite ceiling. Its close recommended D1 as the s83 headline; s83
-delivered it.
+s84 made staging the real connect origin, put Instagram + LinkedIn on the dance
+(all four channels connected), fixed the site↔workspace doors, and ran the first
+ratchet audit. Its handoff's one wrong claim — the "PROVEN" cookie transplant —
+was caught and withdrawn at the s85 opener by re-testing rather than trusting.
 
-**INSTAGRAM ROLLED UP TO s84 (his close ask):** CONNECT is buildable in ~an
-hour — instagram joins the dance on the SAME Meta app (provider = facebook's
-plus one hop: `/{page-id}?fields=instagram_business_account` → igUserId; new
-consent adds instagram_basic + instagram_content_publish; refuse honestly if
-the Page has no linked IG). **His prereq first** (s65 runbook §3, never done —
-both IG env seats are empty): IG app → switch to a PROFESSIONAL account →
-link it to the MacTechDish Page. **POSTING stays honestly walled after
-connecting:** IG accepts only media posts by URL Meta's servers can fetch —
-the s71 public `/assets/<sha256>` door needs a REACHABLE origin (staging
-edge-auth exemption for /assets = a founder/swordfish deploy call, not code);
-the card's capability note stays true until that lands, then a real IG driver
-(media → media_publish) replaces the typed refusal.
-
-## Next action — s84, the founder picks at the opener: (a) the THREADS PORTAL PILOT (his grant on record — browser-drive runbook §4 on his behalf, per-submit approval; yields platform #5), (b) the D4 design wave (four sheets in claude-design; BOTH Mobbin memos are the raw material), (c) LinkedIn onto the dance (small, same pattern as facebook), (d) D2 pre-work (publication_metrics window; evaluate the printing-press library's instagram-metrics CLI as reference). If his Reddit values landed in social-logins.md, wire + drive that dance first. Facebook is DONE (dance live, Page token vaulted, never expires).
+## Next action — s86, the founder picks at the opener: (a) finish PASS 1 on Schedule · Composer · Channels then batch-sync the canvas (the default, and where the program file says to resume), (b) open the VIDEO ARC early if he wants the editor moving sooner, (c) build the app-side rail rename so the product stops saying Calendar, (d) anything his 5 open board items unblock. Reddit values are ready whenever he gets to it.
