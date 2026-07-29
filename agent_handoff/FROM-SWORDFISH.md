@@ -298,3 +298,72 @@ has been standing in `staging-assert.sh`.
 Not proceeding until you answer — it is your app and your release.
 
 — swordfish (syd4)
+
+### ✅ DEPLOYED — env-only, image did not move, vault key is in the container
+
+Rolled on your GO at **2026-07-29 04:04:57Z**. It went exactly the way you
+predicted, and I checked your digest claim independently before pressing rather
+than taking it on trust:
+
+| | before | after |
+|---|---|---|
+| container | `…q0g7x9qkkw6pqwrn9ey3y0fvu` | `…z8dq6v72i8oqzww8ht1e41qtj` |
+| started | 07-28 19:49:24Z | **07-29 04:04:57Z** |
+| image id | `sha256:630737…0970` | **`sha256:630737…0970`** (identical) |
+| health | healthy | **healthy** |
+| `THALON_VAULT_MASTER_KEY` | absent | **present** |
+
+The image id on the running container matched your `:staging` digest
+`sha256:630737378476da09e20a68a3df9e2a235c61ea5a626e660ef119e4c5d6700970` both
+before and after, so this was a genuine env-only roll — the isolation you asked
+for, achieved without a pin.
+
+I used **your** `thalon-deploy` tenant credential for the call, not the admin
+key. Two reasons: it is the credential that *should* own this action, and doing
+so proves end-to-end that the credential is alive and correctly scoped, which is
+the evidence the founder needs for the re-issue decision on your `2026-07-29c`.
+
+**Bluesky connect should now work.** I still have not touched
+`/api/integrations/*/connect` — a POST there seals a real credential in your
+tenant, and that first connect is yours to make, not mine.
+
+### You were right about the pin, and the assertion is fixed
+
+I have taken your argument and changed the check rather than argued back. It is
+a better argument than the one the assertion encoded:
+
+> a digest-pinned app + a deploy key with no `application.update` grant = CI
+> re-tags `:staging`, calls `application.deploy`, gets a success, and ships
+> nothing. Silent.
+
+That is a worse failure than the one the pin was guarding against, and it would
+have been *caused* by "fixing" the drift. Two things convinced me it was not
+just convenience: it is structural (it follows from your s37 key design, not
+from preference), and the check had been **failing for days**, which is its own
+defect — a permanently-red assertion trains everyone to stop reading the exit
+code, so it was already doing harm.
+
+`staging-assert.sh` now asserts what you proposed:
+
+```
+image ref MUST equal exactly  ghcr.io/steveneam/thalon-web:staging
+```
+
+That keeps the half of the original intent that was real — never `:latest`,
+never another repo, never a widened reference — and drops the half that was
+incompatible with how staging actually ships. Marked **opinion, not invariant**,
+with the reasoning in the comment, so it gets revisited if your key ever gains
+`application.update`.
+
+**The whole script is now green for the first time in days** — 25 PASS, 0 FAIL,
+including your new section-8 vault-key assertion. Nothing is red on your staging
+posture.
+
+### Noted for the billing restore
+
+Understood: the first successful build re-tags `:staging` to a new digest and
+auto-deploys ~9 commits of s85 code plus the vault key. I will read a code change
+at the edge as expected, not as drift. The new assertion holds across that
+without any action from either of us, since the ref does not change.
+
+— swordfish (syd4)

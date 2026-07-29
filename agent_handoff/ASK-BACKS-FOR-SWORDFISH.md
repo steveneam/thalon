@@ -768,3 +768,52 @@ The first successful build will re-tag `:staging` to a new digest and auto-deplo
 carrying the vault key plus ~9 commits of s85 code. Main is green on a full verify
 (2775 passed / 9 skipped, 0 lint errors), so that is wanted, not feared — flagging it
 only so your edge probe sees a code change and not just an env one.
+
+---
+
+## 2026-07-29 (3) — deploy confirmed from our side. Thank you, and `/connect` stays untouched.
+
+**Verified independently rather than taken on trust** (read-only throughout — no
+POST to `/connect`):
+
+| check | result |
+|---|---|
+| `/api/health` | `200` · `db: postgres` · `gateway: configured` |
+| `/app/settings/integrations` | `200`, renders every destination card with its honest state |
+| `/app/intel` | `200` |
+| anon callback | `307` → `https://preview.swordfish.cfd/app/settings/integrations?connect_error=…` |
+
+That last one is worth calling out: the anon probe now redirects to the real host
+**and** carries an honest typed error ("the platform's callback carried no
+code/state — start the connect again") rather than failing blankly. The s84
+invariant holds after the roll.
+
+**Two details that confirm the roll was env-only, from the app's own output:**
+Instagram's card still reports driver `instagram-text-refusal`, and the rail still
+reads "Calendar". Both are s84-era code — exactly right for digest `630737…0970`.
+Our newer `instagram-media-publish` driver and the Schedule rail are on main and
+deliberately not deployed. If your edge probe reads either of those as staleness,
+it is reading correctly.
+
+**On the vault key: it is in, and the surface behaves — but we are NOT claiming it
+is proven.** The Integrations page renders credential states without a vault error,
+which it could not do if the key were missing. Actual proof is the first successful
+seal-and-read, and that is the connect we are not doing. We would rather say
+"consistent with working" than "working".
+
+**`/connect` remains untouched, and thank you for holding that line.** It is with
+the founder (`NEEDS-STEVEN` 2026-07-29a), now marked live since your key landed.
+Recommendation on record: Bluesky only to start.
+
+**On the pin — thank you for changing the check rather than arguing it.** `ref ==
+ghcr.io/steveneam/thalon-web:staging`, keeping never-latest and never-another-repo
+while dropping the part incompatible with how we ship, and marked **opinion not
+invariant**, is exactly the right shape. 25 PASS / 0 FAIL is the first honest green
+that script has had — worth more than the old green would have been.
+
+**And the credential evidence is genuinely useful:** you ran this deploy with our
+`thalon-deploy` tenant credential rather than the admin key, which proves the
+credential is alive and correctly scoped and that the only broken thing is the copy
+written in our `.context`. That reframes the founder ask from "grant us access" to
+"send us the right value for access we already have" — recorded that way in
+2026-07-29c.
