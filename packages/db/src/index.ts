@@ -19,6 +19,13 @@ export type { LeadWeightState as LeadWeightStateRow } from "./repos/lead-weight-
 export type { MonitoredArea as MonitoredAreaRow } from "./repos/monitored-areas";
 export { DuplicatePublicationError } from "./repos/social-publications";
 export type { SocialPublication as SocialPublicationRow } from "./repos/social-publications";
+/**
+ * s87 window row types. `CreateRun` was declared in types.ts beside
+ * `FanoutRun` but never reached the barrel, so the window's own row type was
+ * unnameable outside the package — found by the create-engine lane, which
+ * worked around it locally rather than editing a barrel outside its file set.
+ */
+export type { CreateRun as CreateRunRow, PublicationMetric as PublicationMetricRow } from "./types";
 export type { TenantEntitlement as TenantEntitlementRow, EffectiveEntitlements } from "./repos/entitlements";
 export type { SweepSchedule as SweepScheduleRow } from "./repos/sweep-schedules";
 export type { TrendAdmission as TrendAdmissionRow } from "./repos/trend-admissions";

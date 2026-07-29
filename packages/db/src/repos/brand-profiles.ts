@@ -50,6 +50,7 @@ export function brandProfilesRepo(db: Db) {
             routing: config.routing ?? null,
             outreach: config.outreach ?? null,
             social: config.social ?? null,
+            platformRouting: config.platformRouting ?? null,
             version,
             active: input.activate ?? false,
           })

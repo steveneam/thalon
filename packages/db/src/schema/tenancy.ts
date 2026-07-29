@@ -116,6 +116,28 @@ export const brandProfiles = pgTable(
     outreach: jsonb("outreach"),
     /** Sprint-8 window 2: per-platform social publishing config (contracts socialPublishConfigSchema); null = the publish door is disarmed for this tenant. */
     social: jsonb("social"),
+    /**
+     * s87: Create-family → default destinations (contracts
+     * `platformRoutingSchema`); null = no routing opinion, so the wizard's
+     * platform step prefills from `DEFAULT_PLATFORM_ROUTING` instead.
+     *
+     * **This column exists because the same gap shipped a THIRD time.** The
+     * s87 window added `platformRouting` to `brandProfileConfigSchema` and
+     * stopped there — exactly as the s54 window did for `outreach` and as
+     * happened again for `social` (see the `outreach` docblock above). Each
+     * time, the config field was accepted at the write door and silently
+     * dropped, so no real tenant's setting could ever be read back. Found by
+     * the s87 `create-engine` lane while consuming the window; it reported
+     * the gap rather than patching the contract, and pinned it with a
+     * ratchet that went red the moment this column landed.
+     *
+     * The lasting fix is not this column — it is
+     * `brand-profiles.test.ts` → *"every optional config block round-trips"*,
+     * which enumerates the blocks from the CONTRACT and fails for the next
+     * one added without a column. A fourth occurrence now has to get past a
+     * test rather than past a reviewer.
+     */
+    platformRouting: jsonb("platform_routing"),
     version: integer("version").notNull(),
     active: boolean("active").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })

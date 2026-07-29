@@ -658,19 +658,18 @@ describe("loadPlanContext", () => {
     expect((await loadPlanContext(fx.ctx, fx.repos)).routing).toEqual(DEFAULT_PLATFORM_ROUTING);
   });
 
-  it("RATCHET: `platformRouting` is accepted by the config schema and never stored", async () => {
-    // The s87 window added `platformRouting` to `brandProfileConfigSchema`
-    // but `brand_profiles` has no `platform_routing` column and the repo's
-    // create does not persist it — so a tenant's own family routing is
-    // dropped between the schema and the row, and every tenant silently gets
-    // the demo defaults. This is the THIRD time the same gap has shipped:
-    // the `outreach` column's docblock records it for `outreach` and
-    // `social` before it.
+  it("a tenant's OWN platformRouting beats the demo defaults, end to end", async () => {
+    // This replaces the lane's red-on-fix ratchet. That ratchet pinned the
+    // s87 window's gap — `platformRouting` accepted by the config schema and
+    // never stored, the third recurrence of a gap the `outreach` docblock
+    // already records for `outreach` and `social`. The column and the repo's
+    // persist landed at merge, so the ratchet went red exactly as designed
+    // and is now this: proof the tenant's setting survives schema → row →
+    // engine, which is what the ratchet was standing in for.
     //
-    // Pinned rather than written up, so the fix is a deliberate act: when
-    // the column lands, this test goes RED. Delete it then — `loadPlanContext`
-    // already reads the field defensively and will start honouring it with
-    // no further edit.
+    // The gap itself is now guarded generically, from the contract rather
+    // than from anyone's memory, in
+    // `packages/db/src/__tests__/brand-profile-config-blocks.test.ts`.
     const fx = await fixture();
     const config = brandProfileConfigSchema.parse({
       voice: { register: "plain" },
@@ -678,11 +677,15 @@ describe("loadPlanContext", () => {
       platformProfiles: {},
       platformRouting: { post: ["bluesky"], video: ["tiktok"] },
     });
-    expect(config.platformRouting).toEqual({ post: ["bluesky"], video: ["tiktok"] });
-
     await fx.repos.brandProfiles.create(fx.ctx, { config, activate: true });
+
     const active = await fx.repos.brandProfiles.getActive(fx.ctx);
-    expect((active as Record<string, unknown>).platformRouting).toBeUndefined();
-    expect((await loadPlanContext(fx.ctx, fx.repos)).routing).toEqual(DEFAULT_PLATFORM_ROUTING);
+    expect((active as Record<string, unknown>).platformRouting).toEqual({
+      post: ["bluesky"],
+      video: ["tiktok"],
+    });
+    const context = await loadPlanContext(fx.ctx, fx.repos);
+    expect(context.routing).toEqual({ post: ["bluesky"], video: ["tiktok"] });
+    expect(context.routing).not.toEqual(DEFAULT_PLATFORM_ROUTING);
   });
 });
