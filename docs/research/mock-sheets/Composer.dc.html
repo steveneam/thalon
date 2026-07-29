@@ -80,10 +80,13 @@
      is ambiguous: one composer per draft opened from the Approve queue, or one straight
      after Generate? That is a pass-2 decision and it is recorded, not quietly picked.
 
-     MEASURED, not eyeballed: the right column overflowed by ~85px on the first cut —
-     the action row AND the honesty caveat both sat below the 940 fold, i.e. the whole
-     point of the pass was invisible. Judge copy went to single lines, the media to
-     84px, the caveat to one line; preview now ends at 911 inside the card's 916.
+     MEASURED, not eyeballed, TWICE. In the two-column cut the right column overflowed
+     the 940 fold by ~85px, putting the action row AND the honesty caveat below it — the
+     whole point of that pass, invisible. In the three-column rebuild the tooltip was
+     anchored to the COLUMN, so `top:100%` meant the column's full height and threw it
+     off the bottom of the screen. Current geometry: columns 115→828, destination band
+     840→916, tooltip 657→828, all inside 940. Neither defect looked wrong in the render;
+     the content simply stopped.
      View: open this file with theme.css in the same dir; helmet ~= head. -->
 <html>
   <head>
