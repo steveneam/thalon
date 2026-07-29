@@ -29,6 +29,38 @@
            "what went out on Tuesday" is the question the grid gets asked most, and a
            published row is the only honest anchor for cadence arithmetic.
 
+     PASS 1 (s86, the UX refinement programme — docs/research/ux-refinement-program.md).
+     Reference taken: Later's calendar week, which puts MEDIA THUMBNAILS INSIDE the
+     time-grid cells, and Sprout's month event (platform mark + time + excerpt). What
+     changed, and why each change is a subtraction as much as an addition:
+       · Every post chip now leads with its OWN PICTURE, with the platform as a BADGE
+         ON the thumb. One object carries both facts, so the words "Planned ·
+         LinkedIn" leave the chip: the dashed border already says planned (the legend
+         defines it) and the badge already says LinkedIn. Two words out, two visual
+         carriers in — the founder's "more visual, fewer words" applied literally.
+       · A text-only post keeps the slot with an "Aa" mark rather than going blank.
+         The ABSENCE of a picture is information (Instagram refuses a medialess
+         draft), so it is drawn.
+       · An engine RUN is not a post: no picture, no platform, a clock mark instead.
+         The grid stopped pretending the sweep and the post are the same kind of thing.
+       · The legend's two explanatory clauses compress to "won't fire" / "will fire" —
+         the decisive fact stays visible; the paragraph moves behind ⓘ.
+       · CLICKING A CHIP EXPANDS IT INTO A CARD THAT LEADS WITH THE BIG PICTURE
+         (founder, s86: "i assume when you click on the task or box in the Schedule,
+         it expands, and you would get a good thumbnail there too?"). It did NOT —
+         a click opened a text-only verb menu, so the one place with room for a real
+         picture showed none. The card now runs media → excerpt → verbs, and is
+         anchored BELOW the chip so you can still see what you clicked.
+       · ONE tooltip open, on the footer's cadence line. The footer's order flipped to
+         put it there honestly: the cadence RULE leads (persistent context), the
+         scheduled confirmation moved to the trailing edge (transient, and that is
+         where a confirmation belongs). First attempt anchored the tooltip
+         bottom-right and it covered the modal's own commit button.
+
+     MEASURED, not eyeballed (the working loop's step 4): expanded card 441→829 inside
+     .cal's 859 clip — the first cut was 439px tall and lost its Unschedule row off the
+     bottom edge, which reading alone would have shipped.
+
      COPY GRAMMAR: the confirm carries the ABSOLUTE time and the zone (Typefully's rule),
      never "in 3 hours". The scheduled confirmation carries Unschedule at the control, not
      only in a toast (s83b, ADOPT). Timezone rides the toolbar, always visible.
@@ -55,9 +87,38 @@
           .gut span { position: absolute; right: 8px; transform: translateY(-6px); font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
           .dcol { position: relative; height: 572px; border-left: 1px solid var(--n-400); background-image: repeating-linear-gradient(to bottom, var(--n-300) 0 1px, transparent 1px 44px); }
           .dcol.today { background-color: color-mix(in oklab, var(--act-subtle) 30%, transparent); }
-          .ev { position: absolute; left: 4px; right: 4px; border-radius: 6px; border: 1px solid var(--n-500); background: var(--n-200); padding: 4px 7px; font-size: 11px; color: var(--n-900); overflow: hidden; cursor: grab; }
-          .ev b { display: block; font-size: 11.5px; font-weight: 600; color: var(--n-1000); line-height: 1.3; }
+          .ev { position: absolute; left: 4px; right: 4px; border-radius: 6px; border: 1px solid var(--n-500); background: var(--n-200); padding: 4px 6px; font-size: 11px; color: var(--n-900); overflow: hidden; cursor: grab; display: flex; align-items: center; gap: 5px; }
+          .ev .txt { min-width: 0; flex: 1; }
+          .ev .t { display: block; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); line-height: 1.2; }
+          .ev b { display: block; font-size: 11.5px; font-weight: 600; color: var(--n-1000); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .ev .grip { position: absolute; top: 3px; right: 5px; color: var(--n-700); font-size: 9px; letter-spacing: 1px; }
+
+          /* ── PASS-1's headline move: the POST'S OWN PICTURE, in the cell (Later).
+               The platform rides as a badge ON the thumb rather than as a word, so
+               one object carries both facts and the excerpt gets the width back.
+               A text-only post keeps the same slot with an "Aa" mark — the absence
+               of a picture is itself information (Instagram refuses a medialess
+               draft), so it is drawn, never left blank. ── */
+          /* Sized against the MEASURED column: at 1440 the day column is ~147px, so
+             every px the thumb takes is a px the excerpt loses. 30x22 + a 5px gap is
+             the largest picture that still leaves the excerpt legible (36px truncated
+             every row, which reads as a broken layout rather than a dense one). */
+          .ev-media { position: relative; width: 30px; height: 22px; flex: none; }
+          .ev-media .img { width: 100%; height: 100%; border-radius: 4px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-300) 0 5px, var(--n-200) 5px 10px); display: flex; align-items: center; justify-content: center; font-size: 7px; color: var(--n-800); }
+          .ev-media.none .img { background: var(--n-bg); border-style: dashed; font-size: 9px; font-weight: 600; font-family: var(--font-data); }
+          .ev-media .badge { position: absolute; right: -4px; bottom: -4px; width: 13px; height: 13px; border-radius: 4px; background: var(--n-200); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; color: var(--n-1000); }
+
+          /* An engine RUN is not a post: no picture, no platform, its own mark. */
+          .ev-run { width: 22px; height: 22px; border-radius: 50%; flex: none; border: 1px solid var(--n-500); background: var(--n-bg); display: flex; align-items: center; justify-content: center; color: var(--n-800); }
+
+          /* ⓘ + tooltip — the SHARED vocabulary, carried verbatim from Analytics.dc.html
+             so the two sheets speak one dialect (programme rule 4: this wave extends a
+             built system). Copying the markup without this block is what made the first
+             render spill the tooltip into the footer as body copy. */
+          .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+          .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+          .tip { position: absolute; z-index: 9; width: 236px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); }
+          .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
 
           /* ── THE THREE FACTS, as three objects ── */
           .ev-plan { background: var(--n-100); border-style: dashed; }
@@ -82,13 +143,29 @@
           .lg-queue { background: var(--act-subtle); border-color: color-mix(in oklab, var(--act) 45%, var(--n-500)); }
           .lg-pub { background: var(--ok-subtle); border-color: color-mix(in oklab, var(--ok) 35%, var(--n-500)); }
 
-          /* Per-cell verb menu. */
-          .menu { position: absolute; z-index: 6; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 8px 28px oklch(0 0 0 / 0.45); padding: 5px; min-width: 176px; display: flex; flex-direction: column; gap: 1px; }
+          /* ── Per-cell EXPANDED CARD (founder, s86: "i assume when you click on the
+               task or box in the Schedule, it expands, and you would get a good
+               thumbnail there too?"). It did not, and that was the gap: a click used
+               to open a text-only verb menu, so the one place with room for a real
+               picture showed none. The card now LEADS with the media at full card
+               width, then the excerpt, then the verbs — the chip's 30px thumb is an
+               identifier, this is the actual look at the post.
+               A text-only draft shows the same frame with the "no media" state, so the
+               card answers "what will this look like?" either way. ── */
+          .menu { position: absolute; z-index: 6; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 8px 28px oklch(0 0 0 / 0.45); padding: 5px; width: 262px; display: flex; flex-direction: column; gap: 1px; }
           .menu-item { display: flex; align-items: center; gap: 8px; padding: 6px 9px; border-radius: 6px; font-size: 12.5px; color: var(--n-1000); cursor: pointer; }
           .menu-item:hover { background: var(--n-200); }
           .menu-item.danger { color: var(--err); }
           .menu-sep { height: 1px; background: var(--n-400); margin: 4px 2px; }
-          .menu-head { padding: 5px 9px 2px; font-size: 10.5px; color: var(--n-800); font-family: var(--font-data); }
+          .menu-head { padding: 5px 9px 2px; font-size: 10.5px; color: var(--n-800); font-family: var(--font-data); display: flex; align-items: center; gap: 7px; }
+
+          /* The good thumbnail. 16:9 at card width, with the platform badge kept in the
+             same corner it occupies on the chip so the two readings agree. */
+          .peek-media { position: relative; margin: 4px 4px 0; height: 98px; border-radius: 7px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-300) 0 8px, var(--n-200) 8px 16px); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--n-800); font-family: var(--font-data); }
+          .peek-media .badge { position: absolute; right: 7px; bottom: 7px; width: 21px; height: 21px; border-radius: 6px; background: var(--n-100); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; color: var(--n-1000); }
+          .peek-media .dims { position: absolute; left: 7px; bottom: 7px; padding: 1px 6px; border-radius: var(--r-pill); background: var(--n-100); border: 1px solid var(--n-500); font-size: 9.5px; }
+          .peek-body { padding: 8px 9px 2px; font-size: 12px; line-height: 1.45; color: var(--n-1000); }
+          .peek-sub { padding: 0 9px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-800); }
 
           /* The schedule modal — where the cadence pre-check lives. */
           .modal { position: absolute; z-index: 7; width: 348px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 12px; box-shadow: 0 14px 44px oklch(0 0 0 / 0.55); display: flex; flex-direction: column; }
@@ -160,12 +237,12 @@
             <!-- The three facts, named. This legend IS the sheet's organizing idea. -->
             <div style="display:flex;align-items:center;gap:14px">
               <div class="legend">
-                <span class="lg"><span class="lg-swatch lg-plan"></span>Planned · 3 <span class="t-label" style="font-size:11px">— door unarmed, nothing fires</span></span>
-                <span class="lg"><span class="lg-swatch lg-queue"></span>Queued · 2 <span class="t-label" style="font-size:11px">— committed, will fire</span></span>
+                <span class="lg"><span class="lg-swatch lg-plan"></span>Planned · 3 <span class="t-label" style="font-size:11px">— won't fire</span></span>
+                <span class="lg"><span class="lg-swatch lg-queue"></span>Queued · 2 <span class="t-label" style="font-size:11px">— will fire</span></span>
                 <span class="lg"><span class="lg-swatch lg-pub"></span>Published · 2</span>
               </div>
               <div style="flex:1"></div>
-              <span class="t-label">drag to move — an illegal slot refuses the drop and says why</span>
+              <span class="t-label">drag to move</span>
             </div>
 
             <div class="cal">
@@ -205,30 +282,39 @@
                   <span style="top:528px">18:00</span>
                 </div>
                 <div class="dcol">
-                  <div class="ev done ev-ok" style="top:22px;height:36px"><b>Sweep · ran ✓</b>06:30 · 4 cards in</div>
-                  <div class="ev ev-plan" style="top:176px;height:40px"><span class="grip">⋮⋮</span><b>Planned · LinkedIn</b>10:00 · pipeline follow-up</div>
+                  <div class="ev done ev-ok" style="top:22px;height:40px"><span class="ev-run"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg></span><span class="txt"><span class="t">06:30</span><b>Sweep ran · 4 cards</b></span></div>
+                  <div class="ev ev-plan" style="top:176px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span></span><span class="txt"><span class="t">10:00</span><b>pipeline follow-up</b></span></div>
                 </div>
                 <div class="dcol">
-                  <div class="ev ev-queue sel" style="top:154px;height:40px"><span class="grip">⋮⋮</span><b>Queued · LinkedIn</b>09:30 · pipeline thread</div>
+                  <div class="ev ev-queue sel" style="top:154px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span></span><span class="txt"><span class="t">09:30</span><b>pipeline thread</b></span></div>
                 </div>
                 <div class="dcol">
-                  <div class="ev ev-queue" style="top:418px;height:40px"><span class="grip">⋮⋮</span><b>Queued · Facebook</b>15:30 · export-queue post</div>
+                  <div class="ev ev-queue" style="top:418px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z"></path></svg></span></span><span class="txt"><span class="t">15:30</span><b>export-queue</b></span></div>
                 </div>
                 <div class="dcol">
-                  <div class="ev ev-plan" style="top:110px;height:40px"><span class="grip">⋮⋮</span><b>Planned · X</b>08:30 · cadence post</div>
+                  <div class="ev ev-plan" style="top:110px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media none"><span class="img">Aa</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></span></span><span class="txt"><span class="t">08:30</span><b>cadence post</b></span></div>
                   <div class="slot-ghost" style="top:352px">+ schedule here · 14:00</div>
-                  <div class="ev done ev-ok" style="top:456px;height:36px"><b>Blog · published ✓</b>16:20 · view live ↗</div>
+                  <div class="ev done ev-ok" style="top:456px;height:40px"><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg></span></span><span class="txt"><span class="t">16:20</span><b>Blog · live ↗</b></span></div>
                 </div>
                 <div class="dcol today">
-                  <div class="ev" style="top:374px;height:36px"><b>Sweep · engine</b>14:30 · YouTube + Bluesky</div>
-                  <div class="ev ev-plan" style="top:528px;height:40px"><span class="grip">⋮⋮</span><b>Planned · Facebook <span class="flag">⚑</span></b>18:00 · launch film post</div>
+                  <div class="ev" style="top:374px;height:40px"><span class="ev-run"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg></span><span class="txt"><span class="t">14:30</span><b>Sweep · YT + Bluesky</b></span></div>
+                  <div class="ev ev-plan" style="top:528px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z"></path></svg></span></span><span class="txt"><span class="t">18:00</span><b>launch film post <span class="flag">⚑</span></b></span></div>
                 </div>
                 <div class="dcol"></div>
                 <div class="dcol"></div>
 
-                <!-- Per-cell verb menu, open on the selected QUEUED row (Tue 09:30). -->
-                <div class="menu" style="left:236px;top:200px">
-                  <div class="menu-head">Queued · LinkedIn · Tue 22 Jul 09:30</div>
+                <!-- The expanded card, open on the selected QUEUED row (Tue 09:30).
+                     Media first, then the words, then the verbs. -->
+                <!-- Anchored BELOW the chip it expands (chip ends at 194), never on top
+                     of it: you must be able to see what you clicked. -->
+                <div class="menu" style="left:236px;top:196px">
+                  <div class="menu-head"><span class="lg-swatch lg-queue" style="width:14px;height:9px"></span>Queued · Tue 22 Jul 09:30</div>
+                  <div class="peek-media">
+                    <span class="dims">1200 × 675</span>
+                    <span class="badge"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span>
+                  </div>
+                  <div class="peek-body">“Cadence beats volume — what a 90-minute gap did to our reply rate…”</div>
+                  <div class="peek-sub">214 / 3000 chars · alt text set · approved 2d ago</div>
                   <div class="menu-item">Open draft</div>
                   <div class="menu-item">Move to next free slot</div>
                   <div class="menu-item">Reschedule…</div>
@@ -284,14 +370,27 @@
             </div>
 
             <!-- The scheduled confirmation carries Unschedule AT the control. -->
-            <div style="display:flex;align-items:center;gap:12px">
+            <!-- Footer order is deliberate: the CADENCE RULE is persistent context and
+                 leads; the scheduled confirmation is a transient success state and sits
+                 at the trailing edge, where a confirmation conventionally belongs.
+                 Swapping them also gives the sheet's ONE open tooltip somewhere honest
+                 to go — the first attempt anchored it bottom-right and it covered the
+                 modal's own commit button, which is the worst thing a tooltip can hide. -->
+            <div style="display:flex;align-items:center;gap:12px;position:relative">
+              <!-- Fact on the surface (the caps and the gap change an operator's next
+                   move, so they stay visible); rationale behind ⓘ. Opens UPWARD into the
+                   empty lower half of the Mon column — never over what it explains. -->
+              <span class="t-label" style="display:inline-flex;align-items:center;gap:6px">Cadence · LinkedIn ≤ 2/day · X ≤ 4/day · 90m gap <span class="info">i</span></span>
+              <div class="tip" style="left:0;bottom:calc(100% + 9px)">
+                <span class="tip-h">HOW CADENCE IS MEASURED</span>
+                Per platform, counted against queued <em>and</em> published rows in the timezone on the toolbar. A drop onto an illegal slot is refused at the drag itself, naming the next legal instant, so a commit is never spent to be told no.
+              </div>
+              <div style="flex:1"></div>
               <div class="confirm-strip">
                 <span style="color:var(--ok);font-size:12px">✓</span>
                 <span style="font-size:12.5px">Scheduled for <b>Wed 23 Jul, 15:30 AEST</b> · Facebook</span>
                 <div class="btn btn-quiet btn-sm" style="color:var(--ok)">Unschedule</div>
               </div>
-              <div style="flex:1"></div>
-              <span class="t-label">Cadence — LinkedIn ≤ 2/day · X ≤ 4/day · 90m gap</span>
             </div>
 
           </div>
