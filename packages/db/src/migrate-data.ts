@@ -82,6 +82,11 @@ const COPY_ORDER: PgTable[] = [
   schema.tenantCredentials,
   // B-learn L0 window (0019): the admission-cap ledger references monitored_areas.
   schema.trendAdmissions,
+  // s87 window (0022): create_runs references only tenants (its children are
+  // loose kind+id refs by design, not FKs); publication_metrics must follow
+  // social_publications, which it references.
+  schema.createRuns,
+  schema.publicationMetrics,
 ];
 
 const INSERT_BATCH = 200;

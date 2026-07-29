@@ -1,5 +1,6 @@
 export * from "./approval";
 export * from "./brand-profile";
+export * from "./create-run";
 export * from "./direction-doc";
 export * from "./direction-md";
 export * from "./draft-format";
@@ -12,6 +13,7 @@ export * from "./judge";
 export * from "./leads";
 export * from "./media";
 export * from "./platform-capability";
+export * from "./platform-settings";
 export * from "./publish-queue";
 export * from "./run-replay";
 export * from "./search-intel";

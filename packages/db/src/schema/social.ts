@@ -2,6 +2,7 @@ import { SOCIAL_PLATFORMS } from "@thalon/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
+  doublePrecision,
   index,
   jsonb,
   pgTable,
@@ -74,6 +75,83 @@ export const socialPublications = pgTable(
     ),
     check(
       "social_publications_platform_check",
+      sql.raw(`platform in (${inList(SOCIAL_PLATFORMS)})`),
+    ),
+    tenantIsolation(),
+  ],
+);
+
+/**
+ * s87 window (D2): what a publication DID once it was live — the
+ * `source_metrics` pattern (generic `metric_label`/`metric_value`, platform
+ * metric names arriving as data) pointed at our OWN posts instead of at
+ * ingested exemplars. Append-only, never UPDATE. Charter:
+ * `docs/research/distribution-charter.md` §D2, the founder's named ask.
+ *
+ * **The honesty rule this table is shaped around: absence, never zero.** A
+ * platform that cannot report a metric — Bluesky has no impressions,
+ * LinkedIn's are partner-gated, Meta's need permissions the token may lack —
+ * yields NO ROW for it. That is why there is no nullable `metric_value` and
+ * no "unavailable" flag: a row asserts a measurement, and everything the
+ * Analytics surface says about gaps it says by finding nothing here. Storing
+ * a 0 for "we couldn't ask" is the single most expensive lie this table
+ * could tell, and the schema makes it unrepresentable rather than
+ * discouraged.
+ *
+ * `platform` is denormalized off the publication for the per-channel
+ * aggregation the surface reads on every tile. It is NOT forgeable: the repo
+ * derives it from the referenced publication row (tenancy-walled) and never
+ * accepts it from the caller — pinned in the s87 repo tests, because a
+ * denormalization nobody guards is just two truths waiting to disagree.
+ */
+export const publicationMetrics = pgTable(
+  "publication_metrics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id),
+    publicationId: uuid("publication_id")
+      .notNull()
+      .references(() => socialPublications.id),
+    /** Derived from the publication, never supplied — see the docblock. */
+    platform: text("platform").notNull(),
+    /** Generic by design: `likes`, `reposts`, `impressions`… platform vocabulary is DATA. */
+    metricLabel: text("metric_label").notNull(),
+    metricValue: doublePrecision("metric_value").notNull(),
+    /**
+     * The tick's window stamp — passed in, never read in core (the
+     * `publishedAt` convention), so a replayed collection is byte-identical
+     * and the idempotency key below actually holds.
+     */
+    capturedAt: timestamp("captured_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    /**
+     * Structural idempotency: re-running the tick inside the same window
+     * appends nothing. Every column is NOT NULL — the SOP's Postgres trap
+     * (NULLs are distinct in unique indexes, so a nullable member silently
+     * breaks replay-appends-nothing) is avoided by construction, not by
+     * remembering it.
+     */
+    uniqueIndex("publication_metrics_tenant_pub_label_at_idx").on(
+      t.tenantId,
+      t.publicationId,
+      t.metricLabel,
+      t.capturedAt,
+    ),
+    // The surface reads: one publication's series, and a channel's roll-up.
+    index("publication_metrics_tenant_pub_idx").on(t.tenantId, t.publicationId),
+    index("publication_metrics_tenant_platform_captured_idx").on(
+      t.tenantId,
+      t.platform,
+      t.capturedAt,
+    ),
+    check(
+      "publication_metrics_platform_check",
       sql.raw(`platform in (${inList(SOCIAL_PLATFORMS)})`),
     ),
     tenantIsolation(),
