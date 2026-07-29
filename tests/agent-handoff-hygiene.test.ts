@@ -129,4 +129,30 @@ describe("agent_handoff hygiene", () => {
     expect(lanes.length).toBeGreaterThan(0);
     expect(lanes.every((f) => /^(KICKOFF|WRAP)-.*\.md$/.test(f))).toBe(true);
   });
+
+  /**
+   * A DONE ITEM ON A BOARD OF OPEN ACTIONS IS A FALSE CLAIM (founder, 2026-07-29).
+   *
+   * NEEDS-STEVEN feeds his dashboard card, so every line on it reads as a
+   * decision he still owes. It had drifted to 46 lines of which 18 were already
+   * resolved — he noticed before we did ("it is building up with stale
+   * notifications"), and swordfish's read-only hygiene check found the count.
+   * The header rule ("a resolved item moves to archive/ in the SAME wrap") is
+   * documentary and would rot exactly the way the board did; this is the
+   * executable half, and it runs on every verify.
+   *
+   * Scoped deliberately to the ✅/~~strikethrough~~ markers we use to mean
+   * "closed". Prose that merely mentions a resolution is not matched — the test
+   * should catch the habit of ticking an item in place, not police wording.
+   */
+  it("keeps only OPEN actions on the founder's board — resolved ones move to archive/", () => {
+    const board = readFileSync(path.join(HANDOFF, "NEEDS-STEVEN.md"), "utf8")
+      .split("\n")
+      .filter((l) => l.startsWith("- ["));
+    const resolved = board.filter((l) => /✅|~~/.test(l));
+    expect(resolved).toEqual([]);
+    // The archive must actually exist once anything has closed, so the rule is
+    // "move it", never "delete it" — the reasoning outlives the action.
+    expect(existsSync(path.join(HANDOFF, "archive", "NEEDS-STEVEN-closed.md"))).toBe(true);
+  });
 });
