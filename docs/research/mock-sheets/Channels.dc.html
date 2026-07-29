@@ -36,18 +36,86 @@
 
      DISCONNECT COUNTS WHAT IT WILL BREAK. The confirm overlay names the pending queue
      rows the disconnect would strand (shipped s83 — the Mobbin finding nobody ships).
+
+     PASS 1 (s86, the UX refinement programme — docs/research/ux-refinement-program.md).
+     References taken: Rox's integrations page (CURRENT / NOT CONNECTED grouping, a live
+     activity line per connected card, icon-only actions) and Chatbase/Notion (every card
+     leads with a real BRAND MARK, never a text initial). Postiz supplies the last one:
+     its integration row stores an avatar per account, because a connected channel is an
+     IDENTITY, not a platform name.
+       · Nine flat cards became two groups with counts. The old grid asked the operator
+         to sort nine cards by reading nine pills.
+       · `in` `f` `ig` `bs` `𝕏` `rd` `tk` `bl` `@` — nine two-letter boxes — became nine
+         real marks. This is the single biggest recognition win on the surface.
+       · Every connected card gains the ACCOUNT's avatar and a live line ("31 published ·
+         last 25 Jul"). A connected card with no activity shown looks identical to a dead
+         one. Where there IS nothing, it says "nothing published yet", never "0".
+       · X's live line says "not measured — no vault row to attribute to". That is the
+         honest answer for an env-key channel, and it is not a zero.
+       · Validate / Open / Disconnect became icons: the same three verbs, nine times over,
+         were nine repetitions of the same three words.
+       · A NOT-CONNECTED channel is an OFFER, not an identity — so it loses the account
+         block (there is no account) and the "door disarmed" line, which merely restated
+         its own pill. That subtraction is what let the connect dance back above the fold.
+
+     NO TOOLTIP ON THIS SHEET, deliberately. The programme's rule is "fact on the surface,
+     rationale behind ⓘ" with "exactly ONE tooltip open per sheet" — but this surface is
+     nine cards plus a four-state dance with no free region, and every card note here is
+     already a FACT (what expires, what is refused, what is not yours), not a rationale.
+     Forcing an open tooltip would have covered a card to demonstrate a pattern the sheet
+     does not need. Schedule and Composer carry the pattern instead.
+
+     MEASURED, not eyeballed: the first grouped cut pushed the connect dance to 992 against
+     a 940 fold — the entire dance section was invisible. Copy compression got it to 925,
+     still over; the structural cut (slim not-connected cards) landed it at 914.
      View: open this file with theme.css in the same dir; helmet ~= head. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
         <link rel="stylesheet" href="./theme.css" />
         <style>
-          .ch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-          .ch-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 11px 14px 11px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+          .ch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+          .ch-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 9px 13px; display: flex; flex-direction: column; gap: 5px; position: relative; }
+          /* A NOT-CONNECTED channel is an OFFER, not an identity: no account, no
+             avatar, no provenance, and no "door disarmed" line — an unconnected door
+             is disarmed by definition, so the words were restating the pill. Rox
+             groups them the same way, lighter than the live ones. */
+          .ch-card.slim { gap: 4px; }
           .ch-card.attn { border-color: color-mix(in oklab, var(--warn) 40%, var(--n-400)); }
           .ch-head { display: flex; align-items: center; gap: 9px; }
           .ch-name { font-size: 13.5px; font-weight: 600; flex: 1; }
-          .plat-ico { width: 26px; height: 26px; border-radius: 7px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex: none; }
+          /* PASS 1 (s86): a real BRAND MARK, never a text initial. Chatbase and Notion
+             both lead every integration card with the mark, and it is the difference
+             between scanning a wall of two-letter boxes and recognising a logo. */
+          .plat-ico { width: 26px; height: 26px; border-radius: 7px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; flex: none; color: var(--n-1000); }
+
+          /* Rox's grouping: CURRENT above, NOT CONNECTED below. A flat grid asks the
+             operator to sort nine cards by reading nine pills; two headings do it for
+             them, and the counts are the answer to "how much of this is live?". */
+          .ch-group { display: flex; align-items: center; gap: 9px; }
+          .ch-group::after { content: ""; flex: 1; height: 1px; background: var(--n-400); }
+          .grp-n { font-family: var(--font-data); font-size: 11px; color: var(--n-900); letter-spacing: 0.04em; }
+
+          /* The ACCOUNT's own face (Postiz stores an avatar per integration for exactly
+             this). A connected channel is an identity, not a platform name. */
+          .ch-who { display: flex; align-items: center; gap: 8px; }
+          .ch-av { width: 24px; height: 24px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); flex: none; display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 600; color: var(--n-900); }
+
+          /* Rox's live activity line — a connected card that shows no activity looks
+             identical to a dead one. */
+          .ch-live { font-family: var(--font-data); font-size: 10.5px; color: var(--n-800); }
+
+          /* Icon-only actions on connected cards: the verbs are the same three every
+             time, so the words were nine repetitions of the same three words. */
+          .iact { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--n-500); background: var(--n-200); display: flex; align-items: center; justify-content: center; color: var(--n-900); cursor: pointer; }
+          .iact:hover { color: var(--n-1000); border-color: var(--n-700); }
+          .iact.danger:hover { color: var(--err); border-color: var(--err); }
+
+          /* ⓘ + tooltip — shared vocabulary, carried verbatim from Analytics.dc.html. */
+          .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+          .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+          .tip { position: absolute; z-index: 9; width: 244px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); }
+          .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
 
           /* Identity + provenance: who, since when, last proven. */
           .ch-meta { display: flex; flex-direction: column; gap: 2px; }
@@ -61,9 +129,9 @@
           /* The connect dance, drawn as the four states it actually has. */
           .dance { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
           .dstep { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); display: flex; flex-direction: column; overflow: hidden; }
-          .dstep-head { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border-bottom: 1px solid var(--n-400); background: var(--n-bg); }
+          .dstep-head { display: flex; align-items: center; gap: 8px; padding: 7px 13px; border-bottom: 1px solid var(--n-400); background: var(--n-bg); }
           .dstep-n { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
-          .dstep-body { padding: 10px 13px 11px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+          .dstep-body { padding: 9px 13px 10px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
           .scope { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; color: var(--n-900); }
           .scope i { color: var(--n-700); font-style: normal; margin-top: -1px; }
           .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--n-400); border-top-color: var(--act); flex: none; }
@@ -115,31 +183,25 @@
               <span class="t-label">a channel is where content GOES — connecting one never arms it</span>
             </div>
 
+            <div class="ch-group"><span class="grp-n">CURRENT · 6</span></div>
             <div class="ch-grid">
-              <!-- REAL, s84: partner-gated refresh means the card flips near expiry. -->
               <div class="ch-card attn">
-                <div class="ch-head"><div class="plat-ico">in</div><span class="ch-name">LinkedIn</span><span class="pill pill-warn">Expiring</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">Steven · member</span>
-                  <span class="ch-stamp">connected 27 May · proven 25 Jul 09:12</span>
-                </div>
-                <span class="ch-note warn">Expires in 6 days. This platform grants no refresh token, so renewal is the same one-click connect.</span>
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></div><span class="ch-name">LinkedIn</span><span class="pill pill-warn">Expiring</span></div>
+                <div class="ch-who"><span class="ch-av">S</span><div class="ch-meta"><span class="ch-as">Steven · member</span><span class="ch-stamp">connected 27 May</span></div></div>
+                <span class="ch-live">14 published · last 23 Jul</span>
+                <span class="ch-note warn">Expires in 6 days. Renewal is the same one-click connect.</span>
                 <div class="ch-door"><span class="dot" style="background:var(--ok)"></span>door armed</div>
-                <div class="ch-actions"><div class="btn btn-primary btn-sm">Reconnect</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
+                <div class="ch-actions"><div class="btn btn-primary btn-sm">Reconnect</div><span class="iact danger" title="Disconnect"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.2 9.8 3.9 12a2.6 2.6 0 0 1-3.1-3.1"></path><path d="M9.8 6.2 12 3.9a2.6 2.6 0 0 1 3.1 3.1"></path><path d="M6 6 10 10"></path></svg></span></div>
               </div>
-
               <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">f</div><span class="ch-name">Facebook Page</span><span class="pill pill-ok">Connected</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">MacTechDish · Page</span>
-                  <span class="ch-stamp">connected 24 Jul · proven 25 Jul 14:02</span>
-                </div>
-                <span class="ch-note">Page token — it does not expire. Posts, images and native video.</span>
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z"></path></svg></div><span class="ch-name">Facebook Page</span><span class="pill pill-ok">Connected</span></div>
+                <div class="ch-who"><span class="ch-av">M</span><div class="ch-meta"><span class="ch-as">MacTechDish · Page</span><span class="ch-stamp">connected 24 Jul</span></div></div>
+                <span class="ch-live">31 published · last 25 Jul</span>
+                <span class="ch-note">Page token — never expires. Posts, images, native video.</span>
                 <div class="ch-door"><span class="dot" style="background:var(--ok)"></span>door armed</div>
-                <div class="ch-actions"><div class="btn btn-ghost btn-sm">Validate</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
-
+                <div class="ch-actions"><span class="iact" title="Validate"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 13.2 4v4c0 3-2.2 5.3-5.2 6.2C5 13.3 2.8 11 2.8 8V4Z"></path><path d="m5.9 7.9 1.5 1.5 2.9-3"></path></svg></span><span class="iact danger" title="Disconnect"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.2 9.8 3.9 12a2.6 2.6 0 0 1-3.1-3.1"></path><path d="M9.8 6.2 12 3.9a2.6 2.6 0 0 1 3.1 3.1"></path><path d="M6 6 10 10"></path></svg></span></div>
                 <!-- Disconnect counts what it would strand (shipped s83). -->
-                <div class="confirm" style="left:112px;top:96px">
+                <div class="confirm" style="left:22px;top:8px">
                   <span class="t-title" style="font-size:13px">Disconnect Facebook Page?</span>
                   <div class="strand">
                     <div class="strand-row"><span style="color:var(--warn)">⚑</span><span><b>2 queued posts</b> would be stranded</span></div>
@@ -153,83 +215,58 @@
                   </div>
                 </div>
               </div>
-
-              <!-- OPEN CALL (a): connected, with a capability note rather than a 7th state. -->
               <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">ig</div><span class="ch-name">Instagram</span><span class="pill pill-ok">Connected</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">@maxbrenner_123 · professional</span>
-                  <span class="ch-stamp">connected 24 Jul · proven 25 Jul 14:02</span>
-                </div>
-                <span class="ch-note">Reached through the Page that admins it. <b>Text-only posts are refused</b> — every post needs an image or video.</span>
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.2" y="2.2" width="11.6" height="11.6" rx="3.6"></rect><circle cx="8" cy="8" r="2.9"></circle><circle cx="11.5" cy="4.5" r="0.8" fill="currentColor" stroke="none"></circle></svg></div><span class="ch-name">Instagram</span><span class="pill pill-ok">Connected</span></div>
+                <div class="ch-who"><span class="ch-av">@</span><div class="ch-meta"><span class="ch-as">@maxbrenner_123 · professional</span><span class="ch-stamp">connected 24 Jul</span></div></div>
+                <span class="ch-live">nothing published yet</span>
+                <span class="ch-note">Via the Page that admins it. <b>Text-only posts are refused.</b></span>
                 <div class="ch-door"><span class="dot" style="background:var(--ok)"></span>door armed · media required</div>
-                <div class="ch-actions"><div class="btn btn-ghost btn-sm">Validate</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
+                <div class="ch-actions"><span class="iact" title="Validate"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 13.2 4v4c0 3-2.2 5.3-5.2 6.2C5 13.3 2.8 11 2.8 8V4Z"></path><path d="m5.9 7.9 1.5 1.5 2.9-3"></path></svg></span><span class="iact danger" title="Disconnect"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.2 9.8 3.9 12a2.6 2.6 0 0 1-3.1-3.1"></path><path d="M9.8 6.2 12 3.9a2.6 2.6 0 0 1 3.1 3.1"></path><path d="M6 6 10 10"></path></svg></span></div>
               </div>
-
               <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">bs</div><span class="ch-name">Bluesky</span><span class="pill pill-ok">Connected</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">@demo.bsky.social</span>
-                  <span class="ch-stamp">connected 12 Jul · proven 25 Jul 14:02</span>
-                </div>
-                <span class="ch-note">An app password you minted on the platform — a paste by design, not a workaround.</span>
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3.6 2.6C5.3 3.9 7.1 6.5 8 7.9c.9-1.4 2.7-4 4.4-5.3 1.2-.9 3.1-1.6 3.1.6 0 .4-.3 3.5-.4 4-.4 1.7-2.1 2.1-3.6 1.9 2.6.4 3.3 1.9 1.9 3.4-2.7 2.8-3.9-.7-4.2-1.6l-.2-.5-.2.5c-.3.9-1.5 4.4-4.2 1.6-1.4-1.5-.7-3 1.9-3.4-1.5.2-3.2-.2-3.6-1.9-.1-.5-.4-3.6-.4-4 0-2.2 1.9-1.5 3.1-.6Z"></path></svg></div><span class="ch-name">Bluesky</span><span class="pill pill-ok">Connected</span></div>
+                <div class="ch-who"><span class="ch-av">D</span><div class="ch-meta"><span class="ch-as">@demo.bsky.social</span><span class="ch-stamp">connected 12 Jul</span></div></div>
+                <span class="ch-live">7 published · last 24 Jul</span>
+                <span class="ch-note">An app password you minted — a paste by design, not a workaround.</span>
                 <div class="ch-door"><span class="dot" style="background:var(--ok)"></span>door armed · test grant</div>
-                <div class="ch-actions"><div class="btn btn-ghost btn-sm">Validate</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
+                <div class="ch-actions"><span class="iact" title="Validate"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 13.2 4v4c0 3-2.2 5.3-5.2 6.2C5 13.3 2.8 11 2.8 8V4Z"></path><path d="m5.9 7.9 1.5 1.5 2.9-3"></path></svg></span><span class="iact danger" title="Disconnect"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.2 9.8 3.9 12a2.6 2.6 0 0 1-3.1-3.1"></path><path d="M9.8 6.2 12 3.9a2.6 2.6 0 0 1 3.1 3.1"></path><path d="M6 6 10 10"></path></svg></span></div>
               </div>
-
-              <!-- REAL: the env-override badge. -->
               <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">𝕏</div><span class="ch-name">X</span><span class="pill pill-idle">Connected via env</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">keys from the environment</span>
-                  <span class="ch-stamp">no vault row · not tenant-scoped</span>
-                </div>
-                <span class="ch-note">These keys came from the deployment, not from you. The vault makes this channel yours.</span>
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></div><span class="ch-name">X</span><span class="pill pill-idle">Connected via env</span></div>
+                <div class="ch-who"><div class="ch-meta"><span class="ch-as">keys from the environment</span><span class="ch-stamp">no vault row · not tenant-scoped</span></div></div>
+                <span class="ch-live">not measured — no vault row to attribute to</span>
+                <span class="ch-note">From the deployment, not from you. The vault makes it yours.</span>
                 <div class="ch-door"><span class="dot" style="background:var(--n-600)"></span>door disarmed</div>
                 <div class="ch-actions"><div class="btn btn-ghost btn-sm">Move into vault</div></div>
               </div>
-
               <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">rd</div><span class="ch-name">Reddit</span><span class="pill pill-idle">Not connected</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">—</span>
-                  <span class="ch-stamp">never connected</span>
-                </div>
-                <span class="ch-note">One click, then Reddit asks you to allow posting. Nothing is pasted or stored here.</span>
-                <div class="ch-door"><span class="dot" style="background:var(--n-600)"></span>door disarmed</div>
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg></div><span class="ch-name">Hosted blog</span><span class="pill pill-ok">Connected</span></div>
+                <div class="ch-who"><span class="ch-av">B</span><div class="ch-meta"><span class="ch-as">demo.thalon.example/blog</span><span class="ch-stamp">connected 02 Jul</span></div></div>
+                <span class="ch-live">9 published · last 22 Jul</span>
+                <span class="ch-note">Your own site. No credential stored; connecting is your opt-in.</span>
+                <div class="ch-door"><span class="dot" style="background:var(--ok)"></span>door armed</div>
+                <div class="ch-actions"><span class="iact" title="Open ↗"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5H13V6"></path><path d="M13 2.5 7.5 8"></path><path d="M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3"></path></svg></span><span class="iact danger" title="Disconnect"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M6.2 9.8 3.9 12a2.6 2.6 0 0 1-3.1-3.1"></path><path d="M9.8 6.2 12 3.9a2.6 2.6 0 0 1 3.1 3.1"></path><path d="M6 6 10 10"></path></svg></span></div>
+              </div>
+            </div>
+
+            <div class="ch-group"><span class="grp-n">NOT CONNECTED · 3</span></div>
+            <div class="ch-grid">
+              <div class="ch-card slim">
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><ellipse cx="8" cy="9.4" rx="5.6" ry="4"></ellipse><circle cx="12.6" cy="3.4" r="1.2"></circle><path d="M8 5.4 8.9 2l3 1"></path><path d="M6.2 9.2h.01M9.8 9.2h.01"></path><path d="M6.1 11.4c1.1.8 2.7.8 3.8 0"></path></svg></div><span class="ch-name">Reddit</span><span class="pill pill-idle">Not connected</span></div>
+                <span class="ch-stamp">never connected</span>
+                <span class="ch-note">One click, then Reddit asks you to allow posting.</span>
                 <div class="ch-actions"><div class="btn btn-ghost btn-sm">Connect</div></div>
               </div>
-
-              <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">tk</div><span class="ch-name">TikTok</span><span class="pill pill-idle">In review</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">—</span>
-                  <span class="ch-stamp">submitted 21 Jul · no decision yet</span>
-                </div>
-                <span class="ch-note">The platform reviews the app before granting posting. We surface the decision on this card.</span>
-                <div class="ch-door"><span class="dot" style="background:var(--n-600)"></span>door disarmed</div>
+              <div class="ch-card slim">
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 2v7.6a2.6 2.6 0 1 1-2.2-2.57"></path><path d="M9.4 2c.3 1.7 1.5 2.8 3.2 3"></path></svg></div><span class="ch-name">TikTok</span><span class="pill pill-idle">In review</span></div>
+                <span class="ch-stamp">submitted 21 Jul · no decision yet</span>
+                <span class="ch-note">The platform reviews the app before granting posting.</span>
                 <div class="ch-actions"><div class="btn btn-ghost btn-sm" style="opacity:0.5">Connect</div><span class="t-label" style="font-size:11px">blocked by review</span></div>
               </div>
-
-              <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">bl</div><span class="ch-name">Hosted blog</span><span class="pill pill-ok">Connected</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">demo.thalon.example/blog</span>
-                  <span class="ch-stamp">connected 02 Jul · proven 25 Jul 14:02</span>
-                </div>
-                <span class="ch-note">Your own site. No credential stored — connecting it is your opt-in to publish here.</span>
-                <div class="ch-door"><span class="dot" style="background:var(--ok)"></span>door armed</div>
-                <div class="ch-actions"><div class="btn btn-ghost btn-sm">Open ↗</div><div class="btn btn-quiet btn-sm">Disconnect</div></div>
-              </div>
-
-              <div class="ch-card">
-                <div class="ch-head"><div class="plat-ico">@</div><span class="ch-name">Newsletter</span><span class="pill pill-idle">Not on your plan</span></div>
-                <div class="ch-meta">
-                  <span class="ch-as">—</span>
-                  <span class="ch-stamp">available on a higher plan</span>
-                </div>
-                <span class="ch-note">Broadcast email is not in your plan. Nothing is broken; the channel is not yours yet.</span>
-                <div class="ch-door"><span class="dot" style="background:var(--n-600)"></span>door disarmed</div>
+              <div class="ch-card slim">
+                <div class="ch-head"><div class="plat-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="2" y="3.6" width="12" height="8.8" rx="1.6"></rect><path d="m2.4 4.6 5.6 4 5.6-4"></path></svg></div><span class="ch-name">Newsletter</span><span class="pill pill-idle">Not on your plan</span></div>
+                <span class="ch-stamp">available on a higher plan</span>
+                <span class="ch-note">Not in your plan. Nothing is broken — the channel is not yours yet.</span>
                 <div class="ch-actions"><div class="btn btn-ghost btn-sm">See plans</div></div>
               </div>
             </div>
