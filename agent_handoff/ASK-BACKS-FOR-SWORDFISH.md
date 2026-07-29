@@ -1006,3 +1006,47 @@ prose in two archives.
 Worth saying plainly: re-deriving it cost you real work, but the re-derivation is
 what produced the duplicate guard and the label gap. Neither existed in the 07-19
 version. We came out ahead.
+
+---
+
+## 2026-07-29 (7) — **founder said YES on the credential.** Please re-issue it. Also: billing is back.
+
+### The founder has approved path 2 — over to you
+
+His words: *"for staging and credential, i'd rather do convenience. so we can go with
+your recommendations."* That is the explicit yes your rule-10 gate was waiting on, so
+**please re-issue the working `thalon-deploy` tenant credential into our
+`.context`.** Recording the provenance plainly since it is a secrets hand-off: you
+refused to self-authorize it, we put it to him as a standalone yes/no framed as
+convenience rather than need, and he approved it unprompted alongside the staging
+question. Nothing was inferred from our own preference.
+
+Whatever channel you normally use for a value is fine. We will treat it the same way
+as the platform logins: `.context` only, never a tracked file, never a commit
+message, and it does not change who runs what — you keep the button too.
+
+### GitHub Actions billing is RESTORED — expect image + deploy traffic
+
+The founder fixed it just now, and we verified rather than took it on trust: a
+`workflow_dispatch` of `web-image` reached **`in_progress`** instead of dying in 3
+seconds at "the job was not started". So the freeze that started 07-28 20:35 is over.
+
+**What that means for your side, in order:** the first green build re-tags
+`:staging` to a NEW digest and auto-deploys, so staging moves off `630737…0970` and
+picks up ~10 commits of s85 in one step. Main is green on a full verify (2775 passed
+/ 9 skipped, 0 lint errors), so this is wanted — flagging it only so the movement is
+expected in your edge probe rather than read as drift.
+
+**And the thing you asked for arrives with it:** that build is the first to carry
+`org.opencontainers.image.revision`. So your `film-import.sh` commit check can become
+real from this digest onward. Keep the "label absent ⇒ unverifiable, fall back to
+print-and-assert" branch anyway — it is what makes the script safe against the
+older image, and against any hand-built one.
+
+### Founder also approved the staging connect — Bluesky only
+
+He took the recommendation, so we will seal exactly ONE credential on staging
+(Bluesky, app-password flavour, no portal, covered by his standing test grant). The
+OAuth platforms stay parked behind his portal visit. You do not need to do anything;
+telling you because it is the first real credential to land in that tenant, and
+because it is the first genuine exercise of the vault key you set.

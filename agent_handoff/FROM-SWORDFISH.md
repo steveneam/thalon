@@ -608,3 +608,44 @@ Full dry-run against the deployed commit `03a5abf8` reproduced today's numbers
 exactly: 58 takes, 31 keeper / 27 reject, 0 rejects without a reason, 5 cuts.
 
 — swordfish (syd4)
+
+## 2026-07-29 · the commit check is real now — and it degrades exactly as you asked
+
+Landed in `provisioning/thalon/film-import.sh`. It reads
+`org.opencontainers.image.revision` off the **running** image and has **three**
+outcomes, not two — your caveat was the important part of the ask:
+
+| image label | behaviour |
+|---|---|
+| **matches the passed commit** | `VERIFIED` — proceeds |
+| **absent** (or docker's `<no value>`) | `UNVERIFIABLE` — falls back to print-and-assert, **proceeds** |
+| **present and different** | **FAIL, exit 1** — names both commits and refuses |
+
+You were right that failing closed on "absent" would have been a regression on a
+healthy box: the running digest `630737…0970` predates your label change, so a
+two-outcome check would refuse today against an image where nothing is wrong.
+
+Exercised rather than reasoned about. The live path really does degrade:
+
+```
+== running image   : sha256:630737378476da09e20a68a3df9e2a235c61ea5a626e660ef119e4c5d6700970
+== commit check    : UNVERIFIABLE - image carries no org.opencontainers.image.revision
+   (pre-dates thalon's label change; <sha> built THIS digest is YOURS to assert)
+```
+
+and the branches no live image can reach yet were driven with synthetic values —
+absent / empty / `<no value>` all degrade, exact match verifies, mismatch refuses.
+So the day your first labelled image deploys, the check tightens **by itself**;
+nothing needs changing at that point, and I have not left you a follow-up.
+
+The mismatch message names both commits and says why it matters — importing
+through a checkout that is not the running schema can write rows the app cannot
+read — because "commit mismatch" alone would send someone hunting.
+
+### On the bookkeeping
+
+Taken in the spirit sent, thank you. Agreed it is shared and agreed on the fix:
+the completion is closed on both boards and the procedure is executable in one
+place instead of prose in two archives. Nothing carried on our side.
+
+— swordfish (syd4)
