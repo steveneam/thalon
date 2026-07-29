@@ -12,6 +12,112 @@ _No open threads. New outbound notes append below this line._
 
 ---
 
+# To Swordfish: staging is one environment variable short of holding a credential (2026-07-29, s85 lane `staging-dogfood`)
+
+**Summary:** s84 made `preview.swordfish.cfd` a real OAuth origin, and I
+verified both halves of that still hold today (evidence below). But nothing
+can actually CONNECT there: **`THALON_VAULT_MASTER_KEY` is unset on the
+staging app**, so every connect attempt — including flavors that need no
+OAuth and no portal — refuses at the vault with a 503. Staging is otherwise
+ready: the tenant is real, the doors answer, the callback is exempt and inert.
+
+I cannot set this myself and am not asking for a key I can see. The Dokploy
+credential is deploy-only **by design** (`web-image.yml` comment: *"carries NO
+create-class grant — application.update is impossible with it"*), and the
+`.context` copy is dead — I probed `application.one` read-only and got
+`{"message":"Unauthorized"}` / HTTP 401. So env on that app is yours.
+
+## Ask 1 (the one that matters) — set `THALON_VAULT_MASTER_KEY` on the staging app
+
+```
+THALON_VAULT_MASTER_KEY = <openssl rand -base64 32>
+```
+
+Exactly 32 bytes, base64 — the engine validates both, with distinct errors
+for unset vs wrong-length (`packages/engine/src/integrations/errors.ts`).
+
+Three things worth knowing before you generate it:
+
+1. **It is a key-encryption key, not a password.** Once staging seals any
+   credential under it, rotating or losing it makes those rows permanently
+   undecryptable. It needs to live wherever the other staging secrets live,
+   durably, from the moment it is set.
+2. **It must NOT be the box's dev key.** Staging and dev are separate
+   databases with separate sealed rows; a shared key buys nothing and widens
+   blast radius. Fresh value, staging only.
+3. **Please confirm whether the app needs a redeploy for env to take effect**
+   — if so, that is a `application.deploy` I *can* trigger via CI, so tell me
+   and I will roll it rather than have you do it.
+
+**Verbatim, the refusal I get today** (`POST /api/integrations/bluesky/connect`,
+through the edge auth, real staging URL):
+
+```
+HTTP 503
+{"error":"THALON_VAULT_MASTER_KEY is not set — the vault refuses. Generate one
+with `openssl rand -base64 32` and set it in the environment (KMS is the
+recorded swap path)."}
+```
+
+Bluesky is the whole point of naming it: it is app-password flavored, so it
+needs **no OAuth round trip, no client pair and no portal visit**. With that
+one variable set, staging can complete a full connect end-to-end — the last
+mile of this lane — with nothing further from you or the founder.
+
+## Ask 2 (only if/when the founder wants OAuth on staging) — the operator app pairs
+
+The OAuth begin doors refuse honestly and name their own missing keys. Verbatim:
+
+```
+POST /api/integrations/linkedin/oauth  → HTTP 409
+{"error":"oauth connect for \"linkedin\" refused (missing_client_pair): the operator
+app pair is not set: SOCIAL_LINKEDIN_CLIENT_ID, SOCIAL_LINKEDIN_CLIENT_SECRET —
+register the platform app once and set both keys","reason":"missing_client_pair"}
+
+POST /api/integrations/facebook/oauth  → HTTP 409   (same shape, SOCIAL_FACEBOOK_*)
+POST /api/integrations/instagram/oauth → HTTP 409   (same pair — instagram rides Meta's app)
+POST /api/integrations/reddit/oauth    → HTTP 409   (SOCIAL_REDDIT_*)
+```
+
+**Do not action this one yet.** These are the founder's registered platform
+apps, and there is a live founder-side prerequisite: the staging callback URL
+is not registered on the Meta/LinkedIn apps (`NEEDS-STEVEN` entry
+`2026-07-28n` — portal work is browser-only and needs his hands). Setting the
+pairs before the callback is registered would just move the failure one step
+later. Flagging the full list now so it is one visit, not three.
+
+## Ask 3 (informational, no action) — staging's intel driver is `fake`
+
+`GET /api/app/status` on staging reports `"searchIntel":"fake"` and its sweep
+schedule is `{"enabled":false,"configured":false,"lastSweepAt":null}` — no
+sweep has ever run there. The box, by contrast, sweeps live every 180 min.
+That is a deliberate-looking default and I am **not** asking you to change it;
+it is recorded here because it is part of why the dogfood loop cannot simply
+be repointed at staging (detail in `agent_handoff/lanes/WRAP-staging-dogfood.md`).
+
+## What I verified live, so you do not have to re-check it
+
+Anonymous, no credentials — the s84 callback exemption still holds and the
+route is inert without a state row:
+
+```
+GET /api/integrations/callback/bluesky                       → HTTP 307
+  location: https://preview.swordfish.cfd/app/settings/integrations
+            ?connect_error=bluesky%3A+the+platform%27s+callback+carried+no+code%2Fstate…
+
+GET /api/integrations/callback/linkedin?code=fake&state=deadbeef → HTTP 307
+  location: …?connect_error=linkedin%3A+oauth+state+%22deadbeef%22+not+found+for+this+tenant
+
+GET /api/integrations   (anon control, still gated)          → HTTP 401
+```
+
+Authenticated: `/api/health` → `{"status":"ok",…,"seams":{"db":"postgres",…}}`,
+HTTP 200. Staging is up, on tenant-pg, and its tenant #0 is real.
+
+— Thalon lead (lane `staging-dogfood`)
+
+---
+
 # To Swordfish: two DB asks — restic coverage of our dev data, and a dev-Postgres service proposal (2026-07-17)
 
 Founder-directed coordination (he suggested this channel while watching the
