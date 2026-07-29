@@ -155,6 +155,13 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 
 ### The VIDEO arc — its own 3 passes (founder ask, 2026-07-29)
 
+> **s86 close: the arc now has a SPEC — `docs/video-arc/spec.md` (DRAFT, founder
+> verdict pending), written beside `docs/create-engine/spec.md` at his ask.** It
+> carries the flow map, requirements V1–V10, the Create↔Video joins (including the
+> existing `waterfall/` engine as the Repurpose bridge), the script-first DECISION
+> GATE (evaluated in pass 2, not assumed), and the reconciliation ledger. The notes
+> below remain the reference detail behind it.
+
 > *"run the video / video feature / video dashboard / video editor pass the postiz
 > and mobbin mcp 3 times as well? i feel like the ux/ui and flow and visual of it
 > can be improved significantly, as well as the engine (see how postiz creates and

@@ -109,6 +109,10 @@ R10. Every gate is honest in words: a platform that refuses says why and names t
 R11. Multi-tenant: routing table, settings schemas, cadence norms are per-tenant
      config/data, never code. The repo ships the generic demo tenant defaults only.
 R12. Ships disarmed end-to-end: nothing in B-create touches the publish sequence gate.
+R13. Variant provenance: every platform variant records its master and a diverged flag;
+     divergence is visible at the tab and reversible via "re-derive from master".
+R14. Density: detail beyond the resting facts lives in popovers/popouts per the
+     density doctrine; no surface grows an inline form where a popover is specified.
 
 ## Design
 
@@ -135,6 +139,44 @@ Create → Generate → **Composer** → Approve → Schedule. The s86 open deci
 ("per-draft from Approve, or one after Generate?") resolves as **both, with after-
 Generate primary**: the Composer is born run-scoped; the Approve queue gains an
 "Open in Composer" re-entry per draft group (same surface, same rules).
+
+### The Composer's variant model — master + forks (s86 refinement, Mobbin-evidenced)
+
+The founder asked whether per-platform tabs are the right call. Evidence from the
+incumbents ([Sprout composer](https://mobbin.com/flows/699d2e17-fe4f-4c64-8948-317b48caf31f):
+one body + a stacked Network Preview rail; [HubSpot](https://mobbin.com/flows/7fabb9a8-febe-4c5c-b593-30432efa4086):
+per-network editor blocks with **"Duplicate post" to fork** and network-only fields
+inline; [Later](https://mobbin.com/flows/05f0e819-43cc-493e-a41c-322d5bcee58d):
+all per-profile detail in a **popout**): nobody ships N full editors side by side.
+The synthesis we adopt:
+
+- **A run has a MASTER body** (for post runs: the blog-mirror article/base). Each
+  platform variant is a **fork with provenance**: it knows its master and whether it
+  has diverged (generation fits it; hand/AI edits diverge it further). The tab strip
+  keeps the s86 status dots and gains a **divergence badge** ("edited" / "as
+  generated"); a diverged variant offers "re-derive from master" as a verb — never a
+  silent overwrite.
+- **Tabs stay** (Sprout's stacked previews collapse beyond 2–3 networks; we run 5+),
+  but a tab is a *variant switch*, not a separate document.
+- **Platform-only fields appear only on their platform's tab** (HubSpot's X
+  first-reply pattern) — driven by the D3 schema, which is why the rail is generated.
+
+### Density doctrine — pop-outs, popovers, tooltips (founder directive, s86)
+
+Standing rule for every Create/Composer surface, extending the programme's tooltip
+rule: **the resting surface shows facts; detail lives one click away; rationale lives
+in tooltips.** Named applications, so builds don't re-derive them:
+- Preview **popout** (decided s86): true platform width, Sprout-style
+  [Desktop/Mobile pair](https://mobbin.com/flows/c44b3587-9e9f-4485-a2bd-76a5d8a53723).
+- Media tools = icon toolbar with a **popover** for crop/alt detail (not inline forms).
+- Settings rail shows the schema's *common* fields; the long tail sits behind a
+  "More settings" **popover** per tab (Later's popout-per-profile, adapted).
+- Per-platform fit detail (what gets cut, exact rules) = popover on the fit chip;
+  the chip itself carries only the decisive fact.
+- Wizard slot help = tooltips; a slot's AI-assist ("suggest") is a popover with
+  candidates (Jasper's quick-picks), never an inline dump.
+- The guard is unchanged: a popover/tooltip is never the only home of something that
+  changes a decision.
 
 ### The engine — `packages/engine/src/create/`
 
@@ -196,6 +238,10 @@ exist and records the run.
   title/thumbnail/made-for-kids + TikTok privacy/duet/stitch on their own tabs.
   Editor craft (Descript script-first evaluation, VEED timeline) stays in the video
   arc's own passes — Create hands off at the dossier, it does not absorb the editor.
+  **The video arc has its own spec — `docs/video-arc/spec.md` — whose §Joins names
+  the three Create↔Video links (video family in · rendered cuts as use-role media ·
+  the waterfall Repurpose door).** The two specs share the D3 settings slice; it
+  ships once.
 - Postiz takes routed here: D3 settings schemas (this spec pulls the first slice
   forward), per-channel preview (the Composer IS it), validity rules pre-generation
   (R3). Deferred to D3 proper, unchanged: mention autocomplete, judge-gated evergreen,

@@ -175,4 +175,37 @@ he asked for (incorporated / deferred-with-trigger / rejected, per source).
 per his ruling, scoped (apps/web + landing keep the rule), re-arm trigger written into
 the programme file.
 
-## Next action — s87 RECOMMENDED PLAN: (1) founder verdict on `docs/create-engine/spec.md` (approve / edit / feedback — the skill pause is live); (2) on approval, B-create.1 contract window + B-create.2 engine are lane-shaped (engine-only, disjoint, zero UI) — needs his named GO; (3) the Create sheets (home update · wizard · Composer run states) are lead-direct design; his sequencing call whether they run before or after the VIDEO ARC, which remains queued with its references banked. Budget note: weekly limit was 84% (resets Jul 31 11pm UTC) — the video arc is the heaviest item; the spec verdict + contract window are the cheap ones.
+## Next action — s87 RECOMMENDED PLAN (refined at the s86 close, founder-directed)
+
+**TWO SPECS await his verdict at the opener** (approve / edit / feedback each):
+`docs/create-engine/spec.md` + `docs/video-arc/spec.md`. Late s86 refinements already
+in them: the Composer **master + forks** variant model (Mobbin-evidenced: Sprout one-
+body+preview-rail, HubSpot duplicate-to-fork, Later popout-per-profile — tabs stay,
+gain divergence badges + "re-derive from master"); the **density doctrine** (his
+directive: pop-outs/popovers/tooltips, named per control); the **Create↔Video joins**
+(video family in · rendered cuts as use-role media · `waterfall/` = the Repurpose
+bridge — the engine for it already exists).
+
+**THE TWO PARALLEL LANES (his ask: best value), proposed for his named GO:**
+- **Pre-lane, lead, small:** ONE contract window covering both (`create_runs` + media
+  `role` + `platform_routing` + D3 settings slice incl. the video variant +
+  `publication_metrics`). Frozen before launch per contract discipline.
+- **Lane A — `create-engine` (B-create.2):** plan derivation + run orchestrator +
+  reference-describe seam over the existing family engines. Fake-driven, zero UI,
+  zero spend. Files: `packages/engine/src/create/` (new) + contracts/db from the
+  window. *Gated on the Create spec verdict.*
+- **Lane B — `analytics-spine` (D2):** `postAnalytics` connector verb + sweep tick +
+  repos, honest per-platform gaps. **Why it wins the second slot:** it lights the
+  APPROVED Analytics sheet with real data AND fills the Composer "stats" slot he
+  named, it is the charter's "founder's named ask", and it depends on NEITHER spec —
+  safe even if he edits Create. Files: `packages/engine/src/social|trend` + sweep.
+- Disjoint by construction (create/ vs social+trend), both engine-only, no sheets
+  touched, ships disarmed. NOT picked, with reasons: Calendar→Schedule app rename
+  (small, low value — rides any later lane) · B-ve.4 (better after the script-first
+  gate) · surface builds (need verdicted sheets first).
+
+**Lead-serial track:** on the video spec's approval, the Videos Overview + Dossier
+Mobbin sweep → video sheets pass 1 (the only arc surfaces with zero banked
+references); Create sheets follow his sequencing. Budget note: weekly limit was 84%
+(resets Jul 31 11pm UTC) — verdicts + contract window are cheap; the design passes
+are the heavier spend.
