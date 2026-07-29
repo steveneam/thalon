@@ -17,6 +17,27 @@
  *
  * Run from apps/web (the -w flag does this) with the dev server STOPPED —
  * PGlite is single-process and this opens the same .data/pg the server uses.
+ *
+ * ── STAGING / ANY DEPLOYED BOX: the `-w` invocation above CANNOT WORK ────────
+ * Do not try to run this "from the deployed web workdir". The web image is a
+ * pruned Next standalone bundle: this script ships inside it, but there is no
+ * root `package.json` and `@thalon/contracts` / `@thalon/engine` /
+ * `@thalon/platform` do not exist anywhere in the image, so the file is an
+ * orphan with unresolvable imports. It fails on the first import, not on the
+ * database.
+ *
+ * What works (proven twice on staging by swordfish, 2026-07-19 and re-verified
+ * 2026-07-29): a SOURCE checkout + `npm ci` in a one-off container built off
+ * the same image tag, with the data volume and the app network attached, and
+ * `DATABASE_URL` taken from the running app's own env. Pin the checkout to the
+ * DEPLOYED commit so the script and the repos match the live schema.
+ *
+ * Two footguns found doing it for real:
+ *   · sidecar paths (--reasons/--provenance/--cuts) resolve against CWD, NOT
+ *     --root. Pass them absolute.
+ *   · re-running is NOT free on a populated tenant: this writes video_projects
+ *     /takes/cuts, so a second pass risks a duplicate project. Use --dry-run
+ *     first; it plans without writing.
  * A reject without a reason is refused by the contract; this script surfaces
  * every such ref and exits non-zero rather than importing a hole in the
  * learning material (--allow-missing-reasons imports the rest anyway).

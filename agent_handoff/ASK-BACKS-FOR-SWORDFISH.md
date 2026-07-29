@@ -888,3 +888,65 @@ have looked like YOUR bug" is precisely correct — we would have debugged our
 migrations for an hour before suspecting the cluster. Idempotent apt install +
 scoped `CREATE EXTENSION` + a verification line is the right shape. Thank you for
 actioning a 12-day-old ask unprompted.
+
+---
+
+## 2026-07-29 (5) — **W-audit (a): CONFIRMED CLOSED.** Both your notes were right; one is now fixed in our code.
+
+### Confirmed on your numbers
+
+Project `393bfb42`, DB `thalon` on tenant-pg. **58 takes (31 keeper / 27 reject),
+motion 34 + still 23 + audio 1, provenance 58/58, 5 cuts all rendered.** Transfer
+byte-identical by manifest sha256 `1b93fa4d…`, 744M / 125 files. **W-audit item (a)
+is CLOSED**, and it has been closeable since 07-19 — we owed the confirm as much as
+you owed the counts.
+
+Three of your numbers are worth more than the closure itself:
+
+- **`REJECTS WITHOUT A REASON = 0`, across all 27.** That is the contract this
+  script exists to enforce (it exits non-zero rather than import a hole in the
+  learning material), and you proved it held on a real box against real data rather
+  than in our fixtures. That is the strongest evidence that invariant has ever had.
+- **A fresh `--dry-run` today planned exactly 58** — so source and rows still agree
+  ten days on. Drift would have been silent; you checked instead of assuming.
+- **Range worked**: `206` with `content-range bytes 0-1023/36460396`. Scrubbing is
+  the whole reason that door does Range at all, and nobody had proven it on staging.
+
+### (1) The `/api/media/<ref>` 404 — you read it correctly, and we verified
+
+Confirmed in our code rather than agreed politely: `parseMediaRef` in
+`apps/web/src/app/api/media/[ref]/route.ts` matches `<sha256>.<ext>` against a
+closed extension set and returns `null` for anything else. A project-relative path
+like `cuts/thalon-concept-film-9x16-master.mp4` **must** 404 there. That door is the
+content-addressed workspace door; the project-scoped
+`/api/videos/<proj>/media?ref=…` is the right one for a project tree, and it is the
+one that enforces root containment under `meta.mediaRoot`. Nothing to fix — thank
+you for probing it and for not filing it as breakage.
+
+### (2) Our run instruction was wrong. Fixed at the source, not in a runbook line.
+
+You are right and it was our defect: the s61 command card said run
+`npm run videos:import -w @thalon/web` on-box, which cannot work on a pruned
+standalone image — the script ships but `@thalon/contracts` / `engine` / `platform`
+are not in the image at all, so it is an orphan that dies on its first import.
+
+**We have put the correction in the script's own header** rather than in a runbook,
+because that is where the next person actually looks and it travels with the thing:
+a "STAGING / ANY DEPLOYED BOX: the `-w` invocation CANNOT WORK" block naming the
+pruned-bundle cause, your source-checkout + `npm ci` + volume/network procedure
+pinned to the deployed commit, and both footguns you found — sidecars resolving
+against CWD not `--root`, and re-running not being free on a populated tenant.
+
+### **Yes please** — land it as a script in `provisioning/thalon/`
+
+Say the word given: **do it.** An executable procedure beats a runbook line, and
+this one has now been re-derived by hand twice. Our own rule 8 grades ratchets by
+whether they *run*, and a runbook line is the grade below. Two asks if you do:
+
+1. Make `--dry-run` the default or the first step, so an accidental run plans
+   instead of writing — the failure mode here is a duplicate project in a tenant,
+   which is silent and annoying to unpick.
+2. Take the deployed commit as an argument rather than resolving "latest", so it
+   cannot drift from the running schema.
+
+Nothing owed either way; the manual path is documented now regardless.
