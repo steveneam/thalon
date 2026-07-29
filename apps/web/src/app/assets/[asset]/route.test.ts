@@ -1,9 +1,15 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { pinAsset, recordPublicAssets, pinnedAssetKey, type PublicAssetRef } from "@thalon/engine";
-import { openTestDb, type DbHandle, type Repos } from "@thalon/db";
-import { LocalObjectStore } from "@thalon/platform";
+import {
+  pinAsset,
+  publicAssetsKey,
+  recordPublicAssets,
+  pinnedAssetKey,
+  type PublicAssetRef,
+} from "@thalon/engine";
+import { openTestDb, sha256Hex, type DbHandle, type Repos } from "@thalon/db";
+import { LocalObjectStore, objectKey } from "@thalon/platform";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let repos: Repos | undefined;
@@ -135,5 +141,61 @@ describe("GET /assets/[asset] (the public image door)", () => {
     const ref = await pinPublishedPng();
     await store!.put(pinnedAssetKey(ref.contentHash, ref.ext), Buffer.from("evil replacement"));
     await expect(get(`${ref.contentHash}.png`)).rejects.toThrow(/content-address verification/);
+  });
+});
+
+/**
+ * B-ig.1 at the door: the route's ONLY part in the publish-scoped widening is
+ * supplying a real clock. These write the tenant bundle by hand — that is the
+ * point, not a shortcut: they pin the STORED shape the route must honour, so
+ * the two halves (the publish door writes it, this route reads it) cannot
+ * drift apart silently.
+ */
+describe("GET /assets/[asset] — the publish-scoped pending window", () => {
+  const SOCIAL_BYTES = Buffer.from("route-test social jpeg bytes");
+
+  async function admitSocialImage(expiresAtMs: number): Promise<string> {
+    const contentHash = sha256Hex(SOCIAL_BYTES);
+    await store!.put(objectKey("social-media", contentHash, "jpg"), SOCIAL_BYTES);
+    await store!.put(
+      publicAssetsKey(tenantId!),
+      JSON.stringify({
+        version: 1,
+        tenantId,
+        generatedAtMs: Date.now(),
+        posts: [],
+        pending: [
+          {
+            draftId: "d-ig",
+            platform: "instagram",
+            family: "social-media",
+            contentHash,
+            ext: "jpg",
+            expiresAtMs,
+          },
+        ],
+      }),
+    );
+    return contentHash;
+  }
+
+  it("serves the image of a post being published RIGHT NOW — the route supplies the clock", async () => {
+    const hash = await admitSocialImage(Date.now() + 60_000);
+    const res = await get(`${hash}.jpg`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("image/jpeg");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(Buffer.from(await res.arrayBuffer())).toEqual(SOCIAL_BYTES);
+  });
+
+  it("404s an EXPIRED admission — the window really is time-bounded at the door", async () => {
+    const hash = await admitSocialImage(Date.now() - 1);
+    expect((await get(`${hash}.jpg`)).status).toBe(404);
+  });
+
+  it("404s a social image with no admission at all — holding the bytes opens nothing", async () => {
+    const contentHash = sha256Hex(SOCIAL_BYTES);
+    await store!.put(objectKey("social-media", contentHash, "jpg"), SOCIAL_BYTES);
+    expect((await get(`${contentHash}.jpg`)).status).toBe(404);
   });
 });
