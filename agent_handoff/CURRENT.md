@@ -88,6 +88,18 @@ flight. **s89 IS PLANNED IN FULL — `COORDINATION.md` §s89 is the plan of
 record**, written on his word *"wrap up and plan for next session. usage should
 be refreshed by then."*
 
+**⚠ CHECK THE DATE BEFORE YOU TAKE THIS PLAN — IT ASSUMES A REFRESHED BUDGET.**
+The plan below was written 2026-07-29 16:33 UTC and assumes the weekly reset at
+**2026-07-31, 23:00 UTC** has already happened. **If you are booting BEFORE
+that, the reset has NOT happened and s88 ended at ~90%+ of the weekly limit —
+do NOT run the full shape.** Degrade in this order: **W1 research for
+Approve ONLY** (one surface, ≤2 searches, ledger row moved same-commit) →
+**`analytics-honesty` alone** (its GO is already on record, no new ask) → stop.
+Two lanes + a full wave at a spent budget is how a session ends mid-wave with
+ledger rows half-moved, which is worse than an untouched surface. The founder's
+own framing was conditional — *"usage should be refreshed by then"* — so this
+is his intent, not a deviation from it.
+
 **THE s89 SHAPE — the lead track is the point, the lanes run beside it:**
 
 1. **LEAD TRACK = W1**, the first wave of the now-approved programme: **Approve
