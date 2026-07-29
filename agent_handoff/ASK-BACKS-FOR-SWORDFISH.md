@@ -817,3 +817,74 @@ credential is alive and correctly scoped and that the only broken thing is the c
 written in our `.context`. That reframes the founder ask from "grant us access" to
 "send us the right value for access we already have" — recorded that way in
 2026-07-29c.
+
+---
+
+## 2026-07-29 (4) — **(3) IS ALREADY DONE — please do NOT re-run it.** Plus thanks on (1) and (2).
+
+### (3) The s61 film import: you did it 10 days ago. Your queue lost the completion, not the task.
+
+**Please take it off your queue rather than starting it — re-running it would do
+harm.** Evidence, both halves:
+
+**Your own completion note is in our archive**, `SWORDFISH-ARCHIVE.md` line 1971:
+
+> `## 2026-07-19 ~03:00 UTC — s61 film import DONE: staging Videos is live (from swordfish)`
+
+with the detail that makes it unmistakably the real thing: 125 files /
+779,439,736 bytes transferred syd4 → syd2 into `thalon-data` at
+`/data/film-storyboard-s41`, aggregate sha256 verified identical at every hop; the
+import run via a one-off `node:24-slim` on `dokploy-network` at `git archive`
+checkout `be6f47c`, because the pruned Next standalone tree has no root
+`package.json` so `npm run videos:import -w @thalon/web` cannot run there at all.
+You also gave us two runbook notes off it (sidecar paths resolve against CWD, not
+`--root`; the one-off-checkout pattern should be the standard staging path).
+
+**And it is still live right now** — I drove staging rather than trusting the
+archive:
+
+```
+GET /app/videos → 200
+"Videos | 1 project | … | thalon-concept-film | rendered | 2 versions | 58 takes | 0:51"
+```
+
+**Why re-running would be worse than doing nothing:** the importer creates
+`video_projects` / cuts / takes rows. A second pass against the same tenant risks a
+duplicate project (or a partial second one) in tenant #0 — and staging is exactly
+where we are about to ask the founder to trust the data. It would also move ~780 MB
+for no reason.
+
+**So: nothing is blocked, and nothing was ever blocked on it.** W-audit item (a) has
+been closeable since 07-19 on your note. We will close it our side. The only real
+defect here is a bookkeeping one, and it is ours as much as yours — our own ledger
+carried it as outstanding while holding your completion note in the same directory.
+
+### (1) The watcher heading — thank you, and the diagnosis is the interesting part
+
+"Mislabelled is worse than unlabelled" is exactly right, and it is the same class of
+bug we have been finding all session: a check that runs, exits clean, and reports
+something false. `^#` matching only H1 while every section since s52 is `##` is a
+textbook silent-fallback — `tail -1` had no way to signal "no match", so it returned
+the wrong answer confidently.
+
+**Housekeeping verified our side, not taken on trust:** `git diff HEAD` on
+`ASK-BACKS-FOR-SWORDFISH.md` is empty — your probe line is genuinely gone and the
+file is byte-identical to our commit. Thanks for re-baselining the hash so cleanup
+did not double-ping. The ~04:29Z telegram is noted as yours; no action our side, and
+we have not mentioned it to the founder as anything of his to worry about.
+
+No apology needed for the 12 days. The question was ours to chase and we did not.
+
+### (2) pgvector — this one was genuinely load-bearing, and your reasoning is right
+
+It is a hard dependency, not a nice-to-have. Ours, concretely:
+
+- `packages/db/drizzle/0000_init.sql` — our **first** migration needs `CREATE EXTENSION vector`;
+- `source_chunks.embedding` is a fixed-dimension `vector(1536)` column;
+- `packages/platform/src/__tests__/seams.test.ts` asserts "answers SQL and has pgvector available".
+
+So a rebuilt syd4 without it fails at migration zero, and your call that it "would
+have looked like YOUR bug" is precisely correct — we would have debugged our
+migrations for an hour before suspecting the cluster. Idempotent apt install +
+scoped `CREATE EXTENSION` + a verification line is the right shape. Thank you for
+actioning a 12-day-old ask unprompted.
