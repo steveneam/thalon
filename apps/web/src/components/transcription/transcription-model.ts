@@ -66,6 +66,24 @@ export function topRelevance(row: LibrarySourceRow): { area: string; reason: str
   return { area: top.areaName, reason: top.reason };
 }
 
+/**
+ * What a FREE ingest gives up, in the row's own words (s86 — transcription is
+ * free + deterministic by default, founder ruling s79).
+ *
+ * The absence this explains is real: a free source has no chunk embeddings, so
+ * it is never scored against the monitored areas and `topKSimilarChunks` skips
+ * it outright. Left unexplained, the missing "relevant to …" clause reads as an
+ * area that scored nothing — a measurement that never happened. So the words
+ * appear only when the row can actually carry them: `aiEnhanced === false` is
+ * the operator's recorded choice, while `undefined` (every row ingested before
+ * the key existed) claims nothing, and a row that somehow has both a `false`
+ * flag and real scores shows the SCORES — data beats a flag.
+ */
+export function freeIngestNote(row: LibrarySourceRow): string | null {
+  if (row.aiEnhanced !== false || row.areaRelevance.length > 0) return null;
+  return "free ingest — no relevance score, not semantically retrievable";
+}
+
 /* ── THE VIEW KNOBS (founder s77: "re-introduce the good things (like filters,
    sort by …) from the old design"; the s77 fan-out reached the same gap here
    independently — "an unbounded shelf with no search, no filter and no sort").

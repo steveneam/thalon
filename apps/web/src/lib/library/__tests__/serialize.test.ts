@@ -84,3 +84,21 @@ describe("ingest input tags (session-19 rider)", () => {
     ).toBe(false);
   });
 });
+
+describe("toLibraryRow — the free/enhanced state (s86)", () => {
+  it("carries the operator's recorded choice, both ways round", () => {
+    expect(toLibraryRow({ ...BASE, meta: { aiEnhanced: false } }).aiEnhanced).toBe(false);
+    expect(toLibraryRow({ ...BASE, meta: { aiEnhanced: true } }).aiEnhanced).toBe(true);
+  });
+
+  it("leaves pre-s86 rows UNDATED: no key in, no key out — never a back-dated choice", () => {
+    const row = toLibraryRow({ ...BASE, meta: { transcriptProvider: "caption-file" } });
+    expect("aiEnhanced" in row).toBe(false);
+    expect(row.aiEnhanced).toBeUndefined();
+  });
+
+  it("only a real boolean survives — a truthy string is not a choice", () => {
+    expect(toLibraryRow({ ...BASE, meta: { aiEnhanced: "yes" } }).aiEnhanced).toBeUndefined();
+    expect(toLibraryRow({ ...BASE, meta: { aiEnhanced: 0 } }).aiEnhanced).toBeUndefined();
+  });
+});

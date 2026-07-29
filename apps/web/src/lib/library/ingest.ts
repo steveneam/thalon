@@ -13,7 +13,13 @@ import { z } from "zod";
  * precedent — the MATH stays engine-side; this module only parses and
  * delegates. Deps are injectable exactly like judge-runner: tests stay
  * keyless (caption-file provider + fake embedder), production defaults to
- * the env-selected provider + the metered gateway embedder.
+ * the env-selected provider + — only when the operator asked for it — the
+ * metered gateway embedder.
+ *
+ * `aiEnhance` rides the REQUEST, not the env and not the tenant profile
+ * (founder ruling, s79): transcription is free + deterministic by default,
+ * and enhancement is his choice per ingest. Absent ⇒ free, so an old client,
+ * a curl, or a caller that never heard of the toggle spends nothing.
  */
 
 export const videoIngestInputSchema = z.object({
@@ -28,6 +34,13 @@ export const videoIngestInputSchema = z.object({
   captionFormat: z.enum(["srt", "vtt", "text"]).optional(),
   /** Operator-set tags (session-19 rider): ride the request, stored verbatim on sources.meta.tags. */
   tags: z.array(z.string().trim().min(1).max(48)).max(12).optional(),
+  /**
+   * Spend on THIS ingest — embed the chunks and score them against the
+   * monitored areas. Optional with NO default clause on purpose: undefined
+   * reaches the engine as undefined, and the engine's own default is free.
+   * One default, engine-side, so the two can never drift apart.
+   */
+  aiEnhance: z.boolean().optional(),
 });
 
 export type VideoIngestInput = z.infer<typeof videoIngestInputSchema>;
@@ -55,6 +68,7 @@ export async function runVideoIngest(
       url: input.url,
       captions: input.captions,
       captionFormat: input.captionFormat,
+      aiEnhance: input.aiEnhance,
       meta: ingestMeta(input),
     },
     deps,

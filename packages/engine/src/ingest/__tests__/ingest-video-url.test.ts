@@ -55,7 +55,10 @@ describe("ingestVideoUrl (B4.8 — URL in, timed video_transcript source out; ke
     const result = await ingestVideoUrl(
       ctx,
       repos,
-      { url, meta: { note: "operator-permitted" } },
+      // Enhanced: this case is about the EMBEDDED chunk shape, which only the
+      // operator's per-ingest ask produces (the free path is pinned next door
+      // in ingest-free-by-default.test.ts).
+      { url, aiEnhance: true, meta: { note: "operator-permitted" } },
       { transcriptProvider: provider, embedder: createFakeEmbeddingDriver(1536), objectStore, capTokens: 1_000_000 },
     );
 

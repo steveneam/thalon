@@ -36,6 +36,15 @@ import { getWebIngestDriver, type WebIngestDriver } from "./web-ingest";
  * mirror URL, and a changed page re-keys automatically. The raw content
  * persists under the existing `sources/<contentHash>` family as the
  * source's `raw_ref` (the same home ingestSource's url path uses).
+ *
+ * THIS SURFACE STILL EMBEDS BY DEFAULT, deliberately — it is NOT the
+ * transcription path. The s79 free-by-default ruling is about the operator's
+ * knowledge tool (./ingest-video-url.ts); a page ingested here exists only to
+ * be RETRIEVED — the page loop grounds its drafts on `topKSimilarChunks`,
+ * which ranks on these vectors and skips chunks without one. Making this free
+ * by default would leave grounding silently unretrievable, i.e. a source that
+ * still counts as grounding while citing nothing. If a per-ingest toggle is
+ * ever wanted here it needs its own honest story on the page-loop surface.
  */
 
 export interface WebIngestConfig {
