@@ -1,6 +1,8 @@
 # The UX refinement program — 3 passes over the workspace
 
-> **Status: PASS 1 in progress.** This file is the memory of the program. It
+> **Status: PASS 1 — the D4 four are DONE (Analytics s85b; Schedule · Composer ·
+> Channels s86).** Next: the remaining verdicted sheets, then the VIDEO arc.
+> This file is the memory of the program. It
 > survives session boundaries; chat does not. Anything decided here is decided.
 > Update the per-surface tables as you go — a finding with no row here is a
 > finding that will be rediscovered.
@@ -120,9 +122,9 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 | surface | sheet | status | what changed / what is queued |
 |---|---|---|---|
 | Analytics | `Analytics.dc.html` | **DONE (s85b)** + tooltips | Post rendered in-row (avatar + body + media thumb) · sparkline on every tile AND every row · 28-day reach/engagement area chart · icon metric heads · real platform marks · hour-box gains Avg/Days/Heatmap and stays reserved. Two layout defects found by reading the render and fixed: ~300px dead space under the table (→ 10 rows) and a right column clipping the fold (measured: last row bottom 919 ≤ 940). |
-| Schedule | `Schedule.dc.html` | **queued** | Media thumbnails in event chips (Later) · platform glyph per event · keep the three-fact legend. |
-| Composer | `Composer.dc.html` | **queued** | Full-fidelity preview (large media, coloured hashtags, platform action row) · media control with icon toolbar · keep the caveat. |
-| Channels | `Channels.dc.html` | **queued** | CURRENT / NOT CONNECTED grouping (Rox) · real brand marks + **account avatars** (Postiz) · activity line per connected card · icon-only actions. |
+| Schedule | `Schedule.dc.html` | **DONE (s86)** | Media thumbnail in every post chip with the **platform as a badge ON the thumb** — so "Planned · LinkedIn" left the chip entirely (border says planned, badge says LinkedIn). Text-only post keeps the slot with an "Aa" mark: the ABSENCE of a picture is information. An engine RUN is not a post (clock mark, no picture, no platform). Legend compressed to "won't fire"/"will fire". **Founder asked mid-pass whether clicking a chip expands with a good thumbnail — it did NOT** (a text-only verb menu), so the click now opens a card that leads with the media at card width, anchored BELOW the chip. Two defects the render caught: `.info`/`.tip` CSS was never copied from Analytics (only its markup) so the tooltip spilled into the footer as body copy; and a 36px thumb truncated every excerpt in a ~147px column. Measured: expanded card 441→829 inside `.cal`'s 859 clip. |
+| Composer | `Composer.dc.html` | **DONE (s86)** | Full-fidelity preview (HubSpot): media large instead of a 64px strip, hashtags in the platform's LINK colour, LinkedIn's own action row. Media control gains an icon toolbar; the band gains a **cover-frame picker** — the Postiz video-settings finding applied where it is TRUE (YouTube's title/thumbnail/made-for-kids and TikTok's privacy/duet/stitch belong on THEIR tabs; the ⓘ says so rather than drawing them under LinkedIn). **Fabricated-data defect found and cut**: the first draft showed "41 reactions · 6 comments · 2 reposts" on an UNPUBLISHED post — rule 5. Measured: the right column overflowed the fold by ~85px, putting the action row AND the caveat below it, i.e. the pass's whole point invisible; now ends at 911 inside the card's 916. |
+| Channels | `Channels.dc.html` | **DONE (s86)** | CURRENT · 6 / NOT CONNECTED · 3 grouping (Rox), nine real brand marks replacing nine two-letter boxes, account avatars (Postiz), a live line per connected card, icon-only Validate/Open/Disconnect. Honesty held where a number was tempting: "nothing published yet" not 0; X reads "not measured — no vault row to attribute to". **A not-connected channel is an OFFER, not an identity** — it loses the account block and the "door disarmed" line (which restated its own pill), and that subtraction is what got the connect dance back above the fold (992 → 925 → **914**). **No tooltip on this sheet, deliberately** — every card note is already a fact, not a rationale, and there is no free region; forcing one would have covered a card to demonstrate a pattern the sheet does not need. |
 | Rail sweep | all 15 with a rail | **DONE (2026-07-29)** | Calendar→Schedule + Analytics inserted. Rail-only match on the icon markup, so prose was never blind-replaced; `Profiles` cross-ref renamed by hand, `Calendar.dc.html` marked SUPERSEDED. Verified: 15 identical rails, zero rail overflow. |
 | **Transcription** (`Library.dc.html`) | `Library.dc.html` | **queued — has a live dependency** | The s86 `transcription-free` lane adds an AI-enhance toggle beside Ingest. Per rule 7 it ships in the sheet's existing grammar, NOT a fresh design; this pass is where that control gets designed properly. **Also carries a naming drift like Calendar/Schedule: the sheet's `data-screen-label` still says "Library" while the app calls the surface Transcription.** |
 | The other verdicted sheets | — | **not started** | Pass 1 only after the D4 four land; they are law until amended, so each change needs a stated reason. |
@@ -210,10 +212,26 @@ Channels), because those are half-done and leaving them half-done is worse.
 
 1. Search Mobbin for that surface's pattern; add the citation to the library above.
 2. Edit the sheet in `docs/research/mock-sheets/` (one file, both heads).
+   **Reusing the shared vocabulary means copying its CSS, not just its markup.**
+   `.info` / `.tip` / `.tip-h` live in `Analytics.dc.html`'s own `<style>`, not in
+   `theme.css` — s86 pasted the ⓘ markup into `Schedule.dc.html` without the block
+   and the tooltip rendered as raw body copy that wrecked the footer. Same trap for
+   any class a sibling sheet defines locally.
 3. `node scripts/shoot-surface.mjs --sheet <Name>.dc.html --mode dark`
 4. **READ the render.** Then MEASURE anything you suspect — a probe beats a squint
    (`.getBoundingClientRect().bottom` vs the 940 screen height caught a real clip
-   that "looks fine" would have shipped).
+   that "looks fine" would have shipped). **s86 made this the rule, not the advice:
+   all three sheets overflowed the fold on their first cut** (Schedule's expanded
+   card lost its Unschedule row; Composer put the action row AND the honesty caveat
+   below 940, i.e. the pass's own point was invisible; Channels pushed the whole
+   connect-dance section off). None of the three looked wrong in the render — the
+   content simply stopped, which reads as "that is where it ends".
+   **When a sheet will not fit, cut STRUCTURE before you cut padding.** Channels
+   went 992 → 925 on copy compression alone and still did not fit; what landed it
+   at 914 was realising a not-connected channel is an OFFER, not an identity, and
+   deleting a block that had nothing true to say.
+   A one-off probe script must live in the repo root to resolve `puppeteer` (the
+   scratchpad cannot), so delete it before committing.
 5. Upload to the canvas: `finalize_plan` → `write_files` on project
    `f5d304cb-cd0e-484d-8542-7b6561e1ef30`.
 6. Update this file's status table, then commit.
