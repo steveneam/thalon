@@ -112,7 +112,18 @@ export function publicationMetricsRepo(db: Db) {
         .select()
         .from(publicationMetrics)
         .where(and(...filters))
-        .orderBy(asc(publicationMetrics.capturedAt), asc(publicationMetrics.id));
+        .orderBy(
+          asc(publicationMetrics.capturedAt),
+          // Ties broken by LABEL before id. `id` is `defaultRandom()`, so
+          // ordering on it alone made two labels written into the SAME
+          // bucket come back in arbitrary order — a consumer reading across
+          // labels positionally would have been flaky, and flaky in the way
+          // that passes alone and fails in a full suite. Found by the s87
+          // analytics-spine lane, whose read-model groups by label first and
+          // so never tripped on it.
+          asc(publicationMetrics.metricLabel),
+          asc(publicationMetrics.id),
+        );
     },
 
     /**

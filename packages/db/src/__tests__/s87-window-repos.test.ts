@@ -367,6 +367,27 @@ describe("publicationMetrics repo (s87 D2 window)", () => {
     expect(await repos.publicationMetrics.listForPlatform(other, "bluesky", AT)).toHaveLength(0);
   });
 
+  it("series() is deterministic when two labels share a capture bucket", async () => {
+    // `id` is defaultRandom(), so ordering ties on it alone returned two
+    // labels in the SAME bucket in arbitrary order — flaky for any consumer
+    // reading across labels positionally, and flaky in the worst way: green
+    // alone, red in a full suite. Found by the s87 analytics-spine lane.
+    const { ctx, repos, draft } = await setup();
+    const pub = await publication(ctx, repos, draft.id);
+    for (const label of ["reposts", "likes", "replies"]) {
+      await repos.publicationMetrics.append(ctx, {
+        publicationId: pub.id,
+        metricLabel: label,
+        metricValue: 1,
+        capturedAt: AT,
+      });
+    }
+    const first = (await repos.publicationMetrics.series(ctx, pub.id)).map((r) => r.metricLabel);
+    const second = (await repos.publicationMetrics.series(ctx, pub.id)).map((r) => r.metricLabel);
+    expect(first).toEqual(["likes", "replies", "reposts"]);
+    expect(second).toEqual(first);
+  });
+
   it("metric appends emit NO events, by design (the source_metrics precedent)", async () => {
     const { ctx, repos, draft } = await setup();
     const pub = await publication(ctx, repos, draft.id);
