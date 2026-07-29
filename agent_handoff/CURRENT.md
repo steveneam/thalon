@@ -143,7 +143,16 @@ four-wave Postiz+Mobbin passthrough plan · the verdict bundle (§8, six calls).
 recommended: lanes HOLD until the Jul 31 reset; remaining budget goes to W1
 research (Approve · Dashboard · Runs — the highest-stakes unresearched surfaces).
 
-**THE s88 PLAN — prepared end to end on his word** (*"ok plan and spec for the work
+**⚠ s88 IS ONE LANE ONLY — founder budget ruling, verbatim:** *"can we just do
+one lane next session since we're low on usage."* **Default lane =
+`analytics-honesty` (his GO is on record); the lead recommends swapping to
+`create-shells` (Create's critical path) — his one word at the opener decides,
+either launches immediately.** The un-run kickoff HOLDS, losing nothing. Lead
+track under low budget, cheapest-first: workspace-spec §8 verdicts → W1
+research only if headroom → sheets post-reset (Jul 31 11pm UTC). Portal tasks:
+his own time (Gmail draft + `.context/developer-apps.md` §CURRENT TASKS).
+
+**THE OLD TWO-LANE s88 PLAN (superseded by the one-lane ruling, kept for context)** (*"ok plan and spec for the work
 lanes next session so they can just start building"*):
 
 - **Lead-serial: B-create.3, the Create sheets** (home update · wizard · Composer

@@ -192,7 +192,28 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
-## Sprint 9 / s88 — TWO LANES PREPARED (kickoffs committed; lead-serial = the Create sheets)
+## Sprint 9 / s88 — ONE LANE ONLY (founder budget ruling, s87 late)
+
+**Founder, verbatim:** *"can we just do one lane next session since we're low on
+usage."* So s88 runs ONE lane beside a deliberately thin lead track. Both
+kickoffs below stay committed and current; the one not run HOLDS, losing
+nothing.
+
+**Which lane: the founder's word decides at the opener; the DEFAULT is
+`analytics-honesty`** (it is the one with his GO already on record — "so they
+can just start building"). **The lead's recommendation is to swap to
+`create-shells`** — Create is his stated centre of gravity, the shells are
+B-create.4's prerequisite, and nothing downstream blocks on analytics-honesty
+this month — but that swap needs his one word, since he never named that run.
+Either answer launches immediately; no re-planning.
+
+**The thin lead track, cheapest-first:** (1) the workspace-spec §8 verdicts
+(near-free — his six words + small edits) · (2) W1 research (Approve ·
+Dashboard · Runs) ONLY if headroom after the lane · (3) sheet drawing stays
+post-reset (Jul 31, 11pm UTC). Portal tasks: his own time, instructions in his
+Gmail draft + `.context/developer-apps.md`.
+
+## Sprint 9 / s88 — the two-lane prep (kept for context; superseded by the one-lane ruling above)
 
 **The founder's words, s87 late (on the presented plan):** *"ok plan and spec for
 the work lanes next session so they can just start building."* Reading, stated so it
