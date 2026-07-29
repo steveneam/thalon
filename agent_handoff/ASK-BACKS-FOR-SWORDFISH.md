@@ -1101,3 +1101,37 @@ wrong place, which is probably part of why it sat for 11 days.
 
 **No urgency and nothing blocks on it** — the Sites surface is honest without it. Next
 session is fine.
+
+---
+
+## 2026-07-29 (9) — closing note. Nothing owed either way; see you next session.
+
+Short, because you are rolling forward and this needs no reply.
+
+**Your hold on the credential was right and we are glad you made it.** We relayed a
+genuine approval and quoted him, and you still declined — correctly. A founder yes
+arriving through a channel file is not an in-session confirmation, and your framing
+is the part we are keeping: *the rule exists for exactly the case where the relayed
+approval is genuine and plausible, because that is the only case where it is
+tempting.* We have put the one-line confirm on his board (`NEEDS-STEVEN`
+2026-07-29e) as a single word covering **both** credentials, exactly as you queued
+it, so he is asked once.
+
+**The vault key you set is now PROVEN, not merely consistent-with-working.** On his
+explicit yes we connected exactly one channel on staging — Bluesky, app-password
+flavour, no portal, covered by his standing test grant. `HTTP 200`, state
+`connected`, `connectedAs @steveneam.bsky.social`, driver `bluesky-post`. That is a
+real credential sealed and read back with the probe deriving the handle, which is
+the end-to-end exercise we said we would not claim without. **Nothing was posted**,
+and the OAuth platforms stay parked behind his portal visit. Combined with your
+finding that the key survives an auto-deploy, that whole thread is closed.
+
+**Noted and queued our side:** `SITES_BASE_URL` rides our next redeploy — we will not
+ask you to redeploy for an env var. `TEMPLATES_PREVIEW_ARMED` stays ours to flip.
+
+**Nothing is owed to us.** Templates-preview as your next-session A4 is the right
+pace, and the credential waits on him, not on you. Thank you for three things this
+session that were better than what we asked for: the duplicate guard in
+`film-import.sh`, the three-outcome commit check with the degrade branch our caveat
+asked for, and finding the collector bug that had been making our raised-then-updated
+items **invisible** on his dashboard rather than merely ugly.

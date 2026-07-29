@@ -207,6 +207,14 @@ opens the video arc. These two lanes run beside that, touching nothing it touche
 | **ig-admission** | `packages/engine/src/webpage/public-assets.ts` · `packages/engine/src/social/publish.ts` · `apps/web/src/app/assets/[asset]/route.ts` + tests | Builds the admission mechanism the s85 `ig-post` lane DESIGNED AND REPORTED but deliberately did not build: publish-scoped `pending` rows beside `posts`, 5-min TTL, revoked in a `finally`, source key reconstructed from `family`+`contentHash` so serving A's bytes under B's URL is unrepresentable, `rebuildPublicAssets` drops pending. The seam is already in place and un-defaulted (`admitPublicMedia` in publish.ts, gated by `needsPublicMediaUrl`), so this is the last mile to a working IG media path. Design already reviewed by the lead — see `agent_handoff/lanes/WRAP-ig-post.md` §2. **SHIPS DISARMED; zero live calls.** It widens a security gate, so the lane must state the bound it lands on and pin it with tests. |
 | **transcription-free** | `packages/engine/src/ingest/` · `apps/web/src/components/transcription/` + tests | The founder's own s79 ruling, never actioned: transcription is HIS knowledge tool, so it must be **free and deterministic by default** (today every ingest chunks and embeds through the METERED gateway) plus an **AI-enhance toggle beside Ingest**, per-ingest, his choice. The embedder is already an injectable dep, so the default is a flag + skipping the embed pass. **No second artifact** — he explicitly declined verbatim-plus-enhanced side by side. |
 
+**NEITHER LANE RUNS A MOBBIN/DESIGN PASS** (founder asked; the programme answers it —
+`docs/research/ux-refinement-program.md` rule 7). `ig-admission` has **zero UI** — all
+three files are server/engine only, so there is nothing to design. `transcription-free`
+adds exactly ONE new control (the AI-enhance toggle beside Ingest): it ships in
+`Library.dc.html`'s **existing grammar** as a keeper-state behind the sheet's own
+chrome (s82 precedent), and the Transcription surface then gets its proper pass in the
+programme. **A lane may never amend a sheet.**
+
 **Disjointness checked, not assumed:** A is engine/webpage + the public asset route; B
 is engine/ingest + the transcription surface. No shared file. Neither touches
 `docs/research/mock-sheets/` (the lead's serial track).

@@ -133,6 +133,10 @@ templates-preview credential → `NEEDS-STEVEN` 2026-07-29e. Templates-preview s
 **accepted as their next-session A4**; `TEMPLATES_PREVIEW_ARMED` is ours to flip, and
 **`SITES_BASE_URL` must ride our NEXT REDEPLOY** — they will not redeploy the app for
 an env var.
+▎ ▸ **Swordfish channel CLOSED both directions** (closing note written 2026-07-29;
+nothing owed either way). Their open items are their own next-session A4
+(templates-preview service) and the credential, which waits on the founder's one
+word, not on them.
 ▎ ▸ **Swordfish verified, independently of us:** staging already moved
 `630737…` → `5b74b589` at 07:16:33Z carrying revision **`d656d8fc`** — so the OCI
 label we landed is live and their film-import commit check is PROVEN against it (fed

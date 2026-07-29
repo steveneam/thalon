@@ -43,6 +43,18 @@ changing a product invariant. **The rail sweep was separately approved** on
    words. Never a 0 that reads real, never a fabricated curve, never a flat line
    at zero (it reads as "measured, and it was nothing" — use no line at all).
 6. **Postiz is AGPL.** Study its patterns as facts; never copy its code.
+7. **A LANE NEVER RUNS ITS OWN MOBBIN PASS.** (Founder question, 2026-07-29:
+   *"make sure those two lanes have mobbin mcp pass first, or is that redesign
+   already part of the overall workspace redesign?"* — it is, and that is the
+   point.) Design reference is CENTRALISED here; a lane doing its own would
+   invent a dialect, and five lanes would invent five. A lane that needs a new
+   control ships it **in its surface's existing sheet grammar** — the s82
+   keeper-state precedent: *a keeper returns as a state behind the sheet's own
+   chrome, the sheet stays law*. The surface then gets its proper pass in this
+   programme, where the control is designed against real references alongside
+   everything else on the screen. **A lane may never amend a sheet.**
+   Corollary: backend-only lanes need no design input at all — say so plainly
+   rather than performing a pass over a surface that does not exist.
 
 ## The three passes
 
@@ -112,7 +124,8 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 | Composer | `Composer.dc.html` | **queued** | Full-fidelity preview (large media, coloured hashtags, platform action row) · media control with icon toolbar · keep the caveat. |
 | Channels | `Channels.dc.html` | **queued** | CURRENT / NOT CONNECTED grouping (Rox) · real brand marks + **account avatars** (Postiz) · activity line per connected card · icon-only actions. |
 | Rail sweep | all 15 with a rail | **DONE (2026-07-29)** | Calendar→Schedule + Analytics inserted. Rail-only match on the icon markup, so prose was never blind-replaced; `Profiles` cross-ref renamed by hand, `Calendar.dc.html` marked SUPERSEDED. Verified: 15 identical rails, zero rail overflow. |
-| The 16 verdicted sheets | — | **not started** | Pass 1 only after the D4 four land; they are law until amended, so each change needs a stated reason. |
+| **Transcription** (`Library.dc.html`) | `Library.dc.html` | **queued — has a live dependency** | The s86 `transcription-free` lane adds an AI-enhance toggle beside Ingest. Per rule 7 it ships in the sheet's existing grammar, NOT a fresh design; this pass is where that control gets designed properly. **Also carries a naming drift like Calendar/Schedule: the sheet's `data-screen-label` still says "Library" while the app calls the surface Transcription.** |
+| The other verdicted sheets | — | **not started** | Pass 1 only after the D4 four land; they are law until amended, so each change needs a stated reason. |
 
 ### The VIDEO arc — its own 3 passes (founder ask, 2026-07-29)
 
