@@ -157,7 +157,25 @@ now by `launch-lane.sh` when it makes lane #3, along with the fact that
 suite and disclosed it). The s64 "stagger retired" note measured lanes doing
 ordinary work, never three full suites at once.
 
-## Sprint 9 / s85 — proposed parallel lanes (FOUNDER APPROVAL NEEDED PER LANE)
+## Sprint 9 / s85 — parallel lanes: **BOTH MERGED** (founder GO by name: "ig-post + staging-dogfood"; `d2-window` dropped per the board's own sequencing note)
+
+**Merged on a green verify-on-merged-main: 2775 passed / 9 skipped, 0 lint errors.**
+Worktrees, branches and tmux windows GC'd.
+
+| lane | result |
+|---|---|
+| **ig-post** | **MERGED `96a51a6`.** The typed refusal became a real two-step media driver (`/media` → `/media_publish`), and the lane CORRECTED its own charter: the board said "driver-local, no contract change", but IG takes a public `image_url` and never bytes, `SocialPostMedia` dropped the ref, and the public `/assets` door admits only refs a CURRENTLY-PUBLISHED artifact references — so the image 404s exactly when Meta fetches it. It threaded the address (`publicUrl`) and gated the whole widening behind an opt-in, `SocialPublisher.needsPublicMediaUrl` — silence means "uploads bytes", so no image is ever made public for a driver that never needed one. **It stopped at the checkpoint the kickoff set:** the allowlist ADMISSION MECHANISM is designed and reported, NOT built (publish-scoped pending rows, 5-min TTL, revoked in a `finally`, key reconstructed from `family`+`contentHash` so serving A's bytes under B's URL is unrepresentable). Un-defaulted seam ⇒ no address ⇒ honest refusal. **Ships disarmed; zero live calls.** Wrap: `agent_handoff/lanes/WRAP-ig-post.md` |
+| **staging-dogfood** | **MERGED `270642b`.** Re-tested staging rather than trusting the handoff: the s84 real address still works (callback redirects to the real host, inert against a forged state) and tenant #0 is genuinely there (profile, 6 runs, 120 leads, a video project). **No channel is connected because staging was never given the vault master key — that is swordfish's to set**, asked with the exact command in ASK-BACKS. One founder decision raised, no clicks: whether staging should hold real tokens (recommendation: Bluesky only to start). Nothing connected, nothing posted, no portal opened. Wrap: `agent_handoff/lanes/WRAP-staging-dogfood.md` |
+
+**The gate earned its keep.** Both lanes were green in isolation; merged main went RED
+on two calendar tests neither lane touched. Cause was the wall clock (the verify ran
+at 02:50): `.nowline` only renders inside the sheet's 06:00–21:00 band, and a
+"+N more" fixture 2–5 hours old straddles two columns in the small hours. Three tests
+now pin their own clock — the same idiom the file had already adopted for one test
+after the same disease turned main red every evening. Fixed at `b2e09a8`.
+
+### (superseded) original proposal
+
 
 **Shape:** one lead-serial track he cannot delegate, plus three background
 lanes with disjoint file sets. All three lanes are dependency-independent —
