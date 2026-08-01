@@ -299,18 +299,40 @@ describe("platform settings (s87 D3 slice)", () => {
     expect([...SETTINGS_PLATFORMS].sort()).toEqual([...SOCIAL_PLATFORMS].sort());
   });
 
-  it("the YouTube gap is a VALUE a test reads, so it cannot quietly outlive its truth", () => {
-    // Both specs name YouTube's title/thumbnail/made-for-kids settings.
-    // There is no youtube platform key, capability row or driver — so the
-    // day one lands, this fails until the deferral is resolved rather than
-    // sitting in a docblock nobody re-reads.
-    expect(Object.keys(SETTINGS_DEFERRED)).toContain("youtube");
+  it("a deferred destination can never also be a platform — the ratchet that resolved YouTube", () => {
+    // s87 recorded YouTube here as a deferral; s90 added the platform key,
+    // this test fired exactly as designed, and the entry resolved into
+    // `youtubePostSettingsSchema` in the same change. The loop stays armed
+    // for the next deferral.
     for (const deferred of Object.keys(SETTINGS_DEFERRED)) {
       expect(
         SOCIAL_PLATFORMS as readonly string[],
         `"${deferred}" is now a real platform — give it a settings schema and drop the deferral`,
       ).not.toContain(deferred);
     }
+    expect(Object.keys(SETTINGS_DEFERRED)).not.toContain("youtube");
+    expect(SOCIAL_PLATFORMS).toContain("youtube");
+  });
+
+  it("YouTube's resolved settings carry the deferred trio's youtube-scoped knobs", () => {
+    const settings = platformSettingsSchema.parse({
+      youtube: { title: "Launch note", madeForKids: false, privacy: "unlisted" },
+      // The trio's THUMBNAIL is the cut's own cover frame — cross-platform,
+      // never a youtube-scoped duplicate (the header's stated resolution).
+      video: { coverFrameMs: 4_000 },
+    });
+    expect(settings.youtube?.madeForKids).toBe(false);
+    expect(settings.youtube?.privacy).toBe("unlisted");
+    // The platform's own title ceiling (100 chars) and the alt-text
+    // convention (empty string refused, never quietly "unset").
+    expect(
+      platformSettingsSchema.safeParse({ youtube: { title: "y".repeat(101) } }).success,
+    ).toBe(false);
+    expect(platformSettingsSchema.safeParse({ youtube: { title: "" } }).success).toBe(false);
+    // Strict shape: an uploaded-thumbnail knob would be a dead door today.
+    expect(
+      platformSettingsSchema.safeParse({ youtube: { thumbnailRef: "abc" } }).success,
+    ).toBe(false);
   });
 
   it("TikTok's video variant carries the fields the video spec names", () => {

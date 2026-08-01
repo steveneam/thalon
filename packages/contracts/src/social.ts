@@ -13,6 +13,9 @@ import { z } from "zod";
  * last), then the D1 proof pair (s83): reddit + bluesky, chosen because both
  * have instant developer-app creation and no posting-scope review wall, so
  * the connector seam proves end to end without waiting on a partner filing.
+ * youtube joined at s90 (founder ruling s89: "Youtube as a destination") —
+ * the BUILD half only: key, capability rows, settings schema and driver ship
+ * disarmed; the OAuth connect flow waits on the founder's Google portal app.
  */
 export const SOCIAL_PLATFORMS = [
   "linkedin",
@@ -22,6 +25,7 @@ export const SOCIAL_PLATFORMS = [
   "tiktok",
   "reddit",
   "bluesky",
+  "youtube",
 ] as const;
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number];
 export const socialPlatformSchema = z.enum(SOCIAL_PLATFORMS);
@@ -76,5 +80,6 @@ export const socialPublishConfigSchema = z.object({
   tiktok: socialCadenceSchema.optional(),
   reddit: socialRedditCadenceSchema.optional(),
   bluesky: socialCadenceSchema.optional(),
+  youtube: socialCadenceSchema.optional(),
 });
 export type SocialPublishConfig = z.infer<typeof socialPublishConfigSchema>;

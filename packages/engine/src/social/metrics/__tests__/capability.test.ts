@@ -170,6 +170,23 @@ describe("the honesty facts this lane verified against live docs", () => {
   it("exactly the three audience-reporting platforms are offered to a roll-up", () => {
     expect(platformsReportingAudience().sort()).toEqual(["facebook", "instagram", "x"]);
   });
+
+  it("YouTube's absence is PERMISSIONED, not no_driver — the s90 lane's stated posture", () => {
+    // The reader is deliberately unbuilt because nothing could authenticate
+    // it: every honest read of our own uploads rides channel-owner OAuth on
+    // the founder's Google app, which does not exist yet. `no_driver` would
+    // send someone to build a reader that cannot connect; `gated` would
+    // claim a partner application Google does not require. The row's own
+    // docblock argues the choice at length.
+    const youtube = metricCapability("youtube");
+    expect(youtube.reader).toBeNull();
+    expect(youtube.reports).toEqual([]);
+    expect(youtube.refuses.length).toBeGreaterThan(0);
+    expect(youtube.refuses.every((r) => r.permanence === "permissioned")).toBe(true);
+    expect(youtube.audienceLabel).toBeNull();
+    // Reading it must never bill the trend sweep's key — not metered.
+    expect(youtube.metered).toBeUndefined();
+  });
 });
 
 describe("resolveSocialMetricsReader (the credential-only ratchet)", () => {
@@ -230,6 +247,21 @@ describe("resolveSocialMetricsReader (the credential-only ratchet)", () => {
     expect(reader.refusal.permanence).toBe("gated");
     // The operator must not be sent to fix their credential — it is not the problem.
     expect(reader.refusal.message).not.toContain("SOCIAL_LINKEDIN_ACCESS_TOKEN");
+  });
+
+  it("YouTube refuses BEFORE the credential is consulted — a perfect token cannot open an OAuth gate that has no app behind it", () => {
+    const reader = resolveSocialMetricsReader(
+      "youtube",
+      { SOCIAL_YOUTUBE_ACCESS_TOKEN: "a-perfectly-good-token" },
+      {},
+    );
+    expect(isRefusingSocialMetricsReader(reader)).toBe(true);
+    if (!isRefusingSocialMetricsReader(reader)) throw new Error("unreachable");
+    expect(reader.refusal).toBeInstanceOf(SocialMetricsUnavailableError);
+    expect(reader.refusal.permanence).toBe("permissioned");
+    // The operator must not be sent to fix a credential — none can exist yet.
+    expect(reader.refusal.message).not.toContain("SOCIAL_YOUTUBE_ACCESS_TOKEN");
+    expect(reader.refusal.message).toContain("Google");
   });
 
   it("a reader has no publish verb — the seam decision, as a type-level fact checked at runtime", () => {

@@ -462,6 +462,66 @@ export const METRIC_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformMetric
   },
 
   /**
+   * ⛔ NO READER, BY CHOICE — and the word for the absence is `permissioned`,
+   * not `no_driver`, because the two would send the fixer to different
+   * places and only one of them is right (s90 lane ruling, argued in the
+   * lane wrap):
+   *
+   * Every authenticated read of OUR OWN uploads — Data API `videos.list
+   * part=statistics` under OAuth, and the richer YouTube Analytics API —
+   * rides channel-owner consent through the founder's Google portal app,
+   * which does not exist yet. That is not a partner application (`gated`
+   * would be a lie: Google grants these scopes to any consented channel
+   * owner, LinkedIn-style selection is not involved) and not `structural`
+   * (the numbers exist). It is exactly this file's `permissioned`: the API
+   * exists and we could have it; no token or app of ours holds the grant.
+   * The reader is deliberately unbuilt UNTIL that grant can exist — calling
+   * it `no_driver` ("ours to fix") would send someone to build a reader
+   * that cannot authenticate against anything.
+   *
+   * The one road open TODAY — the keyed public `videos.list` read
+   * (statistics.viewCount/likeCount/commentCount on PUBLIC videos, no
+   * OAuth) — is deliberately not taken for our own posts: it cannot see
+   * unlisted/private uploads, and it would spend the intel sweep's
+   * `YOUTUBE_API_KEY` quota on a measurement job that has its own proper
+   * road. The refusal reasons say so rather than leaving a mystery gap.
+   */
+  youtube: {
+    platform: "youtube",
+    reader: null,
+    reports: [],
+    refuses: [
+      {
+        label: "views",
+        permanence: "permissioned",
+        reason:
+          "reading our own uploads needs channel-owner OAuth via the founder's Google app, which does not exist yet — the keyed public statistics road is deliberately not used (blind to unlisted/private videos, and it would spend the intel sweep's quota); the YouTube connect window is the unlock, then the reader is its own small build",
+      },
+      {
+        label: "impressions",
+        permanence: "permissioned",
+        reason:
+          "per-video analytics beyond public counts ride the YouTube Analytics API behind channel-owner OAuth on the founder's Google app — no app or grant exists yet, so nothing here can ask",
+      },
+      {
+        label: "likes",
+        permanence: "permissioned",
+        reason:
+          "same road as views: an authenticated Data API read behind the founder's Google OAuth app, which does not exist yet",
+      },
+      {
+        label: "comments",
+        permanence: "permissioned",
+        reason:
+          "same road as views: an authenticated Data API read behind the founder's Google OAuth app, which does not exist yet",
+      },
+    ],
+    audienceLabel: null,
+    docs: "https://developers.google.com/youtube/v3/docs/videos#statistics + https://developers.google.com/youtube/analytics",
+    verifiedOn: "2026-08-01",
+  },
+
+  /**
    * No publisher, so no publications, so nothing to measure. TikTok is
    * platform-review-gated and ships no driver at all (the registry's own
    * words); its metrics row exists only so the matrix stays total.

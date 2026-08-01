@@ -61,6 +61,16 @@ export const platformCapabilitySchema = z.object({
      */
     required: z.boolean(),
     /**
+     * WHAT the platform demands when `required` — absent means "image", the
+     * shape every pre-s90 row already meant. YouTube is the reason this
+     * field exists: it demands a VIDEO, and an image cannot satisfy it, so
+     * the validator needs the distinction to refuse honestly ("attach a
+     * video" is a different fix from "attach an image"). On a video-required
+     * platform the image fields below describe what may ride BESIDE the
+     * video (YouTube's one custom thumbnail), not what satisfies `required`.
+     */
+    requiredKind: z.enum(["image", "video"]).optional(),
+    /**
      * The platform's own image ceiling. NOTE our publish door caps attached
      * media at ONE image regardless (`mediaRefsSchema`), so today every value
      * here is non-binding; the relationship is pinned by a ratchet rather
@@ -176,6 +186,36 @@ export const PLATFORM_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformCapa
     },
     hashtags: { max: null },
     verifiedOn: VERIFIED_ON,
+  },
+  youtube: {
+    platform: "youtube",
+    // The body is the video DESCRIPTION: `snippet.description`, max 5000 —
+    // and the platform counts BYTES, not characters
+    // (https://developers.google.com/youtube/v3/docs/videos, checked
+    // 2026-08-01: "The property's value has a maximum length of 5000
+    // bytes"). Character counting UNDER-counts multi-byte text, so this is
+    // the one row where the validator's measure is not conservative; the
+    // driver re-checks in bytes before spending the upload call. The TITLE
+    // ceiling (100 characters, same doc) is a separate required field the
+    // driver derives — the Reddit convention — enforced by
+    // `youtubePostSettingsSchema` and the driver, outside this body fact.
+    text: { maxChars: 5000, urlWeight: null },
+    media: {
+      // A VIDEO, not an image — the whole reason `requiredKind` exists.
+      // The image fields describe the one custom THUMBNAIL that may ride
+      // beside it (thumbnails.set accepts JPEG/PNG,
+      // https://developers.google.com/youtube/v3/docs/thumbnails/set).
+      required: true,
+      requiredKind: "video",
+      maxImages: 1,
+      imageContentTypes: ["image/jpeg", "image/png"],
+    },
+    // Past 60 hashtags YouTube ignores EVERY hashtag on the video
+    // (https://support.google.com/youtube/answer/6390658). The API still
+    // accepts the upload, so this refusal is the matrix's conservative bias
+    // pointed at a documented total-loss behavior rather than a hard bounce.
+    hashtags: { max: 60 },
+    verifiedOn: "2026-08-01",
   },
 };
 

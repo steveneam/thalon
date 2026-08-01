@@ -182,7 +182,78 @@ describe("validateForPlatform — media and hashtags", () => {
     expect(fit.problems.map((p) => p.code)).toEqual(["too_many_images"]);
   });
 
-  it("only Instagram caps hashtags today — elsewhere the cap is the authoring profile's opinion, not a refusal", () => {
+  it("YouTube refuses a TEXT-ONLY draft with the typed video problem, not the image sentence (s90)", () => {
+    const fit = validateForPlatform({ platform: "youtube", body: "A description." });
+    expect(fit.problems.map((p) => p.code)).toEqual(["video_required"]);
+    expect(fit.problems[0].message).toContain("video");
+    expect(fit.problems[0].message).not.toContain("attach an image");
+  });
+
+  it("YouTube refuses an IMAGE-ONLY draft too — an image cannot satisfy a video-demanding platform", () => {
+    const fit = validateForPlatform({
+      platform: "youtube",
+      body: "A description.",
+      media: [{ contentType: "image/jpeg" }],
+    });
+    expect(fit.problems.map((p) => p.code)).toEqual(["video_required"]);
+    expect(fit.problems[0].message).toContain("no video");
+  });
+
+  it("YouTube passes with a video, and judges an image BESIDE it by the thumbnail rules", () => {
+    const withVideo = validateForPlatform({
+      platform: "youtube",
+      body: "A description.",
+      media: [{ contentType: "video/mp4" }],
+    });
+    expect(withVideo.fits).toBe(true);
+    // One JPEG beside the video = the platform's one custom thumbnail: fits.
+    const withThumb = validateForPlatform({
+      platform: "youtube",
+      body: "A description.",
+      media: [{ contentType: "video/mp4" }, { contentType: "image/jpeg" }],
+    });
+    expect(withThumb.fits).toBe(true);
+    // A second image is over the thumbnail ceiling; a webp is the wrong type.
+    const overThumb = validateForPlatform({
+      platform: "youtube",
+      body: "A description.",
+      media: [
+        { contentType: "video/mp4" },
+        { contentType: "image/jpeg" },
+        { contentType: "image/png" },
+      ],
+    });
+    expect(overThumb.problems.map((p) => p.code)).toEqual(["too_many_images"]);
+    const badThumb = validateForPlatform({
+      platform: "youtube",
+      body: "A description.",
+      media: [{ contentType: "video/mp4" }, { contentType: "image/webp" }],
+    });
+    expect(badThumb.problems.map((p) => p.code)).toEqual(["unsupported_image_type"]);
+  });
+
+  it("YouTube's description ceiling refuses at 5000, naming both numbers", () => {
+    const fit = validateForPlatform({
+      platform: "youtube",
+      body: "d".repeat(5100),
+      media: [{ contentType: "video/mp4" }],
+    });
+    expect(fit.fits).toBe(false);
+    expect(fit.problems.map((p) => p.code)).toEqual(["text_over_ceiling"]);
+    expect(fit.text.maxChars).toBe(5000);
+    expect(fit.problems[0].message).toContain("5000");
+  });
+
+  it("a video attachment on an IMAGE platform still refuses as an unsupported type — the pre-s90 behavior, pinned", () => {
+    const fit = validateForPlatform({
+      platform: "instagram",
+      body: "A caption.",
+      media: [{ contentType: "video/mp4" }],
+    });
+    expect(fit.problems.map((p) => p.code)).toEqual(["unsupported_image_type"]);
+  });
+
+  it("Instagram (30) and YouTube (60) cap hashtags — elsewhere the cap is the authoring profile's opinion, not a refusal", () => {
     const body = Array.from({ length: 40 }, (_, i) => `#tag${i}`).join(" ");
     expect(validateForPlatform({ platform: "linkedin", body }).fits).toBe(true);
     const ig = validateForPlatform({
@@ -192,6 +263,21 @@ describe("validateForPlatform — media and hashtags", () => {
     });
     expect(ig.problems.map((p) => p.code)).toEqual(["too_many_hashtags"]);
     expect(ig.text.hashtags).toHaveLength(40);
+    // 40 hashtags sit under YouTube's 60; 61 crosses the documented
+    // ignore-all cliff and refuses.
+    expect(
+      validateForPlatform({
+        platform: "youtube",
+        body,
+        media: [{ contentType: "video/mp4" }],
+      }).fits,
+    ).toBe(true);
+    const overCliff = validateForPlatform({
+      platform: "youtube",
+      body: Array.from({ length: 61 }, (_, i) => `#tag${i}`).join(" "),
+      media: [{ contentType: "video/mp4" }],
+    });
+    expect(overCliff.problems.map((p) => p.code)).toEqual(["too_many_hashtags"]);
   });
 });
 
@@ -207,10 +293,15 @@ describe("the ceiling is not the authoring budget", () => {
 
   it("every platform in the enum has a row the validator can measure against", () => {
     for (const platform of SOCIAL_PLATFORMS) {
+      // Attach the medium the row DEMANDS: a video where requiredKind says
+      // so (YouTube), the first accepted image type everywhere else.
+      const { media } = PLATFORM_CAPABILITIES[platform];
+      const contentType =
+        media.requiredKind === "video" ? "video/mp4" : media.imageContentTypes[0];
       const fit = validateForPlatform({
         platform,
         body: "A post.",
-        media: [{ contentType: PLATFORM_CAPABILITIES[platform].media.imageContentTypes[0] }],
+        media: [{ contentType }],
       });
       expect(fit.fits).toBe(true);
       expect(fit.capability.platform).toBe(platform);

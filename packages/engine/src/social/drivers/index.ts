@@ -12,6 +12,7 @@ import { createInstagramDriver, createInstagramMetricsReader } from "./instagram
 import { createLinkedInDriver } from "./linkedin";
 import { createRedditDriver, createRedditMetricsReader } from "./reddit";
 import { createXDriver, createXMetricsReader } from "./x";
+import { createYouTubeDriver } from "./youtube";
 
 export {
   hardenedPlatformFetch,
@@ -49,6 +50,15 @@ export {
   type RedditDriverConfig,
 } from "./reddit";
 export { createXDriver, createXMetricsReader, type XDriverConfig } from "./x";
+export {
+  createYouTubeDriver,
+  youtubeDerivedTitle,
+  YOUTUBE_API_VERSION,
+  YouTubeExtraMediaUnsupportedError,
+  YouTubeMadeForKidsUndeclaredError,
+  YouTubeVideoRequiredError,
+  type YouTubeDriverConfig,
+} from "./youtube";
 
 /**
  * B-pub.2 (s65): the production driver map `resolveSocialPublisher` takes —
@@ -97,6 +107,14 @@ export function productionSocialDrivers(
   // bluesky ACCESS_TOKEN seat carries the app password by declaration
   // (platform env schema): the seat holds the platform's own secret shape.
   drivers.reddit = ({ accessToken }) => createRedditDriver({ accessToken });
+  // s90: youtube is token-only like reddit (videos.insert uploads to the
+  // token's own channel — no identifier extra). The factory assembles
+  // unconditionally, but the platform stays STRUCTURALLY unarmable: its
+  // SOCIAL_YOUTUBE_* pair is not declared in the platform env schema and
+  // youtube is not a vault social destination, so neither resolver source
+  // below can ever fill its seats. Both land with the founder's Google
+  // portal-app window (the LIVE half).
+  drivers.youtube = ({ accessToken }) => createYouTubeDriver({ accessToken });
   const blueskyIdentifier = env.SOCIAL_BLUESKY_IDENTIFIER;
   if (blueskyIdentifier) {
     drivers.bluesky = ({ accessToken }) =>

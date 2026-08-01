@@ -40,6 +40,7 @@ export const PLATFORM_FIT_CODES = [
   "text_empty",
   "text_over_ceiling",
   "media_required",
+  "video_required",
   "too_many_images",
   "unsupported_image_type",
   "too_many_hashtags",
@@ -273,23 +274,48 @@ export function validateForPlatform(input: PlatformFitInput): PlatformFit {
     });
   }
 
+  // A video-demanding platform (matrix `media.requiredKind: "video"` — s90,
+  // YouTube) splits the attachments: video/* entries are the demanded
+  // medium, everything else is judged by the image rules, which on such a
+  // platform describe what may ride BESIDE the video (the one custom
+  // thumbnail). Everywhere else `images` IS `media`, byte-identical to the
+  // pre-s90 behavior — including a video/* entry tripping the
+  // unsupported-type refusal, which is the honest answer on an image
+  // platform.
+  const requiresVideo = capability.media.requiredKind === "video";
+  const images = requiresVideo
+    ? media.filter((m) => !baseContentType(m.contentType).startsWith("video/"))
+    : media;
+
   if (capability.media.required && media.length === 0) {
+    problems.push(
+      requiresVideo
+        ? {
+            code: "video_required",
+            message: `${label} publishes videos — this draft carries no media at all. Attach the run's rendered cut before it can be scheduled; an image cannot satisfy this.`,
+          }
+        : {
+            code: "media_required",
+            message: `${label} refuses a text-only post — attach an image before this can be scheduled.`,
+          },
+    );
+  } else if (requiresVideo && capability.media.required && images.length === media.length && media.length > 0) {
     problems.push({
-      code: "media_required",
-      message: `${label} refuses a text-only post — attach an image before this can be scheduled.`,
+      code: "video_required",
+      message: `${label} publishes videos — this draft carries ${media.length} image${media.length === 1 ? "" : "s"} and no video, and an image cannot satisfy this. Attach the run's rendered cut.`,
     });
   }
 
-  if (media.length > capability.media.maxImages) {
+  if (images.length > capability.media.maxImages) {
     problems.push({
       code: "too_many_images",
-      message: `${label} accepts ${capability.media.maxImages} image${capability.media.maxImages === 1 ? "" : "s"} and this draft carries ${media.length}.`,
+      message: `${label} accepts ${capability.media.maxImages} image${capability.media.maxImages === 1 ? "" : "s"} and this draft carries ${images.length}.`,
     });
   }
 
   const accepted = new Set(capability.media.imageContentTypes.map((t) => t.toLowerCase()));
   const unsupported = [
-    ...new Set(media.map((m) => baseContentType(m.contentType)).filter((t) => !accepted.has(t))),
+    ...new Set(images.map((m) => baseContentType(m.contentType)).filter((t) => !accepted.has(t))),
   ];
   if (unsupported.length > 0) {
     problems.push({
@@ -325,7 +351,8 @@ export function validateForPlatform(input: PlatformFitInput): PlatformFit {
 /**
  * The refusal sentences name the platform the way an operator does. Kept
  * here rather than imported from apps/web's `platformLabel`: the engine
- * must not depend on the app, and these five are the matrix's own enum.
+ * must not depend on the app, and this map is total over the matrix's own
+ * enum by type.
  */
 const PLATFORM_LABELS: Readonly<Record<SocialPlatform, string>> = {
   linkedin: "LinkedIn",
@@ -335,6 +362,7 @@ const PLATFORM_LABELS: Readonly<Record<SocialPlatform, string>> = {
   tiktok: "TikTok",
   reddit: "Reddit",
   bluesky: "Bluesky",
+  youtube: "YouTube",
 };
 
 /** The label map, for callers rendering a refusal the validator produced. */

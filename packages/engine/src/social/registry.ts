@@ -183,7 +183,7 @@ export function resolveSocialPublisher(
   const factory = drivers[platform];
   if (!factory) {
     missing.push(
-      `${platform} driver (none assembled — productionSocialDrivers registers linkedin/x/reddit always, facebook only with SOCIAL_FACEBOOK_PAGE_ID, instagram only with SOCIAL_INSTAGRAM_USER_ID, bluesky only with SOCIAL_BLUESKY_IDENTIFIER; tiktok ships no driver)`,
+      `${platform} driver (none assembled — productionSocialDrivers registers linkedin/x/reddit/youtube always, facebook only with SOCIAL_FACEBOOK_PAGE_ID, instagram only with SOCIAL_INSTAGRAM_USER_ID, bluesky only with SOCIAL_BLUESKY_IDENTIFIER; tiktok ships no driver)`,
     );
   }
   if (!token || !factory || missing.length > 0) {

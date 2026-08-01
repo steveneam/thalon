@@ -27,14 +27,17 @@ import { SOCIAL_PLATFORMS, type SocialPlatform } from "./social";
  * informative. A platform with genuinely no per-post knobs says so with an
  * empty shape.
  *
- * ⚠ **YouTube is deliberately absent, and that is a real gap, not an
- * oversight.** Both specs name YouTube's title / thumbnail / made-for-kids
- * settings. There is no `youtube` key in `SOCIAL_PLATFORMS`, no capability
- * row and no driver — so a YouTube settings schema here would be a contract
- * asserting a destination the product cannot reach. It waits on its own
- * window (platform key + verified capability row + driver), and is recorded
- * as such rather than invented. TikTok's video settings, which DO have a
- * platform key, ship below in full.
+ * YouTube's deferral RESOLVED at s90 (founder ruling s89: "Youtube as a
+ * destination"): the platform key, capability rows and driver now exist, so
+ * the settings schema the specs name ships below in full. Of the deferred
+ * trio, title and made-for-kids are youtube-scoped knobs; the THUMBNAIL is
+ * answered by the cross-platform `video.coverFrameMs` above — the cover
+ * choice belongs to the CUT, exactly as that block's docblock argues. A
+ * youtube-specific *uploaded* thumbnail (a second image file riding beside
+ * the video, `thumbnails.set`) would today be a knob nothing can honor —
+ * the publish door carries one media item — so it is deliberately NOT a
+ * field here; it lands with the video-arc's publish wiring as its own
+ * reviewed change.
  */
 
 /* ------------------------------------------------------------------ */
@@ -137,6 +140,33 @@ export const redditPostSettingsSchema = z.strictObject({
  */
 export const blueskyPostSettingsSchema = z.strictObject({});
 
+/**
+ * YouTube — the fields the video-arc spec names, from the official
+ * `videos.insert` resource (checked 2026-08-01,
+ * https://developers.google.com/youtube/v3/docs/videos):
+ *
+ *  - `title` — `snippet.title`, max 100 characters by the platform's own
+ *    doc. Like Reddit's, a required PLATFORM field rather than a knob: the
+ *    driver derives it from the body's first line when unset, so this is
+ *    the operator's override.
+ *  - `madeForKids` — `status.selfDeclaredMadeForKids`, the COPPA
+ *    declaration. A REQUIRED upload declaration on the official API and a
+ *    compliance flag, so it is never inferred and never defaulted
+ *    (TikTok's `brandedContent` convention): absent = undeclared, and the
+ *    driver refuses to publish an undeclared upload.
+ *  - `privacy` — `status.privacyStatus`, the same knob TikTok's block
+ *    carries. Absent = the platform's own default; a first upload landing
+ *    irreversibly public with no knob would be a dishonest door.
+ *
+ * The deferred trio's THUMBNAIL is `video.coverFrameMs` (see the header) —
+ * deliberately not duplicated here.
+ */
+export const youtubePostSettingsSchema = z.strictObject({
+  title: z.string().min(1).max(100).optional(),
+  madeForKids: z.boolean().optional(),
+  privacy: z.enum(["public", "unlisted", "private"]).optional(),
+});
+
 /* ------------------------------------------------------------------ */
 /* The envelope.                                                        */
 /* ------------------------------------------------------------------ */
@@ -157,6 +187,7 @@ export const platformSettingsSchema = z.strictObject({
   tiktok: tiktokPostSettingsSchema.optional(),
   reddit: redditPostSettingsSchema.optional(),
   bluesky: blueskyPostSettingsSchema.optional(),
+  youtube: youtubePostSettingsSchema.optional(),
 });
 export type PlatformSettings = z.infer<typeof platformSettingsSchema>;
 
@@ -166,10 +197,10 @@ export const SETTINGS_PLATFORMS: readonly SocialPlatform[] = SOCIAL_PLATFORMS;
 /**
  * Destinations named by the specs that have no settings schema here, with
  * the reason. Documentary ratchets rot, so this is a VALUE a test reads:
- * the day `youtube` joins `SOCIAL_PLATFORMS`, the completeness test fails
- * until this entry is resolved rather than quietly outliving its truth.
+ * the day a deferred key joins `SOCIAL_PLATFORMS`, the completeness test
+ * fails until its entry is resolved rather than quietly outliving its truth.
+ * Empty since s90 — the ratchet worked exactly as designed: `youtube`
+ * joined the platform enum, the test fired, and the entry resolved into
+ * `youtubePostSettingsSchema` in the same change.
  */
-export const SETTINGS_DEFERRED: Readonly<Record<string, string>> = {
-  youtube:
-    "no platform key, no capability row, no driver — title/thumbnail/made-for-kids wait on YouTube's own window (video-arc spec §Postiz has NO video editor / the pipeline seam)",
-};
+export const SETTINGS_DEFERRED: Readonly<Record<string, string>> = {};

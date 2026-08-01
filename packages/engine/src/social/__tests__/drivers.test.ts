@@ -420,7 +420,7 @@ describe("productionSocialDrivers (assembly — extras decide which factories ex
     SOCIAL_BLUESKY_IDENTIFIER: "steve.bsky.social",
   };
 
-  it("with every extra set: all six drivered platforms — and NEVER tiktok (out of scope, review-gated)", () => {
+  it("with every extra set: all seven drivered platforms — and NEVER tiktok (out of scope, review-gated)", () => {
     const drivers = productionSocialDrivers(readEnv(FULL_EXTRAS));
     expect(Object.keys(drivers).sort()).toEqual([
       "bluesky",
@@ -429,13 +429,14 @@ describe("productionSocialDrivers (assembly — extras decide which factories ex
       "linkedin",
       "reddit",
       "x",
+      "youtube",
     ]);
     expect(drivers.tiktok).toBeUndefined();
   });
 
-  it("with no extras: only the extra-less linkedin + x + reddit factories assemble (bluesky needs its identifier)", () => {
+  it("with no extras: only the extra-less linkedin + x + reddit + youtube factories assemble (bluesky needs its identifier)", () => {
     const drivers = productionSocialDrivers(readEnv({}));
-    expect(Object.keys(drivers).sort()).toEqual(["linkedin", "reddit", "x"]);
+    expect(Object.keys(drivers).sort()).toEqual(["linkedin", "reddit", "x", "youtube"]);
   });
 
   it("facebook without its page-id extra is driverless — the ladder names the missing driver even fully env-armed", () => {

@@ -94,13 +94,17 @@ describe("deriveCreatePlan — every refusal reason, pinned", () => {
     expect(entry.refusal?.message).toContain("Pick one of:");
   });
 
-  it("unknown_platform: youtube cites the deferral rather than a bare 'unknown'", () => {
-    // The s87 window ships no youtube key ANYWHERE, on purpose, and records
-    // why in SETTINGS_DEFERRED. Derivation reads that record, so the
-    // documentary ratchet is load-bearing instead of decorative.
+  it("channel_not_connected: youtube is a KNOWN platform now, refused for its missing connector (s90)", () => {
+    // s87 pinned youtube as unknown_platform citing SETTINGS_DEFERRED; the
+    // s90 destination lane resolved that deferral (platform key + capability
+    // rows + disarmed driver), so youtube now takes the TikTok-shaped
+    // refusal: a real platform whose connector window — the founder's Google
+    // portal app — has not landed. Telling the operator to "connect it in
+    // Settings" would still point at a card that does not exist yet.
     const entry = refusalFor(deriveCreatePlan(brief({ platforms: ["youtube"] }), CONNECTED), "youtube");
-    expect(entry.refusal?.code).toBe("unknown_platform");
-    expect(entry.refusal?.message).toContain("no platform key");
+    expect(entry.refusal?.code).toBe("channel_not_connected");
+    expect(entry.refusal?.message).toContain("no connector in this build");
+    expect(entry.refusal?.message).not.toContain("Settings");
   });
 
   it("channel_not_connected: a known platform the tenant never connected", () => {

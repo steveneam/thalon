@@ -64,6 +64,31 @@ describe("platform capability matrix (s82 W1)", () => {
     expect(PLATFORM_CAPABILITIES.instagram.hashtags.max).toBe(30);
   });
 
+  it("pins YouTube's s90 row: video-required, the 5000-byte description ceiling, the hashtag cliff", () => {
+    // The doc-verified facts (developers.google.com/youtube/v3/docs/videos,
+    // checked 2026-08-01): description max 5000 (bytes — the row's comment
+    // carries the nuance), a VIDEO demanded rather than an image, one custom
+    // thumbnail in JPEG/PNG beside it, and the 60-hashtag ignore-all cliff.
+    const youtube = PLATFORM_CAPABILITIES.youtube;
+    expect(youtube.text.maxChars).toBe(5000);
+    expect(youtube.text.urlWeight).toBeNull();
+    expect(youtube.media.required).toBe(true);
+    expect(youtube.media.requiredKind).toBe("video");
+    expect(youtube.media.maxImages).toBe(1);
+    expect(youtube.media.imageContentTypes).toEqual(["image/jpeg", "image/png"]);
+    expect(youtube.hashtags.max).toBe(60);
+  });
+
+  it("requiredKind stays ABSENT on every image-required row — absence means image, the pre-s90 shape", () => {
+    for (const platform of SOCIAL_PLATFORMS) {
+      if (platform === "youtube") continue;
+      expect(
+        PLATFORM_CAPABILITIES[platform].media.requiredKind,
+        `${platform} declares a requiredKind — only a video-demanding platform needs one`,
+      ).toBeUndefined();
+    }
+  });
+
   it("keeps X's standard-tier ceiling and its fixed URL weight", () => {
     // Encoding the premium long-post ceiling would make every standard
     // account's post fail at the API instead of at our door.
