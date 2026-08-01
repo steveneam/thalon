@@ -74,3 +74,26 @@
 *The original item, verbatim:*
 
 - [2026-07-29f] 💸 **X analytics COST MONEY — a spend call before the metrics tick ever runs on an X post.** The D2 spine shipped s87 and every other platform reads free. **X is the exception: metered pay-per-use with no free read tier, so every post measured is billed.** Nothing has spent anything — the tick needs an explicit `--armed` flag, it is on no timer, and it prints the bill *before* the pass runs whether armed or not. Your options are the whole decision: measure X and pay per post · skip X and let its row read "not measured" honestly beside the others · or wait until there is enough X volume to be worth it. **Everything else in the spine works without this** — Bluesky, Facebook and Instagram all report free, LinkedIn is gated by their side regardless, and the Analytics surface already says which absences are permanent.
+
+## [2026-07-29e + 2026-08-01 s89-refresh] Both swordfish credentials — RESOLVED, and they had been since 07-29 morning
+
+**CLOSED s90 (2026-08-01).** Both credentials were minted 2026-07-29 ~07:44Z
+under your in-session yes given directly in swordfish's session that same
+morning — the delivery (FROM-SWORDFISH "07:50 UTC" note + both `.context`
+files) was on disk the whole time, and the board carried the ask as open for
+three more sessions anyway. Swordfish confirmed live in s90 ("STAND DOWN on
+2026-07-29e") and you re-confirmed in their session today. **s90 wired them:**
+`DOKPLOY_API_KEY` GitHub secret updated (key probed alive first,
+application.one → 200), `TEMPLATES_DOKPLOY_API_KEY` / `TEMPLATES_DOKPLOY_APP_ID`
+secrets + `TEMPLATES_PREVIEW_HOST` repo var set, `templates-image.yml` made
+deploy-only (the legacy `application.update` curl deleted; edge probe now
+authenticates). The independent deploy button is back; key scope verified
+(templates key cannot see staging — 401). Lesson, same class as the s61
+film-import double-carry: **a carried item must be checked against the end
+state, not re-carried on momentum** — the answer sat in FROM-SWORDFISH and
+`.context` for three sessions.
+
+*The original items, verbatim:*
+
+- [2026-08-01, s89 refresh] ⏫ **You asked "can you handle the credentials?" — everything except ONE step is handled.** The one step is theirs by design, not mine to bypass: swordfish's founder-gate requires the word from YOU directly (they explicitly declined my relayed approval — *"that rule exists for exactly the case where the relayed approval is genuine"*). **The whole ask is one message from you to swordfish** (their session on this box, or your Telegram line to them): **"issue both credentials"** — covers the `thalon-deploy` re-issue AND the templates-preview mint. Nothing is blocked meanwhile; deploys run on request.
+- [2026-07-29e] 🔑 **ONE WORD TO SWORDFISH, COVERING BOTH CREDENTIALS.** You already said yes to the deploy credential, and I relayed it with your words quoted. **Swordfish deliberately did not act on it, and they are right:** an approval relayed through a peer channel file is not an in-session confirmation, and handing out secrets is on their founder-gate list. Their reasoning is the good part — *"that rule exists for exactly the case where the relayed approval is genuine and plausible, because that is the only case where it is tempting."* So they need it from you, once. **The same word covers BOTH:** (1) re-issue our `thalon-deploy` credential so I can run staging deploys without a round-trip, and (2) mint the credential for the new templates-preview service you just rolled to them. They queued it as one confirm so you are asked once, not twice. **Nothing is blocked meanwhile** — they run deploys on request and the templates service is queued for their next session either way.

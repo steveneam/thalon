@@ -2,11 +2,12 @@
 # proprietary/templates/README.md): builds ghcr.io/steveneam/thalon-previews
 # from Dockerfile.templates whenever a template site changes — the ONLY place
 # this image is ever built (no-Docker rule on the dev machine). Same channel
-# shape as web-image.yml: build → smoke → GHCR → Dokploy update+deploy.
-# The deploy+probe steps stay dormant until the founder creates the
-# neutral-named Dokploy service and flips the TEMPLATES_PREVIEW_ARMED repo
-# var — until then this still builds and pushes, so arming is a variable
-# flip, not a code change.
+# shape as web-image.yml: build → smoke → GHCR → deploy-only Dokploy roll.
+# The neutral-named Dokploy service exists (stood up by the ops peer
+# 2026-07-29, founder-routed; it pins :latest, which this workflow already
+# pushes every build). The deploy+probe steps stay dormant until the
+# TEMPLATES_PREVIEW_ARMED repo var flips — arming is a variable flip, not a
+# code change.
 name: templates-image
 
 on:
@@ -85,20 +86,19 @@ jobs:
             ghcr.io/steveneam/thalon-previews:latest
             ghcr.io/steveneam/thalon-previews:${{ github.sha }}
           cache-from: type=gha
-      # Auto-deploy — DORMANT until the founder-created service exists.
-      # Same update+deploy semantics as web-image.yml (never the webhook,
-      # never saveDockerProvider).
-      - name: deploy — pin sha@digest on the preview service
+      # Deploy-only, same semantics as web-image.yml (never the webhook,
+      # never saveDockerProvider). The key carries NO create-class grant —
+      # application.update is impossible with it by design; the service pins
+      # :latest, so the deploy is a re-pull of what the push step just moved.
+      # Rollback = re-push :latest from a previous sha (build-push-action of
+      # that ref), then deploy.
+      - name: deploy — roll the preview service onto :latest
         if: vars.TEMPLATES_PREVIEW_ARMED == 'true'
         env:
           API: ${{ vars.DOKPLOY_API_BASE }}
           KEY: ${{ secrets.TEMPLATES_DOKPLOY_API_KEY }}
           APP: ${{ secrets.TEMPLATES_DOKPLOY_APP_ID }}
-          IMAGE: ghcr.io/steveneam/thalon-previews:${{ github.sha }}@${{ steps.push.outputs.digest }}
         run: |
-          curl -fsS -X POST "$API/application.update" \
-            -H "x-api-key: $KEY" -H 'content-type: application/json' \
-            -d "{\"applicationId\":\"$APP\",\"dockerImage\":\"$IMAGE\"}" > /dev/null
           curl -fsS -X POST "$API/application.deploy" \
             -H "x-api-key: $KEY" -H 'content-type: application/json' \
             -d "{\"applicationId\":\"$APP\",\"title\":\"main ${GITHUB_SHA::7}\"}" > /dev/null
@@ -114,13 +114,16 @@ jobs:
           done
           echo '::error::preview deploy did not settle in 5 minutes'
           exit 1
+      # The service sits behind the SAME edge basicauth pair as staging —
+      # an anonymous probe 401s by design, so the probe authenticates.
       - name: probe — gallery serves through the edge
         if: vars.TEMPLATES_PREVIEW_ARMED == 'true'
         env:
           HOST: ${{ vars.TEMPLATES_PREVIEW_HOST }}
+          EDGE: ${{ secrets.STAGING_EDGE_AUTH }}
         run: |
           for i in $(seq 1 12); do
-            curl -fsS "https://$HOST/healthz" > /dev/null 2>&1 && exit 0
+            curl -fsS -u "$EDGE" "https://$HOST/healthz" > /dev/null 2>&1 && exit 0
             sleep 5
           done
           echo '::error::gallery edge probe failed'
