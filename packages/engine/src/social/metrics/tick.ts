@@ -1,6 +1,7 @@
 import type { SocialPlatform, TenantCtx } from "@thalon/contracts";
 import type { Repos, SocialPublicationRow } from "@thalon/db";
 import { metricCapability } from "./capability";
+import { standingMetricsDeferral } from "./deferral";
 import { SocialMetricsRefusedError } from "./errors";
 import { isRefusingSocialMetricsReader, type SocialMetricsReader } from "./registry";
 
@@ -119,6 +120,16 @@ export interface CollectPublicationMetricsResult {
   bound: { limit: number; windowDays: number; totalPublications: number; truncated: boolean };
   /** Platforms in this pass whose reads are billed — the founder's call to make, so the tick says it out loud. */
   metered: Array<{ platform: string; note: string }>;
+  /**
+   * Platforms in this pass under a STANDING FOUNDER DEFERRAL (deferral.ts):
+   * the reader is built and works, and the founder has ruled it stays parked.
+   * Reported armed or not, with the ruling verbatim — and such a platform is
+   * deliberately NOT in `metered`, because `metered` says "this pass will
+   * bill" and a deferred platform's reads will not run at all. An armed pass
+   * records each of its publications as a typed refusal (`deferred`), spends
+   * nothing, and skips nothing silently.
+   */
+  deferred: Array<{ platform: string; ruling: string }>;
 }
 
 /**
@@ -178,12 +189,23 @@ export async function collectPublicationMetrics(
     failed: [],
     bound: { limit, windowDays, totalPublications: total, truncated: total > rows.length },
     metered: [],
+    deferred: [],
   };
 
   // Say what a pass costs BEFORE it runs, armed or not — a disarmed report is
-  // exactly where an operator should be able to see the bill.
+  // exactly where an operator should be able to see the bill. A platform
+  // under a standing deferral lands in `deferred` INSTEAD of `metered`: the
+  // founder already made the metered call for it — defer — so "this pass will
+  // bill" would be false, and the ruling itself is the honest line. (While X
+  // is both the only metered and the only deferred platform, the `metered`
+  // branch is dormant; lifting the deferral reactivates it.)
   const platforms = [...new Set(inWindow.map((row) => row.platform))];
   for (const platform of platforms) {
+    const ruling = standingMetricsDeferral(platform as SocialPlatform);
+    if (ruling !== undefined) {
+      result.deferred.push({ platform, ruling });
+      continue;
+    }
     const metered = metricCapability(platform as SocialPlatform).metered;
     if (metered) result.metered.push({ platform, note: metered });
   }

@@ -7,6 +7,7 @@ import {
   type MetricAbsence,
   type MetricLabel,
 } from "./capability";
+import { standingMetricsDeferral } from "./deferral";
 
 /**
  * D2 (s87): the ANALYTICS READ-MODEL — engine-side only, no UI. What the
@@ -288,6 +289,14 @@ function audienceCell(
   }
   const metric = latest.get(label);
   if (!metric) {
+    // A standing deferral is "we won't yet", NEVER "not collected yet" —
+    // the second sentence invites the accidental armed pass the founder's
+    // ruling exists to prevent. A historical row, if one exists, still
+    // renders above: deferral explains new absence, it erases nothing.
+    const deferral = standingMetricsDeferral(platform);
+    if (deferral !== undefined) {
+      return { value: null, parts: [], reason: deferral, absence: "deferred", asOf: null };
+    }
     return {
       value: null,
       parts: [],
@@ -325,6 +334,12 @@ function engagementCell(
     asOf = newest([asOf, metric.capturedAt]);
   }
   if (parts.length === 0) {
+    // Same rule as the audience cell: a deferred platform's empty cell says
+    // "we won't yet" with the ruling, not "the tick has not measured it".
+    const deferral = standingMetricsDeferral(platform);
+    if (deferral !== undefined) {
+      return { value: null, parts: [], reason: deferral, absence: "deferred", asOf: null };
+    }
     const reports = capability.reports.some((r) => METRIC_FAMILIES[r.label] === "engagement");
     return {
       value: null,

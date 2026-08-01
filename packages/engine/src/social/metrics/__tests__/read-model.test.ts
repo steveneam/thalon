@@ -154,6 +154,34 @@ describe("analyticsReadModel — the honesty rules", () => {
     expect(model.posts[0].audience.reason).toContain("has not measured it");
   });
 
+  it("a DEFERRED platform's empty cells say 'we won't yet' with the ruling — never 'not collected yet'", async () => {
+    const f = await setup();
+    await publication(f, "x");
+
+    const model = await analyticsReadModel({ repos: f.repos, ctx: f.ctx }, {}, NOW);
+    const row = model.posts[0];
+
+    // "not_collected" would invite the accidental armed pass the founder's
+    // ruling exists to prevent; `deferred` is its own word with its own fix
+    // (a launch date, not a scope).
+    expect(row.audience.value).toBeNull();
+    expect(row.audience.absence).toBe("deferred");
+    expect(row.audience.reason).toContain("only be paid once thalon is ready to launch");
+    expect(row.engagement.absence).toBe("deferred");
+    expect(row.engagement.reason).toContain("only be paid once thalon is ready to launch");
+  });
+
+  it("a deferral erases NOTHING — a historical row still renders as a number with its as-of", async () => {
+    const f = await setup();
+    const pub = await publication(f, "x");
+    await metric(f, pub.id, "impressions", 4200, NOW);
+
+    const model = await analyticsReadModel({ repos: f.repos, ctx: f.ctx }, {}, NOW);
+    expect(model.posts[0].audience.value).toBe(4200);
+    expect(model.posts[0].audience.reason).toBeUndefined();
+    expect(model.posts[0].audience.asOf?.toISOString()).toBe(NOW.toISOString());
+  });
+
   it("a measured ZERO is a number, not an absence", async () => {
     const f = await setup();
     const pub = await publication(f, "instagram");
@@ -252,6 +280,27 @@ describe("analyticsReadModel — the tiles", () => {
     expect(model.audience.deltaPct).toBeNull();
     expect(model.audience.platformsReporting).toEqual([]);
     expect(model.audience.platformsNotReporting[0].permanence).toBe("gated");
+  });
+
+  it("the tile and the channel roll-up both carry `deferred` as its own word, with the ruling", async () => {
+    const f = await setup();
+    const ig = await publication(f, "instagram");
+    await publication(f, "x");
+    await metric(f, ig.id, "reach", 4980, NOW);
+
+    const model = await analyticsReadModel({ repos: f.repos, ctx: f.ctx }, {}, NOW);
+
+    // The audience total is honest about who is missing and WHY: X is
+    // deferred by ruling, not unmeasurable and not merely uncollected.
+    expect(model.audience.value).toBe(4980);
+    expect(model.audience.platformsReporting).toEqual(["instagram"]);
+    const absent = model.audience.platformsNotReporting.find((p) => p.platform === "x");
+    expect(absent?.permanence).toBe("deferred");
+    expect(absent?.reason).toContain("only be paid once thalon is ready to launch");
+
+    const channel = model.channels.find((c) => c.platform === "x");
+    expect(channel?.audience.absence).toBe("deferred");
+    expect(channel?.audience.reason).toContain("only be paid once thalon is ready to launch");
   });
 
   it("the published count comes from OUR OWN rows, so it is always complete", async () => {

@@ -5,6 +5,8 @@
  *
  *   capability.ts — what each platform will TELL us, as data with a
  *                   `verifiedOn` stamp, and why an absence is absent.
+ *   deferral.ts   — the founder's standing deferrals (X until launch).
+ *                   Lifting one is a diff there, never a config change.
  *   registry.ts   — the reader seam. A reader cannot post; that is the point.
  *   errors.ts     — the metrics refusal taxonomy (its own tree, not publish's).
  *   parse.ts      — the shared floor: a number is a number, never a coercion.
@@ -26,7 +28,9 @@ export {
   type MetricReported,
   type PlatformMetricCapability,
 } from "./capability";
+export { standingMetricsDeferral, STANDING_METRICS_DEFERRALS } from "./deferral";
 export {
+  SocialMetricsDeferredError,
   SocialMetricsGatedError,
   SocialMetricsPermissionError,
   SocialMetricsRefusedError,

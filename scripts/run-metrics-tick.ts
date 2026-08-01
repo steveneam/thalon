@@ -21,7 +21,11 @@
  *
  * ⚠ IT CAN COST MONEY. X's API is metered pay-per-use; a pass that includes X
  * publications spends real money per post read. The report prints the bill
- * before any of it happens, armed or not.
+ * before any of it happens, armed or not. While a platform sits under a
+ * STANDING FOUNDER DEFERRAL (packages/engine/src/social/metrics/deferral.ts —
+ * X, since the 2026-07-29 ruling) an armed pass spends nothing on it: the
+ * ratchet refuses its reads with the ruling, and the report prints ⏸ instead
+ * of 💸.
  *
  * Usage (from repo root; source apps/web/.env.local first):
  *   npx tsx scripts/run-metrics-tick.ts --once            # report only
@@ -76,6 +80,12 @@ async function main(): Promise<void> {
       );
       for (const note of result.metered) {
         console.log(`  💸 ${note.platform}: ${note.note}`);
+      }
+      // A standing deferral is the founder's answer to the 💸 line: the pass
+      // spends NOTHING on this platform, armed or not, and the ruling prints
+      // verbatim so nobody has to rediscover why the numbers are absent.
+      for (const note of result.deferred) {
+        console.log(`  ⏸ ${note.platform}: $0 this pass — ${note.ruling}`);
       }
       if (result.bound.truncated) {
         console.log(

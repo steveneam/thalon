@@ -221,9 +221,11 @@ export const METRIC_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformMetric
    * point of the permanence vocabulary: it is not `structural` (X does report
    * the number), not `gated` (no application is pending), and not
    * `permissioned` (the credential is fine). It is DEFERRED BY CHOICE, on
-   * cost, until launch — see `ABSENCE_DEFERRED` in `errors.ts`. Reporting it
-   * as "not collected yet" would invite exactly the accidental armed pass the
-   * ruling exists to prevent.
+   * cost, until launch — the enforcement seat is `STANDING_METRICS_DEFERRALS`
+   * in `deferral.ts`, consulted by `resolveSocialMetricsReader` before
+   * anything else, and lifting it is a founder diff there, not a config
+   * change. Reporting it as "not collected yet" would invite exactly the
+   * accidental armed pass the ruling exists to prevent.
    *
    * organic_metrics / non_public_metrics (url_link_clicks,
    * user_profile_clicks, engagements) would add click data for our OWN

@@ -6,7 +6,13 @@ import {
   type MetricLabel,
   type PlatformMetricCapability,
 } from "./capability";
-import { SocialMetricsGatedError, SocialMetricsUnavailableError, type SocialMetricsRefusedError } from "./errors";
+import { standingMetricsDeferral } from "./deferral";
+import {
+  SocialMetricsDeferredError,
+  SocialMetricsGatedError,
+  SocialMetricsUnavailableError,
+  type SocialMetricsRefusedError,
+} from "./errors";
 
 /**
  * D2 (s87): the METRICS READER seam — a sibling of `../registry.ts`, not an
@@ -130,6 +136,16 @@ export function resolveSocialMetricsReader(
   env: EnvSource,
   readers: Partial<Record<SocialPlatform, SocialMetricsReaderFactory>> = {},
 ): SocialMetricsReader {
+  // The founder's standing deferral BEFORE everything — before the
+  // capability row, before the credential. A deferred platform's refusal
+  // must name the ruling, never a missing credential: sending an operator
+  // to "fix" a token would invite exactly the armed pass the ruling exists
+  // to prevent. Lifting this is a diff in deferral.ts, not a config change.
+  const deferral = standingMetricsDeferral(platform);
+  if (deferral !== undefined) {
+    return refusingSocialMetricsReader(platform, new SocialMetricsDeferredError(platform, deferral));
+  }
+
   const capability: PlatformMetricCapability = metricCapability(platform);
 
   // The platform's own gate first — a credential cannot open it.

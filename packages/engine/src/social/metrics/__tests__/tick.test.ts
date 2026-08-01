@@ -5,6 +5,7 @@ import { SocialMetricsGatedError, SocialMetricsPermissionError } from "../errors
 import {
   createFakeSocialMetricsReader,
   refusingSocialMetricsReader,
+  resolveSocialMetricsReader,
   type SocialMetricsReader,
 } from "../registry";
 import { collectPublicationMetrics, metricsWindowStart } from "../tick";
@@ -140,12 +141,20 @@ describe("collectPublicationMetrics — DISARMED, the shipped posture", () => {
     expect(series).toEqual([]);
   });
 
-  it("prices the pass BEFORE it runs — the metered platform is named while disarmed", async () => {
+  it("prices the pass BEFORE it runs — the deferred platform prints the RULING while disarmed, and is not billed as metered", async () => {
     const f = await setup();
     await publication(f, { platform: "x" });
     const result = await collectPublicationMetrics({ repos: f.repos, ctx: f.ctx }, NOW);
-    expect(result.metered).toEqual([
-      { platform: "x", note: expect.stringContaining("billed") },
+    // X sits under the standing founder deferral, so it reports in `deferred`
+    // INSTEAD of `metered`: nothing will be billed, and saying "this pass
+    // will bill" would be false. Lifting the deferral (a diff in deferral.ts)
+    // puts X back in `metered` — the branch is dormant, not dead.
+    expect(result.metered).toEqual([]);
+    expect(result.deferred).toEqual([
+      {
+        platform: "x",
+        ruling: expect.stringContaining("only be paid once thalon is ready to launch"),
+      },
     ]);
   });
 
@@ -278,6 +287,56 @@ describe("collectPublicationMetrics — ARMED", () => {
     expect(result.refused[0].permanence).toBe("gated");
     expect(result.refused[0].reason).toContain("partner-gated");
     expect(await f.repos.publicationMetrics.series(f.ctx, pub.id)).toEqual([]);
+  });
+
+  it("an ARMED pass through the REAL ratchet reads every other platform and spends NOTHING on X — each X publication a typed refusal, never a silent skip", async () => {
+    const f = await setup();
+    const bsky = await publication(f, { platform: "bluesky" });
+    const xPub = await publication(f, { platform: "x" });
+    let xFactoryCalls = 0;
+    // The production shape: the ratchet resolves per platform, with perfect
+    // credentials for BOTH — proving it is the standing deferral refusing X,
+    // not a missing seat.
+    const resolveReader = (platform: SocialPlatform) =>
+      resolveSocialMetricsReader(
+        platform,
+        {
+          SOCIAL_BLUESKY_ACCESS_TOKEN: "app-password",
+          SOCIAL_X_ACCESS_TOKEN: "a-perfectly-good-token",
+        },
+        {
+          bluesky: () =>
+            createFakeSocialMetricsReader({
+              platform: "bluesky",
+              samples: [{ label: "likes", value: 7, platformField: "likeCount" }],
+            }),
+          x: () => {
+            xFactoryCalls += 1;
+            return createFakeSocialMetricsReader({ platform: "x" });
+          },
+        },
+      );
+
+    const result = await collectPublicationMetrics(
+      { repos: f.repos, ctx: f.ctx, armed: true, resolveReader },
+      NOW,
+    );
+
+    // Bluesky read normally.
+    expect(result.measured.map((m) => m.publicationId)).toEqual([bsky.id]);
+    // X refused PER PUBLICATION, typed, with the ruling — not failed, not skipped.
+    expect(result.failed).toEqual([]);
+    expect(result.refused).toHaveLength(1);
+    expect(result.refused[0].publicationId).toBe(xPub.id);
+    expect(result.refused[0].refusal).toBe("deferred_on_cost");
+    expect(result.refused[0].permanence).toBe("deferred");
+    expect(result.refused[0].reason).toContain("only be paid once thalon is ready to launch");
+    // Nothing was spent: the X reader was never even assembled, and no row landed.
+    expect(xFactoryCalls).toBe(0);
+    expect(await f.repos.publicationMetrics.series(f.ctx, xPub.id)).toEqual([]);
+    // The bill print's facts, armed: deferred with the ruling, not metered.
+    expect(result.metered).toEqual([]);
+    expect(result.deferred.map((d) => d.platform)).toEqual(["x"]);
   });
 
   it("one publication's failure never blocks the others — the batch finishes", async () => {
