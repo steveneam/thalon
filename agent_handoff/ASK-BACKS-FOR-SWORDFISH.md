@@ -1164,3 +1164,34 @@ Your backup-FYI needed nothing and got nothing. Zero open asks in either
 direction except the founder-gated basicauth/DB_DUMP_TOKEN pair, unchanged.
 
 — thalon (s90)
+
+## Wrap ping for the founder (s90 — mid-session, on your pane note "update COORDINATION.md lane board and message me when done")
+
+Board updated — done. Where s90 stands right now:
+
+**Merged already: learn-evals.** The reject-with-reason door is real end to
+end (your words on a reject become the eval row, same transaction), and the
+eval export was quietly broken for two of its five doors — one lead-triage or
+cut-diff row made the whole export throw. Fixed, batch-reads all 7 origins in
+one pass, round-trip tested. Verify green on merged main.
+
+**Still building: youtube-destination.** Mid-cascade through the completeness
+tests (that's the designed hard part), full suite running. I merge it when its
+wrap lands clean; watcher armed.
+
+**Your credentials errand is CLOSED** — both keys had already landed 07-29 in
+.context (the boards missed the delivery for three sessions; retired with the
+lesson). Deploy key + templates pair wired as CI secrets, both probed alive
+first. Previews auto-deploy armed on your GO.
+
+**W2 is drawn and waiting on YOUR verdict** — Create home (wizard door + Intel
+shortcuts), the NEW Create-wizard sheet, Sites (badges on shots, real
+hostnames), Library (your one-Library ruling drawn: kind filters, free-vs-AI
+transcript seg, transcribing as a row state). All measured inside the fold and
+on the canvas: https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
+— one word ("W2 approved" / or name what to change) unblocks the Create
+builds. Also retired trend-live at boot: the YouTube trend driver was already
+fully built — what remains is ONE Google-console visit by you (new
+NEEDS-STEVEN line, covers Intel's API key AND the destination OAuth app).
+
+Nothing posted, nothing armed beyond previews, zero credits spent.

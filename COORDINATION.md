@@ -192,6 +192,27 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s90 — RUNNING (board updated mid-session on his pane instruction, ~14:00Z)
+
+**Launched on his named GO ("GO both" + the previews flip, via the in-session ask):**
+
+| lane | state |
+|---|---|
+| learn-evals | **MERGED** (`bcb8525`, ff onto main after rebase; verify-on-merged-main exit 0; worktree GC'd, branch deleted local+remote, window killed). The reject-reason door pass-through + the 7-origin batch export — the stale union was WORSE than believed: one `lead_triage`/`cut_diff_review` row made the whole export THROW; fixed + round-trip-pinned. The frozen s90 window fit exactly. WRAP: `agent_handoff/lanes/WRAP-learn-evals.md`. |
+| youtube-destination | **LIVE** (launched ~13:11Z, Mode B). Mid-cascade: contracts platform files + capability tests in flight, full suite running in the worktree. Watcher armed (clean-tree + pushed, not file existence). |
+
+**LEAD TRACK, done this session so far:** credentials wired into CI (deploy key
++ templates pair + host var; keys probed alive + cross-scope-refused first;
+`.context` values scrubbed to pointers per the CI-secret-only rule) ·
+`templates-image.yml` made deploy-only + its edge probe authenticates ·
+**TEMPLATES_PREVIEW_ARMED=true on his GO** · NEEDS-STEVEN 2026-07-29e +
+s89-refresh retired (the credentials had landed 07-29; three sessions of boards
+missed the delivery — lesson recorded in the archive) · canvas parity debt
+CLEARED (Approve + Dashboard uploaded, debt block deleted) · the s90 db window
+FROZEN (`3e21aa5`) · **W2 MAKE draw RAN end to end** (4 sheets drawn/amended +
+measured + on the canvas; Postiz launcher walked; §5.3 drawn; ledger 13→15 of
+20) — **HIS W2 VERDICT: OPEN**.
+
 ## Sprint 9 / s90 — PLANNED (W1 APPROVED s89: *"yes to all, W1 approved"*; the runway map of record is `docs/launch-runway.md`)
 
 **The shape mirrors s89: lead track is the point, two disjoint engine lanes
