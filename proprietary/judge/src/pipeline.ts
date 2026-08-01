@@ -1,32 +1,13 @@
-import {
-  FINAL_JUDGE_GATE,
-  brandIdentitySchema,
-  cadenceConfigSchema,
-  renderBrandIdentity,
-  resolveDraftFormatSpec,
-  seoMetaSchema,
-  type TenantCtx,
-} from "@thalon/contracts";
+import type { TenantCtx } from "@thalon/contracts";
 import type { Draft, Repos } from "@thalon/db";
-import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
-import { z } from "zod";
-import { CADENCE_GATE, cadenceFetchHorizonMs, hasCadenceConstraint, runCadenceGate } from "./cadence";
-import { DISCOVERABILITY_GATE, runDiscoverabilityLens } from "./discoverability";
-import { runG1Denylist } from "./g1-denylist";
-import { collectGroundingChunks } from "./grounding";
-import { runSeoAeoLens, SEO_LENS_GATE } from "./seo-lens";
+import { readEnv } from "@thalon/platform";
 import {
-  promptVersionFor,
-  type JudgeModelDriver,
-  type JudgeTier,
-  type SourceChunkInput,
-} from "./shell/driver";
-import { callTierJudge, type TierCallResult } from "./validate-shell-output";
-
-const GATE_FOR_TIER: Record<JudgeTier, string> = {
-  screen: "g3_screen",
-  final: FINAL_JUDGE_GATE,
-};
+  GATE_FOR_TIER,
+  assembleLadderEvidence,
+  meteredTierDriver,
+  runGateLadder,
+} from "./gate-ladder";
+import type { JudgeModelDriver, SourceChunkInput } from "./shell/driver";
 
 export interface RunJudgePipelineInput {
   ctx: TenantCtx;
@@ -51,12 +32,12 @@ export type PipelineOutcome =
   | { status: "blocked"; draft: Draft; reason: string };
 
 /**
- * Deterministic core orchestration (SPINE §2.3 workflow 2; §1.1 state
- * machine). g1 fail ⇒ blocked, zero model calls. g1 pass ⇒ BOTH g3 tiers
- * always run — so a tier disagreement is observable rather than
- * short-circuited on the cheap tier — ⇒ pass/pass ⇒ queued; anything else
- * ⇒ blocked for operator triage (I3, ratified decision 2: a screen pass
- * never overrides a final fail, and vice versa — any disagreement blocks).
+ * The judge OF RECORD: the persist-and-transition wrapper around the shared
+ * gate ladder (`gate-ladder.ts` — one ladder, two entry points; the other is
+ * `judgeCandidate`, which persists nothing). This wrapper resolves the
+ * draft, transitions it to `judging`, assembles evidence through the shared
+ * assembly, appends every rung's verdict via `repos.judgeResults` (bound to
+ * the draft's CURRENT body hash), and transitions on the outcome.
  * The `→ queued` transition below re-checks for itself that a passing
  * g3_final row exists for the CURRENT body hash (I1, enforced in
  * `@thalon/db` `repos/drafts.ts`) — this orchestration cannot bypass that
@@ -72,208 +53,47 @@ export async function runJudgePipeline(
       ? draft
       : await repos.drafts.transition(input.ctx, draft.id, "judging");
 
-  const profile = await repos.brandProfiles.getActive(input.ctx);
-  // Per-tenant denylist is DATA from brand_profiles — never hard-coded here.
-  const denylist = (profile?.denylist as string[] | undefined) ?? [];
+  const { denylist, chunks, cadence } = await assembleLadderEvidence(
+    input.ctx,
+    repos,
+    judging,
+    input.chunks,
+  );
+  const capTokens = input.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
+  const metered = (tier: "screen" | "final", driver: JudgeModelDriver) =>
+    meteredTierDriver({
+      ctx: input.ctx,
+      repos,
+      capTokens,
+      tier,
+      operation: `judge.${GATE_FOR_TIER[tier]}`,
+      driver,
+    });
 
-  // B3.8: the ACTIVE profile's identity is appended as grounding evidence for
-  // every judged draft, inside the pipeline so no caller can forget it —
-  // generation was allowed to draw claims from the same rendered block
-  // (contracts renderBrandIdentity, one canonical rendering for both sides).
-  // Deliberately the CURRENT active identity, not the version the draft was
-  // generated under: a claim the tenant no longer asserts must fail grounding
-  // on re-judge, not pass on stale facts. Empty identity appends nothing.
-  const baseChunks =
-    input.chunks ?? (await collectGroundingChunks(input.ctx, repos, judging));
-  const identityText = profile
-    ? renderBrandIdentity(brandIdentitySchema.parse(profile.identity ?? {}))
-    : "";
-  const chunks: SourceChunkInput[] = identityText
-    ? [
-        ...baseChunks,
-        {
-          ref: `profile:v${profile!.version}:identity`,
-          text: `TENANT IDENTITY (operator-asserted):\n${identityText}`,
-        },
-      ]
-    : baseChunks;
-  const g1 = runG1Denylist({ body: judging.body, denylist });
-  await repos.judgeResults.append(input.ctx, {
-    draftId: judging.id,
-    gate: "g1",
-    verdict: g1.verdict,
-    evidence: g1.evidence,
+  const outcome = await runGateLadder({
+    body: judging.body,
+    platform: judging.platform,
+    format: judging.format,
+    meta: judging.meta,
+    denylist,
+    chunks,
+    ...(cadence ? { cadence } : {}),
+    screenDriver: metered("screen", input.screenDriver),
+    finalDriver: metered("final", input.finalDriver),
+    // Persisting is THIS entry point's job: each rung's verdict lands as a
+    // judge_results row the moment the rung completes, hash-bound by
+    // `append`'s default to the body the ladder actually read.
+    onGate: async (row) => {
+      await repos.judgeResults.append(input.ctx, { draftId: judging.id, ...row });
+    },
   });
-  if (g1.verdict === "fail") {
-    const blocked = await repos.drafts.transition(input.ctx, judging.id, "blocked", {
-      reason: "g1 denylist fail",
-    });
-    return { status: "blocked", draft: blocked, reason: "g1 denylist fail" };
-  }
 
-  // B7.a: the cadence gate — deterministic, zero model calls, armed by DATA
-  // exactly like g1's denylist (`brand_profiles.cadence`, validated at the
-  // profile write door). A tenant or platform without a rule (or a rule with
-  // no fields set) judges byte-identically to pre-B7.a: no read, no row.
-  // Runs before any model spend — a cadence-blocked draft costs one db read.
-  const cadenceConfig = profile?.cadence ? cadenceConfigSchema.parse(profile.cadence) : undefined;
-  const cadenceRule = cadenceConfig?.[judging.platform];
-  if (cadenceRule && hasCadenceConstraint(cadenceRule)) {
-    const now = new Date();
-    const admissions = await repos.drafts.listQueueAdmissions(input.ctx, {
-      platform: judging.platform,
-      since: new Date(now.getTime() - cadenceFetchHorizonMs(cadenceRule)),
-    });
-    const cadence = runCadenceGate({
-      platform: judging.platform,
-      rule: cadenceRule,
-      admissions,
-      now,
-    });
-    await repos.judgeResults.append(input.ctx, {
-      draftId: judging.id,
-      gate: CADENCE_GATE,
-      verdict: cadence.verdict,
-      evidence: cadence.evidence,
-    });
-    if (cadence.verdict === "fail") {
-      const reason = `cadence limit for "${judging.platform}"`;
-      const blocked = await repos.drafts.transition(input.ctx, judging.id, "blocked", { reason });
-      return { status: "blocked", draft: blocked, reason };
-    }
-  }
-
-  // B6.8 (ADR 0006 decision 2): the ADVISORY SEO/AEO lens — deterministic,
-  // zero model calls, appended for operator triage only. Opt-in by DATA: it
-  // runs only when a seoMeta-capable format actually carries a `meta.seo`
-  // block, so every pre-B6.8 draft (and every test built before it) judges
-  // byte-identically. The queued/blocked outcome below never reads this row
-  // (I1 stays g3_final-only) — advisory is structural, not a promise.
-  const spec = resolveDraftFormatSpec(judging.format);
-  const seoRaw = (judging.meta as Record<string, unknown> | null)?.seo;
-  if (spec.capabilities.seoMeta && seoRaw !== undefined) {
-    const parsedSeo = seoMetaSchema.safeParse(seoRaw);
-    const lens = parsedSeo.success
-      ? runSeoAeoLens({
-          seo: parsedSeo.data,
-          body: judging.body,
-          surface: spec.capabilities.renderable ? "video" : "page",
-        })
-      : {
-          verdict: "fail" as const,
-          evidence: {
-            claims: [],
-            notes: `advisory SEO/AEO lens: meta.seo does not parse against seoMetaSchema — ${parsedSeo.error.issues
-              .map((i) => `${i.path.join(".")}: ${i.message}`)
-              .join("; ")}`,
-          },
-        };
-    await repos.judgeResults.append(input.ctx, {
-      draftId: judging.id,
-      gate: SEO_LENS_GATE,
-      verdict: lens.verdict,
-      evidence: lens.evidence,
-    });
-  }
-
-  // Phase 2c (founder catch, s70c): the ADVISORY discoverability lens — the
-  // social path's SEO/AEO/GEO dimension. Same discipline as the seo lens:
-  // deterministic, zero model calls, opt-in BY DATA (runs only when the
-  // draft's meta declares `targetTerms` — generation starts declaring them
-  // with this phase), appended for operator triage; the queued/blocked
-  // outcome never reads it (I1 stays g3_final-only).
-  const targetTermsRaw = (judging.meta as Record<string, unknown> | null)?.targetTerms;
-  const parsedTargets = z.array(z.string()).nonempty().safeParse(targetTermsRaw);
-  if (targetTermsRaw !== undefined) {
-    const lens = parsedTargets.success
-      ? runDiscoverabilityLens({
-          platform: judging.platform,
-          targetTerms: parsedTargets.data,
-          body: judging.body,
-        })
-      : {
-          verdict: "fail" as const,
-          evidence: {
-            claims: [],
-            notes: "advisory discoverability lens: meta.targetTerms is not a non-empty string array",
-          },
-        };
-    await repos.judgeResults.append(input.ctx, {
-      draftId: judging.id,
-      gate: DISCOVERABILITY_GATE,
-      verdict: lens.verdict,
-      evidence: lens.evidence,
-    });
-  }
-
-  const screen = await runTier(repos, input, chunks, judging, "screen", input.screenDriver);
-  const final = await runTier(repos, input, chunks, judging, "final", input.finalDriver);
-
-  if (screen.verdict === "pass" && final.verdict === "pass") {
+  if (outcome.verdict === "pass") {
     const queued = await repos.drafts.transition(input.ctx, judging.id, "queued");
     return { status: "queued", draft: queued };
   }
-  const reason =
-    screen.verdict === final.verdict
-      ? "both g3 tiers failed"
-      : `g3 tier disagreement (screen=${screen.verdict}, final=${final.verdict})`;
-  const blocked = await repos.drafts.transition(input.ctx, judging.id, "blocked", { reason });
-  return { status: "blocked", draft: blocked, reason };
-}
-
-async function runTier(
-  repos: Repos,
-  input: RunJudgePipelineInput,
-  chunks: SourceChunkInput[],
-  draft: Draft,
-  tier: JudgeTier,
-  driver: JudgeModelDriver,
-): Promise<TierCallResult> {
-  const tiers = modelTiers();
-  const model = tier === "screen" ? tiers.judgeScreen : tiers.judgeFinal;
-  const promptVersion = promptVersionFor(tier);
-  // Core meters the shell: EVERY attempt (including repair retries) routes
-  // through the one gateway choke point — budget asserted before, usage
-  // recorded after, span traced (SPINE §1; amendment A2). The shell driver
-  // itself stays read-only.
-  const capTokens = input.capTokens ?? readEnv().TENANT_DAILY_TOKEN_BUDGET;
-  const guarded: JudgeModelDriver = (req) =>
-    withGatewayGuard({
-      usage: {
-        assertWithinBudget: (o) => repos.usageLedger.assertWithinBudget(input.ctx, o),
-        recordUsage: (o) => repos.usageLedger.record(input.ctx, o),
-      },
-      capTokens,
-      model,
-      operation: `judge.${GATE_FOR_TIER[tier]}`,
-      call: async () => {
-        const out = await driver(req);
-        return { result: out, tokensIn: out.tokensIn, tokensOut: out.tokensOut };
-      },
-    });
-  const startedAt = Date.now();
-  const result = await callTierJudge(guarded, { tier, body: draft.body, chunks });
-  const latencyMs = Date.now() - startedAt;
-  await repos.judgeResults.append(input.ctx, {
-    draftId: draft.id,
-    gate: GATE_FOR_TIER[tier],
-    verdict: result.verdict,
-    evidence: result.output
-      ? {
-          claims: result.output.claims.map((c) => ({
-            claim: c.claim,
-            verdict: c.supported ? ("pass" as const) : ("fail" as const),
-            sourceRef: c.chunkRef,
-          })),
-          notes: result.output.notes,
-        }
-      : {
-          claims: [],
-          notes: `irrecoverable after ${result.attempts} attempt(s): ${result.lastError ?? "malformed shell output"}`,
-        },
-    model,
-    promptVersion,
-    latencyMs,
+  const blocked = await repos.drafts.transition(input.ctx, judging.id, "blocked", {
+    reason: outcome.reason,
   });
-  return result;
+  return { status: "blocked", draft: blocked, reason: outcome.reason };
 }

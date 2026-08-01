@@ -5,7 +5,7 @@ import {
   type TenantCtx,
 } from "@thalon/contracts";
 import { InvalidStateError, type Draft, type Repos } from "@thalon/db";
-import { runJudgePipeline, type JudgeModelDriver } from "@thalon/judge";
+import { judgeCandidate, runJudgePipeline, type JudgeModelDriver } from "@thalon/judge";
 import { modelTiers, readEnv, withGatewayGuard } from "@thalon/platform";
 import { CREATE_VARIANT_PLAN_KEY, createVariantPlanSchema, type CreateVariantPlan } from "./plan";
 import { createFakeAiEditDriver, gatewayAiEditDriver, type AiEditDriver } from "./shell/ai-edit";
@@ -13,55 +13,47 @@ import { createFakeAiEditDriver, gatewayAiEditDriver, type AiEditDriver } from "
 /**
  * B-create.2 follow-through: **the R8 AI-edit verb** — instruction →
  * regenerate this variant. Charter `docs/create-engine/spec.md` (APPROVED)
- * R8 and its Error Behavior clause.
+ * R8 and its Error Behavior clause: *"AI-edit judge rejection: the variant
+ * keeps its prior body; the refusal shows at the control."* Met exactly
+ * since s89 (lane `judge-candidate`): the s88 deviation — a judge refusal at
+ * apply left the applied body on a `blocked` draft — is CLOSED by judging
+ * the candidate BEFORE it can land.
  *
- * ## Why this is TWO verbs and not one
+ * ## The shape: propose (judged, writes nothing) / apply (lands, re-judged)
  *
- * The spec asks for one thing this repo's frozen surfaces cannot express:
- * *"AI-edit judge rejection: the variant keeps its prior body."* Judging a
- * candidate body is impossible through the shared harness —
- * `runJudgePipeline` opens with `repos.drafts.get` and every gate reads the
- * PERSISTED body — and faking it would be worse than impossible. Verdict
- * rows bind to `body_hash` (`judgeResults.append` defaults to the draft's
- * current hash; `transitionInTx`'s I1 check requires a passing `g3_final`
- * row for that hash before `→ queued`), so appending a verdict for candidate
- * text while the draft still carries the old hash would mint an I1-valid
- * PASSING VERDICT FOR CONTENT THE JUDGE NEVER READ. That is the hole I1
- * exists to close.
- *
- * Landing first and reverting on refusal is not the spec either: it writes a
- * second `edit_diffs`/`eval_cases` pair whose "expected body" asserts the
- * operator wanted the old text back — a lie in the eval corpus, which is
- * training data — costs a third judge run, strands the draft at `judging` if
- * the restore halts on budget, and leaves machine text on the draft if the
- * process dies in between.
- *
- * So the shape is this repo's own precedent for "an LLM proposes an edit to
- * an existing artifact" — `video.propose_edl_diff`: *core validates, the
- * operator approves, the apply rides the existing verified save door.*
- *
- *   `aiEditDraft`  → shell rewrite, **writes nothing**. The draft's body and
- *                    body hash are untouched on EVERY path, refusal or not.
+ *   `aiEditDraft`  → shell rewrite → **candidate judge** (`judgeCandidate`,
+ *                    `proprietary/judge` — the SAME gate ladder, denylist and
+ *                    grounding assembly as the judge of record, persisting
+ *                    nothing) → refuse with the verbatim reason on fail,
+ *                    propose on pass. **Writes nothing**: the draft's body
+ *                    and body hash are untouched on EVERY path, refusal or
+ *                    not — machine-written text the judge refused can never
+ *                    replace an operator's known-good text.
  *   `applyAiEdit`  → lands the proposal through the existing edit door
  *                    (`approvals.record`, which is the only thing that
  *                    writes `edit_diffs` + `eval_cases` + the body swap +
- *                    `→ judging`) and re-judges through the SAME harness
+ *                    `→ judging`) and re-judges through `runJudgePipeline`
  *                    with the caller's own drivers.
  *
- * **What that does not deliver, stated rather than hidden:** on a judge
- * refusal at APPLY, the draft is `blocked` carrying the applied body. That
- * is hand-edit semantics, not the spec's sentence. Safety is unaffected — I1
- * means a blocked draft cannot leave the Composer — but the operator's
- * known-good text is gone, and it went because the operator explicitly
- * applied the proposal rather than because a machine overwrote it. Closing
- * the gap properly needs a candidate-judge entry in `proprietary/judge`
- * (evaluate `{draft, candidateBody}`, return the verdict, append no
- * hash-bound rows); that is a moat file, outside this lane, and is the
- * recorded follow-up. See `agent_handoff/lanes/WRAP-create-shells.md` §1b.
+ * ## The DOUBLE judge on a passing edit is deliberate — do not collapse it
  *
- * **This module makes no judge call of its own.** Every gate runs inside
- * `runJudgePipeline` with the caller's drivers threaded through untouched —
- * pinned by a test that hands over a recording fake and asserts it arrived.
+ * A passing candidate is judged twice: once as a candidate (advisory,
+ * unwritten — its outcome type says `ofRecord: false` for a reason) and once
+ * after landing (the I1 record). Verdict rows bind to `body_hash`
+ * (`judgeResults.append` defaults to the draft's current hash;
+ * `transitionInTx`'s I1 check requires a passing `g3_final` row for that
+ * hash before `→ queued`), so only the post-land judge's verdict — bound to
+ * the NEW hash — is one I1 can honestly accept. Reusing the candidate
+ * verdict for the landed body (passing it through, back-dating it, or
+ * appending it against the new hash) would mint an I1-valid PASSING VERDICT
+ * FOR CONTENT THE JUDGE NEVER READ — exactly the hole I1 exists to close.
+ * Derivation: `agent_handoff/lanes/WRAP-create-shells.md` §1b, closed by
+ * `WRAP-judge-candidate.md`.
+ *
+ * **This module makes no judge call of its own.** Every gate runs inside the
+ * shared harness (`judgeCandidate` at propose, `runJudgePipeline` at apply)
+ * with the caller's drivers threaded through untouched — pinned by tests
+ * that hand over recording fakes and assert they arrived.
  */
 
 /* ------------------------------------------------------------------ */
@@ -87,6 +79,13 @@ export interface AiEditRequestInput {
 export interface AiEditDeps {
   /** The rewrite driver. Absent = the live gateway one is built. Tests always inject. */
   driver?: AiEditDriver;
+  /**
+   * The candidate judge's tier drivers — REQUIRED, same discipline as
+   * `ApplyAiEditDeps`: a propose path that judged with drivers of its own
+   * would be a second gate nobody configured.
+   */
+  screenDriver: JudgeModelDriver;
+  finalDriver: JudgeModelDriver;
   /** Overrides the tenant daily token budget cap (tests only). */
   capTokens?: number;
 }
@@ -118,13 +117,16 @@ export type AiEditProposalResult =
  * Refuses, with the reason in words (R10), when: the instruction is empty ·
  * the draft is not in an editable status · the shell returned the body
  * unchanged (the prompt file's own refusal convention — an instruction it
- * could not carry out honestly) · the shell returned only whitespace.
+ * could not carry out honestly) · the shell returned only whitespace · **the
+ * candidate judge refused the rewrite** (the spec's Error Behavior: the
+ * refusal carries the judge's reason verbatim, and the operator's known-good
+ * text was never touched).
  */
 export async function aiEditDraft(
   ctx: TenantCtx,
   repos: Repos,
   input: AiEditRequestInput,
-  deps: AiEditDeps = {},
+  deps: AiEditDeps,
 ): Promise<AiEditProposalResult> {
   const instruction = input.instruction.trim();
   if (!instruction) {
@@ -152,6 +154,27 @@ export async function aiEditDraft(
     return {
       status: "refused",
       reason: `the rewrite came back identical to the current body — the instruction ("${instruction}") could not be carried out without inventing something, so nothing was changed`,
+    };
+  }
+
+  // The spec's Error Behavior, met exactly (s89): the candidate is judged
+  // BEFORE it can become a proposal — same ladder, same denylist, same
+  // grounding as the judge that will meet it again at landing. The verdict
+  // is `ofRecord: false`: nothing is appended, nothing transitions, and a
+  // pass here confers no I1 standing — `applyAiEdit`'s re-judge remains the
+  // verdict of record for the landed hash (the double judge is deliberate).
+  const candidate = await judgeCandidate(repos, {
+    ctx,
+    draft,
+    candidateBody: proposedBody,
+    screenDriver: deps.screenDriver,
+    finalDriver: deps.finalDriver,
+    ...(deps.capTokens === undefined ? {} : { capTokens: deps.capTokens }),
+  });
+  if (candidate.verdict === "fail") {
+    return {
+      status: "refused",
+      reason: `the judge refused the rewrite — ${candidate.reason} — the draft keeps its current body`,
     };
   }
 

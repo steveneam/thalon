@@ -46,6 +46,8 @@ export {
 } from "./seo-lens";
 export { collectGroundingChunks, type GroundingChunk } from "./grounding";
 export { runJudgePipeline, type PipelineOutcome, type RunJudgePipelineInput } from "./pipeline";
+export { judgeCandidate, type CandidateOutcome, type JudgeCandidateInput } from "./candidate";
+export type { GateLadderRow } from "./gate-ladder";
 export { callTierJudge, type TierCallResult } from "./validate-shell-output";
 export {
   gatewayJudgeDriver,

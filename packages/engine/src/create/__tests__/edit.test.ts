@@ -7,6 +7,7 @@ import {
   aiEditDraft,
   applyAiEdit,
   markVariantDiverged,
+  type AiEditDeps,
   type AiEditProposal,
   type ApplyAiEditDeps,
 } from "../edit";
@@ -20,12 +21,13 @@ import { createFakeAiEditDriver, type AiEditDriver } from "../shell/ai-edit";
  *
  * THE LOAD-BEARING ASSERTION in this file is that `aiEditDraft` writes
  * NOTHING. The spec's Error Behavior asks that a judge-refused AI edit leave
- * the variant's prior body intact; judging a candidate body is impossible
- * through the shared harness (`runJudgePipeline` reads the PERSISTED body,
- * and verdict rows bind to `body_hash`), so instead of faking that, the
- * propose half never touches the draft at all — on EVERY path, refusal or
- * not. That is a stronger guarantee than the spec's, and `bodyHashUnchanged`
- * below pins it unconditionally rather than only on the refusal branch.
+ * the variant's prior body intact; since s89 the propose path judges the
+ * CANDIDATE through `judgeCandidate` (`proprietary/judge` — the same gate
+ * ladder as the judge of record, persisting nothing) and refuses on fail, so
+ * the clause is met exactly — and the propose half still never touches the
+ * draft at all, on EVERY path, refusal or not. That is a stronger guarantee
+ * than the spec's, and `bodyHashUnchanged` below pins it unconditionally
+ * rather than only on the refusal branch.
  */
 
 let handle: DbHandle | undefined;
@@ -55,6 +57,17 @@ function passJudge(): ApplyAiEditDeps {
   };
 }
 
+/** Propose-half deps: the fake rewrite driver plus a passing candidate judge (s89 — the propose path judges before proposing). */
+function proposeDeps(overrides: Partial<AiEditDeps> = {}): AiEditDeps {
+  return {
+    driver: createFakeAiEditDriver(),
+    screenDriver: judgeDriver(JUDGE_PASS),
+    finalDriver: judgeDriver(JUDGE_PASS),
+    capTokens: 1_000_000,
+    ...overrides,
+  };
+}
+
 const ORIGINAL_BODY = "We shipped usage-based pricing today. It halves the entry cost.";
 
 interface Fx {
@@ -66,13 +79,15 @@ interface Fx {
   createRun(platforms: string[]): Promise<string>;
 }
 
-async function fixture(opts: { body?: string; platform?: string } = {}): Promise<Fx> {
+async function fixture(
+  opts: { body?: string; platform?: string; denylist?: string[] } = {},
+): Promise<Fx> {
   handle = await openTestDb();
   const { repos } = handle;
   const tenant = await repos.tenants.create({ slug: "self", name: "Self (dogfood)" });
   const ctx = tenantCtx(tenant.id);
   const profile = await repos.brandProfiles.create(ctx, {
-    config: { voice: { register: "plain" }, denylist: [], platformProfiles: {} },
+    config: { voice: { register: "plain" }, denylist: opts.denylist ?? [], platformProfiles: {} },
     activate: true,
   });
   const source = await repos.sources.create(ctx, {
@@ -155,7 +170,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "cut it to one sentence" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
 
     expect(result.status).toBe("proposed");
@@ -177,7 +192,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "   " },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     expect(empty.status).toBe("refused");
     if (empty.status === "refused") expect(empty.reason).toContain("needs an instruction");
@@ -189,7 +204,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "refuse this one please" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     expect(declined.status).toBe("refused");
     if (declined.status === "refused") {
@@ -205,10 +220,111 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: blank, capTokens: 1_000_000 },
+      proposeDeps({ driver: blank }),
     );
     expect(emptyRewrite.status).toBe("refused");
     if (emptyRewrite.status === "refused") expect(emptyRewrite.reason).toContain("came back empty");
+    await bodyHashUnchanged(fx, queued);
+
+    // (d) the candidate judge refused the rewrite (s89 — the spec's Error
+    // Behavior path: the variant keeps its prior body, byte for byte).
+    const judgeRefused = await aiEditDraft(
+      fx.ctx,
+      fx.repos,
+      { draftId: queued.id, instruction: "shorten" },
+      proposeDeps({
+        screenDriver: judgeDriver(JUDGE_FAIL),
+        finalDriver: judgeDriver(JUDGE_FAIL),
+      }),
+    );
+    expect(judgeRefused.status).toBe("refused");
+    if (judgeRefused.status === "refused") {
+      // The judge's reason, VERBATIM, inside the operator-facing refusal.
+      expect(judgeRefused.reason).toContain("both g3 tiers failed");
+    }
+    await bodyHashUnchanged(fx, queued);
+  });
+
+  it("a judge-refused rewrite lands NOTHING: no judge_results, no approvals/edit_diffs/eval_cases, no transition", async () => {
+    const fx = await fixture();
+    const queued = await fx.queue();
+    const rowsBefore = await fx.repos.judgeResults.listForDraft(fx.ctx, queued.id);
+
+    const result = await aiEditDraft(
+      fx.ctx,
+      fx.repos,
+      { draftId: queued.id, instruction: "shorten" },
+      proposeDeps({
+        screenDriver: judgeDriver(JUDGE_FAIL),
+        finalDriver: judgeDriver(JUDGE_FAIL),
+      }),
+    );
+
+    expect(result.status).toBe("refused");
+    // The candidate verdict is NOT of record: the fixture queue()'s original
+    // rows are all there are — the refused candidate added none.
+    const rowsAfter = await fx.repos.judgeResults.listForDraft(fx.ctx, queued.id);
+    expect(rowsAfter.map((r) => r.id)).toEqual(rowsBefore.map((r) => r.id));
+    // No edit landed anywhere: no eval row, no status change.
+    expect(await fx.repos.evalCases.list(fx.ctx, { origin: "edit_diff" })).toHaveLength(0);
+    const after = await fx.repos.drafts.get(fx.ctx, queued.id);
+    expect(after.status).toBe("queued");
+    await bodyHashUnchanged(fx, queued);
+  });
+
+  it("a rewrite that trips the tenant denylist refuses on g1 — before any judge model call", async () => {
+    const fx = await fixture({ denylist: ["guaranteed returns"] });
+    const queued = await fx.queue();
+    // The rewrite driver "improves" the draft into a compliance violation.
+    const violating: AiEditDriver = async () => ({
+      body: "Now with guaranteed returns for everyone.",
+      tokensIn: 1,
+      tokensOut: 1,
+    });
+    let judgeCalls = 0;
+    const counting: JudgeModelDriver = async (req) => {
+      judgeCalls += 1;
+      return judgeDriver(JUDGE_PASS)(req);
+    };
+
+    const result = await aiEditDraft(
+      fx.ctx,
+      fx.repos,
+      { draftId: queued.id, instruction: "make it pop" },
+      proposeDeps({ driver: violating, screenDriver: counting, finalDriver: counting }),
+    );
+
+    expect(result.status).toBe("refused");
+    if (result.status === "refused") expect(result.reason).toContain("g1 denylist fail");
+    expect(judgeCalls).toBe(0);
+    await bodyHashUnchanged(fx, queued);
+  });
+
+  it("judges the candidate with the CALLER's drivers, one call per tier, before any proposal exists", async () => {
+    const fx = await fixture();
+    const queued = await fx.queue();
+    let screenCalls = 0;
+    let finalCalls = 0;
+
+    const result = await aiEditDraft(
+      fx.ctx,
+      fx.repos,
+      { draftId: queued.id, instruction: "shorten" },
+      proposeDeps({
+        screenDriver: async (req) => {
+          screenCalls += 1;
+          return judgeDriver(JUDGE_PASS)(req);
+        },
+        finalDriver: async (req) => {
+          finalCalls += 1;
+          return judgeDriver(JUDGE_PASS)(req);
+        },
+      }),
+    );
+
+    expect(result.status).toBe("proposed");
+    expect(screenCalls).toBe(1);
+    expect(finalCalls).toBe(1);
     await bodyHashUnchanged(fx, queued);
   });
 
@@ -226,7 +342,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       fx.ctx,
       fx.repos,
       { draftId: fx.draft.id, instruction: "shorten it" },
-      { driver: counting, capTokens: 1_000_000 },
+      proposeDeps({ driver: counting }),
     );
     expect(result.status).toBe("refused");
     if (result.status === "refused") expect(result.reason).toContain("queued or blocked");
@@ -244,7 +360,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "cut it to one sentence" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
 
     const after = await fx.repos.usageLedger.totalForDay(fx.ctx);
@@ -267,7 +383,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       social.ctx,
       social.repos,
       { draftId: socialQueued.id, instruction: "shorten" },
-      { driver: spy, capTokens: 1_000_000 },
+      proposeDeps({ driver: spy }),
     );
     await handle?.close();
     handle = undefined;
@@ -278,7 +394,7 @@ describe("aiEditDraft — proposes, and writes NOTHING", () => {
       web.ctx,
       web.repos,
       { draftId: webQueued.id, instruction: "shorten" },
-      { driver: spy, capTokens: 1_000_000 },
+      proposeDeps({ driver: spy }),
     );
 
     expect(seen[0]).toBeGreaterThan(0);
@@ -298,7 +414,7 @@ describe("applyAiEdit — lands through the EXISTING edit door and re-judges", (
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "cut it to one sentence" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
 
@@ -324,7 +440,7 @@ describe("applyAiEdit — lands through the EXISTING edit door and re-judges", (
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
     await applyAiEdit(fx.ctx, fx.repos, { proposal: proposed.proposal }, passJudge());
@@ -352,7 +468,7 @@ describe("applyAiEdit — lands through the EXISTING edit door and re-judges", (
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
 
@@ -378,6 +494,36 @@ describe("applyAiEdit — lands through the EXISTING edit door and re-judges", (
     expect(finalCalls).toBe(1);
   });
 
+  it("the DOUBLE judge is deliberate: the landed body's I1 verdict comes from the post-land judge, never the candidate's", async () => {
+    const fx = await fixture();
+    const queued = await fx.queue();
+    const proposed = await aiEditDraft(
+      fx.ctx,
+      fx.repos,
+      { draftId: queued.id, instruction: "shorten" },
+      proposeDeps(),
+    );
+    if (proposed.status !== "proposed") throw new Error("expected a proposal");
+    const newHash = sha256Hex(proposed.proposal.proposedBody);
+
+    // Between propose and apply, NO row exists for the candidate's hash —
+    // the passing candidate verdict conferred nothing.
+    const rowsBetween = await fx.repos.judgeResults.listForDraft(fx.ctx, queued.id);
+    expect(rowsBetween.filter((r) => r.bodyHash === newHash)).toHaveLength(0);
+
+    const result = await applyAiEdit(fx.ctx, fx.repos, { proposal: proposed.proposal }, passJudge());
+    expect(result.status).toBe("queued");
+
+    // The new hash's verdicts are exactly the LANDING judge's ladder —
+    // written after the body swap, bound to the hash I1 actually checks.
+    // Reusing the candidate verdict here (pass-through, back-dating, or
+    // appending against the new hash) would mint an I1-valid verdict for
+    // content the recorded judge never read — the hole this lane closed.
+    const rowsAfter = await fx.repos.judgeResults.listForDraft(fx.ctx, queued.id);
+    const forNewHash = rowsAfter.filter((r) => r.bodyHash === newHash);
+    expect(forNewHash.map((r) => r.gate).sort()).toEqual(["g1", "g3_final", "g3_screen"]);
+  });
+
   it("a judge refusal blocks the draft and returns the reason verbatim", async () => {
     const fx = await fixture();
     const queued = await fx.queue();
@@ -385,7 +531,7 @@ describe("applyAiEdit — lands through the EXISTING edit door and re-judges", (
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
 
@@ -418,7 +564,7 @@ describe("applyAiEdit — lands through the EXISTING edit door and re-judges", (
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
 
@@ -468,7 +614,7 @@ describe("variant provenance (R13)", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
 
@@ -492,7 +638,7 @@ describe("variant provenance (R13)", () => {
       fx.ctx,
       fx.repos,
       { draftId: queued.id, instruction: "shorten" },
-      { driver: createFakeAiEditDriver(), capTokens: 1_000_000 },
+      proposeDeps(),
     );
     if (proposed.status !== "proposed") throw new Error("expected a proposal");
 

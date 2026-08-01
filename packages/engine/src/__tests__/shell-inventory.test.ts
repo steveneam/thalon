@@ -29,10 +29,11 @@ const repoRoot = path.resolve(dirname, "..", "..", "..", "..");
 
 /**
  * THE shell inventory: every operation label metered through
- * `withGatewayGuard`, as the literal source expression. The judge site is a
- * template (`judge.${GATE_FOR_TIER[tier]}`) that expands at runtime to
- * exactly `judge.g3_screen` and `judge.g3_final` — one source site, two
- * gates. Everything else is a plain string literal.
+ * `withGatewayGuard`, as the literal source expression. The two judge sites
+ * are templates (`judge.${GATE_FOR_TIER[tier]}` for the pipeline of record,
+ * `judge.candidate.${GATE_FOR_TIER[tier]}` for the advisory candidate judge)
+ * that each expand at runtime to exactly a screen and a final gate.
+ * Everything else is a plain string literal.
  */
 const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"ingest.embed"', note: "B1.1 — source-chunk embeddings" },
@@ -51,6 +52,7 @@ const EXPECTED_SHELL_OPERATIONS: ReadonlyArray<{ op: string; note: string }> = [
   { op: '"create.describe_reference"', note: "B-create.2 — the reference-describe vision call (spec §Design/The engine): STORED image bytes → style/subject TEXT, so reference-role media informs generation without its bytes ever reaching a draft. The only call in this repo handed an image; MODEL_VISION tier. External + audio refs never reach it (core refuses before the guard)" },
   { op: '"create.ai_edit"', note: "B-create.2 — the R8 AI edit (instruction → rewritten variant body). PROPOSES only: core writes nothing, the operator applies through the existing edit door, and the shared judge harness re-gates before the variant can leave the Composer" },
   { op: "`judge.${GATE_FOR_TIER[tier]}`", note: "B1.3 — G3 two-tier grounding (→ judge.g3_screen | judge.g3_final)" },
+  { op: "`judge.candidate.${GATE_FOR_TIER[tier]}`", note: "s89 — the candidate judge (→ judge.candidate.g3_screen | judge.candidate.g3_final): the SAME gate ladder graded against a body that is not yet the draft's (R8 AI edit proposes only what the judge passed). The verdict is advisory (ofRecord: false) — no judge_results row, no transition — but the spend is real, which is why it is in this inventory under its own label" },
 ];
 
 const SCAN_ROOTS = ["packages", "proprietary"];
@@ -107,15 +109,23 @@ describe("shell inventory (B5.3 executable pin, SPINE §1)", () => {
 
   it("every withGatewayGuard call site carries a pinned operation (count matches — a new site with a reused label is still caught)", () => {
     const { ops, guardCallSites } = collectOperations();
-    // One guarded operation label per guarded call site: 15 string literals +
-    // the single judge template site = 16.
-    expect(guardCallSites).toBe(EXPECTED_SHELL_OPERATIONS.length);
+    // One guarded operation label per guarded call site — EXCEPT the judge
+    // (s89): its two entry points (pipeline + candidate) label the ONE shared
+    // metering shim (`proprietary/judge/src/gate-ladder.ts` meteredTierDriver,
+    // `operation: opts.operation` — pass-through, no literal), so guard sites
+    // run exactly one behind the label count. Sharing that shim is deliberate:
+    // a copied meter is how candidate spend would drift from pipeline spend.
+    // Both counts stay pinned, so a new site OR a new label still fails here.
+    expect(guardCallSites).toBe(EXPECTED_SHELL_OPERATIONS.length - 1);
     expect(ops.length).toBe(EXPECTED_SHELL_OPERATIONS.length);
   });
 
-  it("pins the judge template as the only dynamic operation (its two runtime gates are documented, not free-form)", () => {
+  it("pins the judge templates as the only dynamic operations (their runtime gates are documented, not free-form)", () => {
     const { ops } = collectOperations();
     const templates = ops.filter((o) => o.op.startsWith("`"));
-    expect(templates.map((t) => t.op)).toEqual(["`judge.${GATE_FOR_TIER[tier]}`"]);
+    expect(templates.map((t) => t.op).sort()).toEqual([
+      "`judge.${GATE_FOR_TIER[tier]}`",
+      "`judge.candidate.${GATE_FOR_TIER[tier]}`",
+    ]);
   });
 });

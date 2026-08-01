@@ -300,34 +300,6 @@ exist and records the run.
   platform tab in words ("generation refused: <verbatim reason>"), others proceed.
 - AI-edit judge rejection: the variant keeps its prior body; the refusal shows at the
   control (never a silent revert).
-  > **⚠ DEVIATION AS SHIPPED (s88, lane `create-shells`) — READ BEFORE BUILDING THE
-  > COMPOSER (B-create.4).** This clause is **not fully met by the engine today**, and
-  > the reason is a genuine constraint, not an oversight. `runJudgePipeline`
-  > (`proprietary/judge/src/pipeline.ts`) judges only a draft's **persisted** body, and
-  > `judgeResults` binds every verdict to the draft's current `body_hash`, which
-  > `transitionInTx`'s I1 check reads (`packages/db/src/repos/drafts.ts`). So
-  > "judge the candidate, land only on pass" is unbuildable through the shared harness:
-  > appending verdicts for candidate text while the draft still carries the old hash
-  > would mint an **I1-valid passing verdict for content the judge never read**. The
-  > land-then-revert workaround is worse — it writes an `eval_cases` row asserting the
-  > operator wanted the old text back, and that corpus is training data.
-  > **What ships instead** (`packages/engine/src/create/edit.ts` (new), the house
-  > `video.propose_edl_diff` shape): `aiEditDraft` **writes nothing** and returns a
-  > proposal or a refusal — the draft's body hash is unchanged on *every* path, which is
-  > STRONGER than this clause asks. `applyAiEdit` then lands the operator's explicit
-  > apply through the existing edit door and its re-judge. **The residue:** on a judge
-  > refusal *at apply*, the draft is `blocked` carrying the applied body — hand-edit
-  > semantics, not "keeps its prior body". **Safety is unaffected** (I1 means a blocked
-  > draft cannot leave the Composer); what is lost is this clause's real intent, that
-  > machine-written text the judge refused should never replace an operator's
-  > known-good text.
-  > **Closure path, queued not forgotten:** a candidate-judge entry in
-  > `proprietary/judge` that evaluates `{draft, candidateBody}`, returns the verdict and
-  > appends **no** hash-bound rows; `aiEditDraft` then judges before landing and this
-  > clause is met exactly. Deliberately out of the lane's file set (moat refactor, and
-  > the weekly budget was at 90%). A staged-body column is the heavier alternative.
-  > The lane reported this rather than faking it; `WRAP-create-shells.md` §1b carries
-  > the full derivation.
 - Media import: unsupported type / oversize → refusal naming limits; a reference
   describe-call failure degrades to "reference attached, not yet analysed" (honest,
   non-blocking).
