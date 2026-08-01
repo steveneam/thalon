@@ -374,7 +374,7 @@ amendments → founder verdict):**
 
 | wave | surfaces | why this order |
 |---|---|---|
-| **W1 — the spine's gate + home** | Approve · Dashboard · Runs (+Board decision) · onboarding+notifications questions | highest-stakes unresearched surfaces; journey 2 end-to-end. **RAN s89: research ✓ (library §Approve/§Dashboard+Board/§Runs) · contracts updated ✓ (§3 ORIENT/GATE) · both questions answered ✓ (§5.1, §5.6) · three sheets amended ✓ — AWAITING THE FOUNDER'S VERDICT; no W1 surface builds before it.** |
+| **W1 — the spine's gate + home** | Approve · Dashboard · Runs (+Board decision) · onboarding+notifications questions | highest-stakes unresearched surfaces; journey 2 end-to-end. **RAN s89 · VERDICT: APPROVED — founder, same session, verbatim: *"yes to all, W1 approved."*** Research ✓ · contracts ✓ · questions answered ✓ · sheets amended ✓ · **builds UNBLOCKED: the Approve/Dashboard/Runs rebuilds to the amended sheets, the Board route retirement, and the setup band.** |
 | **W2 — MAKE completion** | Create home+wizard sheets (research already ✅ — this wave DRAWS) · Composer Postiz-launcher flow facts · Sites · Library/Source-Media IA resolution | B-create.3 rides here; the founder's named priority stays first among equals |
 | **W3 — SHIP + IDENTITY** | Channels/Integrations/Settings split (his §5.4 verdict applied) · Schedule build-prep · Profiles | closes journey 6; unblocks the D4 builds |
 | **W4 — KNOW + video draw** | Intel · Leads · video sheets pass 1 (research ✅ — draws) | the moat surfaces, with the loop's joins now fixed |

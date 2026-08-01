@@ -192,6 +192,40 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s90 — PLANNED (W1 APPROVED s89: *"yes to all, W1 approved"*; the runway map of record is `docs/launch-runway.md`)
+
+**The shape mirrors s89: lead track is the point, two disjoint engine lanes
+beside it.** Ceiling unchanged: two lanes + the lead.
+
+**LEAD TRACK, in order:**
+1. **Canvas parity debt FIRST** (programme file §rule 2 — upload
+   `Approve.dc.html` + `Dashboard.dc.html` to project f5d304cb at fresh
+   context, delete the debt block).
+2. **W2, the MAKE draw** (spec §6): Create home sheet update + the wizard
+   sheet (B-create.3 — research already banked s86, this wave DRAWS) ·
+   Composer Postiz-launcher flow facts · Sites pass · Library/Source-Media IA
+   resolution (ONE Library, his §5.3 ruling). Wave shape as W1: any fresh
+   research ≤2 searches/surface · contracts in the workspace spec ·
+   sheets · ledger rows same-commit · **his verdict closes it**.
+
+**LANES — two candidates, kickoffs to be WRITTEN AT THE s90 BOOT (rule 12:
+ground in the repo before speccing; each launch needs his fresh named GO):**
+
+| lane | bucket | scope sketch | why now |
+|---|---|---|---|
+| trend-live | pass-3 trend acquisition | YouTube Data API poller behind the existing `TrendSource` seam (`packages/engine/src/trend/`); official APIs only; fake driver stays the test driver | automated acquisition IS the feature (standing directive); also lights Intel's dark Velocity/Engagement signals (programme file, open decision 4) |
+| learn-evals | B-learn follow-through | the reject-reason → `eval_cases` seam + an evals batch read, engine-side only (no UI — Approve's control builds with the W1 rebuild) | the ship gate is a green eval suite; W1's Approve drew the front door, the engine seam should exist before the surface rebuild wires it |
+
+Disjoint by construction: trend vs evals vs sheets. **Neither touches
+`packages/db` schema or contracts** — if either needs a table/verb, that is a
+contract-window question, STOP and report.
+
+**Behind s90 (from the runway §9):** s91 = W1 BUILDS lead-direct (Approve
+first, Board route deletes as its replacement lands) · s92 = B-create.4
+Composer route · then W3/W4 draws, pass 2/3, landing redesign, launch-asset
+sprint (mint list first; 584 Higgsfield credits reserved), arming ladder
+founder-paced.
+
 ## Sprint 9 / s89 — **CLOSED: the full shape ran** (both lanes MERGED · W1 complete through sheets · verify on merged main exit 0, 3091+/9)
 
 **Ran 2026-08-01 on his "gogogo. you have my approval"** (read as covering the

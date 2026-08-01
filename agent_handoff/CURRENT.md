@@ -64,35 +64,36 @@ is DELETED — the spec's Error Behavior is now met exactly.** WRAP:
 - Ledger moved same-commit: research 9→13 of 20 touched; p1 ✅ on Approve,
   Board, Dashboard, Runs.
 
-## OPEN — HIS CALLS
+## THE VERDICT LANDED SAME SESSION — **W1 APPROVED** (*"yes to all, W1 approved"*)
 
-1. **THE W1 VERDICT** — spec §6 wave shape ends at his word. Repo sheets are
-   the spec of record; renders were read + measured this session. **No W1
-   surface builds before the verdict; W2 (Create home+wizard sheets — his
-   named priority, research already banked) queues directly behind it.**
-   Board's route deletion is also gated on this verdict.
-2. Still his, unchanged: Calendar→Schedule rename (app side) · Composer POPOUT
-   state · YouTube as a destination · thalon-deploy + templates-preview
-   credentials (NEEDS-STEVEN 2026-07-29e) · portal work in his own browser.
+Recorded in `docs/workspace/spec.md` §6 and the ledger (four rows VERDICTED).
+**Unblocked: the W1 surface rebuilds (Approve · Dashboard+toggle+band · Runs),
+the Board route deletion, and W2's draw.** He also commissioned the full
+launch synthesis — **`docs/launch-runway.md` is the map of record** (status ·
+waves · builds · pass-3 engine · arming ladder · landing/video plan ·
+Higgsfield recommendation on a live 584-credit balance · gates checklist ·
+session sequencing s90→s98+).
+
+**Still his, unchanged:** Calendar→Schedule rename (app side) · Composer POPOUT
+state (drawn in pass 3) · YouTube as a destination · thalon-deploy +
+templates-preview credentials (NEEDS-STEVEN 2026-07-29e) · portal work in his
+own browser · every arming step · the stealth lift.
 
 ## Resume prompt (session 90, syd4)
 
-**Resume · Thalon** — s89 merged BOTH lanes (analytics-honesty ×5 commits,
-judge-candidate ×1), ran W1 end-to-end minus his verdict, verify green on
-merged main. **First action: clear the canvas parity debt** (programme file
-§rule 2 — `Approve.dc.html` + `Dashboard.dc.html` to project f5d304cb via
-finalize_plan→write_files, then delete the debt block; Board + Runs already
-uploaded). **Then: his W1 verdict is the gate for everything surface-side** —
-on YES, W2 draws (Create home + wizard sheets, research banked, B-create.3);
-on amendments, W1 sheets iterate first. Engine-side candidates for lanes if he
-wants parallel work: B-create.4 Composer route (now buildable against the
-spec's REAL semantics — the R8 deviation is closed) · the D4 Channels build
-(unblocked by §5.4) · Analytics build (after the Facebook fixture
-reconciliation, capability.ts is the truth).
+**Resume · Thalon** — s89 merged BOTH lanes, ran W1 end-to-end, and banked his
+verdict (**W1 APPROVED**) plus the launch runway. **The s90 plan of record is
+COORDINATION.md §s90:** lead = canvas parity debt FIRST, then the **W2 MAKE
+draw** (Create home + wizard sheets — B-create.3, research banked · Composer
+flow facts · Sites · Library IA); lanes = **trend-live** + **learn-evals**,
+kickoffs written at boot per rule 12, **each needing his fresh named GO**.
+Behind it: s91 = W1 builds lead-direct (Approve first), s92 = B-create.4
+Composer — the full ladder is runway §9.
 
-**Read first:** CLAUDE.md → this file → COORDINATION.md §s89 CLOSED →
-`docs/workspace/spec.md` (§6 W1 status line) → `docs/research/ux-refinement-program.md`
-(ledger + the parity-debt block) → both lane WRAPs.
+**Read first:** CLAUDE.md → this file → **COORDINATION.md §s90 (the plan)** →
+`docs/launch-runway.md` (the map) → `docs/workspace/spec.md` (§6) →
+`docs/research/ux-refinement-program.md` (ledger + parity-debt block) → both
+lane WRAPs.
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run

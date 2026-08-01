@@ -241,15 +241,15 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) | — | — | — | video build order 1 |
 | 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
 | 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
-| 10 | Approve | ✅ s89 (W1) | ✅ s89 | — | — | library §Approve; pass-1 row above |
-| 11 | Board | ✅ s89 (W1) | ✅ s89 | — | — | **retires into a Dashboard toggle** (his s88 ruling; Jira Summary/Board-tabs = the drawn precedent); sheet carries the status note; route deletion only after the wave's verdict |
-| 12 | Dashboard | ✅ s89 (W1) | ✅ s89 | — | — | library §Dashboard+Board; pass-1 row above |
+| 10 | Approve | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Approve; W1 approved by the founder s89 ("yes to all, W1 approved") — build unblocked |
+| 11 | Board | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | **retires into a Dashboard toggle** (his s88 ruling; Jira Summary/Board-tabs = the drawn precedent); sheet carries the status note; route deletion only after the wave's verdict |
+| 12 | Dashboard | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Dashboard+Board; pass-1 row above |
 | 13 | Integrations | — | — | — | — | untouched — not ready |
 | 14 | Intel | — | — | — | — | untouched — not ready |
 | 15 | Leads | — | — | — | — | untouched — not ready |
 | 16 | Library (Transcription) | — | — | — | — | queued row above; naming drift noted |
 | 17 | Profiles | — | — | — | — | untouched — not ready |
-| 18 | Runs | ✅ s89 (W1) | ✅ s89 | — | — | library §Runs; create_runs re-shape drawn (workspace spec §3 ORIENT); pass-1 row above |
+| 18 | Runs | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Runs; create_runs re-shape drawn (workspace spec §3 ORIENT); pass-1 row above |
 | 19 | Sites | — | — | — | — | untouched — not ready |
 | 20 | Source Media | — | — | — | — | verdicted sheet (s77) but pre-programme — no research pass on record |
 | 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
