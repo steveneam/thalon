@@ -261,7 +261,7 @@ export function plannedCards(
         title: `${new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(at)} ${`${at.getHours()}`.padStart(2, "0")}:${`${at.getMinutes()}`.padStart(2, "0")} · ${platformLabel(slot.platform)}`,
         meta: "door unarmed — a plan",
         thumb: null,
-        href: asset ? approveHref(asset) : "/app/calendar",
+        href: asset ? approveHref(asset) : "/app/schedule",
       };
     });
 }

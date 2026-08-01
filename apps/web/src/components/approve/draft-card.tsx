@@ -428,7 +428,7 @@ export function DraftCard({
                 something?" — Create is too early; the draft does not exist yet
                 and may never pass the judge). Planning writes a slot only. */}
             {draft.status === "approved" && (
-              <Link className="btn btn-ghost" href={`/app/calendar?plan=${draft.id}`}>
+              <Link className="btn btn-ghost" href={`/app/schedule?plan=${draft.id}`}>
                 Plan a slot →
               </Link>
             )}

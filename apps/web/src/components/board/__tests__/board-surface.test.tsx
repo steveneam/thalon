@@ -237,7 +237,7 @@ describe("Pipeline board (exact-mock rebuild — Board.dc.html)", () => {
     );
     expect(screen.getByText(/18:00 · Facebook/).closest("a")).toHaveAttribute(
       "href",
-      "/app/calendar",
+      "/app/schedule",
     );
     expect(
       screen.getByText("Rendered our whole launch video from HTML — a build step").closest("a"),

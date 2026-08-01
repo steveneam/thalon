@@ -74,10 +74,17 @@ waves · builds · pass-3 engine · arming ladder · landing/video plan ·
 Higgsfield recommendation on a live 584-credit balance · gates checklist ·
 session sequencing s90→s98+).
 
-**Still his, unchanged:** Calendar→Schedule rename (app side) · Composer POPOUT
-state (drawn in pass 3) · YouTube as a destination · thalon-deploy +
-templates-preview credentials (NEEDS-STEVEN 2026-07-29e) · portal work in his
-own browser · every arming step · the stealth lift.
+**Three more rulings landed post-wrap, same session:** Calendar→Schedule
+rename **RULED + EXECUTED** (route/components/symbols/rail/copy/API/view key;
+CSS internals wait for the D4 rebuild) · YouTube as a destination **RULED YES**
+— chartered as lane candidate `youtube-destination` (COORDINATION §s90; live
+half gated on his Google portal app) · credentials: his word to the lead is on
+record, **swordfish still needs "issue both credentials" from HIM directly,
+once** (their founder-gate; NEEDS-STEVEN 2026-08-01 refresh).
+
+**Still his:** Composer POPOUT state (drawn in pass 3) · the portal apps in his
+own browser (not done yet, his words s89; instructions in his Gmail draft —
+now also gates YouTube's live half) · every arming step · the stealth lift.
 
 ## Resume prompt (session 90, syd4)
 

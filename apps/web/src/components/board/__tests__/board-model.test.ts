@@ -114,7 +114,7 @@ describe("planned slots", () => {
   });
 
   it("a plan whose draft aged out of the read still opens somewhere real", () => {
-    expect(plannedCards(slots, [])[0].href).toBe("/app/calendar");
+    expect(plannedCards(slots, [])[0].href).toBe("/app/schedule");
     expect(plannedCards(slots, [asset({ draftId: "early" })])[0].href).toBe(
       "/app/approve?run=run-1&draft=early",
     );

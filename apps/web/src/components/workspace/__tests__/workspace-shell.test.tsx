@@ -33,7 +33,7 @@ describe("WorkspaceShell (exact-mock chrome, DOCTRINE 0)", () => {
       "Intel",
       "Create",
       "Approve",
-      "Calendar",
+      "Schedule",
       "Leads",
       "Transcription",
       "Videos",

@@ -252,7 +252,7 @@ export function Dashboard() {
                   : "waiting on your review"}
           </span>
         </Link>
-        <Link href="/app/calendar" className="tile tile-link" style={{ color: "inherit" }}>
+        <Link href="/app/schedule" className="tile tile-link" style={{ color: "inherit" }}>
           <div className="tile-head">
             <span className="t-label">Planned slots</span>
             <div style={{ flex: 1 }} />

@@ -259,7 +259,7 @@ document on any unmarked dead citation and fails on citation rot forever after.
 | Videos ×3 | `apps/web/src/app/app/videos/` | `apps/web/src/components/videos/` | Videos Overview · Video Dossier · Videos sheets (in `docs/research/mock-sheets/`) | `packages/engine/src/edl/` · `packages/engine/src/render/` · `packages/engine/src/direction/` · `packages/db/src/repos/video-cuts.ts` · `packages/db/src/repos/video-projects.ts` |
 | Sites | `apps/web/src/app/app/sites/page.tsx` | `apps/web/src/components/sites/` | `docs/research/mock-sheets/Sites.dc.html` | `packages/engine/src/webpage/` |
 | Approve | `apps/web/src/app/app/approve/page.tsx` | `apps/web/src/components/approve/` | `docs/research/mock-sheets/Approve.dc.html` | `packages/db/src/repos/drafts.ts` · `packages/db/src/repos/judge-results.ts` · `proprietary/judge/` |
-| Schedule | `apps/web/src/app/app/calendar/page.tsx` (rename pending, §5.5) | `apps/web/src/components/calendar/` | `docs/research/mock-sheets/Schedule.dc.html` | `packages/db/src/repos/planned-slots.ts` · `packages/db/src/repos/publish-queue.ts` · `packages/db/src/repos/social-publications.ts` |
+| Schedule | `apps/web/src/app/app/schedule/page.tsx` (renamed s89 on his GO) | `apps/web/src/components/schedule/` | `docs/research/mock-sheets/Schedule.dc.html` | `packages/db/src/repos/planned-slots.ts` · `packages/db/src/repos/publish-queue.ts` · `packages/db/src/repos/social-publications.ts` |
 | Channels | (planned — D4 build) | (planned) | `docs/research/mock-sheets/Channels.dc.html` | `packages/engine/src/integrations/` · `packages/engine/src/social/registry.ts` · `packages/db/src/repos/tenant-credentials.ts` · `packages/contracts/src/platform-capability.ts` |
 | Analytics | (planned — after fixture reconciliation) | (planned) | `docs/research/mock-sheets/Analytics.dc.html` | `packages/engine/src/social/metrics/` · `packages/db/src/repos/publication-metrics.ts` |
 | Profiles | `apps/web/src/app/app/profiles/page.tsx` | `apps/web/src/components/profiles/` | `docs/research/mock-sheets/Profiles.dc.html` | `packages/db/src/repos/brand-profiles.ts` · `packages/contracts/src/brand-profile.ts` (incl. s87 `platformRouting`) |
@@ -318,9 +318,14 @@ still his call — say which, never let a gap sit in an undefined state.
    sheet, build it) · **Integrations** = AI seats + providers (its sheet
    re-aimed at exactly that) · **Settings** = operator/seams/env. Lands in
    **W3**; unblocks the D4 Channels build.
-5. **Calendar→Schedule rename** — route, component and app copy still Calendar.
-   *(STILL HIS CALL — deliberately not in the §8 bundle, so "yes to all" did
-   NOT decide it. W3 does the build-prep either way.)*
+5. **Calendar→Schedule rename** — **RULED AND EXECUTED s89** (founder: *"yes
+   change from calendar to schedule"*; done same session): route
+   `/app/schedule`, `components/schedule/`, `Schedule*` symbols, rail label,
+   door copy ("Open schedule →"), the API route `/api/schedule/slots`, and the
+   saved-view key. CSS class internals (`.calendar-surface`, `.cal`) were
+   deliberately NOT renamed — the exact-mock rebuild to `Schedule.dc.html`
+   (the D4 build slot) replaces that stylesheet wholesale, and renaming shared
+   class vocabulary early is blast radius for zero visible gain.
 6. **Notifications/alerts** — needs-you counts exist; no alert center, no
    "what changed since I left". **DECIDED s88: research-first** (P: their
    notification model; M: activity-feed patterns), riding W1's research.

@@ -3,11 +3,11 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { CalendarSurface } from "@/components/calendar/calendar-surface";
-import { queueEvents } from "@/components/calendar/calendar-model";
+import { ScheduleSurface } from "@/components/schedule/schedule-surface";
+import { queueEvents } from "@/components/schedule/schedule-model";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/app/calendar",
+  usePathname: () => "/app/schedule",
   useRouter: () => ({ push: () => {} }),
 }));
 import { server } from "@/lib/testing/server";
@@ -129,7 +129,7 @@ describe("the calendar's scheduled state", () => {
       plan: { plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" }), asset({ draftId: "d-queued" })] },
       rows: [queueRow()],
     });
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     await screen.findByText("1 planned");
     expect(await screen.findByText("1 scheduled")).toBeInTheDocument();
@@ -147,7 +147,7 @@ describe("the calendar's scheduled state", () => {
 
   it("the footer explains the two, and only once there is a commitment to explain", async () => {
     seed({ plan: { plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] } });
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     await screen.findByText("1 planned");
     // Resting copy is the sheet's own, unchanged, while nothing is committed.
     expect(screen.getByText(/Plans, not uploads/)).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe("the calendar's scheduled state", () => {
 
   it("names the distinction in the footer once something IS committed", async () => {
     seed({ plan: { assets: [asset({ draftId: "d-queued" })] }, rows: [queueRow()] });
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     await screen.findByText("1 scheduled");
     expect(screen.getByText(/Dashed is a plan \(an intention\); solid is scheduled/)).toBeInTheDocument();
     expect(screen.getByText(/Neither has published/)).toBeInTheDocument();
@@ -175,7 +175,7 @@ describe("the calendar's scheduled state", () => {
       ),
       http.get("/api/social/queue", () => HttpResponse.json({ error: "down" }, { status: 500 })),
     );
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     // The surface is NOT in its error state, and the plan still renders.
     expect(await screen.findByText("1 planned")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -190,7 +190,7 @@ describe("the calendar's scheduled state", () => {
         return HttpResponse.json({ row: queueRow({ status: "cancelled" }) });
       }),
     );
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
     await screen.findByText("1 scheduled");
 
     await userEvent.click(container.querySelector(".ev-queued") as HTMLElement);

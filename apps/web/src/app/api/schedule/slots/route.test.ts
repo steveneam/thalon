@@ -50,7 +50,7 @@ afterEach(async () => {
 });
 
 function postReq(body: unknown): Request {
-  return new Request("http://test.local/api/calendar/slots", {
+  return new Request("http://test.local/api/schedule/slots", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
@@ -58,7 +58,7 @@ function postReq(body: unknown): Request {
 }
 
 function deleteReq(id: string): Request {
-  return new Request(`http://test.local/api/calendar/slots?draftId=${encodeURIComponent(id)}`, {
+  return new Request(`http://test.local/api/schedule/slots?draftId=${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
 }
@@ -71,7 +71,7 @@ function deleteReq(id: string): Request {
  * route: an upsert rather than a second row, a loud 404 rather than a
  * plausible success, and validation at the boundary.
  */
-describe("/api/calendar/slots (the slot write door)", () => {
+describe("/api/schedule/slots (the slot write door)", () => {
   it("plans a slot, then RE-plans the same draft — one slot, moved, never a duplicate", async () => {
     const planned = await POST(
       postReq({ draftId, scheduledFor: "2026-07-27T09:30:00+10:00", note: "pipeline thread" }),

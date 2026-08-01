@@ -226,6 +226,24 @@ Composer route · then W3/W4 draws, pass 2/3, landing redesign, launch-asset
 sprint (mint list first; 584 Higgsfield credits reserved), arming ladder
 founder-paced.
 
+**Rulings landed s89 (post-wrap turn), same session:**
+- **Calendar→Schedule rename — DONE** (his *"yes change from calendar to
+  schedule"*; route + components + symbols + rail + door copy + API route +
+  view key; CSS internals deliberately deferred to the D4 rebuild; web suite
+  green on exit code, one fixture updated to the new view key).
+- **YouTube as a destination — RULED YES, chartered as a lane candidate**
+  (`youtube-destination`): platform key into `SOCIAL_PLATFORMS` + capability
+  rows + settings schema resolving the `SETTINGS_DEFERRED.youtube` entry
+  (`packages/contracts/src/platform-settings.ts` — its completeness test fires
+  the day the key lands, by design) + driver behind the seam, tests fake.
+  **The LIVE half is gated on the Google portal app — part of the portal work
+  he has not done yet (his browser, instructions in his Gmail draft).** Build
+  half is not blocked.
+- **Credentials (NEEDS-STEVEN 2026-07-29e):** his in-session word to the lead
+  is on record; **swordfish still needs it from HIM directly, once** (their
+  founder-gate for secret issuance — they explicitly declined the relayed
+  approval, correctly). The one word covers both credentials.
+
 ## Sprint 9 / s89 — **CLOSED: the full shape ran** (both lanes MERGED · W1 complete through sheets · verify on merged main exit 0, 3091+/9)
 
 **Ran 2026-08-01 on his "gogogo. you have my approval"** (read as covering the

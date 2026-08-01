@@ -3,11 +3,11 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CalendarSurface } from "@/components/calendar/calendar-surface";
+import { ScheduleSurface } from "@/components/schedule/schedule-surface";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/app/calendar",
+  usePathname: () => "/app/schedule",
   useRouter: () => ({ push: (href: string) => push(href) }),
 }));
 import { listSavedViewsTestState, seedSavedView } from "@/lib/testing/handlers";
@@ -70,15 +70,15 @@ const PLAN_SLOT: PlannedSlotWire = {
  * honesty rules — a fabricated time, a real-looking empty week, or a door
  * that pretends to write is a failure.
  */
-describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
+describe("Schedule (exact-mock rebuild — the verdicted sheet; renamed from Calendar s89)", () => {
   it("renders the sheet's bands with real data behind them", async () => {
     seedPlan({
       plannedSlots: [PLAN_SLOT],
       cadence: [{ platform: "linkedin", maxPerDay: 2, minGapMinutes: 90 }],
     });
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
-    expect(screen.getByRole("heading", { name: "Calendar" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Schedule" })).toBeInTheDocument();
     await screen.findByText("1 planned");
 
     // Both segmented controls, in the sheet's order and vocabulary.
@@ -131,7 +131,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
 
   it("places a plan at its own time, in the sheet's dashed dress", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT] });
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
 
     const plan = await screen.findByText("Planned · LinkedIn");
     const box = plan.closest(".ev");
@@ -161,7 +161,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
         }),
       ],
     });
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     const published = (await screen.findByText("Blog · published ✓")).closest(".ev");
     expect(published).toHaveClass("done", "ev-ok");
@@ -175,7 +175,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     seedPlan({
       assets: [asset({ draftId: "d-wait", status: "queued", judgedAt: hoursAgo(26) })],
     });
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
 
     const chip = await screen.findByText(/LinkedIn · your review · 26h/);
     expect(chip).toHaveClass("amber-chip");
@@ -191,7 +191,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       ],
     });
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     await screen.findByText("2 planned");
     const flagged = container.querySelectorAll(".ev-plan .flag");
@@ -209,7 +209,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
   it("the detail popover opens on a plan and states that its doors cannot write", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
 
@@ -221,7 +221,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       "/app/approve?run=run-1&draft=d-plan",
     );
 
-    // s78: the write doors are LIVE — /api/calendar/slots exists.
+    // s78: the write doors are LIVE — /api/schedule/slots exists.
     expect(within(detail).getByRole("button", { name: "Reschedule" })).toBeEnabled();
     expect(within(detail).getByRole("button", { name: "Remove" })).toBeEnabled();
 
@@ -242,7 +242,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
    */
   it("advertises drag on a plan, and only on a plan", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT] });
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
     await screen.findByText("1 planned");
 
     expect(
@@ -259,7 +259,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
   });
 
   /**
-   * s78 — the calendar's WRITE door. `/api/calendar/slots` rides the slot
+   * s78 — the calendar's WRITE door. `/api/schedule/slots` rides the slot
    * store shipped in the Phase-I window: no new table, no new contract, no
    * migration. A slot is a PLAN — writing one publishes nothing.
    */
@@ -267,7 +267,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
     const posted: Array<Record<string, unknown>> = [];
     server.use(
-      http.post("/api/calendar/slots", async ({ request }) => {
+      http.post("/api/schedule/slots", async ({ request }) => {
         const body = (await request.json()) as Record<string, unknown>;
         posted.push(body);
         return HttpResponse.json({
@@ -276,7 +276,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       }),
     );
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
     const detail = container.querySelector(".detail") as HTMLElement;
@@ -300,12 +300,12 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
   it("Remove asks first, then unplans — and says nothing changed when the route refuses", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
     server.use(
-      http.delete("/api/calendar/slots", () =>
+      http.delete("/api/schedule/slots", () =>
         HttpResponse.json({ error: "planned slot for draft not found" }, { status: 404 }),
       ),
     );
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
     const detail = container.querySelector(".detail") as HTMLElement;
@@ -349,7 +349,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
           source: "bluesky",
         },
       });
-      const { unmount } = render(<CalendarSurface />);
+      const { unmount } = render(<ScheduleSurface />);
       // The pointer projects a tick every interval to the end of the week.
       expect((await screen.findAllByText("Sweep · engine")).length).toBeGreaterThan(0);
       unmount();
@@ -362,7 +362,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
           source: "bluesky",
         },
       });
-      render(<CalendarSurface />);
+      render(<ScheduleSurface />);
       await screen.findByText("0 planned");
       expect(screen.queryByText("Sweep · engine")).not.toBeInTheDocument();
     } finally {
@@ -387,7 +387,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       }),
     );
     const user = userEvent.setup();
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
 
     expect(
       await screen.findByText(
@@ -404,7 +404,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
   it("the density switch is the keeper engine: month cells and an agenda list", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT] });
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
     await screen.findByText("1 planned");
 
     await user.click(screen.getByRole("button", { name: "Month" }));
@@ -425,7 +425,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
   it("an empty week says it is empty rather than showing nothing at all", async () => {
     seedPlan({});
     const user = userEvent.setup();
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     await screen.findByText("0 planned");
 
     await user.click(screen.getByRole("button", { name: "Agenda" }));
@@ -437,13 +437,13 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
 
   it("restores the tenant-wide saved view, and saves changes back to it", async () => {
     seedSavedView({
-      surface: "calendar",
+      surface: "schedule",
       name: "Default",
       config: { density: "agenda", scope: "plans", expanded: false },
     });
     seedPlan({ plannedSlots: [PLAN_SLOT] });
     const user = userEvent.setup();
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
 
     // The stored view decides the resting density and scope — no new band.
     expect(await screen.findByText("Agenda")).toBeInTheDocument();
@@ -460,7 +460,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
 
   it("simply opening the calendar writes nothing back to the views store", async () => {
     seedPlan({ plannedSlots: [PLAN_SLOT] });
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     await screen.findByText("1 planned");
 
     // A visit is not a change: the tenant's view record is created by the
@@ -476,7 +476,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       ],
     });
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
 
     await screen.findByText("1 planned");
     expect(screen.getByText(/quiet hours · collapsed — 1 hidden/)).toBeInTheDocument();
@@ -495,7 +495,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       ],
     });
     const user = userEvent.setup();
-    const { container } = render(<CalendarSurface />);
+    const { container } = render(<ScheduleSurface />);
     await screen.findByText("2 planned");
 
     await user.keyboard("j");
@@ -512,7 +512,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     push.mockClear();
     seedPlan({ plannedSlots: [PLAN_SLOT], assets: [asset({ draftId: "d-plan" })] });
     const user = userEvent.setup();
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     await screen.findByText("1 planned");
 
     await user.keyboard("j");
@@ -558,7 +558,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
 
     it("marks today on the current week and carries older waiting work into it", async () => {
       seedPlan({ assets: olderWaiting });
-      const { container } = render(<CalendarSurface />);
+      const { container } = render(<ScheduleSurface />);
       await screen.findByText("0 planned");
 
       expect(container.querySelectorAll(".cal-dh.today")).toHaveLength(1);
@@ -569,7 +569,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
     it("marks NO day today on a navigated week, draws no now-line, and carries nothing into it", async () => {
       seedPlan({ assets: olderWaiting });
       const user = userEvent.setup();
-      const { container } = render(<CalendarSurface />);
+      const { container } = render(<ScheduleSurface />);
       await screen.findByText("0 planned");
 
       await user.click(screen.getByRole("button", { name: "Next week" }));
@@ -609,7 +609,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
         ],
       });
       const user = userEvent.setup();
-      render(<CalendarSurface />);
+      render(<ScheduleSurface />);
       await screen.findByText("0 planned");
 
       const more = screen.getByRole("button", { name: /Open all 4 waiting this week/ });
@@ -642,7 +642,7 @@ describe("Calendar (exact-mock rebuild — Calendar.dc.html)", () => {
       assets: [asset({ draftId: "w-old", status: "queued", judgedAt: started.toISOString() })],
     });
     const user = userEvent.setup();
-    render(<CalendarSurface />);
+    render(<ScheduleSurface />);
     await screen.findByText("0 planned");
 
     await user.click(screen.getByRole("button", { name: "Agenda" }));

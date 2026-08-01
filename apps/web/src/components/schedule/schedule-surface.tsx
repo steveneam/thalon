@@ -1,6 +1,6 @@
 "use client";
 
-import "@/components/calendar/calendar.css";
+import "@/components/schedule/schedule.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -34,7 +34,7 @@ import {
   type CalEvent,
   type PlanEmptyReason,
   type Scope,
-} from "@/components/calendar/calendar-model";
+} from "@/components/schedule/schedule-model";
 import {
   cancelQueueRow,
   fetchQueueRows,
@@ -51,7 +51,7 @@ type Density = "week" | "month" | "agenda";
 type ReadState = "loading" | "error" | "success";
 
 /** The tenant-wide saved view this surface owns (Phase-I views store, /api/views). */
-const VIEW_SURFACE = "calendar";
+const VIEW_SURFACE = "schedule";
 const VIEW_NAME = "Default";
 /** The sheet bounds a day cell at what it can show; the rest counts honestly. */
 const LANE_CHIP_BOUND = 2;
@@ -103,7 +103,7 @@ function coerceView(config: Record<string, unknown>): SavedConfig {
  *    operator's density/scope without adding a band the sheet does not draw;
  *  - HONEST STATES: a failed read says so and offers retry, an empty week says
  *    it is empty, and a failed write says nothing changed;
- *  - s78: the slot store's WRITE route (`/api/calendar/slots`) is armed, so
+ *  - s78: the slot store's WRITE route (`/api/schedule/slots`) is armed, so
  *    Reschedule and Remove move and delete real plans from the detail
  *    popover — and s78b closed the gap the founder found by using it: nothing
  *    could CREATE a plan, so those two verbs were unreachable by construction.
@@ -111,7 +111,7 @@ function coerceView(config: Record<string, unknown>): SavedConfig {
  *    instant. Both write the same slot door. A plan is an intention — neither
  *    publishes anything nor arms anything.
  */
-export function CalendarSurface() {
+export function ScheduleSurface() {
   const router = useRouter();
   const [status, setStatus] = useState<ReadState>("loading");
   const [plan, setPlan] = useState<PlanPayload | null>(null);
@@ -354,7 +354,7 @@ export function CalendarSurface() {
   });
 
   /**
-   * The slot write door (s78, /api/calendar/slots). A plan is an intention:
+   * The slot write door (s78, /api/schedule/slots). A plan is an intention:
    * moving or removing one publishes nothing and arms nothing. Both re-read
    * the plan afterwards so the grid shows the stored truth, not an optimistic
    * guess — the write is the record, the surface only ever holds a copy.
@@ -519,7 +519,7 @@ export function CalendarSurface() {
       </p>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-        <h1 className="t-headline">Calendar</h1>
+        <h1 className="t-headline">Schedule</h1>
         <button
           type="button"
           className="btn btn-ghost btn-sm"
@@ -1102,7 +1102,7 @@ function toLocalInputValue(date: Date): string {
 
 /**
  * The sheet's detail popover, at the selected event's own height. Its two
- * plan doors are LIVE as of s78: `/api/calendar/slots` writes the slot store
+ * plan doors are LIVE as of s78: `/api/schedule/slots` writes the slot store
  * (POST upserts = plan or re-plan, DELETE unplans), so Reschedule moves a
  * real plan and Remove deletes one. Both are still PLANS — neither publishes
  * nor arms anything.

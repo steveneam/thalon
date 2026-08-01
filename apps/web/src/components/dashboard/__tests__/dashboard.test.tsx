@@ -37,7 +37,7 @@ describe("Dashboard (exact-mock rebuild, Dashboard.dc.html)", () => {
     expect(screen.getByText("Composing").closest("a")).toHaveAttribute("href", "/app/runs");
     expect(screen.getByText("Planned slots").closest("a")).toHaveAttribute(
       "href",
-      "/app/calendar",
+      "/app/schedule",
     );
     expect(screen.getByText(/door unarmed — plans, not uploads/)).toBeInTheDocument();
 
@@ -54,9 +54,9 @@ describe("Dashboard (exact-mock rebuild, Dashboard.dc.html)", () => {
     // Week card: the sheet's seg + local-times note + calendar door.
     expect(screen.getByText("This week")).toBeInTheDocument();
     expect(screen.getByText("all times local")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open calendar →" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Open schedule →" })).toHaveAttribute(
       "href",
-      "/app/calendar",
+      "/app/schedule",
     );
 
     // Published strip: the fixture's deployed blog post carries its live link.

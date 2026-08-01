@@ -15,7 +15,7 @@ import {
   yOf,
   DAY_WINDOW,
   FULL_WINDOW,
-} from "@/components/calendar/calendar-model";
+} from "@/components/schedule/schedule-model";
 import { timeAgo } from "@/lib/workspace/format";
 import {
   dayKey,
@@ -427,8 +427,8 @@ export function WeekCard({
                   : "No cadence rules configured — every platform drafts unconstrained."}
             </span>
             <div style={{ flex: 1 }} />
-            <Link className="card-link" href="/app/calendar">
-              Open calendar →
+            <Link className="card-link" href="/app/schedule">
+              Open schedule →
             </Link>
           </div>
         </>

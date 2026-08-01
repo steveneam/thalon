@@ -25,7 +25,7 @@ import {
   FULL_WINDOW,
   HOUR_PX,
   type CalEvent,
-} from "@/components/calendar/calendar-model";
+} from "@/components/schedule/schedule-model";
 import type { PipelineAsset, PlanCadenceRule, PlannedSlotWire } from "@/lib/workspace/types";
 import { weekDays } from "@/lib/workspace/week";
 
@@ -315,10 +315,10 @@ describe("scope, layout and labels", () => {
  * computed there) and both were REGRESSIONS OF A PORTED SHEET RULE. A
  * documentary note would have rotted; this runs.
  */
-describe("calendar.css — the two rules a real day breaks", () => {
+describe("schedule.css — the two rules a real day breaks", () => {
   // Comments in this file DISCUSS the rules they replaced, so the pins read
   // declarations only — a note about `cursor: grab` must not read as one.
-  const css = readFileSync(new URL("../calendar.css", import.meta.url), "utf8").replace(
+  const css = readFileSync(new URL("../schedule.css", import.meta.url), "utf8").replace(
     /\/\*[\s\S]*?\*\//g,
     "",
   );
@@ -488,7 +488,7 @@ describe("instantOn — a day plus a fractional hour is a real local instant", (
  */
 describe("calendar popovers fit themselves to what is visible", () => {
   const source = readFileSync(
-    new URL("../calendar-surface.tsx", import.meta.url),
+    new URL("../schedule-surface.tsx", import.meta.url),
     "utf8",
   );
 

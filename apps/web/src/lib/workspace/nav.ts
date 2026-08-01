@@ -19,7 +19,7 @@ import {
  * palette, and the topbar title all route from this list so a surface can
  * never exist in one and be missing from another. Order and labels are the
  * founder-verdicted wave-0 mock's, verbatim (kickoff step 3):
- * Home · Intel · Create · Approve(count) · Calendar ┃ Leads · Transcription ·
+ * Home · Intel · Create · Approve(count) · Schedule ┃ Leads · Transcription ·
  * Videos · Sites · Runs ┃ Profiles · Settings.
  * Icons come from the canonical set (components/ui/icons.tsx) — one
  * metaphor per feature, everywhere.
@@ -77,8 +77,8 @@ export const NAV_SURFACES: NavSurface[] = [
     showsNeedsYou: true,
   },
   {
-    label: "Calendar",
-    href: "/app/calendar",
+    label: "Schedule",
+    href: "/app/schedule",
     icon: IconCalendar,
     hint: "The fan-out plan — what will go out, when, where",
     keywords: ["schedule", "fanout", "slots", "month", "week", "agenda", "reschedule"],

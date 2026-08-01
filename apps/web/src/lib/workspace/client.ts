@@ -30,7 +30,7 @@ export async function planSlot(input: {
   note?: string;
 }): Promise<WireSlot> {
   const { slot } = await asJson<{ slot: WireSlot }>(
-    await fetch("/api/calendar/slots", {
+    await fetch("/api/schedule/slots", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(input),
@@ -42,7 +42,7 @@ export async function planSlot(input: {
 /** Remove a draft's plan. A draft with no slot answers 404 — never a quiet success. */
 export async function removeSlot(draftId: string): Promise<void> {
   await asJson<{ removed: string }>(
-    await fetch(`/api/calendar/slots?draftId=${encodeURIComponent(draftId)}`, {
+    await fetch(`/api/schedule/slots?draftId=${encodeURIComponent(draftId)}`, {
       method: "DELETE",
     }),
   );
