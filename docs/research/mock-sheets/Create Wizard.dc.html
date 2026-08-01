@@ -5,8 +5,7 @@
      'i want the claude design as EXACT' — placeholders where the backend lacks
      data, never layout drift). View: open with theme.css in the same dir.
      GRAMMAR (research banked s86, cited not re-searched): Jasper's accordion
-     rail of checkmarked slots beside the live brief ARTIFACT (never a
-     page-stepper — the artifact stays visible); Runway's named reference roles
+     of checkmarked slots (never a page-stepper); Runway's named reference roles
      (use vs reference) as chips on every attach; Leonardo's Select-media dialog
      named on its door (Uploads · Generations · Library); HubSpot's
      review-outline-before-generate = the Review slot; capability notes ride the
@@ -14,13 +13,26 @@
      What ✓ · Platforms ✓ · Sources & media OPEN · Review plan pending. The
      Profound generating-checklist state is pass-3 work, deliberately not drawn
      here (one resting state per sheet). The wizard is an OFFER — "Back to
-     prompt" stays one click away (R2). -->
+     prompt" stays one click away (R2).
+     AMENDED s90b on the founder's minimal-interaction direction ("all the
+     interactables available … without overwhelming"): the two-column layout is
+     GONE — the live brief-artifact column was pure information, so it TUCKS
+     behind one quiet line ("view the brief ▸"; the expanded state = the s90a
+     artifact column, kept in git history, drawn as a pass-3 state) and the
+     accordion — the interactables — becomes the single centered focus. This
+     amends the create-engine spec's Decision 2 by the founder's own later
+     word: accordion stays, page-stepper stays rejected, only
+     "artifact always visible" softens to "artifact one click away". R6
+     unharmed — the plan still previews at Review before anything spends. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
         <link rel="stylesheet" href="./theme.css" />
         <style>
-          .wiz-grid { flex: 1; display: grid; grid-template-columns: 470px 1fr; gap: 14px; min-height: 0; align-items: start; }
+          .wiz-col { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 34px; gap: 14px; min-height: 0; }
+          .wiz-card { width: 780px; display: flex; flex-direction: column; min-height: 0; }
+          .brief-line { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--n-900); cursor: pointer; }
+          .brief-line .chev { width: 7px; height: 7px; border-right: 1.5px solid var(--n-800); border-bottom: 1.5px solid var(--n-800); transform: rotate(45deg) translateY(-2px); }
           .slot { border-top: 1px solid var(--n-400); }
           .slot:first-child { border-top: none; }
           .slot-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; }
@@ -40,11 +52,6 @@
           .att { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
           .pick-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
           .pick-row .ck { color: var(--ok); font-weight: 600; }
-          .brief-block { padding: 12px 16px; border-top: 1px solid var(--n-400); display: flex; flex-direction: column; gap: 7px; }
-          .brief-block:first-child { border-top: none; }
-          .brief-k { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--n-800); font-family: var(--font-data); }
-          .brief-v { font-size: 13.5px; line-height: 1.55; }
-          .plan-pend { border: 1px dashed var(--n-500); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; color: var(--n-800); }
           .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
         </style>
       </helmet>
@@ -85,8 +92,8 @@
               <div style="flex:1"></div>
               <a class="card-link" href="#">Back to the prompt →</a>
             </div>
-            <div class="wiz-grid">
-              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+            <div class="wiz-col">
+              <div class="card wiz-card">
                 <div class="slot">
                   <div class="slot-head">
                     <span class="slot-num done">✓</span>
@@ -156,44 +163,9 @@
                   <span class="t-label">nothing generates until you approve the plan</span>
                 </div>
               </div>
-              <div class="card" style="display:flex;flex-direction:column;min-height:0">
-                <div class="card-head">
-                  <span class="t-title">The brief — building as you go</span>
-                  <div style="flex:1"></div>
-                  <span class="t-label">this exact record rides the run</span>
-                </div>
-                <div class="brief-block">
-                  <span class="brief-k">Topic</span>
-                  <span class="brief-v">Video as a build step: rendering launch clips from HTML — open on the empty timeline, close on the rebuild.</span>
-                  <span class="t-label">voice: confident · concrete · no hype — from profile v4</span>
-                </div>
-                <div class="brief-block">
-                  <span class="brief-k">Platforms</span>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap">
-                    <span class="plat-chip">Facebook</span>
-                    <span class="plat-chip">Instagram</span>
-                    <span class="plat-chip warn">YouTube · will hold until connected</span>
-                    <span class="plat-chip warn">TikTok · will hold until connected</span>
-                  </div>
-                </div>
-                <div class="brief-block">
-                  <span class="brief-k">Grounding</span>
-                  <span class="brief-v" style="font-size:13px">The intel capture + the rendering docs — drafts cite these; the judge checks every claim against them.</span>
-                </div>
-                <div class="brief-block">
-                  <span class="brief-k">Media</span>
-                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                    <span style="font-size:13px">pipeline-hero.png</span><span class="role-chip role-use">use</span>
-                    <span style="font-size:13px">moodboard-frame.jpg</span><span class="role-chip role-ref">reference</span>
-                  </div>
-                </div>
-                <div class="brief-block" style="flex:1">
-                  <span class="brief-k">Plan</span>
-                  <div class="plan-pend">The resolved plan lands here at Review — every platform’s verdict, the judge gates, and the cost preview, before anything generates. A platform that refuses names its reason and the fix.</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-top:1px solid var(--n-400)">
-                  <span class="t-label">judge: denylist · grounding ×2 · every gate on — it gates, it never rewrites</span>
-                </div>
+              <div class="brief-line" title="topic · platforms · grounding · media roles — the exact record that rides the run; the resolved plan and cost land at Review, before anything generates">
+                <span>The brief builds as you go</span><span>·</span><span>every gate on — the judge gates, it never rewrites</span><span>·</span>
+                <span style="color:var(--act-text2, var(--n-1000))">view the brief</span><span class="chev"></span>
               </div>
             </div>
           </div>

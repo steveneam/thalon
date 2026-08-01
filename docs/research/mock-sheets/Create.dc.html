@@ -4,34 +4,42 @@
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
      View: open this file with theme.css in the same dir; helmet ~= head.
-     AMENDED s90 — W2 MAKE draw (create-engine spec §Surfaces 1, research banked
-     s86): the dead "Advanced · staged flow →" header link is DELETED — its job
-     is now a REAL door, "Start guided" in the hero's control row (the wizard is
-     an offer beside the prompt, never a wall — R2; sheet: Create Wizard.dc.html)
-     · Jasper-style task shortcuts seeded from Intel picks (one row, each names
-     its kind + prefills the wizard) · Latest runs rows now carry their door:
-     in-flight → "Open in Composer →" (the run-scoped checkpoint, R7), published
-     → view live (unchanged). -->
+     REDRAWN s90b on the founder's minimal-interaction direction (verbatim:
+     "simplicity is key … all the interactables available to the user without
+     overwhelming them so they only have to interact minimally to get the
+     complex job done" — Create read as intimidating; Latest runs and
+     This-run-before-it-starts are extra info, tucked). The redraw follows the
+     UNANIMOUS best-in-class pattern (library §Create home, 8 products swept
+     s90b: ChatGPT · Copilot · Notion AI · WRITER · Manus · Langdock · Lindy ·
+     Obvious): one warm headline question · ONE centered prompt card whose
+     controls live INSIDE its own bottom row (family seg + intel chip left;
+     Start guided + Generate right) · suggestion chips beneath · everything
+     informational tucked — the run config is ONE collapsed line ("review or
+     change ▸"; its EXPANDED state = the s90a dl-row card, kept in git history,
+     drawn as a pass-3 state) and Latest runs is ONE quiet line at the foot
+     (W1's "Latest runs stays on Create home" decision honored at minimum
+     surface area). R2/R6 hold: the wizard stays an offer; the plan still
+     previews before any spend. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
         <link rel="stylesheet" href="./theme.css" />
         <style>
-          .prompt-hero { border: 1px solid var(--n-500); background: var(--n-100); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-          .task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-          .task-card { display: flex; align-items: center; gap: 10px; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 10px 12px; cursor: pointer; transition: border-color var(--motion-fast); }
-          .task-card:hover { border-color: var(--n-500); }
-          .task-kind { width: 30px; height: 30px; border-radius: 8px; background: var(--n-200); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 10.5px; font-family: var(--font-data); color: var(--n-900); }
-          .prompt-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 16px; font-size: 15px; color: var(--n-1000); min-height: 84px; line-height: 1.6; }
-          .prompt-box .ph { color: var(--n-800); }
-          .pick-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--n-500); border-radius: 8px; background: var(--n-200); font-size: 12.5px; }
-          .cr-grid { display: grid; grid-template-columns: 1fr 400px; gap: 14px; align-items: start; }
-          .dl-row { display: flex; align-items: baseline; gap: 12px; padding: 8px 16px; border-top: 1px solid var(--n-400); font-size: 13px; }
-          .dl-row:first-child { border-top: none; }
-          .dl-row dt { color: var(--n-900); width: 110px; flex: none; font-size: 12.5px; }
-          .dl-row dd { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-          .term-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border: 1px solid var(--n-500); border-radius: var(--r-pill); font-size: 11.5px; color: var(--n-1000); background: var(--n-200); }
-          .term-chip.primary { border-color: var(--act); background: var(--act-subtle); }
+          .ask-col { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 96px; gap: 18px; }
+          .ask-h { font-size: 26px; font-weight: 600; letter-spacing: -0.015em; }
+          .ask-card { width: 740px; border: 1px solid var(--n-500); background: var(--n-100); border-radius: 14px; display: flex; flex-direction: column; }
+          .ask-box { padding: 18px 20px 10px; font-size: 15px; line-height: 1.6; color: var(--n-1000); min-height: 76px; }
+          .ask-box .ph { color: var(--n-800); }
+          .ask-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px 12px; }
+          .pick-chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; border: 1px solid var(--n-500); border-radius: 8px; background: var(--n-200); font-size: 12px; }
+          .run-line { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--n-900); cursor: pointer; }
+          .run-line b { font-weight: 500; color: var(--n-1000); }
+          .run-line .chev { width: 7px; height: 7px; border-right: 1.5px solid var(--n-800); border-bottom: 1.5px solid var(--n-800); transform: rotate(45deg) translateY(-2px); }
+          .sugg-row { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 740px; }
+          .sugg { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border: 1px solid var(--n-400); border-radius: var(--r-pill); background: var(--n-100); font-size: 12.5px; color: var(--n-1000); cursor: pointer; transition: border-color var(--motion-fast); }
+          .sugg:hover { border-color: var(--n-500); }
+          .sugg .k { font-size: 10px; font-family: var(--font-data); color: var(--n-800); }
+          .recent-line { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 12px; color: var(--n-800); margin-top: auto; padding-bottom: 6px; }
           .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
         </style>
       </helmet>
@@ -65,93 +73,35 @@
             <div class="btn btn-primary btn-sm">+ Create</div>
             <div class="avatar">S</div>
           </div>
-          <div class="content" style="gap:16px">
-            <div style="display:flex;align-items:center;gap:12px">
-              <h1 class="t-headline">Create</h1>
-              <div style="flex:1"></div>
-            </div>
-            <div class="prompt-hero">
-              <div style="display:flex;align-items:center;gap:10px">
-                <div class="seg"><span class="seg-opt">Post</span><span class="seg-opt on">Video</span><span class="seg-opt">Page</span><span class="seg-opt">Email</span></div>
-                <div style="flex:1"></div>
-                <span class="t-label">one prompt → drafts → the judge → your click</span>
-              </div>
-              <div class="prompt-box">Video as a build step: rendering launch clips from HTML — open on the empty timeline, close on the rebuild. <span class="ph">…say it in your words; the profile carries the voice.</span></div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="pick-chip"><span class="pill pill-heat-hot" style="height:18px;font-size:10.5px">Hot</span>From intel · title + angle + hook attached<span style="color:var(--n-800);cursor:pointer">×</span></span>
-                <div style="flex:1"></div>
-                <div class="btn btn-ghost" title="the wizard — staged, prefilled, media in; the prompt stays one click away">Start guided</div>
-                <div class="btn btn-ghost">Preview plan</div>
-                <div class="btn btn-primary">Generate</div>
-              </div>
-            </div>
-            <div class="task-grid">
-              <div class="task-card">
-                <span class="task-kind">post</span>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">“Video as a build step” <span class="pill pill-heat-hot" style="height:17px;font-size:10px;vertical-align:2px">Hot</span></div>
-                  <div class="excerpt">from Intel · prefills the brief</div>
-                </div>
-              </div>
-              <div class="task-card">
-                <span class="task-kind">video</span>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">The launch-film angle · staged</div>
-                  <div class="excerpt">opens the wizard at What</div>
-                </div>
-              </div>
-              <div class="task-card">
-                <span class="task-kind">page</span>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">“Inside the render pipeline”</div>
-                  <div class="excerpt">article · the blog mirrors it</div>
-                </div>
-              </div>
-            </div>
-            <div class="cr-grid">
-              <div class="card">
-                <div class="card-head">
-                  <span class="t-title">This run, before it starts</span>
+          <div class="content">
+            <div class="ask-col">
+              <div class="ask-h">What are we making today?</div>
+              <div class="ask-card">
+                <div class="ask-box">Video as a build step: rendering launch clips from HTML — open on the empty timeline, close on the rebuild. <span class="ph">…say it in your words; the profile carries the voice, the engine does the rest.</span></div>
+                <div class="ask-row">
+                  <div class="seg"><span class="seg-opt">Post</span><span class="seg-opt on">Video</span><span class="seg-opt">Page</span><span class="seg-opt">Email</span></div>
+                  <span class="pick-chip"><span class="pill pill-heat-hot" style="height:17px;font-size:10px">Hot</span>From intel<span style="color:var(--n-800);cursor:pointer">×</span></span>
                   <div style="flex:1"></div>
-                  <span class="t-label">prefilled from profile v4 — change anything</span>
-                </div>
-                <div class="dl-row"><dt>Platforms</dt><dd><span class="pill pill-idle">LinkedIn</span><span class="pill pill-idle">X</span><span class="pill pill-idle">Facebook</span><a class="card-link" href="#">edit</a></dd></div>
-                <div class="dl-row"><dt>Voice</dt><dd>Confident · concrete · no hype <span class="t-label">· from the brand profile</span></dd></div>
-                <div class="dl-row"><dt>Grounding</dt><dd>The intel capture + 2 library sources <a class="card-link" href="#">view sources</a></dd></div>
-                <div class="dl-row"><dt>Discoverability</dt><dd><span class="term-chip primary" title="primary entity — named naturally in every draft">AI</span><span class="term-chip">content automation</span><span class="term-chip">build-step video</span><span class="term-chip">deterministic video</span><a class="card-link" href="#">edit</a><span class="t-label" style="width:100%">from the intel pick + your topics · coverage checked beside the judge — a miss warns, right on the draft</span></dd></div>
-                <div class="dl-row"><dt>Judge</dt><dd>Denylist · grounding ×2 · every gate on <span class="t-label">· it gates — it never rewrites</span></dd></div>
-                <div class="dl-row"><dt>Video</dt><dd>~40s · 8 beats · screen text code-drawn <span class="t-label">· cost preview before any mint</span></dd></div>
-              </div>
-              <div class="card">
-                <div class="card-head">
-                  <span class="t-title">Latest runs</span>
-                  <div style="flex:1"></div>
-                  <a class="card-link" href="#">All runs →</a>
-                </div>
-                <div class="row">
-                  <div class="thumb-sm"><span>clip frame</span></div>
-                  <div style="flex:1;min-width:0">
-                    <div style="font-size:13px;font-weight:600">Launch film · 3 platforms</div>
-                    <div class="excerpt">2 at the judge · 1 waiting · <a href="#">In Composer →</a></div>
-                  </div>
-                  <span class="t-data">2h ago</span>
-                </div>
-                <div class="row">
-                  <div style="flex:1;min-width:0">
-                    <div style="font-size:13px;font-weight:600">Deterministic-video post · X</div>
-                    <div class="excerpt">Published · <a href="#">view live ↗</a></div>
-                  </div>
-                  <span class="t-data">Tue</span>
-                </div>
-                <div class="row">
-                  <div class="thumb-sm"><span>page hero</span></div>
-                  <div style="flex:1;min-width:0">
-                    <div style="font-size:13px;font-weight:600">Pipeline article · blog</div>
-                    <div class="excerpt">Published · <a href="#">/blog/build-step-video ↗</a></div>
-                  </div>
-                  <span class="t-data">Mon</span>
+                  <div class="btn btn-ghost btn-sm" title="the wizard — staged, prefilled, media in; the prompt stays one click away">Start guided</div>
+                  <div class="btn btn-primary">Generate</div>
                 </div>
               </div>
+              <div class="run-line" title="the full plan — platforms, grounding, gates, cost — previews before anything spends">
+                <span>This run:</span>
+                <b>LinkedIn · X · Facebook</b><span>·</span><span>voice from profile v4</span><span>·</span><span>every gate on</span><span>·</span><b>~40s video</b>
+                <span style="color:var(--act-text2, var(--n-1000))">review or change</span><span class="chev"></span>
+              </div>
+              <div class="sugg-row">
+                <span class="sugg"><span class="k">post</span>“Video as a build step” <span class="pill pill-heat-hot" style="height:16px;font-size:9.5px">Hot</span></span>
+                <span class="sugg"><span class="k">video</span>The launch-film angle · staged</span>
+                <span class="sugg"><span class="k">page</span>“Inside the render pipeline”</span>
+              </div>
+            </div>
+            <div class="recent-line">
+              <span>Latest · Launch film — 2 at the judge · 1 waiting ·</span>
+              <a class="card-link" href="#" style="font-size:12px">In Composer →</a>
+              <span style="color:var(--n-600)">|</span>
+              <a class="card-link" href="#" style="font-size:12px">All runs →</a>
             </div>
           </div>
         </div>

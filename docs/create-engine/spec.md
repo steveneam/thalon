@@ -257,7 +257,12 @@ exist and records the run.
 2. **Wizard as accordion rail, not page-stepper.** Jasper pattern; keeps the artifact
    visible, matches the founder's "editing rail" instinct, and collapses gracefully to
    the Prompt hero. Alternative: HubSpot's full-page steps (rejected: heavier, hides
-   context). Reversible.
+   context). Reversible. **AMENDED s90b by the founder's own later word (the
+   minimal-interaction doctrine, programme file §mandate): the accordion stays and
+   the page-stepper stays rejected, but "artifact always visible" softened to
+   "artifact one click away" — the brief column was pure information, so it tucks
+   behind a quiet line; the sheet of record draws it tucked. R6 unharmed: the plan
+   still previews at Review before anything spends.**
 3. **One orchestrator over existing engines, not a rewrite.** The family engines are
    proven and judged; Create adds brief/plan/record. Alternative: unify generation
    itself (rejected: high risk, no product gain now). Hard to reverse cheaply — keep

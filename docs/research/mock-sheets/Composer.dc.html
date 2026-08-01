@@ -84,9 +84,29 @@
      the 940 fold by ~85px, putting the action row AND the honesty caveat below it — the
      whole point of that pass, invisible. In the three-column rebuild the tooltip was
      anchored to the COLUMN, so `top:100%` meant the column's full height and threw it
-     off the bottom of the screen. Current geometry: columns 115→828, destination band
-     840→916, tooltip 657→828, all inside 940. Neither defect looked wrong in the render;
-     the content simply stopped.
+     off the bottom of the screen. Neither defect looked wrong in the render; the
+     content simply stopped.
+
+     AMENDED s90b on the founder's minimal-interaction direction ("all the
+     interactables available … without overwhelming … interact minimally to
+     get the complex job done" — and his explicit "do the same for the
+     Composer"). His s86 zoning SURVIVES (write left · see middle · knobs
+     right — his own call); what changed is the weight inside each zone:
+       · The JUDGE card compressed to a verdict STRIP under the body — the
+         decision facts stay visible in words (would block · the named hit ·
+         grounding · voice), the row-per-gate anatomy tucked behind
+         "details ▸" (drawn collapsed; expanded = the s90a card, git
+         history, a pass-3 state). The hit stays marked IN the body.
+       · DISCOVERABILITY compressed to ONE warn line naming the miss — it
+         warns, it never blocks, so it earns a line, not a card.
+       · The SETTINGS rail keeps only the knobs an operator actually turns
+         per post (Media · Cover frame · First comment); the identity/rare
+         fields (Post as · Visibility · Link · Alt text · Who can comment)
+         sit behind "More settings ▾ · 5" — the density doctrine's own
+         popover rule, finally applied to this rail.
+       · The FIT BAND slimmed to words: name + count + the refusal reason —
+         the bars were decoration; the words were the content. Every refusal
+         reason survives verbatim (the honesty grammar is untouched).
      View: open this file with theme.css in the same dir; helmet ~= head. -->
 <html>
   <head>
@@ -147,16 +167,15 @@
           .fit-top { display: flex; align-items: center; gap: 7px; }
           .fit-count { font-family: var(--font-data); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--n-1000); flex: none; }
           .fit-why { font-size: 11px; color: var(--n-900); line-height: 1.35; }
-          .fit-bar { width: 100%; flex: none; }
 
           /* Right column. */
           .cmp-right { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
-          .jrow { display: flex; align-items: flex-start; gap: 9px; padding: 7px 14px; border-top: 1px solid var(--n-400); font-size: 12.5px; }
-          .jrow:first-of-type { border-top: none; }
-          .jmark { width: 16px; flex: none; text-align: center; font-size: 12px; margin-top: 1px; }
-          .term-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border: 1px solid var(--n-500); border-radius: var(--r-pill); font-size: 11.5px; color: var(--n-1000); background: var(--n-200); }
-          .term-chip.primary { border-color: var(--act); background: var(--act-subtle); }
-          .term-chip.miss { border-color: var(--warn); color: var(--warn); background: var(--warn-subtle); }
+          /* s90b: the judge as a verdict STRIP — facts in words, anatomy tucked. */
+          .jstrip { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 9px 12px; display: flex; flex-direction: column; gap: 7px; }
+          .jstrip-top { display: flex; align-items: center; gap: 9px; }
+          .jstrip-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 10px; font-size: 11px; color: var(--n-900); }
+          .jstrip-facts > span, .jstrip-facts > a { white-space: nowrap; }
+          .dline { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--n-900); padding: 0 2px; }
 
           /* Preview with the REAL truncation point drawn. */
           .pv { border: 1px solid var(--n-500); border-radius: 9px; background: var(--n-bg); padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
@@ -258,53 +277,22 @@
                   Deterministic video changed what we can promise. Every beat is a build step, so the same prompt renders the same film twice — and a failed take names the beat that failed instead of the whole render. Nothing here is <span class="hit">guaranteed</span> to be faster on the first pass, but the second pass is free.
                 </div>
 
-                <div class="card">
-                  <div class="card-head">
-                    <span class="t-title">Judge</span>
+                <div class="jstrip">
+                  <div class="jstrip-top">
                     <span class="pill pill-err">would block</span>
+                    <span style="font-size:12.5px">“guaranteed” is denylisted — marked in the body</span>
+                  </div>
+                  <div class="jstrip-facts">
+                    <span><span style="color:var(--ok)">✓</span> grounding 2 of 2</span>
+                    <span><span style="color:var(--ok)">✓</span> voice · profile v4</span>
+                    <span class="t-label" style="font-size:11px">it gates — it never rewrites</span>
                     <div style="flex:1"></div>
-                    <span class="t-label">before you spend a click</span>
-                  </div>
-                  <div class="jrow">
-                    <span class="jmark" style="color:var(--err)">✕</span>
-                    <div style="min-width:0">
-                      <div style="font-weight:500">Denylist · 1 hit</div>
-                      <div class="excerpt" style="white-space:normal">“guaranteed” is on your denylist — marked in the body.</div>
-                    </div>
-                  </div>
-                  <div class="jrow">
-                    <span class="jmark" style="color:var(--ok)">✓</span>
-                    <div style="min-width:0">
-                      <div style="font-weight:500">Grounding · 2 of 2</div>
-                      <div class="excerpt" style="white-space:normal">Every claim ties to a source. <a href="#">View</a></div>
-                    </div>
-                  </div>
-                  <div class="jrow">
-                    <span class="jmark" style="color:var(--ok)">✓</span>
-                    <div style="min-width:0">
-                      <div style="font-weight:500">Voice · within profile v4</div>
-                      <div class="excerpt" style="white-space:normal">Concrete, no hype.</div>
-                    </div>
-                  </div>
-                  <div class="jrow" style="background:var(--n-bg)">
-                    <span class="jmark" style="color:var(--n-800)">·</span>
-                    <span class="t-label" style="font-size:11.5px">It gates — it never rewrites.</span>
+                    <a class="card-link" href="#" style="font-size:11.5px">details ▸</a>
                   </div>
                 </div>
-
-                <div class="card">
-                  <div class="card-head">
-                    <span class="t-title">Discoverability</span>
-                    <span class="pill pill-warn">3 of 4</span>
-                    <div style="flex:1"></div>
-                    <span class="t-label">warns</span>
-                  </div>
-                  <div style="padding:9px 12px;display:flex;flex-wrap:wrap;gap:5px;align-items:center">
-                    <span class="term-chip primary">AI</span>
-                    <span class="term-chip">content automation</span>
-                    <span class="term-chip">build-step video</span>
-                    <span class="term-chip miss">deterministic video · missing</span>
-                  </div>
+                <div class="dline">
+                  <span class="pill pill-warn" style="flex:none">3 of 4</span>
+                  <span>Discoverability — “deterministic video” not in the body · warns, never blocks</span>
                 </div>
               </div>
 
@@ -363,14 +351,10 @@
                         preview could have it (founder's call). ── -->
               <div class="cmp-right" style="position:relative">
                 <div class="band">
-                  <div class="fld"><dt>Post as</dt><dd><span class="ctl">Steven · member</span></dd></div>
-                  <div class="fld"><dt>Visibility</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
-                  <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label" style="font-size:11px">off — links cost no reach here</span></dd></div>
                   <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="mtools"><span class="mtool" title="Crop"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4.5 1.5v10h10"></path><path d="M1.5 4.5h10v10"></path></svg></span><span class="mtool" title="Alt text"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 6.4 3.5h1.2l3.4 9M4.6 9.6h5.2M13 3.5v9"></path></svg></span><span class="mtool" title="Replace"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5A5.5 5.5 0 0 1 12 4.2"></path><path d="M12.4 1.9v2.6H9.8"></path><path d="M13.5 9.5A5.5 5.5 0 0 1 4 11.8"></path><path d="M3.6 14.1v-2.6h2.6"></path></svg></span><span class="mtool danger" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 4.5h9M6.5 4.5V3h3v1.5M5 4.5l.6 8h4.8l.6-8"></path></svg></span></span></dd></div>
                   <div class="fld"><dt>Cover frame</dt><dd><span class="frames"><span class="frame on"><span>0:00</span></span><span class="frame"><span>0:12</span></span><span class="frame"><span>0:24</span></span><span class="frame"><span>0:36</span></span></span></dd></div>
-                  <div class="fld"><dt>Link</dt><dd><span class="ctl">thalon.example/build-step-video</span></dd></div>
-                  <div class="fld"><dt>Alt text</dt><dd><span class="ctl">“A build step renders a beat”</span></dd></div>
-                  <div class="fld"><dt>Who can comment</dt><dd><span class="ctl">Anyone ▾</span></dd></div>
+                  <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label" style="font-size:11px">off — links cost no reach here</span></dd></div>
+                  <div class="fld" style="background:var(--n-bg)"><dt style="display:none"></dt><dd style="width:100%"><span style="display:flex;align-items:center;gap:7px;width:100%;font-size:12.5px;color:var(--n-900);cursor:pointer">More settings<span class="t-data">· 5</span><div style="flex:1"></div><span style="font-size:10px">▾</span></span><span class="t-label" style="font-size:10.5px">Post as · Visibility · Link · Alt text · Who can comment — set once, rarely touched</span></dd></div>
                 </div>
                 <!-- The wrapper is what the tooltip anchors to. Anchoring it to the
                      COLUMN instead put `top:100%` at the column's full height and threw
@@ -393,12 +377,10 @@
             <div class="fitband">
                 <div class="fitline">
                   <div class="fit-top"><span class="fit-count">2,412 / 3,000</span><div style="flex:1"></div><span class="t-data">LinkedIn</span></div>
-                  <div class="fit-bar bar-trough"><div class="bar-fill" style="width:80%;background:var(--ok)"></div></div>
                   <span class="fit-why">Fits. The body posts whole — no cut.</span>
                 </div>
                 <div class="fitline">
                   <div class="fit-top"><span class="fit-count">2,412 / 63,206</span><div style="flex:1"></div><span class="t-data">Facebook</span></div>
-                  <div class="fit-bar bar-trough"><div class="bar-fill" style="width:6%;background:var(--ok)"></div></div>
                   <span class="fit-why">Fits, with room to spare.</span>
                 </div>
                 <div class="fitline" style="background:var(--err-subtle)">
@@ -408,7 +390,6 @@
                 </div>
                 <div class="fitline" style="background:var(--warn-subtle)">
                   <div class="fit-top"><span class="fit-count" style="color:var(--warn)">312 / 300</span><div style="flex:1"></div><span class="t-data">Bluesky</span></div>
-                  <div class="fit-bar bar-trough"><div class="bar-fill" style="width:100%;background:var(--warn)"></div></div>
                   <span class="fit-why" style="color:var(--warn)">Over by 12. The last sentence gets cut — trim it here.</span>
                 </div>
                 <div class="fitline">
