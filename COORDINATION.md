@@ -192,7 +192,34 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
-## Sprint 9 / s89 — PLANNED (budget refreshes **Jul 31, 11pm UTC**; his word: *"usage should be refreshed by then"*)
+## Sprint 9 / s89 — **CLOSED: the full shape ran** (both lanes MERGED · W1 complete through sheets · verify on merged main exit 0, 3091+/9)
+
+**Ran 2026-08-01 on his "gogogo. you have my approval"** (read as covering the
+one outstanding ask, `judge-candidate`'s named word — both lanes launched).
+The budget condition held (reset was Jul 31, 23:00 UTC), so the degrade ladder
+was never needed.
+
+| lane | outcome |
+|---|---|
+| analytics-honesty | **MERGED** (5 commits, ff onto main). X deferral structural (`metrics/deferral.ts` — lifting it at launch = deleting `deferral.ts:26-35`, pinning tests fail by name) · FB comment/share via the post-object second GET, live-doc-cited 2026-08-01, per-metric degradation · batch `seriesForPublications` on the frozen table, read-model 1+N→2 queries. WRAP: `agent_handoff/lanes/WRAP-analytics-honesty.md`. |
+| judge-candidate | **MERGED** (1 commit, ff onto main). One shared gate ladder (`proprietary/judge/src/gate-ladder.ts`), two entry points — `runJudgePipeline` unchanged (pipeline tests untouched), `judgeCandidate` writes nothing · `aiEditDraft` judges the candidate BEFORE proposing (R8 now met exactly) · deviation block DELETED from `docs/create-engine/spec.md` · typecheck caught a real Draft.format nullability error. WRAP: `agent_handoff/lanes/WRAP-judge-candidate.md`. |
+
+**LEAD TRACK — W1 ran end to end minus the verdict:** research banked
+(library §Approve/§Dashboard+Board/§Runs, ≤2 searches per surface held),
+contracts updated in `docs/workspace/spec.md` §3, both research questions
+ANSWERED (§5.1 onboarding = a Dashboard setup band + empty states, no route;
+§5.6 notifications = bundled-by-reason, recorded and deliberately waiting),
+three sheets amended + shot + measured (Approve · Dashboard w/ Board toggle +
+setup band · Runs w/ the create_runs re-shape), ledger rows moved same-commit
+(research 9→13 of 20; p1 on all four W1 rows). **OPEN: the founder's W1
+verdict — no W1 surface builds before it; W2 (Create sheets) queues behind it.**
+
+**Residue:** canvas parity debt on Approve/Dashboard (programme file §rule 2,
+dated, trigger = next session's first action; Board + Runs uploaded) · both
+lane panes were found with founder-typed UNSUBMITTED text ("merge the lane" /
+"Read …WRAP…") — never submitted, windows killed at GC; flagged in CURRENT.md.
+
+## Sprint 9 / s89 — the plan as written (budget refreshes **Jul 31, 11pm UTC**; his word: *"usage should be refreshed by then"*)
 
 **The shape: the lead track is the point, and the lanes run beside it.** s88 was
 one lane + a thin lead track because budget forced it. s89 inverts that — the
