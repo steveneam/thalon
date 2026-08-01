@@ -3,7 +3,15 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s89 — W1 research pass (ux-refinement-program.md §Dashboard+Board):
+     the Overview|Board seg IS the Board ruling (s88: Board retires as a route,
+     becomes this toggle — Jira ships Summary/Board as tabs of one space); the
+     SETUP BAND is gap §5.1's answer drawn (Hex's "Set up your workspace · N of
+     4", every step skippable, dismissible — no onboarding route exists or will);
+     the Composing tile doors to Runs (the ORIENT join); "Latest runs" stays on
+     Create home by W1 decision — this surface shows counts, never a second run
+     list. Board.dc.html's content becomes this sheet's Board view state. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -39,6 +47,10 @@
           .pub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
           .pub-card { display: flex; align-items: center; gap: 10px; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 10px 12px; cursor: pointer; transition: border-color var(--motion-fast); }
           .pub-card:hover { border-color: var(--n-500); }
+          .setup { display: flex; align-items: center; gap: 14px; padding: 9px 14px; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); }
+          .step { font-size: 12px; color: var(--n-800); display: inline-flex; align-items: center; gap: 5px; }
+          .step.done { color: var(--ok); }
+          .setup-x { color: var(--n-800); font-size: 14px; cursor: pointer; padding: 0 2px; }
         </style>
       </helmet>
       <div class="screen" data-screen-label="Dashboard">
@@ -110,6 +122,16 @@
               <div style="flex:1"></div>
               <div class="seg"><span class="seg-opt on">Overview</span><span class="seg-opt">Board</span></div>
             </div>
+            <div class="setup">
+              <span class="t-title" style="font-size:13px">Set up your workspace</span>
+              <span class="t-label">3 of 4</span>
+              <span class="step done">✓ Connect a channel</span>
+              <span class="step done">✓ Make a profile</span>
+              <span class="step done">✓ First create</span>
+              <a class="card-link" href="#">First approve — 4 waiting →</a>
+              <div style="flex:1"></div>
+              <span class="setup-x" title="dismiss — every step is skippable, this band never blocks">×</span>
+            </div>
             <div class="tiles">
               <div class="tile tile-link">
                 <div class="tile-head"><span class="t-label">Rising trends</span><div style="flex:1"></div><div class="spark" title="cards per sweep · 7 days"><i style="height:5px"></i><i style="height:8px"></i><i style="height:6px"></i><i style="height:10px"></i><i style="height:9px"></i><i style="height:12px"></i><i style="height:15px;background:var(--n-800)"></i></div><span class="tile-arrow">→</span></div>
@@ -117,9 +139,9 @@
                 <span class="ctx">swept 2h ago · next in 4h</span>
               </div>
               <div class="tile tile-link">
-                <div class="tile-head"><span class="t-label">Composing</span><div style="flex:1"></div><span class="tile-arrow">→</span></div>
+                <div class="tile-head"><span class="t-label">Runs live</span><div style="flex:1"></div><span class="tile-arrow">→</span></div>
                 <span class="fact">2</span>
-                <span class="ctx">drafts at the judge gate</span>
+                <span class="ctx">1 rendering · 1 at the judge gate</span>
               </div>
               <div class="tile tile-link" style="border-color: color-mix(in oklab, var(--warn) 35%, var(--n-400))">
                 <div class="tile-head"><span class="t-label">Needs you</span><div style="flex:1"></div><span class="tile-arrow">→</span></div>
@@ -220,9 +242,9 @@
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;border-top:1px solid var(--n-400)">
-                  <span class="t-label">Cadence — LinkedIn ≤ 2/day · X ≤ 4/day</span>
+                  <span class="t-label" title="cadence caps — the planner refuses past these">LinkedIn ≤ 2/day · X ≤ 4/day</span>
                   <div style="flex:1"></div>
-                  <a class="card-link" href="#">Open calendar →</a>
+                  <a class="card-link" href="#">Open schedule →</a>
                 </div>
               </div>
             </div>
