@@ -62,12 +62,6 @@ changing a product invariant. **The rail sweep was separately approved** on
    is the viewing surface. Keep them byte-identical: one file, whose `<head>`
    carries BOTH `theme.css` (local shooting) and `support.js` (canvas). Proven
    on `Source Media.dc.html` and now the D4 four.
-   **⚠ OPEN PARITY DEBT (s89, 2026-08-01): `Approve.dc.html` + `Dashboard.dc.html`
-   are AHEAD of the canvas** — the W1 amendments are committed here but not yet
-   uploaded (Board + Runs went up same-session; the two larger files exceeded the
-   session's inline-transfer budget). **Trigger: first action of the next session**
-   — `finalize_plan` → `write_files` on project f5d304cb, then delete this block.
-   Until then the canvas's Approve/Dashboard are the STALE pre-W1 versions.
 3. **Shoot and READ before presenting.** `node scripts/shoot-surface.mjs --sheet
    <Name>.dc.html --mode dark`. The viewport is parsed from `theme.css`'s
    `.screen` rule (**1440×940** — not 900; a 900px shot invents false clipping).
