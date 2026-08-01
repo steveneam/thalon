@@ -297,11 +297,14 @@ export type PlatformRouting = z.infer<typeof platformRoutingSchema>;
  *  - `page` and `email` carry exactly ONE destination each (the tenant's own
  *    site; their list), so "routing" them is a choice with one option —
  *    absence is more truthful than a one-element array pretending to decide.
- *  - Kompozy routes video to YouTube first. We cannot: there is no `youtube`
- *    platform key (see `platform-settings.ts` §SETTINGS_DEFERRED). Shipping
- *    it here would prefill every video run with a destination that plan
- *    derivation must immediately refuse — a default that generates its own
- *    error message is worse than no default.
+ *  - Kompozy routes video to YouTube first. We still don't: the `youtube`
+ *    platform key EXISTS (s90 lane — capability rows, settings schema,
+ *    disarmed driver) but the video PUBLISH path does not (the publish
+ *    door's media envelope is image-only, so every youtube draft fails fit
+ *    with `video_required`). Prefilling it would seed every video run with
+ *    a destination that refuses — a default that generates its own error
+ *    message is worse than no default. Add it here when the video-arc
+ *    publish wiring lands.
  */
 export const DEFAULT_PLATFORM_ROUTING: PlatformRouting = {
   post: ["linkedin", "facebook", "x", "bluesky"],
