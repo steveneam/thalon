@@ -3,7 +3,15 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s89 — W1 research pass + the Runs↔create_runs re-shape (workspace
+     spec §3 ORIENT, §5.8; ux-refinement-program.md §Runs): RUNNING-NOW band
+     above the history (Cloudflare) · create-run PARENT rows with the family
+     runs nested under them (the s87 window's shape) — an orphan family run
+     (pre-create era, the Thursday rows) stays flat, never minting a fake
+     parent · status carries its duration beside it (Vercel) · judge outcome
+     rides the row as a chip (Hume) · per-run cost with a day TOTAL in the
+     footer (Clay, from usage_ledger) · seg gains Live/Waiting states. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -12,6 +20,14 @@
           .day-hd { font-size: 12.5px; font-weight: 600; color: var(--n-900); padding: 4px 2px; }
           .run-lead { font-size: 13.5px; font-weight: 600; }
           .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+          .live-band { border-color: color-mix(in oklab, var(--act) 30%, var(--n-400)); }
+          .work-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--n-500); border-top-color: var(--act); flex: none; }
+          .child { padding-left: 46px; background: var(--n-bg); }
+          .child .run-lead { font-size: 12.5px; font-weight: 500; }
+          .jchip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: var(--ok-subtle); color: var(--ok); white-space: nowrap; }
+          .jchip.wait { background: var(--warn-subtle); color: var(--warn); }
+          .dur { font-family: var(--font-data); font-size: 11px; color: var(--n-800); white-space: nowrap; }
+          .plat-dot { width: 16px; height: 16px; border-radius: 4px; background: var(--n-300); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--n-1000); }
         </style>
       </helmet>
       <div class="screen" data-screen-label="Runs">
@@ -50,31 +66,81 @@
               <span class="pill pill-idle">18 this week</span>
               <span class="pill pill-err">1 failed</span>
               <div style="flex:1"></div>
-              <div class="seg"><span class="seg-opt on">All</span><span class="seg-opt">Failed</span><span class="seg-opt">Published</span></div>
+              <div class="seg"><span class="seg-opt on">All</span><span class="seg-opt">Live</span><span class="seg-opt">Waiting</span><span class="seg-opt">Failed</span><span class="seg-opt">Published</span></div>
+            </div>
+            <div class="card live-band">
+              <div class="row">
+                <span class="work-spin"></span>
+                <div style="flex:1;min-width:0">
+                  <div class="run-lead">Rendering · launch film beat 03</div>
+                  <div class="bar-trough" style="margin-top:6px;max-width:420px"><div class="bar-fill" style="width:62%;background:var(--act)"></div></div>
+                </div>
+                <span class="dur">~40s left</span>
+                <a class="card-link" href="#">Watch →</a>
+              </div>
+              <div class="row">
+                <span class="work-spin"></span>
+                <div style="flex:1;min-width:0">
+                  <div class="run-lead">Fan-out · 3 drafts</div>
+                  <div class="excerpt">at the judge gate</div>
+                </div>
+                <span class="dur">12s</span>
+                <a class="card-link" href="#">Watch →</a>
+              </div>
             </div>
             <div class="day-hd">Today · Friday 25 July</div>
             <div class="card">
               <div class="row">
                 <div class="thumb-sm"><span>clip frame</span></div>
                 <div style="flex:1;min-width:0">
-                  <div class="run-lead">Launch film · LinkedIn + X + Facebook</div>
-                  <div class="excerpt">One prompt → 3 drafts · 2 passed the judge · 1 waiting on you</div>
+                  <div class="run-lead">Create run · launch film — one prompt → video + 3 posts</div>
+                  <div class="excerpt">profile v4 · drafted opus-5 · the 3 posts below are its family</div>
                 </div>
-                <span class="pill pill-warn">1 waits</span>
+                <span class="jchip">judge ✓ 3 of 3</span>
+                <span class="pill pill-warn">3 wait on you</span>
+                <span class="dur">3m 42s · $0.09</span>
                 <span class="t-data">09:00</span>
                 <a class="card-link" href="#">Open →</a>
               </div>
+              <div class="row child">
+                <div class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></div>
+                <div style="flex:1;min-width:0">
+                  <div class="run-lead">clip plan 0:12–0:47 · <em style="color:var(--n-900)">“Our launch video has no editor file…”</em></div>
+                </div>
+                <span class="jchip">✓ passed</span>
+                <span class="pill pill-warn">Waiting</span>
+                <a class="card-link" href="#">In Approve →</a>
+              </div>
+              <div class="row child">
+                <div class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></div>
+                <div style="flex:1;min-width:0">
+                  <div class="run-lead">post · <em style="color:var(--n-900)">“The export queue disappeared the day video…”</em></div>
+                </div>
+                <span class="jchip">✓ passed</span>
+                <span class="pill pill-warn">Waiting</span>
+                <a class="card-link" href="#">In Approve →</a>
+              </div>
+              <div class="row child">
+                <div class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z"></path></svg></div>
+                <div style="flex:1;min-width:0">
+                  <div class="run-lead">post · <em style="color:var(--n-900)">“Render your launch film from HTML…”</em></div>
+                </div>
+                <span class="jchip">✓ passed</span>
+                <span class="pill pill-warn">Waiting</span>
+                <a class="card-link" href="#">In Approve →</a>
+              </div>
               <div class="row">
                 <div style="flex:1;min-width:0">
-                  <div class="run-lead">X post · deterministic-video thread</div>
+                  <div class="run-lead">Create run · deterministic-video thread for X</div>
                   <div class="excerpt" style="color:var(--err)">Gateway timeout at generation — nothing was drafted; the run kept its receipts</div>
                 </div>
                 <span class="pill pill-err">Failed</span>
+                <span class="dur">failed at 8s · $0.00</span>
                 <span class="t-data">08:41</span>
                 <div class="btn btn-ghost btn-sm">Retry</div>
               </div>
             </div>
-            <div class="day-hd">Thursday 24 July</div>
+            <div class="day-hd">Thursday 24 July <span style="font-weight:400;color:var(--n-800)">· family runs from before the create era stay their own rows — no fake parents</span></div>
             <div class="card">
               <div class="row">
                 <div class="thumb-sm"><span>page hero</span></div>
@@ -106,8 +172,10 @@
                 <a class="card-link" href="#">Open →</a>
               </div>
             </div>
-            <div style="display:flex">
+            <div style="display:flex;align-items:center;gap:10px">
               <span class="t-label">Every run keeps its receipts — prompt, sources, judge verdicts, model seats, cost — one click deep.</span>
+              <div style="flex:1"></div>
+              <span class="dur">Today — 2 runs finished · <b style="color:var(--n-1000)">$0.09 total</b> · 2 live</span>
             </div>
           </div>
         </div>
