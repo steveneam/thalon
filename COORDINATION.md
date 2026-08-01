@@ -201,6 +201,19 @@ the one with the weakest near-term payoff by its own charter.
 | learn-evals | **MERGED** (`bcb8525`, ff onto main after rebase; verify-on-merged-main exit 0; worktree GC'd, branch deleted local+remote, window killed). The reject-reason door pass-through + the 7-origin batch export — the stale union was WORSE than believed: one `lead_triage`/`cut_diff_review` row made the whole export THROW; fixed + round-trip-pinned. The frozen s90 window fit exactly. WRAP: `agent_handoff/lanes/WRAP-learn-evals.md`. |
 | youtube-destination | **LIVE** (launched ~13:11Z, Mode B). Mid-cascade: contracts platform files + capability tests in flight, full suite running in the worktree. Watcher armed (clean-tree + pushed, not file existence). |
 
+**FOUNDER CONSTRAINT LANDED MID-SESSION (s90, his words):** *"i won't have time
+to do console visits this week … structure the plan over the next few sessions
+so that you still get work on thalon done (towards launch) but without needing
+my direct manoeuvring."* **Encoded in `docs/launch-runway.md` §9 (the
+restructured ladder — every session needs at most a texted one-word verdict;
+the three console items are batched under NEEDS-STEVEN's parked header, and a
+session whose verdict hasn't arrived takes the next verdicted-and-unbuilt item
+instead of waiting).** The s91 plan of record: **W1 builds lead-direct, Approve
+FIRST** (verdicted s89, zero founder hands, and it wires the reject-reason seat
+learn-evals just merged) → Dashboard+toggle+setup band → Runs re-shape → Board
+route deletion; lane candidate = the Analytics fixture reconciliation
+(engine-side). His W2 verdict, whenever texted, queues B-create.4 behind it.
+
 **LEAD TRACK, done this session so far:** credentials wired into CI (deploy key
 + templates pair + host var; keys probed alive + cross-scope-refused first;
 `.context` values scrubbed to pointers per the CI-secret-only rule) ·

@@ -137,27 +137,47 @@ each arming.
 - [ ] Staging edge auth posture at launch (basicauth pair + `DB_DUMP_TOKEN`
       rotation → CI `STAGING_EDGE_AUTH` swap; db-dump route REMOVAL is a
       checkpoint candidate before public traffic).
-- [ ] `thalon-deploy` + templates-preview credentials (NEEDS-STEVEN 2026-07-29e).
+- [x] `thalon-deploy` + templates-preview credentials — **DONE s90** (wired as
+      CI secrets, keys probed alive + cross-scope-refused first; previews
+      auto-deploy armed on his GO).
 - [ ] Platform portal apps in HIS browser (instructions in his Gmail draft;
       one app per platform forever; logins live durably in `.context`).
+      **BATCHED with the Google-console visit into ONE sitting — parked on his
+      s90 word ("i won't have time to do console visits this week"). The batch
+      list lives on NEEDS-STEVEN under its own parked header; nothing on the
+      build path blocks on it.**
 - [ ] Key rotation sweep (founder-timed, post-migration list).
 - [ ] Production gateway top-up (§3).
 - [ ] X billing at launch (covers analytics + posting, his ruling).
 - [ ] Eval suite green (§4) + final verify-on-main.
 
-## 9. Recommended session sequencing (from s90; ~indicative, not a promise)
+## 9. Recommended session sequencing (RESTRUCTURED s90 on the founder's word)
 
-| session | lead track | parallel lanes (each needs his GO) |
+> **The s90 constraint of record (founder, 2026-08-01, verbatim intent):** *"i
+> won't have time to do console visits this week, so structure the plan over
+> the next few sessions so that you still get work on thalon done (towards
+> launch) but without needing my direct manoeuvring."* Consequences: every
+> session below needs AT MOST a one-word verdict he can text from his phone
+> (the relay carries it) — never a browser, portal, console or terminal.
+> Everything console-gated is BATCHED into one sitting on NEEDS-STEVEN's
+> parked header and joins whenever he next has console time; no session
+> blocks on it. If a verdict hasn't arrived by a session's boot, the session
+> takes the next verdicted-and-unbuilt item instead of waiting — the ladder
+> below already orders things so that is always possible.
+
+| session | lead track (all founder-hands-free) | parallel lanes (each needs his named GO — a text suffices) |
 |---|---|---|
-| s90 | canvas debt (first action) → **W2 draw** | trend-live (YouTube poller) · learn-loop evals slice |
-| s91 | **W1 builds** — Approve first (the priority surface), then Dashboard+toggle+band, Runs; Board route deleted | engine follow-ups from W2 findings |
-| s92 | **B-create.4 Composer route** (exact-mock) | Analytics build (after fixture reconciliation) |
-| s93 | **W3 draw** (split + Settings sheet + Schedule prep + Profiles) | Channels build prep behind W3's verdict |
-| s94 | **W4 draw** (Intel · Leads · video sheets) | Schedule rename build (once he rules) |
-| s95–96 | **Pass 2 flow walks** + fixes; journey tests on staging | transcript live driver · gateway top-up |
-| s97 | **Pass 3 states** + impeccable re-arm | dogfood ladder step 1–2 |
-| s98+ | **Landing redesign** → launch-asset sprint (mint list first) → pillar #1 through the product | arming ladder, founder-paced |
+| s90 | canvas debt → **W2 draw** ✅ RAN | ~~trend-live~~ retired at boot (already built) → **youtube-destination (build half)** · **learn-evals** ✅ MERGED |
+| s91 | **W1 builds** — Approve FIRST (verdicted s89; wires the merged reject-reason seat), then Dashboard+toggle+setup band, Runs re-shape; Board route deleted | Analytics fixture reconciliation (COORDINATION §s87 lead item — engine-side, no hands) |
+| s92 | **W2 verdicted by then → B-create.4 Composer route + wizard build** (exact-mock); NOT yet → **W3 draw** (split + Settings sheet + Schedule prep + Profiles) — swap, never wait | Analytics build (once fixture reconciled) |
+| s93 | whichever of B-create.4 / W3 draw s92 didn't take | Schedule rebuild to `Schedule.dc.html` (D4, verdicted) |
+| s94 | **W4 draw** (Intel · Leads · video sheets pass 1 — research ✅, draws only) | Channels build (D4, ruled s88 — the §5.4 split is decided) |
+| s95–96 | **Pass 2 flow walks** + fixes; journey tests on staging against the self/demo tenant (disarmed — no hands) | transcript live driver (box-side install, OUR machine, not his) |
+| s97 | **Pass 3 states** + impeccable re-arm | dogfood ladder step 1 (self-tenant triage on staging, disarmed) |
+| s98+ | **Landing redesign** (built + previewed behind edge auth — deploying to thalon.org stays HIS stealth call) → launch-asset mint LIST (spend waits on his credit call, §7) → pillar #1 prep | arming ladder — founder-paced, untouched by this restructure |
+| whenever he has console time | — | **THE CONSOLE BATCH, one sitting:** Meta+LinkedIn callback URLs · Reddit app · Google console (Intel API key + YouTube OAuth app). Each lights an already-built live half the moment it lands. |
 
-*Anything here can be re-ordered at a checkpoint; the only hard orderings are
-verdict-before-build, research-before-landing-redesign, mint-list-before-spend,
-and every arming step behind its named GO.*
+*Hard orderings unchanged: verdict-before-build,
+research-before-landing-redesign, mint-list-before-spend, every arming step
+behind its named GO. New one from this restructure: nothing enters a session
+plan that needs his hands beyond a texted word.*
