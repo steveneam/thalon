@@ -3,13 +3,25 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s90 — W2 MAKE draw (create-engine spec §Surfaces 1, research banked
+     s86): the dead "Advanced · staged flow →" header link is DELETED — its job
+     is now a REAL door, "Start guided" in the hero's control row (the wizard is
+     an offer beside the prompt, never a wall — R2; sheet: Create Wizard.dc.html)
+     · Jasper-style task shortcuts seeded from Intel picks (one row, each names
+     its kind + prefills the wizard) · Latest runs rows now carry their door:
+     in-flight → "Open in Composer →" (the run-scoped checkpoint, R7), published
+     → view live (unchanged). -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
         <link rel="stylesheet" href="./theme.css" />
         <style>
           .prompt-hero { border: 1px solid var(--n-500); background: var(--n-100); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+          .task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+          .task-card { display: flex; align-items: center; gap: 10px; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 10px 12px; cursor: pointer; transition: border-color var(--motion-fast); }
+          .task-card:hover { border-color: var(--n-500); }
+          .task-kind { width: 30px; height: 30px; border-radius: 8px; background: var(--n-200); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 10.5px; font-family: var(--font-data); color: var(--n-900); }
           .prompt-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 16px; font-size: 15px; color: var(--n-1000); min-height: 84px; line-height: 1.6; }
           .prompt-box .ph { color: var(--n-800); }
           .pick-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--n-500); border-radius: 8px; background: var(--n-200); font-size: 12.5px; }
@@ -57,7 +69,6 @@
             <div style="display:flex;align-items:center;gap:12px">
               <h1 class="t-headline">Create</h1>
               <div style="flex:1"></div>
-              <a class="card-link" href="#">Advanced · staged flow →</a>
             </div>
             <div class="prompt-hero">
               <div style="display:flex;align-items:center;gap:10px">
@@ -69,8 +80,32 @@
               <div style="display:flex;align-items:center;gap:10px">
                 <span class="pick-chip"><span class="pill pill-heat-hot" style="height:18px;font-size:10.5px">Hot</span>From intel · title + angle + hook attached<span style="color:var(--n-800);cursor:pointer">×</span></span>
                 <div style="flex:1"></div>
+                <div class="btn btn-ghost" title="the wizard — staged, prefilled, media in; the prompt stays one click away">Start guided</div>
                 <div class="btn btn-ghost">Preview plan</div>
                 <div class="btn btn-primary">Generate</div>
+              </div>
+            </div>
+            <div class="task-grid">
+              <div class="task-card">
+                <span class="task-kind">post</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">“Video as a build step” <span class="pill pill-heat-hot" style="height:17px;font-size:10px;vertical-align:2px">Hot</span></div>
+                  <div class="excerpt">from Intel · prefills the brief</div>
+                </div>
+              </div>
+              <div class="task-card">
+                <span class="task-kind">video</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">The launch-film angle · staged</div>
+                  <div class="excerpt">opens the wizard at What</div>
+                </div>
+              </div>
+              <div class="task-card">
+                <span class="task-kind">page</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">“Inside the render pipeline”</div>
+                  <div class="excerpt">article · the blog mirrors it</div>
+                </div>
               </div>
             </div>
             <div class="cr-grid">
@@ -97,7 +132,7 @@
                   <div class="thumb-sm"><span>clip frame</span></div>
                   <div style="flex:1;min-width:0">
                     <div style="font-size:13px;font-weight:600">Launch film · 3 platforms</div>
-                    <div class="excerpt">2 drafts at the judge · 1 waiting on you</div>
+                    <div class="excerpt">2 at the judge · 1 waiting · <a href="#">In Composer →</a></div>
                   </div>
                   <span class="t-data">2h ago</span>
                 </div>

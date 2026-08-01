@@ -126,22 +126,28 @@ send door (armed separately). Backend: leads/scores/outreach_sends. State:
 built, unresearched. M: lightweight-CRM tables, lead detail rails.
 P: none directly (no CRM in Postiz) — mark n/a rather than force it.
 
-**Library / Transcription** (`/app/library` AND `/app/transcription` — **two
-routes exist for one idea; the sheet still says "Library"**) — job: the
-knowledge sources the judge grounds on: ingested docs/URLs/transcripts, free
-by default, AI-enhance per ingest (s86). Joins: source → Create grounding
-picks, → chunks/embeddings. Backend: sources/source_chunks, ingest engine.
-State: built, unresearched, **naming/IA drift is a structure defect: resolve
-to ONE surface** (proposal: "Library" = the knowledge shelf; transcription is
-an ingest KIND, not a sibling surface). M: knowledge-base/library patterns
-(Notion, Mem, Readwise-style source lists).
+**Library / Transcription** (`/app/library` AND `/app/transcription` — the
+two routes collapse to ONE at the rebuild) — job: the knowledge sources the
+judge grounds on: ingested docs/URLs/transcripts, free by default, AI-enhance
+per ingest (s86). Joins: source → Create grounding picks, → chunks/embeddings.
+Backend: sources/source_chunks, ingest engine. State: built, **researched +
+DRAWN s90 (W2; library §Library — the §5.3 ruling made legible)**: the ingest
+band names every kind it takes and carries the Free-transcript | AI-enhance
+seg (free default, enhance metered); kind is a qtab FILTER with counts, never
+a route; a mid-transcription source is a row state ("Transcribing · ~3m
+left"), not an absence. `/app/transcription` retires when the rebuild lands
+(build task, its own go). Awaiting the W2 verdict.
 
 **Source Media** (media components; verdicted sheet s77, pre-programme) — job:
 the media the product holds — every image/poster/audio with provenance and
 roles (`use|reference`, s87). Joins: → Create wizard's media dialog
 (Uploads/Generations/Library tabs), → Composer media control. Backend: object
-store, media envelopes + roles. State: partially built as components,
-**no research pass on record**. M: asset-library/DAM patterns (the Leonardo
+store, media envelopes + roles. State: partially built as components. **IA
+RESOLVED s90 (W2): its own component family, reached through the wizard's
+media dialog — knowledge shelf (Library) and media shelf are different jobs,
+never merged.** Research ◐: the banked Leonardo dialog + Runway roles were
+APPLIED in the W2 wizard draw; its own sheet's pass is still owed.
+M: asset-library/DAM patterns (the Leonardo
 Select-Media dialog is already banked in the Create spec — extend, don't
 re-search).
 
@@ -150,17 +156,27 @@ re-search).
 **Create home** — job: the front door; prompt hero + wizard offer + latest
 runs. **Spec of record: `docs/create-engine/spec.md` (APPROVED).** Research:
 ✅ (its Mobbin pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·
-Leonardo). Next: sheet update (B-create.3).
+Leonardo). **Sheet UPDATED s90 (W2)**: the dead "Advanced · staged flow"
+link is a real "Start guided" door in the hero; Intel task shortcuts; run
+rows carry their Composer door. Awaiting the W2 verdict.
 
-**Create wizard** (new sheet) — per the Create spec: rail-accordion beside a
-live brief; What → Platforms → Sources & media → Review plan → Generate.
-Research ✅. Next: the sheet.
+**Create wizard** (`Create Wizard.dc.html` — EXISTS since s90) — per the
+Create spec: rail-accordion beside a live brief; What → Platforms → Sources
+& media → Review plan → Generate. Research ✅. **Sheet DRAWN s90 (W2)** at
+the Sources & media step: capability on the platform chips before spend
+(R3), role chips at every attach (use | reference, the fact visible on the
+row), the plan an honest dashed PENDING until Review. Awaiting the W2
+verdict.
 
 **Composer** — job: the run-scoped checkpoint (previews · fit · judge ·
 settings rail · edit/AI edit). Research ✅ s86; **unbuilt — the route is
-B-create.4**, engine verbs land via the `create-shells` lane. P (queued for the
-passthrough): Postiz launcher end-to-end — field order, per-platform overrides,
-error surfaces — as FLOW facts (their editor's shape is already partly taken).
+B-create.4**, engine verbs landed via the `create-shells` + `judge-candidate`
+lanes. **P ANSWERED s90 (W2; library §Postiz launcher):** their launcher is
+per-integration bundles with per-platform `settings` discriminated by
+`__type` — REJECTED as our model (no master, no divergence, no way back; our
+fork-with-provenance stays) · their pre-validation endpoint (maxLength +
+rules + settings schema) VALIDATES R3 and the D3 slice · their docs carry NO
+multi-platform failure contract — our Error Behavior stands alone.
 
 **Videos Overview / Dossier / Editor** — spec of record: `docs/video-arc/spec.md`
 (corrected s87 — engine ALL built; remaining work is surface). Research ✅ all
@@ -170,8 +186,12 @@ badges · the version rail that collapses four of the five no-affordance jobs).
 **Sites** (`/app/sites`) — job: the page family's artifacts — generated pages,
 the blog loop, publish-to-own-site. Joins: ← Create page family, → blog (the
 SEO/AEO farm, s70c doctrine: social mirrors the blog). Backend: webpage engine,
-public-assets door. State: built, unresearched. M: site-builder galleries /
-page-manager patterns. P: none (no site builder) — n/a stated.
+public-assets door. State: built, **researched + DRAWN s90 (W2; library
+§Sites)**: state badge ON the preview shot (Lovable), live cards carry their
+hostname / drafts say "previews only" (Squarespace's the-address-is-the-fact),
+the h1 pills became the state filter seg, and the blog-loop join got its
+door (the published ledger). P: none (no site builder) — n/a stated.
+Awaiting the W2 verdict.
 
 ### GATE
 
@@ -380,7 +400,7 @@ amendments → founder verdict):**
 | wave | surfaces | why this order |
 |---|---|---|
 | **W1 — the spine's gate + home** | Approve · Dashboard · Runs (+Board decision) · onboarding+notifications questions | highest-stakes unresearched surfaces; journey 2 end-to-end. **RAN s89 · VERDICT: APPROVED — founder, same session, verbatim: *"yes to all, W1 approved."*** Research ✓ · contracts ✓ · questions answered ✓ · sheets amended ✓ · **builds UNBLOCKED: the Approve/Dashboard/Runs rebuilds to the amended sheets, the Board route retirement, and the setup band.** |
-| **W2 — MAKE completion** | Create home+wizard sheets (research already ✅ — this wave DRAWS) · Composer Postiz-launcher flow facts · Sites · Library/Source-Media IA resolution | B-create.3 rides here; the founder's named priority stays first among equals |
+| **W2 — MAKE completion** | Create home+wizard sheets (research already ✅ — this wave DRAWS) · Composer Postiz-launcher flow facts · Sites · Library/Source-Media IA resolution | B-create.3 rides here; the founder's named priority stays first among equals. **RAN s90: all four sheets drawn/amended + measured (every bottom ≤ 940, zero truncation), the launcher walk answered the standing P-question, §5.3 drawn, Source-Media IA resolved (own component family, never merged). VERDICT: OPEN — no W2 surface builds before it.** |
 | **W3 — SHIP + IDENTITY** | Channels/Integrations/Settings split (his §5.4 verdict applied) · Schedule build-prep · Profiles | closes journey 6; unblocks the D4 builds |
 | **W4 — KNOW + video draw** | Intel · Leads · video sheets pass 1 (research ✅ — draws) | the moat surfaces, with the loop's joins now fixed |
 

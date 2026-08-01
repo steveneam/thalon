@@ -3,7 +3,21 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s90 — W2 IA resolution (his §5.3 ruling, verbatim consequence:
+     "ONE Library surface; transcription becomes an ingest kind + a filter,
+     not a second route"). What that ruling looks like drawn: the ingest band
+     names EVERY kind it takes (URL · file · text · video/audio — ElevenLabs'
+     kind-doors, compressed to our one-box grammar) and gains the s86
+     transcription-free lane's control designed properly — a Free-transcript |
+     AI-enhance seg (free is the default; enhance is metered and says so) ·
+     KIND is a filter row with counts (the qtab grammar from Approve — type
+     is a lens, never a route) · a source mid-transcription is an honest ROW
+     STATE ("Transcribing · ~3m left" — Relevance AI's processing chips), not
+     an absence. The /app/transcription route retires at the rebuild; this
+     sheet's label was always "Library" and stays. Source Media remains its
+     own component family (the wizard's media dialog) — knowledge shelf and
+     media shelf are different jobs, resolved as such, not merged. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -12,6 +26,10 @@
           .ingest { border: 1px solid var(--n-500); background: var(--n-100); border-radius: 14px; padding: 16px; display: flex; gap: 10px; align-items: center; }
           .ingest-box { flex: 1; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 12px 14px; font-size: 14px; color: var(--n-800); }
           .src-lead { font-size: 13.5px; font-weight: 600; }
+          .qtabs { display: flex; align-items: center; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--n-400); }
+          .qtab { font-size: 12px; padding: 6px 10px 8px; color: var(--n-900); display: inline-flex; gap: 6px; align-items: baseline; }
+          .qtab.on { color: var(--n-1000); font-weight: 600; box-shadow: inset 0 -2px 0 var(--act); }
+          .qtab .n { font-size: 10.5px; font-family: var(--font-data); color: var(--n-800); }
           .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
         </style>
       </helmet>
@@ -48,15 +66,33 @@
           <div class="content" style="gap:16px">
             <div style="display:flex;align-items:center;gap:12px">
               <h1 class="t-headline">Library</h1>
-              <span class="pill pill-idle">5 sources</span>
+              <span class="pill pill-idle">6 sources</span>
               <div style="flex:1"></div>
               <span class="t-label">everything here is grounding — the judge cites these verbatim</span>
             </div>
             <div class="ingest">
-              <div class="ingest-box">Paste a video URL or drop a file — transcript in, chunked, ready to ground on…</div>
+              <div class="ingest-box">Paste a URL, drop a file, or paste text — video and audio transcribe on ingest; everything lands chunked, ready to ground on…</div>
+              <div class="seg" title="free transcript is the default; AI enhance is metered and its cost shows before the run"><span class="seg-opt on">Free transcript</span><span class="seg-opt">AI enhance</span></div>
               <div class="btn btn-primary">Ingest</div>
             </div>
             <div class="card">
+              <div class="qtabs">
+                <span class="qtab on">All<span class="n">6</span></span>
+                <span class="qtab">Video<span class="n">2</span></span>
+                <span class="qtab">Audio<span class="n">1</span></span>
+                <span class="qtab">Article<span class="n">1</span></span>
+                <span class="qtab">Capture<span class="n">1</span></span>
+                <span class="qtab">Text<span class="n">1</span></span>
+              </div>
+              <div class="row">
+                <div class="thumb-sm"><span>audio</span></div>
+                <div style="flex:1;min-width:0">
+                  <div class="src-lead">Interview — raw.m4a</div>
+                  <div class="excerpt">Audio · 41:12 · Transcribing · free transcript · chunks land when it finishes</div>
+                </div>
+                <span class="pill pill-warn">Transcribing</span>
+                <span class="t-data">~3m left</span>
+              </div>
               <div class="row">
                 <div class="thumb-sm"><span>video</span></div>
                 <div style="flex:1;min-width:0">

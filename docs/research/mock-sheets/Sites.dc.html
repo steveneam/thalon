@@ -3,7 +3,15 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s90 — W2 pass (library §Sites): the state pill moved ONTO the
+     preview shot (Lovable — you read a gallery by its pictures, so the state
+     rides the picture) · every card gains its truth line under the name —
+     LIVE cards carry their hostname (Squarespace: the site's address IS its
+     card fact), drafts say "previews only" (never a fake URL) · the h1 pills
+     became a real state filter seg (All | Live | Draft — Lovable's status
+     filter in our seg grammar) · footer gains the blog door (the contract's
+     blog-loop join: the page family and the blog ride one engine). -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -12,9 +20,10 @@
           .site-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
           .site-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; cursor: pointer; transition: border-color var(--motion-fast); display: flex; flex-direction: column; }
           .site-card:hover { border-color: var(--n-500); }
-          .site-shot { height: 150px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; }
+          .site-shot { position: relative; height: 132px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; }
           .site-shot span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
-          .site-meta { padding: 11px 14px; display: flex; align-items: center; gap: 9px; }
+          .site-shot .pill { position: absolute; top: 8px; left: 8px; }
+          .site-meta { padding: 10px 14px; display: flex; align-items: flex-start; gap: 9px; }
           .prompt-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 13px 16px; font-size: 14px; color: var(--n-800); flex: 1; }
           .cat-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border: 1px solid var(--n-400); border-radius: var(--r-pill); font-size: 12.5px; color: var(--n-900); background: var(--n-100); cursor: pointer; }
           .cat-chip:hover { border-color: var(--n-500); color: var(--n-1000); }
@@ -54,9 +63,9 @@
           <div class="content" style="gap:16px">
             <div style="display:flex;align-items:center;gap:12px">
               <h1 class="t-headline">Sites</h1>
-              <span class="pill pill-idle">17 built</span>
-              <span class="pill pill-ok">2 live</span>
+              <div class="seg"><span class="seg-opt on">All 17</span><span class="seg-opt">Live 2</span><span class="seg-opt">Draft 15</span></div>
               <div style="flex:1"></div>
+              <span class="t-label">newest first</span>
             </div>
             <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
               <div style="display:flex;gap:10px;align-items:center">
@@ -75,32 +84,70 @@
             </div>
             <div class="site-grid">
               <div class="site-card">
-                <div class="site-shot"><span>site preview · hero</span></div>
-                <div class="site-meta"><span style="font-size:13px;font-weight:600;flex:1">Sparkwright</span><span class="pill pill-ok">Live</span><a class="card-link" href="#">Dossier →</a></div>
+                <div class="site-shot"><span>site preview · hero</span><span class="pill pill-ok">Live</span></div>
+                <div class="site-meta">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600">Sparkwright</div>
+                    <div class="excerpt"><a href="#">sparkwright.example ↗</a> · minted 12 Jul</div>
+                  </div>
+                  <a class="card-link" href="#">Dossier →</a>
+                </div>
               </div>
               <div class="site-card">
-                <div class="site-shot"><span>site preview · hero</span></div>
-                <div class="site-meta"><span style="font-size:13px;font-weight:600;flex:1">Ridge &amp; Valley</span><span class="pill pill-idle">Draft</span><a class="card-link" href="#">Dossier →</a></div>
+                <div class="site-shot"><span>site preview · hero</span><span class="pill pill-idle">Draft</span></div>
+                <div class="site-meta">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600">Ridge &amp; Valley</div>
+                    <div class="excerpt">previews only · minted 10 Jul</div>
+                  </div>
+                  <a class="card-link" href="#">Dossier →</a>
+                </div>
               </div>
               <div class="site-card">
-                <div class="site-shot"><span>site preview · hero</span></div>
-                <div class="site-meta"><span style="font-size:13px;font-weight:600;flex:1">First Crack</span><span class="pill pill-idle">Draft</span><a class="card-link" href="#">Dossier →</a></div>
+                <div class="site-shot"><span>site preview · hero</span><span class="pill pill-idle">Draft</span></div>
+                <div class="site-meta">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600">First Crack</div>
+                    <div class="excerpt">previews only · minted 8 Jul</div>
+                  </div>
+                  <a class="card-link" href="#">Dossier →</a>
+                </div>
               </div>
               <div class="site-card">
-                <div class="site-shot"><span>site preview · hero</span></div>
-                <div class="site-meta"><span style="font-size:13px;font-weight:600;flex:1">Stem &amp; Vow</span><span class="pill pill-idle">Draft</span><a class="card-link" href="#">Dossier →</a></div>
+                <div class="site-shot"><span>site preview · hero</span><span class="pill pill-idle">Draft</span></div>
+                <div class="site-meta">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600">Stem &amp; Vow</div>
+                    <div class="excerpt">previews only · minted 5 Jul</div>
+                  </div>
+                  <a class="card-link" href="#">Dossier →</a>
+                </div>
               </div>
               <div class="site-card">
-                <div class="site-shot"><span>site preview · hero</span></div>
-                <div class="site-meta"><span style="font-size:13px;font-weight:600;flex:1">Sprig &amp; Barrow</span><span class="pill pill-ok">Live</span><a class="card-link" href="#">Dossier →</a></div>
+                <div class="site-shot"><span>site preview · hero</span><span class="pill pill-ok">Live</span></div>
+                <div class="site-meta">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600">Sprig &amp; Barrow</div>
+                    <div class="excerpt"><a href="#">sprigandbarrow.example ↗</a> · minted 2 Jul</div>
+                  </div>
+                  <a class="card-link" href="#">Dossier →</a>
+                </div>
               </div>
               <div class="site-card">
-                <div class="site-shot"><span>site preview · hero</span></div>
-                <div class="site-meta"><span style="font-size:13px;font-weight:600;flex:1">Hartline</span><span class="pill pill-idle">Draft</span><a class="card-link" href="#">Dossier →</a></div>
+                <div class="site-shot"><span>site preview · hero</span><span class="pill pill-idle">Draft</span></div>
+                <div class="site-meta">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600">Hartline</div>
+                    <div class="excerpt">previews only · minted 28 Jun</div>
+                  </div>
+                  <a class="card-link" href="#">Dossier →</a>
+                </div>
               </div>
             </div>
-            <div style="display:flex">
+            <div style="display:flex;align-items:center;gap:10px">
               <span class="t-label">Every site carries its record — prompt, plan, mint ledger, verdicts — in its dossier.</span>
+              <div style="flex:1"></div>
+              <a class="card-link" href="#">Blog articles ride the same engine · the published ledger →</a>
             </div>
           </div>
         </div>

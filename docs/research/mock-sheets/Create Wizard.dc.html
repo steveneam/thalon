@@ -1,0 +1,203 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Create wizard' — NEW s90 (W2 MAKE draw; the sheet
+     the APPROVED create-engine spec §Surfaces 2 names — B-create.3). THE SPEC IS
+     THIS MARKUP + theme.css beside it: implement surfaces EXACTLY (founder s72:
+     'i want the claude design as EXACT' — placeholders where the backend lacks
+     data, never layout drift). View: open with theme.css in the same dir.
+     GRAMMAR (research banked s86, cited not re-searched): Jasper's accordion
+     rail of checkmarked slots beside the live brief ARTIFACT (never a
+     page-stepper — the artifact stays visible); Runway's named reference roles
+     (use vs reference) as chips on every attach; Leonardo's Select-media dialog
+     named on its door (Uploads · Generations · Library); HubSpot's
+     review-outline-before-generate = the Review slot; capability notes ride the
+     platform chips BEFORE generation (R3 — refusals before spend). Drawn state:
+     What ✓ · Platforms ✓ · Sources & media OPEN · Review plan pending. The
+     Profound generating-checklist state is pass-3 work, deliberately not drawn
+     here (one resting state per sheet). The wizard is an OFFER — "Back to
+     prompt" stays one click away (R2). -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          .wiz-grid { flex: 1; display: grid; grid-template-columns: 470px 1fr; gap: 14px; min-height: 0; align-items: start; }
+          .slot { border-top: 1px solid var(--n-400); }
+          .slot:first-child { border-top: none; }
+          .slot-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; }
+          .slot-num { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-family: var(--font-data); color: var(--n-900); flex: none; }
+          .slot-num.done { border-color: var(--ok); color: var(--ok); }
+          .slot-num.now { border-color: var(--act); color: var(--act-text); background: var(--act); }
+          .slot-title { font-size: 13.5px; font-weight: 600; }
+          .slot-sum { font-size: 12px; color: var(--n-900); padding: 0 16px 12px 48px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+          .slot-body { padding: 2px 16px 16px 48px; display: flex; flex-direction: column; gap: 12px; }
+          .plat-chip { display: inline-flex; align-items: center; gap: 7px; height: 24px; padding: 0 10px; border: 1px solid var(--n-500); border-radius: var(--r-pill); font-size: 11.5px; background: var(--n-200); color: var(--n-1000); }
+          .plat-chip .cap { font-size: 10.5px; color: var(--n-800); }
+          .plat-chip.warn { border-color: color-mix(in oklab, var(--warn) 45%, var(--n-500)); }
+          .plat-chip.warn .cap { color: var(--warn); }
+          .role-chip { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 4px; font-size: 10px; font-family: var(--font-data); }
+          .role-use { background: var(--act-subtle); color: var(--act-text2, var(--n-1000)); border: 1px solid var(--act); }
+          .role-ref { background: var(--n-200); color: var(--n-900); border: 1px dashed var(--n-600); }
+          .att { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+          .pick-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+          .pick-row .ck { color: var(--ok); font-weight: 600; }
+          .brief-block { padding: 12px 16px; border-top: 1px solid var(--n-400); display: flex; flex-direction: column; gap: 7px; }
+          .brief-block:first-child { border-top: none; }
+          .brief-k { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--n-800); font-family: var(--font-data); }
+          .brief-v { font-size: 13.5px; line-height: 1.55; }
+          .plan-pend { border: 1px dashed var(--n-500); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; color: var(--n-800); }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        </style>
+      </helmet>
+      <div class="screen" data-screen-label="Create wizard">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">4</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Schedule</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 13.2V9.6M6.6 13.2V5.4M10.4 13.2v-5M14.2 13.2V3.2"></path></svg>Analytics</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Demo Studio</span>
+            <span class="crumb">profile v4</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 4</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content">
+            <div style="display:flex;align-items:center;gap:12px">
+              <h1 class="t-headline">Create · guided</h1>
+              <span class="t-label">deterministic slots first — AI fills a creative slot only on your click</span>
+              <div style="flex:1"></div>
+              <a class="card-link" href="#">Back to the prompt →</a>
+            </div>
+            <div class="wiz-grid">
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="slot">
+                  <div class="slot-head">
+                    <span class="slot-num done">✓</span>
+                    <span class="slot-title">What</span>
+                    <div style="flex:1"></div>
+                    <a class="card-link" href="#">edit</a>
+                  </div>
+                  <div class="slot-sum">Video · staged · “Video as a build step” <span class="pill pill-heat-hot" style="height:17px;font-size:10px">Hot</span> <span class="t-label">from the Intel pick</span></div>
+                </div>
+                <div class="slot">
+                  <div class="slot-head">
+                    <span class="slot-num done">✓</span>
+                    <span class="slot-title">Platforms</span>
+                    <div style="flex:1"></div>
+                    <a class="card-link" href="#">edit</a>
+                  </div>
+                  <div class="slot-sum">
+                    <span class="plat-chip">Facebook <span class="cap">✓ ready</span></span>
+                    <span class="plat-chip">Instagram <span class="cap">✓ video carries the media</span></span>
+                    <span class="plat-chip warn">YouTube <span class="cap">connect to publish</span></span>
+                    <span class="plat-chip warn">TikTok <span class="cap">connect to publish</span></span>
+                    <span class="t-label" style="width:100%">routing defaults for video · capability checked before anything spends</span>
+                  </div>
+                </div>
+                <div class="slot" style="background:var(--n-bg)">
+                  <div class="slot-head">
+                    <span class="slot-num now">3</span>
+                    <span class="slot-title">Sources &amp; media</span>
+                    <div style="flex:1"></div>
+                    <span class="t-label">grounding + what the video may use</span>
+                  </div>
+                  <div class="slot-body">
+                    <div class="pick-row"><span class="ck">✓</span>Intel capture · @framecraft.example thread <a class="card-link" href="#">view</a></div>
+                    <div class="pick-row"><span class="ck">✓</span>Deterministic rendering docs · 31 chunks <a class="card-link" href="#">in Library</a></div>
+                    <div class="att">
+                      <div class="thumb-sm"><span>product still</span></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:12.5px;font-weight:600">pipeline-hero.png</div>
+                        <div class="excerpt">rides the drafts as their media</div>
+                      </div>
+                      <span class="role-chip role-use">use</span>
+                    </div>
+                    <div class="att">
+                      <div class="thumb-sm"><span>style ref</span></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:12.5px;font-weight:600">moodboard-frame.jpg</div>
+                        <div class="excerpt">informs · never in the output</div>
+                      </div>
+                      <span class="role-chip role-ref">reference</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div class="btn btn-ghost btn-sm">Select media · Uploads · Generations · Library</div>
+                      <span class="t-label">role is chosen at attach — it stays on the file</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="slot">
+                  <div class="slot-head">
+                    <span class="slot-num">4</span>
+                    <span class="slot-title" style="color:var(--n-900)">Review plan</span>
+                    <div style="flex:1"></div>
+                    <span class="t-label">platforms · gates · cost — before it spends</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--n-400);margin-top:auto">
+                  <div class="btn btn-primary">Next · Review plan</div>
+                  <span class="t-label">nothing generates until you approve the plan</span>
+                </div>
+              </div>
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="card-head">
+                  <span class="t-title">The brief — building as you go</span>
+                  <div style="flex:1"></div>
+                  <span class="t-label">this exact record rides the run</span>
+                </div>
+                <div class="brief-block">
+                  <span class="brief-k">Topic</span>
+                  <span class="brief-v">Video as a build step: rendering launch clips from HTML — open on the empty timeline, close on the rebuild.</span>
+                  <span class="t-label">voice: confident · concrete · no hype — from profile v4</span>
+                </div>
+                <div class="brief-block">
+                  <span class="brief-k">Platforms</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <span class="plat-chip">Facebook</span>
+                    <span class="plat-chip">Instagram</span>
+                    <span class="plat-chip warn">YouTube · will hold until connected</span>
+                    <span class="plat-chip warn">TikTok · will hold until connected</span>
+                  </div>
+                </div>
+                <div class="brief-block">
+                  <span class="brief-k">Grounding</span>
+                  <span class="brief-v" style="font-size:13px">The intel capture + the rendering docs — drafts cite these; the judge checks every claim against them.</span>
+                </div>
+                <div class="brief-block">
+                  <span class="brief-k">Media</span>
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <span style="font-size:13px">pipeline-hero.png</span><span class="role-chip role-use">use</span>
+                    <span style="font-size:13px">moodboard-frame.jpg</span><span class="role-chip role-ref">reference</span>
+                  </div>
+                </div>
+                <div class="brief-block" style="flex:1">
+                  <span class="brief-k">Plan</span>
+                  <div class="plan-pend">The resolved plan lands here at Review — every platform’s verdict, the judge gates, and the cost preview, before anything generates. A platform that refuses names its reason and the fix.</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-top:1px solid var(--n-400)">
+                  <span class="t-label">judge: denylist · grounding ×2 · every gate on — it gates, it never rewrites</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

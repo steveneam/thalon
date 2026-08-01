@@ -192,6 +192,23 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 - [Hume · chat history](https://mobbin.com/screens/0fc3643f-ecb6-435b-8146-680f7480ff64) — run rows carry EVALUATION chips beside status. **TAKEN**: judge outcome rides the run row as a chip (blocked/passed counts), not buried in detail.
 - [Runway · credit table](https://mobbin.com/screens/850f0ad4-96f6-4368-865f-7657acabd025) — balance before/after per row. **REJECTED for the surface**: that is a billing ledger's honesty, not a run list's; our per-run cost + total covers the operator's actual question.
 
+**Sites (W2, s90)**
+- [Lovable · projects](https://mobbin.com/screens/114dc619-8f00-4816-bed1-e861558c122b) — the state badge rides ON the preview thumbnail ("Published", top-left), cards carry edited-ago meta, and the toolbar is a real status/visibility filter set. **TAKEN**: badge-on-the-shot (you read a gallery by its pictures, so the state belongs on the picture) + the status filter as our seg + per-card age meta.
+- [Squarespace · dashboard](https://mobbin.com/screens/3e8db334-1f8e-4d5c-a055-c50bfd4288f9) — every site row leads with its own DOMAIN under the name; the card states its billing/expiry truth in words. **TAKEN**: a live site's hostname IS its card fact (drafts say "previews only" — never a placeholder URL that reads real).
+- [Webflow · CMS list](https://mobbin.com/screens/6a47ce90-a40e-461b-97e5-f866e73cf254) — "Staged for Publish" as a distinct state word between draft and published. *Reference only — our page family has no staging tier; noted for the day publish-to-own-site arms.*
+
+**Library (W2, s90 — the §5.3 ONE-Library ruling drawn)**
+- [ElevenLabs · Knowledge Base](https://mobbin.com/screens/67e87818-fd79-43a6-a0e3-cc6d795f7478) — ingest KINDS as entry doors (Add URL · Add Files · Create Text · Create Folder) above ONE list with `+Type` filter chips, plus a storage-honesty chip. **TAKEN as the ruling's drawn shape**: kind is an ingest door and a filter — never a route; our one-box ingest band names every kind it takes.
+- [Relevance AI · Knowledge](https://mobbin.com/screens/e6486eeb-75f6-4cd8-8244-408d4fe49ed7) — rows carry LIVE state chips (Processing · Uploading) in the same list as finished sources; the upload zone names its supported formats. **TAKEN**: a source mid-transcription is a row STATE ("Transcribing · ~3m left"), not an absence — transcription visibly IS an ingest kind, which is the §5.3 ruling made legible.
+- [Chatbase · data sources](https://mobbin.com/screens/493fb3e6-8ee3-408e-9897-c04824012c8c) — a by-kind roll-up rail (2 Files · 2 Text · 1 Link with sizes) and a "retraining required" honesty banner. **TAKEN (the roll-up)** as the qtab counts; the banner pattern is n/a — our chunks embed at ingest, nothing goes stale silently.
+- [Mistral · Files](https://mobbin.com/screens/5046fb14-6216-4ac2-9fc1-6637e6563d30) — Type/Source as dropdown filters over one table. *Validates the filter-not-route IA; nothing further taken.*
+
+**Postiz launcher — the W2 flow-facts walk (s90; API contract as the flow of record, docs.postiz.com)**
+- Their create contract: `type` (now/schedule/draft) + `date` + `posts[]`, each item = one integration id + its `value[]` (content + media) + a per-platform `settings` object discriminated by `__type`. **Content is per-integration BUNDLES from the start — REJECTED as our Composer model**: no master, no divergence tracking, no way back; our master+forks-with-provenance ("re-derive from master") is deliberately richer and stays.
+- Their pre-validation endpoint (`integration-settings`: `maxLength` + `rules` text + a settings JSON schema + provider `tools`) — clients validate BEFORE creating. **VALIDATES ours twice over**: R3 (capability surfaced pre-generation — the wizard's platform chips) and the D3 settings-as-schema slice. Two products, same conclusion.
+- **Failure surfaces: UNDOCUMENTED** — their public contract has no multi-platform partial-failure story at all. The standing question closes with: our create spec's Error Behavior (partial run state, per-tab verbatim refusal) stands alone; nothing to take.
+- `find-slot` (next open slot per channel) — a Schedule flow fact, noted for its pass. Draft→schedule status flips exist but are a status change, not a human gate — our Approve separation is structural, theirs is not.
+
 **Onboarding + Notifications — the two W1 research questions (s89; answers, not surfaces)**
 - [Hex · home with setup band](https://mobbin.com/screens/1316cdc2-0371-4ee7-b75e-63894c17ce75) — "**Set up your workspace · 2 of 4 complete**" checklist band ON the home (Connect data → Create project → Invite team → Customize), each step expanding inline, sitting ABOVE "Jump back in". **TAKEN as the onboarding ANSWER**: a dismissible setup band on Dashboard + per-surface empty states with the same steps (HubSpot above). No route, no wizard — exactly the spec's "thin guided state over existing surfaces".
 - [Steep · demo-data banner](https://mobbin.com/screens/d9f49fbc-87c3-4e69-a96c-c5b7cc317acf) — "You are using demo data. Continue setup to connect your own." **TAKEN**: our demo/self tenant states itself the same way.
@@ -210,7 +227,10 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 | Runs | `Runs.dc.html` | **DONE (s89, W1)** | The create_runs re-shape drawn (spec §5.8): RUNNING-NOW band above the history (Cloudflare) mirroring the Dashboard tray's fixture · ONE create-run parent row — judge chip ("judge ✓ 3 of 3", Hume) + status pill + duration-and-cost together ("3m 42s · $0.09", Vercel/Clay) — with its three family drafts NESTED (platform dot · quote · passed chip · Waiting pill · "In Approve →" door each) · the failed run states its cost honestly ("failed at 8s · $0.00 — kept its receipts") with Retry · Thursday's pre-create rows stay FLAT under a day-header note ("no fake parents" — the orphan rule stated where it applies) · seg gains Live/Waiting · footer gains the day total ("2 runs finished · $0.09 total · 2 live"). Child mini-thumbs cut after the render read — blank 34px boxes said nothing the platform dot didn't. |
 | Dashboard | `Dashboard.dc.html` | **DONE (s89, W1)** | The SETUP BAND (gap §5.1's answer drawn): "Set up your workspace · 3 of 4", steps inline, the open step is a live door ("First approve — 4 waiting →"), dismiss × with every-step-skippable on hover — coherent with the sheet's own fixture, NOT a fresh-tenant lie. The Overview|Board seg (drawn s71) is now THE Board ruling made real; `Board.dc.html` carries a status note that its kanban becomes this toggle's Board state. Composing tile → **"Runs live"** — the ORIENT door to `/app/runs`, its ctx now agreeing with the work tray (1 rendering · 1 at the judge gate). "Open calendar" → "Open schedule" (sheet law since the rail sweep); cadence caps compressed to one line, rationale on hover. "Latest runs" deliberately ABSENT — it stays on Create home (W1 decision); this surface shows counts, never a second run list. |
 | Approve | `Approve.dc.html` | **DONE (s89, W1)** | State tabs with counts (All 8 · Waiting 3 · Blocked 1 · Approved 3 · Rejected 1 — Reddit) · run-group header with "Approve run · 2" (Deel's count-carrying batch verb, applied per run) · real platform marks on every row (in/X/f/bsky/globe) · the judge's reason as a chip on the Blocked row, the OPERATOR's reason as a warn chip on the new Rejected row ("your reason → eval: …" — the learn loop drawn on the surface) · every detail verb carries its key inline (Approve a / Edit e / Reject r — Plain) · "Open in Composer →" re-entry door added to the detail head (the Create-spec join) · queue filled 5→8 rows (the Analytics dead-space rule; the Rejected state existed nowhere before). Reject's reason-required rationale moved to hover title — the Rejected row already states the fact on the surface. Measured: footer caption 2 lines, card bottom inside 940. |
-| **Transcription** (`Library.dc.html`) | `Library.dc.html` | **queued — has a live dependency** | The s86 `transcription-free` lane adds an AI-enhance toggle beside Ingest. Per rule 7 it ships in the sheet's existing grammar, NOT a fresh design; this pass is where that control gets designed properly. **Also carries a naming drift like Calendar/Schedule: the sheet's `data-screen-label` still says "Library" while the app calls the surface Transcription.** |
+| Create home | `Create.dc.html` | **DONE (s90, W2)** | The dead "Advanced · staged flow →" header link DELETED — its job is a real door now: **"Start guided"** in the hero's control row (the wizard is an offer beside the prompt, R2). Jasper-style task shortcuts seeded from Intel picks (one row of three, each names its kind — post/video/page — and says what it prefills). Latest-runs rows carry their door: in-flight → "In Composer →" (the Runs sheet's door grammar; "Open in Composer" truncated at the 400px column — probed, not squinted), published → view live. Measured: bottom 717 ≤ 940, zero truncation. |
+| Create wizard | `Create Wizard.dc.html` (NEW) | **DONE (s90, W2)** | The B-create.3 sheet the approved Create spec names, drawn at the Sources & media step: Jasper's accordion rail (What ✓ · Platforms ✓ · Sources & media OPEN · Review plan pending) beside the live brief ARTIFACT ("this exact record rides the run"). Platform chips carry capability BEFORE spend (R3): Facebook ✓ ready · Instagram ✓ video carries the media · YouTube/TikTok "connect to publish" in warn — an honest fixture, those two aren't connected. Media attaches wear their ROLE at the file (Runway): `use` solid, `reference` dashed + "informs · never in the output" visible on the row (never tooltip-only — it changes a decision). The media door names the dialog (Leonardo: Uploads · Generations · Library). The plan region is a dashed HONEST PENDING ("lands at Review — before anything generates"), never invented numbers. Profound's generating-checklist state = pass 3, stated in the header. Measured: bottom 916 ≤ 940. |
+| Sites | `Sites.dc.html` | **DONE (s90, W2)** | State pill moved ONTO the preview shot (Lovable); every card gains its truth line — live → its hostname ↗ + minted date (Squarespace), draft → "previews only" (never a fake URL); h1 pills became a real filter seg (All 17 · Live 2 · Draft 15); footer gains the blog door ("Blog articles ride the same engine · the published ledger →" — the contract's blog-loop join, previously doorless). Measured: bottom 690 ≤ 940. |
+| Library | `Library.dc.html` | **DONE (s90, W2 — §5.3 drawn)** | ONE Library: the ingest band names every kind it takes (URL · file · text · video/audio transcribe on ingest) and gains the s86 lane's control designed properly — a **Free transcript | AI enhance** seg (free default; enhance metered, cost shows before the run); KIND became a qtab filter row with counts (All 6 · Video 2 · Audio 1 · Article 1 · Capture 1 · Text 1 — type is a lens, never a route); a mid-transcription source is an honest ROW STATE ("Transcribing · ~3m left · chunks land when it finishes"). The `/app/transcription` route retires at the rebuild; `data-screen-label` was always "Library" and stays. Source Media stays its own component family (knowledge shelf ≠ media shelf — resolved, not merged). Measured: bottom 662 ≤ 940. |
 | The other verdicted sheets | — | *(bucket row retired)* | Superseded by the coverage ledger below — his ruling forbids unnamed "others". |
 
 ## THE COVERAGE LEDGER — every surface, by his definition of done
@@ -228,10 +248,10 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 |---|---|---|---|---|---|---|
 | 1 | Analytics | ✅ s85b | ✅ | — | — | reference library §Analytics |
 | 2 | Schedule | ✅ s86 | ✅ | — | — | §Schedule |
-| 3 | Composer | ✅ s86 + Create-spec Mobbin pass | ✅ | — | — | popout state = p3, drawn open |
+| 3 | Composer | ✅ s86 + Create-spec Mobbin pass + **P walked s90** (launcher flow facts, library §Postiz launcher) | ✅ | — | — | popout state = p3, drawn open; the launcher walk REJECTED their bundle model, VALIDATED R3 + D3 |
 | 4 | Channels | ✅ s86 | ✅ | — | — | §Channels |
-| 5 | Create home | ✅ s86 (Create-spec pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·Leonardo) | — | — | — | sheets = B-create.3, s88 lead-serial |
-| 6 | Create wizard (new sheet) | ✅ s86 (same pass) | — | — | — | rides B-create.3 |
+| 5 | Create home | ✅ s86 (Create-spec pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·Leonardo) | ✅ s90 (W2) | — | — | pass-1 row above; awaiting the W2 verdict |
+| 6 | Create wizard (new sheet) | ✅ s86 (same pass) | ✅ s90 (W2) | — | — | `Create Wizard.dc.html` EXISTS now; pass-1 row above; awaiting the W2 verdict |
 | 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) | — | — | — | video build order 1 |
 | 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
 | 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
@@ -241,18 +261,20 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 13 | Integrations | — | — | — | — | untouched — not ready |
 | 14 | Intel | — | — | — | — | untouched — not ready |
 | 15 | Leads | — | — | — | — | untouched — not ready |
-| 16 | Library (Transcription) | — | — | — | — | queued row above; naming drift noted |
+| 16 | Library (Transcription) | ✅ s90 (W2) | ✅ s90 (W2) | — | — | §5.3 DRAWN — one Library, kind = filter, transcribing = row state; pass-1 row above; awaiting the W2 verdict |
 | 17 | Profiles | — | — | — | — | untouched — not ready |
 | 18 | Runs | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Runs; create_runs re-shape drawn (workspace spec §3 ORIENT); pass-1 row above |
-| 19 | Sites | — | — | — | — | untouched — not ready |
-| 20 | Source Media | — | — | — | — | verdicted sheet (s77) but pre-programme — no research pass on record |
+| 19 | Sites | ✅ s90 (W2) | ✅ s90 (W2) | — | — | library §Sites; pass-1 row above; awaiting the W2 verdict |
+| 20 | Source Media | ◐ banked (Leonardo dialog + Runway roles, s86 — APPLIED in the W2 wizard draw) | — | — | — | the IA question is RESOLVED (own component family, the wizard's media dialog — never merged into Library); its own sheet's p1 still owed |
 | 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
 | — | Calendar | *(superseded s85 — rail sweep; kept only as history)* | | | | |
 
-**The honest count: 13 of 20 live surfaces have been touched by the research; 7
+**The honest count: 15 of 20 live surfaces have been touched by the research; 5
 have not and are therefore not ready.** (W1/s89 moved Approve · Board · Dashboard
-· Runs.) Every design session updates this table in the same commit as its
-sheets — a pass that does not move a row here did not happen.
+· Runs; W2/s90 moved Sites · Library and drew Create home + wizard from the s86
+bank; Source Media is ◐ — its dialog pattern is banked and applied, its own
+sheet's pass is still owed.) Every design session updates this table in the same
+commit as its sheets — a pass that does not move a row here did not happen.
 
 ### The VIDEO arc — its own 3 passes (founder ask, 2026-07-29)
 
