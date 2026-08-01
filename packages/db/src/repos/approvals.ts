@@ -11,17 +11,26 @@ export interface RecordApprovalInput {
   action: ApprovalAction;
   /** Required when action is "edit". */
   editedBody?: string;
+  /**
+   * Operator's stated reason on a "reject" (s90 window). Present ⇒ the
+   * rejection is a CORRECTION: an eval_cases row (origin 'approve_reject')
+   * lands in the same transaction as the queued→rejected transition, and
+   * the reason rides the transition event. Absent ⇒ a bare decision — no
+   * eval row (the learning doors record signal, not ceremony).
+   */
+  reason?: string;
 }
 
 export function approvalsRepo(db: Db) {
   return {
     /**
      * One operator touch, one transaction. approve ⇒ queued→approved;
-     * reject ⇒ queued→rejected; edit ⇒ approvals + edit_diffs + eval_cases
-     * rows AND the body swap AND the re-judge transition, atomically — the
-     * "every override becomes an eval row in the same change" rule as a
-     * mechanism, not a habit (SPINE risk 4). An illegal starting status rolls
-     * the whole touch back, approval row included.
+     * reject ⇒ queued→rejected (+ an 'approve_reject' eval row when a
+     * reason is stated — s90 window); edit ⇒ approvals + edit_diffs +
+     * eval_cases rows AND the body swap AND the re-judge transition,
+     * atomically — the "every override becomes an eval row in the same
+     * change" rule as a mechanism, not a habit (SPINE risk 4). An illegal
+     * starting status rolls the whole touch back, approval row included.
      */
     async record(
       ctx: TenantCtx,
@@ -59,7 +68,23 @@ export function approvalsRepo(db: Db) {
           return { approval, draft: updated };
         }
         if (input.action === "reject") {
-          const updated = await transitionInTx(tx, ctx, draft.id, "rejected", opts);
+          const reason = input.reason?.trim();
+          if (reason) {
+            // Ground truth only, mirroring the edit branch's eval row: what
+            // the operator did and said — never an invented semantic label.
+            await tx.insert(evalCases).values({
+              tenantId: ctx.tenantId,
+              kind: "draft_reject",
+              input: { draftId: draft.id, platform: draft.platform, body: draft.body },
+              expected: { operatorAction: "rejected", reason },
+              origin: "approve_reject",
+              sourceRef: approval.id,
+            });
+          }
+          const updated = await transitionInTx(tx, ctx, draft.id, "rejected", {
+            ...opts,
+            ...(reason ? { reason } : {}),
+          });
           return { approval, draft: updated };
         }
 

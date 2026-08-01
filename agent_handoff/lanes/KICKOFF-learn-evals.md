@@ -24,18 +24,23 @@ reason — the W1 Approve sheet's "your reason → eval" chip — has NO door**:
 ## The ground truth that decides the design
 
 1. **The db half is a CONTRACT WINDOW, already opened and frozen by the lead
-   at s90 boot — you CONSUME it, you do not touch it.** The window (its
-   commit is on main before your launch):
+   at s90 boot — you CONSUME it, you do not touch it.** The frozen shape
+   (its commit is on main before your launch; migration
+   `packages/db/drizzle/0024_s90_approve_reject_origin.sql`):
    - `eval_cases_origin_check` widened with `'approve_reject'`
-     (`packages/db/src/schema/judging.ts:134` + migration);
-   - `evalCasesRepo.recordApproveReject` `(new verb, frozen)` — mechanism-
-     written, same-transaction audit event, exactly the shape of its three
-     sibling verbs;
-   - `approvals.record`'s reject branch accepts optional
-     `reason: string` and, when present, writes the eval row in the SAME
-     transaction as the `queued→rejected` transition
-     (`packages/db/src/repos/approvals.ts:61` — invariant I4's one-transaction
-     rule).
+     (`packages/db/src/schema/judging.ts`);
+   - `approvals.record` takes optional `reason?: string`; on `"reject"` with
+     a non-blank reason it writes the eval row (kind `draft_reject`, origin
+     `approve_reject`, `expected` = operator action + words, `sourceRef` =
+     the approval id) INLINE in the SAME transaction as the
+     `queued→rejected` transition, and the reason rides the transition
+     event (`packages/db/src/repos/approvals.ts` — the edit branch's inline
+     precedent; a standalone repo verb was deliberately NOT minted: it would
+     have run a second transaction, which is exactly what I4 forbids).
+   - Repo-level pins already exist
+     (`packages/db/src/__tests__/eval-cases.test.ts` §s90 window): reason ⇒
+     one row; blank/absent reason ⇒ none. Your pins sit a level up, at the
+     web action.
    If the frozen shapes don't fit what you build, **STOP and report** — the
    lead amends the window; you never edit `packages/db/**`.
 2. **The suite's read side is STALE and narrower than the table.** The origin

@@ -6,8 +6,10 @@ import { appendEvent } from "./events";
 
 /**
  * eval_cases rows are WRITTEN exclusively by mechanisms (approvals.record
- * on operator edits; recordIntelDismiss on intel triage) — never ad hoc.
- * The eval suite consumes them via list.
+ * on operator edits AND rejects-with-reason (s90 window, origin
+ * 'approve_reject'); recordIntelDismiss on intel triage; recordLeadTriage
+ * on the leads queue; recordCutDiffReview on editor proposals) — never ad
+ * hoc. The eval suite consumes them via list.
  */
 export function evalCasesRepo(db: Db) {
   return {

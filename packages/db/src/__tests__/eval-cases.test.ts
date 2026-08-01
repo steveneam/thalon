@@ -1,6 +1,7 @@
 import { tenantCtx } from "@thalon/contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import { openTestDb, type DbHandle } from "../client";
+import { fixture, type Fixture } from "./helpers";
 
 let handle: DbHandle | undefined;
 afterEach(async () => {
@@ -80,5 +81,71 @@ describe("evalCases.recordCutDiffReview (B-ve.4 — the editor's proposal learni
         reason: "   ",
       }),
     ).rejects.toThrow(/must carry its reason/);
+  });
+});
+
+describe("approvals.record reject-with-reason (s90 window — the Approve queue's learning door)", () => {
+  let fx: Fixture | undefined;
+  afterEach(async () => {
+    await fx?.close();
+    fx = undefined;
+  });
+
+  async function queuedDraft(f: Fixture) {
+    const { repos } = f.handle;
+    await repos.drafts.transition(f.ctx, f.draft.id, "judging");
+    await repos.judgeResults.append(f.ctx, { draftId: f.draft.id, gate: "g3_final", verdict: "pass" });
+    await repos.drafts.transition(f.ctx, f.draft.id, "queued");
+  }
+
+  it("a stated reason is a correction: one approve_reject row, ground-truth expected, same transaction as the transition", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await queuedDraft(fx);
+
+    const reason = "off-brand for launch week";
+    const { approval, draft } = await repos.approvals.record(fx.ctx, {
+      draftId: fx.draft.id,
+      actor: "operator",
+      action: "reject",
+      reason,
+    });
+    expect(draft.status).toBe("rejected");
+
+    // The migration took: the check constraint accepts the new origin.
+    const rows = await repos.evalCases.list(fx.ctx, { origin: "approve_reject" });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      kind: "draft_reject",
+      origin: "approve_reject",
+      // Ground truth only — the operator's action and words, no invented label.
+      expected: { operatorAction: "rejected", reason },
+      sourceRef: approval.id,
+    });
+    expect(rows[0].input).toMatchObject({ draftId: fx.draft.id });
+
+    // The reason rides the transition event too (provenance in the stream).
+    const events = await repos.events.list(fx.ctx, { entityType: "draft", entityId: fx.draft.id });
+    expect(
+      events.some((e) => {
+        const p = e.payload as Record<string, unknown>;
+        return p.to === "rejected" && p.reason === reason;
+      }),
+    ).toBe(true);
+  });
+
+  it("a bare reject is a decision, not a correction — no eval row, blank-only reason included", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await queuedDraft(fx);
+
+    const { draft } = await repos.approvals.record(fx.ctx, {
+      draftId: fx.draft.id,
+      actor: "operator",
+      action: "reject",
+      reason: "   ",
+    });
+    expect(draft.status).toBe("rejected");
+    expect(await repos.evalCases.list(fx.ctx, { origin: "approve_reject" })).toHaveLength(0);
   });
 });

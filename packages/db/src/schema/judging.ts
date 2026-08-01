@@ -131,10 +131,14 @@ export const evalCases = pgTable(
     // 'cut_diff_review' (B-ve.4 half-window): the editor's proposal door —
     // an operator REJECTING an agent-proposed EDL diff is a correction, and
     // corrections become eval rows in the same change (AGENTS.md rule 6).
+    // 'approve_reject' (s90 window): the Approve queue's reject-WITH-REASON
+    // door — a stated reason makes the rejection a correction, written by
+    // approvals.record in the same transaction as the queued→rejected
+    // transition; a bare reject is a decision and writes nothing.
     check(
       "eval_cases_origin_check",
       sql.raw(
-        `origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage', 'cut_diff_review')`,
+        `origin in ('edit_diff', 'golden', 'manual', 'intel_dismiss', 'lead_triage', 'cut_diff_review', 'approve_reject')`,
       ),
     ),
     tenantIsolation(),
