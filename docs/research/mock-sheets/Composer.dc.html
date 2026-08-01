@@ -107,6 +107,38 @@
        · The FIT BAND slimmed to words: name + count + the refusal reason —
          the bars were decoration; the words were the content. Every refusal
          reason survives verbatim (the honesty grammar is untouched).
+
+     s90c — THE PURPOSE, SPELT (founder question: "what is the purpose of
+     Composer, and is the layout achieving it?"). The purpose of record
+     (create-engine spec R7–R9): THE RUN-SCOPED CHECKPOINT BETWEEN GENERATE
+     AND APPROVE — what was built · what it looks like per destination ·
+     based on what · whether it will pass and how it should do. Nothing
+     publishes from here. His audit found three real gaps, all closed in
+     this iteration:
+       · EVERY ZONE NOW NAMES ITS JOB on the surface (his: "the purpose of
+         each column and box had to be spelt out — only the Preview was"):
+         YOUR WORDS — EDITS RE-JUDGE (left) · Preview (middle, his) · THIS
+         DESTINATION'S SETTINGS + HOW IT SHOULD DO (right) · EVERY
+         DESTINATION AT A GLANCE (the band). Mono zone-labels, one line each.
+       · "BASED ON WHAT" was under-served: a provenance line now sits under
+         the header — the run, the intel pick, the grounding count, the
+         profile, the models. The Approve detail's src-line grammar, reused.
+       · "HOW IT WOULD TREND" gets its honest home: the HOW IT SHOULD DO
+         band (right) = Discoverability (real) · Posting slot (real, agrees
+         with the Schedule sheet's week) · Trend forecast — which SAYS it
+         joins when Analytics (D2) has real history, with the sheet's one
+         open tooltip explaining why a number today would be fiction. The
+         spec already deferred Composer stats to D2; his question gave the
+         deferral a visible, honest seat instead of silence.
+       · THE THIRD COLUMN WAS NEVER EDITING — editing lives LEFT (direct
+         edit, re-judged) and the built-but-doorless AI-edit verb (the
+         s88/s89 create-shells + judge-candidate lanes) finally gets its
+         drawn door: "AI edit…" beside YOUR WORDS — propose → judge →
+         apply, never landing unjudged. The right column is the platform's
+         own switches, generated from its schema.
+       · The open tooltip MOVED from the schema-ⓘ (now closed) to the
+         forecast-ⓘ — one open per sheet, and the forecast's honesty is the
+         explanation most worth pre-answering.
      View: open this file with theme.css in the same dir; helmet ~= head. -->
 <html>
   <head>
@@ -176,6 +208,10 @@
           .jstrip-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 10px; font-size: 11px; color: var(--n-900); }
           .jstrip-facts > span, .jstrip-facts > a { white-space: nowrap; }
           .dline { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--n-900); padding: 0 2px; }
+          /* s90c: every zone names its job — the mono zone-label, one line. */
+          .zlabel { font-family: var(--font-data); font-size: 10px; letter-spacing: .05em; color: var(--n-800); }
+          /* s90c: provenance — the Approve detail's src-line grammar, reused. */
+          .src-line { font-size: 12px; color: var(--n-900); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
           /* Preview with the REAL truncation point drawn. */
           .pv { border: 1px solid var(--n-500); border-radius: 9px; background: var(--n-bg); padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
@@ -267,12 +303,30 @@
               <div class="btn btn-primary btn-sm">Send to Approve</div>
             </div>
 
+            <!-- s90c: BASED ON WHAT — the provenance line, plus the surface's own
+                 purpose in words. The Approve detail's src-line grammar. -->
+            <div class="src-line">
+              <span>The checkpoint before Approve — nothing publishes from here.</span>
+              <span style="color:var(--n-600)">|</span>
+              <span>From</span><a href="#">the launch-film run</a>
+              <span>·</span><a href="#">@framecraft.example on Bluesky ↗</a>
+              <span>·</span><a href="#">2 grounding sources</a>
+              <span>·</span><span>profile v4</span>
+              <span>·</span><span>drafted opus-5 · judged opus-5</span>
+            </div>
+
             <div class="cmp-grid">
 
               <!-- ── LEFT: your words, and what is wrong with them. The judge sits HERE,
                         beside the body, because the denylist hit it names is marked IN
-                        the body — a gate that points at a word belongs next to the word. ── -->
+                        the body — a gate that points at a word belongs next to the word.
+                        s90c: the zone says so, and the built AI-edit verb gets its door. ── -->
               <div class="cmp-left">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="zlabel">YOUR WORDS — EDITS RE-JUDGE</span>
+                  <div style="flex:1"></div>
+                  <div class="btn btn-ghost btn-sm" title="describe the change — the engine proposes, the judge re-checks, you apply · a refused proposal never touches your text">AI edit…</div>
+                </div>
                 <div class="body-box">
                   Deterministic video changed what we can promise. Every beat is a build step, so the same prompt renders the same film twice — and a failed take names the beat that failed instead of the whole render. Nothing here is <span class="hit">guaranteed</span> to be faster on the first pass, but the second pass is free.
                 </div>
@@ -289,10 +343,6 @@
                     <div style="flex:1"></div>
                     <a class="card-link" href="#" style="font-size:11.5px">details ▸</a>
                   </div>
-                </div>
-                <div class="dline">
-                  <span class="pill pill-warn" style="flex:none">3 of 4</span>
-                  <span>Discoverability — “deterministic video” not in the body · warns, never blocks</span>
                 </div>
               </div>
 
@@ -350,30 +400,48 @@
               <!-- ── RIGHT: the knobs for THIS destination, moved off the centre so the
                         preview could have it (founder's call). ── -->
               <div class="cmp-right" style="position:relative">
+                <span class="zlabel">THIS DESTINATION'S SETTINGS</span>
                 <div class="band">
                   <div class="fld"><dt>Media</dt><dd><div class="thumb-sm"><span>clip frame</span></div><span class="mtools"><span class="mtool" title="Crop"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4.5 1.5v10h10"></path><path d="M1.5 4.5h10v10"></path></svg></span><span class="mtool" title="Alt text"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 6.4 3.5h1.2l3.4 9M4.6 9.6h5.2M13 3.5v9"></path></svg></span><span class="mtool" title="Replace"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5A5.5 5.5 0 0 1 12 4.2"></path><path d="M12.4 1.9v2.6H9.8"></path><path d="M13.5 9.5A5.5 5.5 0 0 1 4 11.8"></path><path d="M3.6 14.1v-2.6h2.6"></path></svg></span><span class="mtool danger" title="Remove"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 4.5h9M6.5 4.5V3h3v1.5M5 4.5l.6 8h4.8l.6-8"></path></svg></span></span></dd></div>
                   <div class="fld"><dt>Cover frame</dt><dd><span class="frames"><span class="frame on"><span>0:00</span></span><span class="frame"><span>0:12</span></span><span class="frame"><span>0:24</span></span><span class="frame"><span>0:36</span></span></span></dd></div>
                   <div class="fld"><dt>First comment</dt><dd><span class="toggle off"></span><span class="t-label" style="font-size:11px">off — links cost no reach here</span></dd></div>
                   <div class="fld" style="background:var(--n-bg)"><dt style="display:none"></dt><dd style="width:100%"><span style="display:flex;align-items:center;gap:7px;width:100%;font-size:12.5px;color:var(--n-900);cursor:pointer">More settings<span class="t-data">· 5</span><div style="flex:1"></div><span style="font-size:10px">▾</span></span><span class="t-label" style="font-size:10.5px">Post as · Visibility · Link · Alt text · Who can comment — set once, rarely touched</span></dd></div>
                 </div>
-                <!-- The wrapper is what the tooltip anchors to. Anchoring it to the
-                     COLUMN instead put `top:100%` at the column's full height and threw
-                     the tooltip off the bottom of the screen — caught in the render. -->
-                <div style="display:flex;align-items:center;gap:6px;padding:0 2px;position:relative">
+                <div style="display:flex;align-items:center;gap:6px;padding:0 2px">
                   <span class="t-label" style="font-size:11px">generated from this platform's schema</span>
-                  <span class="info">i</span>
-                <!-- THE SHEET'S ONE OPEN TOOLTIP, in the rail's own free space below the
-                     band — it covers nothing, which is the whole rule. -->
-                <div class="tip" style="right:0;top:calc(100% + 8px)">
-                  <span class="tip-h">WHY THIS RAIL CHANGES PER TAB</span>
-                  Each platform declares its own settings, so the rail is generated, never hand-written. A VIDEO destination declares more — YouTube wants a title, a thumbnail, a made-for-kids answer; TikTok wants privacy, duet, stitch — on their own tabs.
+                  <span class="info" title="each platform declares its own settings — a video destination declares more (YouTube: title · thumbnail · made-for-kids; TikTok: privacy · duet · stitch), on their own tabs">i</span>
                 </div>
+                <!-- s90c: HOW IT SHOULD DO — the honest trend answer. Two real signals
+                     today; the forecast row NAMES its D2 dependency instead of showing
+                     a number that would be fiction. -->
+                <span class="zlabel" style="margin-top:2px">HOW IT SHOULD DO</span>
+                <!-- The tip anchors to this WRAPPER, not inside the band — .band clips
+                     (overflow:hidden), and the first cut of this pass hid the tooltip
+                     exactly that way. Caught in the render. -->
+                <div style="position:relative">
+                  <div class="band">
+                    <div class="fld"><dt>Discoverability</dt><dd><span class="pill pill-warn" style="flex:none">3 of 4</span><span style="font-size:12px;color:var(--n-900)">“deterministic video” not in the body — warns, never blocks</span></dd></div>
+                    <div class="fld"><dt>Posting slot</dt><dd><span style="font-size:12.5px">Sun 09:30 planned</span><span class="t-label" style="font-size:11px">· LinkedIn ≤ 2/day has room</span></dd></div>
+                    <div class="fld"><dt>Trend forecast</dt><dd>
+                      <span class="t-label" style="font-size:11px">joins when Analytics has real history — nothing invented before that <span class="info" style="vertical-align:-3px">i</span></span>
+                    </dd></div>
+                  </div>
+                  <!-- THE SHEET'S ONE OPEN TOOLTIP — moved here s90c: the forecast's
+                       honesty is the explanation most worth pre-answering. It spills
+                       LEFT into the preview card's empty lower region (the Analytics
+                       anchor precedent) — a below-hang collides with the fit band,
+                       which the first cut of this pass proved in the render. -->
+                  <div class="tip" style="right:calc(100% + 9px);top:165px">
+                    <span class="tip-h">WHY THERE IS NO PREDICTION YET</span>
+                    A forecast needs measured posts. The analytics loop records how every published post actually does; once that history exists, this row predicts from it. Until then a number here would be fiction — honesty beats polish.
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- All five destinations at a glance — the band needs the width more than
                  any single column does. -->
+            <span class="zlabel">EVERY DESTINATION AT A GLANCE — FIT + REFUSALS</span>
             <div class="fitband">
                 <div class="fitline">
                   <div class="fit-top"><span class="fit-count">2,412 / 3,000</span><div style="flex:1"></div><span class="t-data">LinkedIn</span></div>
