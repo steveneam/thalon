@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { tenantCtx } from "@thalon/contracts";
-import { openTestDb, sha256Hex, type DbHandle } from "@thalon/db";
+import { tenantCtx, type TenantCtx } from "@thalon/contracts";
+import { openTestDb, sha256Hex, type DbHandle, type Draft, type Repos } from "@thalon/db";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseJsonl, toJsonl } from "../dataset";
 import { exportEvalCases } from "../export-eval-cases";
@@ -13,6 +13,44 @@ afterEach(async () => {
 });
 
 /**
+ * Fixture: one tenant with an active profile and a draft walked through the
+ * judge gate to `queued` — the state every operator learning door acts from
+ * (edit, reject-with-reason). Extend here, not inline, as doors multiply.
+ */
+async function seedQueuedDraft(repos: Repos): Promise<{ ctx: TenantCtx; draft: Draft }> {
+  const tenant = await repos.tenants.create({ slug: "self", name: "Self (dogfood)" });
+  const ctx = tenantCtx(tenant.id);
+  const profile = await repos.brandProfiles.create(ctx, {
+    config: { voice: {}, denylist: [], platformProfiles: {} },
+    activate: true,
+  });
+  const source = await repos.sources.create(ctx, {
+    kind: "prompt",
+    contentHash: sha256Hex("launch note"),
+  });
+  const run = await repos.fanoutRuns.create(ctx, {
+    sourceId: source.id,
+    brandProfileId: profile.id,
+    brandProfileVersion: profile.version,
+    platforms: ["demo-platform"],
+    promptVersion: "fanout.v1",
+    model: "test/model",
+    generationKey: sha256Hex(`${ctx.tenantId}:run`),
+  });
+  const draft = await repos.drafts.create(ctx, {
+    fanoutRunId: run.id,
+    sourceId: source.id,
+    platform: "demo-platform",
+    body: "We are thrilled to announce a revolutionary feature!!!",
+    generationKey: sha256Hex(`${ctx.tenantId}:draft`),
+  });
+  await repos.drafts.transition(ctx, draft.id, "judging");
+  await repos.judgeResults.append(ctx, { draftId: draft.id, gate: "g3_final", verdict: "pass" });
+  await repos.drafts.transition(ctx, draft.id, "queued");
+  return { ctx, draft };
+}
+
+/**
  * The charter's B0.4 exit condition: edit_diff/override capture wired
  * end-to-end AND PROVEN BY TEST — a real operator edit against a real
  * (embedded) database must come out the other end as a consumable dataset
@@ -22,37 +60,8 @@ describe("override capture → eval dataset (end-to-end)", () => {
   it("an operator edit becomes exactly one exported eval record", async () => {
     handle = await openTestDb();
     const { repos } = handle;
-    const tenant = await repos.tenants.create({ slug: "self", name: "Self (dogfood)" });
-    const ctx = tenantCtx(tenant.id);
-    const profile = await repos.brandProfiles.create(ctx, {
-      config: { voice: {}, denylist: [], platformProfiles: {} },
-      activate: true,
-    });
-    const source = await repos.sources.create(ctx, {
-      kind: "prompt",
-      contentHash: sha256Hex("launch note"),
-    });
-    const run = await repos.fanoutRuns.create(ctx, {
-      sourceId: source.id,
-      brandProfileId: profile.id,
-      brandProfileVersion: profile.version,
-      platforms: ["demo-platform"],
-      promptVersion: "fanout.v1",
-      model: "test/model",
-      generationKey: sha256Hex(`${ctx.tenantId}:run`),
-    });
-    const draft = await repos.drafts.create(ctx, {
-      fanoutRunId: run.id,
-      sourceId: source.id,
-      platform: "demo-platform",
-      body: "We are thrilled to announce a revolutionary feature!!!",
-      generationKey: sha256Hex(`${ctx.tenantId}:draft`),
-    });
+    const { ctx, draft } = await seedQueuedDraft(repos);
 
-    // Walk the state machine to queued, then the operator overrides.
-    await repos.drafts.transition(ctx, draft.id, "judging");
-    await repos.judgeResults.append(ctx, { draftId: draft.id, gate: "g3_final", verdict: "pass" });
-    await repos.drafts.transition(ctx, draft.id, "queued");
     const edited = "We shipped scheduled exports today. Details in the changelog.";
     await repos.approvals.record(ctx, {
       draftId: draft.id,
@@ -73,6 +82,85 @@ describe("override capture → eval dataset (end-to-end)", () => {
     expect(records[0].sourceRef).toMatch(/^[0-9a-f-]{36}$/);
 
     // And the dataset round-trips losslessly through JSONL.
+    expect(parseJsonl(toJsonl(records))).toEqual(records);
+  });
+
+  it("a rejected-with-reason draft round-trips write→export→dataset as a first-class record (s90 door)", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    const { ctx, draft } = await seedQueuedDraft(repos);
+
+    const reason = "wrong audience — this reads like an investor update";
+    const { approval } = await repos.approvals.record(ctx, {
+      draftId: draft.id,
+      actor: "operator",
+      action: "reject",
+      reason,
+    });
+
+    const records = await exportEvalCases(repos, ctx);
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      kind: "draft_reject",
+      origin: "approve_reject",
+      input: { draftId: draft.id, platform: "demo-platform" },
+    });
+    // Ground truth only: the operator rejected, their words — nothing invented.
+    expect(records[0].expected).toEqual({ operatorAction: "rejected", reason });
+    expect(records[0].sourceRef).toBe(approval.id);
+    expect(parseJsonl(toJsonl(records))).toEqual(records);
+  });
+
+  it("one export pass carries EVERY door's origin, batched per kind (the stale-union gap, closed)", async () => {
+    handle = await openTestDb();
+    const { repos } = handle;
+    const { ctx, draft } = await seedQueuedDraft(repos);
+
+    // Interleave the doors so arrival order (createdAt/id) differs from the
+    // batched order — the two intel rows land with other doors between them.
+    await repos.evalCases.recordIntelDismiss(ctx, {
+      kind: "intel_trend_rank",
+      input: { cardId: "card-1" },
+      sourceRef: "card-1",
+    });
+    await repos.evalCases.recordLeadTriage(ctx, {
+      kind: "lead_rank",
+      input: { leadId: "lead-1" },
+      action: "dismissed",
+      sourceRef: "lead-1",
+    });
+    await repos.evalCases.recordIntelDismiss(ctx, {
+      kind: "intel_trend_rank",
+      input: { cardId: "card-2" },
+      sourceRef: "card-2",
+    });
+    await repos.evalCases.recordCutDiffReview(ctx, {
+      kind: "video_cut_diff",
+      input: { proposalId: "cut-1" },
+      reason: "cuts away before the product is on screen",
+      sourceRef: "cut-1",
+    });
+    await repos.approvals.record(ctx, {
+      draftId: draft.id,
+      actor: "operator",
+      action: "reject",
+      reason: "hashtag soup",
+    });
+
+    // ONE pass, one dataset — every mechanism origin present, kinds contiguous.
+    const records = await exportEvalCases(repos, ctx);
+    expect(records.map((r) => ({ kind: r.kind, origin: r.origin }))).toEqual([
+      { kind: "draft_reject", origin: "approve_reject" },
+      { kind: "intel_trend_rank", origin: "intel_dismiss" },
+      { kind: "intel_trend_rank", origin: "intel_dismiss" },
+      { kind: "lead_rank", origin: "lead_triage" },
+      { kind: "video_cut_diff", origin: "cut_diff_review" },
+    ]);
+    // Within a kind, the repo's write order (createdAt/id) is preserved.
+    const intel = records.filter((r) => r.kind === "intel_trend_rank");
+    expect(intel.map((r) => r.sourceRef)).toEqual(["card-1", "card-2"]);
+    // The previously-unexportable origins now serialize — before the union
+    // widened, toJsonl THREW on lead_triage/cut_diff_review rows.
     expect(parseJsonl(toJsonl(records))).toEqual(records);
   });
 

@@ -57,6 +57,39 @@ describe("approve-queue actions", () => {
     expect(rejected.status).toBe("rejected");
   });
 
+  it("reject WITH a reason writes exactly one approve_reject eval row carrying ground truth only (the s90 learning door)", async () => {
+    seeded = await seedDraft();
+    const { handle, ctx, draft } = seeded;
+    await handle.repos.drafts.transition(ctx, draft.id, "judging");
+    await handle.repos.judgeResults.append(ctx, { draftId: draft.id, gate: "g3_final", verdict: "pass" });
+    await handle.repos.drafts.transition(ctx, draft.id, "queued");
+
+    const reason = "off-brand: we never open with a rhetorical question";
+    const { approval, draft: rejected } = await rejectDraft(handle.repos, ctx, draft.id, "operator", reason);
+    expect(rejected.status).toBe("rejected");
+
+    const cases = await handle.repos.evalCases.list(ctx, { origin: "approve_reject" });
+    expect(cases).toHaveLength(1);
+    expect(cases[0].kind).toBe("draft_reject");
+    // toEqual, not toMatchObject: `expected` carries ONLY the ground truth —
+    // the operator rejected, their words — never an invented semantic label.
+    expect(cases[0].expected).toEqual({ operatorAction: "rejected", reason });
+    expect(cases[0].input).toMatchObject({ draftId: draft.id, platform: draft.platform, body: draft.body });
+    expect(cases[0].sourceRef).toBe(approval.id);
+  });
+
+  it("reject WITHOUT a reason writes NO eval row — a bare reject is a decision, not a correction", async () => {
+    seeded = await seedDraft();
+    const { handle, ctx, draft } = seeded;
+    await handle.repos.drafts.transition(ctx, draft.id, "judging");
+    await handle.repos.judgeResults.append(ctx, { draftId: draft.id, gate: "g3_final", verdict: "pass" });
+    await handle.repos.drafts.transition(ctx, draft.id, "queued");
+
+    const { draft: rejected } = await rejectDraft(handle.repos, ctx, draft.id, "operator");
+    expect(rejected.status).toBe("rejected");
+    expect(await handle.repos.evalCases.list(ctx, { origin: "approve_reject" })).toHaveLength(0);
+  });
+
   it("edit-save captures edit_diffs + eval_cases atomically AND runs the judge lane synchronously, reaching the fully-judged outcome (queued)", async () => {
     seeded = await seedDraft();
     const { handle, ctx, draft } = seeded;

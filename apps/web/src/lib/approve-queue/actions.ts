@@ -29,13 +29,20 @@ export async function approveDraft(
   return repos.approvals.record(ctx, { draftId, actor, action: "approve" });
 }
 
+/**
+ * s90 window: a stated reason turns the rejection into a CORRECTION — the
+ * repo writes the 'approve_reject' eval row in the same transaction as the
+ * queued→rejected transition. No reason ⇒ no row (a bare reject is a
+ * decision, not a correction — the doors record signal, not ceremony).
+ */
 export async function rejectDraft(
   repos: Repos,
   ctx: TenantCtx,
   draftId: string,
   actor: string = DEFAULT_ACTOR,
+  reason?: string,
 ): Promise<ActionResult> {
-  return repos.approvals.record(ctx, { draftId, actor, action: "reject" });
+  return repos.approvals.record(ctx, { draftId, actor, action: "reject", reason });
 }
 
 /**
