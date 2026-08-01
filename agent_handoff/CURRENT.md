@@ -115,6 +115,17 @@ unblocks B-create.4; **the verdict now covers the s90b-REDRAWN Create set**)
    **Composer** (zoning kept; judge strip · 3 knobs + More-settings·5 · fit
    band in words, refusal reasons verbatim). All ≤ 940, all on canvas.
    **Cite this doctrine in every future pass — W1 builds included.**
+4. **s90c — the Composer's PURPOSE spelt on the surface** (his audit: "what
+   is the Composer for?"): purpose of record = the run-scoped checkpoint
+   between Generate and Approve (spec R7–R9). Every zone now carries a mono
+   job-label; a provenance line answers "based on what"; "how it would
+   trend" got its honest home (**HOW IT SHOULD DO**: Discoverability +
+   Posting slot real today, Trend forecast NAMES its D2 dependency — never
+   an invented number); **the built-but-doorless AI-edit verb has its drawn
+   door** ("AI edit…" beside YOUR WORDS); the third column was never
+   editing — that's the left column, now labeled. Tooltip moved twice on
+   probe evidence; intersection-probed clean. The W2 verdict covers this
+   iteration too.
 
 ## Resume prompt (session 91, syd4)
 
