@@ -3,7 +3,13 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s89 — W1 research pass (ux-refinement-program.md §Approve): state
+     tabs with counts (Reddit mod queue) · run-grouped batch verb carrying its
+     count (Deel) · judge reason as a chip on the blocked row (Reddit) · real
+     platform marks on queue rows (house rule since Analytics) · every verb
+     carries its key inline on the control (Plain) · reject states that its
+     reason becomes the eval row (Klaviyo). -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -23,6 +29,15 @@
           .q-row .thumb-sm { margin-top: 1px; }
           .ver-strip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--n-900); padding: 8px 12px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
           .ver-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--n-700); flex: none; }
+          .qtabs { display: flex; align-items: center; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--n-400); }
+          .qtab { font-size: 12px; padding: 6px 10px 8px; color: var(--n-900); display: inline-flex; gap: 6px; align-items: baseline; }
+          .qtab.on { color: var(--n-1000); font-weight: 600; box-shadow: inset 0 -2px 0 var(--act); }
+          .qtab .n { font-size: 10.5px; font-family: var(--font-data); color: var(--n-800); }
+          .run-hd { display: flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--n-bg); border-bottom: 1px solid var(--n-400); font-size: 11px; color: var(--n-800); }
+          .why { display: inline-flex; align-items: center; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: var(--err-subtle); color: var(--err); white-space: nowrap; }
+          .plat-dot { width: 16px; height: 16px; border-radius: 4px; background: var(--n-300); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--n-1000); vertical-align: -4px; }
+          .btn .kbd { margin-left: 2px; padding: 1px 5px; font-size: 10px; }
+          .btn-primary .kbd { background: rgba(255,255,255,.14); border-color: transparent; color: var(--act-text); }
         </style>
       </helmet>
       <div class="screen" data-screen-label="Approve">
@@ -62,17 +77,29 @@
               <span class="pill pill-err">1 blocked</span>
               <div style="flex:1"></div>
               <div class="btn btn-ghost btn-sm sel-ctl">Oldest first<span class="chev"></span></div>
-              <div class="btn btn-ghost btn-sm sel-ctl">All drafts<span class="chev"></span></div>
+              <div class="btn btn-ghost btn-sm sel-ctl">All families<span class="chev"></span></div>
               <div class="btn btn-primary btn-sm">Approve all waiting (3)</div>
             </div>
             <div class="split">
               <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="qtabs">
+                  <span class="qtab on">All<span class="n">8</span></span>
+                  <span class="qtab">Waiting<span class="n">3</span></span>
+                  <span class="qtab">Blocked<span class="n">1</span></span>
+                  <span class="qtab">Approved<span class="n">3</span></span>
+                  <span class="qtab">Rejected<span class="n">1</span></span>
+                </div>
                 <div style="flex:1;overflow:hidden">
+                  <div class="run-hd">
+                    <span>Run · launch video · 4 Jul, 09:00 · 2 drafts</span>
+                    <div style="flex:1"></div>
+                    <div class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px">Approve run · 2</div>
+                  </div>
                   <div class="row sel q-row">
                     <div class="thumb-sm"><span>clip frame</span></div>
                     <div style="flex:1;min-width:0">
                       <div class="q-title">Our launch video has no editor file. It has a build step.</div>
-                      <div class="excerpt">LinkedIn · clip 0:12–0:47 · <em>“We rendered the whole thing from HTML — every scene a component…”</em></div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span> clip 0:12–0:47 · <em>“We rendered the whole thing from HTML — every scene a component…”</em></div>
                     </div>
                     <span class="pill pill-warn">Waiting</span>
                     <span class="t-data">4 Jul, 09:00</span>
@@ -80,15 +107,15 @@
                   <div class="row q-row">
                     <div style="flex:1;min-width:0">
                       <div class="q-title">The export queue disappeared the day video became a build artifact</div>
-                      <div class="excerpt">X · post · <em>“No timeline. No render farm. A rebuild.”</em></div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></span> post · <em>“No timeline. No render farm. A rebuild.”</em></div>
                     </div>
                     <span class="pill pill-warn">Waiting</span>
-                    <span class="t-data">4 Jul, 08:41</span>
+                    <span class="t-data">4 Jul, 09:00</span>
                   </div>
                   <div class="row q-row">
                     <div style="flex:1;min-width:0">
                       <div class="q-title">Works with every platform — one pipeline, every destination</div>
-                      <div class="excerpt">LinkedIn · post · <span style="color:var(--err)">grounding failed — no source supports the claim</span></div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span> post · <span class="why">grounding failed — no source supports the claim</span></div>
                     </div>
                     <span class="pill pill-err">Blocked</span>
                     <span class="t-data">3 Jul, 17:22</span>
@@ -97,7 +124,7 @@
                     <div class="thumb-sm"><span>post image</span></div>
                     <div style="flex:1;min-width:0">
                       <div class="q-title">Render your launch film from HTML — the deterministic pipeline</div>
-                      <div class="excerpt">Facebook · post · <em>“The same system that drafts our posts renders the film…”</em></div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z"></path></svg></span> post · <em>“The same system that drafts our posts renders the film…”</em></div>
                     </div>
                     <span class="pill pill-warn">Waiting</span>
                     <span class="t-data">3 Jul, 16:05</span>
@@ -106,14 +133,39 @@
                     <div class="thumb-sm"><span>page hero</span></div>
                     <div style="flex:1;min-width:0">
                       <div class="q-title">From HTML to launch film: inside the build-step pipeline</div>
-                      <div class="excerpt">Blog · article · <em>2,100 words · 4 sections · hero image attached</em></div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg></span> article · <em>2,100 words · 4 sections · hero image attached</em></div>
                     </div>
                     <span class="pill pill-ok">Approved</span>
                     <span class="t-data">2 Jul, 11:14</span>
                   </div>
+                  <div class="row q-row">
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">Every rewrite is a rebuild — versioning video like source code</div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></span> post · <span class="why" style="background:var(--warn-subtle);color:var(--warn)">your reason → eval: cites a benchmark we never ran</span></div>
+                    </div>
+                    <span class="pill">Rejected</span>
+                    <span class="t-data">1 Jul, 15:48</span>
+                  </div>
+                  <div class="row q-row">
+                    <div class="thumb-sm"><span>post image</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">The launch film was code-reviewed. Literally.</div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M3.6 2.6C5.3 3.9 7.1 6.5 8 7.9c.9-1.4 2.7-4 4.4-5.3 1.2-.9 3.1-1.6 3.1.6 0 .4-.3 3.5-.4 4-.4 1.7-2.1 2.1-3.6 1.9 2.6.4 3.3 1.9 1.9 3.4-2.7 2.8-3.9-.7-4.2-1.6l-.2-.5-.2.5c-.3.9-1.5 4.4-4.2 1.6-1.4-1.5-.7-3 1.9-3.4-1.5.2-3.2-.2-3.6-1.9-.1-.5-.4-3.6-.4-4 0-2.2 1.9-1.5 3.1-.6Z"></path></svg></span> post · <em>“Every scene a component, every cut a commit…”</em></div>
+                    </div>
+                    <span class="pill pill-ok">Approved</span>
+                    <span class="t-data">1 Jul, 09:12</span>
+                  </div>
+                  <div class="row q-row">
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">Why our launch video is a build artifact, not an export</div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span> post · <em>“An export queue is a place where certainty goes to wait…”</em></div>
+                    </div>
+                    <span class="pill pill-ok">Approved</span>
+                    <span class="t-data">30 Jun, 17:03</span>
+                  </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--n-400)">
-                  <span class="t-label">5 of 5</span>
+                  <span class="t-label">8 of 8</span>
                   <div style="flex:1"></div>
                   <span class="kbd">j</span><span class="kbd">k</span><span class="t-label">row</span>
                   <span class="kbd">a</span><span class="t-label">approve</span>
@@ -127,6 +179,7 @@
                   <span class="t-title">LinkedIn draft · clip plan</span>
                   <span class="t-label">0:12–0:47 · 35s</span>
                   <div style="flex:1"></div>
+                  <a class="card-link" href="#">Open in Composer →</a>
                   <span class="t-data" title="Deep link · draft 3f9a2c1e">#3f9a2c1e</span>
                 </div>
                 <div style="flex:1;overflow:hidden;padding:18px 24px;display:flex;flex-direction:column;gap:14px">
@@ -164,11 +217,11 @@
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--n-400)">
-                  <div class="btn btn-primary">Approve</div>
-                  <div class="btn btn-ghost">Edit</div>
+                  <div class="btn btn-primary">Approve<span class="kbd">a</span></div>
+                  <div class="btn btn-ghost">Edit<span class="kbd">e</span></div>
                   <span class="t-label" style="margin-left:6px">recorded — nothing publishes until the door arms</span>
                   <div style="flex:1"></div>
-                  <div class="btn btn-danger">Reject…</div>
+                  <div class="btn btn-danger" title="reason required — it becomes the eval row">Reject…<span class="kbd">r</span></div>
                 </div>
               </div>
             </div>
