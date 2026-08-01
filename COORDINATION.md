@@ -211,14 +211,37 @@ beside it.** Ceiling unchanged: two lanes + the lead.
 **LANES — two candidates, kickoffs to be WRITTEN AT THE s90 BOOT (rule 12:
 ground in the repo before speccing; each launch needs his fresh named GO):**
 
+> **s90 BOOT RE-GROUND (rule 12 doing its job — the s87 ve4 class, caught at
+> the opener this time): `trend-live` is RETIRED AS A LANE.** The sketched
+> feature is ALREADY BUILT end to end: the YouTube Data API driver exists
+> (`packages/engine/src/trend/youtube-source.ts`, B6.5), it is registered
+> behind the env-selected seam (`source-registry.ts`; `TREND_SOURCE` takes a
+> comma-list since s72), credentials resolve vault-first (B-int.3
+> `intel_youtube`), and the velocity math is WIRED into live intake
+> (`intake.ts:380` calls `detectLongitudinalOutlier`; the "pass-3 work"
+> line in `longitudinal.ts`'s header is stale). What actually remains is not
+> lane work: (a) a free YouTube Data API v3 key — HIS Google console visit,
+> now a NEEDS-STEVEN line joined to the portal batch; (b) the
+> `TREND_SOURCE=bluesky,youtube` config flip + sweeper restart when the key
+> lands; (c) one deliberate non-feature: youtube account polling is a
+> recorded loud refusal (bluesky covers account watching, keyless).
+> **Replacement lane: `youtube-destination`** — his own s89 charter candidate
+> (ruling recorded below), build-half unblocked, disjoint from `learn-evals`.
+
 | lane | bucket | scope sketch | why now |
 |---|---|---|---|
-| trend-live | pass-3 trend acquisition | YouTube Data API poller behind the existing `TrendSource` seam (`packages/engine/src/trend/`); official APIs only; fake driver stays the test driver | automated acquisition IS the feature (standing directive); also lights Intel's dark Velocity/Engagement signals (programme file, open decision 4) |
-| learn-evals | B-learn follow-through | the reject-reason → `eval_cases` seam + an evals batch read, engine-side only (no UI — Approve's control builds with the W1 rebuild) | the ship gate is a green eval suite; W1's Approve drew the front door, the engine seam should exist before the surface rebuild wires it |
+| youtube-destination | destination build half (s89 ruling) | `"youtube"` into `SOCIAL_PLATFORMS` + both capability truth-tables + settings schema resolving the `SETTINGS_DEFERRED.youtube` IOU + `packages/engine/src/social/drivers/youtube.ts` (new) behind the seam; tests fake; NOTHING armed; kickoff = `agent_handoff/lanes/KICKOFF-youtube-destination.md` | his s89 ruling chartered it; the completeness cascade is designed to fire the day the key lands; live half stays gated on his Google portal app |
+| learn-evals | B-learn follow-through | the reject-reason → `eval_cases` seam + the suite's batch read (stale origin unions in `eval/src/export-eval-cases.ts` / `eval/src/dataset.ts` close as part of it); no UI — Approve's control builds with the s91 rebuild; kickoff = `agent_handoff/lanes/KICKOFF-learn-evals.md` | the ship gate is a green eval suite; W1's Approve drew the front door, the engine seam should exist before the surface rebuild wires it |
 
-Disjoint by construction: trend vs evals vs sheets. **Neither touches
-`packages/db` schema or contracts** — if either needs a table/verb, that is a
-contract-window question, STOP and report.
+Disjoint by construction: contracts-platform/social-engine vs eval-suite/web-lib
+vs sheets. **The STOP-and-report tripwire FIRED at boot, as designed:**
+`learn-evals` needs `eval_cases_origin_check` widened (+ a repo verb +
+the `approvals.record` reason seat) — `packages/db` schema, so it is a
+CONTRACT-WINDOW question: the lead opens/freezes a minimal window (reported
+to the founder with the lane ask) BEFORE that lane launches; the lane
+consumes frozen shapes only. `youtube-destination`'s contracts touches are
+its chartered scope (his s89 ruling names them), confined to the platform
+files, and off-limits to every other actor while the lane lives.
 
 **Behind s90 (from the runway §9):** s91 = W1 BUILDS lead-direct (Approve
 first, Board route deletes as its replacement lands) · s92 = B-create.4
