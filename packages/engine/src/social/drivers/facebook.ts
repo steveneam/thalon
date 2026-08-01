@@ -161,6 +161,19 @@ export function createFacebookDriver(config: FacebookDriverConfig): SocialPublis
  * its total is summed here. That is the metric's own stated meaning, not a
  * derivation this reader invented — and the sum only ever includes numbers
  * the platform actually sent.
+ *
+ * COMMENT AND SHARE COUNTS ARE NOT INSIGHTS METRICS — they are fields on the
+ * post OBJECT, so this reader makes a second GET
+ * (`/{post-id}?fields=comments.summary(true),shares`) beside the insights
+ * call. Verified against the live Graph docs 2026-08-01:
+ * https://developers.facebook.com/docs/graph-api/reference/pagepost/ lists
+ * `shares` ("Number of times the post has been shared", a struct with
+ * `count`), and https://developers.facebook.com/docs/graph-api/reference/object/comments
+ * documents the `summary` parameter whose `total_count` counts top-level
+ * comments under the default filter (replies join only under filter=stream,
+ * which is not asked for). The object read failing degrades PER-METRIC: the
+ * insights numbers still land, the object fields simply yield no samples —
+ * a partial answer recorded partially, never zeroed.
  */
 export function createFacebookMetricsReader(config: FacebookDriverConfig): SocialMetricsReader {
   const baseUrl = (config.baseUrl ?? "https://graph.facebook.com").replace(/\/$/, "");
@@ -218,6 +231,30 @@ export function createFacebookMetricsReader(config: FacebookDriverConfig): Socia
             break;
         }
       }
+
+      // The second read: the post OBJECT's own fields (see the docblock).
+      // Failure here — an outage, a scope oddity, a shape change — costs
+      // exactly the two object metrics and nothing else: no throw, no
+      // invented zero, and the insights samples above still land.
+      try {
+        const objectUrl =
+          `${baseUrl}/${FACEBOOK_GRAPH_VERSION}/${encodeURIComponent(externalPostId)}` +
+          `?fields=${encodeURIComponent("comments.summary(true),shares")}`;
+        const objectResponse = await hardenedPlatformFetch("facebook", fetchImpl, objectUrl, {
+          headers: { Authorization: `Bearer ${config.accessToken}` },
+        });
+        const object = postObjectSchema.safeParse(await responseJson(objectResponse));
+        if (object.success) {
+          collectSample(samples, "facebook", "comments", object.data.comments?.summary?.total_count);
+          // Graph omits `shares` on a post nobody shared — collectSample
+          // records nothing for the absent field, which is the correct absence.
+          collectSample(samples, "facebook", "shares", object.data.shares?.count);
+        }
+      } catch {
+        // Degraded per-metric, deliberately: the tick records the partial
+        // answer and the absent labels stay absent rather than zeroed.
+      }
+
       return {
         platform: "facebook",
         samples,
@@ -247,6 +284,24 @@ function sumReactionTypes(raw: unknown): number | undefined {
   }
   return sawOne ? total : undefined;
 }
+
+/**
+ * The post-object read's essentials, everything else passed through loose.
+ * `total_count` and `count` stay `unknown` on purpose — `collectSample`'s
+ * a-number-is-a-number floor decides what is recordable, so a platform that
+ * changed a field's type surfaces as an honest absence, not a guess.
+ */
+const postObjectSchema = z
+  .object({
+    comments: z
+      .object({
+        summary: z.object({ total_count: z.unknown() }).loose().optional(),
+      })
+      .loose()
+      .optional(),
+    shares: z.object({ count: z.unknown() }).loose().optional(),
+  })
+  .loose();
 
 /** The insights envelope: named metrics, each with a values series whose last entry is current. */
 const insightsSchema = z.object({

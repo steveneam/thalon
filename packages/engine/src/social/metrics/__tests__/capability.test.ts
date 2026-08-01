@@ -136,6 +136,17 @@ describe("the honesty facts this lane verified against live docs", () => {
     expect(retired?.permanence).toBe("retired");
   });
 
+  it("Facebook reports comment and share counts from the post OBJECT — the second call, verified 2026-08-01", async () => {
+    const facebook = metricCapability("facebook");
+    expect(facebook.reports.find((r) => r.label === "comments")?.platformField).toBe(
+      "comments.summary.total_count",
+    );
+    expect(facebook.reports.find((r) => r.label === "shares")?.platformField).toBe("shares.count");
+    // The flip is complete: nothing refuses what the reader now reads.
+    expect(facebook.refuses.map((r) => r.label)).toEqual(["impressions"]);
+    expect(facebook.verifiedOn).toBe("2026-08-01");
+  });
+
   it("Instagram reports views (not the v22-retired impressions) and a real reach", () => {
     const instagram = metricCapability("instagram");
     const fields = instagram.reports.map((r) => r.platformField);

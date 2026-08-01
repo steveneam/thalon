@@ -218,6 +218,60 @@ describe("facebook metrics reader", () => {
     ]);
   });
 
+  it("reads comment and share counts from the post OBJECT — the second call beside insights", async () => {
+    const { seen, fetchImpl } = capture((url) =>
+      url.includes("/insights")
+        ? json({ data: [{ name: "post_media_view", values: [{ value: 980 }] }] })
+        : json({
+            comments: { data: [], summary: { order: "ranked", total_count: 9 } },
+            shares: { count: 4 },
+          }),
+    );
+    const reader = createFacebookMetricsReader({ accessToken: TOKEN, pageId: "page", fetchImpl });
+    const report = await reader.fetchPostMetrics({ externalPostId: "page_1" });
+
+    expect(report.samples).toEqual([
+      { label: "views", value: 980, platformField: "post_media_view" },
+      { label: "comments", value: 9, platformField: "comments.summary.total_count" },
+      { label: "shares", value: 4, platformField: "shares.count" },
+    ]);
+    // The second call asks the post object for exactly the two fields —
+    // comment/share counts are object fields, not Page Insights metrics.
+    expect(seen).toHaveLength(2);
+    expect(decodeURIComponent(seen[1].url)).toContain("fields=comments.summary(true),shares");
+    // The token stays in the Authorization header on BOTH calls, never the URL.
+    expect(seen.every((s) => !s.url.includes(TOKEN))).toBe(true);
+  });
+
+  it("a post nobody shared has NO shares struct — no row, not a zero; a STATED zero total_count IS a row", async () => {
+    const { fetchImpl } = capture((url) =>
+      url.includes("/insights")
+        ? json({ data: [] })
+        : // Graph omits `shares` entirely on an unshared post.
+          json({ comments: { data: [], summary: { order: "chronological", total_count: 0 } } }),
+    );
+    const reader = createFacebookMetricsReader({ accessToken: TOKEN, pageId: "page", fetchImpl });
+    const report = await reader.fetchPostMetrics({ externalPostId: "page_1" });
+
+    expect(report.samples).toEqual([
+      { label: "comments", value: 0, platformField: "comments.summary.total_count" },
+    ]);
+    expect(report.samples.some((s) => s.label === "shares")).toBe(false);
+  });
+
+  it("the object read failing costs exactly the two object metrics — the insights numbers still land", async () => {
+    const { fetchImpl } = capture((url) =>
+      url.includes("/insights")
+        ? json({ data: [{ name: "post_clicks", values: [{ value: 45 }] }] })
+        : new Response("upstream exploded", { status: 500 }),
+    );
+    const reader = createFacebookMetricsReader({ accessToken: TOKEN, pageId: "page", fetchImpl });
+    const report = await reader.fetchPostMetrics({ externalPostId: "page_1" });
+
+    // Degraded PER-METRIC: a partial answer recorded partially, never zeroed.
+    expect(report.samples).toEqual([{ label: "clicks", value: 45, platformField: "post_clicks" }]);
+  });
+
   it("a reaction map that is not a map of numbers yields NO sample — not a zero", async () => {
     const { fetchImpl } = capture(() =>
       json({ data: [{ name: "post_reactions_by_type_total", values: [{ value: "unexpected" }] }] }),

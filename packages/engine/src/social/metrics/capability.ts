@@ -268,7 +268,14 @@ export const METRIC_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformMetric
   /**
    * `GET /{post-id}/insights?metric=…` under `read_insights` +
    * `pages_read_engagement`, with a page token from someone holding the
-   * ANALYZE task.
+   * ANALYZE task — plus a SECOND read on the post OBJECT
+   * (`GET /{post-id}?fields=comments.summary(true),shares`), because comment
+   * and share counts are post-object fields, not Page Insights metrics.
+   * Verified against the live Graph docs 2026-08-01: the Page Post reference
+   * lists `shares` ("Number of times the post has been shared", a struct
+   * with `count`) and the comments edge's `summary` parameter returns
+   * `total_count`. The object read failing degrades PER-METRIC — the
+   * insights numbers still land (drivers/facebook.ts).
    *
    * ⚠ THE IMPRESSIONS FAMILY IS GONE, and this is the finding that most
    * changes what the Analytics sheet can draw. Meta retired
@@ -301,6 +308,16 @@ export const METRIC_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformMetric
         platformField: "post_reactions_by_type_total",
         note: "the named reaction types summed — the metric is a per-type map and this is its own stated total",
       },
+      {
+        label: "comments",
+        platformField: "comments.summary.total_count",
+        note: "from the post OBJECT read, not insights — total_count counts top-level comments under the endpoint's default filter (replies join it only under filter=stream, which is not asked for)",
+      },
+      {
+        label: "shares",
+        platformField: "shares.count",
+        note: "from the post OBJECT read — Graph omits the shares struct on a post nobody shared, and an omitted field yields no row, which is the correct absence",
+      },
     ],
     refuses: [
       {
@@ -309,22 +326,10 @@ export const METRIC_CAPABILITIES: Readonly<Record<SocialPlatform, PlatformMetric
         reason:
           "Meta retired post_impressions on 2025-11-15 (and post_impressions_unique on 2025-06-15) in favour of post_media_view — asking for it now returns an invalid-metric error, so nothing is asked",
       },
-      {
-        label: "comments",
-        permanence: "no_driver",
-        reason:
-          "comment and share counts are fields on the post object (comments.summary / shares), not Page Insights metrics — a second call this lane did not build",
-      },
-      {
-        label: "shares",
-        permanence: "no_driver",
-        reason:
-          "comment and share counts are fields on the post object (comments.summary / shares), not Page Insights metrics — a second call this lane did not build",
-      },
     ],
     audienceLabel: "reach",
-    docs: "https://developers.facebook.com/docs/graph-api/reference/insights/ + .../pages-api/platforminsights/page/deprecated-metrics",
-    verifiedOn: VERIFIED_ON,
+    docs: "https://developers.facebook.com/docs/graph-api/reference/insights/ + .../graph-api/reference/pagepost/ (shares) + .../graph-api/reference/object/comments (summary.total_count)",
+    verifiedOn: "2026-08-01",
   },
 
   /**
