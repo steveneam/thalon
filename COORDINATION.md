@@ -239,10 +239,10 @@ founder-paced.
   **The LIVE half is gated on the Google portal app — part of the portal work
   he has not done yet (his browser, instructions in his Gmail draft).** Build
   half is not blocked.
-- **Credentials (NEEDS-STEVEN 2026-07-29e):** his in-session word to the lead
-  is on record; **swordfish still needs it from HIM directly, once** (their
-  founder-gate for secret issuance — they explicitly declined the relayed
-  approval, correctly). The one word covers both credentials.
+- **Credentials (NEEDS-STEVEN 2026-07-29e): HIS WORD IS SENT** (s89 close —
+  *"sent word to swordfish, he is live, and i will approve in his tmux"*).
+  Expect both credentials via the swordfish channel; s90 opener checks
+  FROM-SWORDFISH.md and wires the deploy key as a CI secret only.
 
 ## Sprint 9 / s89 — **CLOSED: the full shape ran** (both lanes MERGED · W1 complete through sheets · verify on merged main exit 0, 3091+/9)
 

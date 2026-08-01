@@ -3,15 +3,17 @@
 ## Stamp
 
 2026-08-01 (session 89, syd4 — **zero credit spend, zero posts**). **THE FULL
-s89 SHAPE RAN: both lanes MERGED, W1 complete through the sheets, and the one
-open step is HIS VERDICT.** Verify-on-merged-main after the LAST merge: **exit
-0** (vitest leg 3091 passed / 9 skipped pre-final-docs; final verify after the
-wrap commit — see below). Both worktrees GC'd, branches deleted local+remote,
-tmux windows killed, tree clean, pushed.
+s89 SHAPE RAN AND THEN SOME: both lanes MERGED · W1 ran end-to-end and was
+APPROVED same session · the launch runway written · Calendar→Schedule RENAMED
+on his GO · YouTube ruled a destination · credentials word SENT to swordfish.**
+Verify-on-merged-main: exit 0 at every boundary (3104/9 after the merges; the
+rename's own full gate ran after its commit). Both worktrees GC'd, branches
+deleted local+remote, tmux windows killed, tree clean, pushed.
 
-**His words this session:** *"gogogo. you have my approval"* — read as covering
-the one outstanding ask (`judge-candidate`'s named word); both lanes launched
-on it, and that reading is flagged here for his correction if wrong.
+**His words this session:** *"gogogo. you have my approval"* (both lanes
+launched on it) · *"yes to all, W1 approved"* · *"yes change from calendar to
+schedule. Youtube as a destination."* · *"sent word to swordfish, he is live,
+and i will approve in his tmux."*
 
 ## WHAT SHIPPED
 
@@ -78,9 +80,12 @@ session sequencing s90→s98+).
 rename **RULED + EXECUTED** (route/components/symbols/rail/copy/API/view key;
 CSS internals wait for the D4 rebuild) · YouTube as a destination **RULED YES**
 — chartered as lane candidate `youtube-destination` (COORDINATION §s90; live
-half gated on his Google portal app) · credentials: his word to the lead is on
-record, **swordfish still needs "issue both credentials" from HIM directly,
-once** (their founder-gate; NEEDS-STEVEN 2026-08-01 refresh).
+half gated on his Google portal app) · credentials: **his word to
+swordfish is SENT (s89 close: "sent word to swordfish, he is live, and i will
+approve in his tmux")** — expect both credentials (thalon-deploy re-issue +
+templates-preview) to land via the swordfish channel; **s90 opener: check
+`agent_handoff/FROM-SWORDFISH.md` for the handoff**. Standing rule holds: the
+deploy key is CI-secret-only, never a `.context` copy.
 
 **Still his:** Composer POPOUT state (drawn in pass 3) · the portal apps in his
 own browser (not done yet, his words s89; instructions in his Gmail draft —
@@ -100,7 +105,8 @@ Composer — the full ladder is runway §9.
 **Read first:** CLAUDE.md → this file → **COORDINATION.md §s90 (the plan)** →
 `docs/launch-runway.md` (the map) → `docs/workspace/spec.md` (§6) →
 `docs/research/ux-refinement-program.md` (ledger + parity-debt block) → both
-lane WRAPs.
+lane WRAPs → **FROM-SWORDFISH.md (the credentials should have landed — wire
+the thalon-deploy key as a CI secret, never `.context`)**.
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
