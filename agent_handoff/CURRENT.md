@@ -95,7 +95,26 @@ hasn't arrived takes the next verdicted-and-unbuilt item — never waits.**
 Memory file `founder-hands-free-week.md` carries it too.
 
 **Open verdicts he can text:** **W2** ("W2 approved" / name changes —
-unblocks B-create.4) · the W1-era leftovers stand as before.
+unblocks B-create.4; **the verdict now covers the s90b-REDRAWN Create set**)
+· the W1-era leftovers stand as before.
+
+## s90b — three more post-wrap rulings, all executed same turn
+
+1. **Library name: "Keep Library"** (third ruling deep — spec §5.3 carries
+   the s74/s88/s90 history; never re-open without new facts).
+2. **Pipeline board → s91** (the flow-visual ask): the Dashboard toggle's
+   Board state redraws as the pipeline board — refs banked (§Pipeline board),
+   node-graph rejected with reason, home = `Board.dc.html`.
+3. **THE MINIMAL-INTERACTION DOCTRINE** (programme §mandate, verbatim):
+   interactables forward · information one click behind a quiet line · one
+   action launches the complex job · decision-changing facts NEVER tucked.
+   Applied lead-direct same turn: **Create home fully redrawn** (8-product
+   ask pattern, unanimous: headline question · one centered ask-card ·
+   collapsed run-line · chips · recents one line) · **wizard** (brief column
+   tucked, accordion centered; Create spec Decision 2 amended by his word) ·
+   **Composer** (zoning kept; judge strip · 3 knobs + More-settings·5 · fit
+   band in words, refusal reasons verbatim). All ≤ 940, all on canvas.
+   **Cite this doctrine in every future pass — W1 builds included.**
 
 ## Resume prompt (session 91, syd4)
 

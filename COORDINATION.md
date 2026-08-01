@@ -210,6 +210,20 @@ the one with the weakest near-term payoff by its own charter.
    reason). Draw = s91 boot, HIS VERDICT BY TEXT, then the Dashboard build
    wires the toggle to it. Home: `Board.dc.html` per its retirement note.
 
+**THIRD POST-WRAP DIRECTION (s90b): THE MINIMAL-INTERACTION DOCTRINE** — his
+words banked verbatim as a standing steer (programme file §mandate): Create
+read as intimidating; interactables forward, information tucked, one action
+launches the complex job. **Applied same turn, lead-direct: Create home fully
+REDRAWN** to the unanimous 8-product ask pattern (ChatGPT/Copilot/Notion/
+WRITER/Manus/Langdock/Lindy/Obvious — headline question · one centered
+ask-card · collapsed run-line · suggestion chips · recents one foot line) ·
+**Create wizard**: brief-artifact column tucked behind a line, accordion the
+single focus (Create spec Decision 2 amended by his word) · **Composer** (his
+"do the same"): s86 zoning kept, judge → verdict strip, settings rail → 3
+knobs + More-settings·5, fit band → words with refusal reasons verbatim. All
+measured ≤ 940, all on the canvas. **The W2 verdict now covers the REDRAWN
+Create set.**
+
 **FOUNDER CONSTRAINT LANDED MID-SESSION (s90, his words):** *"i won't have time
 to do console visits this week … structure the plan over the next few sessions
 so that you still get work on thalon done (towards launch) but without needing
