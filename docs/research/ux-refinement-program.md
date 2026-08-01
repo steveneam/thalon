@@ -166,6 +166,37 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 - Their integration row stores `token/refresh/expiry/username/**avatar**` — connected channels render the **account's real profile picture**. *PENDING on Channels: our `.plat-ico` is a text initial.*
 - Per-platform settings tabs + per-channel preview before scheduling, generated from **28 settings DTOs**. **Validates our Composer tabs**; the schemas are D3.
 - ONE dynamic callback route serves all ~36 platforms. Already ours (s84 `callbackAs`).
+- **W1 walk (s89, docs + web):** their HOME is the calendar itself — one centralized calendar, all channels. **REJECTED as our Dashboard model**: Schedule owns the calendar; our Dashboard's job is triage (needs-you → act), which their home simply does not do. Their **approvals exist but as an agency permission gate** (role-based, client-reviews-before-publish, inside the post lifecycle) — **REJECTED as a model for Approve**: our gate is a first-class surface because judge verdicts + eval rows make each decision a RECORD, not a permission check. Their **notifications are real but thin**: an org-scoped paginated list (`GET /public-api/notifications`) — a flow fact for gap §5.6, not a UI to imitate. No run-history surface documented at all — n/a, stated.
+
+**Approve (W1, s89)**
+- [Reddit · mod queue](https://mobbin.com/screens/1caf9bf6-61a5-4cc2-b63f-705d756973f5) — queue tabs named by STATE (Needs Review / Reported / Removed / Edited / Unmoderated), per-item Approve/Remove + secondary verbs, a reason chip ON the item ("This is spam"), "1 action successful" toast. **TAKEN**: state-named tabs + the judge's reason as a chip on the card + the action toast.
+- [Sprout Social · Needs Approval](https://mobbin.com/screens/acaff017-f7dd-4611-8163-428b099a22d9) — the post renders at FULL fidelity in the queue (avatar + handle + body + media), workflow-step chip on the card, filter bar (My approvals / Workflows / Tags / Authors / Post types), sort oldest-first. **TAKEN**: full-fidelity post card (the same in-row-post idea Analytics already took) + the step chip becomes our judge-verdict chip.
+- [Deel · Action required](https://mobbin.com/screens/ebede796-0ca0-408a-bf05-630420732e1f) — bulk verbs CARRY THE COUNT ("Approve all your pending (71)"), per-row ✓/✗ quick verdicts, nav badge. **TAKEN**: batch-by-run verbs state their count; a bulk verb that hides its blast radius is a dead-door cousin.
+- [Klaviyo · review detail](https://mobbin.com/screens/fe6a4a63-ed41-4e2e-95a8-5bd2332551a3) — Reject is a dropdown carrying guidance ("only reject with a valid reason"). **TAKEN**: reject asks for a reason — for us that reason is an `eval_cases` row, so the control that collects it IS the learn loop's front door.
+- [Plain · support triage](https://mobbin.com/screens/729a1556-d706-4943-aefa-1cc648ce320c) — **the keyboard grammar, drawn**: every verb carries its key INLINE on the control ("Reply R", "Add note N", "Wait for Customer W", "Done E"), plus an event timeline on the thread. **TAKEN — this VALIDATES the DESIGN.md j/k grammar** and sharpens it: keys live on the buttons, not in a help overlay.
+- [Front · inbox](https://mobbin.com/screens/ca886cf9-1312-40e6-a0bc-e7a20dc8973c) — list→detail split; events (assigned / archived / reopened) ride inline in the thread. *Reference for the detail rail's verdict + edit history.*
+
+**Dashboard + Board (W1, s89)**
+- [Jira · space Summary](https://mobbin.com/screens/6d79381a-e824-465c-86d6-bea59049ccf5) — **the structural match.** Count tiles carry TIME WINDOWS ("2 updated *in the last 7 days*", "0 due soon *in the next 7 days*"), a status donut, a Recent-activity feed whose items carry state chips (APPROVED / IN DESIGN) — and **Summary · List · Board · Calendar are TABS of one space**, which is our Board-as-a-Dashboard-toggle ruling already drawn by someone else. **TAKEN** (tiles-with-windows · activity-with-state-chips · the toggle precedent).
+- [Gorgias · Live overview](https://mobbin.com/screens/8d140229-3dec-4e38-aa2c-b16f18419001) — the needs-you strip: labeled count tiles with ⓘ, a "Today" header, live volume chart. **TAKEN**: the strip; also revalidates our `.info` vocabulary.
+- [HubSpot · Help Desk summary](https://mobbin.com/screens/49fb345d-b6f3-4145-833a-9b2e111e7e1f) — empty-state cards with one illustration + ONE named CTA ("Connect a channel"). **TAKEN** for first-run states (see Onboarding below).
+- [ClickUp · dashboard AI digest](https://mobbin.com/screens/2802e4dc-5a33-4b61-b556-7008bffeeb2f) — "Key Decisions and Updates" + "Who did what" as a machine-written summary block. *Reference for "what changed since I left" (gap §5.6) — noted, not drawn.*
+
+**Runs (W1, s89)**
+- [Vercel · Deployments](https://mobbin.com/screens/b9d9cc23-34a1-434c-a4ed-52a2a4f49bb7) — the row grammar: status dot + word + DURATION together ("● Ready 16s" / "● Error 19s"), env + Current pill, commit line, age + author; a status MULTI-FILTER (Ready/Error/Building/Queued/…); Rolled Back badge. **TAKEN**: status-with-duration + the filter.
+- [Cursor · automation Run History](https://mobbin.com/screens/8a1c7ab7-54f3-4284-bb15-b929555ef3da) — window tiles (Last 1h / 24h / 7d success counts) above a Trigger · Triggered · Tools · Status · Duration table, per-row Cancel. **TAKEN — this is the `create_runs` table shape**: our Trigger = the prompt/family, Tools = the shells it ran.
+- [Cloudflare · Workers deployments](https://mobbin.com/screens/2dfb1cd3-26ac-4e63-9866-f293a0306177) — an ACTIVE-deployment band sits above Version History. **TAKEN**: running-now band above the history list.
+- [PlanetScale · deploy requests](https://mobbin.com/screens/be0ec4c5-4a49-4f4a-8a29-179143a514c5) — a queue-state banner that NAMES ITS REASON ("queue is paused while a deployment is in a revertible state"). *Reference: our honesty banners already speak this register.*
+- [Clay · usage history](https://mobbin.com/screens/8b5ce126-379a-4dbc-86dd-a98eed54d93a) — cost grouped by WHAT SPENT IT (per-verb rows: count · avg cost · credits) with a TOTAL row. **TAKEN**: the run detail's cost roll-up ends in a total, per `usage_ledger`.
+- [ElevenLabs · generation history](https://mobbin.com/screens/070f4b10-fa79-43a7-94c6-4ff005a0940e) — day-grouped history WITH OUTPUT THUMBNAILS, model/aspect/duration chips per generation. **TAKEN**: a run that produced media shows its thumbs on the row — the founder's thumbnails-everywhere note applied to Runs.
+- [Hume · chat history](https://mobbin.com/screens/0fc3643f-ecb6-435b-8146-680f7480ff64) — run rows carry EVALUATION chips beside status. **TAKEN**: judge outcome rides the run row as a chip (blocked/passed counts), not buried in detail.
+- [Runway · credit table](https://mobbin.com/screens/850f0ad4-96f6-4368-865f-7657acabd025) — balance before/after per row. **REJECTED for the surface**: that is a billing ledger's honesty, not a run list's; our per-run cost + total covers the operator's actual question.
+
+**Onboarding + Notifications — the two W1 research questions (s89; answers, not surfaces)**
+- [Hex · home with setup band](https://mobbin.com/screens/1316cdc2-0371-4ee7-b75e-63894c17ce75) — "**Set up your workspace · 2 of 4 complete**" checklist band ON the home (Connect data → Create project → Invite team → Customize), each step expanding inline, sitting ABOVE "Jump back in". **TAKEN as the onboarding ANSWER**: a dismissible setup band on Dashboard + per-surface empty states with the same steps (HubSpot above). No route, no wizard — exactly the spec's "thin guided state over existing surfaces".
+- [Steep · demo-data banner](https://mobbin.com/screens/d9f49fbc-87c3-4e69-a96c-c5b7cc317acf) — "You are using demo data. Continue setup to connect your own." **TAKEN**: our demo/self tenant states itself the same way.
+- Grain's connect step ships an explicit **"Skip Connection"** — a first-run step you cannot skip is a wall, not a guide. **TAKEN** as a rule for the band's steps.
+- [Asana · Inbox](https://mobbin.com/screens/ec4d0343-84cd-4faa-939a-e67070294db4) — **the notification MODEL**: bundled-by-reason groups ("Your overdue tasks from the past week"), day-grouped, an AI "Inbox Summary" offer, a "Manage notifications" door. [ClickUp · Inbox](https://mobbin.com/screens/bc8a4bb6-6f82-4001-a0d4-4ffa237149fd) adds triage buckets (Primary / Other / Later / Cleared) and overdue-age honesty ("due date was 2 days ago"). **RECORDED as the answer to gap §5.6, not drawn**: no alert center exists until real signals exist; the Dashboard needs-you strip + activity feed carry the job for now, and the ruling ("research decides the shape") is satisfied — the shape is bundled-by-reason, and it waits for its wave.
 
 ## Pass 1 — per-surface status
 
@@ -201,24 +232,24 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) | — | — | — | video build order 1 |
 | 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
 | 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
-| 10 | Approve | — | — | — | — | **untouched — not ready** |
-| 11 | Board | — | — | — | — | untouched — not ready |
-| 12 | Dashboard | — | — | — | — | untouched by RESEARCH (s73 shell re-true was exact-mock work, not a research pass) |
+| 10 | Approve | ✅ s89 (W1) | — | — | — | library §Approve; sheet amendment = this wave |
+| 11 | Board | ✅ s89 (W1) | — | — | — | **retires into a Dashboard toggle** (his s88 ruling; Jira Summary/Board-tabs = the drawn precedent); route deletion only after the wave's verdict |
+| 12 | Dashboard | ✅ s89 (W1) | — | — | — | library §Dashboard+Board; sheet amendment = this wave |
 | 13 | Integrations | — | — | — | — | untouched — not ready |
 | 14 | Intel | — | — | — | — | untouched — not ready |
 | 15 | Leads | — | — | — | — | untouched — not ready |
 | 16 | Library (Transcription) | — | — | — | — | queued row above; naming drift noted |
 | 17 | Profiles | — | — | — | — | untouched — not ready |
-| 18 | Runs | — | — | — | — | untouched — not ready; will gain create_runs rows (s87 window) |
+| 18 | Runs | ✅ s89 (W1) | — | — | — | library §Runs; create_runs re-shape specced (workspace spec §3 ORIENT); sheet amendment = this wave |
 | 19 | Sites | — | — | — | — | untouched — not ready |
 | 20 | Source Media | — | — | — | — | verdicted sheet (s77) but pre-programme — no research pass on record |
 | 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
 | — | Calendar | *(superseded s85 — rail sweep; kept only as history)* | | | | |
 
-**The honest count: 9 of 20 live surfaces have been touched by the research; 11
-have not and are therefore not ready.** Every design session updates this table
-in the same commit as its sheets — a pass that does not move a row here did not
-happen.
+**The honest count: 13 of 20 live surfaces have been touched by the research; 7
+have not and are therefore not ready.** (W1/s89 moved Approve · Board · Dashboard
+· Runs.) Every design session updates this table in the same commit as its
+sheets — a pass that does not move a row here did not happen.
 
 ### The VIDEO arc — its own 3 passes (founder ask, 2026-07-29)
 

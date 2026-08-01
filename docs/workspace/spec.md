@@ -75,25 +75,40 @@ interface/design).
 **Dashboard** (`/app`) — job: the day's triage in one glance — needs-you counts,
 pulse, the work calendar, the pipeline schematic. Joins: → Approve (needs-you),
 → Runs, → Schedule, → every act (tiles are doors). Backend: events spine,
-approvals queue counts, planned_slots, create_runs ("Latest runs" moves here or
-stays on Create — decide in research). State: built, **unresearched**.
-P: Postiz launch/home — what do they surface first, what do they NOT put on a
-home? M: command-center/ops-home patterns; needs-you inbox patterns.
+approvals queue counts, planned_slots, create_runs. State: built, **researched
+W1/s89** (library §Dashboard+Board). **Researched shape:** a needs-you strip of
+count tiles that carry their TIME WINDOW in words ("in the last 7 days" —
+Jira/Gorgias), an activity feed whose items carry state chips, and the
+**Pipeline | Board view toggle** absorbing Board (§5.9; Jira ships
+Summary·Board as tabs of one space). **DECIDED (was "decide in research"):
+"Latest runs" STAYS on Create home** — the Create spec owns that block;
+Dashboard shows run COUNTS in the strip and doors to `/app/runs`, never a
+second run list. First-run: the Dashboard carries the onboarding setup band
+(§5.1's answer) above its tiles, and every tile's empty state names one CTA.
+P walked: Postiz's home IS its calendar — rejected; Schedule owns ours.
 
-**Board** (`/app/board`) — job: the SAME pipeline as a kanban lens (columns =
-stages, heat carried). Joins: card → its draft/run. Backend: same spine as
-Dashboard. State: built, unresearched. **Structure question for the verdict: is
-Board a surface or a Dashboard view-toggle?** (s71 drew it as a toggle;
-the build split it into a route.) P/M: does anyone ship pipeline-kanban for
-content ops, or is this a lens nobody uses?
+**Board** (`/app/board`) — **RULED s88 (§5.9): retires as a route, becomes the
+Dashboard's Board toggle.** The kanban lens survives as a VIEW of the same
+spine (columns = stages, heat carried; card → its draft/run). W1's Dashboard
+sheet draws the toggle; the route deletes only after the wave's verdict —
+nothing is deleted before its replacement is drawn. Research W1/s89: Jira's
+Summary/Board tabs are the drawn precedent.
 
 **Runs** (`/app/runs`) — job: every generation run, outcome-first, with cost and
 error honesty. Joins: run → its children (drafts/video project) → Approve;
 **s87: `create_runs` is now the parent record — Runs becomes Create-run-first,
 family runs nest under it.** Backend: create_runs (s87 window) + fanout_runs +
-usage_ledger. State: built, unresearched; the s87 window makes its current shape
-stale. M: job-history/run-log patterns (Vercel deployments, CI runs).
-P: their post-history/log equivalent.
+usage_ledger. State: built, **researched W1/s89** (library §Runs); the s87
+window made its pre-window shape stale. **Researched re-shape (§5.8, now
+concrete):** a running-now band above the history (Cloudflare); parent rows in
+the Cursor run-history grammar — trigger/prompt · family · **status with its
+duration beside it** (Vercel "● Error 19s") · judge outcome as a chip on the
+row (Hume) · output THUMBNAILS on rows that made media (ElevenLabs; the
+founder's thumbnails-everywhere note) — with a status multi-filter; the run
+detail's cost roll-up groups by what spent it and ends in a TOTAL row (Clay,
+per `usage_ledger`). Fanout/family runs nest under their create-run parent;
+an orphan family run (pre-s87 history) stays a top-level row rather than
+minting a fake parent.
 
 ### KNOW
 
@@ -165,11 +180,19 @@ visible, edit, approve/reject; batch by run. **s71 doctrine: the priority
 surface for media-first.** Joins: ← every family's drafts, → Composer re-entry
 ("Open in Composer", per the Create spec), → Schedule on approve. Backend:
 drafts state machine, judge_results, edit_diffs, eval rows. State: built,
-unresearched — **the highest-stakes unresearched surface in the product**.
-P: their approval/review flow if any (teams feature — verify; likely thin).
-M: review-queue / moderation-queue / email-triage patterns (superhuman-style
-keyboard triage; the DESIGN.md j/k grammar already exists — research validates
-or replaces it).
+**researched W1/s89** (library §Approve). **Researched grammar:** queue tabs
+named by STATE with counts (Reddit's mod queue); each draft renders at FULL
+fidelity in the queue — avatar, body, media — never a title row (Sprout, and
+the same in-row-post idea Analytics already ships); the judge's verdict rides
+the card as a chip with its reason (Reddit's "This is spam"); **the keyboard
+grammar is VALIDATED and sharpened** — every verb carries its key inline on
+the control (Plain's "Reply R / Done E"), not in a help overlay; batch
+verbs carry their COUNT ("Approve run · 4" — Deel); **reject asks for a
+reason, and that reason is the `eval_cases` row** (Klaviyo's guidance
+pattern) — the control that collects it is the learn loop's front door.
+P walked: Postiz approval = an agency permission gate inside the post
+lifecycle — rejected as a model; our gate is a first-class surface because
+the verdict is a record, not a permission.
 
 ### SHIP
 
@@ -275,7 +298,14 @@ still his call — say which, never let a gap sit in an undefined state.
 1. **Onboarding/first-run** — nothing owns journey 1. **DECIDED s88:
    research-first** — no route is scaffolded for it; W1's research decides the
    shape, and the standing expectation is a thin guided state over existing
-   surfaces rather than a new surface.
+   surfaces rather than a new surface. **ANSWERED W1/s89 (library §Onboarding),
+   and the expectation held:** the shape is a **dismissible setup band on the
+   Dashboard** ("Set up your workspace · 2 of 4" — Hex) whose steps expand
+   inline (connect a channel → make a profile → first create → first approve),
+   every step skippable (Grain), plus per-surface EMPTY STATES that name the
+   same one CTA (HubSpot), plus the demo-tenant stating itself in a banner
+   (Steep). No route, no wizard, no new surface. The band is drawn in W1's
+   Dashboard sheet; building it is a build slot after the wave's verdict.
 2. **A Settings sheet** — the route ships real function with no spec of record.
    *(Lead work, now scoped by the §5.4 ruling: Settings = operator/seams/env.
    Its sheet is drawn in W3 alongside the split.)*
@@ -294,16 +324,30 @@ still his call — say which, never let a gap sit in an undefined state.
 6. **Notifications/alerts** — needs-you counts exist; no alert center, no
    "what changed since I left". **DECIDED s88: research-first** (P: their
    notification model; M: activity-feed patterns), riding W1's research.
-   Nothing is invented ahead of it.
+   Nothing is invented ahead of it. **ANSWERED W1/s89 (library §Onboarding +
+   Notifications): the shape of record is bundled-by-reason** — groups like
+   "3 drafts blocked since you left", day-grouped, with a manage door (Asana's
+   Inbox; ClickUp's Primary/Later/Cleared buckets as the triage variant;
+   Postiz ships only an org-scoped notification list — thin, noted). **Not
+   drawn and not built yet, deliberately:** until publish failures, judge
+   blocks and metrics ticks produce real signal volume, the Dashboard's
+   needs-you strip + activity feed carry the job; an alert center earns its
+   wave when the signals exist. The research-first ruling is satisfied — the
+   shape is recorded, and it waits.
 7. **Global search / command palette** — s74 built a Search tab inside Intel;
    nothing global. **DECIDED s88: research-first, and it stays a question**
    until a wave earns it — not a commitment.
 8. **The Runs↔create_runs re-shape** — the s87 window made Runs' current shape
    stale (§3 ORIENT). *(Lead work, inside W1 — Runs is a W1 surface.)*
+   **SPECCED W1/s89** — the concrete shape is in §3 ORIENT's Runs contract
+   (running-now band · Cursor-grammar parent rows · nested family runs ·
+   Clay-style cost totals); the sheet amendment draws it this wave.
 9. **Board's existence** as a route vs a Dashboard toggle (§3 ORIENT).
    **DECIDED s88: a Dashboard toggle, not its own route** — it duplicates
    Dashboard's job. The route retires in W1's ORIENT pass; nothing is deleted
-   before the wave draws its replacement.
+   before the wave draws its replacement. **W1/s89: the toggle is drawn in the
+   Dashboard sheet this wave** (Jira's Summary/Board tabs = the precedent);
+   route deletion is a build task gated on the wave's verdict.
 10. **Wave-0 sheet retirement** (§3 Retired). *(Lead work; the s87 hygiene audit
     already SUPERSEDED + archived the wave-0 sheet.)*
 
