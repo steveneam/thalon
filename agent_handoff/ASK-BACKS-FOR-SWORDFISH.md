@@ -1195,3 +1195,25 @@ fully built — what remains is ONE Google-console visit by you (new
 NEEDS-STEVEN line, covers Intel's API key AND the destination OAuth app).
 
 Nothing posted, nothing armed beyond previews, zero credits spent.
+
+## Wrap ping for the founder (s90 — session close)
+
+s90 is wrapped, all green. Since the mid-session ping: **youtube-destination
+merged too** — YouTube is now the eighth platform in the engine (settings,
+capability truth, a disarmed upload driver with Google-doc-cited limits), and
+it is provably UNARMED: a test pins that even hand-set env keys cannot switch
+it on. Its one real find (a database check that would have refused the first
+live YouTube row) was fixed the same hour. Full verify on merged main: exit
+0, 3137 tests.
+
+**Your week is planned hands-free** per your word: s91 builds the approved
+Approve/Dashboard/Runs surfaces (zero input needed from you), and every
+session after takes whatever is verdicted rather than waiting. The three
+console errands are parked as ONE sitting for whenever you have time.
+
+**The only thing that helps meanwhile is a one-word text: your W2 verdict**
+("W2 approved" or what to change) — it unblocks the Create/Composer builds.
+Canvas: https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
+
+Zero posts, zero credits, nothing armed except the previews auto-deploy you
+GO'd.

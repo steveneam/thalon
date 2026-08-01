@@ -2,167 +2,185 @@
 
 ## Stamp
 
-2026-08-01 (session 89, syd4 — **zero credit spend, zero posts**). **THE FULL
-s89 SHAPE RAN AND THEN SOME: both lanes MERGED · W1 ran end-to-end and was
-APPROVED same session · the launch runway written · Calendar→Schedule RENAMED
-on his GO · YouTube ruled a destination · credentials word SENT to swordfish.**
-Verify-on-merged-main: exit 0 at every boundary (3104/9 after the merges; the
-rename's own full gate ran after its commit). Both worktrees GC'd, branches
-deleted local+remote, tmux windows killed, tree clean, pushed.
+2026-08-01 (session 90, syd4 — **zero credit spend, zero posts**). **s90 ran
+the whole plan and absorbed a mid-session re-plan: credentials wired into CI ·
+trend-live RETIRED at boot (rule 12 — already built) · the s90 db window
+frozen · BOTH replacement lanes merged (learn-evals + youtube-destination) ·
+canvas parity debt cleared · the full W2 MAKE draw ran (4 sheets, measured,
+on the canvas) · and the runway was RESTRUCTURED on his word to run
+founder-hands-free.** Verify on merged main: exit 0 at every boundary (final:
+3137/9 via the literal `npm run verify`, single-lane). Both worktrees GC'd,
+branches deleted local+remote, windows killed, tree clean, pushed.
 
-**His words this session:** *"gogogo. you have my approval"* (both lanes
-launched on it) · *"yes to all, W1 approved"* · *"yes change from calendar to
-schedule. Youtube as a destination."* · *"sent word to swordfish, he is live,
-and i will approve in his tmux."*
+**His words this session:** *"gogogo"* (the boot) · **"GO both"** + **"Flip
+it"** (lanes + previews arm, via the in-session ask) · pane note: *"update
+COORDINATION.md lane board and message me when done"* (honored as lead work —
+board updated, Telegram ping sent mid-session) · *"i won't have time to do
+console visits this week, so try to structure your plan over the next few
+sessions so that you still get work on thalon done (towards launch) but
+without needing my direct manoeuvring"* — **THE CONSTRAINT OF RECORD for
+s91+, encoded in `docs/launch-runway.md` §9.**
 
 ## WHAT SHIPPED
 
-**LANE `analytics-honesty` (5 commits, merged ff):** the X ruling made
-STRUCTURAL — `packages/engine/src/social/metrics/deferral.ts` seats
-`STANDING_METRICS_DEFERRALS`, consulted by `resolveSocialMetricsReader` before
-capability and credential, so a perfect token still refuses with the ruling;
-armed ticks read every other platform and record typed `deferred_on_cost`
-refusals per X publication; the bill print shows "⏸ x: $0 this pass"; the
-read-model's cells/tiles/roll-ups carry `deferred` with the ruling sentence.
-**Lifting at launch = deleting `deferral.ts:26-35`; pinning tests fail by
-name.** Plus Facebook comment/share (post-object second GET, live Graph docs
-cited 2026-08-01, per-metric degradation, matrix rows refused→reported) and
-the batch read (`seriesForPublications`, read-model 1+N→2 queries, ordering
-byte-identical to `series()`). WRAP: `agent_handoff/lanes/WRAP-analytics-honesty.md`.
+**OPENER:** both swordfish credentials (already landed 07-29 — three sessions
+of boards missed the delivery; lesson archived) probed alive + cross-scope-
+refused, then wired: `DOKPLOY_API_KEY` + `TEMPLATES_DOKPLOY_*` secrets +
+`TEMPLATES_PREVIEW_HOST` var; `templates-image.yml` made deploy-only (legacy
+`application.update` deleted) and its edge probe now AUTHENTICATES (anon
+would 401); `TEMPLATES_PREVIEW_ARMED=true on his GO`; `.context` key values
+scrubbed to pointers (CI-secret-only rule); NEEDS-STEVEN 2026-07-29e +
+s89-refresh retired; FROM-SWORDFISH pruned to open threads only (one left:
+the founder-gated basicauth/DB_DUMP_TOKEN pair).
 
-**LANE `judge-candidate` (1 commit, merged ff):** the R8 deviation is CLOSED.
-One shared gate ladder (`proprietary/judge/src/gate-ladder.ts`) with two entry
-points — `runJudgePipeline` keeps its exact behaviour (existing pipeline tests
-untouched, the kickoff's pin), new `judgeCandidate` runs the same gates over
-the same grounding and **writes nothing**. `aiEditDraft` now judges the
-candidate BEFORE proposing; refusal carries the verbatim reason; the
-unconditional `bodyHashUnchanged` tripwire still passes on every path. The
-double judge is deliberate and preserved (post-land verdict = the only hash I1
-can honestly bind). **The dated deviation block in `docs/create-engine/spec.md`
-is DELETED — the spec's Error Behavior is now met exactly.** WRAP:
-`agent_handoff/lanes/WRAP-judge-candidate.md`.
+**RULE 12 AT THE BOOT:** trend-live's sketched feature was ALREADY BUILT
+(youtube-source.ts B6.5 · comma-list registry · vault-first creds · velocity
+math wired at intake). Retired as a lane; remainder = HIS one Google-console
+visit (parked, below) + a config flip that is mine. Replacement lane =
+youtube-destination (his own s89 charter).
 
-**LEAD TRACK — W1 (Approve · Dashboard · Runs), everything but the verdict:**
-- Research banked in `docs/research/ux-refinement-program.md` §Approve /
-  §Dashboard+Board / §Runs / §Onboarding+Notifications — every entry
-  TAKEN/REJECTED with its reason; ≤2 Mobbin searches per surface held; the
-  Postiz walk rejected their home-is-the-calendar and permission-gate-approval
-  models with reasons on record.
-- Contracts updated in `docs/workspace/spec.md` §3 (ORIENT + GATE) and the two
-  research questions ANSWERED in place: **§5.1 onboarding = a dismissible
-  Dashboard setup band + per-surface empty states — no route, no wizard**;
-  **§5.6 notifications = bundled-by-reason (Asana model), recorded and
-  deliberately NOT built until real signal volume exists.**
-- Three sheets amended, shot at 1440×940, measured: **Approve** (state tabs
-  with counts · run-group "Approve run · 2" · judge reason chips · a drawn
-  REJECTED state whose chip reads "your reason → eval" · keys inline on verbs ·
-  "Open in Composer →" door · queue 5→8 rows), **Dashboard** (the setup band
-  "3 of 4 · First approve — 4 waiting →" · the Overview|Board seg now IS the
-  Board ruling, Board.dc.html carries the retirement note · Composing tile →
-  "Runs live" door · Open schedule), **Runs** (running-now band · create-run
-  parent with judge chip + "3m 42s · $0.09" + three nested family drafts each
-  with platform dot/passed chip/In Approve door · failed run "$0.00 — kept its
-  receipts" · flat pre-create rows under "no fake parents" · day total footer).
-- Ledger moved same-commit: research 9→13 of 20 touched; p1 ✅ on Approve,
-  Board, Dashboard, Runs.
+**LANE `learn-evals` (MERGED):** reject-with-reason is a real learning door
+end to end — `rejectDraft(..., reason?)` → the frozen window seat → one
+`eval_cases` row (origin `approve_reject`, his words as ground truth) in the
+SAME transaction as queued→rejected. Found the eval export silently broken
+for two doors (one `lead_triage`/`cut_diff_review` row made the whole export
+THROW); now reads all 7 origins in one pass, batch-per-kind, round-trip
+pinned. WRAP: `agent_handoff/lanes/WRAP-learn-evals.md`.
 
-## THE VERDICT LANDED SAME SESSION — **W1 APPROVED** (*"yes to all, W1 approved"*)
+**LANE `youtube-destination` (MERGED):** youtube = the eighth platform key.
+Capability truth in both homes (`permissioned` for metrics, argued in the
+WRAP), `youtubePostSettingsSchema` resolves the SETTINGS_DEFERRED IOU (map
+now EMPTY), disarmed `videos.insert` driver with doc-cited ceilings (checked
+2026-08-01; the 5000 limit is BYTES — driver is the byte-accurate backstop).
+**Armed-proof is test-pinned: a hand-set env pair cannot arm it** (no env
+seats, no vault road, `video_required` fails every existing draft). Its
+reported db CHECK drift closed same session: migration
+`packages/db/drizzle/0025_s90_youtube_platform_checks.sql`. Reviewer-strike
+candidates the founder may glance: the hashtags-60 refusal (API would
+accept; YouTube ignores ALL past 60) and the added `privacy` knob. WRAP:
+`agent_handoff/lanes/WRAP-youtube-destination.md`.
 
-Recorded in `docs/workspace/spec.md` §6 and the ledger (four rows VERDICTED).
-**Unblocked: the W1 surface rebuilds (Approve · Dashboard+toggle+band · Runs),
-the Board route deletion, and W2's draw.** He also commissioned the full
-launch synthesis — **`docs/launch-runway.md` is the map of record** (status ·
-waves · builds · pass-3 engine · arming ladder · landing/video plan ·
-Higgsfield recommendation on a live 584-credit balance · gates checklist ·
-session sequencing s90→s98+).
+**THE s90 DB WINDOW (frozen `3e21aa5`):** `eval_cases_origin_check` gained
+`approve_reject` (migration 0024); `approvals.record` takes optional
+`reason` — a standalone verb was deliberately NOT minted (second transaction
+= what I4 forbids). Repo-level pins in `packages/db/src/__tests__/eval-cases.test.ts`.
 
-**Three more rulings landed post-wrap, same session:** Calendar→Schedule
-rename **RULED + EXECUTED** (route/components/symbols/rail/copy/API/view key;
-CSS internals wait for the D4 rebuild) · YouTube as a destination **RULED YES**
-— chartered as lane candidate `youtube-destination` (COORDINATION §s90; live
-half gated on his Google portal app) · credentials: **his word to
-swordfish is SENT (s89 close: "sent word to swordfish, he is live, and i will
-approve in his tmux")** — expect both credentials (thalon-deploy re-issue +
-templates-preview) to land via the swordfish channel; **s90 opener: check
-`agent_handoff/FROM-SWORDFISH.md` for the handoff**. Standing rule holds: the
-deploy key is CI-secret-only, never a `.context` copy.
+**LEAD TRACK — W2, the MAKE draw, end to end (VERDICT: OPEN):**
+- `Create.dc.html`: dead "Advanced · staged flow" link → a real **Start
+  guided** door; Intel task shortcuts row; run rows carry "In Composer →".
+- **`Create Wizard.dc.html` NEW** (B-create.3): Jasper accordion rail beside
+  the live brief artifact; capability on platform chips BEFORE spend;
+  use|reference role chips with the never-in-output fact visible; plan =
+  honest dashed pending; Profound generating-checklist deliberately deferred
+  to pass 3.
+- `Sites.dc.html`: state badge ON the shot · live cards carry hostnames,
+  drafts say "previews only" · state filter seg · the blog-loop door.
+- `Library.dc.html`: **his §5.3 ruling drawn** — ONE Library, kind = qtab
+  filter with counts, Free-transcript|AI-enhance seg, "Transcribing · ~3m
+  left" as a row state. `/app/transcription` retires at the rebuild.
+- Postiz launcher walked (flow facts): bundle model REJECTED, pre-validation
+  VALIDATES R3+D3, failure surfaces undocumented — ours stands alone.
+- All measured (bottoms 717/916/690/662 ≤ 940, zero truncation), all four on
+  canvas f5d304cb; parity debt from s89 also cleared (Approve + Dashboard
+  uploaded, debt block deleted). Ledger 13→15 of 20 same-commit.
 
-**Still his:** Composer POPOUT state (drawn in pass 3) · the portal apps in his
-own browser (not done yet, his words s89; instructions in his Gmail draft —
-now also gates YouTube's live half) · every arming step · the stealth lift.
+## THE RESTRUCTURE (his s90 word — the next sessions run without his hands)
 
-## Resume prompt (session 90, syd4)
+**`docs/launch-runway.md` §9 is the ladder of record**, constraint quoted at
+the top: every session needs AT MOST a texted one-word verdict; the three
+console items (Meta/LinkedIn callbacks · Reddit app · Google console for both
+YouTube halves) are ONE batched sitting under NEEDS-STEVEN's **PARKED**
+header (trigger = his word he has console time); **a session whose verdict
+hasn't arrived takes the next verdicted-and-unbuilt item — never waits.**
+Memory file `founder-hands-free-week.md` carries it too.
 
-**Resume · Thalon** — s89 merged BOTH lanes, ran W1 end-to-end, and banked his
-verdict (**W1 APPROVED**) plus the launch runway. **The s90 plan of record is
-COORDINATION.md §s90:** lead = canvas parity debt FIRST, then the **W2 MAKE
-draw** (Create home + wizard sheets — B-create.3, research banked · Composer
-flow facts · Sites · Library IA); lanes = **trend-live** + **learn-evals**,
-kickoffs written at boot per rule 12, **each needing his fresh named GO**.
-Behind it: s91 = W1 builds lead-direct (Approve first), s92 = B-create.4
-Composer — the full ladder is runway §9.
+**Open verdicts he can text:** **W2** ("W2 approved" / name changes —
+unblocks B-create.4) · the W1-era leftovers stand as before.
 
-**Read first:** CLAUDE.md → this file → **COORDINATION.md §s90 (the plan)** →
-`docs/launch-runway.md` (the map) → `docs/workspace/spec.md` (§6) →
-`docs/research/ux-refinement-program.md` (ledger + parity-debt block) → both
-lane WRAPs → **FROM-SWORDFISH.md (the credentials should have landed — wire
-the thalon-deploy key as a CI secret, never `.context`)**.
+## Resume prompt (session 91, syd4)
+
+**Resume · Thalon** — s90 merged BOTH lanes (learn-evals · youtube-destination),
+drew W2 (verdict OPEN), wired the credentials, and restructured the runway
+founder-hands-free on his word. **The s91 plan of record (COORDINATION §s90
+close + runway §9): W1 BUILDS, lead-direct, zero founder hands — Approve
+FIRST** (verdicted s89; wire the W1 sheet exactly, and the reject control
+lands on the `rejectDraft(..., reason?)` seat learn-evals just merged), then
+Dashboard (Board toggle + setup band), Runs re-shape, Board route deletion.
+Lane candidate (needs his texted GO): Analytics fixture reconciliation
+(COORDINATION §s87 lead item 1 — capability.ts is the truth, the sheet's
+Facebook fixture still shows retired `post_impressions*`). If his W2 verdict
+arrived, B-create.4 queues for s92; if not, W3 draw slots there — never wait.
+
+**Read first:** CLAUDE.md → this file → **runway §9 (the restructured
+ladder)** → COORDINATION §s90 (closed) → `docs/workspace/spec.md` §3 Approve
+contract + `Approve.dc.html` (the build target) → both s90 WRAPs →
+`docs/research/ux-refinement-program.md` (ledger).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
-▎ ▸ **⚠ CANVAS PARITY DEBT (dated 2026-08-01):** Approve + Dashboard sheets are
-ahead of the canvas; Board + Runs are synced. First action next session; the
-debt block in the programme file deletes when cleared.
-▎ ▸ **⚠ FOUNDER-TYPED UNSUBMITTED TEXT was found in BOTH lane panes** at their
-finish ("merge the lane" in analytics; "Read …WRAP-judge-candidate.md" in
-judge). Neither was ever submitted; the lead merged per doctrine and killed the
-windows. If those were meant as instructions to the LEAD, they were honored
-(merge done); if they were meant for the lanes, note the lanes never saw them.
-▎ ▸ **The s89 watcher pattern worked** (background wait-loop → notification →
-merge) but its first fire was premature (WRAP file existed before commits) —
-watch for clean-tree + pushed-branch, not file existence.
-▎ ▸ **swordfish FYI (2026-08-01, committed):** portal Chrome's on-device AI
-model ballooned the profile → fleet backup cap blown → fixed their side; four
-Chrome-managed re-downloadable stores now EXCLUDED from the syd4 nightly; real
-profile state still backed up; watcher alerts at 8 GiB now. No action owed.
-▎ ▸ **⚠ THE ANALYTICS SHEET'S FACEBOOK FIXTURE IS STILL WRONG** — Meta retired
-`post_impressions*`; capability.ts is the truth (COORDINATION §s87 lead item 1).
-The D2 lane flipped comment/share rows only.
-▎ ▸ **✅ X SPEND ruling is now STRUCTURAL** (deferral.ts) — Analytics unblocked:
-Bluesky/Facebook/Instagram read free, X refuses with the ruling in words.
+▎ ▸ **⛔ HIS s90 CONSTRAINT IS LIVE: no console visits this week.** Nothing
+enters a session plan needing his hands beyond a texted word. The console
+batch is PARKED on NEEDS-STEVEN with its trigger. Re-test (don't assume
+expired) at each opener — "this week" dates from 2026-08-01.
+▎ ▸ **W2 VERDICT OPEN** — no W2 surface (Create home/wizard/Sites/Library)
+builds before it. W1 builds are NOT gated (approved s89).
+▎ ▸ **youtube CHECK migration 0025 is applied-in-repo, NOT yet on staging**
+— staging moves on the next image deploy; harmless meanwhile (nothing can
+write a youtube row: nothing armed, `video_required` fails all drafts).
+▎ ▸ **SETTINGS_DEFERRED is now EMPTY** — its completeness ratchet stays
+armed for the next deferral; don't re-add youtube anywhere as deferred.
+▎ ▸ **Founder-typed pane text was found AGAIN this session** (learn-evals
+pane: "update COORDINATION.md lane board and message me when done") — caught
+LIVE this time, honored as lead work (board updated, ping sent), window
+killed with the text unsubmitted. Pattern: he types into lane panes;
+check panes for unsubmitted text BEFORE killing windows, treat it as
+addressed to whoever the content fits (COORDINATION = the lead's file).
+▎ ▸ **The watcher pattern is now proven twice** (clean-tree + pushed-branch,
+never file existence); single-lane watcher script shape in this session's
+scratchpad if wanted again.
+▎ ▸ **Two full suites CAN run concurrently post-resize, but the literal
+`npm run verify` (uncapped vitest) CANNOT beside a lane** — the yd lane had
+it OOM-killed twice; it ran capped gates + the lead re-ran the literal
+script post-merge. Keep that split: lanes cap at `--maxWorkers=2`, the lead
+runs the literal gate single-lane.
+▎ ▸ **⚠ THE ANALYTICS SHEET'S FACEBOOK FIXTURE IS STILL WRONG** — s91's lane
+candidate exists to fix exactly this (COORDINATION §s87 lead item 1).
 ▎ ▸ **⛔ SEQUENCE GATE unchanged:** bluesky armed for testing on his recorded
 words; every other platform per-platform + per-post GO; the queue consumer's
-key rests EMPTY. Instagram's media path BUILT and disarmed. **Nothing posted.**
-▎ ▸ **`impeccable` still RELAXED on `docs/research/mock-sheets/**`** only.
+key rests EMPTY; youtube additionally CANNOT arm (no env seats, no vault
+road — test-pinned). **Nothing posted. Zero credits spent.**
 ▎ ▸ **Traps worth keeping:** Bash cwd PERSISTS (`git -C`/absolute paths) ·
-lane-pane key sends (C-u/Esc/BSpace) may NOT clear a Claude TUI input box —
-don't fight it, kill the window at GC · `npx vitest run -w <pkg>` is
-`--watch` · never `pkill -f vitest` with lanes live · vitest doesn't typecheck ·
-zod 4 `z.record()` over an enum key is exhaustive (`partialRecord`) ·
-`branch -d` refuses after a rebase (upstream comparison) — `-D` is safe once
-ff-merged to main.
-▎ ▸ **Standing:** stealth · hermes-relay = founder · design lead-direct, never
-delegated · every lane/subagent launch needs fresh founder approval · GATE ON
-EXIT CODE · verify-on-merged-main = THE gate, re-run after your LAST commit ·
-research before build (rule 10) · environment before his hands (rule 11) ·
-specs carry ground truth (rule 12) · platform logins live durably in `.context`
-· no AGPL embedded · wrap = verify+commit+push+restamp.
+`npx vitest run -w <pkg>` is `--watch` · never `pkill -f vitest` with lanes
+live · vitest doesn't typecheck · `branch -D` safe once ff-merged ·
+migrations journal is `packages/db/drizzle/meta/_journal.json` (hand-append
+idx/when/tag) · claude-design project id must be the FULL uuid
+(f5d304cb-cd0e-484d-8542-7b6561e1ef30).
+▎ ▸ **Standing:** stealth · hermes-relay = founder · design lead-direct ·
+every lane/subagent launch needs fresh founder approval (a texted GO
+suffices) · GATE ON EXIT CODE · verify-on-merged-main = THE gate, re-run
+after your LAST commit · research before build (rule 10) · environment
+before his hands (rule 11) · specs carry ground truth (rule 12) · platform
+logins live durably in `.context` · no AGPL embedded · wrap =
+verify+commit+push+restamp.
 ▎ ▸ **State:** main = origin (this wrap's commit) · staging on s85 code + OCI
-label · four social channels connected · dev PG live.
+label (moves next deploy; W1 rebuilds will roll it) · four social channels
+connected · previews auto-deploy ARMED (s90) · dev PG live.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; both lanes GC'd; tree clean and
 pushed after the wrap commit's verify.
 
 ## Pointer
 
-CLAUDE.md → this file → COORDINATION.md (§s89 CLOSED) → `docs/workspace/spec.md`
-→ `docs/research/ux-refinement-program.md` → both lane WRAPs → NEEDS-STEVEN.md
-→ `docs/research/prior-art-portal-automation-s84.md` (READ BEFORE ANY PORTAL WORK).
+CLAUDE.md → this file → `docs/launch-runway.md` §9 → COORDINATION.md (§s90
+CLOSED) → `docs/workspace/spec.md` → `docs/research/ux-refinement-program.md`
+→ both s90 lane WRAPs → NEEDS-STEVEN.md (note the PARKED header) →
+`docs/research/prior-art-portal-automation-s84.md` (READ BEFORE ANY PORTAL WORK).
 
-## Delta (session 88)
+## Delta (session 89)
 
-s88 merged `create-shells`, fixed main's inherited red (`"\0"` escape), and
-banked the workspace-spec approval that made this session's W1 legal. s89 spent
-that approval: the wave ran, the lanes landed, and the surface programme now
-waits only on his verdict.
+s89 merged its two lanes, ran W1 through the sheets, and banked the W1
+verdict + the runway. s90 spent all of it: the runway's s90 row ran exactly
+as written (minus trend-live, which rule 12 killed at boot), and the runway
+itself was then reshaped around his no-console-time week so s91–s98 keep
+moving without him.
