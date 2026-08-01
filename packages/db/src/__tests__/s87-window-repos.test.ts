@@ -388,6 +388,66 @@ describe("publicationMetrics repo (s87 D2 window)", () => {
     expect(second).toEqual(first);
   });
 
+  it("seriesForPublications reads MANY publications in one query, each group byte-identical to series()", async () => {
+    const { ctx, repos, draft } = await setup();
+    const pub = await publication(ctx, repos, draft.id);
+    // Same draft, different platform — a second real publication.
+    const pub2 = await repos.socialPublications.record(ctx, {
+      draftId: draft.id,
+      platform: "reddit",
+      externalPostId: "t3_abc",
+      bodyHash: sha256Hex("published body"),
+      publishedAt: AT,
+    });
+    // Two labels into the SAME bucket on pub — the 7bcd5b9 determinism case.
+    for (const [publicationId, metricLabel, metricValue, capturedAt] of [
+      [pub.id, "reposts", 3, AT],
+      [pub.id, "likes", 12, AT],
+      [pub.id, "likes", 30, LATER],
+      [pub2.id, "score", 42, AT],
+    ] as const) {
+      await repos.publicationMetrics.append(ctx, {
+        publicationId,
+        metricLabel,
+        metricValue,
+        capturedAt,
+      });
+    }
+
+    const batch = await repos.publicationMetrics.seriesForPublications(ctx, [pub.id, pub2.id]);
+
+    // Each group is EXACTLY what series() answers for that id — the batch
+    // only prepends the grouping key to the ordering.
+    expect(batch[pub.id]).toEqual(await repos.publicationMetrics.series(ctx, pub.id));
+    expect(batch[pub2.id]).toEqual(await repos.publicationMetrics.series(ctx, pub2.id));
+    expect(batch[pub.id].map((r) => `${r.metricLabel}=${r.metricValue}`)).toEqual([
+      "likes=12",
+      "reposts=3",
+      "likes=30",
+    ]);
+  });
+
+  it("seriesForPublications: an empty page reads nothing, and a publication with no rows has NO key", async () => {
+    const { ctx, repos, draft } = await setup();
+    const pub = await publication(ctx, repos, draft.id);
+    expect(await repos.publicationMetrics.seriesForPublications(ctx, [])).toEqual({});
+    // Absence stays absence: no key, not an invented empty array.
+    expect(await repos.publicationMetrics.seriesForPublications(ctx, [pub.id])).toEqual({});
+  });
+
+  it("seriesForPublications is tenant-walled: a stranger holding our ids reads nothing", async () => {
+    const { ctx, other, repos, draft } = await setup();
+    const pub = await publication(ctx, repos, draft.id);
+    await repos.publicationMetrics.append(ctx, {
+      publicationId: pub.id,
+      metricLabel: "likes",
+      metricValue: 12,
+      capturedAt: AT,
+    });
+    expect(await repos.publicationMetrics.seriesForPublications(other, [pub.id])).toEqual({});
+    expect((await repos.publicationMetrics.seriesForPublications(ctx, [pub.id]))[pub.id]).toHaveLength(1);
+  });
+
   it("metric appends emit NO events, by design (the source_metrics precedent)", async () => {
     const { ctx, repos, draft } = await setup();
     const pub = await publication(ctx, repos, draft.id);

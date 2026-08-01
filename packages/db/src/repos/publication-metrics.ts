@@ -1,5 +1,5 @@
 import type { TenantCtx } from "@thalon/contracts";
-import { and, asc, desc, eq, gte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray } from "drizzle-orm";
 import { NotFoundError } from "../errors";
 import { publicationMetrics, socialPublications } from "../schema";
 import type { Db, PublicationMetric } from "../types";
@@ -124,6 +124,48 @@ export function publicationMetricsRepo(db: Db) {
           asc(publicationMetrics.metricLabel),
           asc(publicationMetrics.id),
         );
+    },
+
+    /**
+     * Many publications' series in ONE query — `series()` batched, for the
+     * analytics read-model, whose page otherwise cost one query per
+     * publication (s87's stated flag; this is the additive method that
+     * future contract window turned out not to need a schema for).
+     *
+     * Per publication, the rows come back in EXACTLY `series()`'s order —
+     * `(captured_at, metric_label, id)`, the 7bcd5b9 determinism — because
+     * the SQL only prepends `publication_id` to that ordering, which does
+     * the grouping and nothing else. A publication with no rows has NO key
+     * in the result: absence stays absence, and the caller renders it from
+     * the capability matrix rather than from an empty array this repo
+     * invented meaning for.
+     */
+    async seriesForPublications(
+      ctx: TenantCtx,
+      publicationIds: readonly string[],
+    ): Promise<Record<string, PublicationMetric[]>> {
+      const grouped: Record<string, PublicationMetric[]> = {};
+      // inArray([]) is not a no-op filter in SQL — an empty page reads nothing.
+      if (publicationIds.length === 0) return grouped;
+      const rows = await db
+        .select()
+        .from(publicationMetrics)
+        .where(
+          and(
+            eq(publicationMetrics.tenantId, ctx.tenantId),
+            inArray(publicationMetrics.publicationId, [...publicationIds]),
+          ),
+        )
+        .orderBy(
+          asc(publicationMetrics.publicationId),
+          asc(publicationMetrics.capturedAt),
+          asc(publicationMetrics.metricLabel),
+          asc(publicationMetrics.id),
+        );
+      for (const row of rows) {
+        (grouped[row.publicationId] ??= []).push(row);
+      }
+      return grouped;
     },
 
     /**

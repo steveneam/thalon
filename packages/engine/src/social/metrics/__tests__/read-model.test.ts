@@ -368,6 +368,38 @@ describe("analyticsReadModel — channels and bounds", () => {
     expect(model.bound.truncated).toBe(true);
   });
 
+  it("the page costs ONE metrics query, batched — never one per publication (s87's stated flag, resolved)", async () => {
+    const f = await setup();
+    const a = await publication(f, "bluesky");
+    const b = await publication(f, "instagram");
+    await metric(f, a.id, "likes", 10, NOW);
+    await metric(f, b.id, "reach", 5, NOW);
+
+    const counts = { series: 0, batch: 0 };
+    const real = f.repos.publicationMetrics;
+    const repos = {
+      ...f.repos,
+      publicationMetrics: {
+        ...real,
+        series: (async (...args: Parameters<typeof real.series>) => {
+          counts.series += 1;
+          return real.series(...args);
+        }) as typeof real.series,
+        seriesForPublications: (async (
+          ...args: Parameters<typeof real.seriesForPublications>
+        ) => {
+          counts.batch += 1;
+          return real.seriesForPublications(...args);
+        }) as typeof real.seriesForPublications,
+      },
+    } as Repos;
+
+    const model = await analyticsReadModel({ repos, ctx: f.ctx }, {}, NOW);
+    expect(model.posts).toHaveLength(2);
+    expect(model.posts.find((p) => p.publicationId === a.id)?.engagement.value).toBe(10);
+    expect(counts).toEqual({ series: 0, batch: 1 });
+  });
+
   it("is tenant-walled", async () => {
     const f = await setup();
     const pub = await publication(f, "bluesky");

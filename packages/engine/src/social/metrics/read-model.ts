@@ -144,18 +144,14 @@ export interface AnalyticsReadModelInput {
 }
 
 /**
- * THE read. One publications page, then one `series` read per publication in
- * both windows — `series` rather than `latestPerLabel` because it answers
- * both questions at once (the newest value per label AND the sparkline
- * points), halving the queries a naive version would make.
- *
- * ⚠ It is still one query per publication, bounded by `limit`. The frozen
- * s87 window gives this read three methods — `series`, `latestPerLabel`,
- * `listForPlatform` — and none of them is "many publications at once", so a
- * single-query version would need a new repo method at a future contract
- * window. Stated rather than hidden: at the default bound that is ≤100
- * indexed reads on `(tenant, publication)`, which is fine for a surface page
- * and would not be fine as an unbounded export.
+ * THE read. One publications page, then ONE batch series read across every
+ * publication in BOTH windows (`seriesForPublications` — s87's stated flag,
+ * resolved by this lane with an additive repo method and no schema change).
+ * Two queries total, where the spine's first cut made `1 + N` (one `series`
+ * per publication, ≤100 at the default bound). The series shape is kept over
+ * `latestPerLabel` for the same reason as before: ascending order answers
+ * both questions at once — the last write per label IS the newest value, and
+ * the whole series IS the sparkline.
  *
  * The clock is an argument, as everywhere else in the engine.
  */
@@ -182,15 +178,15 @@ export async function analyticsReadModel(
   const truncated =
     total > rows.length && (oldest === undefined || oldest.getTime() > previousWindow.from.getTime());
 
-  const posts: PostAnalyticsRow[] = [];
-  for (const row of current) {
-    posts.push(await postRow(repos, ctx, row));
-  }
+  // One batch read covers both windows — a publication with no rows simply
+  // has no key, and its absence is worded from the capability matrix below.
+  const seriesById = await repos.publicationMetrics.seriesForPublications(ctx, [
+    ...current.map((r) => r.id),
+    ...previous.map((r) => r.id),
+  ]);
+  const posts = current.map((row) => postRow(row, seriesById[row.id] ?? []));
   // The comparison window's numbers are needed as totals only, never as rows.
-  const previousRows: PostAnalyticsRow[] = [];
-  for (const row of previous) {
-    previousRows.push(await postRow(repos, ctx, row));
-  }
+  const previousRows = previous.map((row) => postRow(row, seriesById[row.id] ?? []));
 
   return {
     window: { from, to },
@@ -213,14 +209,9 @@ function inRange(at: Date, from: Date, to: Date): boolean {
   return t >= from.getTime() && t <= to.getTime();
 }
 
-/** One publication's row, built from its whole series. */
-async function postRow(
-  repos: Repos,
-  ctx: TenantCtx,
-  row: SocialPublicationRow,
-): Promise<PostAnalyticsRow> {
+/** One publication's row, built from its whole series — pure over rows the batch read already fetched. */
+function postRow(row: SocialPublicationRow, series: PublicationMetricRow[]): PostAnalyticsRow {
   const platform = socialPlatformSchema.parse(row.platform);
-  const series = await repos.publicationMetrics.series(ctx, row.id);
   const capability = metricCapability(platform);
 
   // series() is oldest-first, so the last write per label IS the newest.
