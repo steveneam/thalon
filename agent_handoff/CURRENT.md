@@ -100,12 +100,22 @@ unblocks B-create.4) · the W1-era leftovers stand as before.
 ## Resume prompt (session 91, syd4)
 
 **Resume · Thalon** — s90 merged BOTH lanes (learn-evals · youtube-destination),
-drew W2 (verdict OPEN), wired the credentials, and restructured the runway
-founder-hands-free on his word. **The s91 plan of record (COORDINATION §s90
-close + runway §9): W1 BUILDS, lead-direct, zero founder hands — Approve
-FIRST** (verdicted s89; wire the W1 sheet exactly, and the reject control
-lands on the `rejectDraft(..., reason?)` seat learn-evals just merged), then
-Dashboard (Board toggle + setup band), Runs re-shape, Board route deletion.
+drew W2 (verdict OPEN), wired the credentials, restructured the runway
+founder-hands-free on his word, and banked TWO post-wrap rulings: **Library
+name re-confirmed ("Keep Library", three rulings deep — spec §5.3)** and
+**the PIPELINE BOARD ruled into s91** (his flow-visual ask: the Dashboard
+toggle's Board state redraws as a pipeline board — references banked s90,
+library §Pipeline board; node-graph rejected). **The s91 plan of record
+(COORDINATION §s90 close + runway §9), in order:**
+1. **Draw the Pipeline board** (`Board.dc.html` becomes the toggle's Board
+   state — columns in loop order, counts on heads, day's in/out on feet,
+   judge/state chips on cards; search banked, ≤1 more if needed). Text him
+   for the verdict, then build on while it waits.
+2. **W1 BUILDS, lead-direct, zero founder hands — Approve FIRST** (verdicted
+   s89; wire the W1 sheet exactly; the reject control lands on the
+   `rejectDraft(..., reason?)` seat learn-evals merged), then Dashboard
+   (Overview + setup band + the toggle — wire the Board state only once its
+   verdict lands), Runs re-shape, Board route deletion.
 Lane candidate (needs his texted GO): Analytics fixture reconciliation
 (COORDINATION §s87 lead item 1 — capability.ts is the truth, the sheet's
 Facebook fixture still shows retired `post_impressions*`). If his W2 verdict

@@ -332,7 +332,14 @@ still his call — say which, never let a gap sit in an undefined state.
 3. **Library/Transcription split** — two routes, one sheet, three names.
    **DECIDED s88: ONE Library surface**; transcription becomes an ingest kind +
    a filter, not a second route. Un-parks the collapse the s87 hygiene audit
-   left queued on this verdict. Lands in **W2**.
+   left queued on this verdict. Landed in **W2** (s90 draw).
+   **RE-CONFIRMED s90 against the s74 record:** the founder asked *"wasn't
+   Library supposed to be called Transcript?"* — the two-rulings history was
+   put to him plainly (s74: his "Library → Transcription" call, which minted
+   `/app/transcription`; s88: his "yes to all" on this spec reversing it) and
+   he ruled **"Keep Library"** with the reasoning restated (3+ of the shelf's
+   6 source kinds aren't transcripts). Three rulings deep now — do not
+   re-open without new facts.
 4. **Channels vs Integrations vs Settings** — three overlapping names.
    **DECIDED s88, as proposed:** **Channels** = social destinations (the D4
    sheet, build it) · **Integrations** = AI seats + providers (its sheet

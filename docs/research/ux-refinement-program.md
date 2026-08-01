@@ -192,6 +192,12 @@ so it spills into the neighbouring column, which is what a real tooltip does.
 - [Hume · chat history](https://mobbin.com/screens/0fc3643f-ecb6-435b-8146-680f7480ff64) — run rows carry EVALUATION chips beside status. **TAKEN**: judge outcome rides the run row as a chip (blocked/passed counts), not buried in detail.
 - [Runway · credit table](https://mobbin.com/screens/850f0ad4-96f6-4368-865f-7657acabd025) — balance before/after per row. **REJECTED for the surface**: that is a billing ledger's honesty, not a run list's; our per-run cost + total covers the operator's actual question.
 
+**Pipeline board — the Dashboard toggle's Board state (s90 founder ask: "an overall visual representation on how things are connected and flow"; ruled into the s91 draw)**
+- [HubSpot · Deals board](https://mobbin.com/screens/35b26dbf-8d2b-4f6c-a789-738b02d927b1) — every stage column head carries its COUNT, and every column FOOT carries a per-stage roll-up (Total / Weighted) — the funnel math lives IN the board. **TAKEN as the grammar**: our columns get live counts on the head and the day's in/out on the foot.
+- [folk · recruitment pipeline](https://mobbin.com/screens/30e4db23-d229-42c9-8122-57fbcdc65205) / [Twenty](https://mobbin.com/screens/b4ca148d-0555-4928-877c-8f2ee3115856) / [Attio](https://mobbin.com/screens/a2b97705-be0b-44a3-84ec-522316c873bf) — stage-colored column heads with counts; grouped-by-stage IS the flow reading. **Validates the core finding: nobody in the reference set draws arrows — the board itself is the flow, left→right.**
+- **Node-graph canvas (n8n/Zapier genre) — REJECTED with reason:** that grammar means *editable wiring*; our loop is linear with ONE human gate, and a graph editor would promise re-plumbing the pipeline, which is not a product truth. Recorded so it isn't re-proposed.
+- **The drawn shape (s91):** columns in loop order — Intel picks → Generating → At the judge → In Approve → Scheduled → Published — heads carry live counts, feet carry the day's in/out, cards keep their judge/state chips; home = `Board.dc.html` per its own retirement note (it becomes the Dashboard toggle's Board state). His verdict arrives by text (hands-free week).
+
 **Sites (W2, s90)**
 - [Lovable · projects](https://mobbin.com/screens/114dc619-8f00-4816-bed1-e861558c122b) — the state badge rides ON the preview thumbnail ("Published", top-left), cards carry edited-ago meta, and the toolbar is a real status/visibility filter set. **TAKEN**: badge-on-the-shot (you read a gallery by its pictures, so the state belongs on the picture) + the status filter as our seg + per-card age meta.
 - [Squarespace · dashboard](https://mobbin.com/screens/3e8db334-1f8e-4d5c-a055-c50bfd4288f9) — every site row leads with its own DOMAIN under the name; the card states its billing/expiry truth in words. **TAKEN**: a live site's hostname IS its card fact (drafts say "previews only" — never a placeholder URL that reads real).
@@ -256,7 +262,7 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
 | 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
 | 10 | Approve | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Approve; W1 approved by the founder s89 ("yes to all, W1 approved") — build unblocked |
-| 11 | Board | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | **retires into a Dashboard toggle** (his s88 ruling; Jira Summary/Board-tabs = the drawn precedent); sheet carries the status note; route deletion only after the wave's verdict |
+| 11 | Board | ✅ s89 (W1) + **s90 pipeline pass** (library §Pipeline board) | ✅ s89 · **VERDICTED** | — | — | **retires into a Dashboard toggle** (his s88 ruling); **s90 founder ask + ruling: the toggle's Board state redraws as the PIPELINE BOARD (s91 draw, verdict by text)** — counts on heads, day's in/out on feet, the board IS the flow; node-graph rejected with reason |
 | 12 | Dashboard | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Dashboard+Board; pass-1 row above |
 | 13 | Integrations | — | — | — | — | untouched — not ready |
 | 14 | Intel | — | — | — | — | untouched — not ready |

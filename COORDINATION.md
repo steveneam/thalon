@@ -199,6 +199,17 @@ the one with the weakest near-term payoff by its own charter.
 | learn-evals | **MERGED** (`bcb8525`, ff after rebase; verify exit 0; GC'd). The reject-reason door pass-through + the 7-origin batch export — the stale union was WORSE than believed: one `lead_triage`/`cut_diff_review` row made the whole export THROW; fixed + round-trip-pinned. The frozen s90 window fit exactly. WRAP: `agent_handoff/lanes/WRAP-learn-evals.md`. |
 | youtube-destination | **MERGED** (`30d9f4c`+WRAP, ff after rebase; the literal `npm run verify` it deferred ran post-merge single-lane: exit 0, 3137 passed; GC'd). youtube is the EIGHTH platform key: capability truth in both homes (metrics word = `permissioned`, argued), `youtubePostSettingsSchema` resolving the SETTINGS_DEFERRED IOU (map now EMPTY, ratchet stays armed), disarmed `videos.insert` driver with doc-cited ceilings (5000-BYTE description backstop · title 100 · made-for-kids required at the driver, never defaulted · hashtags-60 refusal flagged for reviewer strike). **Armed-proof pinned by test: even a hand-set env pair cannot arm it** — no env seats, no vault road, and `video_required` fails every draft that exists today. Its one real IOU — the db CHECK drift (migrations baked 7 platforms, schema derives 8) — was closed SAME SESSION by the lead: migration `0025_s90_youtube_platform_checks`. WRAP: `agent_handoff/lanes/WRAP-youtube-destination.md`. |
 
+**TWO MORE RULINGS, POST-WRAP TURN (s90, via the in-session ask):**
+1. **Library name RE-CONFIRMED — "Keep Library"** (he asked about the s74
+   "Transcript" call; the two-rulings history was put to him; three rulings
+   deep now — workspace spec §5.3 carries the record).
+2. **The flow visual — RULED "s91 Board state":** the Dashboard toggle's
+   Board state redraws as the **PIPELINE BOARD** (columns in loop order with
+   live counts on heads + the day's in/out on feet; the board IS the flow —
+   references banked s90, library §Pipeline board; node-graph rejected with
+   reason). Draw = s91 boot, HIS VERDICT BY TEXT, then the Dashboard build
+   wires the toggle to it. Home: `Board.dc.html` per its retirement note.
+
 **FOUNDER CONSTRAINT LANDED MID-SESSION (s90, his words):** *"i won't have time
 to do console visits this week … structure the plan over the next few sessions
 so that you still get work on thalon done (towards launch) but without needing
