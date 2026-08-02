@@ -192,6 +192,32 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s91 — OPEN (boot 2026-08-02: *"gogogo. you have my approval on W2 too"*)
+
+**HIS W2 VERDICT LANDED AT THE BOOT** — "you have my approval on W2 too"
+covers all four W2 sheets (Create home · Create wizard · Sites · Library)
+**including the s90b-redrawn Create set and the s90c Composer iteration**
+(the scope the s90 wrap recorded). Ledger rows 5/6/16/19 flipped to
+VERDICTED same turn. Consequence per runway §9: **B-create.4 (Composer
+route + wizard build) queues for s92.**
+
+**LEAD TRACK (the s91 plan of record, in order):**
+1. **Pipeline board draw** — `Board.dc.html` redraws as the Dashboard
+   toggle's Board state (columns in loop order, counts on heads, day's
+   in/out on feet, judge/state chips on cards; refs = library §Pipeline
+   board; node-graph stays rejected). Verdict asked by text; build
+   continues while it waits.
+2. **W1 BUILDS, lead-direct, zero founder hands — Approve FIRST**
+   (verdicted s89; wires the merged `rejectDraft(..., reason?)` seat) →
+   Dashboard (Overview + setup band + toggle; the toggle's Board state
+   wires only once its verdict lands) → Runs re-shape → Board route
+   deletion.
+
+**LANE candidate (needs his named GO — asked in the mid-session text):**
+Analytics fixture reconciliation (§s87 lead item 1 — `capability.ts` is
+the truth; the sheet's Facebook fixture still shows retired
+`post_impressions*`). "gogogo" boots the plan; it does not name a lane.
+
 ## Sprint 9 / s90 — **CLOSED: both lanes MERGED, W2 drawn, the plan restructured founder-hands-free** (verify on merged main exit 0, 3137/9)
 
 | lane | outcome |

@@ -271,8 +271,8 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 2 | Schedule | ✅ s86 | ✅ | — | — | §Schedule |
 | 3 | Composer | ✅ s86 + Create-spec Mobbin pass + **P walked s90** (launcher flow facts, library §Postiz launcher) | ✅ | — | — | popout state = p3, drawn open; the launcher walk REJECTED their bundle model, VALIDATED R3 + D3 |
 | 4 | Channels | ✅ s86 | ✅ | — | — | §Channels |
-| 5 | Create home | ✅ s86 (Create-spec pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·Leonardo) | ✅ s90 (W2) | — | — | pass-1 row above; awaiting the W2 verdict |
-| 6 | Create wizard (new sheet) | ✅ s86 (same pass) | ✅ s90 (W2) | — | — | `Create Wizard.dc.html` EXISTS now; pass-1 row above; awaiting the W2 verdict |
+| 5 | Create home | ✅ s86 (Create-spec pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·Leonardo) | ✅ s90 (W2) · **VERDICTED** | — | — | pass-1 row above; W2 approved by the founder s91, 2026-08-02 ("you have my approval on W2 too") — covers the s90b ask-card redraw; B-create.4 build unblocked (queues s92) |
+| 6 | Create wizard (new sheet) | ✅ s86 (same pass) | ✅ s90 (W2) · **VERDICTED** | — | — | `Create Wizard.dc.html` EXISTS now; pass-1 row above; W2 approved s91 — covers the s90b tucked-artifact amendment |
 | 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) | — | — | — | video build order 1 |
 | 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
 | 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
@@ -282,10 +282,10 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 13 | Integrations | — | — | — | — | untouched — not ready |
 | 14 | Intel | — | — | — | — | untouched — not ready |
 | 15 | Leads | — | — | — | — | untouched — not ready |
-| 16 | Library (Transcription) | ✅ s90 (W2) | ✅ s90 (W2) | — | — | §5.3 DRAWN — one Library, kind = filter, transcribing = row state; pass-1 row above; awaiting the W2 verdict |
+| 16 | Library (Transcription) | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | §5.3 DRAWN — one Library, kind = filter, transcribing = row state; pass-1 row above; W2 approved s91 — the `/app/transcription` retirement builds with the rebuild |
 | 17 | Profiles | — | — | — | — | untouched — not ready |
 | 18 | Runs | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Runs; create_runs re-shape drawn (workspace spec §3 ORIENT); pass-1 row above |
-| 19 | Sites | ✅ s90 (W2) | ✅ s90 (W2) | — | — | library §Sites; pass-1 row above; awaiting the W2 verdict |
+| 19 | Sites | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | library §Sites; pass-1 row above; W2 approved s91 |
 | 20 | Source Media | ◐ banked (Leonardo dialog + Runway roles, s86 — APPLIED in the W2 wizard draw) | — | — | — | the IA question is RESOLVED (own component family, the wizard's media dialog — never merged into Library); its own sheet's p1 still owed |
 | 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
 | — | Calendar | *(superseded s85 — rail sweep; kept only as history)* | | | | |
