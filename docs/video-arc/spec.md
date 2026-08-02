@@ -116,13 +116,20 @@ V10. Zero credit spend in build/test: renders in tests replay fixtures; live min
 ## Design
 
 **Surfaces (design lead-direct; sheets → founder verdict → exact-mock build):**
-1. **Videos Overview** — pass 1 needs a fresh Mobbin sweep (asset-grid/media-library
-   patterns); nothing banked yet. Render-state badges ride the rows (V1/V7).
-2. **Video Dossier** — pass 1 needs the sweep too (project-detail-with-versions);
-   versions/compare/audition live here (V1).
+1. **Videos Overview** — ~~pass 1 needs a fresh Mobbin sweep; nothing banked yet~~
+   **BANKED s87** (`docs/research/ux-refinement-program.md` §"Videos Overview —
+   the list": VEED · Riverside · Loom · Arcade · ClickUp). Render-state badges
+   ride the rows (V1/V7); Loom's metrics triplet stays EMPTY until
+   `publication_metrics` has rows — never zeros (rule 5).
+2. **Video Dossier** — **BANKED s87 likewise** (§"Video Dossier — the project
+   page": Synthesia · Adobe Express · Google AI Studio · Fibery · Sana ·
+   Frame.io). The sweep's own synthesis: four of the five no-affordance jobs
+   are ONE well-drawn version rail (Synthesia's breadcrumb selector + Adobe's
+   marked group + Fibery's naming confirm); take audition is the one separate
+   affordance.
 3. **Editor** (`Videos.dc.html`) — pass 1 = thumbnails + track colour + credit
-   badges (V2/V4); pass 2 = the script-first gate (V3); pass 3 = states (V7, the
-   audit's refused/empty/loading matrix).
+   badges (V2/V4; references banked s85); pass 2 = the script-first gate (V3);
+   pass 3 = states (V7, the audit's refused/empty/loading matrix).
 4. **Composer video tab** — already specced in the Create spec (cover frame drawn
    s86; platform video settings per D3 slice). No separate work here.
 
@@ -186,6 +193,68 @@ landing/marketing video.
 3. Pass-2 script-first gate (V3) — evaluated with the SHIPPED B-ve.4 diffs in hand;
    nothing blocks it but the pass itself.
 4. Pass 3 states across the four surfaces (V7 honesty, V9 render gates).
+
+## The s95 execution plan (stamped s94, on the founder's direction — "refine the plan and spec … then you can start on them")
+
+**Where the arc actually stands (re-grounded s94, per rule 12 — no inherited
+claims):** the three sheets EXIST since the s72 verdicted export
+(`docs/research/mock-sheets/Videos Overview.dc.html` · `Video Dossier.dc.html` ·
+`Videos.dc.html`) and the three surfaces are BUILT exact-mock to them
+(`apps/web/src/app/app/videos/page.tsx` ·
+`apps/web/src/app/app/videos/[projectId]/page.tsx` ·
+`apps/web/src/app/app/videos/[projectId]/edit/page.tsx`, components under
+`apps/web/src/components/videos/`). What has NOT happened is the
+research-refinement pass over those sheets — the ledger's word is exact:
+"REFERENCES BANKED (s87), SHEETS NOT STARTED" means the pass-1 AMENDMENT
+draws, not first draws. So s95 is the same shape as the s94 Sites build: amend
+the verdicted sheets from the banked references, get the verdict, ship the
+deltas — never a from-scratch surface.
+
+**Phase 1 — the design block (lead-direct, Fable 5, claude-design canvas
+`f5d304cb` → re-export to `docs/research/mock-sheets/`):**
+- `Videos Overview.dc.html` amendment: VEED state badge ON the thumb +
+  duration badge + the honest "No Preview Available" tile as a drawn state;
+  Riverside's history-count meta line ("2 recordings · 5 edits" — ours:
+  takes/cuts counts from the project's own rows); ClickUp kind label. NO
+  metrics triplet until D2 (Loom REJECT-until-data, recorded above).
+- `Video Dossier.dc.html` amendment: THE VERSION RAIL — Synthesia breadcrumb
+  version selector with the published pill, Adobe's marked-versions group
+  (save-as-named-variant), Fibery's naming confirm for delete/restore
+  (reversibility in words), AI-Studio radio rows as the compare-two precursor,
+  and the take-audition play door. This is V1 drawn.
+- `Videos.dc.html` (editor) amendment: frame thumbnails on clips + track
+  colour by kind (V2) + credit badges on metered verbs (V4 — copilot verbs,
+  B-ve.4 diffs, scene re-renders).
+- Per the s93 re-check precedent, the block opens with a FRESH Mobbin pull per
+  surface to confirm the banked patterns still read best-in-class; banked
+  citations above are the floor, not the ceiling.
+
+**Phase 2 — ONE verdict ask** (hands-free week: a single texted word covers
+the three amended sheets + the Schedule amendment — see
+`docs/schedule-refinement/spec.md`, drawn in the same block).
+
+**Phase 3 — builds on GO (order within the phase):**
+1. Editor p1 deltas (V2/V4) — smallest, pure surface; the render-gate
+   screenshot re-baselines after.
+2. Overview + Dossier amendment deltas + **V1's five affordances**. Existing
+   doors first: the cuts routes already shipped
+   (`apps/web/src/app/api/videos/[projectId]/cuts/[cutId]/route.ts` ·
+   `…/approve/route.ts` · `…/derive/route.ts` · `…/propose/route.ts`); data =
+   `packages/db/src/schema/video.ts` (`videoProjects` · `videoTakes` ·
+   `videoCuts`) via `packages/db/src/repos/video-projects.ts` ·
+   `video-takes.ts` · `video-cuts.ts`. Decision 5 pre-check at kickoff:
+   named-variant + delete/restore must come from THESE rows; if a column is
+   genuinely missing it is a contract-window ask `(planned)`, flagged before
+   any build — the s90 windows stay frozen until then.
+3. Schedule calendar deltas (its own spec, same GO).
+**Zero credit spend throughout** (V10): renders replay fixtures; no live mints.
+
+**Phase 4 — after the deltas land:** the V3 script-first gate gets its own
+decision session (criteria already in V3), then pass-3 states (V7/V9).
+
+**Interleave:** B-create.5 dogfood (the first real Create run) stays its own
+gate and can land before, between or after these — it needs a spend statement
++ his GO, and none of the above depends on it.
 
 ## Reconciliation ledger
 
