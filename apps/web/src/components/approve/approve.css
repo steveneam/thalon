@@ -40,6 +40,17 @@
 .approve-surface .ver-strip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--n-900); padding: 8px 12px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
 .approve-surface .ver-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--n-700); flex: none; }
 
+/* ── W1 amendments (Approve.dc.html AMENDED s89), verbatim from the helmet ── */
+.approve-surface .qtabs { display: flex; align-items: center; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--n-400); }
+.approve-surface .qtab { font-size: 12px; padding: 6px 10px 8px; color: var(--n-900); display: inline-flex; gap: 6px; align-items: baseline; }
+.approve-surface .qtab.on { color: var(--n-1000); font-weight: 600; box-shadow: inset 0 -2px 0 var(--act); }
+.approve-surface .qtab .n { font-size: 10.5px; font-family: var(--font-data); color: var(--n-800); }
+.approve-surface .run-hd { display: flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--n-bg); border-bottom: 1px solid var(--n-400); font-size: 11px; color: var(--n-800); }
+.approve-surface .why { display: inline-flex; align-items: center; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: var(--err-subtle); color: var(--err); white-space: nowrap; }
+.approve-surface .plat-dot { width: 16px; height: 16px; border-radius: 4px; background: var(--n-300); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--n-1000); vertical-align: -4px; }
+.approve-surface .btn .kbd { margin-left: 2px; padding: 1px 5px; font-size: 10px; }
+.approve-surface .btn-primary .kbd { background: rgba(255, 255, 255, 0.14); border-color: transparent; color: var(--act-text); }
+
 /*
  * ── App adaptations (each NAMED; the rendered result at 1440×940 stays
  * indistinguishable from the sheet) ──
@@ -145,3 +156,23 @@
    legend still advertised all five). Scoped, additive; `.kbd` itself stays
    the shell's shared class. */
 .approve-surface .kbd.kbd-off { opacity: 0.45; }
+
+/* ── W1 app adaptations (each named; the rendered result stays the sheet's) ── */
+/* The sheet's qtabs are spans; real tabs are BUTTONS (keyboard + AT). */
+.approve-surface .qtab { background: none; border: none; font-family: inherit; cursor: pointer; }
+/* A row after a run band would double its border with the band's own. */
+.approve-surface .run-hd + .row.q-btn { border-top: none; }
+/* The band's batch verb at the sheet's own inline size (`font-size:11px;padding:2px 8px`). */
+.approve-surface .run-approve { font-size: 11px; padding: 2px 8px; }
+/* The rejected row's reason chip — the sheet's `.why` on the WARN channel
+   ("your reason → eval:"), exactly as its fixture styles it inline. */
+.approve-surface .why.why-warn { background: var(--warn-subtle); color: var(--warn); }
+/* A reason can outgrow the chip's one line inside a 600px column — clip with
+   an ellipsis rather than blowing the row out; the full text rides `title`
+   and the detail card. */
+.approve-surface .excerpt .why { max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
+/* The letter fallback for a platform the sheet drew no mark for. */
+.approve-surface .plat-dot-letter { font-size: 9px; font-weight: 600; }
+/* The Composer door rests UNARMED until the route exists (B-create.4) —
+   visibly present, visibly not yet a door. */
+.approve-surface .door-unarmed { opacity: 0.55; cursor: not-allowed; }

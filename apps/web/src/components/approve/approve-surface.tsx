@@ -6,13 +6,16 @@ import {
   applyQueueView,
   batchScopeNote,
   defaultSelection,
-  FILTER_OPTIONS,
+  FAMILY_OPTIONS,
   flattenQueue,
+  groupByRun,
   isWaiting,
   SORT_OPTIONS,
+  type QueueFamily,
   type QueueFilter,
   type QueueItem,
   type QueueSort,
+  type RunGroup,
 } from "@/components/approve/approve-model";
 import { DraftCard, type DetailStatus } from "@/components/approve/draft-card";
 import { QueueCard, type QueueStatus } from "@/components/approve/queue-card";
@@ -69,13 +72,19 @@ export function ApproveSurface() {
   const [queueStatus, setQueueStatus] = useState<QueueStatus>("loading");
   const [items, setItems] = useState<QueueItem[]>([]);
   // The operator's view knobs (founder s66): newest first by default,
-  // switchable, plus a status filter. Presentation state only.
+  // switchable; the state filter lives on the queue card's tabs (W1) and
+  // the family picker in the header. Presentation state only.
   const [sort, setSort] = useState<QueueSort>("newest");
   const [filter, setFilter] = useState<QueueFilter>("all");
+  const [family, setFamily] = useState<QueueFamily>("all");
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   // Failing judge reasons per BLOCKED draft id — what the sheet's blocked
   // row quotes in red where a passing row quotes the body.
   const [reasons, setReasons] = useState<Record<string, string[]>>({});
+  // Reasons stated on THIS session's rejects (the sheet's "your reason →
+  // eval:" chip). Not re-read from the wire — the reason lives in the eval
+  // row and the transition event, which no read exposes yet.
+  const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
   // Mirrors selectedDraftId so an in-flight detail fetch can tell, once it
   // resolves, whether the operator has since selected something else — a
   // stale fetch discards itself instead of clobbering the card. This is
@@ -235,8 +244,10 @@ export function ApproveSurface() {
       });
   }, []);
 
-  // The rendered view: filter + direction over the stable flat list.
-  const view = useMemo(() => applyQueueView(items, sort, filter), [items, sort, filter]);
+  // The rendered view: tabs + family + direction over the stable flat list,
+  // then grouped by consecutive run for the sheet's `.run-hd` bands.
+  const view = useMemo(() => applyQueueView(items, sort, filter, family), [items, sort, filter, family]);
+  const groups = useMemo(() => groupByRun(view), [view]);
 
   // A filter change can drop the selected draft out of the view — land the
   // selection back on the view's own default instead of a hidden row.
@@ -295,15 +306,59 @@ export function ApproveSurface() {
     if (succeeded && confirmToast) setToast(confirmToast);
   }
 
-  // Reject's NAMED confirm (the consent design: "reject asks for a named
-  // confirm") — shared by the button and the `r` key, so keyboard triage
-  // never skips it.
+  // Reject ASKS FOR A REASON (the W1 grammar — Klaviyo's guidance pattern):
+  // the stated reason becomes the eval_cases row in the same transaction as
+  // queued→rejected (s90 window), which makes this control the learn loop's
+  // front door. A blank reason is a bare decision — legal, recorded, no eval
+  // row (the seat's own semantics); Cancel keeps the draft. Shared by the
+  // button and the `r` key, so keyboard triage never skips the ask.
   function requestReject(draft: GridDraft) {
-    const confirmed = window.confirm(
-      `Reject this ${draft.platform} draft? The rejection is recorded and the draft closes.`,
+    const input = window.prompt(
+      `Reject this ${draft.platform} draft?\n\nSay why and your words become an eval row the engine learns from. Leave blank to reject without one. Cancel keeps the draft.`,
+      "",
     );
-    if (!confirmed) return;
-    void withBusy(() => rejectDraft(draft.id), { message: "Draft rejected." });
+    if (input === null) return;
+    const reason = input.trim();
+    void withBusy(
+      async () => {
+        await rejectDraft(draft.id, reason || undefined);
+        if (reason) setRejectReasons((prev) => ({ ...prev, [draft.id]: reason }));
+      },
+      { message: reason ? "Draft rejected — your reason became an eval row." : "Draft rejected." },
+    );
+  }
+
+  /** The run band's batchable set — that group's queued, non-staged drafts. */
+  function runBatchCount(group: RunGroup) {
+    return group.items.filter(
+      (i) => i.draft.status === "queued" && !isStagedDraftFormat(i.draft.format),
+    ).length;
+  }
+
+  // The run band's "Approve run · N" (Deel): the same sequential
+  // single-draft endpoint as the header's bulk verb, scoped to one run's
+  // group, behind its own named confirm carrying the count.
+  function approveRun(group: RunGroup) {
+    const batch = group.items.filter(
+      (i) => i.draft.status === "queued" && !isStagedDraftFormat(i.draft.format),
+    );
+    const count = batch.length;
+    if (count === 0) return;
+    if (
+      !window.confirm(
+        `Approve this run's ${count} waiting draft${count === 1 ? "" : "s"}? Each records its own approval.`,
+      )
+    ) {
+      return;
+    }
+    void withBusy(
+      async () => {
+        for (const { draft } of batch) {
+          await approveDraft(draft.id);
+        }
+      },
+      { message: `Approved ${count} queued draft${count === 1 ? "" : "s"}.` },
+    );
   }
 
   // Batch approve: every QUEUED draft in the CURRENT VIEW, in view order,
@@ -390,7 +445,7 @@ export function ApproveSurface() {
     stagedWaiting,
   });
   const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "";
-  const filterLabel = FILTER_OPTIONS.find((o) => o.value === filter)?.label ?? "";
+  const familyLabel = FAMILY_OPTIONS.find((o) => o.value === family)?.label ?? "";
 
   return (
     // `approve-surface` is the anchor every rule in ./approve.css hangs off
@@ -427,15 +482,15 @@ export function ApproveSurface() {
           </select>
         </div>
         <div className="btn btn-ghost btn-sm sel-ctl">
-          {filterLabel}
+          {familyLabel}
           <span className="chev" />
           <select
             className="sel-native"
-            aria-label="Status filter"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as QueueFilter)}
+            aria-label="Family filter"
+            value={family}
+            onChange={(e) => setFamily(e.target.value as QueueFamily)}
           >
-            {FILTER_OPTIONS.map((o) => (
+            {FAMILY_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
               </option>
@@ -500,13 +555,19 @@ export function ApproveSurface() {
       <div className="split">
         <QueueCard
           status={queueStatus}
-          items={view}
-          totalCount={items.length}
+          groups={groups}
+          allItems={items}
+          filter={filter}
+          onFilter={setFilter}
           selectedDraftId={selectedDraftId}
           reasons={reasons}
+          rejectReasons={rejectReasons}
           inboxZero={inboxZero}
           actionsDisabled={stagedSelected}
+          busy={busy}
           onSelect={selectDraft}
+          onApproveRun={approveRun}
+          runBatchCount={runBatchCount}
           onRetry={() => {
             setQueueStatus("loading");
             void loadSurface();

@@ -4,13 +4,17 @@ import {
   batchScopeNote,
   checkGlyph,
   checkMarks,
+  familyOf,
   flattenQueue,
   formatStamp,
   formatWord,
+  groupByRun,
   headWindow,
   platformLabel,
+  queueTabCounts,
   rowQuote,
   rowTitle,
+  runGroupLabel,
   statusPill,
   targetTerms,
   thumbLabel,
@@ -68,11 +72,12 @@ describe("the sheet's copy grammar (Approve.dc.html)", () => {
     ).toBeNull();
   });
 
-  it("status pills: the sheet's three words on their channels; every other state keeps its own on neutral", () => {
+  it("status pills: the sheet's words on their channels; every other state keeps its own on neutral", () => {
     expect(statusPill("queued")).toEqual({ word: "Waiting", cls: "pill-warn" });
     expect(statusPill("blocked")).toEqual({ word: "Blocked", cls: "pill-err" });
     expect(statusPill("approved")).toEqual({ word: "Approved", cls: "pill-ok" });
-    expect(statusPill("rejected")).toEqual({ word: "Rejected", cls: "pill-idle" });
+    // The W1 sheet draws Rejected as the BARE pill — decided, quiet, no channel.
+    expect(statusPill("rejected")).toEqual({ word: "Rejected", cls: "" });
     expect(statusPill("judging")).toEqual({ word: "Judging", cls: "pill-idle" });
   });
 
@@ -114,10 +119,50 @@ describe("the queue view", () => {
     expect(applyQueueView(flat, "oldest", "all").map((i) => i.draft.id)).toEqual(["a", "b"]);
   });
 
-  it("filters on the two triage states only", () => {
-    const flat = flattenQueue([[{ draft: older, run: RUN }, { draft: newer, run: RUN }]]);
+  it("the state tabs filter on the sheet's five states; Approved covers published too", () => {
+    const approved = draft("c", RUN.id, "x", "C", "approved", "hc");
+    const published = draft("d", RUN.id, "x", "D", "published", "hd");
+    const rejected = draft("e", RUN.id, "x", "E", "rejected", "he");
+    const flat = flattenQueue([
+      [older, newer, approved, published, rejected].map((d) => ({ draft: d, run: RUN })),
+    ]);
     expect(applyQueueView(flat, "oldest", "waiting").map((i) => i.draft.id)).toEqual(["a"]);
     expect(applyQueueView(flat, "oldest", "blocked").map((i) => i.draft.id)).toEqual(["b"]);
+    expect(applyQueueView(flat, "oldest", "approved").map((i) => i.draft.id)).toEqual(["c", "d"]);
+    expect(applyQueueView(flat, "oldest", "rejected").map((i) => i.draft.id)).toEqual(["e"]);
+    expect(queueTabCounts(flat)).toEqual({ all: 5, waiting: 1, blocked: 1, approved: 2, rejected: 1 });
+  });
+
+  it("the family lens cuts on the engine's own format vocabulary", () => {
+    const post = draft("p", RUN.id, "linkedin", "P", "queued", "hp");
+    const clip = draft("q", RUN.id, "linkedin", "Q", "queued", "hq", { format: "clip_plan" });
+    const page = draft("r", RUN.id, "blog", "R", "queued", "hr", { format: "web_page" });
+    const email = draft("s", RUN.id, "email", "S", "queued", "hs", { format: "outreach_email" });
+    const board = draft("t", RUN.id, "video", "T", "queued", "ht", { format: "storyboard" });
+    expect(familyOf(post)).toBe("social");
+    expect(familyOf(clip)).toBe("social");
+    expect(familyOf(page)).toBe("page");
+    expect(familyOf(email)).toBe("email");
+    expect(familyOf(board)).toBe("video");
+    const flat = flattenQueue([[post, clip, page, email, board].map((d) => ({ draft: d, run: RUN }))]);
+    expect(applyQueueView(flat, "oldest", "all", "social").map((i) => i.draft.id)).toEqual(["p", "q"]);
+    expect(applyQueueView(flat, "oldest", "all", "video").map((i) => i.draft.id)).toEqual(["t"]);
+  });
+
+  it("run groups: CONSECUTIVE view rows sharing a run — never re-sorted, so an interleaved run appears twice", () => {
+    const runB = run("22222222-2222-2222-2222-222222222222", "2026-07-04T10:00:00.000Z");
+    const a1 = { draft: older, run: RUN };
+    const b1 = { draft: newer, run: runB };
+    const a2 = { draft: draft("z", RUN.id, "x", "Z", "queued", "hz"), run: RUN };
+    const groups = groupByRun([a1, b1, a2]);
+    expect(groups.map((g) => [g.run.id, g.items.length])).toEqual([
+      [RUN.id, 1],
+      [runB.id, 1],
+      [RUN.id, 1],
+    ]);
+    // The band's copy carries only what is on the wire: stamp + count (the
+    // fixture's run subject isn't on this read — never an invented word).
+    expect(runGroupLabel({ run: RUN, items: [a1, a2] })).toMatch(/^Run · \d{1,2} Jul, \d{2}:\d{2} · 2 drafts$/);
   });
 });
 

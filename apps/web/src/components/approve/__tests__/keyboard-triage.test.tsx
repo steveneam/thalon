@@ -82,19 +82,23 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
     await waitFor(() => expect(approved).toEqual([FIXTURE_DRAFT_A_ID]));
   });
 
-  it("'r' goes through the NAMED confirm — confirms stay intact under keyboard triage", async () => {
+  it("'r' goes through the reason ASK (W1) — the prompt stays intact under keyboard triage", async () => {
     const user = userEvent.setup();
-    const rejected: string[] = [];
+    const rejected: Array<{ id: string; reason: string | undefined }> = [];
     server.use(
-      http.post("/api/drafts/:draftId/reject", ({ params }) => {
-        rejected.push(params.draftId as string);
+      http.post("/api/drafts/:draftId/reject", async ({ params, request }) => {
+        const body = (await request.json().catch(() => ({}))) as { reason?: string };
+        rejected.push({ id: params.draftId as string, reason: body?.reason });
         return HttpResponse.json({
           approval: { id: "appr", tenantId: "t", draftId: params.draftId, actor: "operator", action: "reject", editedBody: null, createdAt: "2026-07-04T11:00:00.000Z" },
           draft: { ...draftA, status: "rejected" },
         });
       }),
     );
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    // The reject control is the learn loop's front door: it ASKS for a
+    // reason (Cancel = null keeps the draft; a stated reason rides the wire
+    // and becomes the eval row server-side — s90 window).
+    const promptSpy = vi.spyOn(window, "prompt").mockReturnValue(null);
 
     render(<ApproveSurface />);
     // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
@@ -103,15 +107,45 @@ describe("ApproveQueue — keyboard triage (shared grammar, s40)", () => {
     await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
     await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
 
-    // Declined confirm: nothing happens.
+    // Cancelled ask: nothing happens.
     await user.keyboard("r");
-    expect(confirmSpy).toHaveBeenCalledWith(expect.stringMatching(/Reject this linkedin draft/));
+    expect(promptSpy).toHaveBeenCalledWith(expect.stringMatching(/Reject this linkedin draft/), "");
     expect(rejected).toHaveLength(0);
 
-    // Accepted confirm: the reject records.
-    confirmSpy.mockReturnValue(true);
+    // A stated reason: the reject records WITH the reason on the wire.
+    promptSpy.mockReturnValue("cites a benchmark we never ran");
     await user.keyboard("r");
-    await waitFor(() => expect(rejected).toEqual([FIXTURE_DRAFT_A_ID]));
+    await waitFor(() =>
+      expect(rejected).toEqual([
+        { id: FIXTURE_DRAFT_A_ID, reason: "cites a benchmark we never ran" },
+      ]),
+    );
+  });
+
+  it("a BLANK reason is a bare decision — the reject records with no reason field on the wire", async () => {
+    const user = userEvent.setup();
+    const bodies: unknown[] = [];
+    server.use(
+      http.post("/api/drafts/:draftId/reject", async ({ request }) => {
+        bodies.push(await request.json().catch(() => null));
+        return HttpResponse.json({
+          approval: { id: "appr", tenantId: "t", draftId: FIXTURE_DRAFT_A_ID, actor: "operator", action: "reject", editedBody: null, createdAt: "2026-07-04T11:00:00.000Z" },
+          draft: { ...draftA, status: "rejected" },
+        });
+      }),
+    );
+    vi.spyOn(window, "prompt").mockReturnValue("   ");
+
+    render(<ApproveSurface />);
+    const detail = () => screen.getByRole("region", { name: "Draft detail" });
+    const queue = await screen.findByRole("region", { name: "Approve queue" });
+    await user.click(await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_A_ID}` }));
+    await waitFor(() => within(detail()).getByText("Run2 LinkedIn draft"));
+
+    await user.keyboard("r");
+    // Whitespace trims to blank ⇒ no JSON body at all — the seat treats the
+    // rejection as a decision, not a correction, and no eval row lands.
+    await waitFor(() => expect(bodies).toEqual([null]));
   });
 
   /**

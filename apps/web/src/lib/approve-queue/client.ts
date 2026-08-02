@@ -36,8 +36,19 @@ export async function approveDraft(draftId: string): Promise<ActionResult> {
   return asJson<ActionResult>(res);
 }
 
-export async function rejectDraft(draftId: string): Promise<ActionResult> {
-  const res = await fetch(`/api/drafts/${draftId}/reject`, { method: "POST" });
+export async function rejectDraft(draftId: string, reason?: string): Promise<ActionResult> {
+  // A stated reason makes the rejection a CORRECTION — it becomes the
+  // eval_cases row in the same transaction (s90 window). Absent ⇒ a bare
+  // decision, and the body stays empty rather than carrying a blank field.
+  const res = await fetch(`/api/drafts/${draftId}/reject`, {
+    method: "POST",
+    ...(reason
+      ? {
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason }),
+        }
+      : {}),
+  });
   return asJson<ActionResult>(res);
 }
 

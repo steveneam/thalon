@@ -40,7 +40,11 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     expect(await screen.findByText("2 waiting")).toBeInTheDocument();
     expect(screen.getByText("1 blocked")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Sort order" })).toHaveValue("newest");
-    expect(screen.getByRole("combobox", { name: "Status filter" })).toHaveValue("all");
+    // W1: status moved from a header picker onto the queue card's tabs with
+    // live counts; the header's second picker is the family lens.
+    expect(screen.getByRole("combobox", { name: "Family filter" })).toHaveValue("all");
+    expect(screen.getByRole("button", { name: /^All 4/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /^Waiting 2/ })).toBeInTheDocument();
     // …but a stage artifact advances through its own staged walk, so the
     // bulk action's count and the set it acts on agree at ONE.
     expect(screen.getByRole("button", { name: "Approve all waiting (1)" })).toBeInTheDocument();
@@ -50,11 +54,14 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     // Re-queried: the draft card remounts per draft (keyed-by-entity, s78).
     const detail = () => screen.getByRole("region", { name: "Draft detail" });
 
-    // Rows speak the sheet's grammar: platform brand name · format word,
-    // status as a pill WORD, and the exact creation stamp (never an age).
-    expect((await within(queue).findAllByText(/^LinkedIn · post/)).length).toBeGreaterThan(0);
+    // Rows speak the W1 sheet's grammar: a REAL platform mark (its name on
+    // the title) · format word, status as a pill WORD, and the exact
+    // creation stamp (never an age).
+    await waitFor(() => expect(within(queue).getAllByTitle("LinkedIn").length).toBeGreaterThan(0));
+    expect(within(queue).getAllByText(/post ·|post$/).length).toBeGreaterThan(0);
     expect(within(queue).getAllByText("Waiting").length).toBeGreaterThanOrEqual(1);
-    expect(within(queue).getByText("Blocked")).toBeInTheDocument();
+    // "Blocked" is now both a pill and a tab label — both are the vocabulary.
+    expect(within(queue).getAllByText("Blocked").length).toBeGreaterThanOrEqual(1);
     expect(within(queue).getAllByText(/^\d{1,2} \w{3}.*, \d{2}:\d{2}$/).length).toBeGreaterThan(0);
     // The footer rail states the count and the keyboard legend.
     expect(within(queue).getByText("4 of 4")).toBeInTheDocument();
@@ -150,9 +157,9 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     await user.selectOptions(screen.getByRole("combobox", { name: "Sort order" }), "oldest");
     await waitFor(() => expect(indexOf(FIXTURE_DRAFT_A_ID)).toBeLessThan(indexOf(FIXTURE_DRAFT_C_ID)));
 
-    // Filter to waiting: the blocked and terminal rows leave, and the
-    // footer states the honest filtered-of-total count.
-    await user.selectOptions(screen.getByRole("combobox", { name: "Status filter" }), "waiting");
+    // Filter to waiting via the W1 state tab: the blocked and terminal rows
+    // leave, and the footer states the honest filtered-of-total count.
+    await user.click(screen.getByRole("button", { name: /^Waiting \d/ }));
     await waitFor(() => expect(indexOf(FIXTURE_DRAFT_B_ID)).toBe(-1));
     expect(indexOf(FIXTURE_DRAFT_C_ID)).toBe(-1);
     expect(within(queue).getByText(`${names().length} of 4`)).toBeInTheDocument();
@@ -334,7 +341,7 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     render(<ApproveSurface />);
     const queue = await screen.findByRole("region", { name: "Approve queue" });
     await within(queue).findByRole("button", { name: `Select linkedin draft ${FIXTURE_DRAFT_C_ID}` });
-    await user.selectOptions(screen.getByRole("combobox", { name: "Status filter" }), "waiting");
+    await user.click(screen.getByRole("button", { name: /^Waiting \d/ }));
     expect(await screen.findByText("Nothing matches this view")).toBeInTheDocument();
   });
 
@@ -366,6 +373,9 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     // no media ref — placeholders over drift), and the clip window rides
     // the format word exactly as the sheet writes it.
     expect(await within(queue).findByText("clip frame")).toBeInTheDocument();
-    expect(within(queue).getByText(/LinkedIn · clip 0:12–0:47/)).toBeInTheDocument();
+    // W1: the platform is a real MARK (name on its title); the clip window
+    // still rides the format word exactly as the sheet writes it.
+    expect(within(queue).getByText(/clip 0:12–0:47/)).toBeInTheDocument();
+    expect(within(queue).getAllByTitle("LinkedIn").length).toBeGreaterThan(0);
   });
 });

@@ -19,18 +19,87 @@ export interface QueueItem {
 }
 
 export type QueueSort = "newest" | "oldest";
-export type QueueFilter = "all" | "waiting" | "blocked";
+
+/**
+ * The W1 sheet's state tabs (Reddit's mod queue): status filtering moved
+ * from the header picker onto the queue card as tabs with live counts, and
+ * grew the two decided states. "Waiting" is the operator's word for
+ * `queued` (judge-passed, needs you); "Approved" includes `published` —
+ * a published draft passed this gate and its pill still says Published.
+ * States outside the five tabs (`judging`, `generated`) show under All only.
+ */
+export type QueueFilter = "all" | "waiting" | "blocked" | "approved" | "rejected";
 
 /** The sheet's picker copy — the visible label of each option. */
 export const SORT_OPTIONS: ReadonlyArray<{ value: QueueSort; label: string }> = [
   { value: "newest", label: "Newest first" },
   { value: "oldest", label: "Oldest first" },
 ];
-export const FILTER_OPTIONS: ReadonlyArray<{ value: QueueFilter; label: string }> = [
-  { value: "all", label: "All drafts" },
+export const QUEUE_TABS: ReadonlyArray<{ value: QueueFilter; label: string }> = [
+  { value: "all", label: "All" },
   { value: "waiting", label: "Waiting" },
   { value: "blocked", label: "Blocked" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
 ];
+
+function matchesFilter(draft: GridDraft, filter: QueueFilter): boolean {
+  switch (filter) {
+    case "all":
+      return true;
+    case "waiting":
+      return draft.status === "queued";
+    case "blocked":
+      return draft.status === "blocked";
+    case "approved":
+      return draft.status === "approved" || draft.status === "published";
+    case "rejected":
+      return draft.status === "rejected";
+  }
+}
+
+/** Every tab's live count over the UNFILTERED queue — the `.qtab .n` numbers. */
+export function queueTabCounts(items: QueueItem[]): Record<QueueFilter, number> {
+  const counts: Record<QueueFilter, number> = { all: 0, waiting: 0, blocked: 0, approved: 0, rejected: 0 };
+  for (const { draft } of items) {
+    for (const tab of QUEUE_TABS) {
+      if (matchesFilter(draft, tab.value)) counts[tab.value] += 1;
+    }
+  }
+  return counts;
+}
+
+/**
+ * The header's second picker (the W1 sheet's "All families"): the content
+ * FAMILY lens, keyed on the draft's format in the engine's own vocabulary —
+ * social platform drafts (plain posts + clip plans), site articles, outreach
+ * email, and the video-arc artifacts (storyboard / direction doc / demo plan).
+ */
+export type QueueFamily = "all" | "social" | "page" | "email" | "video";
+
+export const FAMILY_OPTIONS: ReadonlyArray<{ value: QueueFamily; label: string }> = [
+  { value: "all", label: "All families" },
+  { value: "social", label: "Social" },
+  { value: "page", label: "Articles" },
+  { value: "email", label: "Email" },
+  { value: "video", label: "Video" },
+];
+
+export function familyOf(draft: GridDraft): Exclude<QueueFamily, "all"> {
+  switch (draft.format) {
+    case "web_page":
+      return "page";
+    case "outreach_email":
+      return "email";
+    case "storyboard":
+    case "direction_doc":
+    case "demo_plan":
+      return "video";
+    default:
+      // A plain post (format null) or a clip plan — a social platform draft.
+      return "social";
+  }
+}
 
 /** Waiting on the operator = judge-passed (queued) or judge-blocked. */
 export function isWaiting(draft: GridDraft): boolean {
@@ -91,6 +160,9 @@ export function statusPill(status: string): { word: string; cls: string } {
       return { word: "Approved", cls: "pill-ok" };
     case "published":
       return { word: "Published", cls: "pill-ok" };
+    case "rejected":
+      // The W1 sheet draws Rejected as the BARE pill — decided, quiet, no channel.
+      return { word: "Rejected", cls: "" };
     default:
       return { word: status.charAt(0).toUpperCase() + status.slice(1), cls: "pill-idle" };
   }
@@ -201,15 +273,53 @@ export function formatStamp(iso: string, now: Date = new Date()): string {
 
 /**
  * The operator's view over the flat queue (founder s66): NEWEST first by
- * default, with the sort switchable and a status filter — presentation
- * only, the stored list stays the stable ascending flatten.
+ * default, with the sort switchable, the state tabs (W1), and the family
+ * picker — presentation only, the stored list stays the stable ascending
+ * flatten.
  */
-export function applyQueueView(items: QueueItem[], sort: QueueSort, filter: QueueFilter): QueueItem[] {
-  const filtered =
-    filter === "all"
-      ? items
-      : items.filter((i) => (filter === "waiting" ? i.draft.status === "queued" : i.draft.status === "blocked"));
+export function applyQueueView(
+  items: QueueItem[],
+  sort: QueueSort,
+  filter: QueueFilter,
+  family: QueueFamily = "all",
+): QueueItem[] {
+  const filtered = items.filter(
+    (i) => matchesFilter(i.draft, filter) && (family === "all" || familyOf(i.draft) === family),
+  );
   return sort === "oldest" ? filtered : [...filtered].reverse();
+}
+
+/* ── Run groups (the W1 sheet's `.run-hd` band — Deel's batch-verb-with-count) ── */
+
+export interface RunGroup {
+  run: FeedRun;
+  items: QueueItem[];
+}
+
+/**
+ * CONSECUTIVE view rows sharing a run become one group — the view's order
+ * is the truth, never re-sorted for grouping, so a run whose drafts
+ * interleave with another's under a sort honestly appears twice.
+ */
+export function groupByRun(view: QueueItem[]): RunGroup[] {
+  const groups: RunGroup[] = [];
+  for (const item of view) {
+    const last = groups[groups.length - 1];
+    if (last && last.run.id === item.run.id) last.items.push(item);
+    else groups.push({ run: item.run, items: [item] });
+  }
+  return groups;
+}
+
+/**
+ * The group band's copy — "Run · 4 Jul, 09:00 · 2 drafts". The sheet's
+ * fixture also names the run's subject ("launch video"); no read exposes a
+ * run's source subject yet, so the band carries what IS on the wire rather
+ * than an invented word (the "diff not on the wire" precedent).
+ */
+export function runGroupLabel(group: RunGroup): string {
+  const n = group.items.length;
+  return `Run · ${formatStamp(group.run.createdAt)} · ${n} draft${n === 1 ? "" : "s"}`;
 }
 
 /**

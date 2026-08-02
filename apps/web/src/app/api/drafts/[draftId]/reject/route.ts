@@ -14,8 +14,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ dra
     typeof body === "object" && body !== null && typeof (body as { actor?: unknown }).actor === "string"
       ? (body as { actor: string }).actor
       : undefined;
+  // The operator's stated reason (s90 window): present ⇒ the rejection is a
+  // correction and lands an eval_cases row in the same transaction. The
+  // repo trims and treats blank as absent — no policing here.
+  const reason =
+    typeof body === "object" && body !== null && typeof (body as { reason?: unknown }).reason === "string"
+      ? (body as { reason: string }).reason
+      : undefined;
   try {
-    const result = await rejectDraft(repos, ctx, draftId, actor);
+    const result = await rejectDraft(repos, ctx, draftId, actor, reason);
     return NextResponse.json(result);
   } catch (err) {
     return toErrorResponse(err);

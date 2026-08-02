@@ -176,10 +176,22 @@ export function DraftCard({
   return (
     <section className="card" aria-label="Draft detail" style={CARD_STYLE}>
       <div className="card-head">
-        <span className={`pill ${pill.cls}`}>{pill.word}</span>
+        <span className={pill.cls ? `pill ${pill.cls}` : "pill"}>{pill.word}</span>
         <span className="t-title">{`${platformLabel(draft.platform)} draft · ${formatWord(draft)}`}</span>
         {window_ && <span className="t-label">{window_}</span>}
         <div style={{ flex: 1 }} />
+        {/* The sheet's Composer re-entry door, drawn at full fidelity but
+            RESTING UNARMED with its reason (the Runs-Retry precedent): the
+            Composer route is B-create.4, queued behind the W2 verdict — the
+            href arms when the route exists, and until then the door says so
+            rather than 404ing. */}
+        <span
+          className="card-link door-unarmed"
+          title="the Composer route lands with the Create build (B-create.4) — this door arms then"
+          aria-disabled="true"
+        >
+          Open in Composer →
+        </span>
         <span className="t-data" title={`Deep link · draft ${draft.id}`}>
           #{draft.id.slice(0, 8)}
         </span>
@@ -402,14 +414,38 @@ export function DraftCard({
           </>
         ) : (
           <>
+            {/* The W1 grammar (Plain): every verb carries its key INLINE on
+                the control — the footer legend orients, the button itself
+                teaches. */}
+            {/* The inline key hint is visual (aria-hidden) so the button's
+                accessible name stays the verb; the shortcut reaches AT via
+                aria-keyshortcuts instead. */}
             {canApproveReject && (
-              <button type="button" className="btn btn-primary" onClick={onApprove} disabled={busy}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                aria-keyshortcuts="a"
+                onClick={onApprove}
+                disabled={busy}
+              >
                 Approve
+                <span className="kbd" aria-hidden>
+                  a
+                </span>
               </button>
             )}
             {canEdit && (
-              <button type="button" className="btn btn-ghost" onClick={startEdit} disabled={busy}>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                aria-keyshortcuts="e"
+                onClick={startEdit}
+                disabled={busy}
+              >
                 Edit
+                <span className="kbd" aria-hidden>
+                  e
+                </span>
               </button>
             )}
             {canReJudge && (
@@ -443,8 +479,21 @@ export function DraftCard({
             </span>
             <div style={{ flex: 1 }} />
             {canApproveReject && (
-              <button type="button" className="btn btn-danger" onClick={onReject} disabled={busy}>
+              <button
+                type="button"
+                className="btn btn-danger"
+                // The sheet says "reason required"; the seat's own semantics
+                // are richer — a stated reason becomes the eval row, a blank
+                // one is a bare decision. The title tells the truth.
+                title="asks for your reason — it becomes the eval row; blank rejects without one"
+                aria-keyshortcuts="r"
+                onClick={onReject}
+                disabled={busy}
+              >
                 Reject…
+                <span className="kbd" aria-hidden>
+                  r
+                </span>
               </button>
             )}
           </>
