@@ -192,6 +192,25 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s93 — **CLOSED** (boot 2026-08-02 "gogogo + Mobbin re-check directive"; wrap = this session's verify)
+
+**Two founder directives this session, both delivered lead-direct:** (1) *"use
+mobbin-mcp to re-check and adjust any UX/UI as needed to ensure the surfaces you
+made are indeed world class"* → the re-check pass; (2) *"continue with the plan
+you had for this session too"* → the stamped B-create.4 remainder. Plus one ask:
+verify the staging preview is reachable.
+
+| track | outcome |
+|---|---|
+| Mobbin re-check (all six built surfaces, live renders dark+light) | **DONE (`7a8ba72`)** — record: `ux-refinement-program.md` §s93 re-check. 24 fresh references; four surfaces validated with rejects recorded; **two live defects found by the pass and fixed with test rows**: raw-hour ages ("380h" hid sixteen days — `waitLabel` shared day-rollover at 48h, the 26h-not-1d decision preserved below it) + Approve's singular scope note ("1 staged draft advanceS through ITS own flow"). Composer's populated state stays honestly uncheckable behind the first-real-run gate. |
+| Create home rebuild (B-create.4 remainder, lead-direct) | **SHIPPED** — `/app/create` rebuilt exact-mock to the s90b ask-card sheet (headline at 172 · card 740 · recent-line 916, probed): ONE centered ask-card with controls in its own bottom row, run-line of REAL facts with the s90a plan card as its expanded keeper state (s74 shape), sugg chips = real Intel picks riding the existing `?ctx=` spine (empty/failed reads say so), recent-line = the real feed's newest run with its Composer door. Old prompt-hero/two-card layout DELETED. 26 tests, every honesty pin carried over. |
+| Create wizard build (B-create.3's sheet made real) | **SHIPPED** — `/app/create/guided` exact-mock to the s90b-amended sheet: accordion slots (What → Platforms → Sources & media → Review plan), **platform chips carry `deriveCreatePlan`'s own verdicts** via new pure `POST /api/create/plan` (R3 — live render: TikTok "connect to publish", refusal verbatim on the title), Review = the derived plan (refusals verbatim · real judge gates · cost honesty incl. `unestimated` words), **Generate → new `POST /api/create` → `runCreate`** with the founder's sequence gate enforced SERVER-side (executable ratchet: `api/create/route.test.ts` pins post/page → 409 verbatim) — success doors to the run's Composer. Media dialog = STATED deferral (lands with the media pass), never a dead button. Brief tucked behind its line (s90b amendment honored). 13 surface tests + 4 route-gate tests. |
+| staging probe (founder ask) | **ALL REACHABLE** — `preview.swordfish.cfd` landing + `/app` + rebuilt surfaces all 200 behind the edge basic-auth (401 without it — the stealth posture working); **staging carries the s92 code** (auto-deploy fired: `/app/board` 404s as deleted, board toggle + Composer routes serve). No swordfish coordination needed. |
+
+**DEFERRED, stated:** Sites + Library rebuilds (the `/app/transcription`
+retirement) — W2-VERDICTED, next build session's first item. B-create.5 dogfood
+(the first real Create run) remains the populated-state visual gate everywhere.
+
 ## Sprint 9 / s92 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap verify exit 0, **3227 passed / 9 skipped**, 0 lint errors — the literal single-lane run, dev server stopped)
 
 **The s91-stamped parallel plan ran EXACTLY as written, founder-hands-free

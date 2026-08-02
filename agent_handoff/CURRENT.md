@@ -2,162 +2,135 @@
 
 ## Stamp
 
-2026-08-02 (session 92, syd4 — **zero credit spend, zero posts, zero founder
-hands**). **s92 booted on "gogogo" alone and ran the s91-stamped parallel
-plan exactly as written: the `analytics` lane LAUNCHED at the boot (GO was
-on record) and MERGED at the lead's gate · the PIPELINE BOARD wired as the
-Dashboard toggle's state with `/app/board` DELETED in the same change ·
-B-create.4's CORE shipped — the Composer route is real and Approve's
-"Open in Composer" door is ARMED.** Verify on merged main at the wrap:
-**exit 0, 3227 passed / 9 skipped (+73 over s91), 0 lint errors** — the
-literal `npm run verify`, single-lane, dev server stopped first.
-
-**No founder words this session** — none were needed: both verdicts landed
-s91b ("board approved and go analytics") and the lane's approval covered
-exactly the named run.
+2026-08-02 (session 93, syd4 — **zero credit spend, zero posts, zero founder
+hands**). Two founder directives ran this session: **the Mobbin re-check pass
+over all six built surfaces** ("ensure the surfaces that you made are indeed
+world class design") and **the stamped s93 plan** ("continue with the plan you
+had for this session too") — the B-create.4 remainder shipped: **Create home
+rebuilt to the s90b ask-card sheet + the wizard built at `/app/create/guided`,
+both exact-mock, lead-direct.** Plus his staging ask answered: **preview
+reachable, carrying the s92 code.** Verify on main at the wrap: **exit 0,
+3251 passed / 9 skipped (+24 over s92), 0 lint errors** — the literal
+`npm run verify`, single-lane, dev server stopped first.
 
 ## WHAT SHIPPED
 
-**ANALYTICS LANE MERGED** (3 commits + wrap, ff after clean rebase; lane
-suite 154 files / 1350 green capped): read-only **`/api/analytics`** over
-the existing `analyticsReadModel` · exact-mock **`/app/analytics`**
-(scoped `analytics.css`; on live dev data every absence word renders
-verbatim — X **deferred** (the s87 cost ruling structural on a surface),
-LinkedIn **partner-gated**, Bluesky **no impressions in the API**; tiles/
-chart/hour-box honestly empty until the metrics tick runs) · the rail
-entry after Schedule. **Deliverable 1 delivered:** the Facebook fixture
-derivation (`WRAP-analytics.md` §1) — the LEAD applied the sheet amendment
-at the gate (`Analytics.dc.html` header records `post_media_view` /
-`post_total_media_view_unique` provenance truth; drawn values stand).
-Lead gate passed dark+light on real data. Boundary exception accepted
-(three additive one-line shell edits; the kickoff's nav ground truth was
-stale — my authorship, noted).
+**MOBBIN RE-CHECK (`7a8ba72`; record = `ux-refinement-program.md` §s93
+re-check):** 24 fresh references against the LIVE renders (dark+light, real
+dev data). Dashboard/Board/Approve/Runs/Analytics **validated** — rejects
+recorded (greeting personas · selection-bulk · duration-trend-on-n=2 ·
+Dub/Ghost's real-reading zeros = the rule-5 anti-pattern shipped at scale).
+**Two live defects found and fixed with test rows:** raw-hour ages
+("oldest has waited 380h" hid sixteen days) → shared `waitLabel()` rolls to
+days at 48h, the recorded 26h-not-1d decision preserved below it (dashboard
+tile · board cards · week-card wait lane); Approve's scope-note singular
+("1 staged draft advance**s** through **its** own flow"). Composer's populated
+state stays honestly uncheckable behind the first-real-run gate.
 
-**PIPELINE BOARD WIRED + ROUTE DELETED (`d357233`, one change per the
-ruling):** Home's Board state at **`/app?view=board`** (view resolved
-server-side — a measured hydration mismatch fixed at the page, not
-patched) — loop-order columns over real reads: Intel picks (**new
-read-only `/api/intel/picks`** over `trend_promote` captures), Generating
-(both run reads + drafting drafts, real elapsed), At the judge (gates
-n/m), In Approve (warn dress, the pulse's needs-you number, ✓/✗ judge
-chips, blocked reason VERBATIM in `.k-reason`), Scheduled (slots +
-approved-unplanned "ready to plan"), Published (newest first, view-live
-only with a deploy ref). **Feet = the day's recorded stage crossings,
-"–" where no read carries the instant** (picks-out, scheduled-in — model
-doc states the math). Probed: six feet ONE aligned row at 916 ≤ 940.
-`components/board/**` + the route deleted; s77 knobs stay retired (the
-verdicted sheet: cards + seg are the only interactables). Light register
-via `light-dark()` — the css scope ratchet rejected an ancestor selector,
-correctly. 27 pins.
+**CREATE HOME REBUILT (`cf5a0c0`):** `/app/create` = the s90b ask-card
+exact-mock — headline question · ONE centered 740px ask-card (family seg ·
+pick-chip · Start guided · Generate in its own bottom row) · run-line of REAL
+facts (profile platforms + version · every gate on · the family's true word)
+whose expanded state = the kept s90a plan card (s74 keeper shape) · sugg chips
+= REAL Intel picks through the existing `?ctx=` spine (empty/failed reads say
+so) · recent-line = the feed's newest run with its Composer door. Old
+prompt-hero/two-card layout DELETED. Probed: headline at 172 · recent-line
+bottom 916 ≤ 940 (the sheet's own measure). 26 tests, every honesty pin
+carried (unread≠empty · doors only where they exist).
 
-**COMPOSER ROUTE — B-create.4 CORE (`c6a8dd9`):**
-**`/app/create/run/[runId]`** exact-mock from the s90c sheet — zones
-named on-surface · provenance src-line (only wire facts) · judge verdict
-strip with the quoted hit marked IN the body (no parseable term = no
-mark, never a guess) · click-to-edit body, **Save re-judges** (existing
-edit door) · **AI edit armed**: new `/api/drafts/[id]/ai-edit` +
-`/ai-edit/apply` over the create-shells engine verbs (propose → judge →
-apply; refusal VERBATIM at the control; stale-proposal refusal = the
-divergence model visible) · full-fidelity preview (real feed-cut line
-from the fit read, per-platform action rows, honesty caveat) ·
-schema-generated settings rail (firstComment only where the platform
-declares it; "More settings · N" counts real remaining fields) · HOW IT
-SHOULD DO (real discoverability from `meta.targetTerms` · suggested slot
-from the fit read · forecast = the honest D2 deferral) · fit band =
-each variant's own counter WITH its refusal verbatim. The run read
-resolves a CHILD id, so **Approve's door arms** and a pre-Create run
-lands on "predates Create" in words + a door back. 29 tests.
-**Deliberately unbuilt, stated:** Expand popout (pass 3) · media tools ·
-first-comment arming · per-run models/profile provenance (not on the wire).
+**CREATE WIZARD BUILT (same commit):** `/app/create/guided` = the s90b-amended
+sheet exact-mock — accordion slots (What → Platforms → Sources & media →
+Review plan), brief TUCKED behind its line. **Platform chips carry
+`deriveCreatePlan`'s OWN verdicts** via new pure **`POST /api/create/plan`**
+(R3 refusals-before-spend; live render: TikTok "connect to publish", verbatim
+refusal on the title). Review = the derived plan (refusals verbatim · real
+judge gates g1/g3_screen/g3_final · cost honesty incl. `unestimated` words).
+**Generate → new `POST /api/create` → `runCreate`** — the founder's sequence
+gate enforced SERVER-side (`lib/create/families.ts` read at the route;
+executable ratchet `api/create/route.test.ts` pins post/page → 409 verbatim);
+success doors to `/app/create/run/[runId]`. **Media dialog = STATED deferral**
+(lands with the media pass) — a fact line, never a dead button. 13 surface
+tests + 4 route-gate tests.
 
-**MERGE-GATE CLOSES (`187289e`):** Schedule rail icon rekeyed
-(Calendar→Schedule — the lane's G2, visible in this session's own board
-screenshots) · the sheet amendment · workspace spec Board row → the
-retirement. **The spec-ground-truth ratchet FIRED on the deleted route
-exactly as designed** — answered by correcting the spec.
+**STAGING (his ask):** `preview.swordfish.cfd` — 401 without edge auth (the
+stealth posture working), 200 with it on landing + `/app` + approve +
+analytics; **auto-deploy has staging on s92 code** (`/app/board` 404s as
+deleted, board toggle + Composer routes serve). The s93 builds roll with the
+next deploy. No swordfish coordination was needed.
 
-## Resume prompt (session 93, syd4)
+## Resume prompt (session 94, syd4)
 
-**Resume · Thalon** — s92 merged the analytics lane, wired the pipeline
-board (route deleted), and armed the Composer. **Nothing awaits a
-verdict** — everything below is already W2-VERDICTED; s93 is a build
-session:
+**Resume · Thalon** — s93 ran the Mobbin re-check (2 fixes, 4 surfaces
+validated) and shipped the Create home + wizard rebuilds. **Nothing awaits a
+verdict.** s94 is a build session:
 
-1. **B-create.4 remainder, lead-direct:** Create home rebuild to the s90b
-   ask-card sheet (`Create.dc.html`) + the wizard build
-   (`Create Wizard.dc.html` — accordion focus, brief tucked, capability
-   on chips before spend, honest PENDING plan region). Existing surface:
-   `components/create/` (replace per DOCTRINE 0); engine doors:
-   `/api/create/video|email` exist — re-ground what starts a POST-family
-   run before wiring Generate (rule 12).
-2. **Sites + Library rebuilds** (the `/app/transcription` retirement rides
-   Library's) — sheets verdicted s91.
-3. **Composer follow-ons stay gated:** popout = pass 3 · media tools =
-   media pass · first-comment = queue settings seat · G1 (read-model
-   second series) = D2.
+1. **Sites + Library rebuilds, lead-direct** (the `/app/transcription`
+   retirement rides Library's) — sheets W2-VERDICTED s91; existing surfaces
+   `components/sites/` + `components/transcription/` replace per DOCTRINE 0.
+2. **B-create.5 dogfood stays the gate** for every populated state (Composer ·
+   Runs create-parent grammar · Analytics bands · the wizard's real run) — a
+   real Create run, bluesky test grant; never seed fake runs to screenshot.
+3. **Composer follow-ons stay gated:** popout = pass 3 · media tools = media
+   pass (the wizard's Select-media line arms then too) · first-comment = queue
+   settings seat · G1 = D2.
 
-**Read first:** CLAUDE.md → this file → COORDINATION §s92 →
-`docs/create-engine/spec.md` → the W2 sheets →
-`agent_handoff/lanes/WRAP-analytics.md` (G1/G2 + divergences) → runway §9.
+**Read first:** CLAUDE.md → this file → COORDINATION §s93 →
+`docs/research/ux-refinement-program.md` (§s93 re-check + rows 5/6) →
+`docs/create-engine/spec.md` §Routes → runway §9.
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
-▎ ▸ **⛔ HIS s90 CONSTRAINT: no console visits this week** (dated
-2026-08-01 — re-test, don't assume expired). Console batch stays PARKED on
-NEEDS-STEVEN.
-▎ ▸ **The first real Create run (B-create.5 dogfood) is the visual gate**
-for the Composer's populated state AND Runs' create-parent grammar AND
-Analytics' populated bands — dev truthfully renders empty/predates-Create
-everywhere until then. Don't seed fake create runs to screenshot.
-▎ ▸ **`/app/board` is GONE; the board is `/app?view=board`** (spec §5.9
-row updated; the ground-truth ratchet guards the spec now).
-▎ ▸ **The s90 windows stay frozen** — s92 touched neither packages/db nor
-packages/contracts (every new route reads existing repos; the lane was
-read-only against the engine).
-▎ ▸ **impeccable hook notes:** composer.css joins approve.css/runs.css as
-SHEET-VERBATIM ports (DOCTRINE 0) — radius/font findings intentional, not
-suppressed; don't "fix" them.
+▎ ▸ **⛔ HIS s90 CONSTRAINT: no console visits this week** (dated 2026-08-01 —
+re-test, don't assume expired). Console batch stays PARKED on NEEDS-STEVEN.
+▎ ▸ **The wizard's Generate spends when clicked** (metered judge calls ride
+every dispatch) — it is door-gated and plan-previewed, but a LIVE click is a
+real run; the s93 gate was verified with faked dispatch in tests, zero spend.
+▎ ▸ **The s90 windows stay frozen** — s93 touched neither packages/db nor
+packages/contracts (both new routes read existing engine seams; the plan
+route is pure).
+▎ ▸ **impeccable hook notes:** create.css + wizard.css join the SHEET-VERBATIM
+ports (DOCTRINE 0) — radius/font findings intentional, not suppressed.
 ▎ ▸ **Dev server stopped at wrap**; 8899 preview + sweeper user units keep
 running — NEVER hand-start the sweeper.
 ▎ ▸ **Traps worth keeping:** Bash cwd PERSISTS (`git -C`/absolute paths) ·
-`npx vitest run -w <pkg>` is `--watch` · vitest doesn't typecheck (run
-`npx tsc --noEmit -p apps/web`) · `pgrep -f` self-matches its own shell
-wrapper (probe ports, not process names) · lanes cap vitest at
-`--maxWorkers=2`; the lead runs the literal verify single-lane.
-▎ ▸ **⛔ SEQUENCE GATE unchanged:** bluesky armed for testing on his
-recorded words; every other platform per-platform + per-post GO; queue
-consumer's key EMPTY; youtube CANNOT arm (test-pinned). **Nothing posted.
-Zero credits spent.**
+`npx vitest run` has NO `--project web` (path filters work) · vitest doesn't
+typecheck (`npx tsc --noEmit -p apps/web`) · theme = localStorage
+`thalon-workspace-mode` (default dark — flip it for light shots, not
+prefers-color-scheme) · react-hooks/set-state-in-effect is a lint ERROR: use
+the stamped-key derived-loading pattern (wizard-surface shows it).
+▎ ▸ **⛔ SEQUENCE GATE unchanged AND now executable:** post/page generation
+409s at `POST /api/create` until his GO (flip `lib/create/families.ts`, retire
+the two route-test pins with it); bluesky armed for testing on his recorded
+words; queue consumer's key EMPTY; youtube CANNOT arm. **Nothing posted. Zero
+credits spent.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · design lead-direct ·
-every lane/subagent launch needs fresh founder approval (a texted GO
-suffices) · GATE ON EXIT CODE · verify-on-main = THE gate, re-run after
-your LAST commit · rules 10/11/12 · platform logins live durably in
-`.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (this wrap) · staging on s85 code (the W1/W2
-builds + board + analytics + composer all roll with the next deploy) ·
-four social channels connected · previews auto-deploy ARMED · dev PG live ·
-analytics worktree GC'd.
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and
-pushed; s93 boots on "gogogo" alone (this file carries the whole plan; no
-verdicts are open, so no re-asks).
+every lane/subagent launch needs fresh founder approval · GATE ON EXIT CODE ·
+verify-on-main = THE gate, re-run after your LAST commit · rules 10/11/12 ·
+platform logins live durably in `.context` · no AGPL embedded · wrap =
+verify+commit+push+restamp.
+▎ ▸ **State:** main = origin (this wrap) · staging on s92 code, s93 rolls with
+the next auto-deploy · four social channels connected · dev PG live · edge
+auth creds = `.context/staging-secrets-from-swordfish.md`.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
+s94 boots on "gogogo" alone (this file carries the whole plan; no verdicts
+are open).
 
 ## Pointer
 
-CLAUDE.md → this file → COORDINATION.md (§s92) → `docs/workspace/spec.md`
+CLAUDE.md → this file → COORDINATION.md (§s93) → `docs/workspace/spec.md`
 → `docs/create-engine/spec.md` → `docs/research/ux-refinement-program.md`
 → NEEDS-STEVEN.md (PARKED header) →
 `docs/research/prior-art-portal-automation-s84.md` (BEFORE ANY PORTAL WORK).
 
-## Delta (session 91)
+## Delta (session 92)
 
-s91 banked the W2 verdict, drew the pipeline board, and shipped the three
-W1 builds; its post-wrap text banked both remaining verdicts. s92 spent
-them exactly as stamped: the lane launched at the boot and merged at the
-gate, the board wired as the toggle's state with the route deleted in the
-same change, and the Composer went from a drawn sheet with an unarmed
-Approve door to a live route with the AI-edit verbs finally doored. The
-only deferrals are the stated s93 builds (Create home · wizard · Sites ·
-Library) and the gated Composer follow-ons — all behind gates that
-already exist, none behind him.
+s92 merged the analytics lane, wired the pipeline board and armed the
+Composer; it deferred the Create home + wizard builds to s93 with the sheets
+already verdicted. s93 spent exactly that: the re-check directive first (the
+founder's world-class bar applied to what was already built — two real
+defects surfaced by looking, both fixed with tests), then the two builds, and
+the wizard closed the loop the spec drew — brief → derived plan → gated run →
+the Composer. What remains is the stated s94 pair (Sites · Library) and the
+dogfood run that lights every populated state.
