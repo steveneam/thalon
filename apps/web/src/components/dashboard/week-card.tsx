@@ -270,16 +270,21 @@ export function WeekCard({
           {view === "today" && waitLane.length > 0 && (
             <div className="wd-wait">
               <span className="wd-wait-gut">waiting</span>
-              {waitLane.slice(0, WAIT_LANE_BOUND).map((event) => (
-                <Link
-                  key={event.id}
-                  href={event.href ?? "/app/approve"}
-                  className="wd-wait-chip"
-                  title={`started waiting before this week — ${waitLabel(event.hours)}, so it has no place on today's clock`}
-                >
-                  {event.lead} · {waitLabel(event.hours)} →
-                </Link>
-              ))}
+              {waitLane.slice(0, WAIT_LANE_BOUND).map((event) => {
+                // An event without a recorded wait states no age — never "undefinedh".
+                const wait = typeof event.hours === "number" ? waitLabel(event.hours) : null;
+                return (
+                  <Link
+                    key={event.id}
+                    href={event.href ?? "/app/approve"}
+                    className="wd-wait-chip"
+                    title={`started waiting before this week${wait ? ` — ${wait}` : ""}, so it has no place on today's clock`}
+                  >
+                    {event.lead}
+                    {wait ? ` · ${wait}` : ""} →
+                  </Link>
+                );
+              })}
               {waitLane.length > WAIT_LANE_BOUND && (
                 // A count is not a door (the calendar's own ruling): the
                 // remainder gets the queue that holds all of it.

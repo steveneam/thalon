@@ -1,0 +1,180 @@
+/*
+ * Create wizard — the surface's own atomics, PORTED 1:1 from the helmet
+ * <style> of docs/research/mock-sheets/Create Wizard.dc.html (DOCTRINE 0;
+ * the s90b amendment: single centered accordion, brief tucked). Shared
+ * classes (.card, .btn, .pill, .seg, .excerpt, .thumb-sm, type roles) come
+ * from workspace.css.
+ *
+ * EVERY RULE IS SCOPED UNDER `.wizard-surface` — the cross-lane contract
+ * (mock-sheets README): sheet helmets reuse class names with different
+ * values across sheets.
+ *
+ * The sheet's `.avatar` is already shared in workspace.css — not duplicated.
+ */
+
+.wizard-surface .wiz-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 34px;
+  gap: 14px;
+  min-height: 0;
+}
+.wizard-surface .wiz-card {
+  width: 780px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.wizard-surface .brief-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--n-900);
+  cursor: pointer;
+}
+.wizard-surface .brief-line .chev {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--n-800);
+  border-bottom: 1.5px solid var(--n-800);
+  transform: rotate(45deg) translateY(-2px);
+}
+.wizard-surface .slot { border-top: 1px solid var(--n-400); }
+.wizard-surface .slot:first-child { border-top: none; }
+.wizard-surface .slot-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+.wizard-surface .slot-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--n-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-family: var(--font-data);
+  color: var(--n-900);
+  flex: none;
+}
+.wizard-surface .slot-num.done { border-color: var(--ok); color: var(--ok); }
+.wizard-surface .slot-num.now {
+  border-color: var(--act);
+  color: var(--act-text);
+  background: var(--act);
+}
+.wizard-surface .slot-title { font-size: 13.5px; font-weight: 600; }
+.wizard-surface .slot-sum {
+  font-size: 12px;
+  color: var(--n-900);
+  padding: 0 16px 12px 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.wizard-surface .slot-body {
+  padding: 2px 16px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wizard-surface .plat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--n-500);
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  background: var(--n-200);
+  color: var(--n-1000);
+}
+.wizard-surface .plat-chip .cap { font-size: 10.5px; color: var(--n-800); }
+.wizard-surface .plat-chip.warn {
+  border-color: color-mix(in oklab, var(--warn) 45%, var(--n-500));
+}
+.wizard-surface .plat-chip.warn .cap { color: var(--warn); }
+.wizard-surface .role-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-data);
+}
+.wizard-surface .role-use {
+  background: var(--act-subtle);
+  color: var(--act-text2, var(--n-1000));
+  border: 1px solid var(--act);
+}
+.wizard-surface .role-ref {
+  background: var(--n-200);
+  color: var(--n-900);
+  border: 1px dashed var(--n-600);
+}
+.wizard-surface .att {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--n-bg);
+  border: 1px solid var(--n-400);
+  border-radius: 8px;
+}
+.wizard-surface .pick-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.wizard-surface .pick-row .ck { color: var(--ok); font-weight: 600; }
+
+/*
+ * App adaptations (the NAMED kind — real behavior on a static sheet's
+ * chrome; each keeps the 1440×940 render indistinguishable):
+ *  - slot heads are real <button>s (they open their slot) — reset to the
+ *    sheet's row look, full width so the whole head is the target;
+ *  - .brief-line is a real <button> too (it toggles the brief record);
+ *  - the What slot's brief is a real <textarea> in the slot's own body
+ *    grammar (border/background from .att's family);
+ *  - the surface root is a flex column so the sheet's .content flex flows.
+ */
+.wizard-surface { display: flex; flex-direction: column; }
+.wizard-surface button.slot-head {
+  background: none;
+  border: none;
+  font: inherit;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+}
+.wizard-surface .slot > button.slot-head { border-top: none; }
+.wizard-surface button.brief-line { background: none; border: none; font: inherit; padding: 0; }
+.wizard-surface textarea.wiz-brief {
+  width: 100%;
+  display: block;
+  background: var(--n-bg);
+  border: 1px solid var(--n-400);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--n-1000);
+  min-height: 64px;
+  resize: vertical;
+}
+.wizard-surface textarea.wiz-brief:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.wizard-surface .plat-chip.off { opacity: 0.45; }
+.wizard-surface button.plat-chip { cursor: pointer; font: inherit; }
+.wizard-surface .brief-pop { width: 780px; }

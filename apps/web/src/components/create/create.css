@@ -1,53 +1,119 @@
 /*
  * Create — the surface's own atomics, PORTED 1:1 from the helmet <style> of
  * docs/research/mock-sheets/Create.dc.html (DOCTRINE 0: the sheet is the
- * blueprint). Shared classes (.card, .row, .pill, .seg, .btn, .thumb-sm,
- * .excerpt, type roles) come from workspace.css — that file is the shell
- * contract and is not edited from here.
+ * blueprint; REDRAWN s90b to the ask-card pattern, built s93). Shared classes
+ * (.card, .pill, .seg, .btn, type roles) come from workspace.css — that file
+ * is the shell contract and is not edited from here.
  *
  * EVERY RULE IS SCOPED UNDER `.create-surface` — the cross-lane contract
- * (stated in the mock-sheets README, found at the s74 merge gate). The mock's
- * helmets reuse class names across sheets with DIFFERENT values, so an
- * unscoped surface stylesheet silently restyles its neighbours the moment
- * both land. The live example: `.prompt-box` is 16px padding / 15px type
- * here and 13px 16px / smaller type in Sites.dc.html. Same name, different
- * surface, different rule — scoping is what makes the sheets composable.
+ * (mock-sheets README): the mock's helmets reuse class names across sheets
+ * with DIFFERENT values, so an unscoped surface stylesheet silently restyles
+ * its neighbours the moment both land.
  *
  * The sheet's helmet also declares `.avatar`; it is already shared in
- * workspace.css (identical in 15 of the 16 sheets), so it is deliberately
- * NOT duplicated here.
+ * workspace.css, so it is deliberately NOT duplicated here.
  */
 
-.create-surface .prompt-hero {
+.create-surface .ask-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 96px;
+  gap: 18px;
+}
+.create-surface .ask-h {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.create-surface .ask-card {
+  width: 740px;
   border: 1px solid var(--n-500);
   background: var(--n-100);
   border-radius: 14px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
-.create-surface .prompt-box {
-  background: var(--n-bg);
-  border: 1px solid var(--n-400);
-  border-radius: 10px;
-  padding: 16px;
+.create-surface .ask-box {
+  padding: 18px 20px 10px;
   font-size: 15px;
-  color: var(--n-1000);
-  min-height: 84px;
   line-height: 1.6;
+  color: var(--n-1000);
+  min-height: 76px;
 }
-.create-surface .prompt-box .ph { color: var(--n-800); }
+.create-surface .ask-box .ph { color: var(--n-800); }
+.create-surface .ask-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 12px;
+}
 .create-surface .pick-chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 7px;
+  padding: 4px 10px;
   border: 1px solid var(--n-500);
   border-radius: 8px;
   background: var(--n-200);
-  font-size: 12.5px;
+  font-size: 12px;
 }
+.create-surface .run-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--n-900);
+  cursor: pointer;
+}
+.create-surface .run-line b { font-weight: 500; color: var(--n-1000); }
+.create-surface .run-line .chev {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--n-800);
+  border-bottom: 1.5px solid var(--n-800);
+  transform: rotate(45deg) translateY(-2px);
+}
+.create-surface .sugg-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 740px;
+}
+.create-surface .sugg {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-pill);
+  background: var(--n-100);
+  font-size: 12.5px;
+  color: var(--n-1000);
+  cursor: pointer;
+  transition: border-color var(--motion-fast);
+}
+.create-surface .sugg:hover { border-color: var(--n-500); }
+.create-surface .sugg .k {
+  font-size: 10px;
+  font-family: var(--font-data);
+  color: var(--n-800);
+}
+.create-surface .recent-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--n-800);
+  margin-top: auto;
+  padding-bottom: 6px;
+}
+
 /* The chip's text doubles as the pruning disclosure — at rest it must be
    indistinguishable from the sheet's plain chip text (founder ruling s74:
    a keeper returns as a state behind the chrome, never as extra chrome). */
@@ -62,7 +128,7 @@
   text-align: left;
 }
 .create-surface .pick-panel {
-  margin-top: 10px;
+  width: 740px;
   border: 1px solid var(--n-500);
   border-radius: 10px;
   background: var(--n-100);
@@ -71,10 +137,7 @@
   flex-direction: column;
   gap: 8px;
 }
-.create-surface .pick-panel-head {
-  font-size: 12px;
-  color: var(--n-800);
-}
+.create-surface .pick-panel-head { font-size: 12px; color: var(--n-800); }
 .create-surface .pick-field {
   display: flex;
   align-items: center;
@@ -83,17 +146,9 @@
   border-top: 1px solid var(--n-300);
   font-size: 12.5px;
 }
-.create-surface .pick-field.off {
-  opacity: 0.45;
-}
-.create-surface .pick-field.off .pick-field-value {
-  text-decoration: line-through;
-}
-.create-surface .pick-field-label {
-  flex: none;
-  width: 84px;
-  color: var(--n-800);
-}
+.create-surface .pick-field.off { opacity: 0.45; }
+.create-surface .pick-field.off .pick-field-value { text-decoration: line-through; }
+.create-surface .pick-field-label { flex: none; width: 84px; color: var(--n-800); }
 .create-surface .pick-field-value {
   flex: 1;
   min-width: 0;
@@ -102,12 +157,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.create-surface .cr-grid {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 14px;
-  align-items: start;
-}
+
+/* The run-line's EXPANDED state — the s90a "This run, before it starts"
+   dl-row card, kept as the keeper behind "review or change ▸" (the sheet's
+   own note: expanded state = the s90a card, drawn properly at pass 3). */
+.create-surface .plan-pop { width: 740px; }
 .create-surface .dl-row {
   display: flex;
   align-items: baseline;
@@ -130,22 +184,37 @@
   color: var(--n-1000);
   background: var(--n-200);
 }
-.create-surface .term-chip.primary { border-color: var(--act); background: var(--act-subtle); }
 
 /*
- * App adaptations (the NAMED kind — real data is wider/longer than the
- * canvas fixture; each keeps the 1440×940 render indistinguishable):
- *  - grid children must be shrinkable or a nowrap excerpt blows out the 1fr
- *    column (the same adaptation .home-grid carries);
- *  - the prompt box is a real <textarea>: it inherits the box's type and
- *    sheds the UA chrome, nothing more.
+ * App adaptations (the NAMED kind — real behavior needs what a static canvas
+ * doesn't; each keeps the 1440×940 render indistinguishable):
+ *  - the ask box is a real <textarea> INSIDE the card: it sheds the UA chrome
+ *    and its own border/background (the card is the drawn box), nothing more;
+ *  - .run-line renders as a <button> (it toggles the plan) — reset to the
+ *    sheet's inline text look;
+ *  - .sugg renders as an <a> (a pick prefills through the ?ctx= spine) — no
+ *    underline, sheet colors; real pick titles are longer than the fixture's,
+ *    so the text cell clips at the chip (same ellipsis rule every surface
+ *    uses for real data in fixed chrome);
+ *  - the surface root must be a flex column for .recent-line's
+ *    margin-top:auto to reach the foot, exactly as .content is in the sheet.
  */
-.create-surface .cr-grid > * { min-width: 0; }
-.create-surface textarea.prompt-box {
+.create-surface { display: flex; flex-direction: column; }
+.create-surface textarea.ask-box {
   width: 100%;
   display: block;
+  background: none;
+  border: none;
   font-family: inherit;
-  resize: vertical;
+  resize: none;
 }
-.create-surface textarea.prompt-box::placeholder { color: var(--n-800); }
-.create-surface textarea.prompt-box:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.create-surface textarea.ask-box::placeholder { color: var(--n-800); }
+.create-surface textarea.ask-box:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; border-radius: 14px 14px 0 0; }
+.create-surface button.run-line { background: none; border: none; font: inherit; padding: 0; }
+.create-surface a.sugg { text-decoration: none; }
+.create-surface .sugg .sugg-t {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

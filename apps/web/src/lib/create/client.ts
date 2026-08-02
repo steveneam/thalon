@@ -72,3 +72,70 @@ export async function fetchCreateRun(
     : [];
   return { run: data.run, drafts: Array.isArray(data.drafts) ? data.drafts : [] };
 }
+
+/* ------------------------------------------------------------------ */
+/* The wizard's two doors (B-create.4 remainder).                       */
+/* ------------------------------------------------------------------ */
+
+/** One destination's verdict from plan derivation — the chip's capability fact. */
+export interface PlatformPlanWire {
+  platform: string;
+  admitted: boolean;
+  refusal?: { code: string; message: string };
+}
+
+export interface CreatePlanWire {
+  platforms: PlatformPlanWire[];
+  judgeGates: string[];
+  targetTerms: string[];
+  costPreview?: { credits?: number; meteredCalls?: number; unestimated: string[] };
+  blogMirror?: { articlePlatform: string; mirrorPlatforms: string[] };
+  family: Record<string, unknown>;
+}
+
+/** The brief as the wizard sends it — the same shape `createBriefSchema` parses. */
+export interface CreateBriefWire {
+  family: string;
+  mode: "prompt" | "wizard";
+  prompt?: string;
+  context?: Record<string, unknown>;
+  platforms?: string[];
+  sourceRefs?: string[];
+  media?: Array<Record<string, unknown>>;
+  wizard?: Record<string, unknown>;
+}
+
+async function readError(res: Response, fallback: string): Promise<string> {
+  const body = (await res.json().catch(() => null)) as { error?: string } | null;
+  return body?.error ?? fallback;
+}
+
+/** Plan preview — pure derivation, nothing spends (spec R6). */
+export async function fetchCreatePlan(brief: CreateBriefWire): Promise<CreatePlanWire> {
+  const res = await fetch("/api/create/plan", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(brief),
+  });
+  if (!res.ok) throw new Error(await readError(res, `plan preview failed: ${res.status}`));
+  return ((await res.json()) as { plan: CreatePlanWire }).plan;
+}
+
+export interface CreateRunOutcomeWire {
+  runId: string;
+  status: string;
+  dispatched: boolean;
+  children: CreateChildRefWire[];
+  failures: string[];
+}
+
+/** The run door — a refusal (sequence gate, refused plan) throws its reason verbatim. */
+export async function runCreateBrief(brief: CreateBriefWire): Promise<CreateRunOutcomeWire> {
+  const res = await fetch("/api/create", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(brief),
+  });
+  if (!res.ok) throw new Error(await readError(res, `create run failed: ${res.status}`));
+  return (await res.json()) as CreateRunOutcomeWire;
+}
