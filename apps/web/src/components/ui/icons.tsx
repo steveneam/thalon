@@ -121,6 +121,15 @@ export function IconRuns(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Analytics: the measure — four bars, the sheet's rail metaphor. */
+export function IconAnalytics(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Glyph {...props}>
+      <path d="M4.5 20v-5.5M10 20V8M15.5 20v-7.5M21 20V4.5" />
+    </Glyph>
+  );
+}
+
 /** Calendar: the month sheet. */
 export function IconCalendar(props: SVGProps<SVGSVGElement>) {
   return (

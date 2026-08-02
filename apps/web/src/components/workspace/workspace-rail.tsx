@@ -67,7 +67,7 @@ export function WorkspaceRail() {
         <BrandMark className="rail-mark" />
         <span className="rail-name">Thalon</span>
       </Link>
-      {["Home", "Intel", "Create", "Approve", "Schedule"].map(item)}
+      {["Home", "Intel", "Create", "Approve", "Schedule", "Analytics"].map(item)}
       <div className="nav-sep" />
       {["Leads", "Transcription", "Videos", "Sites", "Runs"].map(item)}
       <div style={{ marginTop: "auto" }} />

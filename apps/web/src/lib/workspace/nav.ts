@@ -1,4 +1,5 @@
 import {
+  IconAnalytics,
   IconApprove,
   IconCalendar,
   IconCreate,
@@ -18,9 +19,10 @@ import {
  * The ONE registry of workspace surfaces — the labeled side nav, the Cmd-K
  * palette, and the topbar title all route from this list so a surface can
  * never exist in one and be missing from another. Order and labels are the
- * founder-verdicted wave-0 mock's, verbatim (kickoff step 3):
- * Home · Intel · Create · Approve(count) · Schedule ┃ Leads · Transcription ·
- * Videos · Sites · Runs ┃ Profiles · Settings.
+ * founder-verdicted wave-0 mock's, verbatim (kickoff step 3), plus the D4
+ * ratified rail addition (2026-07-29 sweep — Analytics joins under Schedule):
+ * Home · Intel · Create · Approve(count) · Schedule · Analytics ┃ Leads ·
+ * Transcription · Videos · Sites · Runs ┃ Profiles · Settings.
  * Icons come from the canonical set (components/ui/icons.tsx) — one
  * metaphor per feature, everywhere.
  */
@@ -82,6 +84,17 @@ export const NAV_SURFACES: NavSurface[] = [
     icon: IconCalendar,
     hint: "The fan-out plan — what will go out, when, where",
     keywords: ["schedule", "fanout", "slots", "month", "week", "agenda", "reschedule"],
+    section: "work",
+  },
+  {
+    // s92: the D4 ratified rail — Analytics directly under Schedule, so the
+    // rail reads as the loop it is (Intel measures the market → Create →
+    // Approve → Schedule → Analytics measures us).
+    label: "Analytics",
+    href: "/app/analytics",
+    icon: IconAnalytics,
+    hint: "What YOUR posts did — reach, engagement, and the honest gaps",
+    keywords: ["metrics", "reach", "engagement", "impressions", "performance", "measure", "posts"],
     section: "work",
   },
   {

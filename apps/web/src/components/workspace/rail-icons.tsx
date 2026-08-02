@@ -51,6 +51,11 @@ export const RAIL_ICONS: Record<string, React.ReactNode> = {
       <path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" />
     </Ico>
   ),
+  Analytics: (
+    <Ico joins>
+      <path d="M2.8 13.2V9.6M6.6 13.2V5.4M10.4 13.2v-5M14.2 13.2V3.2" />
+    </Ico>
+  ),
   Leads: (
     <Ico>
       <circle cx="8" cy="5.5" r="2.5" />
