@@ -64,6 +64,33 @@
      COPY GRAMMAR: the confirm carries the ABSOLUTE time and the zone (Typefully's rule),
      never "in 3 hours". The scheduled confirmation carries Unschedule at the control, not
      only in a toast (s83b, ADOPT). Timezone rides the toolbar, always visible.
+
+     AMENDED s95 — the Schedule refinement pass (docs/schedule-refinement/spec.md;
+     fresh Mobbin pulls re-run per the s93 precedent):
+       · S1 (Later's thumbs-in-cells) was DRAWN here at pass 1 and stands — the s95
+         pull re-surfaced the same Later screen top-ranked, so the reference held.
+         DENSITY RULING settled by the pull: thumbs render at week + agenda ONLY.
+         No product found puts media in a month cell (Midday, Airtable, Toggl all
+         keep month text-only), so the month event keeps the text grammar. The gap
+         is the BUILD, not the sheet: the live CalEvent carries no media — the
+         event read widens (serializer-only, s90 windows stay frozen) and the chip
+         renders through SourceThumb's five states; a medialess draft keeps "Aa".
+       · S2 (Sprout's month event grammar), RECORDED — the month density is not a
+         drawn screen (the seg names it; the s86 build built it from this sheet's
+         vocabulary, and that precedent stands): the month mark leads with its
+         KIND colour (the three-fact split stays the organizing idea; platform-
+         colour legends stay REJECTED), the platform GLYPH rides the mark exactly
+         as the week chips' badges do, then clock + lead. Sprout's hover action
+         icons map to what a mark already is here — a door.
+       · S3 ("+N more" — the lead's s77 call, carried from README §Calendar and
+         now DRAWN): Thu 11:00 shows the concurrent cluster — a fan-out that
+         went to four platforms at one instant draws TWO chips splitting the
+         slot, the remainder behind a count that OPENS THE DAY (the legend's
+         published census counts all four). The build's month cells and
+         waiting lane already carry their counts; the WEEK TIME GRID is the
+         gap — placeColumn splits concurrent events evenly with no cap (that
+         named adaptation is SUPERSEDED): cap at 2 per instant, remainder
+         behind the count, any kind.
      View: open this file with theme.css in the same dir; helmet ~= head. -->
 <html>
   <head>
@@ -135,6 +162,9 @@
           .ev-ok b { color: var(--ok); }
           .ev.done { opacity: 0.6; }
           .ev.sel { border-color: var(--act); border-style: solid; box-shadow: 0 0 0 1px var(--act); cursor: grabbing; }
+          /* s95 · S3: the concurrent-instant overflow count — a door, not a label. */
+          .ev-more { position: absolute; left: 4px; right: 4px; border-radius: 6px; border: 1px dashed var(--n-500); background: var(--n-bg); padding: 2px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); text-align: center; cursor: pointer; }
+          .ev-more:hover { border-color: var(--n-600); color: var(--n-1000); }
           .flag { color: var(--warn); font-size: 10px; }
           .nowline { position: absolute; left: 64px; right: 0; height: 2px; background: var(--err); z-index: 3; }
           .nowline::before { content: ""; position: absolute; left: -1px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--err); }
@@ -246,7 +276,7 @@
               <div class="legend">
                 <span class="lg"><span class="lg-swatch lg-plan"></span>Planned · 3 <span class="t-label" style="font-size:11px">— won't fire</span></span>
                 <span class="lg"><span class="lg-swatch lg-queue"></span>Queued · 2 <span class="t-label" style="font-size:11px">— will fire</span></span>
-                <span class="lg"><span class="lg-swatch lg-pub"></span>Published · 2</span>
+                <span class="lg"><span class="lg-swatch lg-pub"></span>Published · 6</span>
               </div>
               <div style="flex:1"></div>
               <span class="t-label">drag to move</span>
@@ -299,6 +329,12 @@
                   <div class="ev ev-queue" style="top:418px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z"></path></svg></span></span><span class="txt"><span class="t">15:30</span><b>export-queue</b></span></div>
                 </div>
                 <div class="dcol">
+                  <!-- s95 · S3 drawn: four platforms shared one instant. Two chips
+                       split it; the count is the door to the rest — it opens the
+                       day. Nothing clips mid-word; nothing is hidden silently. -->
+                  <div class="ev done ev-ok" style="top:220px;height:40px;left:4px;right:51%"><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span></span><span class="txt"><span class="t">11:00</span><b>teaser · live ↗</b></span></div>
+                  <div class="ev done ev-ok" style="top:220px;height:40px;left:51%;right:4px"><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></span></span><span class="txt"><span class="t">11:00</span><b>teaser · live ↗</b></span></div>
+                  <div class="ev-more" style="top:263px">+2 more at 11:00 · open day</div>
                   <div class="ev ev-plan" style="top:110px;height:40px"><span class="grip">⋮⋮</span><span class="ev-media none"><span class="img">Aa</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z"></path></svg></span></span><span class="txt"><span class="t">08:30</span><b>cadence post</b></span></div>
                   <div class="slot-ghost" style="top:352px">+ schedule here · 14:00</div>
                   <div class="ev done ev-ok" style="top:456px;height:40px"><span class="ev-media"><span class="img">IMG</span><span class="badge"><svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg></span></span><span class="txt"><span class="t">16:20</span><b>Blog · live ↗</b></span></div>

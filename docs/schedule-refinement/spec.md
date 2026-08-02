@@ -1,10 +1,24 @@
 # The Schedule calendar refinement — plan + spec (the "calendar part", stamped s94)
 
-> **Status: PLAN OF RECORD, awaiting the founder's one-word GO** (asked in the
-> same W3 verdict as the video-arc sheet amendments — see
+> **Status: DRAWN s95 — awaiting the founder's one-word W3 GO** (one verdict
+> covers this + the three video-arc sheet amendments — see
 > `docs/video-arc/spec.md` §"The s95 execution plan"). Authored s94 on the
 > founder's direction: *"continue refining the plan and spec for the video and
 > calendar part as needed (mobbin, postiz, research etc)."*
+>
+> **s95 execution record:** S1 was already DRAWN at pass 1 (s86) — the fresh
+> pull re-surfaced the same Later screen top-ranked, and the density question
+> closed NEGATIVE (no product puts media in a month cell: Midday, Airtable,
+> Toggl all text-only), so thumbs stay a week+agenda affordance and S1's
+> remaining work is the BUILD (the event-media read widening below). S2 is
+> RECORDED in the sheet's amendment block (month grammar: kind colour →
+> platform glyph → clock + lead). S3 is DRAWN (the Thu 11:00 concurrent
+> cluster; kickoff verify ran: month cells and the waiting lane already carry
+> counts — the gap is `placeColumn`, which splits concurrent time-grid events
+> evenly with NO cap; the build caps at 2 + count-door). S4 done: the sheet
+> carries the amendment block, `Calendar.dc.html` is archived, the ledger's
+> §Schedule rows are flipped, and the live spec pointers in `schedule.css` /
+> `schedule-surface.tsx` were repointed to `Schedule.dc.html`.
 
 ## What "calendar" means now (re-grounded s94 — rule 12, no inherited claims)
 
@@ -89,7 +103,8 @@ build stamps.
 ## Dependencies (rule 12 — existing verbatim, future marked)
 
 - Sheet: `docs/research/mock-sheets/Schedule.dc.html` (amend) ·
-  `docs/research/mock-sheets/Calendar.dc.html` (archive move).
+  `docs/research/mock-sheets/archive/Calendar.dc.html` (the S4 archive move,
+  done s95).
 - Surface: `apps/web/src/components/schedule/schedule-surface.tsx` ·
   `apps/web/src/components/schedule/schedule-model.ts` ·
   `apps/web/src/components/schedule/schedule.css` ·

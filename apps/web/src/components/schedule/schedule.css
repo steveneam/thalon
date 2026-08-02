@@ -1,7 +1,8 @@
 /*
- * Calendar — the surface's own atomics, PORTED 1:1 from the helmet <style> of
- * docs/research/mock-sheets/Calendar.dc.html (DOCTRINE 0: the sheet is the
- * blueprint). Shared classes (.card, .row, .pill, .seg, .btn, .excerpt,
+ * Schedule — the surface's own atomics, PORTED 1:1 from the helmet <style> of
+ * docs/research/mock-sheets/Schedule.dc.html (DOCTRINE 0: the sheet is the
+ * blueprint; it carries the superseded Calendar sheet's week grid forward
+ * deliberately — that sheet lives in mock-sheets/archive since s95). Shared classes (.card, .row, .pill, .seg, .btn, .excerpt,
  * .card-link, type roles) come from workspace.css — that file is the shell
  * contract and is not edited from here.
  *

@@ -37,7 +37,8 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // same change (DOCTRINE 0 rule 3). board-surface.tsx beside it — the CONTENT
   // pipeline board, shipped s75 — was never in the map: it sits at ZERO.
   // components/calendar/* left the map entirely at the s75 exact-mock rebuild:
-  // the surface was rebuilt from Calendar.dc.html and the old implementation
+  // the surface was rebuilt from the Calendar sheet (superseded by Schedule,
+  // archived s95) and the old implementation
   // (week/month/agenda grids, day panel, slot chip) was deleted in the same
   // change (DOCTRINE 0 rule 3). The rebuild sits at ZERO bridged tokens.
   // components/create/* left the map at s74 — the surface was rebuilt from

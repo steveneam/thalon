@@ -85,10 +85,12 @@ function coerceView(config: Record<string, unknown>): SavedConfig {
 }
 
 /**
- * Calendar — STEP 2 of the two-step rebuild: the byte-true port of
- * Calendar.dc.html with the real plan read behind it. The sheet owns every
- * band, class and copy grammar; this layer only decides what is TRUE to put
- * in them:
+ * Schedule — STEP 2 of the two-step rebuild: the byte-true port of the week
+ * grid first drawn in the superseded Calendar sheet — carried forward by
+ * Schedule.dc.html, the live sheet of record (the origin sheet moved to
+ * mock-sheets/archive, s95) — with the real plan read behind it. The sheet
+ * owns every band, class and copy grammar; this layer only decides what is
+ * TRUE to put in them:
  *
  *  - the grid places PLANS (the tenant's planned slots), work that COMPLETED
  *    at the instant it completed, and the sweeps the engine WILL run —

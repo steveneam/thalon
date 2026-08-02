@@ -141,8 +141,8 @@ Cite these rather than re-searching. Each entry is the PATTERN worth taking.
 - [Sprout Social · Listening](https://mobbin.com/screens/d979824e-201d-4b75-9170-c2928144d30c) — per-network table with platform icons per row. **TAKEN** (real platform marks).
 
 **Schedule**
-- [Later · calendar week](https://mobbin.com/screens/85de220d-a33e-4850-b9b9-00b73f91fa52) — **media thumbnails inside the time-grid cells.** The single biggest visual win available to this surface. *PENDING.*
-- [Sprout Social · month](https://mobbin.com/screens/31ee54e5-18dc-407a-b01d-f7db20d388f7) — event = platform icon + time + excerpt + tag chip + action icons. *PENDING.*
+- [Later · calendar week](https://mobbin.com/screens/85de220d-a33e-4850-b9b9-00b73f91fa52) — **media thumbnails inside the time-grid cells.** The single biggest visual win available to this surface. **TAKEN — drawn into `Schedule.dc.html` at pass 1 (s86: `.ev-media`, platform badge on the thumb, "Aa" for medialess), re-confirmed s95** (the fresh pull re-surfaced this exact screen top-ranked). Density ruling s95: thumbs at week + agenda ONLY — the s95 pull found NO product with media in a month cell (Midday/Airtable/Toggl all text-only at month). The remaining delta is the BUILD (CalEvent carries no media — serializer-only widening, s95 Phase 3).
+- [Sprout Social · month](https://mobbin.com/screens/31ee54e5-18dc-407a-b01d-f7db20d388f7) — event = platform icon + time + excerpt + tag chip + action icons. **TAKEN s95 — recorded in `Schedule.dc.html`'s amendment block as the month-mark grammar** (kind colour first, platform glyph riding the mark, clock + lead; month is a built density, not a drawn screen — the s86 precedent). Build delta rides s95 Phase 3.
 - [monday.com · content calendar](https://mobbin.com/screens/0a728fda-2e33-44f3-97c1-8243b526f429) — legends by PLATFORM colour. **REJECTED**: our legend names the three FACTS (planned/queued/published), which is the sheet's organizing idea. Platform identity rides the glyph instead.
 
 **Composer**
@@ -284,14 +284,14 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | # | surface (sheet) | research | p1 | p2 | p3 | note |
 |---|---|---|---|---|---|---|
 | 1 | Analytics | ✅ s85b | ✅ | — | — | reference library §Analytics; **BUILT s92** (lane `analytics`, merged at the lead's gate): `/app/analytics` + read-only `/api/analytics` over the engine read-model, rail entry after Schedule, every absence word verbatim on the live render (deferred · partner-gated · no impressions in the API); the sheet's FB provenance amendment lead-applied; honest divergences + the D2 series gap (G1) = `agent_handoff/lanes/WRAP-analytics.md` |
-| 2 | Schedule | ✅ s86 | ✅ | — | — | §Schedule |
+| 2 | Schedule | ✅ s86 + **s95 fresh pulls** (Later re-confirmed top-ranked; month-media: none found in the wild) | ✅ · **S1–S3 refinement AMENDED s95 (W3) · verdict OPEN** | — | — | §Schedule; the S3 concurrent cluster DRAWN (Thu 11:00, cap 2 + count-door), S1 density ruling settled (thumbs week+agenda only), S2 month grammar recorded; build deltas (event-media widening · placeColumn cap) ride s95 Phase 3 on the GO |
 | 3 | Composer | ✅ s86 + Create-spec Mobbin pass + **P walked s90** (launcher flow facts, library §Postiz launcher) | ✅ | — | — | popout state = p3, drawn open; the launcher walk REJECTED their bundle model, VALIDATED R3 + D3; **ROUTE BUILT s92** (B-create.4 core): `/app/create/run/[runId]` exact-mock from the s90c iteration, AI-edit door armed over the create-shells verbs (propose→judge→apply), Approve's re-entry door armed, fit band verbatim from the one validator; populated-state visual gate rides the first real Create run (dev truthfully renders predates-Create/empty) |
 | 4 | Channels | ✅ s86 | ✅ | — | — | §Channels |
 | 5 | Create home | ✅ s86 (Create-spec pass: HubSpot·Jasper·Linktree·Profound·Midjourney·Runway·Krea·Leonardo) | ✅ s90 (W2) · **VERDICTED** | — | — | pass-1 row above; W2 approved by the founder s91, 2026-08-02 ("you have my approval on W2 too"); **BUILT s93** — the s90b ask-card exact-mock at `/app/create` (headline 26px at 172 · card 740 · recent-line bottom 916, all probed): run-line facts real (profile platforms/version), the s90a plan card = its expanded state, sugg chips = real Intel picks via `?ctx=`, honest empties throughout; 26 tests |
 | 6 | Create wizard (new sheet) | ✅ s86 (same pass) | ✅ s90 (W2) · **VERDICTED** | — | — | `Create Wizard.dc.html`; W2 approved s91 (covers the s90b tucked-artifact amendment); **BUILT s93** — `/app/create/guided` exact-mock: accordion slots, platform chips carry `deriveCreatePlan`'s OWN verdicts via the new pure `POST /api/create/plan` (R3 before spend — live render: TikTok "connect to publish" verbatim), Review = the derived plan with cost honesty, Generate → new gated `POST /api/create` → `runCreate` → the Composer door; media dialog = STATED deferral (media pass), never a dead button; brief tucked behind its line; 13 tests + the sequence-gate route ratchet |
-| 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) | — | — | — | video build order 1 |
-| 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) | — | — | — | video build order 1 |
-| 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) | — | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; thumbnails/track-colour/credit-badges = p1, script-first = p2 gate |
+| 7 | Videos Overview | ✅ s87 (VEED·Riverside·Loom·Arcade·ClickUp) + s95 re-pull (banked set confirmed) | ✅ s95 (W3) · **verdict OPEN** | — | — | video build order 1; AMENDED s95 — pill onto the thumb (opaque composite drawn in), no-preview words, takes·cuts family counts, kind token, still sheds its 0:00; Loom metrics triplet stays REJECT-until-D2 |
+| 8 | Video Dossier | ✅ s87 (Synthesia·Adobe·AI Studio·Fibery·Sana·Frame.io) + s95 re-pull (**Resend revert-confirm added** — "current content preserved" register) | ✅ s95 (W3) · **verdict OPEN** | — | — | video build order 1; **V1 DRAWN s95** — crumb selector, marked/named cuts + published pill, compare radios, delete confirm in words, take-audition band |
+| 9 | Videos (editor) | ✅ s85 (VEED·Vimeo·Descript) + s95 re-pull (banked set confirmed) | ✅ s95 (W3, p1 deltas) · **verdict OPEN** | — | — | **NOT FINISHED by his ruling** — engine done ≠ done; p1 drawn s95 (frame-thumb blocks, kind-coloured tracks, credit badges at metered verbs); script-first = p2 gate (V3), deliberately not drawn |
 | 10 | Approve | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Approve; W1 approved by the founder s89 ("yes to all, W1 approved") — build unblocked |
 | 11 | Board | ✅ s89 (W1) + **s90 pipeline pass** (library §Pipeline board) | ✅ s89 · **PIPELINE BOARD DRAWN s91 · VERDICTED** (founder text, 2026-08-02 post-wrap: *"board approved"*) | — | — | **retires into a Dashboard toggle** (his s88 ruling); **the toggle's Board state redrawn as the PIPELINE BOARD s91** — loop-order columns (Intel picks → Generating → At the judge → In Approve → Scheduled → Published), counts on heads, the day's in/out as ONE aligned feet row (columns stretch full height so the funnel math reads as a row), ✓/✗ judge chips on every Approve card with the blocked reason verbatim; the W1 fixture's "unpicked" card removed (picks only — an unpicked trend lives on Intel); measured: all six columns bottom 916 ≤ 940, zero clipped text; on canvas; **BUILT s92 (`d357233`)**: the toggle's Board state wired at `/app?view=board` + `/app/board` DELETED in the same change; feet aligned at 916 by probe; picks read = `/api/intel/picks`; node-graph stays rejected |
 | 12 | Dashboard | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Dashboard+Board; pass-1 row above |
@@ -304,7 +304,7 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 19 | Sites | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | library §Sites; W2 approved s91; **BUILT s94** — the W2 amendment applied to the existing exact-mock port: verdict pill onto the shot (opaque backing named-adaptation — the alpha subtle channels vanished over real heroes, seen live), truth line per card ("previews only · minted {d MMM}" — no deploy state/hostname recorded, no fake URLs), h1 pills → state-filter seg in the VERDICT vocabulary (census counts; chips state their own narrowing), "newest first" label (true of parseCatalog), blog-loop door → the published ledger on Settings (the Dashboard's door); shot 150→132 + meta per the amended sheet; 43 tests |
 | 20 | Source Media | ◐ banked (Leonardo dialog + Runway roles, s86 — APPLIED in the W2 wizard draw) | — | — | — | the IA question is RESOLVED (own component family, the wizard's media dialog — never merged into Library); its own sheet's p1 still owed |
 | 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
-| — | Calendar | *(superseded s85 — rail sweep; kept only as history)* | | | | |
+| — | Calendar | *(superseded s85 — rail sweep; ARCHIVED s95 to `mock-sheets/archive/` — spec pointers repointed to Schedule)* | | | | |
 
 **The honest count: 15 of 20 live surfaces have been touched by the research; 5
 have not and are therefore not ready.** (W1/s89 moved Approve · Board · Dashboard
@@ -392,6 +392,7 @@ these; the editor set above is likewise banked.**
 - **[Adobe Express · version history](https://mobbin.com/screens/8e02843d-74a8-420a-b8b7-ea4f5630bf0f)** — a **"Marked versions"** group collapsed ABOVE the raw timestamp list, and a version carrying a typed name ("First Project V1 ✓"). That is **save-as-a-named-variant** exactly, and the marked/unmarked split is the honest answer to a list of forty autosaves where three matter.
 - **[Google AI Studio · app versions](https://mobbin.com/screens/26c8f8ba-2aaa-4028-8983-d41f4b71b784)** — versions as **radio rows** with a `● Current` pill and one "Restore version" action at the foot. Radio-select-then-act is the natural precursor to **compare two**: the same rows, two selectable slots.
 - **[Fibery · restore confirm](https://mobbin.com/screens/eb05e8be-4a16-47f0-94fe-08ad3da74171)** — *"Restore this version? Your current version will revert to version Jan 8, 2026 1:13 pm."* The confirm NAMES what you lose and when it was from. Our delete-a-version and restore rules land in this register — reversibility stated in words, per V1.
+- **[Resend · revert confirm](https://mobbin.com/screens/450e76cf-4e4c-420b-9802-9831819df1d4)** *(added by the s95 re-pull)* — *"This will create a new version with the content from the selected one. Your current content will be preserved in the Version History."* Non-destructive restore PROMISED in words — a stronger register than Fibery's; the s95 Dossier confirm draws it ("Restore brings it back exactly as it is now").
 - **[Sana AI](https://mobbin.com/screens/0d1c373e-876d-48f2-b460-54aa375f8b35)** + Fibery both carry a **"Highlight changes" / "Show changes" toggle** beside the history — the diff-on-demand idea the SHIPPED B-ve.4 diff panel could be re-aimed at for version-compare.
 - **[Frame.io · asset detail](https://mobbin.com/screens/c11d1ed7-0776-4793-8f12-4132d25d11c3)** — a `Show all versions` switch inside a settings rail, plus per-asset metadata rows and a **Grid | Reel** layout toggle.
 
@@ -410,14 +411,14 @@ affordance. **Sheets are still lead-direct and still owed a founder verdict.**
 3. **State & button** — finish the 5 no-affordance jobs, and every control's
    refused/empty/loading state.
 
-**Status: REFERENCES BANKED (s87), SHEETS NOT STARTED.** The D4 pass-1 sheets are
-done (s86) and the Overview + Dossier sweep is done (above) — so the arc's blocker
-is no longer research, it is drawing time. **Held deliberately at the s87 boot on
-BUDGET, not on doubt:** the weekly limit read 87% used with two engine lanes live
-(resets Jul 31, 11pm UTC), and the sheet passes are the heaviest spend left in the
-programme. Banking the references first is what makes the hold cheap — the durable
-half is done and the sheets can start cold from this section whenever there is
-headroom.
+**Status: SHEETS AMENDED s95 (W3) — VERDICT OPEN.** The s87 hold ("REFERENCES
+BANKED, SHEETS NOT STARTED") is spent: the s95 design block amended all three
+video sheets from this section's banked references (each opened with a fresh
+Mobbin re-pull; the banked sets held everywhere, and the Dossier gained the
+Resend confirm above). The five no-affordance jobs are DRAWN (V1 = the
+Dossier's version rail + takes band; render-on-return = the Overview thumb
+badge + the v2 chip). Builds ride the W3 GO, in the video-arc spec's Phase-3
+order. Script-first (V3) stays a pass-2 gate, deliberately undrawn.
 
 **s94 UPDATE — the s95 plan is STAMPED on the founder's direction** ("continue
 refining the plan and spec for the video and calendar part"): the execution plan

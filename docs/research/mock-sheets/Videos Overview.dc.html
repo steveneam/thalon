@@ -3,7 +3,21 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s95 — video-arc pass (ledger §Videos Overview, banked s87): the
+     state pill moved ONTO the thumb (VEED projects grid — state rides the
+     picture, the same rule Sites took at W2), drawn WITH the opaque-backing
+     adaptation the s94 Sites build learned live (ok/warn subtle channels are
+     ~13% alpha tints and vanish over real posters — composite over --n-bg) ·
+     the composing card's thumb says "no preview yet" in words (VEED draws
+     No-Preview as a deliberate tile, never a blank or a borrowed frame) ·
+     the family line counts the project's own history rows — takes · cuts ·
+     platforms (Riverside's "2 Recordings · 5 Edits"; ours come from
+     videoTakes/videoCuts) · the provenance line's first token is formalized
+     as the KIND (ClickUp's per-card kind label) · the still drops its 0:00
+     duration badge (a still has no duration; the kind token says image) ·
+     Loom's metrics triplet is deliberately NOT drawn — REJECT until
+     publication_metrics has rows (D2). -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -15,6 +29,11 @@
           .thumb-lg { height: 132px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; position: relative; }
           .thumb-lg span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
           .dur { position: absolute; right: 8px; bottom: 8px; font-family: var(--font-data); font-size: 10.5px; padding: 1px 6px; border-radius: 4px; background: oklch(0.10 0.008 262 / 0.75); color: var(--n-1000); }
+          .thumb-lg .pill { position: absolute; top: 8px; left: 8px; }
+          .thumb-lg .pill-ok, .thumb-lg .pill-warn { background-color: var(--n-bg); }
+          .thumb-lg .pill-ok { background-image: linear-gradient(var(--ok-subtle), var(--ok-subtle)); }
+          .thumb-lg .pill-warn { background-image: linear-gradient(var(--warn-subtle), var(--warn-subtle)); }
+          .kind { color: var(--n-900); font-weight: 600; }
           .vbody { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
           .fam { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--n-900); }
           .fam a { color: var(--n-900); border-bottom: 1px dotted var(--n-600); }
@@ -74,43 +93,43 @@
             </div>
             <div class="vgrid">
               <div class="vcard">
-                <div class="thumb-lg"><span>poster · beat 04</span><span class="dur">0:42</span></div>
+                <div class="thumb-lg"><span>poster · beat 04</span><span class="pill pill-warn">in Approve</span><span class="dur">0:42</span></div>
                 <div class="vbody">
-                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">One-prompt launch film</span><span class="pill pill-warn">in Approve</span></div>
-                  <div class="fam"><a href="#">2 versions</a><span class="sep">·</span><a href="#">4 clips</a><span class="sep">·</span><a href="#">3 platforms</a></div>
-                  <div style="display:flex;align-items:center"><span class="prov">one-prompt · kling3 turbo</span><div style="flex:1"></div><span class="t-data">today</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">One-prompt launch film</span></div>
+                  <div class="fam"><a href="#">9 takes</a><span class="sep">·</span><a href="#">2 cuts</a><span class="sep">·</span><a href="#">3 platforms</a></div>
+                  <div style="display:flex;align-items:center"><span class="prov"><span class="kind">one-prompt</span> · kling3 turbo</span><div style="flex:1"></div><span class="t-data">today</span></div>
                 </div>
               </div>
               <div class="vcard">
-                <div class="thumb-lg"><span>composing · beat 4/8</span></div>
+                <div class="thumb-lg"><span>no preview yet · composing beat 4/8</span><span class="pill pill-idle">composing</span></div>
                 <div class="vbody">
-                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Ship-notes explainer #3</span><span class="pill pill-idle">composing</span></div>
-                  <div class="fam"><a href="#">1 version</a><span class="sep">·</span><span class="subtle">clips follow the cut</span></div>
-                  <div style="display:flex;align-items:center"><span class="prov">one-prompt · queued 14:20</span><div style="flex:1"></div><span class="t-data">today</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Ship-notes explainer #3</span></div>
+                  <div class="fam"><a href="#">4 takes so far</a><span class="sep">·</span><span class="subtle">the cut follows the compose</span></div>
+                  <div style="display:flex;align-items:center"><span class="prov"><span class="kind">one-prompt</span> · queued 14:20</span><div style="flex:1"></div><span class="t-data">today</span></div>
                 </div>
               </div>
               <div class="vcard">
-                <div class="thumb-lg"><span>your master · frame 0:12</span><span class="dur">3:05</span></div>
+                <div class="thumb-lg"><span>your master · frame 0:12</span><span class="pill pill-idle">draft</span><span class="dur">3:05</span></div>
                 <div class="vbody">
-                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Founder cut — conference talk</span><span class="pill pill-idle">draft</span></div>
-                  <div class="fam"><a href="#">1 version</a><span class="sep">·</span><a href="#">2 clips</a><span class="sep">·</span><span class="subtle">no platforms yet</span></div>
-                  <div style="display:flex;align-items:center"><span class="prov">imported by you</span><div style="flex:1"></div><span class="t-data">Mon</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Founder cut — conference talk</span></div>
+                  <div class="fam"><a href="#">your master</a><span class="sep">·</span><a href="#">2 cuts</a><span class="sep">·</span><span class="subtle">no platforms yet</span></div>
+                  <div style="display:flex;align-items:center"><span class="prov"><span class="kind">imported</span> · by you</span><div style="flex:1"></div><span class="t-data">Mon</span></div>
                 </div>
               </div>
               <div class="vcard">
-                <div class="thumb-lg"><span>poster · seasons tree</span><span class="dur">1:18</span></div>
+                <div class="thumb-lg"><span>poster · seasons tree</span><span class="pill pill-ok">published</span><span class="dur">1:18</span></div>
                 <div class="vbody">
-                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Feature tour — staged chain</span><span class="pill pill-ok">published</span></div>
-                  <div class="fam"><a href="#">3 versions</a><span class="sep">·</span><a href="#">6 clips</a><span class="sep">·</span><a href="#">4 platforms</a></div>
-                  <div style="display:flex;align-items:center"><span class="prov">staged · 3-stage advanced</span><div style="flex:1"></div><span class="t-data">18 Jul</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Feature tour — staged chain</span></div>
+                  <div class="fam"><a href="#">14 takes</a><span class="sep">·</span><a href="#">3 cuts</a><span class="sep">·</span><a href="#">4 platforms</a></div>
+                  <div style="display:flex;align-items:center"><span class="prov"><span class="kind">staged</span> · 3-stage advanced</span><div style="flex:1"></div><span class="t-data">18 Jul</span></div>
                 </div>
               </div>
               <div class="vcard">
-                <div class="thumb-lg"><span>meme frame</span><span class="dur">0:00</span></div>
+                <div class="thumb-lg"><span>meme frame</span><span class="pill pill-ok">live on 3</span></div>
                 <div class="vbody">
-                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Meme post — the horse</span><span class="pill pill-ok">live on 3</span></div>
-                  <div class="fam"><a href="#">1 version</a><span class="sep">·</span><a href="#">1 still</a><span class="sep">·</span><a href="#">3 platforms</a></div>
-                  <div style="display:flex;align-items:center"><span class="prov">image · approved 19 Jul</span><div style="flex:1"></div><span class="t-data">22 Jul</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span class="t-title" style="flex:1">Meme post — the horse</span></div>
+                  <div class="fam"><a href="#">1 still</a><span class="sep">·</span><a href="#">3 platforms</a></div>
+                  <div style="display:flex;align-items:center"><span class="prov"><span class="kind">image</span> · approved 19 Jul</span><div style="flex:1"></div><span class="t-data">22 Jul</span></div>
                 </div>
               </div>
               <div class="newcard">
@@ -120,7 +139,7 @@
               </div>
             </div>
             <div style="display:flex">
-              <span class="t-label">Derivatives never clutter this grid — every project folds its versions, clips and platform renders behind one card. Open a project for the full family.</span>
+              <span class="t-label">Derivatives never clutter this grid — every project folds its takes, cuts and platform renders behind one card. Open a project for the full family.</span>
             </div>
           </div>
         </div>

@@ -79,21 +79,19 @@ s66 ruling, so the app already defaults to `newest` (`approve-surface.tsx`
 do not "fix" the app to match the chip. Both sort options stay available; only
 the default is settled.
 
-### `Calendar.dc.html` — concurrent events clip; adopt the sheet's own "+N more" (LEAD'S CALL, s77)
+### ~~`Calendar.dc.html`~~ — concurrent events clip; adopt "+N more" (LEAD'S CALL s77 — **DRAWN s95, exception retired**)
 
 When several platforms are approved for the same instant the week column
 splits N ways and each chip lands at ~45px, clipping mid-word ("Linked·",
-"Faceb·"). That is the sheet's own `.ev { overflow: hidden }` meeting a density
-its fixture never had. The founder handed the call to the lead ("calendar is up
-to you"), and the call is: **adopt "+N more"** — capped visible chips, the
-remainder collapsed behind a count that opens the day.
-
-Why this is the conservative choice rather than an invention: **the sheet
-ALREADY uses that treatment in its own waiting lane**, so this applies the
-sheet's existing vocabulary to a density it never drew, instead of introducing
-new grammar. Clipping a platform name mid-word is not an honest state — it
-loses information with no cue that anything was lost, which is exactly what the
-"+N more" pattern exists to prevent. Implementation rides the s78 fix pass.
+"Faceb·"). The founder handed the call to the lead ("calendar is up
+to you"), and the call was: **adopt "+N more"** — capped visible chips, the
+remainder collapsed behind a count that opens the day. The call is no longer
+an exception living here: **`Schedule.dc.html` now DRAWS it** (s95 · S3 — the
+Thu 11:00 concurrent cluster, cap 2 per instant, the count is a door), so the
+sheet and the ruling agree again. The build-side gap that remains is the week
+time grid's `placeColumn` (it still splits evenly with no cap — month cells
+and the waiting lane already carry their counts); that delta rides the s95
+Phase-3 Schedule build.
 
 
 The sheets are the spec, with these recorded exceptions. **A lane must not
@@ -128,6 +126,12 @@ Brief: `../d4-PREPLAN.md`. Raw material: `../mobbin-patterns-s83.md` +
 founder rule; each carries **its own OPEN CALLS in its file header** — the
 questions the mock asks him rather than answers for him. **His verdict makes a
 sheet law; no build lane opens on any of them before that.**
+
+**Status update (recorded s95): the D4 four were ratified and pass-1'd s86,
+and `Schedule.dc.html` is BUILT** (s86, `/app/schedule`) — the do-not-port
+bar no longer applies to it. Its s95 amendment block (S1–S3, the Schedule
+refinement pass) is the piece that awaits the W3 verdict, alongside the
+three video-arc sheet amendments.
 
 - **`Analytics.dc.html`** — a NEW surface. Per-post table with honest per-platform
   N/A (LinkedIn reach/engagement read "partner-gated", Bluesky reach reads
@@ -164,12 +168,12 @@ mentions were then handled by hand, because a regex could not tell them apart:
 
 - `Profiles.dc.html` cross-referenced the surface **by name** ("Calendar — platform
   cadence caps the fan-out plan") → renamed; it means the surface.
-- **`Calendar.dc.html` is now SUPERSEDED** by `Schedule.dc.html` and carries a banner
-  saying so. It is kept, not deleted: the shipped `/app/calendar` was built from it
-  and it stays that code's spec until the rebuild lands. Its rail was swept with
-  every other sheet (one canonical rail in this directory) while its own headline
-  still reads "Calendar", because that is what shipped. **Do not resolve that tension
-  by editing the file — resolve it by building Schedule.**
+- **`Calendar.dc.html` — SUPERSEDED at the sweep, ARCHIVED s95.** Its hold
+  clause ("stays that code's spec until the rebuild lands") expired when
+  Schedule shipped s86 at `/app/schedule` and the old `/app/calendar` was
+  deleted in the same change. It now lives in `archive/` (reference only);
+  the live spec pointers in `schedule.css` / `schedule-surface.tsx` were
+  repointed to `Schedule.dc.html` in the same change, per the archive rule.
 
 Verified after the sweep: all 15 rails render identically to the D4 four, and the
 extra item causes **zero rail overflow** at the 1440×940 viewport.

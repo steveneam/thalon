@@ -192,6 +192,29 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s95 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap = this session's verify)
+
+**The s94-stamped plan's Phase 1 + 2 ran as written, lead-direct, zero founder
+hands: the four-sheet design block drawn, synced to the canvas, and the ONE W3
+verdict ask sent.** Every surface opened with a fresh Mobbin pull — the s94
+MCP error did not recur; the banked reference sets held everywhere (the week
+pull re-surfaced the banked Later screen itself top-ranked).
+
+| track | outcome |
+|---|---|
+| Videos Overview amendment | **DRAWN** — state pill ONTO the thumb (VEED) with the s94 opaque-backing adaptation drawn INTO the sheet (the trap is on record; the sheet doesn't re-learn it); "no preview yet" in words on the composing card; family line = takes · cuts · platforms counted from the project's own rows (Riverside — and the first mechanical mapping contradicted the Dossier's 9-takes fixture, caught and fixed); kind token formalized (ClickUp); the still sheds its lying 0:00; Loom's metrics triplet deliberately NOT drawn (REJECT-until-D2). |
+| Video Dossier amendment — **V1 DRAWN** | The five no-affordance jobs get homes, four as ONE version rail: crumb selector beside the h1 (Synthesia) · marked/named cuts ("✓ Founder pick") + the ☆ Mark door (Adobe) · published pill on the shipped cut · compare radios, two selected, door armed (AI Studio) · delete confirm OPEN in the Fibery/**Resend** register (the s95 re-pull added Resend: "current content preserved" — preservation PROMISED in words) · the Takes audition band under the player (play doors; auditioning take shows scrub + Swap-into-cut). First render CRUSHED the strip (published pill wrapped vertical, door chips clipped) — caught in the browser pass, chips slimmed, confirm re-anchored. |
+| Videos editor p1 amendment | **DRAWN** — V2 frame thumbnails on every clip block (striped placeholder per rule 2; selection = ring, never a repaint that hides frames) + track colour BY KIND with sheet-local kind tokens (deliberately not ok/warn — status keeps meaning) + kind dots on lane heads; V4 credit badges at the metered verbs (Recut ⚡9 · Retake ⚡12 · Propose ⚡1; EDL-only verbs unbadged — free stated by absence). Script-first (V3) deliberately undrawn: pass-2 gate. |
+| Schedule refinement (S1–S4) | **S1 was already drawn** (pass 1 s86 — the ledger's PENDING rows were stale against the sheet; flipped). Density ruling CLOSED NEGATIVE by the fresh pull: no product puts media in a month cell (Midday/Airtable/Toggl text-only) → thumbs stay week+agenda. **S2 recorded** as the month-mark grammar in the sheet's amendment block. **S3 DRAWN** — the Thu 11:00 concurrent cluster (cap 2 + count-door; first placement sat under the sheet's own open modal — moved; legend census updated to Published · 6). Kickoff verify ran: month + waiting-lane counts BUILT; the real gap = `placeColumn` (even split, no cap) + CalEvent's missing media — both Phase-3 build deltas. **S4 done**: `Calendar.dc.html` → `archive/` (its hold clause expired s86), and the grep-before-moving rule caught two LIVE spec pointers (`schedule.css` header + `schedule-surface.tsx` header cited Calendar.dc.html as port source) — repointed to `Schedule.dc.html` in the same change. |
+| Canvas + record hygiene | All four amended sheets **synced to canvas `f5d304cb`** (etag-checked writes; zero parity debt). Ledger rows 2/7/8/9 flipped to "AMENDED s95 (W3) · verdict OPEN"; §video Status block spent its s87 hold; README §Calendar exception RETIRED (now drawn), §Proposals gains the D4-ratified status line (a lane reading it would have refused the Schedule build); both specs carry execution records. impeccable findings on schedule.css = pre-existing sheet-verbatim ports (DOCTRINE 0), intentional, not suppressed. |
+
+**Phase 2 SENT: one W3 verdict ask** (wrap ping, hands-free — a single texted
+word covers all four amended sheets). **Phase 3 waits on his GO**, order
+stamped: editor p1 deltas → Overview/Dossier + V1's five affordances
+(Decision-5 pre-check first) → Schedule deltas (event-media read widening +
+the placeColumn cap). Zero credit spend; nothing armed; the s90 windows
+untouched.
+
 ## Sprint 9 / s94 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap = this session's verify)
 
 **The s93-stamped plan ran as written, founder-hands-free (both sheets were

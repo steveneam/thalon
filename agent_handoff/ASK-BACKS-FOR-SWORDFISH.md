@@ -1241,3 +1241,37 @@ hands. **"GO analytics"** launches it; silence just leaves it queued.
 Meanwhile I'm building the surfaces you approved earlier (Approve first,
 then Dashboard and Runs) — no input needed from you on those. Zero posts,
 zero credits, nothing new armed.
+
+## Wrap ping for the founder (s95 — the video + calendar sheets are drawn)
+
+The plan you set last session ran hands-free: **all four sheets are amended
+and on the canvas — this is the ONE verdict ask (W3), a single word.**
+
+**Videos list** — status badge rides the thumbnail (legible over real
+posters), a project with no render says "no preview yet" in words, every
+card counts its own takes · cuts · platforms, and stills stop claiming a
+0:00 duration.
+
+**Video project page** — the big one: your five missing jobs are drawn.
+One version rail gives you compare-two, save-as-a-named-cut ("✓ Founder
+pick"), delete with a confirm that says what survives ("takes, credits and
+judge verdicts stay in Cut history — Restore brings it back exactly"), and
+the version you're on lives in the breadcrumb with a published pill on the
+one that shipped. Plus a Takes band: play any take BEFORE swapping it into
+the cut.
+
+**Video editor** — timeline clips now carry frame thumbnails, the three
+tracks are colour-coded by kind, and every button that spends credits says
+so before you click (⚡9 cr on Recut, ⚡12 on Retake; free verbs stay
+unmarked).
+
+**Schedule** — the thumbnails-in-calendar idea you already have gets its
+missing piece: when several platforms fire at one instant, two chips split
+the slot and "+N more" opens the day — nothing clips mid-word anymore.
+(Research says month cells stay text-only: nobody in the wild puts media
+there honestly, so we don't either.)
+
+Canvas: https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
+**One word — "W3 approved" — unblocks the builds** (or name what to
+change). Build order on your GO: editor first, then the project pages, then
+Schedule. Zero credits spent, nothing posted, nothing armed.

@@ -196,6 +196,15 @@ landing/marketing video.
 
 ## The s95 execution plan (stamped s94, on the founder's direction — "refine the plan and spec … then you can start on them")
 
+> **Phase 1 EXECUTED s95 (2026-08-02), lead-direct.** All four sheets amended
+> and re-exported to `docs/research/mock-sheets/`; every surface opened with a
+> fresh Mobbin pull (the s94 MCP error did not recur) — the banked sets held
+> everywhere, the Dossier gained Resend's revert-confirm register, and the
+> Schedule month-media question closed NEGATIVE (no honest month treatment
+> found; thumbs stay week+agenda). Each sheet's header carries its amendment
+> record; renders verified at 1440×940, no clip. **Phase 2 (the single W3
+> verdict) is OPEN — Phase 3 waits on his word.**
+
 **Where the arc actually stands (re-grounded s94, per rule 12 — no inherited
 claims):** the three sheets EXIST since the s72 verdicted export
 (`docs/research/mock-sheets/Videos Overview.dc.html` · `Video Dossier.dc.html` ·

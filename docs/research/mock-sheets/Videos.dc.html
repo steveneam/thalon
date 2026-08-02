@@ -3,7 +3,25 @@
      claude-design canvas (project f5d304cb). THE SPEC IS THIS MARKUP + theme.css
      beside it: implement surfaces EXACTLY (founder s72: 'i want the claude design
      as EXACT' — placeholders where the backend lacks data, never layout drift).
-     View: open this file with theme.css in the same dir; helmet ~= head. -->
+     View: open this file with theme.css in the same dir; helmet ~= head.
+     AMENDED s95 — video-arc editor p1 (ledger §video editor, seeded s87):
+     · V2 frame thumbnails — every video clip block carries its frames
+       (Vimeo/VEED: "every reference puts frame thumbnails on its timeline
+       clips; ours were plain blocks"); drawn as the striped placeholder per
+       rule 2, real frames in the build; selection becomes a ring, never a
+       flat repaint that hides the frames
+     · V2 track colour BY KIND (VEED) — sheet-local kind tokens on the three
+       lanes (video slate-blue · music green · captions violet) + a kind dot
+       in each lane header; deliberately NOT the ok/warn status colours, so
+       status keeps its meaning on this surface
+     · V4 credit badges at the metered verbs (VEED Magic Tools' credit badge
+       — cost learnt BEFORE the click): Recut 9:16 and Retake-a-beat carry
+       their render cost, Propose carries its AI-call cost, the retake door
+       in the takes strip repeats it; EDL-only verbs (Tighten, Swap music,
+       Apply) stay unbadged — free is stated by absence
+     · NO metrics, no new bands — the editor's paradigm question (Descript
+       script-first, V3) is deliberately NOT drawn: it is a pass-2 gate with
+       its own criteria, not an amendment. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -23,19 +41,28 @@
           .take .thumb-md { width: 118px; height: 68px; }
           .take.on .thumb-md { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); }
           .take-cap { font-size: 11px; color: var(--n-900); }
-          /* ── Multi-track timeline (the EDL surface: video · music · captions) ── */
+          /* ── Multi-track timeline (the EDL surface: video · music · captions) ──
+               s95: tracks are colour-coded BY KIND (VEED) with sheet-local kind
+               tokens — deliberately NOT the status colours, so ok/warn keep
+               meaning; video clips carry FRAME THUMBNAILS (Vimeo/VEED) — striped
+               placeholder here per rule 2, real frames in the build. */
           .tl-head { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--n-400); }
-          .tl-body { position: relative; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 6px; }
+          .tl-body { position: relative; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 6px; --tk-video: oklch(0.66 0.10 250); --tk-music: oklch(0.72 0.12 160); --tk-cap: oklch(0.68 0.11 300); }
           .lane { display: flex; align-items: center; gap: 10px; }
           .lane-hd { width: 74px; flex: none; font-size: 11.5px; font-weight: 500; color: var(--n-900); display: flex; flex-direction: column; line-height: 1.25; }
           .lane-hd small { font-size: 10px; color: var(--n-800); font-weight: 400; }
+          .kdot { width: 8px; height: 8px; border-radius: 3px; flex: none; display: inline-block; margin-right: 5px; }
           .lane-tr { flex: 1; display: flex; gap: 3px; position: relative; }
-          .blk { height: 34px; border-radius: 5px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: flex-end; padding: 3px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); overflow: hidden; white-space: nowrap; }
-          .blk.on { background: var(--act-subtle); border-color: var(--act); color: var(--n-1000); }
-          .blk-music { height: 30px; background: repeating-linear-gradient(90deg, var(--n-400) 0 2px, var(--n-200) 2px 5px); border: 1px solid var(--n-500); position: relative; }
+          .blk { height: 34px; border-radius: 5px; background: repeating-linear-gradient(135deg, var(--n-300), var(--n-300) 6px, var(--n-200) 6px, var(--n-200) 12px); border: 1px solid oklch(0.66 0.10 250 / 0.5); display: flex; align-items: flex-end; padding: 3px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); overflow: hidden; white-space: nowrap; }
+          .blk.on { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); color: var(--n-1000); }
+          .blk-music { height: 30px; background: repeating-linear-gradient(90deg, oklch(0.72 0.12 160 / 0.45) 0 2px, var(--n-200) 2px 5px); border: 1px solid oklch(0.72 0.12 160 / 0.5); position: relative; }
           .cresc { position: absolute; top: -4px; width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); background: var(--heat-warm); }
-          .blk-cap { height: 22px; border-radius: 4px; background: var(--n-200); border: 1px solid var(--n-500); }
+          .blk-cap { height: 22px; border-radius: 4px; background: oklch(0.68 0.11 300 / 0.16); border: 1px solid oklch(0.68 0.11 300 / 0.45); }
           .blk-cap.on { background: var(--act-subtle); border-color: var(--act); }
+          /* s95: credit badges at the metered verbs (VEED Magic Tools) — the
+             cost is learnt BEFORE the click, never after. EDL-only verbs stay
+             unbadged: applying a trim is free and the absence says so. */
+          .cr { display: inline-flex; align-items: center; margin-left: 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--warn); }
           .playhead { position: absolute; top: 6px; bottom: 6px; left: calc(84px + (100% - 100px) * 0.34); width: 2px; background: var(--act); border-radius: 1px; z-index: 2; }
           .playhead::before { content: ""; position: absolute; top: -5px; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--act); }
           /* ── Direct the edit — the agent-native front door (founder s72) ── */
@@ -94,10 +121,10 @@
             <div class="copilot">
               <div class="cop-box">Direct the edit — <em>"tighten beat 04, land the crescendo on the close, recut for 9:16"</em> — the agent answers with a proposal on the timeline, never a silent change.</div>
               <div class="chipbtn">Tighten to 30s</div>
-              <div class="chipbtn">Recut 9:16</div>
+              <div class="chipbtn">Recut 9:16<span class="cr">⚡9 cr</span></div>
               <div class="chipbtn">Swap music</div>
-              <div class="chipbtn">Retake a beat</div>
-              <div class="btn btn-primary btn-sm">Propose</div>
+              <div class="chipbtn">Retake a beat<span class="cr">⚡12 cr</span></div>
+              <div class="btn btn-primary btn-sm">Propose<span class="cr" style="color:var(--act-text);opacity:.85">⚡1</span></div>
             </div>
             <div class="ed-grid">
               <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
@@ -127,7 +154,7 @@
                   <div class="tl-body">
                     <div class="playhead"></div>
                     <div class="lane">
-                      <div class="lane-hd">Video<small>beats · takes</small></div>
+                      <div class="lane-hd"><span><span class="kdot" style="background:var(--tk-video)"></span>Video</span><small>beats · takes</small></div>
                       <div class="lane-tr">
                         <div class="blk" style="width:11%">01</div>
                         <div class="blk on" style="width:13%">02 · take 1</div>
@@ -140,7 +167,7 @@
                       </div>
                     </div>
                     <div class="lane">
-                      <div class="lane-hd">Music<small>cue · waveform</small></div>
+                      <div class="lane-hd"><span><span class="kdot" style="background:var(--tk-music)"></span>Music</span><small>cue · waveform</small></div>
                       <div class="lane-tr">
                         <div class="blk-music" style="width:100%" title="one cue · offset 0:00 · gain −6dB under captions">
                           <div class="cresc" style="left:24%" title="measured crescendo · aligns beat 03"></div>
@@ -150,7 +177,7 @@
                       </div>
                     </div>
                     <div class="lane">
-                      <div class="lane-hd">Captions<small>plates · fades</small></div>
+                      <div class="lane-hd"><span><span class="kdot" style="background:var(--tk-cap)"></span>Captions</span><small>plates · fades</small></div>
                       <div class="lane-tr" style="align-items:center">
                         <div class="blk-cap" style="width:9%"></div>
                         <div class="blk-cap" style="width:7%;margin-left:2%"></div>
@@ -180,7 +207,7 @@
                     <div class="take on"><div class="thumb-md"><span>take 1 · keeper</span></div><span class="take-cap">5.1s · first-take</span></div>
                     <div class="take"><div class="thumb-md"><span>take 2</span></div><span class="take-cap">5.0s · text drift</span></div>
                     <div class="take"><div class="thumb-md"><span>take 3</span></div><span class="take-cap">5.2s · flat motion</span></div>
-                    <div class="take"><div class="thumb-md" style="border-style:dashed;background:transparent"><span>+ retake</span></div><span class="take-cap">re-brief this beat</span></div>
+                    <div class="take"><div class="thumb-md" style="border-style:dashed;background:transparent"><span>+ retake</span></div><span class="take-cap">re-brief this beat<span class="cr">⚡12 cr</span></span></div>
                   </div>
                 </div>
               </div>
