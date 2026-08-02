@@ -184,7 +184,8 @@ describe("Dashboard — s79 verified fixes", () => {
 
     const lane = container.querySelector(".wd-wait");
     expect(lane).not.toBeNull();
-    expect(within(lane as HTMLElement).getByRole("link", { name: /your review · \d+h →/ })).toHaveAttribute(
+    // 9 days reads as days (s93 waitLabel rollover) — "216h" hid the magnitude.
+    expect(within(lane as HTMLElement).getByRole("link", { name: /your review · 9d →/ })).toHaveAttribute(
       "href",
       expect.stringContaining("/app/approve?run="),
     );
