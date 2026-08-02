@@ -180,18 +180,17 @@ export function DraftCard({
         <span className="t-title">{`${platformLabel(draft.platform)} draft · ${formatWord(draft)}`}</span>
         {window_ && <span className="t-label">{window_}</span>}
         <div style={{ flex: 1 }} />
-        {/* The sheet's Composer re-entry door, drawn at full fidelity but
-            RESTING UNARMED with its reason (the Runs-Retry precedent): the
-            Composer route is B-create.4, queued behind the W2 verdict — the
-            href arms when the route exists, and until then the door says so
-            rather than 404ing. */}
-        <span
-          className="card-link door-unarmed"
-          title="the Composer route lands with the Create build (B-create.4) — this door arms then"
-          aria-disabled="true"
+        {/* The sheet's Composer re-entry door, ARMED in s92 (B-create.4
+            landed the route). It carries the draft's fanout id — the route
+            resolves it to the create run that recorded it, and a run that
+            predates Create lands on that fact in words, never a bare 404. */}
+        <Link
+          className="card-link"
+          href={`/app/create/run/${encodeURIComponent(draft.fanoutRunId)}`}
+          title="the run-scoped checkpoint — this draft's run in the Composer"
         >
           Open in Composer →
-        </span>
+        </Link>
         <span className="t-data" title={`Deep link · draft ${draft.id}`}>
           #{draft.id.slice(0, 8)}
         </span>

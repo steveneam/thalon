@@ -5,6 +5,8 @@
  * actually there (the approve-queue types' rule).
  */
 
+import type { GridDraft } from "@/lib/approve-queue/types";
+
 export interface CreateChildRefWire {
   kind: "fanout_run" | "draft" | "video_project";
   id: string;
@@ -50,4 +52,23 @@ export async function fetchCreateRunsFeed(): Promise<CreateRunsFeed> {
       : [];
   }
   return { runs, usageToday: data.usageToday ?? null };
+}
+
+/** The Composer's run-scoped read: one run + every draft its children produced. */
+export async function fetchCreateRun(
+  runId: string,
+): Promise<{ run: CreateRunWire; drafts: GridDraft[] }> {
+  const res = await fetch(`/api/create/runs/${encodeURIComponent(runId)}`);
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error ?? `create-run read failed: ${res.status}`);
+  }
+  const data = (await res.json()) as { run: CreateRunWire; drafts?: GridDraft[] };
+  data.run.children = Array.isArray(data.run.children)
+    ? data.run.children.filter(
+        (c): c is CreateChildRefWire =>
+          typeof c === "object" && c !== null && typeof (c as { id?: unknown }).id === "string",
+      )
+    : [];
+  return { run: data.run, drafts: Array.isArray(data.drafts) ? data.drafts : [] };
 }

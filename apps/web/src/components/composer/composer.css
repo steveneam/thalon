@@ -1,0 +1,100 @@
+/*
+ * Composer — the surface's own atomics, PORTED 1:1 from the helmet <style>
+ * of docs/research/mock-sheets/Composer.dc.html (the s90c iteration;
+ * DOCTRINE 0: the sheet is the blueprint). Shared classes (.card, .pill,
+ * .seg, .btn, type roles) come from workspace.css — the shell contract,
+ * never edited from here.
+ *
+ * EVERY RULE IS SCOPED UNDER `.composer-surface` (mock-sheets README rule 6,
+ * enforced by lib/__tests__/surface-css-scope.test.ts).
+ */
+
+.composer-surface .cmp-grid { flex: 1; display: grid; grid-template-columns: 330px 1fr 300px; gap: 12px; align-items: stretch; min-height: 0; }
+.composer-surface .cmp-left { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.composer-surface .cmp-mid { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.composer-surface .body-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 15px 16px; font-size: 14.5px; line-height: 1.62; color: var(--n-1000); flex: 1; min-height: 0; }
+.composer-surface .body-box .hit { background: var(--err-subtle); border-bottom: 1.5px solid var(--err); border-radius: 2px; padding: 0 1px; }
+
+.composer-surface .ptabs { display: flex; gap: 2px; padding: 3px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: var(--r-ctl); }
+.composer-surface .ptab { display: flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 5px; font-size: 12.5px; font-weight: 500; color: var(--n-900); cursor: pointer; }
+.composer-surface .ptab:hover { color: var(--n-1000); }
+.composer-surface .ptab.on { background: var(--n-300); color: var(--n-1000); }
+
+.composer-surface .band { flex: none; display: flex; flex-direction: column; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; }
+.composer-surface .fld { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 7px 12px; border-top: 1px solid var(--n-400); font-size: 13px; }
+.composer-surface .fld:first-of-type { border-top: none; }
+.composer-surface .fld dt { color: var(--n-900); font-size: 11px; font-family: var(--font-data); }
+.composer-surface .fld dd { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; max-width: 100%; margin: 0; }
+.composer-surface .toggle { width: 30px; height: 17px; border-radius: var(--r-pill); background: var(--act); position: relative; flex: none; }
+.composer-surface .toggle::after { content: ""; position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--act-text); }
+.composer-surface .toggle.off { background: var(--n-500); }
+.composer-surface .toggle.off::after { right: auto; left: 2px; background: var(--n-800); }
+
+.composer-surface .fitband { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; }
+.composer-surface .fitline { display: flex; flex-direction: column; gap: 3px; padding: 8px 12px; border-left: 1px solid var(--n-400); background: var(--n-bg); }
+.composer-surface .fitline:first-child { border-left: none; }
+.composer-surface .fit-top { display: flex; align-items: center; gap: 7px; }
+.composer-surface .fit-count { font-family: var(--font-data); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--n-1000); flex: none; }
+.composer-surface .fit-why { font-size: 11px; color: var(--n-900); line-height: 1.35; }
+
+.composer-surface .cmp-right { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.composer-surface .jstrip { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 9px 12px; display: flex; flex-direction: column; gap: 7px; }
+.composer-surface .jstrip-top { display: flex; align-items: center; gap: 9px; }
+.composer-surface .jstrip-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 10px; font-size: 11px; color: var(--n-900); }
+.composer-surface .jstrip-facts > span, .composer-surface .jstrip-facts > a { white-space: nowrap; }
+.composer-surface .zlabel { font-family: var(--font-data); font-size: 10px; letter-spacing: 0.05em; color: var(--n-800); }
+.composer-surface .src-line { font-size: 12px; color: var(--n-900); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.composer-surface .pv { border: 1px solid var(--n-500); border-radius: 9px; background: var(--n-bg); padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
+.composer-surface .pv-head { display: flex; align-items: center; gap: 8px; }
+.composer-surface .pv-av { width: 30px; height: 30px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); flex: none; }
+.composer-surface .pv-body { font-size: 12.5px; line-height: 1.55; color: var(--n-1000); white-space: pre-wrap; }
+.composer-surface .pv-cut { border-top: 1px dashed var(--warn); margin: 2px 0 0; padding-top: 6px; display: flex; align-items: center; gap: 7px; }
+.composer-surface .pv-fade { color: var(--n-800); }
+.composer-surface .pv-media { position: relative; width: 100%; height: 84px; border-radius: 7px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 8px, var(--n-100) 8px, var(--n-100) 16px); display: flex; align-items: center; justify-content: center; font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
+.composer-surface .tag { color: var(--act); }
+.composer-surface .pv-actions { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--n-400); padding-top: 7px; }
+.composer-surface .pv-act { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--n-900); }
+
+.composer-surface .thumb-sm { width: 46px; height: 30px; border-radius: 5px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-300) 0 6px, var(--n-200) 6px 12px); display: flex; align-items: center; justify-content: center; }
+.composer-surface .thumb-sm span { font-family: var(--font-data); font-size: 8px; color: var(--n-800); }
+
+.composer-surface .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+.composer-surface .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+
+/* ── App adaptations (the NAMED kind only) ──
+   1. REAL TABS/VERBS: the sheet's spans ship as buttons; `.screen a` paints
+      anchors accent-blue, so links inside cards re-inherit their colours.
+   2. The status dot is a class, not an inline style — a state a tab HAS.
+   3. The editor: resting = the marked read view; click = a textarea with the
+      body-box's exact dress (edits re-judge on Save).
+   4. AI edit: the drawn door's working state — instruction in, proposal out,
+      refusal verbatim at the control.
+   5. The fitband's column count follows the run's real destination count
+      (inline grid-template-columns) — five is the sheet's fixture, not a law. */
+.composer-surface a { color: inherit; }
+.composer-surface .ptab { background: none; border: none; font-family: inherit; }
+.composer-surface .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.composer-surface .dot-ok { background: var(--ok); }
+.composer-surface .dot-warn { background: var(--warn); }
+.composer-surface .dot-err { background: var(--err); }
+.composer-surface .body-read { cursor: text; }
+.composer-surface .body-edit { resize: none; font-family: inherit; width: 100%; }
+.composer-surface .body-edit:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.composer-surface .ai-box { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); padding: 9px 12px; display: flex; flex-direction: column; gap: 8px; }
+.composer-surface .ai-input { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 7px; padding: 8px 10px; font-size: 12.5px; font-family: inherit; color: var(--n-1000); min-height: 52px; resize: none; }
+.composer-surface .ai-input:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.composer-surface .ai-proposal { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 7px; padding: 8px 10px; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; max-height: 180px; overflow-y: auto; }
+.composer-surface .cmp-verb-err { color: var(--err); font-size: 11.5px; }
+.composer-surface .bare { background: none; border: none; padding: 0; cursor: pointer; font: inherit; color: inherit; }
+.composer-surface .bare:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.composer-surface .cmp-retry { color: var(--act); text-decoration: underline; }
+.composer-surface .read-error { border-color: color-mix(in oklab, var(--err) 40%, var(--n-400)); }
+.composer-surface .more-row { display: flex; align-items: center; gap: 7px; width: 100%; font-size: 12.5px; color: var(--n-900); cursor: pointer; }
+.composer-surface .fld-more { background: var(--n-bg); }
+.composer-surface .fitline-err { background: var(--err-subtle); }
+.composer-surface .fitline-warn { background: var(--warn-subtle); }
+.composer-surface .fit-count-err { color: var(--err); }
+.composer-surface .fit-count-warn { color: var(--warn); }
+.composer-surface .fit-why-err { color: var(--err); }
+.composer-surface .fit-why-warn { color: var(--warn); }
