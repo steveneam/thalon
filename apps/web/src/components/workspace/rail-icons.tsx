@@ -45,7 +45,10 @@ export const RAIL_ICONS: Record<string, React.ReactNode> = {
       <path d="M5.5 8.2 7.3 10l3.4-3.6" />
     </Ico>
   ),
-  Calendar: (
+  // Keyed by the CURRENT nav label — this sat as `Calendar` after the
+  // Calendar→Schedule rename, so the Schedule rail item rendered iconless
+  // (found s92: the board screenshot showed it, the analytics lane named it).
+  Schedule: (
     <Ico>
       <rect x="2.5" y="3.5" width="11" height="10" rx="1.5" />
       <path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" />

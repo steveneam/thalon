@@ -87,12 +87,15 @@ second run list. First-run: the Dashboard carries the onboarding setup band
 (§5.1's answer) above its tiles, and every tile's empty state names one CTA.
 P walked: Postiz's home IS its calendar — rejected; Schedule owns ours.
 
-**Board** (`/app/board`) — **RULED s88 (§5.9): retires as a route, becomes the
-Dashboard's Board toggle.** The kanban lens survives as a VIEW of the same
-spine (columns = stages, heat carried; card → its draft/run). W1's Dashboard
-sheet draws the toggle; the route deletes only after the wave's verdict —
-nothing is deleted before its replacement is drawn. Research W1/s89: Jira's
-Summary/Board tabs are the drawn precedent.
+**Board** — **RULED s88 (§5.9), DONE s92: the route retired and became the
+Dashboard's Board toggle** (`/app?view=board`; the old route deleted in the
+same change that wired the state, honoring the ruling's own gate). The kanban
+lens survives as a VIEW of the same spine — the s91 pipeline-board redraw:
+loop-order columns with live counts on heads, the day's in/out as one aligned
+feet row, judge chips on Approve cards, warn dress on the one human gate.
+Homes: `apps/web/src/components/dashboard/board-view.tsx` +
+`board-view-model.ts`; picks read = `apps/web/src/app/api/intel/picks/route.ts`.
+Research W1/s89: Jira's Summary/Board tabs are the drawn precedent.
 
 **Runs** (`/app/runs`) — job: every generation run, outcome-first, with cost and
 error honesty. Joins: run → its children (drafts/video project) → Approve;
@@ -268,7 +271,7 @@ document on any unmarked dead citation and fails on citation rot forever after.
 | surface | route (frontend) | components / lib | sheet | backend truth (engine · db) |
 |---|---|---|---|---|
 | Dashboard | `apps/web/src/app/app/page.tsx` | `apps/web/src/components/dashboard/` | `docs/research/mock-sheets/Dashboard.dc.html` | `packages/db/src/repos/events.ts` · `packages/db/src/repos/approvals.ts` · `packages/db/src/repos/planned-slots.ts` · `packages/db/src/repos/create-runs.ts` |
-| Board | `apps/web/src/app/app/board/page.tsx` | `apps/web/src/components/board/` | `docs/research/mock-sheets/Board.dc.html` | same spine as Dashboard (a lens, §5.9) |
+| Board (Dashboard's toggle state — route RETIRED s92) | `/app?view=board` (the `/app/board` route deleted with the wiring, per §5.9's own gate) | `apps/web/src/components/dashboard/board-view.tsx` + `apps/web/src/components/dashboard/board-view-model.ts` | `docs/research/mock-sheets/Board.dc.html` (the s91 pipeline-board redraw) | same spine as Dashboard (a lens, §5.9) + `apps/web/src/app/api/intel/picks/route.ts` (picks) |
 | Runs | `apps/web/src/app/app/runs/page.tsx` | `apps/web/src/components/runs/` | `docs/research/mock-sheets/Runs.dc.html` | `packages/db/src/repos/fanout-runs.ts` · `packages/db/src/repos/create-runs.ts` (s87 — re-shape pending, §5.8) · `packages/db/src/repos/usage-ledger.ts` |
 | Intel | `apps/web/src/app/app/intel/page.tsx` | `apps/web/src/components/intel/` + `apps/web/src/lib/intel/types.ts` | `docs/research/mock-sheets/Intel.dc.html` | `packages/engine/src/trend/` · `packages/engine/src/search/` · `packages/db/src/repos/monitored-areas.ts` · `packages/db/src/repos/intel-captures.ts` |
 | Leads | `apps/web/src/app/app/leads/page.tsx` | `apps/web/src/components/leads/` | `docs/research/mock-sheets/Leads.dc.html` | `packages/engine/src/leads/` · `packages/engine/src/outreach/` · `packages/db/src/repos/leads.ts` · `packages/db/src/repos/outreach-sends.ts` |

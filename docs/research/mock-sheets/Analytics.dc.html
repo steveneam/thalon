@@ -40,7 +40,25 @@
            nothing else moves.
        (b) TABLE is drawn as the default view; Cards is the second seg option. Sprout
            defaults to cards; our rows are dense data, and the house rule is "dense data
-           = rows, edge-to-edge, never Card-wrapped". -->
+           = rows, edge-to-edge, never Card-wrapped".
+
+     AMENDED s92 — FACEBOOK PROVENANCE RECONCILED to capability truth
+     (lead-applied at the analytics lane's merge gate; derivation of record =
+     agent_handoff/lanes/WRAP-analytics.md §Deliverable 1; truth source =
+     packages/engine/src/social/metrics/capability.ts, facebook entry,
+     verifiedOn 2026-08-01). Meta retired post_impressions_unique on
+     2025-06-15 and the rest of post_impressions* on 2025-11-15. Every
+     Facebook "Reach" number on this sheet therefore rides
+     `post_total_media_view_unique` ("unique media viewers; the surviving
+     unique-audience metric after the 2025 impressions retirement") — NEVER
+     post_impressions_unique — and Facebook "views" means `post_media_view`.
+     The drawn VALUES stand as fixtures; the Reach COLUMN survives (capability
+     keeps audienceLabel "reach" for FB); the chart tip's "3 platforms that
+     report reach" stays TRUE under the new platform word — do not "fix" it.
+     Any future tooltip/provenance copy for FB cells must carry those field
+     names verbatim. The Blog analytics row is fixture-only (blog deploys are
+     not social_publications; no metrics reader exists) — the built surface
+     never renders it, honestly. -->
 <html>
   <head>
     <meta charset="utf-8" />
