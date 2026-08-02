@@ -126,3 +126,74 @@ export function slotsInWeek(slots: PlannedSlotWire[], days: WeekDay[]): PlannedS
     return at >= start && at < end;
   });
 }
+
+/* ── The setup band (W1 sheet amendment — Hex's "Set up your workspace · N of 4",
+   gap §5.1's answer: a dismissible band over existing surfaces, no route, no
+   wizard, every step skippable) ── */
+
+export interface SetupStep {
+  key: "channel" | "profile" | "create" | "approve";
+  /** The step's resting words — "Connect a channel". */
+  label: string;
+  done: boolean;
+  /** Where the step's door leads while it is pending. */
+  href: string;
+  /** The door's words — the FIRST pending step renders these as its link. */
+  doorLabel: string;
+}
+
+export interface SetupState {
+  steps: SetupStep[];
+  doneCount: number;
+  allDone: boolean;
+}
+
+/**
+ * The four steps' truth, each from a real read: a connected integration
+ * card, the active brand profile, any fan-out run, any recorded approval.
+ * The approve door carries the live waiting count (the sheet's "First
+ * approve — 4 waiting →") only when something actually waits.
+ */
+export function setupState(input: {
+  channelConnected: boolean;
+  hasProfile: boolean;
+  hasRun: boolean;
+  hasApproval: boolean;
+  needsYou: number;
+}): SetupState {
+  const steps: SetupStep[] = [
+    {
+      key: "channel",
+      label: "Connect a channel",
+      done: input.channelConnected,
+      href: "/app/settings",
+      doorLabel: "Connect a channel →",
+    },
+    {
+      key: "profile",
+      label: "Make a profile",
+      done: input.hasProfile,
+      href: "/app/profiles",
+      doorLabel: "Make a profile →",
+    },
+    {
+      key: "create",
+      label: "First create",
+      done: input.hasRun,
+      href: "/app/create",
+      doorLabel: "First create →",
+    },
+    {
+      key: "approve",
+      label: "First approve",
+      done: input.hasApproval,
+      href: "/app/approve",
+      doorLabel:
+        input.needsYou > 0
+          ? `First approve — ${input.needsYou} waiting →`
+          : "Walk the approve queue →",
+    },
+  ];
+  const doneCount = steps.filter((s) => s.done).length;
+  return { steps, doneCount, allDone: doneCount === steps.length };
+}

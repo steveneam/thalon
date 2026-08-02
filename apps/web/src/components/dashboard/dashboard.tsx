@@ -9,11 +9,14 @@ import {
   needsYouRows,
   oldestWaitHours,
   publishedRows,
+  setupState,
   slotsInWeek,
 } from "@/components/dashboard/dashboard-model";
 import { NeedsYouCard, type NeedsYouStatus } from "@/components/dashboard/needs-you-card";
+import { SetupBand } from "@/components/dashboard/setup-band";
 import { WeekCard, type WeekCardStatus } from "@/components/dashboard/week-card";
 import { usePulse } from "@/components/workspace/pulse-context";
+import { fetchIntegrationCards } from "@/lib/integrations/client";
 import { fetchTrends } from "@/lib/intel/client";
 import { fetchPlan, fetchStatus } from "@/lib/workspace/client";
 import { timeAgo } from "@/lib/workspace/format";
@@ -24,6 +27,11 @@ import type { TrendsPayload } from "@/lib/intel/types";
 function headerDate(now: Date): string {
   // en-GB gives the sheet's exact grammar: "Friday 25 July".
   return now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+}
+
+/** Dismissal is per-tenant presentation state — localStorage, like the theme toggle. */
+function setupDismissKey(tenantSlug: string): string {
+  return `thalon:setup-dismissed:${tenantSlug}`;
 }
 
 /** "next in 4h" from an ISO instant — quiet when there is honestly no next sweep. */
@@ -53,6 +61,12 @@ export function Dashboard() {
   const [planStatus, setPlanStatus] = useState<WeekCardStatus>("loading");
   const [plan, setPlan] = useState<PlanPayload | null>(null);
   const [trends, setTrends] = useState<TrendsPayload | null>(null);
+  // The setup band's channel step needs the integration cards. null until the
+  // read RESOLVES; a failed read leaves it null and the band simply doesn't
+  // render — a nudge is optional chrome, and a wrong nudge ("connect a
+  // channel" to someone connected) would be worse than none.
+  const [channelConnected, setChannelConnected] = useState<boolean | null>(null);
+  const [setupDismissed, setSetupDismissed] = useState(false);
 
   const loadPlan = useCallback(
     () =>
@@ -88,6 +102,14 @@ export function Dashboard() {
       .catch(() => {
         /* the pulse error card covers engine-down; nothing extra to say */
       });
+    // The setup band's channel truth. Failure leaves the band unrendered.
+    fetchIntegrationCards()
+      .then((cards) => {
+        if (!cancelled) setChannelConnected(cards.some((c) => c.state === "connected"));
+      })
+      .catch(() => {
+        /* band stays absent — see the state's comment */
+      });
     return () => {
       cancelled = true;
     };
@@ -97,6 +119,35 @@ export function Dashboard() {
   const firstRun = pulseStatus === "success" && pulse?.tenant === null;
   const pulseError = pulseStatus === "error";
   const needsYou = pulse?.needsYou ?? 0;
+
+  const tenantSlug = pulse?.tenant?.slug ?? null;
+  useEffect(() => {
+    if (!tenantSlug) return;
+    // The async wrapper keeps the setState out of the effect's own body
+    // (react-hooks/set-state-in-effect — the B1.4 lesson).
+    Promise.resolve(window.localStorage.getItem(setupDismissKey(tenantSlug))).then((stored) => {
+      setSetupDismissed(stored === "1");
+    });
+  }, [tenantSlug]);
+
+  // The band exists only once every step's truth has been READ: the pulse
+  // (profile/runs/approvals) and the integration cards (channel). All four
+  // done, or dismissed, and it is gone — it never blocks, it never nags.
+  const setup =
+    pulseStatus === "success" && pulse?.tenant && channelConnected !== null
+      ? setupState({
+          channelConnected,
+          hasProfile: pulse.profile !== null,
+          hasRun: pulse.counts.runs > 0,
+          hasApproval: pulse.counts.approved > 0,
+          needsYou,
+        })
+      : null;
+  const showSetup = setup !== null && !setup.allDone && !setupDismissed;
+  const dismissSetup = () => {
+    if (tenantSlug) window.localStorage.setItem(setupDismissKey(tenantSlug), "1");
+    setSetupDismissed(true);
+  };
 
   const retryPlan = () => {
     setPlanStatus("loading");
@@ -179,6 +230,10 @@ export function Dashboard() {
           <button
             type="button"
             className="seg-opt"
+            // The toggle's Board state redraws as the PIPELINE BOARD (his s90
+            // ruling); it wires IN PLACE here once his verdict on the drawn
+            // sheet lands. Until then the still-live /app/board route carries
+            // the view — the toggle is never a dead door.
             title="The same day as pipeline columns"
             onClick={() => router.push("/app/board")}
           >
@@ -186,6 +241,8 @@ export function Dashboard() {
           </button>
         </div>
       </div>
+
+      {showSetup && setup && <SetupBand state={setup} onDismiss={dismissSetup} />}
 
       <div className="tiles">
         <Link href="/app/intel" className="tile tile-link" style={{ color: "inherit" }}>
