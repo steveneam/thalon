@@ -17,6 +17,15 @@ server stopped first. No lanes ran (the analytics lane awaits his GO).
 boot + the W2 verdict of record — covers the s90b-redrawn Create set and
 the s90c Composer iteration, per the scope the s90 wrap recorded).
 
+**s91b — POST-WRAP, his text (verbatim): "board approved and go
+analytics. wrap it all up for next session, with your plan (or parrallel
+worktree)."** Both banked same turn (ledger row 11 + library §Pipeline
+board + COORDINATION §s91 close): the **pipeline board is VERDICTED**
+(toggle wiring + `/app/board` deletion unblocked, one change) and the
+**analytics lane GO is ON RECORD** (launches at the s92 boot, no re-ask;
+kickoff written at the boot per rule 12). The parallel-worktree shape he
+asked for is the s92 plan below.
+
 ## WHAT SHIPPED
 
 **W2 VERDICT BANKED (`2af1611`):** ledger rows 5/6/16/19 → VERDICTED;
@@ -73,24 +82,44 @@ renders flat/bandless because that is TRUE (no create rows, nothing live).
 
 ## Resume prompt (session 92, syd4)
 
-**Resume · Thalon** — s91 banked the W2 verdict, drew the Pipeline board
-(verdict OPEN, asked by text), and shipped all three W1 builds lead-direct
-(Approve+reject-reason door · Dashboard setup band · Runs re-shape). Plan
-of record (runway §9 + COORDINATION §s91), in order:
-1. **If his "board approved" text landed:** wire the Dashboard toggle's
-   Board state to the pipeline board (in-place render) **and delete the
-   /app/board route in the same change** — its replacement is then drawn
-   and wired. If a change is named instead, redraw first.
-2. **B-create.4 — the Composer route + wizard build** (W2 verdicted at the
-   s91 boot; exact-mock from `Composer.dc.html` s90c iteration +
-   `Create Wizard.dc.html` + Create home + Sites + Library rebuilds per
-   the W2 set — Create home first if sequencing is needed; the
-   `/app/transcription` route retires with the Library rebuild).
-3. **If his "GO analytics" text landed:** launch the analytics-fixture
-   reconciliation lane (COORDINATION §s87 lead item 1; Mode B via
-   scripts/launch-lane.sh). No text = stays queued, never re-ask.
-If NO verdict text arrived at all: take W3 draw prep or B-create.4 anyway
-(W2 is verdicted) — never wait.
+**Resume · Thalon** — s91 banked the W2 verdict, drew the Pipeline board,
+shipped all three W1 builds lead-direct, and **both post-wrap verdicts
+LANDED by text: "board approved and go analytics"** — nothing is waiting
+on him. **The s92 plan of record (COORDINATION §s91 close), his
+parallel-worktree ask honored — two tracks, disjoint by construction:**
+
+**LANE (launch AT THE BOOT, GO already on record — no re-ask):**
+`analytics` — write the kickoff at the boot (rule 12 re-ground first:
+check `capability.ts`'s current Facebook metric vocabulary + what
+`/api/...` reads exist for publication_metrics), then Mode B via
+`scripts/launch-lane.sh`, worktree, strongest-tier pin, vitest
+`--maxWorkers=2`. Scope: derive the corrected Facebook fixture values
+(capability.ts is the truth — the sheet still shows retired
+`post_impressions*`) + the Analytics BUILD (`Analytics.dc.html` →
+`/app/analytics`, exact-mock, surface-scoped analytics.css per README
+rule 6). The worktree cannot shoot its own work — the LEAD is the
+screenshot-vs-sheet merge gate and applies the sheet's fixture edit there
+(sheets stay lead-owned). Worktree prep: hand `ln -s` the node_modules
+set (junctions no-op on Linux), copy env, NEVER npm install in the lane,
+`next dev` can't run inside it.
+
+**LEAD TRACK, in order, while the lane runs:**
+1. **Wire the Dashboard toggle's Board state as the pipeline board and
+   DELETE `/app/board` in the same change** (verdicted; the board's reads:
+   intel picks · live/generating runs · judge state · approve queue ·
+   planned slots · published — every count real or visibly unresolved,
+   feet = the day's in/out, the drawn sheet is the spec). Delete
+   `Board`'s route + components as rebuilt; screenshot-vs-sheet the
+   toggle's Board state against `Board.dc.html`.
+2. **B-create.4 — Composer route + wizard build** (W2 verdicted):
+   exact-mock from `Composer.dc.html` (the s90c iteration is the spec) +
+   `Create Wizard.dc.html`; Create home rebuild to the s90b ask-card
+   sheet rides the same arc. Sites + Library rebuilds (the
+   `/app/transcription` retirement) go s93 if time runs short — never
+   rushed past their gates.
+3. **Merge gate for the lane** (rebase → capped verify green → lead
+   screenshot-vs-sheet → merge; the literal `npm run verify` single-lane
+   AFTER the merge, dev server stopped).
 
 **Read first:** CLAUDE.md → this file → runway §9 → COORDINATION §s91 →
 `docs/workspace/spec.md` (Create/Composer contracts) → the W2 sheets →
@@ -103,11 +132,12 @@ If NO verdict text arrived at all: take W3 draw prep or B-create.4 anyway
 ▎ ▸ **⛔ HIS s90 CONSTRAINT IS LIVE: no console visits this week** ("this
 week" dates from 2026-08-01 — re-test, don't assume expired). Console
 batch stays PARKED on NEEDS-STEVEN.
-▎ ▸ **TWO VERDICTS OPEN, both one-word texts:** "board approved" (pipeline
-board — unblocks the toggle wiring + Board route deletion) · "GO
-analytics" (the lane). Neither blocks anything else.
-▎ ▸ **The /app/board route is ALIVE ON PURPOSE** — deletion is gated on
-the board verdict + toggle wiring landing together. Do not delete early.
+▎ ▸ **NO VERDICTS OPEN** — both landed post-wrap ("board approved and go
+analytics"). The board wiring + `/app/board` deletion and the analytics
+lane are UNBLOCKED; the lane's approval covers exactly the named run
+(reviewer/fix-round resumes included), nothing else.
+▎ ▸ **The /app/board route deletes ONLY in the same change that wires the
+toggle's Board state** — never before, never separately.
 ▎ ▸ **`/api/create/runs` is NEW** (read-only, no schema change) — dev
 create_runs is empty so Runs renders flat; the first real Create run
 exercises the parent grammar live.

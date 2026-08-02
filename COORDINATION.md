@@ -192,7 +192,34 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
-## Sprint 9 / s91 — OPEN (boot 2026-08-02: *"gogogo. you have my approval on W2 too"*)
+## Sprint 9 / s91 — **CLOSED** (boot 2026-08-02: *"gogogo. you have my approval on W2 too"*; wrap verify exit 0, 3154/9)
+
+**POST-WRAP, HIS TEXT (2026-08-02, verbatim): "board approved and go
+analytics. wrap it all up for next session, with your plan (or parrallel
+worktree)."** Both banked same turn:
+
+1. **PIPELINE BOARD VERDICTED** — the s92 lead track wires the Dashboard
+   toggle's Board state to the drawn board and **deletes `/app/board` in
+   the same change** (its replacement is now drawn AND verdicted; the
+   deletion gate is open).
+2. **ANALYTICS LANE GO ON RECORD** — launches at the s92 boot, no re-ask
+   (the s73-close pattern). Kickoff written AT the boot (rule 12: re-ground
+   before speccing). Scope as GO'd: reconcile the Analytics sheet's
+   Facebook fixture to `capability.ts` truth (§s87 lead item 1), then the
+   Analytics build (`Analytics.dc.html` → `/app/analytics`, exact-mock,
+   the runway's s92 lane row). Mode B via `scripts/launch-lane.sh`,
+   worktree, strongest-tier pin, vitest capped `--maxWorkers=2`; the
+   worktree cannot shoot its own work (ratchet) — the LEAD is the
+   screenshot-vs-sheet merge gate, and the lead applies the sheet's
+   fixture edit at that gate (sheets stay lead-owned; the lane derives the
+   corrected values).
+
+**s92 SHAPE (parallel by construction, disjoint file sets):** lead =
+Dashboard board-state wiring + `/app/board` deletion, then **B-create.4**
+(Composer route + wizard build, W2-verdicted) — apps/web dashboard/create/
+composer surfaces. Lane = analytics — apps/web analytics (new) + engine
+capability reads (read-only). No shared files; contracts untouched by
+both (any window need = STOP and report, per the standing tripwire).
 
 **HIS W2 VERDICT LANDED AT THE BOOT** — "you have my approval on W2 too"
 covers all four W2 sheets (Create home · Create wizard · Sites · Library)
