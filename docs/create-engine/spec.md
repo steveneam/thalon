@@ -226,7 +226,13 @@ exist and records the run.
 3. **Composer** (sheet exists, s86): gains the run scope (header names the run, tab
    set = run platforms), the generating→ready state, and the AI-edit door beside the
    edit rail. Popout preview state = pass 3 (already queued).
-4. Routes: `/app/create` (exists) · `/app/create/run/[id]` → Composer scoped to run.
+4. Routes: `/app/create` (exists; s90b ask-card rebuild BUILT s93) ·
+   `/app/create/guided` → the wizard (BUILT s93) · `/app/create/run/[id]` → Composer
+   scoped to run (BUILT s92). The wizard's doors: `POST /api/create/plan` (pure
+   plan preview — R6's derivation, zero spend) and `POST /api/create` → `runCreate`
+   (the sequence gate enforced SERVER-side via `lib/create/families.ts`; executable
+   ratchet `apps/web/src/app/api/create/route.test.ts`). Media attach is a stated
+   deferral on the wizard (the dialog lands with the media pass — never a dead door).
    The Approve re-entry links here.
 
 ### Video + Postiz specifics (founder: "of course include")
