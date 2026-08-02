@@ -6,12 +6,18 @@ import type {
   CreateFamily,
   HorizonPayload,
   IntelCapture,
+  IntelPickWire,
   TargetRow,
   TrendsPayload,
 } from "./types";
 
 export async function fetchTrends(): Promise<TrendsPayload> {
   return asJson<TrendsPayload>(await fetch("/api/intel/trends"));
+}
+
+/** The pipeline board's Intel-picks read — promoted trends only, newest last. */
+export async function fetchIntelPicks(): Promise<IntelPickWire[]> {
+  return (await asJson<{ picks: IntelPickWire[] }>(await fetch("/api/intel/picks"))).picks;
 }
 
 /** Run one live sweep now (B6.5) — driver refusals surface verbatim as the thrown message. */

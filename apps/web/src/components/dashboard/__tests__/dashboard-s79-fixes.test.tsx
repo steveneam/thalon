@@ -49,7 +49,9 @@ describe("Dashboard — s79 verified fixes", () => {
 
     // Measured live before this fix: Enter here landed on
     // /app/approve?run=…&draft=… instead of the Board the operator was on.
-    expect(push).toHaveBeenCalledWith("/app/board");
+    // (s92: the toggle switches Home's state in place — /app?view=board —
+    // since the /app/board route retired with the pipeline-board wiring.)
+    expect(push).toHaveBeenCalledWith("/app?view=board");
     expect(push.mock.calls.every(([href]) => !String(href).includes("draft="))).toBe(true);
   });
 

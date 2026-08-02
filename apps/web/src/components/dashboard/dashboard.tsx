@@ -12,6 +12,7 @@ import {
   setupState,
   slotsInWeek,
 } from "@/components/dashboard/dashboard-model";
+import { BoardView } from "@/components/dashboard/board-view";
 import { NeedsYouCard, type NeedsYouStatus } from "@/components/dashboard/needs-you-card";
 import { SetupBand } from "@/components/dashboard/setup-band";
 import { WeekCard, type WeekCardStatus } from "@/components/dashboard/week-card";
@@ -34,6 +35,22 @@ function setupDismissKey(tenantSlug: string): string {
   return `thalon:setup-dismissed:${tenantSlug}`;
 }
 
+export type HomeView = "overview" | "board";
+
+/**
+ * The seg's state rides the URL (`/app?view=board`) so the board stays
+ * linkable after the /app/board route's retirement. The PAGE resolves the
+ * initial view from its own searchParams — server and client render the same
+ * state on a deep link (a `typeof window` branch here was a measured
+ * hydration mismatch) — and popstate re-reads it so back/forward re-cross
+ * the toggle.
+ */
+function readHomeView(): HomeView {
+  return new URLSearchParams(window.location.search).get("view") === "board"
+    ? "board"
+    : "overview";
+}
+
 /** "next in 4h" from an ISO instant — quiet when there is honestly no next sweep. */
 function nextIn(iso: string | null, now: Date): string | null {
   if (!iso) return null;
@@ -52,7 +69,7 @@ function nextIn(iso: string | null, now: Date): string | null {
  * real-looking zero. The first-run and engine-unreachable states keep
  * their honesty cards in the sheet's card grammar.
  */
-export function Dashboard() {
+export function Dashboard({ initialView = "overview" }: { initialView?: HomeView }) {
   const { pulse, status: pulseStatus, refresh } = usePulse();
   const router = useRouter();
 
@@ -67,6 +84,21 @@ export function Dashboard() {
   // channel" to someone connected) would be worse than none.
   const [channelConnected, setChannelConnected] = useState<boolean | null>(null);
   const [setupDismissed, setSetupDismissed] = useState(false);
+  const [view, setView] = useState<HomeView>(initialView);
+
+  // Back/forward re-crosses the toggle — the URL stays the one truth of which
+  // state is on screen (the toggle is a lens, and lenses must be reversible).
+  useEffect(() => {
+    const onPop = () => setView(readHomeView());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const showView = (next: HomeView) => {
+    if (next === view) return;
+    setView(next);
+    router.push(next === "board" ? "/app?view=board" : "/app");
+  };
 
   const loadPlan = useCallback(
     () =>
@@ -218,31 +250,31 @@ export function Dashboard() {
         </section>
       )}
 
+      {/* Each state renders ITS sheet's header exactly: Overview puts the date
+          beside Today and the seg on the right (Dashboard.dc.html); Board puts
+          the seg beside Today and the loop hint on the right (Board.dc.html).
+          The seg's buttons are buttons, not Links: `.screen a` paints anchors
+          accent-blue and workspace.css is the shell contract — the week card's
+          Today/This week control sets the same precedent. */}
       <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
         <h1 className="t-headline">Today</h1>
-        <span className="t-label">{headerDate(now)}</span>
+        {view === "overview" && <span className="t-label">{headerDate(now)}</span>}
+        {view === "board" && <HomeSeg view={view} onShow={showView} />}
         <div style={{ flex: 1 }} />
-        <div className="seg">
-          <span className="seg-opt on">Overview</span>
-          {/* A button, not a Link: `.screen a` paints anchors accent-blue and
-              workspace.css is the shell contract — the week card's Today/This
-              week control sets the same precedent. */}
-          <button
-            type="button"
-            className="seg-opt"
-            // The toggle's Board state redraws as the PIPELINE BOARD (his s90
-            // ruling); it wires IN PLACE here once his verdict on the drawn
-            // sheet lands. Until then the still-live /app/board route carries
-            // the view — the toggle is never a dead door.
-            title="The same day as pipeline columns"
-            onClick={() => router.push("/app/board")}
-          >
-            Board
-          </button>
-        </div>
+        {view === "overview" ? (
+          <HomeSeg view={view} onShow={showView} />
+        ) : (
+          <span className="t-label">
+            left to right is the loop · cards move when the work moves · one human gate — Approve
+          </span>
+        )}
       </div>
 
-      {showSetup && setup && <SetupBand state={setup} onDismiss={dismissSetup} />}
+      {view === "board" ? (
+        <BoardView plan={plan} planStatus={planStatus} onRetryPlan={retryPlan} now={now} />
+      ) : (
+        <>
+          {showSetup && setup && <SetupBand state={setup} onDismiss={dismissSetup} />}
 
       <div className="tiles">
         <Link href="/app/intel" className="tile tile-link" style={{ color: "inherit" }}>
@@ -398,6 +430,31 @@ export function Dashboard() {
             : "Reading the ledger…"}
         </span>
       )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/** The Overview | Board lens switch — one control, drawn wherever its state's sheet puts it. */
+function HomeSeg({ view, onShow }: { view: HomeView; onShow: (next: HomeView) => void }) {
+  return (
+    <div className="seg">
+      <button
+        type="button"
+        className={view === "overview" ? "seg-opt on" : "seg-opt"}
+        onClick={() => onShow("overview")}
+      >
+        Overview
+      </button>
+      <button
+        type="button"
+        className={view === "board" ? "seg-opt on" : "seg-opt"}
+        title="The same day as pipeline columns"
+        onClick={() => onShow("board")}
+      >
+        Board
+      </button>
     </div>
   );
 }

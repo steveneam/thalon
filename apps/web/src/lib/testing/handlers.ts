@@ -387,6 +387,11 @@ export const handlers = [
   // The staged fixture run rides last (oldest) so the classic fixtures keep auto-selecting first.
   http.get("/api/runs", () => HttpResponse.json({ runs: [...fixtureRuns, getStagedRunForFeed()] })),
 
+  // The board state's two other reads — deliberately empty and honest (the
+  // s82 C1/C2 pattern above): a test that cares registers its own.
+  http.get("/api/create/runs", () => HttpResponse.json({ runs: [], usageToday: null })),
+  http.get("/api/intel/picks", () => HttpResponse.json({ picks: [] })),
+
   http.get("/api/runs/:runId/drafts", ({ params }) => {
     const staged = listStagedRunDrafts(params.runId as string);
     if (staged) return HttpResponse.json({ drafts: staged });

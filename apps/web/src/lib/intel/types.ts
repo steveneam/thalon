@@ -136,6 +136,23 @@ export interface HorizonPayload {
   demo: boolean;
 }
 
+/**
+ * One promoted trend as the pipeline board's Intel-picks card (s91 sheet
+ * correction: the column holds PICKS only — an unpicked trend lives on
+ * Intel). Read-only projection of a `trend_promote` capture; the capture
+ * stays the record.
+ */
+export interface IntelPickWire {
+  captureId: string;
+  at: string;
+  /** The operator's picked title where the dossier had one, else the item's own text. */
+  title: string;
+  family: CreateFamily;
+  score: number | null;
+  source: string;
+  thumbnailUrl: string | null;
+}
+
 /** Operator intel actions captured for the feedback loop (dismiss/promote → eval rows in pass 3). */
 export interface IntelCapture {
   id: string;
