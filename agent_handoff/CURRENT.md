@@ -2,81 +2,85 @@
 
 ## Stamp
 
-2026-08-02 (session 93, syd4 — **zero credit spend, zero posts, zero founder
-hands**). Two founder directives ran this session: **the Mobbin re-check pass
-over all six built surfaces** ("ensure the surfaces that you made are indeed
-world class design") and **the stamped s93 plan** ("continue with the plan you
-had for this session too") — the B-create.4 remainder shipped: **Create home
-rebuilt to the s90b ask-card sheet + the wizard built at `/app/create/guided`,
-both exact-mock, lead-direct.** Plus his staging ask answered: **preview
-reachable, carrying the s92 code.** Verify on main at the wrap: **exit 0,
-3251 passed / 9 skipped (+24 over s92), 0 lint errors** — the literal
-`npm run verify`, single-lane, dev server stopped first.
+2026-08-02 (session 94, syd4 — **zero credit spend, zero posts, zero founder
+hands**). Three things ran: (1) the s93-stamped builds — **Sites + Library
+rebuilt exact-mock to their W2-verdicted sheets, lead-direct, and
+`/app/transcription` retired** (the s74 rename reversed by §5.3, exactly on
+the boundary the s74 note itself drew); (2) his mid-session direction — **the
+s95 video + calendar plan re-grounded and STAMPED** (specs below); (3) the
+boot caught two s93 doc edits the wrap commit had stranded (`306dea0`).
+Verify on main at the wrap: **exit 0, 3265 passed / 9 skipped (+14 over
+s93), 357 files** — the literal `npm run verify`, single-lane, dev server
+stopped first.
 
 ## WHAT SHIPPED
 
-**MOBBIN RE-CHECK (`7a8ba72`; record = `ux-refinement-program.md` §s93
-re-check):** 24 fresh references against the LIVE renders (dark+light, real
-dev data). Dashboard/Board/Approve/Runs/Analytics **validated** — rejects
-recorded (greeting personas · selection-bulk · duration-trend-on-n=2 ·
-Dub/Ghost's real-reading zeros = the rule-5 anti-pattern shipped at scale).
-**Two live defects found and fixed with test rows:** raw-hour ages
-("oldest has waited 380h" hid sixteen days) → shared `waitLabel()` rolls to
-days at 48h, the recorded 26h-not-1d decision preserved below it (dashboard
-tile · board cards · week-card wait lane); Approve's scope-note singular
-("1 staged draft advance**s** through **its** own flow"). Composer's populated
-state stays honestly uncheckable behind the first-real-run gate.
+**SITES (W2 amendment):** verdict pill ONTO the shot — with an
+opaque-backing named adaptation, because the ok/warn subtle channels are ~13%
+alpha tints and the state word VANISHED over real heroes (caught in the
+browser pass, invisible to jsdom); truth line under every name ("previews
+only · minted {d MMM}" — the catalog records no deploy state or hostname, so
+no card invents an address); h1 pills → the state-filter seg in the VERDICT
+vocabulary (census counts); "newest first" (true of `parseCatalog`); footer
+blog door → the published ledger on Settings. Shot 132px + meta per the
+amended sheet. 43 tests.
 
-**CREATE HOME REBUILT (`cf5a0c0`):** `/app/create` = the s90b ask-card
-exact-mock — headline question · ONE centered 740px ask-card (family seg ·
-pick-chip · Start guided · Generate in its own bottom row) · run-line of REAL
-facts (profile platforms + version · every gate on · the family's true word)
-whose expanded state = the kept s90a plan card (s74 keeper shape) · sugg chips
-= REAL Intel picks through the existing `?ctx=` spine (empty/failed reads say
-so) · recent-line = the feed's newest run with its Composer door. Old
-prompt-hero/two-card layout DELETED. Probed: headline at 172 · recent-line
-bottom 916 ≤ 940 (the sheet's own measure). 26 tests, every honesty pin
-carried (unread≠empty · doors only where they exist).
+**LIBRARY (§5.3 rebuild):** ONE Library at `/app/library`
+(`components/library/`, `.library-surface`); `/app/transcription` DELETED —
+404s live — rail/palette/activity/pipeline rewired, `IconLibrary`. **The
+rail hard-codes label lists** — "Transcription" resolved to null SILENTLY;
+caught in the browser pass. `/api/library` widened to every non-`prompt`
+kind with `kind` on the wire; the dev shelf proved the lens at once: **189
+Intel-admitted exemplar captures + 1 video + 2 voice** behind qtabs with
+real counts. Free|AI-enhance seg IN the band (per-ingest reset, s79; enhance
+unfolds its cost words BEFORE the run); transcript doors gate on kind
+(server-guarded; d/↵ inert on non-transcript rows); rows bounded at 50 with
+a stated "+N more" foot; thumb legends read the row's kind; article/text
+ingest = STATED deferral (`ingestWebUrl` has zero callers). 52 tests; every
+s79/s86 pin carried. README exception updated; workspace spec Sites+Library
+blocks + ledger rows 16/19 = BUILT s94.
 
-**CREATE WIZARD BUILT (same commit):** `/app/create/guided` = the s90b-amended
-sheet exact-mock — accordion slots (What → Platforms → Sources & media →
-Review plan), brief TUCKED behind its line. **Platform chips carry
-`deriveCreatePlan`'s OWN verdicts** via new pure **`POST /api/create/plan`**
-(R3 refusals-before-spend; live render: TikTok "connect to publish", verbatim
-refusal on the title). Review = the derived plan (refusals verbatim · real
-judge gates g1/g3_screen/g3_final · cost honesty incl. `unestimated` words).
-**Generate → new `POST /api/create` → `runCreate`** — the founder's sequence
-gate enforced SERVER-side (`lib/create/families.ts` read at the route;
-executable ratchet `api/create/route.test.ts` pins post/page → 409 verbatim);
-success doors to `/app/create/run/[runId]`. **Media dialog = STATED deferral**
-(lands with the media pass) — a fact line, never a dead button. 13 surface
-tests + 4 route-gate tests.
+**THE s95 PLAN (his direction, stamped):** re-grounded FIRST (rule 11/12 —
+inherited claims re-tested): the three video sheets EXIST since s72 and
+their surfaces are BUILT to them, so the work is AMENDMENT passes, not first
+draws; `/app/calendar` is GONE (Schedule shipped s86), so "calendar" = the
+Schedule refinement pass. **Plan of record =
+`docs/video-arc/spec.md` §"The s95 execution plan"** (status corrections +
+phases + rule-12 paths) **+ NEW `docs/schedule-refinement/spec.md`** (S1
+Later thumbs-in-cells · S2 Sprout month grammar · S3 "+N more" · S4 sheet +
+archive hygiene). Mobbin MCP errored twice from this box — fresh pulls ride
+the s95 design block (s93 re-check precedent); the s85/s87 banked references
+are the floor and are sufficient to draw.
 
-**STAGING (his ask):** `preview.swordfish.cfd` — 401 without edge auth (the
-stealth posture working), 200 with it on landing + `/app` + approve +
-analytics; **auto-deploy has staging on s92 code** (`/app/board` 404s as
-deleted, board toggle + Composer routes serve). The s93 builds roll with the
-next deploy. No swordfish coordination was needed.
+## Resume prompt (session 95, syd4)
 
-## Resume prompt (session 94, syd4)
+**Resume · Thalon** — s94 shipped Sites + Library and stamped the s95 plan.
+**Nothing awaits a verdict yet** — s95 CREATES the one verdict ask. The
+session is the plan's Phase 1 + 2, then Phase 3 on his GO:
 
-**Resume · Thalon** — s93 ran the Mobbin re-check (2 fixes, 4 surfaces
-validated) and shipped the Create home + wizard rebuilds. **Nothing awaits a
-verdict.** s94 is a build session:
+1. **Phase 1 — ONE design block, lead-direct (Fable 5, canvas `f5d304cb` →
+   re-export to `docs/research/mock-sheets/`):** amend `Videos Overview` ·
+   `Video Dossier` · `Videos` (editor p1: thumbnails/track-colour/credit
+   badges) · `Schedule` (S1–S3) from the banked references
+   (ledger §Videos Overview/§Video Dossier/§Schedule). Open with a fresh
+   Mobbin pull per surface (the MCP errored s94 — retry there). Archive
+   `Calendar.dc.html` per S4.
+2. **Phase 2 — ONE W3 verdict ask** covering all four amended sheets (his
+   hands-free week: a single texted word).
+3. **Phase 3 on GO — builds in order:** editor p1 deltas → Overview/Dossier
+   deltas + V1's five affordances (Decision-5 pre-check FIRST: named-variant
+   + delete/restore must come from `videoProjects`/`videoTakes`/`videoCuts`
+   rows — a missing column is a contract-window ask, flagged, never built
+   around) → Schedule deltas (event-media read widening `(new)`, no schema
+   change). Zero credit spend — renders replay fixtures (V10).
+4. **Interleavable, its own gate:** B-create.5 dogfood (first real Create
+   run, bluesky) — needs a spend statement + his GO. Phase 4 (V3
+   script-first gate · pass-3 states) queues behind Phase 3.
 
-1. **Sites + Library rebuilds, lead-direct** (the `/app/transcription`
-   retirement rides Library's) — sheets W2-VERDICTED s91; existing surfaces
-   `components/sites/` + `components/transcription/` replace per DOCTRINE 0.
-2. **B-create.5 dogfood stays the gate** for every populated state (Composer ·
-   Runs create-parent grammar · Analytics bands · the wizard's real run) — a
-   real Create run, bluesky test grant; never seed fake runs to screenshot.
-3. **Composer follow-ons stay gated:** popout = pass 3 · media tools = media
-   pass (the wizard's Select-media line arms then too) · first-comment = queue
-   settings seat · G1 = D2.
-
-**Read first:** CLAUDE.md → this file → COORDINATION §s93 →
-`docs/research/ux-refinement-program.md` (§s93 re-check + rows 5/6) →
-`docs/create-engine/spec.md` §Routes → runway §9.
+**Read first:** CLAUDE.md → this file → COORDINATION §s94 →
+`docs/video-arc/spec.md` (§s95 plan) → `docs/schedule-refinement/spec.md` →
+`docs/research/ux-refinement-program.md` (§video sections + §Schedule refs)
+→ runway §9.
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
@@ -84,53 +88,56 @@ verdict.** s94 is a build session:
 
 ▎ ▸ **⛔ HIS s90 CONSTRAINT: no console visits this week** (dated 2026-08-01 —
 re-test, don't assume expired). Console batch stays PARKED on NEEDS-STEVEN.
-▎ ▸ **The wizard's Generate spends when clicked** (metered judge calls ride
-every dispatch) — it is door-gated and plan-previewed, but a LIVE click is a
-real run; the s93 gate was verified with faked dispatch in tests, zero spend.
-▎ ▸ **The s90 windows stay frozen** — s93 touched neither packages/db nor
-packages/contracts (both new routes read existing engine seams; the plan
-route is pure).
-▎ ▸ **impeccable hook notes:** create.css + wizard.css join the SHEET-VERBATIM
-ports (DOCTRINE 0) — radius/font findings intentional, not suppressed.
+▎ ▸ **Design work = Fable 5 direct, never delegated** (standing s51). The
+Phase-1 block is the lead's own hands; lanes only at Phase 3, each launch on
+fresh approval.
+▎ ▸ **The wizard's Generate spends when clicked** — door-gated, but a LIVE
+click is a real run. **Zero credits spent to date.**
+▎ ▸ **The s90 windows stay frozen** — s94 touched neither packages/db nor
+packages/contracts; the s95 plan keeps it that way (Decision-5 flag path if
+the video rows disagree).
+▎ ▸ **impeccable hook notes:** sites.css font-size findings = SHEET-VERBATIM
+ports (DOCTRINE 0), intentional, not suppressed; library.css scanned clean.
 ▎ ▸ **Dev server stopped at wrap**; 8899 preview + sweeper user units keep
 running — NEVER hand-start the sweeper.
-▎ ▸ **Traps worth keeping:** Bash cwd PERSISTS (`git -C`/absolute paths) ·
-`npx vitest run` has NO `--project web` (path filters work) · vitest doesn't
-typecheck (`npx tsc --noEmit -p apps/web`) · theme = localStorage
-`thalon-workspace-mode` (default dark — flip it for light shots, not
-prefers-color-scheme) · react-hooks/set-state-in-effect is a lint ERROR: use
-the stamped-key derived-loading pattern (wizard-surface shows it).
-▎ ▸ **⛔ SEQUENCE GATE unchanged AND now executable:** post/page generation
-409s at `POST /api/create` until his GO (flip `lib/create/families.ts`, retire
-the two route-test pins with it); bluesky armed for testing on his recorded
-words; queue consumer's key EMPTY; youtube CANNOT arm. **Nothing posted. Zero
-credits spent.**
-▎ ▸ **Standing:** stealth · hermes-relay = founder · design lead-direct ·
-every lane/subagent launch needs fresh founder approval · GATE ON EXIT CODE ·
-verify-on-main = THE gate, re-run after your LAST commit · rules 10/11/12 ·
-platform logins live durably in `.context` · no AGPL embedded · wrap =
-verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (this wrap) · staging on s92 code, s93 rolls with
-the next auto-deploy · four social channels connected · dev PG live · edge
-auth creds = `.context/staging-secrets-from-swordfish.md`.
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
-s94 boots on "gogogo" alone (this file carries the whole plan; no verdicts
-are open).
+▎ ▸ **Traps worth keeping:** Bash cwd PERSISTS (`git -C`/absolute paths — bit
+again s94) · the RAIL hard-codes label lists (`workspace-rail.tsx` — a
+renamed nav surface vanishes SILENTLY) · alpha-tint pills are illegible over
+photos (sites.css opaque-backing = the pattern) · vitest doesn't typecheck
+(`npx tsc --noEmit -p apps/web`) · theme = localStorage
+`thalon-workspace-mode` (default dark) · Mobbin MCP can error from this box —
+retry in-session before concluding anything.
+▎ ▸ **⛔ SEQUENCE GATE unchanged AND executable:** post/page generation 409s
+at `POST /api/create` until his GO (flip `lib/create/families.ts`); bluesky
+armed for testing on his recorded words; queue consumer's key EMPTY; youtube
+CANNOT arm. **Nothing posted. Zero credits spent.**
+▎ ▸ **Standing:** stealth · hermes-relay = founder · every lane/subagent
+launch needs fresh founder approval · GATE ON EXIT CODE · verify-on-main =
+THE gate · rules 10/11/12 · platform logins live durably in `.context` · no
+AGPL embedded · wrap = verify+commit+push+restamp.
+▎ ▸ **State:** main = origin (this wrap) · staging rolls s93+s94 with the
+next auto-deploy (`/app/transcription` will 404 there too — correct) · four
+social channels connected · dev PG live · edge auth creds =
+`.context/staging-secrets-from-swordfish.md`.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and
+pushed; s95 boots on "gogogo" alone (this file + the two specs carry the
+whole plan; the only verdict is the one s95 itself creates).
 
 ## Pointer
 
-CLAUDE.md → this file → COORDINATION.md (§s93) → `docs/workspace/spec.md`
-→ `docs/create-engine/spec.md` → `docs/research/ux-refinement-program.md`
-→ NEEDS-STEVEN.md (PARKED header) →
+CLAUDE.md → this file → COORDINATION.md (§s94) → `docs/video-arc/spec.md` →
+`docs/schedule-refinement/spec.md` → `docs/workspace/spec.md` →
+`docs/research/ux-refinement-program.md` → NEEDS-STEVEN.md (PARKED header) →
 `docs/research/prior-art-portal-automation-s84.md` (BEFORE ANY PORTAL WORK).
 
-## Delta (session 92)
+## Delta (session 93)
 
-s92 merged the analytics lane, wired the pipeline board and armed the
-Composer; it deferred the Create home + wizard builds to s93 with the sheets
-already verdicted. s93 spent exactly that: the re-check directive first (the
-founder's world-class bar applied to what was already built — two real
-defects surfaced by looking, both fixed with tests), then the two builds, and
-the wizard closed the loop the spec drew — brief → derived plan → gated run →
-the Composer. What remains is the stated s94 pair (Sites · Library) and the
-dogfood run that lights every populated state.
+s93 ran the Mobbin re-check and shipped the Create home + wizard; s94 spent
+its stamped plan exactly — and the browser pass earned its keep twice (the
+rail's silent null on the renamed seat; the alpha-tint pills vanishing over
+real heroes — both traps now on record). Mid-session the founder re-aimed
+s95 at the video + calendar arc; the re-grounding caught that the inherited
+frame ("build the video surfaces", "rebuild calendar") was wrong on both
+counts — sheets exist and are built, calendar is already Schedule — so s95
+is amendment passes + one verdict, not fresh construction. What remains
+after that: the dogfood run, the article-ingest door, and Phase 4.

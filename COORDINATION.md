@@ -192,6 +192,27 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s94 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap = this session's verify)
+
+**The s93-stamped plan ran as written, founder-hands-free (both sheets were
+W2-VERDICTED s91 — nothing was asked of him): the Sites + Library rebuilds,
+lead-direct, exact-mock.** Boot also caught and committed two s93 doc edits
+the wrap commit had stranded (`306dea0` — the stamp's "tree clean" claim was
+wrong; the ledger rows 5/6 + the Create spec's routes block).
+
+| track | outcome |
+|---|---|
+| Sites — the W2 amendment applied (lead 1) | **SHIPPED** — verdict pill ONTO the shot with an **opaque-backing named adaptation** (the ok/warn subtle channels are ~13% alpha tints; over real heroes the state word vanished — seen live in the browser pass, fixed in `sites.css` so the resting look composites identically); per-card truth line ("previews only · minted {d MMM}" — the catalog records no deploy state or hostname, so no card invents an address; the live/hostname branch waits on a deploy fact); h1 pills → the **state-filter seg in the VERDICT vocabulary** (All 20 · Approved 16 · Awaiting verdict 4 on dev — census counts, the sheet's Live/Draft words wait on data that exists to read); "newest first" (true of `parseCatalog`); footer blog door → the published ledger on Settings (the Dashboard's own destination). Shot 150→132 + meta paddings per the amended sheet. 43 tests green; dark+light screenshots clean at 1440×940, no horizontal scroll. |
+| Library — the §5.3 rebuild + `/app/transcription` retirement (lead 2) | **SHIPPED** — ONE Library at `/app/library` (`components/library/`, `.library-surface`), `/app/transcription` **DELETED** (404s live) with the rail/palette/activity/pipeline hrefs rewired and `IconTranscription`→`IconLibrary`; **the rail's hard-coded label list was the hidden coupling** — "Transcription" resolved to null silently, caught in the browser pass. `/api/library` widened to every **non-`prompt`** kind with `kind` on the wire (prompt = per-run provenance, stated in the route): the dev shelf immediately showed why — **189 Intel-admitted exemplar captures + 1 video + 2 voice samples**, so the kind qtabs (All · Exemplar · Video · Voice, real counts) carry real weight on day one. Free-transcript \| AI-enhance **seg in the band** (per-ingest reset kept — founder s79; picking enhance unfolds the cost words BEFORE the run); transcript doors gate on kind (read/delete routes are server-guarded; d/↵ inert on non-transcript rows); rows **bounded at 50 with a stated "+N more" foot** (the Settings-ledger pattern); thumb legends read the row's own kind, never "video"; article/file/text ingest = **STATED deferral** (`ingestWebUrl` exists engine-side with zero callers — wiring it is its own task); the transcribing row state has no data while ingest is synchronous (the band's button carries the in-flight word). 52 tests; the s79 T1/T2/T3 + s86 free-ingest pins all carried. mock-sheets README exception updated (the s74 rename retired by its own boundary clause); workspace spec's Sites + Library blocks record the builds. |
+
+| the s95 plan — video + calendar (founder-directed mid-session: "refine the plan and spec … then you can start on them … all for next session") | **STAMPED** — re-grounded first (rule 11/12: the three video sheets EXIST since s72 and their surfaces are BUILT to them; `/app/calendar` is GONE — Schedule shipped s86 — so "calendar" = the Schedule refinement pass). Plan of record: `docs/video-arc/spec.md` §"The s95 execution plan" (Phase 1 = one lead-direct design block amending the four sheets from the s85/s87 banked references · Phase 2 = ONE texted W3 verdict · Phase 3 = builds in order: editor p1 → Overview/Dossier + V1's five affordances → Schedule deltas · Phase 4 = V3 script-first gate, then pass-3 states) + NEW `docs/schedule-refinement/spec.md` (Later thumbs-in-cells · Sprout month grammar · "+N more" · Calendar.dc.html archives). Mobbin MCP errored twice from this box s94 — the fresh pulls ride the design block itself (s93 re-check precedent), banked references are the floor. Zero spend; his hands = one word. |
+
+**DEFERRED, stated:** B-create.5 dogfood (the first real Create run) stays the
+populated-state visual gate everywhere — interleavable with the s95 phases, its
+own GO + spend statement. Article/web-URL ingest door (`ingestWebUrl` → route +
+band) = a build task when chartered. Composer follow-ons unchanged behind their
+gates (popout p3 · media pass · queue seat · G1/D2).
+
 ## Sprint 9 / s93 — **CLOSED** (boot 2026-08-02 "gogogo + Mobbin re-check directive"; wrap = this session's verify)
 
 **Two founder directives this session, both delivered lead-direct:** (1) *"use
