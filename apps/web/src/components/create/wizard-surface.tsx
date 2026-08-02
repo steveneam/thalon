@@ -77,7 +77,10 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
   // null = the tenant's routing defaults decide; a list = the operator's ask.
   const [asked, setAsked] = useState<string[] | null>(null);
   const [openSlot, setOpenSlot] = useState<number>(() => (brief0(initialPrompt, context) ? 3 : 1));
-  const [planState, setPlanState] = useState<PlanState>({ status: "loading" });
+  // Stamped with the ask it answers (the context-loader pattern): "loading"
+  // is DERIVED from a stale stamp, so the effect never sets state synchronously
+  // and a changed ask can never show the previous ask's verdicts.
+  const [planRead, setPlanRead] = useState<{ key: string; state: PlanState } | null>(null);
   const [briefOpen, setBriefOpen] = useState(false);
   const [run, setRun] = useState<RunState>({ state: "idle" });
 
@@ -91,25 +94,30 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
 
   // The chips' verdicts re-derive whenever the ask changes. The prompt does
   // not steer platform capability, so it does not retrigger the read.
+  const planKey = JSON.stringify([family, asked, context?.captureId ?? null]);
   useEffect(() => {
     let cancelled = false;
-    setPlanState({ status: "loading" });
     const b: CreateBriefWire = { family, mode: "wizard" };
     if (context) b.context = context as unknown as Record<string, unknown>;
     if (asked !== null) b.platforms = asked;
     fetchCreatePlan(b)
       .then((plan) => {
-        if (!cancelled) setPlanState({ status: "success", plan });
+        if (!cancelled) setPlanRead({ key: planKey, state: { status: "success", plan } });
       })
       .catch((err) => {
         if (!cancelled)
-          setPlanState({ status: "error", message: err instanceof Error ? err.message : String(err) });
+          setPlanRead({
+            key: planKey,
+            state: { status: "error", message: err instanceof Error ? err.message : String(err) },
+          });
       });
     return () => {
       cancelled = true;
     };
-  }, [family, asked, context]);
+  }, [family, asked, context, planKey]);
 
+  const planState: PlanState =
+    planRead && planRead.key === planKey ? planRead.state : { status: "loading" };
   const plan = planState.status === "success" ? planState.plan : null;
   const admitted = plan?.platforms.filter((p) => p.admitted) ?? [];
   const door = createDoor(family, {
