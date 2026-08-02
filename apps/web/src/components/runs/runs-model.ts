@@ -1,5 +1,6 @@
 import { platformLabel, thumbLabel } from "@/components/dashboard/dashboard-model";
 import type { FeedRun } from "@/lib/approve-queue/types";
+import type { CreateRunWire } from "@/lib/create/client";
 import type { PipelineAsset } from "@/lib/workspace/types";
 import { dayKey, weekDays } from "@/lib/workspace/week";
 
@@ -13,7 +14,8 @@ import { dayKey, weekDays } from "@/lib/workspace/week";
  * instead of inventing draft numbers.
  */
 
-export type RunFilter = "all" | "failed" | "published";
+/** The W1 sheet's seg — All · Live · Waiting · Failed · Published. */
+export type RunFilter = "all" | "live" | "waiting" | "failed" | "published";
 
 /**
  * The operator's view knobs (founder s77: "re-introduce the good things (like
@@ -54,6 +56,10 @@ export interface RunRow {
   published: boolean;
   /** Replay isn't wired — the sheet's Retry rides failed rows unarmed, and says so. */
   retryable: boolean;
+  /** Still generating (pending/running, no recorded failure) — the live band + Live filter. */
+  live: boolean;
+  /** Drafts of this run waiting on the operator — the Waiting filter. */
+  waiting: number;
 }
 
 /** jsonb on the wire: trust nothing, name only what is actually there. */
@@ -186,6 +192,8 @@ export function runRow(run: FeedRun, assets: PipelineAsset[], planStatus: PlanRe
     failed,
     published: published.length > 0,
     retryable: recordedFailure,
+    live: !recordedFailure && (run.status === "pending" || run.status === "running"),
+    waiting,
   };
 }
 
@@ -199,6 +207,8 @@ export function rowsFor(
 }
 
 export function filterRows(rows: RunRow[], filter: RunFilter): RunRow[] {
+  if (filter === "live") return rows.filter((row) => row.live);
+  if (filter === "waiting") return rows.filter((row) => row.waiting > 0);
   if (filter === "failed") return rows.filter((row) => row.failed);
   if (filter === "published") return rows.filter((row) => row.published);
   return rows;
@@ -277,4 +287,251 @@ export function runsThisWeek(rows: RunRow[], now: Date): number {
   const start = days[0].date.getTime();
   const end = new Date(days[days.length - 1].date).setHours(24, 0, 0, 0);
   return rows.filter((row) => row.at.getTime() >= start && row.at.getTime() < end).length;
+}
+
+/* ── The W1 re-shape (Runs.dc.html AMENDED s89; workspace spec §3 ORIENT, §5.8):
+   the running-now band (Cloudflare), create-run PARENTS with the family
+   nested under them, the five-state seg, and the day-total footer (Clay).
+   Deliberately NOT drawn from thin air: per-run cost and durations are on
+   the sheet but no read exposes them (usage_ledger has no per-run read;
+   runs record no completion instant) — the footer's day total is the cost
+   truth that IS on the wire. ── */
+
+/** Elapsed-time word for a live row — "12s" / "3m 42s" / "2h 5m". Real math, never a fixture. */
+export function elapsedWord(fromIso: string, now: Date): string {
+  const s = Math.max(0, Math.floor((now.getTime() - new Date(fromIso).getTime()) / 1000));
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m`;
+}
+
+/** The brief's operator ask, when the jsonb actually carries one — the parent lead's topic. */
+export function briefTopic(brief: unknown): string | null {
+  if (typeof brief !== "object" || brief === null) return null;
+  const prompt = (brief as { prompt?: unknown }).prompt;
+  if (typeof prompt !== "string" || prompt.trim() === "") return null;
+  const collapsed = prompt.replace(/\s+/g, " ").trim();
+  if (collapsed.length <= LEAD_TOPIC_CHARS) return collapsed;
+  return `${collapsed.slice(0, collapsed.lastIndexOf(" ", LEAD_TOPIC_CHARS - 1) + 1 || LEAD_TOPIC_CHARS).trim()}…`;
+}
+
+export interface LiveRow {
+  id: string;
+  lead: string;
+  /** The second line — a state the read actually carries, or null. */
+  sub: string | null;
+  elapsed: string;
+  /** The fanout rows keep their receipts door; a create run has no detail surface yet — null, no dead Watch. */
+  href: string | null;
+}
+
+/** The running-now band: in-flight work from BOTH reads, newest first. */
+export function liveRows(rows: RunRow[], createRuns: CreateRunWire[], now: Date): LiveRow[] {
+  const fanouts: Array<LiveRow & { at: number }> = rows
+    .filter((row) => row.live)
+    .map((row) => ({
+      id: row.id,
+      lead: row.lead,
+      sub: row.excerpt || null,
+      elapsed: elapsedWord(row.at.toISOString(), now),
+      href: row.href,
+      at: row.at.getTime(),
+    }));
+  const creates: Array<LiveRow & { at: number }> = createRuns
+    .filter((run) => run.status === "pending" || run.status === "running")
+    .map((run) => ({
+      id: run.id,
+      lead: `Create run · ${briefTopic(run.brief) ?? run.family}`,
+      sub: `${run.family} · ${run.mode}`,
+      elapsed: elapsedWord(run.createdAt, now),
+      href: null,
+      at: new Date(run.createdAt).getTime(),
+    }));
+  return [...fanouts, ...creates]
+    .sort((a, b) => b.at - a.at)
+    .map((row) => ({ id: row.id, lead: row.lead, sub: row.sub, elapsed: row.elapsed, href: row.href }));
+}
+
+/** One nested family output under a create-run parent — the sheet's `.child` row grammar. */
+export interface ChildAssetRow {
+  draftId: string;
+  platform: string;
+  /** "post" / "clip plan" — the format opened up, never a fake word. */
+  word: string;
+  quote: string;
+  /** The Hume chip: the judge's outcome for this output, or null before any verdict. */
+  judge: "passed" | "blocked" | null;
+  pill: RunPill;
+  href: string;
+}
+
+export interface CreateParentBlock {
+  id: string;
+  lead: string;
+  excerpt: string;
+  excerptError: boolean;
+  pill: RunPill;
+  at: Date;
+  thumb: string | null;
+  children: ChildAssetRow[];
+  /** The parent chip — "judge ✓ N of M" over its family's outputs. */
+  judgePassed: number;
+  judgeTotal: number;
+  waiting: number;
+  failed: boolean;
+  published: boolean;
+  live: boolean;
+  /** The parent's door: its family's queue when it has one; null = no dead Open. */
+  href: string | null;
+  /** Platforms across the family — what the platform filter narrows by. */
+  platforms: string[];
+}
+
+function childRow(asset: PipelineAsset): ChildAssetRow {
+  const status = asset.status;
+  const pill: RunPill =
+    status === "queued"
+      ? { tone: "warn", label: "Waiting" }
+      : status === "blocked"
+        ? { tone: "err", label: "Blocked" }
+        : status === "approved"
+          ? { tone: "ok", label: "Approved" }
+          : status === "published"
+            ? { tone: "ok", label: "Published" }
+            : { tone: "idle", label: statusWord(status) };
+  return {
+    draftId: asset.draftId,
+    platform: asset.platform,
+    word: (asset.format ?? "post").replace(/_/g, " "),
+    quote: asset.excerpt,
+    judge: asset.judgedAt === null ? null : status === "blocked" ? "blocked" : "passed",
+    pill,
+    href: `/app/approve?draft=${encodeURIComponent(asset.draftId)}`,
+  };
+}
+
+/**
+ * Create runs as parent blocks (the s87 window's shape): a parent's family
+ * outputs are the plan assets of its child fanout runs plus any direct
+ * child drafts. Returns the blocks AND the set of fanout-run ids the
+ * parents absorbed — an orphan family run (pre-create era) stays a flat
+ * row, never minting a fake parent (the sheet's Thursday rule).
+ */
+export function createParents(
+  createRuns: CreateRunWire[],
+  assets: PipelineAsset[],
+): { blocks: CreateParentBlock[]; absorbedRunIds: Set<string> } {
+  const byRun = assetsByRun(assets);
+  const absorbedRunIds = new Set<string>();
+  const blocks = createRuns.map((run) => {
+    const childRunIds = run.children.filter((c) => c.kind === "fanout_run").map((c) => c.id);
+    const childDraftIds = new Set(run.children.filter((c) => c.kind === "draft").map((c) => c.id));
+    for (const id of childRunIds) absorbedRunIds.add(id);
+    const familyAssets = [
+      ...childRunIds.flatMap((id) => byRun.get(id) ?? []),
+      ...assets.filter((a) => childDraftIds.has(a.draftId)),
+    ];
+    const children = familyAssets.map(childRow);
+    const judgePassed = children.filter((c) => c.judge === "passed").length;
+    const waiting = familyAssets.filter((a) => WAITING.has(a.status)).length;
+    const published = familyAssets.some((a) => a.publishedAt !== null);
+    const childErrors = run.children.filter((c) => typeof c.error === "string" && c.error !== "");
+    const failed = run.status === "failed" || run.lastError !== null || childErrors.length > 0;
+    const live = !failed && (run.status === "pending" || run.status === "running");
+
+    const pill: RunPill = failed
+      ? { tone: "err", label: "Failed" }
+      : waiting > 0
+        ? { tone: "warn", label: `${waiting} wait on you` }
+        : live
+          ? { tone: "idle", label: "Running" }
+          : published
+            ? { tone: "ok", label: "Published" }
+            : { tone: "idle", label: statusWord(run.status) };
+
+    // The error channel carries the RECORDED words: the run's own lastError
+    // first, else the first child failure — verbatim, never paraphrased.
+    const recorded = run.lastError ?? childErrors[0]?.error ?? null;
+    const excerpt =
+      recorded ??
+      `${run.family} · ${run.mode}${
+        children.length > 0
+          ? ` · the ${children.length} row${children.length === 1 ? "" : "s"} below are its family`
+          : " · no outputs recorded"
+      }`;
+
+    return {
+      id: run.id,
+      lead: `Create run · ${briefTopic(run.brief) ?? run.family}`,
+      excerpt,
+      excerptError: recorded !== null,
+      pill,
+      at: new Date(run.createdAt),
+      thumb: familyAssets.map(thumbLabel).find((label) => label !== null) ?? null,
+      children,
+      judgePassed,
+      judgeTotal: children.length,
+      waiting,
+      failed,
+      published,
+      live,
+      href: childRunIds.length > 0 ? `/app/approve?run=${encodeURIComponent(childRunIds[0])}` : null,
+      platforms: [...new Set(familyAssets.map((a) => a.platform))],
+    };
+  });
+  return { blocks, absorbedRunIds };
+}
+
+/** One history entry: a flat (orphan) run row, or a create-run parent block. */
+export type DayItem = { type: "run"; row: RunRow } | { type: "create"; block: CreateParentBlock };
+
+export function itemAt(item: DayItem): Date {
+  return item.type === "run" ? item.row.at : item.block.at;
+}
+
+/** The view knobs over the MIXED history (the RunRow pass's exact semantics, item-shaped). */
+export function applyItemView(items: DayItem[], view: RunView): DayItem[] {
+  const needle = view.find.trim().toLowerCase();
+  return items.filter((item) => {
+    const flags =
+      item.type === "run"
+        ? item.row
+        : {
+            live: item.block.live,
+            waiting: item.block.waiting,
+            failed: item.block.failed,
+            published: item.block.published,
+          };
+    if (view.filter === "live" && !flags.live) return false;
+    if (view.filter === "waiting" && !(flags.waiting > 0)) return false;
+    if (view.filter === "failed" && !flags.failed) return false;
+    if (view.filter === "published" && !flags.published) return false;
+    const platforms = item.type === "run" ? item.row.platforms : item.block.platforms;
+    if (view.platform !== null && !platforms.includes(view.platform)) return false;
+    if (needle === "") return true;
+    const text =
+      item.type === "run"
+        ? `${item.row.lead} ${item.row.excerpt}`
+        : `${item.block.lead} ${item.block.excerpt} ${item.block.children.map((c) => c.quote).join(" ")}`;
+    return text.toLowerCase().includes(needle);
+  });
+}
+
+export interface ItemDay {
+  key: string;
+  heading: string;
+  items: DayItem[];
+}
+
+/** `groupByDay`, item-shaped — same two-level ordering rule. */
+export function groupItemsByDay(items: DayItem[], now: Date, sort: RunSort = "newest"): ItemDay[] {
+  const direction = sort === "oldest" ? -1 : 1;
+  const days: ItemDay[] = [];
+  for (const item of [...items].sort((a, b) => direction * (itemAt(b).getTime() - itemAt(a).getTime()))) {
+    const key = dayKey(itemAt(item));
+    const day = days.find((d) => d.key === key);
+    if (day) day.items.push(item);
+    else days.push({ key, heading: dayHeading(itemAt(item), now), items: [item] });
+  }
+  return days;
 }

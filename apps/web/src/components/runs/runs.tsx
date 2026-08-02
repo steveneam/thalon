@@ -4,27 +4,39 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  applyRunView,
-  groupByDay,
+  applyItemView,
+  createParents,
+  groupItemsByDay,
+  itemAt,
+  liveRows,
   platformOptions,
   rowsFor,
   runsThisWeek,
+  type CreateParentBlock,
+  type DayItem,
+  type LiveRow,
   type PlanReadStatus,
   type RunFilter,
   type RunRow,
   type RunSort,
 } from "@/components/runs/runs-model";
+import { PlatMark } from "@/components/approve/plat-mark";
 import { fetchRunsFeed } from "@/lib/approve-queue/client";
+import { fetchCreateRunsFeed, type CreateRunsFeed } from "@/lib/create/client";
 import { fetchPlan } from "@/lib/workspace/client";
 import { platformLabel } from "@/lib/workspace/format";
 import { useListKeys } from "@/lib/workspace/keyboard";
 import type { FeedRun } from "@/lib/approve-queue/types";
 import type { PlanPayload } from "@/lib/workspace/types";
+import { dayKey } from "@/lib/workspace/week";
 
 type ReadStatus = "loading" | "error" | "success";
 
+/** The W1 sheet's seg — the two live states joined the original three. */
 const FILTERS: { key: RunFilter; label: string }[] = [
   { key: "all", label: "All" },
+  { key: "live", label: "Live" },
+  { key: "waiting", label: "Waiting" },
   { key: "failed", label: "Failed" },
   { key: "published", label: "Published" },
 ];
@@ -81,6 +93,11 @@ export function Runs() {
   const [runs, setRuns] = useState<FeedRun[]>([]);
   const [planStatus, setPlanStatus] = useState<PlanReadStatus>("loading");
   const [plan, setPlan] = useState<PlanPayload | null>(null);
+  // The W1 re-shape's read: create-run parents + the day's usage total.
+  // Best-effort — a failed read degrades the history to flat rows with a
+  // stated note, never a blank surface.
+  const [createStatus, setCreateStatus] = useState<ReadStatus>("loading");
+  const [createFeed, setCreateFeed] = useState<CreateRunsFeed | null>(null);
   const [filter, setFilter] = useState<RunFilter>("all");
   // The view knobs the founder asked to re-introduce. Presentation state only:
   // every derivation below reads them, none of them reaches a client.
@@ -133,10 +150,24 @@ export function Runs() {
     [],
   );
 
+  const loadCreateFeed = useCallback(
+    () =>
+      fetchCreateRunsFeed()
+        .then((data) => {
+          setCreateFeed(data);
+          setCreateStatus("success");
+        })
+        .catch(() => {
+          setCreateStatus("error");
+        }),
+    [],
+  );
+
   useEffect(() => {
     void loadRuns();
     void loadPlan();
-  }, [loadRuns, loadPlan]);
+    void loadCreateFeed();
+  }, [loadRuns, loadPlan, loadCreateFeed]);
 
   // Mount-time clock: the day headings and "this week" count stay stable
   // across renders (and injectable-free in tests, like the dashboard's).
@@ -145,27 +176,47 @@ export function Runs() {
     () => rowsFor(runs, plan?.assets ?? [], planStatus),
     [runs, plan, planStatus],
   );
+  // The W1 re-shape: create-run parents absorb their family fanout rows;
+  // orphans (pre-create history) stay flat — never a fake parent.
+  const { blocks, absorbedRunIds } = useMemo(
+    () => createParents(createFeed?.runs ?? [], plan?.assets ?? []),
+    [createFeed, plan],
+  );
+  const items = useMemo<DayItem[]>(
+    () => [
+      ...rows
+        .filter((row) => !absorbedRunIds.has(row.id))
+        .map((row): DayItem => ({ type: "run", row })),
+      ...blocks.map((block): DayItem => ({ type: "create", block })),
+    ],
+    [rows, blocks, absorbedRunIds],
+  );
+  const live = useMemo(() => liveRows(rows, createFeed?.runs ?? [], now), [rows, createFeed, now]);
   const days = useMemo(
-    () => groupByDay(applyRunView(rows, { filter, platform, find, sort }), now, sort),
-    [rows, filter, platform, find, sort, now],
+    () => groupItemsByDay(applyItemView(items, { filter, platform, find, sort }), now, sort),
+    [items, filter, platform, find, sort, now],
   );
   const platforms = useMemo(() => platformOptions(rows), [rows]);
   /** The operator narrowed the view themselves — an empty result must say so. */
   const narrowed = platform !== null || find.trim() !== "";
   // Rendered order, flattened — what j/k walks and what ↵ opens.
-  const ordered = useMemo(() => days.flatMap((day) => day.rows), [days]);
-  const failedCount = rows.filter((row) => row.failed).length;
+  const ordered = useMemo(() => days.flatMap((day) => day.items), [days]);
+  const failedCount =
+    rows.filter((row) => row.failed && !absorbedRunIds.has(row.id)).length +
+    blocks.filter((block) => block.failed).length;
+  const itemId = (item: DayItem) => (item.type === "run" ? item.row.id : item.block.id);
+  const itemHref = (item: DayItem) => (item.type === "run" ? item.row.href : item.block.href);
   // The deep-linked run is selected until the operator moves (keeper: the
   // dashboard-provenance ?run= link lands ON the entity).
-  const deepIndex = targetRunId ? ordered.findIndex((row) => row.id === targetRunId) : -1;
-  const selectedIndex = selectedId ? ordered.findIndex((row) => row.id === selectedId) : -1;
+  const deepIndex = targetRunId ? ordered.findIndex((item) => itemId(item) === targetRunId) : -1;
+  const selectedIndex = selectedId ? ordered.findIndex((item) => itemId(item) === selectedId) : -1;
   const active =
     selectedIndex >= 0
       ? selectedIndex
       : Math.min(deepIndex >= 0 ? deepIndex : 0, Math.max(0, ordered.length - 1));
   const moveTo = (index: number) => {
-    const row = ordered[Math.max(0, Math.min(index, ordered.length - 1))];
-    if (row) setSelectedId(row.id);
+    const item = ordered[Math.max(0, Math.min(index, ordered.length - 1))];
+    if (item) setSelectedId(itemId(item));
   };
 
   useEffect(() => {
@@ -189,18 +240,19 @@ export function Runs() {
         // A FOCUSED CONTROL OWNS ITS OWN ENTER. `useListKeys` listens on
         // window and only skips typing targets, so without this the j/k
         // grammar swallowed Enter from every button and link on screen —
-        // the surface's own All/Failed/Published seg could not be operated
-        // by keyboard (its onClick never ran: preventDefault here cancels
-        // the keydown's activation default), and even the shell's side-nav
-        // links navigated to the selected RUN instead. Verified live, s78.
-        // `[role=button]` covers this surface's own rows, which are divs
-        // carrying their own Enter handler. Same guard, same words, as
-        // sites.tsx, intel.tsx, videos.tsx and calendar-surface.tsx —
-        // Runs was the outlier (s77 finding, runs.tsx:149).
+        // the surface's own seg could not be operated by keyboard (its
+        // onClick never ran: preventDefault here cancels the keydown's
+        // activation default), and even the shell's side-nav links navigated
+        // to the selected RUN instead. Verified live, s78. `[role=button]`
+        // covers this surface's own rows, which are divs carrying their own
+        // Enter handler. Same guard, same words, as sites.tsx, intel.tsx,
+        // videos.tsx and calendar-surface.tsx — Runs was the outlier (s77
+        // finding, runs.tsx:149).
         if ((event.target as HTMLElement | null)?.closest("button, a, [role=button]")) return;
-        if (ordered[active]) {
+        const href = ordered[active] ? itemHref(ordered[active]) : null;
+        if (href) {
           event.preventDefault();
-          router.push(ordered[active].href);
+          router.push(href);
         }
       },
     },
@@ -214,6 +266,10 @@ export function Runs() {
     if (planStatus === "error") {
       setPlanStatus("loading");
       void loadPlan();
+    }
+    if (createStatus === "error") {
+      setCreateStatus("loading");
+      void loadCreateFeed();
     }
   };
 
@@ -332,6 +388,24 @@ export function Runs() {
         </section>
       )}
 
+      {/* The create-run read failing must not silently flatten the history —
+          the grouping is a claim about lineage, so its absence is stated.
+          Only beside a history that rendered: when the runs read itself
+          failed, its alert owns the moment (one failure, one message). */}
+      {createStatus === "error" && runsStatus === "success" && (
+        <section className="card" style={{ padding: "11px 16px" }} role="status">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span className="t-label">
+              Create-run grouping couldn’t be read — the history shows flat rows meanwhile.
+            </span>
+            <div style={{ flex: 1 }} />
+            <button type="button" className="btn btn-ghost btn-sm" onClick={retryReads}>
+              Try again
+            </button>
+          </div>
+        </section>
+      )}
+
       {runsStatus === "loading" && (
         <div className="card">
           <div className="row">
@@ -340,11 +414,21 @@ export function Runs() {
         </div>
       )}
 
+      {/* The RUNNING-NOW band (Cloudflare) — in-flight work spotlighted above
+          the history it will join when it finishes. */}
+      {runsStatus === "success" && live.length > 0 && (
+        <div className="card live-band" aria-label="Running now">
+          {live.map((row) => (
+            <LiveRowView key={row.id} row={row} />
+          ))}
+        </div>
+      )}
+
       {runsStatus === "success" && ordered.length === 0 && (
         <div className="card">
           <div className="row">
             <span className="t-label">
-              {emptyLine(rows.length, filter, planStatus, narrowed)}
+              {emptyLine(items.length, filter, planStatus, narrowed)}
             </span>
           </div>
         </div>
@@ -354,16 +438,25 @@ export function Runs() {
         <div key={day.key}>
           <div className="day-hd">{day.heading}</div>
           <div className="card" style={{ marginTop: 14 }}>
-            {day.rows.map((row) => {
-              const position = ordered.indexOf(row);
-              return (
+            {day.items.map((item) => {
+              const position = ordered.indexOf(item);
+              return item.type === "run" ? (
                 <RunRowView
-                  key={row.id}
-                  row={row}
+                  key={item.row.id}
+                  row={item.row}
                   selected={position === active}
                   ref={position === active ? selectedRef : undefined}
-                  onSelect={() => setSelectedId(row.id)}
-                  onOpen={() => router.push(row.href)}
+                  onSelect={() => setSelectedId(item.row.id)}
+                  onOpen={() => router.push(item.row.href)}
+                />
+              ) : (
+                <ParentBlockView
+                  key={item.block.id}
+                  block={item.block}
+                  selected={position === active}
+                  ref={position === active ? selectedRef : undefined}
+                  onSelect={() => setSelectedId(item.block.id)}
+                  onOpen={() => item.block.href && router.push(item.block.href)}
                 />
               );
             })}
@@ -371,16 +464,134 @@ export function Runs() {
         </div>
       ))}
 
-      {/* The sheet's footer is ONE label — unlike the Dashboard sheet, this
-          one draws no j/k chips, so the keyboard grammar stays invisible
-          chrome here rather than growing the band. */}
-      <div style={{ display: "flex" }}>
+      {/* The footer gained the day's roll-up (Clay, from usage_ledger): the
+          COST truth that is actually on the wire — per-run cost has no read
+          yet, so the sheet's per-row "$0.09" deliberately isn't drawn. */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span className="t-label">
           Every run keeps its receipts — prompt, sources, judge verdicts, model seats, cost — one
           click deep.
         </span>
+        <div style={{ flex: 1 }} />
+        {createFeed?.usageToday && (
+          <span className="dur">
+            {`Today — ${
+              ordered.filter((item) => dayKey(itemAt(item)) === dayKey(now) && !(item.type === "run" ? item.row.live : item.block.live)).length
+            } finished · `}
+            <b style={{ color: "var(--n-1000)" }}>{`$${createFeed.usageToday.costEstimate.toFixed(2)} total`}</b>
+            {live.length > 0 ? ` · ${live.length} live` : ""}
+          </span>
+        )}
       </div>
     </div>
+  );
+}
+
+/** One running-now row: spinner · lead/state · elapsed · the receipts door when one exists. */
+function LiveRowView({ row }: { row: LiveRow }) {
+  return (
+    <div className="row">
+      <span className="work-spin" aria-hidden />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="run-lead">{row.lead}</div>
+        {row.sub && <div className="excerpt">{row.sub}</div>}
+      </div>
+      <span className="dur">{row.elapsed}</span>
+      {row.href && (
+        <Link className="card-link" href={row.href}>
+          Watch →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/** A create-run parent with its family nested under it — the sheet's `.child` grammar. */
+function ParentBlockView({
+  block,
+  selected,
+  onSelect,
+  onOpen,
+  ref,
+}: {
+  block: CreateParentBlock;
+  selected: boolean;
+  onSelect: () => void;
+  onOpen: () => void;
+  ref?: React.Ref<HTMLDivElement>;
+}) {
+  return (
+    <>
+      <div
+        ref={ref}
+        role={block.href ? "button" : undefined}
+        tabIndex={0}
+        className={selected ? "row sel" : "row"}
+        style={block.href ? { cursor: "pointer" } : undefined}
+        aria-label={`${block.lead} — ${block.pill.label}`}
+        onClick={block.href ? onOpen : onSelect}
+        onFocus={onSelect}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && event.target === event.currentTarget && block.href) onOpen();
+        }}
+      >
+        {block.thumb && (
+          <div className="thumb-sm">
+            <span>{block.thumb}</span>
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="run-lead">{block.lead}</div>
+          <div className="excerpt" style={block.excerptError ? { color: "var(--err)" } : undefined}>
+            {block.excerpt}
+          </div>
+        </div>
+        {block.judgeTotal > 0 && (
+          <span className={block.judgePassed === block.judgeTotal ? "jchip" : "jchip wait"}>
+            {`judge ✓ ${block.judgePassed} of ${block.judgeTotal}`}
+          </span>
+        )}
+        <span className={`pill pill-${block.pill.tone}`}>{block.pill.label}</span>
+        <span className="t-data">
+          {block.at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+        </span>
+        {block.href && (
+          <Link
+            className="card-link"
+            href={block.href}
+            tabIndex={-1}
+            onClick={(event: React.MouseEvent<HTMLAnchorElement>) => event.stopPropagation()}
+          >
+            Open →
+          </Link>
+        )}
+      </div>
+      {block.children.map((child) => (
+        <div key={child.draftId} className="row child">
+          <PlatMark platform={child.platform} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="run-lead">
+              {child.word}
+              {child.quote && (
+                <>
+                  {" · "}
+                  <em style={{ color: "var(--n-900)" }}>“{child.quote}”</em>
+                </>
+              )}
+            </div>
+          </div>
+          {child.judge && (
+            <span className={child.judge === "passed" ? "jchip" : "jchip wait"}>
+              {child.judge === "passed" ? "✓ passed" : "✗ blocked"}
+            </span>
+          )}
+          <span className={`pill pill-${child.pill.tone}`}>{child.pill.label}</span>
+          <Link className="card-link" href={child.href}>
+            In Approve →
+          </Link>
+        </div>
+      ))}
+    </>
   );
 }
 

@@ -233,3 +233,111 @@ describe("filters, day groups, and the week count", () => {
     ).toBe(0);
   });
 });
+
+/* ── The W1 re-shape derivations (Runs.dc.html AMENDED s89) ── */
+
+import {
+  applyItemView,
+  briefTopic,
+  createParents,
+  elapsedWord,
+  liveRows,
+  type DayItem,
+} from "@/components/runs/runs-model";
+import type { CreateRunWire } from "@/lib/create/client";
+
+function createRun(overrides: Partial<CreateRunWire> = {}): CreateRunWire {
+  return {
+    id: "cr-1",
+    family: "video",
+    mode: "prompt",
+    brief: { prompt: "launch film — one prompt to video plus posts" },
+    plan: {},
+    children: [],
+    status: "complete",
+    lastError: null,
+    createdAt: AT,
+    ...overrides,
+  };
+}
+
+describe("the W1 re-shape (live band · create-run parents · five-state view)", () => {
+  it("elapsed words are real math, never a fixture", () => {
+    const now = new Date("2026-07-25T09:03:42.000Z");
+    expect(elapsedWord("2026-07-25T09:03:30.000Z", now)).toBe("12s");
+    expect(elapsedWord(AT, now)).toBe("3m 42s");
+  });
+
+  it("briefTopic reads only what the jsonb actually carries", () => {
+    expect(briefTopic({ prompt: "a launch film" })).toBe("a launch film");
+    expect(briefTopic({})).toBeNull();
+    expect(briefTopic("not-an-object")).toBeNull();
+  });
+
+  it("a create run's family assets nest under it; the fanout rows it owns are absorbed", () => {
+    const assets = [
+      asset({ draftId: "d1", status: "queued" }),
+      asset({ draftId: "d2", status: "blocked", judgedAt: "2026-07-25T09:02:00.000Z" }),
+    ];
+    const parent = createRun({ children: [{ kind: "fanout_run", id: RUN_ID }] });
+    const { blocks, absorbedRunIds } = createParents([parent], assets);
+    expect(absorbedRunIds.has(RUN_ID)).toBe(true);
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0].children.map((c) => c.draftId)).toEqual(["d1", "d2"]);
+    expect(blocks[0].judgeTotal).toBe(2);
+    expect(blocks[0].judgePassed).toBe(1);
+    expect(blocks[0].waiting).toBe(2);
+    expect(blocks[0].lead).toBe("Create run · launch film — one prompt to video plus posts");
+    // The family door leads to the child run's queue.
+    expect(blocks[0].href).toBe(`/app/approve?run=${RUN_ID}`);
+  });
+
+  it("an orphan family run is never given a fake parent", () => {
+    const { blocks, absorbedRunIds } = createParents([], [asset({})]);
+    expect(blocks).toHaveLength(0);
+    expect(absorbedRunIds.size).toBe(0);
+  });
+
+  it("a child failure surfaces on the parent VERBATIM in the error channel", () => {
+    const parent = createRun({
+      children: [{ kind: "fanout_run", id: RUN_ID, error: "video mint refused: no source media" }],
+    });
+    const { blocks } = createParents([parent], []);
+    expect(blocks[0].failed).toBe(true);
+    expect(blocks[0].excerpt).toBe("video mint refused: no source media");
+    expect(blocks[0].excerptError).toBe(true);
+  });
+
+  it("the live band takes in-flight work from BOTH reads, newest first; a create run gets no dead Watch door", () => {
+    const now = new Date("2026-07-25T09:05:00.000Z");
+    const liveFan = runRow({ ...run(RUN_ID, AT), status: "running" }, [], "success");
+    const liveCreate = createRun({
+      id: "cr-live",
+      status: "running",
+      createdAt: "2026-07-25T09:04:00.000Z",
+    });
+    const rows = liveRows([liveFan], [liveCreate], now);
+    expect(rows.map((r) => r.id)).toEqual(["cr-live", RUN_ID]);
+    expect(rows[0].href).toBeNull();
+    expect(rows[1].href).toBe(`/app/approve?run=${encodeURIComponent(RUN_ID)}`);
+  });
+
+  it("the five-state view filters run rows and parent blocks by the same predicates", () => {
+    const liveItem: DayItem = {
+      type: "run",
+      row: runRow({ ...run("r-live", AT), status: "running" }, [], "success"),
+    };
+    const waitingParent: DayItem = {
+      type: "create",
+      block: createParents(
+        [createRun({ children: [{ kind: "fanout_run", id: RUN_ID }] })],
+        [asset({ draftId: "d1", status: "queued" })],
+      ).blocks[0],
+    };
+    const items = [liveItem, waitingParent];
+    const view = { platform: null, find: "", sort: "newest" as const };
+    expect(applyItemView(items, { ...view, filter: "live" })).toEqual([liveItem]);
+    expect(applyItemView(items, { ...view, filter: "waiting" })).toEqual([waitingParent]);
+    expect(applyItemView(items, { ...view, filter: "all" })).toHaveLength(2);
+  });
+});

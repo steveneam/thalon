@@ -66,3 +66,24 @@
 }
 .runs-surface .find-input::placeholder { color: var(--n-800); font-weight: 400; }
 .runs-surface .find-input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+
+/* ── W1 amendments (Runs.dc.html AMENDED s89), verbatim from the helmet ── */
+.runs-surface .live-band { border-color: color-mix(in oklab, var(--act) 30%, var(--n-400)); }
+.runs-surface .work-spin { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--n-500); border-top-color: var(--act); flex: none; }
+.runs-surface .child { padding-left: 46px; background: var(--n-bg); }
+.runs-surface .child .run-lead { font-size: 12.5px; font-weight: 500; }
+.runs-surface .jchip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: var(--ok-subtle); color: var(--ok); white-space: nowrap; }
+.runs-surface .jchip.wait { background: var(--warn-subtle); color: var(--warn); }
+.runs-surface .dur { font-family: var(--font-data); font-size: 11px; color: var(--n-800); white-space: nowrap; }
+.runs-surface .plat-dot { width: 16px; height: 16px; border-radius: 4px; background: var(--n-300); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--n-1000); }
+/* App adaptations (named): a live spinner that MOVES — the sheet's static
+   ring is a still of motion, and a stopped spinner beside "12s" elapsing
+   would read as a hang; honoured under reduced-motion as the still. */
+@media (prefers-reduced-motion: no-preference) {
+  .runs-surface .work-spin { animation: runs-spin 0.9s linear infinite; }
+}
+@keyframes runs-spin { to { transform: rotate(360deg); } }
+/* The letter fallback the shared PlatMark renders for platforms the sheets
+   drew no mark for (approve.css's twin — the component is shared, rule 6
+   category 2: render the SHARED grammar, style it per surface). */
+.runs-surface .plat-dot-letter { font-size: 9px; font-weight: 600; }
