@@ -133,7 +133,9 @@ export function batchScopeNote(counts: {
   const parts: string[] = [];
   if (stagedWaiting > 0) {
     parts.push(
-      `${stagedWaiting} staged draft${stagedWaiting === 1 ? "" : "s"} advance through their own flow`,
+      stagedWaiting === 1
+        ? "1 staged draft advances through its own flow"
+        : `${stagedWaiting} staged drafts advance through their own flow`,
     );
   }
   // Anything left over is the filter narrowing the view — named separately so

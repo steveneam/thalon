@@ -13,6 +13,17 @@ export function timeUntil(iso: string, now: number = Date.now()): string {
   return new Date(iso).toLocaleDateString();
 }
 
+/**
+ * Compact WAIT duration ("26h", "16d") — bare, no "ago"; the queue-age grammar
+ * the sheets draw at "26h". Hours hold below 48h (the recorded decision: 26
+ * hours is a day-and-a-bit of someone waiting and "1d" would hide it) and roll
+ * to days at 48h, where raw hours ("380h") start hiding the magnitude they were
+ * meant to expose — the feed rows on the same screen already say "15d ago".
+ */
+export function waitLabel(hours: number): string {
+  return hours < 48 ? `${hours}h` : `${Math.floor(hours / 24)}d`;
+}
+
 /** Compact relative time for feed rows ("2m ago") — coarse on purpose, no live re-render ticker. */
 export function timeAgo(iso: string, now: number = Date.now()): string {
   const then = new Date(iso).getTime();

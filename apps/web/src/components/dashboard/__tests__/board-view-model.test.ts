@@ -386,6 +386,12 @@ describe("the small grammars", () => {
     expect(ageLabel(new Date(NOW.getTime() - 45 * 60_000), NOW)).toBe("45m");
   });
 
+  it("ageLabel rolls to days at 48h — 380h hides sixteen days behind arithmetic (s93 Mobbin re-check)", () => {
+    expect(ageLabel(new Date(NOW.getTime() - 47 * 3_600_000), NOW)).toBe("47h");
+    expect(ageLabel(new Date(NOW.getTime() - 48 * 3_600_000), NOW)).toBe("2d");
+    expect(ageLabel(new Date(NOW.getTime() - 380 * 3_600_000), NOW)).toBe("15d");
+  });
+
   it("publishedDayLabel: today · short weekday inside the week · date beyond it", () => {
     expect(publishedDayLabel(new Date("2026-08-02T09:00:00Z"), NOW)).toBe("today");
     expect(publishedDayLabel(new Date("2026-07-30T09:00:00Z"), NOW)).toBe("Thu");

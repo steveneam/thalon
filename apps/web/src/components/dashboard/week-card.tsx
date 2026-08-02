@@ -16,7 +16,7 @@ import {
   DAY_WINDOW,
   FULL_WINDOW,
 } from "@/components/schedule/schedule-model";
-import { timeAgo } from "@/lib/workspace/format";
+import { timeAgo, waitLabel } from "@/lib/workspace/format";
 import {
   dayKey,
   groupByDay,
@@ -275,9 +275,9 @@ export function WeekCard({
                   key={event.id}
                   href={event.href ?? "/app/approve"}
                   className="wd-wait-chip"
-                  title={`started waiting before this week — ${event.hours}h, so it has no place on today's clock`}
+                  title={`started waiting before this week — ${waitLabel(event.hours)}, so it has no place on today's clock`}
                 >
-                  {event.lead} · {event.hours}h →
+                  {event.lead} · {waitLabel(event.hours)} →
                 </Link>
               ))}
               {waitLane.length > WAIT_LANE_BOUND && (

@@ -20,7 +20,7 @@ import { usePulse } from "@/components/workspace/pulse-context";
 import { fetchIntegrationCards } from "@/lib/integrations/client";
 import { fetchTrends } from "@/lib/intel/client";
 import { fetchPlan, fetchStatus } from "@/lib/workspace/client";
-import { timeAgo } from "@/lib/workspace/format";
+import { timeAgo, waitLabel } from "@/lib/workspace/format";
 import { weekDays } from "@/lib/workspace/week";
 import type { PlanPayload, WorkspaceStatus } from "@/lib/workspace/types";
 import type { TrendsPayload } from "@/lib/intel/types";
@@ -336,8 +336,8 @@ export function Dashboard({ initialView = "overview" }: { initialView?: HomeView
                 ? "queue clear"
                 : oldestWait !== null
                   ? waitingRead !== null && waitingRead < needsYou
-                    ? `${waitingRead} of ${needsYou} read · oldest of those ${oldestWait}h`
-                    : `oldest has waited ${oldestWait}h`
+                    ? `${waitingRead} of ${needsYou} read · oldest of those ${waitLabel(oldestWait)}`
+                    : `oldest has waited ${waitLabel(oldestWait)}`
                   : "waiting on your review"}
           </span>
         </Link>

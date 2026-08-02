@@ -7,7 +7,7 @@ import {
 import type { CreateRunWire } from "@/lib/create/client";
 import type { IntelPickWire } from "@/lib/intel/types";
 import { isStagedDraftFormat } from "@/lib/staged-flow/types";
-import { platformLabel } from "@/lib/workspace/format";
+import { platformLabel, waitLabel } from "@/lib/workspace/format";
 import type { PipelineAsset, PlannedSlotWire } from "@/lib/workspace/types";
 import { dayKey, waitingSince } from "@/lib/workspace/week";
 
@@ -99,12 +99,14 @@ function waitsOnOperator(asset: Pick<PipelineAsset, "status" | "format">): boole
 
 /**
  * The sheet's age grammar — "45m", "2h", "26h". Deliberately NOT timeAgo's
- * day rollover: 26 hours is a day and a bit of someone waiting, and "1d"
- * would hide it.
+ * 24h day rollover: 26 hours is a day and a bit of someone waiting, and "1d"
+ * would hide it. Past 48h the same honesty flips sides — "380h" hides sixteen
+ * days behind arithmetic — so waitLabel rolls to days there (the sheet's
+ * fixtures never cross 48h; this extends the grammar where it was undrawn).
  */
 export function ageLabel(since: Date, now: Date): string {
   const minutes = Math.max(0, Math.floor((now.getTime() - since.getTime()) / 60_000));
-  return minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h`;
+  return minutes < 60 ? `${minutes}m` : waitLabel(Math.floor(minutes / 60));
 }
 
 function approveHref(asset: Pick<PipelineAsset, "runId" | "draftId">): string {

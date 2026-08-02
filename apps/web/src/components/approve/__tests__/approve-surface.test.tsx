@@ -243,7 +243,7 @@ describe("Approve (exact-mock rebuild, Approve.dc.html)", () => {
     expect(screen.getByRole("button", { name: "Approve all waiting (1)" })).toBeInTheDocument();
     expect(
       screen.getByText(
-        /1 of 2 waiting can be approved together — 1 staged draft advance through their own flow/,
+        /1 of 2 waiting can be approved together — 1 staged draft advances through its own flow/,
       ),
     ).toBeInTheDocument();
   });

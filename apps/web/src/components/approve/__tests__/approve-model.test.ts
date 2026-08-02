@@ -188,9 +188,9 @@ describe("batchScopeNote — the gap between the two waiting counts", () => {
     expect(note).toContain("3 sit outside this view");
   });
 
-  it("singularises one staged draft", () => {
+  it("singularises one staged draft — verb and pronoun both (s93 re-check: 'advance through their' read broken on the live header)", () => {
     expect(batchScopeNote({ waiting: 3, batchable: 2, stagedWaiting: 1 })).toContain(
-      "1 staged draft advance",
+      "1 staged draft advances through its own flow",
     );
   });
 });
