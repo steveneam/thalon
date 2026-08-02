@@ -8,23 +8,47 @@
      (workspace spec §5.9) — this sheet's kanban becomes the Dashboard's Board
      view state (the Overview|Board seg on Dashboard.dc.html). The sheet stays
      the spec of that VIEW; the /app/board route deletes after the W1 verdict,
-     never before. -->
+     never before.
+     AMENDED s91 — the PIPELINE BOARD redraw (founder s90 ask: "an overall
+     visual representation on how things are connected and flow"; ruled s90
+     post-wrap: the toggle's Board state redraws as the pipeline board; refs =
+     ux-refinement-program.md library §Pipeline board — HubSpot's in-board
+     funnel math TAKEN as the feet, folk/Twenty/Attio validate that grouped
+     columns ARE the flow reading, node-graph REJECTED with reason: that
+     grammar promises editable wiring we don't offer). Columns now run in
+     LOOP ORDER — Intel picks → Generating → At the judge → In Approve →
+     Scheduled → Published; heads carry live counts; FEET carry the day's
+     in/out as one aligned bottom row (columns stretch full height so the
+     funnel math reads as a row); cards keep their judge/state chips (Hume:
+     evaluation rides the row — ✓/✗ judge on every Approve card, the blocked
+     card's reason VERBATIM per rule 5). In Approve keeps the warn tint: the
+     ONE human gate, said in the header line. Intel picks holds PICKS only —
+     an unpicked trend lives on Intel, not in the pipeline (the W1 fixture's
+     "unpicked" card removed as a drift from the column's own name). The
+     Generating foot's 5-in against Intel's 2-out is TRUE, not an error: a
+     fan-out multiplies one pick into several drafts. Minimal-interaction
+     doctrine (programme §mandate): cards and the seg are the only
+     interactables; the day's math is quiet feet; nothing decision-changing
+     is tucked. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
         <link rel="stylesheet" href="./theme.css" />
         <style>
-          .cols { flex: 1; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; min-height: 0; align-items: start; }
+          .cols { flex: 1; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; min-height: 0; }
           .col { background: oklch(0.17 0.009 261); border: 1px solid var(--n-400); border-radius: var(--r-card); display: flex; flex-direction: column; min-width: 0; }
           .col-hd { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--n-400); font-size: 12.5px; font-weight: 600; }
           .col-ct { font-size: 11px; font-weight: 600; color: var(--n-900); background: var(--n-200); border-radius: var(--r-pill); padding: 1px 7px; font-variant-numeric: tabular-nums; }
-          .col-bd { display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+          .col-bd { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+          .col-ft { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--n-400); font-size: 10.5px; color: var(--n-900); }
           .k-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: 8px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: border-color var(--motion-fast); }
           .k-card:hover { border-color: var(--n-500); }
           .k-thumb { height: 54px; border-radius: 5px; border: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 7px, var(--n-100) 7px, var(--n-100) 14px); display: flex; align-items: center; justify-content: center; }
           .k-thumb span { font-family: var(--font-data); font-size: 9px; color: var(--n-800); }
           .k-title { font-size: 12px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-          .k-meta { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--n-900); }
+          .k-meta { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--n-900); flex-wrap: wrap; }
+          .k-meta .pill { height: 17px; font-size: 10px; }
+          .k-reason { font-size: 10.5px; line-height: 1.4; color: var(--err); }
           .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
         </style>
       </helmet>
@@ -63,7 +87,7 @@
               <h1 class="t-headline">Today</h1>
               <div class="seg"><span class="seg-opt">Overview</span><span class="seg-opt on">Board</span></div>
               <div style="flex:1"></div>
-              <span class="t-label">the pipeline as columns — cards move when the work moves</span>
+              <span class="t-label">left to right is the loop · cards move when the work moves · one human gate — Approve</span>
             </div>
             <div class="cols">
               <div class="col">
@@ -72,86 +96,97 @@
                   <div class="k-card">
                     <div class="k-thumb"><span>post media</span></div>
                     <div class="k-title">Rendered our whole launch video from HTML — a build step</div>
-                    <div class="k-meta"><span class="pill pill-heat-hot" style="height:17px;font-size:10px">Hot</span><span>picked · video</span></div>
+                    <div class="k-meta"><span class="pill pill-heat-hot">Hot</span><span>picked · video</span></div>
                   </div>
                   <div class="k-card">
                     <div class="k-thumb"><span>yt thumb</span></div>
                     <div class="k-title">Agent-driven editing: the timeline learns to cut</div>
-                    <div class="k-meta"><span class="pill pill-heat-rising" style="height:17px;font-size:10px">Rising</span><span>unpicked</span></div>
+                    <div class="k-meta"><span class="pill pill-heat-rising">Rising</span><span>picked · post</span></div>
                   </div>
                 </div>
+                <div class="col-ft"><span>today</span><span class="t-data">2 in · 2 out</span></div>
               </div>
               <div class="col">
-                <div class="col-hd">Composing<span class="col-ct">1</span></div>
+                <div class="col-hd">Generating<span class="col-ct">1</span></div>
                 <div class="col-bd">
                   <div class="k-card">
                     <div class="k-title">Deterministic-video explainer · LinkedIn</div>
-                    <div class="k-meta"><span>drafting · 24s in</span></div>
+                    <div class="k-meta"><span class="pill pill-idle">drafting</span><span>24s in</span></div>
                   </div>
                 </div>
+                <div class="col-ft"><span>today</span><span class="t-data">5 in · 4 out</span></div>
               </div>
               <div class="col">
                 <div class="col-hd">At the judge<span class="col-ct">1</span></div>
                 <div class="col-bd">
                   <div class="k-card">
                     <div class="k-title">Build-step guide · blog</div>
-                    <div class="k-meta"><span>4 gates · running</span></div>
+                    <div class="k-meta"><span class="pill pill-idle">gates 2/4</span><span>running</span></div>
                   </div>
                 </div>
+                <div class="col-ft"><span>today</span><span class="t-data">4 in · 3 out</span></div>
               </div>
               <div class="col" style="border-color: color-mix(in oklab, var(--warn) 35%, var(--n-400))">
-                <div class="col-hd">Waiting on you<span class="col-ct" style="background:var(--warn-subtle);color:var(--warn)">4</span></div>
+                <div class="col-hd">In Approve<span class="col-ct" style="background:var(--warn-subtle);color:var(--warn)">4</span></div>
                 <div class="col-bd">
                   <div class="k-card">
                     <div class="k-thumb"><span>clip frame</span></div>
                     <div class="k-title">Our launch video has no editor file</div>
-                    <div class="k-meta"><span>LinkedIn · 26h</span></div>
+                    <div class="k-meta"><span class="pill pill-ok">✓ judge</span><span>LinkedIn · 26h</span></div>
                   </div>
                   <div class="k-card">
                     <div class="k-title">The export queue disappeared…</div>
-                    <div class="k-meta"><span>X · 2h</span></div>
+                    <div class="k-meta"><span class="pill pill-ok">✓ judge</span><span>X · 2h</span></div>
                   </div>
                   <div class="k-card">
                     <div class="k-thumb"><span>post image</span></div>
                     <div class="k-title">Render your launch film from HTML</div>
-                    <div class="k-meta"><span>Facebook · 45m</span></div>
+                    <div class="k-meta"><span class="pill pill-ok">✓ judge</span><span>Facebook · 45m</span></div>
                   </div>
                   <div class="k-card">
                     <div class="k-title" style="color:var(--err)">Works with every platform — blocked</div>
-                    <div class="k-meta"><span>needs your edit · 1h</span></div>
+                    <div class="k-reason">no provided source supports this claim</div>
+                    <div class="k-meta"><span class="pill pill-err">✗ judge</span><span>your edit · 1h</span></div>
                   </div>
                 </div>
+                <div class="col-ft"><span>today</span><span class="t-data">3 in · 0 out</span></div>
               </div>
               <div class="col">
-                <div class="col-hd">Approved<span class="col-ct">2</span></div>
+                <div class="col-hd">Scheduled<span class="col-ct">3</span></div>
+                <div class="col-bd">
+                  <div class="k-card">
+                    <div class="k-title">Launch film post · Facebook</div>
+                    <div class="k-meta"><span class="t-data">Fri 18:00</span><span>door unarmed — a plan</span></div>
+                  </div>
+                  <div class="k-card">
+                    <div class="k-title">The meme post · X</div>
+                    <div class="k-meta"><span class="t-data">Sat 11:00</span><span>door unarmed — a plan</span></div>
+                  </div>
+                  <div class="k-card">
+                    <div class="k-title">Inside the build-step pipeline · LinkedIn</div>
+                    <div class="k-meta"><span class="t-data">Sun 09:30</span><span>door unarmed — a plan</span></div>
+                  </div>
+                </div>
+                <div class="col-ft"><span>today</span><span class="t-data">0 in · 0 out</span></div>
+              </div>
+              <div class="col">
+                <div class="col-hd">Published<span class="col-ct">3</span></div>
                 <div class="col-bd">
                   <div class="k-card">
                     <div class="k-thumb"><span>page hero</span></div>
-                    <div class="k-title">Blog · inside the build-step pipeline</div>
-                    <div class="k-meta"><span>published ↗</span></div>
+                    <div class="k-title">Inside the build-step pipeline · blog</div>
+                    <div class="k-meta"><span>view live ↗ · Thu</span></div>
                   </div>
                   <div class="k-card">
-                    <div class="k-title">Facebook · launch film post</div>
-                    <div class="k-meta"><span>ready to plan</span></div>
+                    <div class="k-title">The meme post · LinkedIn</div>
+                    <div class="k-meta"><span>view live ↗ · 19 Jul</span></div>
+                  </div>
+                  <div class="k-card">
+                    <div class="k-title">The meme post · X</div>
+                    <div class="k-meta"><span>view live ↗ · 19 Jul</span></div>
                   </div>
                 </div>
-              </div>
-              <div class="col">
-                <div class="col-hd">Planned<span class="col-ct">3</span></div>
-                <div class="col-bd">
-                  <div class="k-card">
-                    <div class="k-title">Friday 18:00 · Facebook</div>
-                    <div class="k-meta"><span>door unarmed — a plan</span></div>
-                  </div>
-                  <div class="k-card">
-                    <div class="k-title">Saturday 11:00 · X</div>
-                    <div class="k-meta"><span>door unarmed — a plan</span></div>
-                  </div>
-                  <div class="k-card">
-                    <div class="k-title">Sunday 09:30 · LinkedIn</div>
-                    <div class="k-meta"><span>door unarmed — a plan</span></div>
-                  </div>
-                </div>
+                <div class="col-ft"><span>today</span><span class="t-data">0 in · last Thu</span></div>
               </div>
             </div>
           </div>
