@@ -192,6 +192,26 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s92 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap verify exit 0, **3227 passed / 9 skipped**, 0 lint errors — the literal single-lane run, dev server stopped)
+
+**The s91-stamped parallel plan ran EXACTLY as written, founder-hands-free
+(both verdicts were already banked — nothing was asked of him):**
+
+| track | outcome |
+|---|---|
+| lane `analytics` (Mode B, launched at the boot on the s91b GO — no re-ask) | **MERGED** (ff after clean rebase; lane suite 154 files / 1350 green capped). Three commits: read-only `/api/analytics` over `analyticsReadModel` · exact-mock `/app/analytics` (scoped `analytics.css`, honest absence words verbatim — deferred/partner-gated/no-impressions all render on live dev data) · the rail entry after Schedule. **Deliverable 1 (the Facebook fixture derivation) delivered as chartered** — the LEAD applied the sheet amendment at the gate (`Analytics.dc.html` header now records `post_media_view` / `post_total_media_view_unique` truth; drawn values stand as fixtures). Lead gate: dark+light screenshots on real data, both clean. Flagged boundary exception ACCEPTED (three additive one-line shell edits the kickoff's stale nav ground-truth made unavoidable — reviewed at rebase, no conflicts). WRAP: `agent_handoff/lanes/WRAP-analytics.md` (incl. gap G1: the read-model's one-series-per-post limit, a D2 follow-on). |
+| lead 1 — pipeline board | **SHIPPED (`d357233`)**: the Dashboard toggle's Board state wired at `/app?view=board` (server-resolved view — a measured hydration mismatch fixed properly) + **`/app/board` DELETED in the same change** per the ruling's gate. Loop-order columns over real reads (picks = new read-only `/api/intel/picks` over trend_promote captures · both run reads · the plan read), feet = the day's recorded stage crossings with "–" where no read carries the instant, In Approve carries the pulse's number. Probed: six feet aligned at 916 ≤ 940. The s77 filter/sort knobs stay retired (the verdicted sheet names cards + seg as the only interactables). Light register via `light-dark()` (the scope ratchet rejected an ancestor selector — correctly). |
+| lead 2 — B-create.4, the Composer core | **SHIPPED (`c6a8dd9`)**: `/app/create/run/[runId]` exact-mock from the s90c iteration (zones named · judge verdict strip with the hit marked IN the body · full-fidelity preview with real feed-cut + per-platform action rows · schema-generated settings rail · HOW IT SHOULD DO with the honest forecast deferral · fit band verbatim from the one validator) + the AI-edit doors over the create-shells verbs (`/api/drafts/[id]/ai-edit` propose → judge → apply; refusals verbatim; apply re-judges — rule 4) + the run read that resolves a CHILD id (`/api/create/runs/[runId]`), so **Approve's "Open in Composer" door ARMED** (a pre-Create run lands on that fact in words, never a bare 404). Dev truthfully renders predates-Create/empty; the populated-state visual gate rides the first real Create run (B-create.5). 29 tests. |
+| merge-gate closes (`187289e`) | Schedule rail icon rekeyed (the lane's G2 — visible in the board screenshots) · the sheet amendment · workspace spec's Board row updated to the retirement — **the spec-ground-truth ratchet FIRED on the deleted route path exactly as designed** and was answered by correcting the spec, not the ratchet. |
+
+**DEFERRED to s93, stated (never rushed past gates):** the Create home rebuild
+(s90b ask-card sheet) + the wizard build (`Create Wizard.dc.html`) — B-create.4's
+remaining surfaces — alongside the already-queued Sites + Library rebuilds (the
+`/app/transcription` retirement). All four are W2-VERDICTED; no new verdict is
+needed. Composer follow-ons queued behind their own gates: Expand popout (pass 3)
+· media tools (media pass) · first-comment arming (queue settings seat) · G1
+(read-model second series, D2).
+
 ## Sprint 9 / s91 — **CLOSED** (boot 2026-08-02: *"gogogo. you have my approval on W2 too"*; wrap verify exit 0, 3154/9)
 
 **POST-WRAP, HIS TEXT (2026-08-02, verbatim): "board approved and go
