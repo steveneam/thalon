@@ -30,6 +30,13 @@ export interface AreaRelevance {
 
 export interface LibrarySourceRow {
   id: string;
+  /**
+   * The sources table's own `kind` (contracts SOURCE_KINDS) — the §5.3 lens:
+   * "transcription becomes an ingest kind + a filter, not a second route".
+   * Open-ended on the wire like the column itself; the surface humanizes the
+   * kinds it knows and shows an unknown token as itself.
+   */
+  kind: string;
   uri: string | null;
   /** oEmbed title (sources.meta.title, mini-contract) — null on pre-rider rows: the URL stays the row's identity. */
   title: string | null;

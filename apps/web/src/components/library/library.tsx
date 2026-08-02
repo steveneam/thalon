@@ -7,6 +7,9 @@ import {
   applyShelfFilters,
   dayStamp,
   freeIngestNote,
+  hasTranscript,
+  kindTabs,
+  kindWord,
   parseTags,
   shelfNarrowed,
   shelfTags,
@@ -17,7 +20,7 @@ import {
   webOrigin,
   type ShelfFilters,
   type ShelfSort,
-} from "@/components/transcription/transcription-model";
+} from "@/components/library/library-model";
 import { SourceThumb } from "@/components/media/source-thumb";
 import { deleteSource, fetchLibrary, fetchTranscript, ingestVideo } from "@/lib/library/client";
 import {
@@ -37,22 +40,45 @@ type ReadStatus = "loading" | "error" | "success";
 const CAPTION_EXTENSIONS = [".srt", ".vtt", ".txt"];
 
 /**
- * Transcription, rebuilt exactly from Library.dc.html (DOCTRINE 0 — the sheet is
- * the blueprint): the headline + source count, the ingest band, one card of
- * source rows (thumb → lead/facts → copy/export doors → day stamp), and the
- * per-tenant grounding footer.
- *
- * Step 2 wires the EXISTING library clients (no API changes) and weaves the
- * old surface's keepers back in BEHIND byte-true resting chrome: the ingest
- * door is the sheet's own box+button, and the operator extras it grew
- * (tags, pasted captions, the transcript seam's honest readout) unfold only
- * once the operator engages the box; the transcript doors (read, copy the
- * Markdown brief, .md/.txt/.csv/.srt export) and Delete live in the panel a
- * row opens — the sheet draws no panel at rest, so neither do we. The one
- * list keyboard grammar rides the sheet's `.row.sel` (j/k move · ↵ open ·
- * d delete, still behind the named confirm).
+ * The row region's bound (Bounded-List, the Settings ledger's own pattern:
+ * the count states the rest, nothing is truncated silently). The §5.3
+ * widening put the WHOLE shelf behind this card — on dev that is ~190
+ * admission captures at once — and the foot row names the two lenses that
+ * narrow it. The keyboard cursor walks the RENDERED rows only.
  */
-export function Transcription() {
+const SHELF_SHOWN = 50;
+
+/**
+ * Library, rebuilt exactly from Library.dc.html at its s90 W2 amendment
+ * (DOCTRINE 0 — the sheet is the blueprint; s94, the founder's §5.3 ruling:
+ * "ONE Library surface; transcription becomes an ingest kind + a filter,
+ * not a second route"). The headline + source count, the ingest band with
+ * the Free-transcript | AI-enhance seg, the kind qtabs over one card of
+ * source rows (thumb → lead/facts → doors → day stamp), and the per-tenant
+ * grounding footer. `/app/transcription` retired with this rebuild.
+ *
+ * What is honestly narrower than the sheet's demo shelf, each a fact the
+ * surface states rather than a dead door:
+ *  - the band INGESTS video/audio URLs (the transcript seam) plus dropped
+ *    caption files on the caption-file provider; article/file/text ingest
+ *    has no live door yet (`ingestWebUrl` exists engine-side with no route),
+ *    so the extras state the deferral instead of the box pretending;
+ *  - a mid-transcription row state ("Transcribing · ~3m left") has no data
+ *    behind it — ingest is synchronous, so the in-flight state lives on the
+ *    band's own button ("Ingesting…") and a row only exists once recorded;
+ *  - transcript doors (open, copy, export, delete) belong to transcript
+ *    rows; other kinds carry their facts and their original ↗ — the
+ *    transcript read and delete routes are kind-guarded server-side, and a
+ *    door the server refuses is not drawn.
+ *
+ * Keepers carried whole from the s74–s86 surface, each behind byte-true
+ * resting chrome: the ingest extras (tags, captions on the caption-file
+ * seam, the seam's honest readout), the advertised drop with its refusal
+ * branches, the view knobs (find · tag · sort), the one list keyboard
+ * grammar (j/k move · ↵ open · d delete behind the named confirm), and the
+ * transcript panel with its export doors.
+ */
+export function Library() {
   const [status, setStatus] = useState<ReadStatus>("loading");
   const [payload, setPayload] = useState<LibraryPayload | null>(null);
   const [url, setUrl] = useState("");
@@ -60,7 +86,8 @@ export function Transcription() {
   const [tagsRaw, setTagsRaw] = useState("");
   // Free + deterministic is the RESTING state, and it returns to it after every
   // ingest (founder ruling s79: per-ingest, his choice each time — never a
-  // setting that quietly stays on).
+  // setting that quietly stays on). The W2 sheet drew the s86 control properly:
+  // a seg in the band, free leading.
   const [aiEnhance, setAiEnhance] = useState(false);
   const [ingestOpen, setIngestOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -71,10 +98,7 @@ export function Transcription() {
   const [ingestNote, setIngestNote] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptPayload | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  // The selection is a SOURCE, not a position. Ingest prepends and delete
-  // removes, so an index re-points at a different source after every one
-  // of them — and the Copy/Export buttons act on the row the index lands
-  // on (keyed-by-entity sweep, s78). null = the operator hasn't moved yet.
+  // The selection is a SOURCE, not a position (keyed-by-entity sweep, s78).
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<ShelfFilters>(SHELF_DEFAULTS);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,16 +129,18 @@ export function Transcription() {
   const captionMode = seam?.selected === "caption-file";
   // The shelf the operator is actually looking at. Every downstream index — the
   // `.row.sel` cursor, j/k, ↵ open, d delete — walks THIS list, never the
-  // unnarrowed one: a cursor that can land on a row the filter removed is the
-  // same keyed-by-entity hazard the s78 sweep closed here, one step removed.
+  // unnarrowed one (the keyed-by-entity hazard, one step removed).
   const shown = applyShelfFilters(rows, filters);
+  const rendered = shown.slice(0, SHELF_SHOWN);
+  const beyondBound = shown.length - rendered.length;
   const narrowed = shelfNarrowed(filters);
   const tags = shelfTags(rows);
-  const selectedIndex = selectedId ? shown.findIndex((row) => row.id === selectedId) : -1;
+  const tabs = kindTabs(rows);
+  const selectedIndex = selectedId ? rendered.findIndex((row) => row.id === selectedId) : -1;
   const active = selectedIndex >= 0 ? selectedIndex : 0;
-  const activeRow: LibrarySourceRow | undefined = shown[active];
+  const activeRow: LibrarySourceRow | undefined = rendered[active];
   const moveTo = (index: number) => {
-    const row = shown[Math.max(0, Math.min(index, shown.length - 1))];
+    const row = rendered[Math.max(0, Math.min(index, rendered.length - 1))];
     if (row) setSelectedId(row.id);
   };
   const openRow = transcript ? (rows.find((row) => row.id === transcript.sourceId) ?? null) : null;
@@ -156,8 +182,8 @@ export function Transcription() {
       setDropNote(null);
       // A RE-INGEST RE-PROCESSES NOTHING. Content identity is the transcript,
       // so pasting a video already on the shelf resolves to the existing row —
-      // and with the toggle on, that is a control the operator just used which
-      // had no effect. Silence there would read as "enhanced"; say it instead.
+      // and with the seg on enhance, that is a control the operator just used
+      // which had no effect. Silence there would read as "enhanced"; say it.
       setIngestNote(
         result.created
           ? null
@@ -173,22 +199,15 @@ export function Transcription() {
   }
 
   /**
-   * The ingest box's advertised file drop (s79 verify round, T2 3/3).
+   * The ingest box's advertised file drop (s79 verify round, T2 3/3). The
+   * first duty is `preventDefault` on both events — the drop can never leave
+   * the surface (Chrome navigates the tab to the file; Firefox pastes a
+   * file:// path that then fails ingest's https-only refine).
    *
-   * The sheet's own placeholder says "or drop a file" and nothing read one, so
-   * a dropped .srt was handled by the BROWSER: Chrome navigates the tab to the
-   * file (losing the typed URL and tags), Firefox pastes a file:// path into
-   * the box that then fails ingest's https-only refine. So the first duty here
-   * is `preventDefault` on both events — the drop can never leave the surface.
-   *
-   * WHAT THE NAIVE FIX WOULD HAVE DONE (the audit's own sketch): read the file
-   * into `captions` and stop. That is worse than the bug. Captions are consumed
-   * ONLY by the caption-file provider (packages/engine transcript.ts) — the
-   * live seam is hosted-vendor, which fetches from the link and ignores them —
-   * and the captions textarea is not even rendered outside caption mode. The
-   * file would have vanished into invisible state under a button still disabled
-   * by `!url.trim()`. So a drop the seam cannot use is REFUSED BY NAME instead,
-   * and a drop it can use opens the panel so the operator sees where it landed.
+   * Captions are consumed ONLY by the caption-file provider — the live seam
+   * is hosted-vendor, which fetches from the link and ignores them — so a
+   * drop the seam cannot use is REFUSED BY NAME, and a drop it can use opens
+   * the panel so the operator sees where it landed.
    */
   async function acceptDrop(file: File) {
     const name = file.name.toLowerCase();
@@ -230,6 +249,9 @@ export function Transcription() {
   }
 
   async function openSource(row: LibrarySourceRow) {
+    // Only a transcript row has a panel to open — the read route itself
+    // refuses other kinds, and a door the server refuses is not offered.
+    if (!hasTranscript(row)) return;
     await withBusy(async () => {
       setTranscript(await fetchTranscript(row.id));
     });
@@ -252,6 +274,9 @@ export function Transcription() {
 
   /** Delete (founder direction, s39): ONE confirm, named by title; the server's refusal shows verbatim. */
   async function removeSource(row: LibrarySourceRow) {
+    // The delete route is transcript-scoped (other kinds' cascade rules are
+    // uncharted) — so is this verb.
+    if (!hasTranscript(row)) return;
     if (!window.confirm(`Delete "${sourceLead(row)}" from the library?`)) return;
     await withBusy(async () => {
       await deleteSource(row.id);
@@ -305,9 +330,9 @@ export function Transcription() {
   });
 
   return (
-    <div className="content transcription-surface" style={{ gap: 16 }}>
+    <div className="content library-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <h1 className="t-headline">Transcription</h1>
+        <h1 className="t-headline">Library</h1>
         {/* A narrowed shelf never passes for the whole shelf: the pill states
             the bound, so the count can't assert a number nothing on screen
             supports. */}
@@ -340,15 +365,41 @@ export function Transcription() {
           className="ingest-box"
           name="video-url"
           aria-label="Video URL"
-          placeholder="Paste a video URL or drop a file — transcript in, chunked, ready to ground on…"
+          placeholder="Paste a video or audio URL, or drop a caption file — it transcribes on ingest and lands chunked, ready to ground on…"
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           onFocus={() => setIngestOpen(true)}
         />
+        {/* The W2 seg: the s86 free/enhance control designed properly — free
+            leads, enhance says it is metered, and picking enhance unfolds the
+            extras so its cost words are on screen BEFORE the run. */}
+        <div
+          className="seg"
+          title="free transcript is the default; AI enhance is metered and its cost shows before the run"
+        >
+          <button
+            type="button"
+            className={aiEnhance ? "seg-opt" : "seg-opt on"}
+            aria-pressed={!aiEnhance}
+            onClick={() => setAiEnhance(false)}
+          >
+            Free transcript
+          </button>
+          <button
+            type="button"
+            className={aiEnhance ? "seg-opt on" : "seg-opt"}
+            aria-pressed={aiEnhance}
+            onClick={() => {
+              setAiEnhance(true);
+              setIngestOpen(true);
+            }}
+          >
+            AI enhance
+          </button>
+        </div>
         {/* A dimmed control must say WHICH kind of not-now it is: the label
             flips while the ingest is in flight (running ≠ not ready), and the
-            resting refusal names what it is waiting for instead of leaving the
-            operator to guess why the primary button is inert. */}
+            resting refusal names what it is waiting for. */}
         <button
           type="submit"
           className="btn btn-primary"
@@ -369,7 +420,7 @@ export function Transcription() {
       </form>
 
       {/* The ingest door's operator extras (keepers) unfold once the box is
-          engaged — the resting band stays the sheet's box + button. */}
+          engaged — the resting band stays the sheet's box + seg + button. */}
       {ingestOpen && (
         <div
           className="card"
@@ -394,28 +445,20 @@ export function Transcription() {
             value={tagsRaw}
             onChange={(event) => setTagsRaw(event.target.value)}
           />
-          {/* THE AI-ENHANCE TOGGLE (founder ruling, s79). It joins the extras
-              that already unfold on engage rather than growing the resting
-              band, and it states its own consequence both ways round: an
-              operator choosing between free and metered can only choose
-              honestly if the surface says what free gives up BEFORE he
-              spends, not after. */}
-          <label
-            className="t-label"
-            style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
-          >
-            <input
-              type="checkbox"
-              name="ai-enhance"
-              checked={aiEnhance}
-              onChange={(event) => setAiEnhance(event.target.checked)}
-            />
-            AI-enhance this ingest
-          </label>
+          {/* The seg's consequence, in words, before anything spends (founder
+              ruling s79; the W2 sheet's own title says the cost shows before
+              the run). */}
           <span className="t-label">
             {aiEnhance
               ? "This ingest embeds its chunks and scores them against your monitored areas — one metered call. It goes back to free for the next one."
               : "Free and deterministic: the transcript is stored verbatim, with no relevance score and no semantic retrieval — you'll find it by title, URL and tag."}
+          </span>
+          {/* §5.3 names URL · file · text as ingest kinds; the band takes what
+              the engine has a door for TODAY, and states the rest as the
+              deferral it is — never a box that pretends. */}
+          <span className="t-label">
+            Article, file and pasted-text ingest land with their own pass — today the band
+            transcribes video/audio URLs; article captures arrive from Intel’s admission door.
           </span>
           {seam && (
             <span className="t-label">
@@ -485,8 +528,7 @@ export function Transcription() {
       )}
 
       {/* THE VIEW KNOBS. Gated on a shelf that HAS rows: a filter row above
-          "Nothing ingested yet" would be a control with nothing to control —
-          the exact dead affordance this pass exists to remove. */}
+          "Nothing ingested yet" would be a control with nothing to control. */}
       {status === "success" && rows.length > 0 && (
         <div className="shelf-knobs">
           <input
@@ -553,16 +595,44 @@ export function Transcription() {
 
       {status === "success" && (
         <div className="card">
+          {/* The §5.3 kind lens — the sheet's qtab row, over a shelf that has
+              rows to lens. Counts are the WHOLE shelf's (the tab is the
+              census; find/tag narrow inside the pick, and the pill states
+              that bound). */}
+          {rows.length > 0 && (
+            <div className="qtabs" role="tablist" aria-label="Source kind">
+              {tabs.map((tab) => {
+                const on = filters.kind === (tab.kind ?? "");
+                return (
+                  <button
+                    key={tab.kind ?? "all"}
+                    type="button"
+                    role="tab"
+                    aria-selected={on}
+                    className={on ? "qtab on" : "qtab"}
+                    onClick={() => setFilters((f) => ({ ...f, kind: tab.kind ?? "" }))}
+                  >
+                    {tab.label}
+                    <span className="n">{tab.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
           {rows.length === 0 ? (
             <div className="row">
               <span className="t-label">Nothing ingested yet — paste a video URL above.</span>
             </div>
           ) : shown.length === 0 ? (
             <div className="row">
-              {/* The KNOB emptied it, never "nothing here" — lane 1's rule
-                  across leads/board/runs, one grammar. */}
+              {/* The KNOB emptied it, never "nothing here". */}
               <span className="t-label" style={{ flex: 1 }}>
-                No source matches {filters.find.trim() !== "" ? `“${filters.find.trim()}”` : "this tag"}
+                No source matches{" "}
+                {filters.find.trim() !== ""
+                  ? `“${filters.find.trim()}”`
+                  : filters.tag !== ""
+                    ? "this tag"
+                    : "this kind"}
                 {filters.tag !== "" && filters.find.trim() !== "" ? ` tagged ${filters.tag}` : ""} —{" "}
                 {rows.length} {rows.length === 1 ? "source is" : "sources are"} on the shelf.
               </span>
@@ -575,17 +645,18 @@ export function Transcription() {
               </button>
             </div>
           ) : (
-            shown.map((row, index) => {
+            rendered.map((row, index) => {
               const relevance = topRelevance(row);
               const freeNote = freeIngestNote(row);
               const origin = webOrigin(row.uri);
+              const transcriptRow = hasTranscript(row);
               return (
                 <div
                   key={row.id}
                   role="button"
                   tabIndex={0}
                   className={index === active ? "row sel" : "row"}
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: transcriptRow ? "pointer" : "default" }}
                   aria-label={sourceLead(row)}
                   onClick={() => {
                     setSelectedId(row.id);
@@ -596,19 +667,17 @@ export function Transcription() {
                     if (event.key === "Enter") void openSource(row);
                   }}
                 >
-                  {/* Media-first, through the one component (B-media.0): the
-                      resolved oEmbed poster, contained when it is portrait,
-                      the striped box when the source never had media, and a
-                      distinct "gone" when the poster died on the platform. */}
-                  <SourceThumb resolution={row.media} legend="video" />
+                  {/* Media-first, through the one component (B-media.0). The
+                      striped placeholder's legend is the row's own kind word
+                      — a capture is not a "video" box. */}
+                  <SourceThumb resolution={row.media} legend={kindWord(row.kind).toLowerCase()} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="src-lead">{sourceLead(row)}</div>
                     <div className="excerpt" title={relevance?.reason}>
                       {sourceFacts(row)}
                       {relevance && ` · relevant to ${relevance.area}`}
                       {/* …and where an enhanced row states its area, a free one
-                          states why it has none — same slot, same grammar, so
-                          the absence is never left to be read as a zero. */}
+                          states why it has none — same slot, same grammar. */}
                       {freeNote && ` · ${freeNote}`}
                       {origin && (
                         <>
@@ -627,36 +696,53 @@ export function Transcription() {
                       )}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    disabled={busy}
-                    aria-busy={busy || undefined}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSelectedId(row.id);
-                      void copySource(row);
-                    }}
-                  >
-                    {copiedId === row.id ? "Copied" : busy ? "Working…" : "Copy transcript"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-quiet btn-sm"
-                    disabled={busy}
-                    aria-busy={busy || undefined}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSelectedId(row.id);
-                      void openSource(row);
-                    }}
-                  >
-                    {busy ? "Working…" : "Export"}
-                  </button>
+                  {/* Transcript doors belong to transcript rows — the sheet's
+                      per-kind door grammar, gated by what the server serves.
+                      A non-transcript row's doors are its facts + original ↗
+                      (no text read route exists yet — nothing is pretended). */}
+                  {transcriptRow && (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        disabled={busy}
+                        aria-busy={busy || undefined}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setSelectedId(row.id);
+                          void copySource(row);
+                        }}
+                      >
+                        {copiedId === row.id ? "Copied" : busy ? "Working…" : "Copy transcript"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-quiet btn-sm"
+                        disabled={busy}
+                        aria-busy={busy || undefined}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setSelectedId(row.id);
+                          void openSource(row);
+                        }}
+                      >
+                        {busy ? "Working…" : "Export"}
+                      </button>
+                    </>
+                  )}
                   <span className="t-data">{dayStamp(row.createdAt, now)}</span>
                 </div>
               );
             })
+          )}
+          {beyondBound > 0 && (
+            <div className="row">
+              {/* The stated bound — never a silent truncation: the rest is
+                  counted, and the two lenses that reach it are named. */}
+              <span className="t-label">
+                +{beyondBound} more — narrow with find or the kind tabs to reach them.
+              </span>
+            </div>
           )}
         </div>
       )}
@@ -726,14 +812,11 @@ export function Transcription() {
         </div>
       )}
 
-      {/* The sheet's footer is ONE label — unlike the Dashboard sheet, this
-          one draws no j/k chips, so the keyboard grammar stays invisible
-          chrome here rather than growing the band.
-
-          Its old wording ("chunked and embedded once") became a LIE the moment
-          free ingest landed: it asserted of the whole shelf a thing that is now
-          true only of the ingests the operator paid for. The shelf-wide honest
-          statement replaces it, so a row with no "relevant to …" clause reads
+      {/* The sheet's footer is ONE label. Its drawn wording ("chunked and
+          embedded once") became a LIE the moment free ingest landed: it
+          asserted of the whole shelf a thing true only of the ingests the
+          operator paid for. The shelf-wide honest statement stands (s86
+          divergence, recorded), so a row with no "relevant to …" clause reads
           as a known free ingest rather than as an area that scored nothing. */}
       <div style={{ display: "flex" }}>
         <span className="t-label">

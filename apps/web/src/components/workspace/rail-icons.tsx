@@ -65,7 +65,7 @@ export const RAIL_ICONS: Record<string, React.ReactNode> = {
       <path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" />
     </Ico>
   ),
-  Transcription: (
+  Library: (
     <Ico>
       <rect x="3" y="2.5" width="3.4" height="11" rx="0.8" />
       <rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)" />

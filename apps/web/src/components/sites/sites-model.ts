@@ -1,4 +1,4 @@
-import type { SiteRecord, SiteVerdictStatus } from "@/lib/sites/catalog";
+import { SITE_VERDICT_STATUSES, type SiteRecord, type SiteVerdictStatus } from "@/lib/sites/catalog";
 
 /**
  * Pure math for the Sites surface (the exact-mock rebuild of Sites.dc.html).
@@ -12,6 +12,8 @@ export interface SiteFilters {
   vertical?: string;
   axis?: string;
   wave?: number;
+  /** The W2 seg's cut — a recorded verdict state, never an invented deploy state. */
+  state?: SiteVerdictStatus;
 }
 
 /** The verdict chip vocabulary — picked once, worn everywhere (Q3). */
@@ -38,8 +40,53 @@ export function applyFilters(records: SiteRecord[], f: SiteFilters): SiteRecord[
     (r) =>
       (!f.vertical || r.vertical === f.vertical) &&
       (!f.axis || r.axes.primary === f.axis || r.axes.secondary === f.axis) &&
-      (f.wave === undefined || r.wave === f.wave),
+      (f.wave === undefined || r.wave === f.wave) &&
+      (f.state === undefined || verdictStatus(r) === f.state),
   );
+}
+
+/**
+ * The h1 seg (W2 amendment: "the h1 pills became a real state filter seg").
+ * The sheet's fixture reads All 17 · Live 2 · Draft 15 — a deploy-state
+ * census. The catalog records no deploy state (the same fact that put the
+ * VERDICT on the state pill), so the seg's vocabulary is the recorded one:
+ * All, then each verdict state that has members. Counts are the whole
+ * portfolio's census, like the sheet's own — a chip narrowing the grid is
+ * stated by the chip itself (visibly on, s79 rule), never by re-counting
+ * the census under it.
+ */
+export interface StateSegOption {
+  state?: SiteVerdictStatus;
+  label: string;
+}
+
+export function stateSeg(records: SiteRecord[]): StateSegOption[] {
+  const out: StateSegOption[] = [{ label: `All ${records.length}` }];
+  for (const status of SITE_VERDICT_STATUSES) {
+    const n = records.filter((r) => verdictStatus(r) === status).length;
+    if (n > 0) out.push({ state: status, label: `${VERDICT_WORDS[status]} ${n}` });
+  }
+  return out;
+}
+
+/**
+ * The card's truth line (W2 amendment): a LIVE site would carry its hostname
+ * — "the site's address IS its card fact" — and a draft says "previews
+ * only", never a fake URL. The catalog records no deploy state and no
+ * hostname, so every card today is honestly on the draft branch; the live
+ * branch renders the day a deploy fact exists to render, not before.
+ */
+export function truthLine(site: SiteRecord): string {
+  const minted = mintedStamp(site.built);
+  return minted ? `previews only · minted ${minted}` : "previews only";
+}
+
+/** "2026-07-18" → "18 Jul" (the sheet's minted grammar); an unparseable date is no date. */
+export function mintedStamp(built: string | undefined): string | null {
+  if (!built) return null;
+  const at = new Date(built);
+  if (Number.isNaN(at.getTime())) return null;
+  return at.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 export function facetValues(records: SiteRecord[]): {
@@ -197,22 +244,4 @@ export function toggleChip(chip: SiteChip, filters: SiteFilters): SiteFilters {
   }
   const wave = Number(chip.value);
   return { ...filters, wave: filters.wave === wave ? undefined : wave };
-}
-
-/**
- * The headline pills. The sheet's fixture reads "17 built · 2 live"; the
- * catalog carries no deploy state, so the second pill states what the
- * portfolio actually records — how many carry the founder's approval. A
- * filter never hides the total (Bounded-List: counts stated, nothing hidden
- * silently).
- */
-export function headerPills(
-  all: SiteRecord[],
-  shown: SiteRecord[],
-): { built: string; approved: string } {
-  const approved = all.filter((r) => verdictStatus(r) === "approved").length;
-  return {
-    built: shown.length === all.length ? `${all.length} built` : `${shown.length} of ${all.length} built`,
-    approved: `${approved} approved`,
-  };
 }

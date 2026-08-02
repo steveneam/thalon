@@ -10,9 +10,11 @@ import {
   cardFacts,
   chipActive,
   facetValues,
-  headerPills,
+  mintedStamp,
   siteChips,
+  stateSeg,
   toggleChip,
+  truthLine,
   verdictStatus,
   verticalLabel,
 } from "../sites-model";
@@ -54,11 +56,19 @@ describe("sites catalog + surface model (W-sites s61, re-homed at the exact-mock
     const filtered = applyFilters(records, { axis: "high-quality-3d" });
     expect(filtered.map((r) => r.slug)).toContain("sparkwright");
     expect(filtered.map((r) => r.slug)).toContain("hartline");
-    // The headline pills never hide the total behind a filter.
-    expect(headerPills(records, filtered).built).toBe(
-      `${filtered.length} of ${records.length} built`,
-    );
-    expect(headerPills(records, records).built).toBe(`${records.length} built`);
+    // The W2 seg is the portfolio's own census: All leads, every option's
+    // count is real, and only states with members earn a seat.
+    const seg = stateSeg(records);
+    expect(seg[0].label).toBe(`All ${records.length}`);
+    expect(seg.length).toBeGreaterThanOrEqual(2);
+    for (const opt of seg.slice(1)) {
+      const n = records.filter((r) => verdictStatus(r) === opt.state).length;
+      expect(opt.label.endsWith(` ${n}`)).toBe(true);
+      expect(n).toBeGreaterThan(0);
+    }
+    // The seg CUTS: a state option leaves exactly its members.
+    const approved = applyFilters(records, { state: "approved" });
+    expect(approved.every((r) => verdictStatus(r) === "approved")).toBe(true);
     // Verdicts are DATA — founder calls flip them between commits, so the
     // logic is tested against synthetic records, never a real site's current
     // status (that pin went red the moment ⑭'s fix round was accepted, s62).
@@ -114,6 +124,17 @@ describe("sites catalog + surface model (W-sites s61, re-homed at the exact-mock
       "editorial-print",
     ]);
     expect(cardFacts({ ...localRecords()[0], axes: { primary: "" } })).toEqual([]);
+  });
+
+  it("the truth line never invents an address or a date — previews-only is the recorded fact", () => {
+    const base = localRecords()[0];
+    // The catalog records no deploy state, so the line is the draft branch —
+    // with the minted date only when `built` actually parses.
+    expect(truthLine({ ...base, built: "2026-07-18" })).toBe("previews only · minted 18 Jul");
+    expect(truthLine({ ...base, built: undefined })).toBe("previews only");
+    expect(truthLine({ ...base, built: "not-a-date" })).toBe("previews only");
+    expect(mintedStamp("2026-07-05")).toBe("5 Jul");
+    expect(mintedStamp(undefined)).toBeNull();
   });
 
   it("the sheet's placeholder rule stays a CHILD selector — it swallowed the record caption once", () => {

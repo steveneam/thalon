@@ -35,6 +35,7 @@ export function toLibraryRow(source: Source): LibrarySourceRow {
   const meta = (source.meta ?? {}) as Record<string, unknown>;
   return {
     id: source.id,
+    kind: source.kind,
     uri: source.uri,
     title: typeof meta.title === "string" && meta.title.trim() !== "" ? meta.title : null,
     // One resolver, one place — the surface receives a state, never a URL to

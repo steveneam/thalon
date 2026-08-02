@@ -3,31 +3,28 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
-import { Transcription } from "@/components/transcription/transcription";
+import { Library } from "@/components/library/library";
 import { seedLibraryRow } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 
 /**
- * THE AI-ENHANCE TOGGLE (founder ruling, s79: transcription is HIS knowledge
- * tool — free and deterministic by default, with an AI-enhance toggle beside
- * Ingest, per-ingest, his choice).
+ * THE FREE | AI-ENHANCE CHOICE (founder ruling, s79: the shelf is HIS
+ * knowledge tool — free and deterministic by default, per-ingest, his choice).
+ * The s90 W2 sheet drew the s86 control properly: a seg IN the ingest band,
+ * free leading, enhance stating that it is metered — so the control now
+ * rests in the band the sheet draws it in, and picking enhance unfolds the
+ * extras so its cost words are on screen BEFORE the run.
  *
  * Two things this pins that the engine tests cannot:
  *
  * 1. THE DEFAULT THE OPERATOR ACTUALLY GETS. The engine defaults to free, but
- *    a surface that ticks the box for him would spend anyway. So: the box is
- *    off at rest, and an untouched ingest sends no flag at all.
- * 2. THAT THE SURFACE SAYS WHAT FREE COSTS, IN WORDS, BEFORE HE CHOOSES. A
- *    free source has no relevance score and is not semantically retrievable;
- *    on the shelf that shows up as an ABSENCE (no "relevant to …" clause), and
- *    an absence nobody explained reads as "nothing matched" rather than "you
- *    chose not to score this". The consequence line and the footer are the
- *    words, and they are asserted as words.
- *
- * Rule 7 (docs/research/ux-refinement-program.md): a lane never runs its own
- * design pass and never amends a sheet. The toggle therefore joins the ingest
- * box's EXISTING unfolding extras — the same group the tags field and the seam
- * readout live in — rather than growing the sheet's resting band.
+ *    a surface that armed enhance for him would spend anyway. So: Free
+ *    transcript is on at rest, and an untouched ingest sends no flag at all.
+ * 2. THAT THE SURFACE SAYS WHAT EACH CHOICE COSTS, IN WORDS, BEFORE HE
+ *    CHOOSES. A free source has no relevance score and is not semantically
+ *    retrievable; on the shelf that shows up as an ABSENCE, and an absence
+ *    nobody explained reads as "nothing matched" rather than "you chose not
+ *    to score this". The consequence line and the footer are the words.
  */
 
 const SEGMENTS = [
@@ -52,41 +49,50 @@ function captureIngest(created = true) {
   return bodies;
 }
 
-describe("Transcription — AI-enhance is a per-ingest choice, off by default", () => {
-  it("the toggle is not in the resting band; it unfolds with the other extras, unticked", async () => {
-    const user = userEvent.setup();
-    render(<Transcription />);
+describe("Library — AI-enhance is a per-ingest choice, free by default (the W2 seg)", () => {
+  it("the seg rests in the band with Free transcript on, and its title states the deal", async () => {
+    render(<Library />);
     await screen.findByText("0 sources");
 
-    expect(screen.queryByLabelText(/AI-enhance this ingest/i)).not.toBeInTheDocument();
-
-    await user.click(screen.getByLabelText("Video URL"));
-    const toggle = screen.getByLabelText(/AI-enhance this ingest/i);
-    expect(toggle).not.toBeChecked();
+    const free = screen.getByRole("button", { name: "Free transcript" });
+    expect(free).toHaveClass("seg-opt", "on");
+    expect(free).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "AI enhance" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(free.closest(".seg")).toHaveAttribute(
+      "title",
+      expect.stringContaining("AI enhance is metered"),
+    );
   });
 
-  it("states what free gives up BEFORE the choice, and what enhancing costs after it", async () => {
+  it("picking AI enhance puts its cost words ON SCREEN before the run", async () => {
     const user = userEvent.setup();
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("0 sources");
-    await user.click(screen.getByLabelText("Video URL"));
 
-    // The two real consequences, in words — not a 0, not a blank.
-    const resting = screen.getByText(/Free and deterministic/i);
-    expect(resting.textContent).toMatch(/no relevance score/i);
-    expect(resting.textContent).toMatch(/no semantic retrieval/i);
+    // At rest nothing has unfolded and nothing is armed.
+    expect(screen.queryByText(/scores them against your monitored areas/i)).toBeNull();
 
-    await user.click(screen.getByLabelText(/AI-enhance this ingest/i));
+    await user.click(screen.getByRole("button", { name: "AI enhance" }));
+    expect(screen.getByRole("button", { name: "AI enhance" })).toHaveClass("on");
     const armed = screen.getByText(/scores them against your monitored areas/i);
     expect(armed.textContent).toMatch(/metered/i);
     // And that it is a ONE-INGEST choice, not a setting that stays on.
     expect(armed.textContent).toMatch(/back to free for the next one/i);
+
+    // Flipping back states what free gives up, in the same slot.
+    await user.click(screen.getByRole("button", { name: "Free transcript" }));
+    const resting = screen.getByText(/Free and deterministic/i);
+    expect(resting.textContent).toMatch(/no relevance score/i);
+    expect(resting.textContent).toMatch(/no semantic retrieval/i);
   });
 
   it("an untouched ingest sends NO flag — the free default lives engine-side, once", async () => {
     const user = userEvent.setup();
     const bodies = captureIngest();
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("0 sources");
 
     await user.type(screen.getByLabelText("Video URL"), "https://example.com/v-free");
@@ -97,35 +103,35 @@ describe("Transcription — AI-enhance is a per-ingest choice, off by default", 
     expect("aiEnhance" in bodies[0]).toBe(false);
   });
 
-  it("ticking it carries aiEnhance:true — and the next ingest is free again", async () => {
+  it("picking enhance carries aiEnhance:true — and the next ingest is free again", async () => {
     const user = userEvent.setup();
     const bodies = captureIngest();
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("0 sources");
 
     await user.type(screen.getByLabelText("Video URL"), "https://example.com/v-paid");
-    await user.click(screen.getByLabelText(/AI-enhance this ingest/i));
+    await user.click(screen.getByRole("button", { name: "AI enhance" }));
     await user.click(screen.getByRole("button", { name: "Ingest" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0].aiEnhance).toBe(true);
 
-    // Per-ingest means per-ingest: the box returns to its resting free state
+    // Per-ingest means per-ingest: the seg returns to its resting free state
     // rather than quietly spending on everything that follows.
+    expect(screen.getByRole("button", { name: "Free transcript" })).toHaveClass("on");
     await user.type(screen.getByLabelText("Video URL"), "https://example.com/v-next");
-    expect(screen.getByLabelText(/AI-enhance this ingest/i)).not.toBeChecked();
     await user.click(screen.getByRole("button", { name: "Ingest" }));
     await waitFor(() => expect(bodies).toHaveLength(2));
     expect("aiEnhance" in bodies[1]).toBe(false);
   });
 
-  it("a re-ingest re-processes nothing, and says so instead of letting the toggle look effective", async () => {
+  it("a re-ingest re-processes nothing, and says so instead of letting the seg look effective", async () => {
     const user = userEvent.setup();
     captureIngest(false);
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("0 sources");
 
     await user.type(screen.getByLabelText("Video URL"), "https://example.com/v-dup");
-    await user.click(screen.getByLabelText(/AI-enhance this ingest/i));
+    await user.click(screen.getByRole("button", { name: "AI enhance" }));
     await user.click(screen.getByRole("button", { name: "Ingest" }));
 
     const note = await screen.findByText(/Already on the shelf/i);
@@ -147,7 +153,7 @@ describe("Transcription — AI-enhance is a per-ingest choice, off by default", 
     // A row from before the key existed: nothing is known about it, so nothing
     // is claimed — it must not be labelled free retroactively.
     seedLibraryRow({ uri: "https://example.com/v-old", title: "Pre-s86 row" }, SEGMENTS);
-    render(<Transcription />);
+    render(<Library />);
 
     const free = await screen.findByRole("button", { name: "Free row" });
     expect(free.textContent).toMatch(
@@ -165,7 +171,7 @@ describe("Transcription — AI-enhance is a per-ingest choice, off by default", 
 
   it("the shelf footer no longer claims every source is embedded", async () => {
     seedLibraryRow({ uri: "https://example.com/v1" }, SEGMENTS);
-    render(<Transcription />);
+    render(<Library />);
 
     const footer = await screen.findByText(/Sources are per-tenant and chunked once/);
     // The sheet-wide honest statement: an absent "relevant to …" on a row is a

@@ -97,6 +97,30 @@ describe("/api/library", () => {
     ]);
   });
 
+  it("lists every non-prompt kind with `kind` on the wire — §5.3's one shelf (s94)", async () => {
+    await repos!.tenants.create({ slug: "self", name: "Self" });
+    const ctx = { tenantId: (await repos!.tenants.getBySlug("self"))!.id };
+    await seedTranscript("https://www.youtube.com/watch?v=tZQ9SNw4TYQ");
+    await repos!.sources.create(ctx, {
+      kind: "url",
+      uri: "https://example.com/deterministic-rendering",
+      contentHash: "hash-url-1",
+      meta: {},
+    });
+    // A run's captured brief is per-run provenance, not a shelf item.
+    await repos!.sources.create(ctx, {
+      kind: "prompt",
+      contentHash: "hash-prompt-1",
+      meta: {},
+    });
+
+    const list = await (await GET()).json();
+    expect(list.sources).toHaveLength(2);
+    const kinds = list.sources.map((s: { kind: string }) => s.kind).sort();
+    expect(kinds).toEqual(["url", "video_transcript"]);
+    expect(kinds).not.toContain("prompt");
+  });
+
   it("re-ingesting the same captions is the zero-embed fast path (content identity = the transcript)", async () => {
     await repos!.tenants.create({ slug: "self", name: "Self" });
     const first = await seedTranscript("https://www.youtube.com/watch?v=tZQ9SNw4TYQ");

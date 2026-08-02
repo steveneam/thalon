@@ -59,7 +59,7 @@ export function assetStages(asset: PipelineAsset): StageView[] {
       label: STAGE_LABELS.captured,
       at: asset.capturedAt,
       state: asset.capturedAt ? "done" : "pending",
-      href: asset.capturedAt ? "/app/transcription" : null,
+      href: asset.capturedAt ? "/app/library" : null,
       detail: asset.sourceKind,
     },
     {

@@ -66,8 +66,21 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
 
     expect(container.querySelector(".content.sites-surface")).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Sites" })).toBeInTheDocument();
-    expect(screen.getByText("3 built")).toHaveClass("pill", "pill-idle");
-    expect(screen.getByText("1 approved")).toHaveClass("pill", "pill-ok");
+    // W2: the h1 pills became a real state filter seg — its vocabulary is
+    // the catalog's recorded verdicts, its counts the portfolio census.
+    const seg = container.querySelector(".seg")!;
+    expect(seg).not.toBeNull();
+    expect(within(seg as HTMLElement).getByRole("button", { name: "All 3" })).toHaveClass(
+      "seg-opt",
+      "on",
+    );
+    expect(within(seg as HTMLElement).getByRole("button", { name: "Approved 1" })).toBeInTheDocument();
+    expect(within(seg as HTMLElement).getByRole("button", { name: "Fix round 1" })).toBeInTheDocument();
+    expect(
+      within(seg as HTMLElement).getByRole("button", { name: "Awaiting verdict 1" }),
+    ).toBeInTheDocument();
+    // The read is newest-built first (parseCatalog), and the sheet says so.
+    expect(screen.getByText("newest first")).toHaveClass("t-label");
 
     // The grid is the sheet's: a shot over a meta row, the whole card a door.
     const cards = container.querySelectorAll(".site-grid > .site-card");
@@ -93,6 +106,27 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
     expect(
       screen.getByText(/local template dir · previews served by the workspace from/),
     ).toHaveClass("t-data");
+    // W2: the blog door — the contract's blog-loop join opens the published
+    // ledger, which lives on Settings (the Dashboard's own door).
+    expect(
+      screen.getByRole("link", {
+        name: "Blog articles ride the same engine · the published ledger →",
+      }),
+    ).toHaveAttribute("href", "/app/settings");
+  });
+
+  it("the seg filters by recorded state, and clearing it restores the whole grid", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Sites source={LOCAL} />);
+
+    await user.click(screen.getByRole("button", { name: "Approved 1" }));
+    expect(screen.getByRole("button", { name: "Approved 1" })).toHaveClass("seg-opt", "on");
+    const cards = container.querySelectorAll(".site-grid > .site-card");
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toHaveAttribute("href", "/app/sites/sparkwright");
+
+    await user.click(screen.getByRole("button", { name: "All 3" }));
+    expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(3);
   });
 
   it("resolves every preview against the WORKSPACE, never an origin only the box can reach", () => {
@@ -141,31 +175,65 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
     ).toBeInTheDocument();
     expect(within(caption as HTMLElement).getByText("2026-07-16")).toHaveClass("t-data");
 
-    // The sheet's own meta row gains nothing.
+    // The sheet's meta row is the name block + the dossier door — the pill
+    // moved onto the shot (W2), and the caption never leaks into it.
     const meta = container.querySelector(".site-meta")!;
-    expect(meta.children).toHaveLength(3);
+    expect(meta.children).toHaveLength(2);
     expect(meta.querySelector(".site-cap")).toBeNull();
+    expect(meta.querySelector(".pill")).toBeNull();
   });
 
   it("lands pre-filtered when a dossier fact door deep-links into the grid", () => {
     const { container } = render(<Sites source={LOCAL} initialFilters={{ wave: 2 }} />);
 
     expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(1);
-    expect(screen.getByText("1 of 3 built")).toBeInTheDocument();
+    // The seg stays the whole portfolio's census — the narrowing is stated
+    // by the chip itself, visibly on, never by a re-counted census.
+    expect(screen.getByRole("button", { name: "All 3" })).toBeInTheDocument();
     // The chip doing the filtering is VISIBLE — a deep link never hides its
     // own reason behind "More →".
     expect(screen.getByRole("button", { name: "Wave 2" })).toHaveClass("cat-chip", "on");
   });
 
-  it("the state pill says what the catalog RECORDS — the verdict, never an invented deploy state", () => {
-    render(<Sites source={LOCAL} />);
+  it("the state pill rides the shot and says what the catalog RECORDS — never an invented deploy state", () => {
+    const { container } = render(<Sites source={LOCAL} />);
 
     expect(screen.getByText("Approved")).toHaveClass("pill", "pill-ok");
     expect(screen.getByText("Fix round")).toHaveClass("pill", "pill-warn");
     // A site with no verdict is loudly awaiting, never quietly fine.
     expect(screen.getByText("Awaiting verdict")).toHaveClass("pill", "pill-idle");
+    // W2: every card's pill lives INSIDE the preview shot.
+    for (const card of container.querySelectorAll(".site-card")) {
+      expect(card.querySelector(".site-shot .pill")).not.toBeNull();
+    }
     expect(screen.queryByText("Live")).not.toBeInTheDocument();
     expect(screen.queryByText("Draft")).not.toBeInTheDocument();
+  });
+
+  it("the truth line is previews-only with the minted date — never a fake URL", () => {
+    const { container } = render(
+      <Sites
+        source={{
+          kind: "local",
+          previewUpstream: "the local template directory",
+          records: [
+            site({ slug: "sparkwright", name: "Sparkwright", built: "2026-07-18" }),
+            site({ slug: "hartline", name: "Hartline" }),
+          ],
+        }}
+      />,
+    );
+
+    // A minted date joins the line when the catalog records one…
+    expect(screen.getByText("previews only · minted 18 Jul")).toHaveClass("excerpt");
+    // …and a record without one states only what is true.
+    expect(screen.getByText("previews only")).toHaveClass("excerpt");
+    // No card invents an address: the only links on the surface are the card
+    // doors and the blog door — nothing reads as a hostname click-out.
+    for (const meta of container.querySelectorAll(".site-meta")) {
+      expect(meta.querySelector("a")).toBeNull();
+      expect(meta.textContent).not.toContain("↗");
+    }
   });
 
   it("the build door states its seam instead of offering a dead primary button", () => {
@@ -189,7 +257,6 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
     await user.click(screen.getByRole("button", { name: "Trade · electrician" }));
     expect(screen.getByRole("button", { name: "Trade · electrician" })).toHaveClass("cat-chip", "on");
     expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(1);
-    expect(screen.getByText("1 of 3 built")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "More →" }));
     expect(chips()).toContain("Wave 2");
@@ -197,7 +264,7 @@ describe("Sites (exact-mock rebuild — Sites.dc.html)", () => {
     // slice, and the surface says so instead of showing an empty grid.
     await user.click(screen.getByRole("button", { name: "Wave 2" }));
     expect(container.querySelector(".site-grid")).toBeNull();
-    expect(screen.getByText(/No sites match these chips/)).toBeInTheDocument();
+    expect(screen.getByText(/No sites match this slice/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Clear filters" }));
     expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(3);

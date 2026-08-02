@@ -298,10 +298,10 @@ done); **p1/p2/p3** = the three passes. A `—` is a debt, not a detail.
 | 13 | Integrations | — | — | — | — | untouched — not ready |
 | 14 | Intel | — | — | — | — | untouched — not ready |
 | 15 | Leads | — | — | — | — | untouched — not ready |
-| 16 | Library (Transcription) | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | §5.3 DRAWN — one Library, kind = filter, transcribing = row state; pass-1 row above; W2 approved s91 — the `/app/transcription` retirement builds with the rebuild |
+| 16 | Library (Transcription) | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | §5.3 DRAWN — one Library, kind = filter; W2 approved s91; **BUILT s94** — `/app/library` exact-mock (`components/library/`, scope `.library-surface`), `/app/transcription` DELETED + rail/palette/activity/pipeline rewired + IconLibrary; the read widened to every non-`prompt` kind with `kind` on the wire (dev shelf: 189 Intel-admitted exemplars + video + voice — the lens carries real weight); Free\|AI-enhance seg in the band (per-ingest reset kept, cost words before the run); transcript doors gate on kind (server-guarded); bounded rows with stated "+N more"; article/text ingest = STATED deferral (`ingestWebUrl` uncalled — its own task); transcribing row state has no data while ingest is sync (band button carries the word); every s79/s86 pin carried (52 tests) |
 | 17 | Profiles | — | — | — | — | untouched — not ready |
 | 18 | Runs | ✅ s89 (W1) | ✅ s89 · **VERDICTED** | — | — | library §Runs; create_runs re-shape drawn (workspace spec §3 ORIENT); pass-1 row above |
-| 19 | Sites | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | library §Sites; pass-1 row above; W2 approved s91 |
+| 19 | Sites | ✅ s90 (W2) | ✅ s90 (W2) · **VERDICTED** | — | — | library §Sites; W2 approved s91; **BUILT s94** — the W2 amendment applied to the existing exact-mock port: verdict pill onto the shot (opaque backing named-adaptation — the alpha subtle channels vanished over real heroes, seen live), truth line per card ("previews only · minted {d MMM}" — no deploy state/hostname recorded, no fake URLs), h1 pills → state-filter seg in the VERDICT vocabulary (census counts; chips state their own narrowing), "newest first" label (true of parseCatalog), blog-loop door → the published ledger on Settings (the Dashboard's door); shot 150→132 + meta per the amended sheet; 43 tests |
 | 20 | Source Media | ◐ banked (Leonardo dialog + Runway roles, s86 — APPLIED in the W2 wizard draw) | — | — | — | the IA question is RESOLVED (own component family, the wizard's media dialog — never merged into Library); its own sheet's p1 still owed |
 | 21 | Wave 0 – Triage spine | — | — | — | — | untouched — not ready |
 | — | Calendar | *(superseded s85 — rail sweep; kept only as history)* | | | | |
@@ -418,6 +418,15 @@ BUDGET, not on doubt:** the weekly limit read 87% used with two engine lanes liv
 programme. Banking the references first is what makes the hold cheap — the durable
 half is done and the sheets can start cold from this section whenever there is
 headroom.
+
+**s94 UPDATE — the s95 plan is STAMPED on the founder's direction** ("continue
+refining the plan and spec for the video and calendar part"): the execution plan
+is `docs/video-arc/spec.md` §"The s95 execution plan" (amend the three s72
+sheets from THIS section's banked references → one W3 verdict → build the
+deltas + V1's five affordances), and the calendar half — the Schedule
+refinement pass (Later thumbs-in-cells · Sprout month grammar · "+N more") —
+is `docs/schedule-refinement/spec.md`, drawn in the same design block and
+riding the same verdict ask.
 
 ## Open decisions (founder's, NOT closed by the blanket design approval)
 

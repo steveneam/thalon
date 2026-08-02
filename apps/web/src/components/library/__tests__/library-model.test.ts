@@ -1,19 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyShelfFilters,
   dayStamp,
   freeIngestNote,
+  hasTranscript,
+  kindTabs,
+  kindWord,
   parseTags,
   sourceFacts,
   sourceLead,
   topRelevance,
   transcriptStamp,
   webOrigin,
-} from "@/components/transcription/transcription-model";
+  SHELF_DEFAULTS,
+} from "@/components/library/library-model";
 import type { LibrarySourceRow } from "@/lib/library/types";
 
 function row(overrides: Partial<LibrarySourceRow> = {}): LibrarySourceRow {
   return {
     id: "11111111-1111-1111-1111-111111111111",
+    kind: "video_transcript",
     uri: "https://youtube.com/watch?v=abc",
     title: null,
     media: { state: "empty" },
@@ -41,12 +47,17 @@ describe("shelf-row facts (only what the ingest recorded)", () => {
     expect(sourceLead(row({ uri: null }))).toBe("11111111-1111-1111-1111-111111111111");
   });
 
-  it("states segments, provider and tags — and never invents 'grounds N drafts'", () => {
+  it("leads the facts with the row's KIND word, then segments, provider and tags — never 'grounds N drafts'", () => {
     expect(sourceFacts(row({ segmentCount: 84, provider: "hosted-vendor", tags: ["ai", "hooks"] })))
       .toBe("Video · 84 segments · hosted-vendor · ai, hooks");
     // Pre-rider row: nothing recorded, nothing claimed.
     expect(sourceFacts(row())).toBe("Video");
     expect(sourceFacts(row({ segmentCount: 1 }))).toBe("Video · 1 segment");
+    // §5.3: every kind is a legible fact in the same slot.
+    expect(sourceFacts(row({ kind: "url" }))).toBe("Article");
+    expect(sourceFacts(row({ kind: "doc", tags: ["notes"] }))).toBe("Doc · notes");
+    // An unknown kind states its own token rather than hiding.
+    expect(sourceFacts(row({ kind: "future_kind" }))).toBe("future_kind");
   });
 
   it("carries the engine's top-scored area with its reason, or nothing at all", () => {
@@ -67,6 +78,51 @@ describe("shelf-row facts (only what the ingest recorded)", () => {
     expect(webOrigin("https://youtube.com/watch?v=abc")).toBe("https://youtube.com/watch?v=abc");
     expect(webOrigin("/media/local-clip.mp4")).toBeNull();
     expect(webOrigin(null)).toBeNull();
+  });
+});
+
+describe("the §5.3 kind lens", () => {
+  it("humanizes the kinds it knows and passes an unknown token through", () => {
+    expect(kindWord("video_transcript")).toBe("Video");
+    expect(kindWord("url")).toBe("Article");
+    expect(kindWord("site_crawl")).toBe("Site crawl");
+    expect(kindWord("voice_sample")).toBe("Voice");
+    expect(kindWord("something_new")).toBe("something_new");
+  });
+
+  it("builds All + one tab per kind the shelf HOLDS, with real counts — no zero fixtures", () => {
+    const rows = [
+      row({ id: "a", kind: "video_transcript" }),
+      row({ id: "b", kind: "video_transcript" }),
+      row({ id: "c", kind: "url" }),
+    ];
+    expect(kindTabs(rows)).toEqual([
+      { label: "All", count: 3 },
+      { kind: "url", label: "Article", count: 1 },
+      { kind: "video_transcript", label: "Video", count: 2 },
+    ]);
+    expect(kindTabs([])).toEqual([{ label: "All", count: 0 }]);
+  });
+
+  it("the kind filter cuts the shelf and composes with find/tag", () => {
+    const rows = [
+      row({ id: "a", kind: "video_transcript", title: "A video" }),
+      row({ id: "b", kind: "url", title: "An article", tags: ["ai"] }),
+      row({ id: "c", kind: "url", title: "Another article" }),
+    ];
+    expect(applyShelfFilters(rows, { ...SHELF_DEFAULTS, kind: "url" }).map((r) => r.id)).toEqual([
+      "b",
+      "c",
+    ]);
+    expect(
+      applyShelfFilters(rows, { ...SHELF_DEFAULTS, kind: "url", tag: "ai" }).map((r) => r.id),
+    ).toEqual(["b"]);
+  });
+
+  it("only a transcript row has transcript doors", () => {
+    expect(hasTranscript(row())).toBe(true);
+    expect(hasTranscript(row({ kind: "url" }))).toBe(false);
+    expect(hasTranscript(row({ kind: "doc" }))).toBe(false);
   });
 });
 

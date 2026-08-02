@@ -3,12 +3,12 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { Transcription } from "@/components/transcription/transcription";
+import { Library } from "@/components/library/library";
 import { seedLibraryRow } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/app/transcription",
+  usePathname: () => "/app/library",
   useRouter: () => ({ push: vi.fn() }),
 }));
 
@@ -34,15 +34,16 @@ function seamIs(selected: string) {
 const seed = seedLibraryRow;
 
 /**
- * The s79 lane-3 fix pass — the three Transcription findings that survived the
- * adversarial verify round (T1 3/3, T2 3/3, T3 2/3). Each test was run against
+ * The s79 lane-3 fix pass — the three findings that survived the adversarial
+ * verify round (T1 3/3, T2 3/3, T3 2/3), carried whole through the s94 §5.3
+ * re-homing (Transcription → Library). Each test was originally run against
  * the reverted fix to prove it fails without it.
  */
-describe("Transcription — s79 verified fixes", () => {
+describe("Library — s79 verified fixes (carried through the §5.3 re-homing)", () => {
   /* ── T1 [high] — a refused control must not look armed ──────────────────── */
 
   it("T1: the resting Ingest refusal names what it is waiting for", async () => {
-    render(<Transcription />);
+    render(<Library />);
     const ingest = await screen.findByRole("button", { name: "Ingest" });
     expect(ingest).toBeDisabled();
     expect(ingest).toHaveAttribute("title", expect.stringContaining("Paste a video URL first"));
@@ -52,9 +53,7 @@ describe("Transcription — s79 verified fixes", () => {
 
   it("T1: an in-flight control says RUNNING, never wearing the refusal look alone", async () => {
     const user = userEvent.setup();
-    // Hold the ingest open so the busy state is observable. The resolver lives
-    // on an object: a bare `let` assigned inside the handler narrows to `never`
-    // at the call site, and `vitest` would never have told us (typecheck did).
+    // Hold the ingest open so the busy state is observable.
     const gate: { release: () => void } = { release: () => {} };
     server.use(
       http.post("/api/library/ingest", async () => {
@@ -64,7 +63,7 @@ describe("Transcription — s79 verified fixes", () => {
         return HttpResponse.json({ sourceId: "held", created: true }, { status: 201 });
       }),
     );
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByRole("button", { name: "Ingest" });
     await user.type(screen.getByLabelText("Video URL"), "https://example.com/held");
     await user.click(screen.getByRole("button", { name: "Ingest" }));
@@ -85,7 +84,7 @@ describe("Transcription — s79 verified fixes", () => {
   }
 
   it("T2: a dropped file never reaches the browser — the surface handles the event", async () => {
-    const { container } = render(<Transcription />);
+    const { container } = render(<Library />);
     await screen.findByRole("button", { name: "Ingest" });
     const form = container.querySelector(".ingest") as HTMLElement;
 
@@ -101,7 +100,7 @@ describe("Transcription — s79 verified fixes", () => {
   });
 
   it("T2: a non-caption file is refused BY NAME, not silently swallowed", async () => {
-    const { container } = render(<Transcription />);
+    const { container } = render(<Library />);
     await screen.findByRole("button", { name: "Ingest" });
     (container.querySelector(".ingest") as HTMLElement).dispatchEvent(
       dropEvent(new File(["not a transcript"], "clip.mp4", { type: "video/mp4" })),
@@ -114,10 +113,9 @@ describe("Transcription — s79 verified fixes", () => {
 
   it("T2: on a fetching seam the drop is refused in the engine's own words", async () => {
     // The live seam is hosted-vendor, which fetches from the link and IGNORES
-    // captions — the audit's own suggested fix (read the file into `captions`)
-    // would have dropped the file into invisible state under a still-disabled
-    // button. An honest refusal is the correct behaviour here.
-    const { container } = render(<Transcription />);
+    // captions — reading the file into invisible state under a still-disabled
+    // button would be worse than the refusal.
+    const { container } = render(<Library />);
     await screen.findByRole("button", { name: "Ingest" });
     (container.querySelector(".ingest") as HTMLElement).dispatchEvent(
       dropEvent(new File(["1\n00:00:01,000 --> 00:00:02,000\nhi\n"], "cues.srt")),
@@ -132,7 +130,7 @@ describe("Transcription — s79 verified fixes", () => {
 
   it("T2: on the caption-file seam the drop lands VISIBLY, in the box the operator can see", async () => {
     seamIs("caption-file");
-    const { container } = render(<Transcription />);
+    const { container } = render(<Library />);
     // Wait for the SEAM to arrive, not just the button: captionMode is a fact
     // of the read, and a drop before it lands would take the refusal branch.
     await screen.findByText(/Nothing ingested yet/);
@@ -151,7 +149,7 @@ describe("Transcription — s79 verified fixes", () => {
   /* ── T3 [high] — filters, sort by (the founder's own re-introduction) ───── */
 
   it("T3: no shelf, no knobs — the band never appears with nothing to control", async () => {
-    const { container } = render(<Transcription />);
+    const { container } = render(<Library />);
     expect(await screen.findByText(/Nothing ingested yet/)).toBeInTheDocument();
     expect(container.querySelector(".shelf-knobs")).toBeNull();
   });
@@ -161,7 +159,7 @@ describe("Transcription — s79 verified fixes", () => {
     seed({ uri: "https://example.com/a", title: "Cold brew basics", tags: ["coffee"] });
     seed({ uri: "https://example.com/b", title: "Roast profiles", tags: ["coffee", "roasting"] });
     seed({ uri: "https://example.com/c", title: "Hiring engineers", tags: ["hiring"] });
-    render(<Transcription />);
+    render(<Library />);
 
     expect(await screen.findByText("3 sources")).toBeInTheDocument();
     // "coffee" is a TAG on two rows and in no title — so this also proves the
@@ -175,7 +173,7 @@ describe("Transcription — s79 verified fixes", () => {
     const user = userEvent.setup();
     seed({ uri: "https://example.com/a", title: "Cold brew basics", tags: ["coffee"] });
     seed({ uri: "https://example.com/c", title: "Hiring engineers", tags: ["hiring"] });
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("2 sources");
 
     const tagFilter = screen.getByLabelText("Tag filter");
@@ -191,7 +189,7 @@ describe("Transcription — s79 verified fixes", () => {
     const user = userEvent.setup();
     seed({ uri: "https://example.com/old", title: "Older", createdAt: "2026-07-01T00:00:00.000Z" });
     seed({ uri: "https://example.com/new", title: "Newer", createdAt: "2026-07-20T00:00:00.000Z" });
-    const { container } = render(<Transcription />);
+    const { container } = render(<Library />);
     await screen.findByText("2 sources");
 
     const leads = () =>
@@ -200,15 +198,14 @@ describe("Transcription — s79 verified fixes", () => {
 
     await user.selectOptions(screen.getByLabelText("Sort order"), "oldest");
     await waitFor(() => expect(leads()).toEqual(["Older", "Newer"]));
-    // The chip face states the order (the same query lane 1 used on Leads —
-    // the word also exists as an <option>).
+    // The chip face states the order.
     expect(screen.getByText("Oldest first", { selector: ".sel-ctl" })).toBeInTheDocument();
   });
 
   it("T3: a narrowed-empty shelf says the KNOB emptied it, and offers the way back", async () => {
     const user = userEvent.setup();
     seed({ uri: "https://example.com/a", title: "Cold brew basics" });
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("1 sources");
 
     await user.type(screen.getByLabelText("Find a source"), "zzzz");
@@ -219,44 +216,55 @@ describe("Transcription — s79 verified fixes", () => {
     await waitFor(() => expect(screen.getByText("Cold brew basics")).toBeInTheDocument());
   });
 
-  it("T3: the cursor can never land on a row the filter removed", async () => {
+  it("T3: the cursor can never land on a row the filter removed — the kind qtab included", async () => {
     const user = userEvent.setup();
-    seed({ uri: "https://example.com/a", title: "Cold brew basics", tags: ["coffee"] });
-    seed({ uri: "https://example.com/c", title: "Hiring engineers", tags: ["hiring"] });
-    render(<Transcription />);
+    seed({ uri: "https://example.com/a", title: "Cold brew basics" });
+    seed({
+      uri: "https://example.com/c",
+      title: "An article source",
+      kind: "url",
+      provider: null,
+      segmentCount: null,
+    });
+    render(<Library />);
     await screen.findByText("2 sources");
 
-    // Pick the row that the filter is about to remove.
-    const hiring = screen.getByRole("button", { name: "Hiring engineers" });
-    await user.click(hiring);
-    await waitFor(() => expect(hiring).toHaveClass("sel"));
+    // Pick the row that the lens is about to remove.
+    const article = screen.getByRole("button", { name: "An article source" });
+    await user.click(article);
+    await waitFor(() => expect(article).toHaveClass("sel"));
 
-    await user.selectOptions(screen.getByLabelText("Tag filter"), "coffee");
+    await user.click(screen.getByRole("tab", { name: "Video 1" }));
 
     // The selected source is gone from the shelf; the cursor falls back to the
     // first VISIBLE row, never to an index into a list nobody can see — this
     // surface's d/↵ verbs act on it.
     const remaining = await screen.findByRole("button", { name: "Cold brew basics" });
     expect(remaining).toHaveClass("sel");
-    // Gone from the SHELF. The transcript panel the operator opened keeps its
-    // own subject — it is a different entity, not a shelf row.
     const shelf = remaining.parentElement as HTMLElement;
-    expect(within(shelf).queryByText("Hiring engineers")).toBeNull();
+    expect(within(shelf).queryByText("An article source")).toBeNull();
   });
 
-  it("T3: an ingest is never hidden behind a filter the operator forgot", async () => {
+  it("T3: an ingest is never hidden behind a filter the operator forgot — the kind lens included", async () => {
     const user = userEvent.setup();
-    seed({ uri: "https://example.com/a", title: "Cold brew basics", tags: ["coffee"] });
-    render(<Transcription />);
+    seed({
+      uri: "https://example.com/article",
+      title: "An article source",
+      kind: "url",
+      provider: null,
+      segmentCount: null,
+    });
+    render(<Library />);
     await screen.findByText("1 sources");
-    await user.type(screen.getByLabelText("Find a source"), "cold");
+    await user.click(screen.getByRole("tab", { name: "Article 1" }));
     expect(await screen.findByText("1 of 1 sources")).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("Video URL"), "https://example.com/fresh");
     await user.click(screen.getByRole("button", { name: "Ingest" }));
 
-    // A write that lands behind a filter reads as a failed write.
+    // A write that lands behind a filter reads as a failed write — the fresh
+    // video row must be visible even though the Article lens was on.
     await waitFor(() => expect(screen.getByText("2 sources")).toBeInTheDocument());
-    expect((screen.getByLabelText("Find a source") as HTMLInputElement).value).toBe("");
+    expect(screen.getByRole("tab", { name: "All 2" })).toHaveClass("on");
   });
 });

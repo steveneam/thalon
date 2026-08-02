@@ -8,7 +8,7 @@ import { CreateContextLoader } from "@/components/create/create-context-loader";
 import { NeedsYouCard } from "@/components/dashboard/needs-you-card";
 import { Integrations } from "@/components/settings/integrations";
 import { LeadsSurface } from "@/components/leads/leads-surface";
-import { Transcription } from "@/components/transcription/transcription";
+import { Library } from "@/components/library/library";
 import { draftA, FIXTURE_DRAFT_A_ID, FIXTURE_DRAFT_B_ID } from "@/lib/approve-queue/fixtures";
 import type { NeedsYouRow } from "@/components/dashboard/dashboard-model";
 import type { CreateContext } from "@/lib/intel/types";
@@ -234,12 +234,12 @@ describe("keyed by entity — state must not outlive the entity it describes", (
     expect(screen.getByText("LinkedIn · post").closest(".row")).not.toHaveClass("sel");
   });
 
-  it("Transcription: the selection is a source, not a position — it survives an ingest that prepends", async () => {
+  it("Library: the selection is a source, not a position — it survives an ingest that prepends", async () => {
     const user = userEvent.setup();
     seedLibraryRow({ uri: "https://example.com/older", title: "OLDER SOURCE" });
     seedLibraryRow({ uri: "https://example.com/newer", title: "NEWER SOURCE" });
 
-    render(<Transcription />);
+    render(<Library />);
     // seedLibraryRow unshifts, so the shelf reads NEWER (0) → OLDER (1).
     const older = await screen.findByRole("button", { name: "OLDER SOURCE" });
     await user.click(older);

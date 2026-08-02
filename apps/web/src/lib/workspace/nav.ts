@@ -6,7 +6,7 @@ import {
   IconIntel,
   IconJourney,
   IconLeads,
-  IconTranscription,
+  IconLibrary,
   IconProfiles,
   IconRuns,
   IconSettings,
@@ -22,7 +22,9 @@ import {
  * founder-verdicted wave-0 mock's, verbatim (kickoff step 3), plus the D4
  * ratified rail addition (2026-07-29 sweep — Analytics joins under Schedule):
  * Home · Intel · Create · Approve(count) · Schedule · Analytics ┃ Leads ·
- * Transcription · Videos · Sites · Runs ┃ Profiles · Settings.
+ * Library · Videos · Sites · Runs ┃ Profiles · Settings. (The s74
+ * "Transcription" rename retired s94 — the §5.3 ruling put the sheets' own
+ * "Library" back once the shelf widened beyond transcripts.)
  * Icons come from the canonical set (components/ui/icons.tsx) — one
  * metaphor per feature, everywhere.
  */
@@ -106,11 +108,11 @@ export const NAV_SURFACES: NavSurface[] = [
     section: "outputs",
   },
   {
-    label: "Transcription",
-    href: "/app/transcription",
-    icon: IconTranscription,
-    hint: "Paste a video URL — transcript in, ready to copy, export, and ground on",
-    keywords: ["transcript", "video", "url", "youtube", "ingest", "captions", "srt", "csv", "sources"],
+    label: "Library",
+    href: "/app/library",
+    icon: IconLibrary,
+    hint: "The grounding shelf — every ingested source, by kind, ready to cite",
+    keywords: ["library", "transcript", "transcription", "video", "url", "youtube", "ingest", "captions", "srt", "sources", "grounding", "article"],
     section: "outputs",
   },
   {

@@ -19,13 +19,24 @@
 .sites-surface .site-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .sites-surface .site-card { background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-card); overflow: hidden; cursor: pointer; transition: border-color var(--motion-fast); display: flex; flex-direction: column; }
 .sites-surface .site-card:hover { border-color: var(--n-500); }
-.sites-surface .site-shot { height: 150px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; }
+.sites-surface .site-shot { position: relative; height: 132px; border-bottom: 1px solid var(--n-400); background: repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); display: flex; align-items: center; justify-content: center; }
+/* W2: the state pill rides the picture — the sheet's own rule. */
+.sites-surface .site-shot .pill { position: absolute; top: 8px; left: 8px; }
+/* NAMED adaptation: the sheet's pill sits on its muted striped placeholder,
+   but the app's shots are real heroes (media-first, s71) and the ok/warn
+   subtle channels are ~13% ALPHA tints — over a bright photo the state word
+   vanished (seen live, s94). The same tint composited over an opaque
+   `--n-bg` reproduces the resting look exactly while staying legible on any
+   image. `.pill-idle` is already opaque (`--n-200`) and keeps its own paint. */
+.sites-surface .site-shot .pill-ok, .sites-surface .site-shot .pill-warn { background-color: var(--n-bg); }
+.sites-surface .site-shot .pill-ok { background-image: linear-gradient(var(--ok-subtle), var(--ok-subtle)); }
+.sites-surface .site-shot .pill-warn { background-image: linear-gradient(var(--warn-subtle), var(--warn-subtle)); }
 /* `> span` narrows the sheet's rule to the PLACEHOLDER caption it was written
    for — a direct child of the shot. The declaration is the sheet's, untouched;
    without the child combinator it also swallows the record caption's own spans
    (proved on screen: the one-liner rendered as 10px mono). */
 .sites-surface .site-shot > span { font-family: var(--font-data); font-size: 10px; color: var(--n-800); }
-.sites-surface .site-meta { padding: 11px 14px; display: flex; align-items: center; gap: 9px; }
+.sites-surface .site-meta { padding: 10px 14px; display: flex; align-items: flex-start; gap: 9px; }
 .sites-surface .prompt-box { background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 10px; padding: 13px 16px; font-size: 14px; color: var(--n-800); flex: 1; }
 .sites-surface .cat-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border: 1px solid var(--n-400); border-radius: var(--r-pill); font-size: 12.5px; color: var(--n-900); background: var(--n-100); cursor: pointer; }
 .sites-surface .cat-chip:hover { border-color: var(--n-500); color: var(--n-1000); }
@@ -51,7 +62,9 @@
  *    is the sheet's own `.t-label`/`.t-data` roles.
  */
 .sites-surface .site-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.sites-surface .site-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* W2: the name sits over its truth line inside the meta's flex:1 block. */
+.sites-surface .site-name { display: block; min-width: 0; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sites-surface .site-meta .excerpt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sites-surface a.site-card { color: inherit; }
 .sites-surface .site-card .card-link { color: var(--act); }
 .sites-surface .site-card.sel { border-color: var(--act); box-shadow: inset 2px 0 0 var(--act); }

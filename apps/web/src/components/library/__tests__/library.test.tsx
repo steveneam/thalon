@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
-import { Transcription } from "@/components/transcription/transcription";
+import { Library } from "@/components/library/library";
 import { seedLibraryRow } from "@/lib/testing/handlers";
 import { server } from "@/lib/testing/server";
 
@@ -12,8 +12,8 @@ const SEGMENTS = [
   { text: "second ingested segment", startMs: 1_500, endMs: 3_000 },
 ];
 
-describe("Library (exact-mock rebuild, Library.dc.html)", () => {
-  it("renders the sheet's bands: headline + source count, the ingest band, shelf rows, the footer", async () => {
+describe("Library (exact-mock rebuild, Library.dc.html — the s90 W2 amendment, §5.3)", () => {
+  it("renders the sheet's bands: headline + source count, the ingest band with its seg, kind qtabs, shelf rows, the footer", async () => {
     seedLibraryRow({
       uri: "https://youtube.com/watch?v=abc",
       title: "Build-step pipeline walkthrough",
@@ -22,23 +22,31 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         { areaId: "a1", areaName: "ai tooling", score: 0.82, reason: "close to the area description" },
       ],
     }, SEGMENTS);
-    render(<Transcription />);
+    render(<Library />);
 
-    expect(screen.getByRole("heading", { name: "Transcription" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Library" })).toBeInTheDocument();
     expect(await screen.findByText("1 sources")).toBeInTheDocument();
     expect(
       screen.getByText(/everything here is grounding — the judge cites these verbatim/),
     ).toBeInTheDocument();
-    // The ingest band is the sheet's box + button at rest.
+    // The ingest band is the sheet's box + seg + button at rest — the box
+    // states what the seam actually takes (video/audio URL), never more.
     expect(screen.getByLabelText("Video URL")).toHaveAttribute(
       "placeholder",
-      expect.stringContaining("Paste a video URL"),
+      expect.stringContaining("Paste a video or audio URL"),
     );
+    expect(screen.getByRole("button", { name: "Free transcript" })).toHaveClass("seg-opt", "on");
+    expect(screen.getByRole("button", { name: "AI enhance" })).toHaveClass("seg-opt");
     expect(screen.getByRole("button", { name: "Ingest" })).toBeInTheDocument();
 
+    // The §5.3 kind lens: All plus each kind the shelf actually holds.
+    const tabs = screen.getByRole("tablist", { name: "Source kind" });
+    expect(within(tabs).getByRole("tab", { name: "All 1" })).toHaveClass("qtab", "on");
+    expect(within(tabs).getByRole("tab", { name: "Video 1" })).toBeInTheDocument();
+
     const row = screen.getByRole("button", { name: "Build-step pipeline walkthrough" });
-    // The facts line states only what the ingest recorded — plus the way back;
-    // the engine's scoring reason rides the line's tooltip.
+    // The facts line states only what the ingest recorded — led by the row's
+    // kind word — plus the way back; the scoring reason rides the tooltip.
     const facts = within(row).getByTitle("close to the area description");
     expect(facts.textContent).toContain("Video · 2 segments · hosted-vendor · ai, hooks");
     expect(facts.textContent).toContain("relevant to ai tooling");
@@ -49,6 +57,62 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
     expect(
       screen.getByText(/Sources are per-tenant and chunked once/),
     ).toBeInTheDocument();
+  });
+
+  it("the kind qtabs are a lens with real counts — they cut the shelf and never invent a zero tab", async () => {
+    const user = userEvent.setup();
+    seedLibraryRow({ uri: "https://youtube.com/watch?v=v1", title: "A video source" }, SEGMENTS);
+    seedLibraryRow({
+      uri: "https://example.com/deterministic-rendering",
+      title: "Deterministic rendering docs",
+      kind: "url",
+      provider: null,
+      segmentCount: null,
+    });
+    render(<Library />);
+    await screen.findByText("2 sources");
+
+    const tabs = screen.getByRole("tablist", { name: "Source kind" });
+    // Only kinds the shelf HOLDS get a tab — no fixture tabs, no zeros.
+    expect(within(tabs).getAllByRole("tab").map((t) => t.textContent)).toEqual([
+      "All2",
+      "Article1",
+      "Video1",
+    ]);
+
+    await user.click(within(tabs).getByRole("tab", { name: "Article 1" }));
+    expect(within(tabs).getByRole("tab", { name: "Article 1" })).toHaveClass("on");
+    expect(screen.getByText("1 of 2 sources")).toBeInTheDocument();
+    expect(screen.queryByText("A video source")).toBeNull();
+    // The article row leads its facts with its own kind word.
+    const article = screen.getByRole("button", { name: "Deterministic rendering docs" });
+    expect(article.textContent).toContain("Article");
+
+    await user.click(within(tabs).getByRole("tab", { name: "All 2" }));
+    expect(await screen.findByText("2 sources")).toBeInTheDocument();
+  });
+
+  it("a non-transcript row carries no transcript doors — the server refuses them, so none are drawn", async () => {
+    seedLibraryRow({ uri: "https://youtube.com/watch?v=v1", title: "A video source" }, SEGMENTS);
+    seedLibraryRow({
+      uri: "https://example.com/article",
+      title: "An article source",
+      kind: "url",
+      provider: null,
+      segmentCount: null,
+    });
+    render(<Library />);
+    await screen.findByText("2 sources");
+
+    const video = screen.getByRole("button", { name: "A video source" });
+    expect(within(video).getByRole("button", { name: "Copy transcript" })).toBeInTheDocument();
+    expect(within(video).getByRole("button", { name: "Export" })).toBeInTheDocument();
+
+    const article = screen.getByRole("button", { name: "An article source" });
+    expect(within(article).queryByRole("button", { name: "Copy transcript" })).toBeNull();
+    expect(within(article).queryByRole("button", { name: "Export" })).toBeNull();
+    // Its way back survives — the origin link is the row's own door.
+    expect(within(article).getByRole("link", { name: /Open the original source/ })).toBeInTheDocument();
   });
 
   it("keeps the ingest keepers behind the sheet's resting chrome: tags + seam unfold on engage", async () => {
@@ -65,7 +129,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         );
       }),
     );
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("0 sources");
 
     // At rest the sheet's band carries no tag field — it unfolds on engage.
@@ -82,10 +146,20 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
     expect(screen.getByText("1 sources")).toBeInTheDocument();
   });
 
+  it("the extras state the ingest kinds that are still deferred — a fact line, never a dead door", async () => {
+    const user = userEvent.setup();
+    render(<Library />);
+    await screen.findByText("0 sources");
+
+    await user.click(screen.getByLabelText("Video URL"));
+    const deferral = screen.getByText(/Article, file and pasted-text ingest land with their own pass/);
+    expect(deferral.textContent).toMatch(/today the band transcribes video\/audio URLs/);
+  });
+
   it("opening a row reveals the transcript doors — read, copy the brief, export, delete", async () => {
     const user = userEvent.setup();
     seedLibraryRow({ uri: "https://example.com/v2", title: "Shelf opened" }, SEGMENTS);
-    render(<Transcription />);
+    render(<Library />);
 
     // Resting chrome: no panel until a row is opened.
     expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
@@ -115,7 +189,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         HttpResponse.json({ error: "this source still grounds 2 drafts" }, { status: 409 }),
       ),
     );
-    render(<Transcription />);
+    render(<Library />);
 
     await user.click(await screen.findByRole("button", { name: "Grounds a draft" }));
     await user.click(await screen.findByRole("button", { name: "Delete" }));
@@ -134,7 +208,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
     seedLibraryRow({ uri: "https://x.example/2", title: "Second video" }, SEGMENTS);
     seedLibraryRow({ uri: "https://x.example/1", title: "First video" }, SEGMENTS);
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
-    render(<Transcription />);
+    render(<Library />);
 
     const first = await screen.findByRole("button", { name: "First video" });
     expect(first.className).toContain("row sel");
@@ -153,9 +227,42 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
     confirmSpy.mockRestore();
   });
 
+  it("d and ↵ are inert on a non-transcript row — the guarded verbs never reach the server", async () => {
+    const user = userEvent.setup();
+    seedLibraryRow({
+      uri: "https://example.com/article",
+      title: "An article source",
+      kind: "url",
+      provider: null,
+      segmentCount: null,
+    });
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<Library />);
+    await screen.findByText("1 sources");
+
+    await user.keyboard("d");
+    expect(confirmSpy).not.toHaveBeenCalled();
+    await user.keyboard("{Enter}");
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
+    confirmSpy.mockRestore();
+  });
+
+  it("the row region is BOUNDED and the bound is stated — never a silent truncation", async () => {
+    for (let i = 0; i < 55; i++) {
+      seedLibraryRow({ uri: `https://example.com/v${i}`, title: `Source ${i}` });
+    }
+    const { container } = render(<Library />);
+    await screen.findByText("55 sources");
+
+    // 50 rows render; the foot row counts the rest and names the lenses.
+    expect(container.querySelectorAll(".card .row[role='button']")).toHaveLength(50);
+    const foot = screen.getByText(/\+5 more/);
+    expect(foot.textContent).toMatch(/narrow with find or the kind tabs/);
+  });
+
   it("a failed read is an alert with retry, never an empty shelf", async () => {
     server.use(http.get("/api/library", () => HttpResponse.error()));
-    render(<Transcription />);
+    render(<Library />);
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(/Couldn’t read the library/);
@@ -165,9 +272,10 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
     expect(screen.getByText("– sources")).toBeInTheDocument();
   });
 
-  it("an empty shelf says so plainly", async () => {
-    render(<Transcription />);
+  it("an empty shelf says so plainly — and draws no qtabs over nothing", async () => {
+    const { container } = render(<Library />);
     expect(await screen.findByText(/Nothing ingested yet/)).toBeInTheDocument();
+    expect(container.querySelector(".qtabs")).toBeNull();
   });
 
   it("the caption-file seam asks for captions instead of pretending URL-only works", async () => {
@@ -184,7 +292,7 @@ describe("Library (exact-mock rebuild, Library.dc.html)", () => {
         }),
       ),
     );
-    render(<Transcription />);
+    render(<Library />);
     await screen.findByText("0 sources");
 
     await user.click(screen.getByLabelText("Video URL"));

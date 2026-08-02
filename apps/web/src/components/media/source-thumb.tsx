@@ -8,7 +8,8 @@ import "@/components/media/source-thumb.css";
  * `<SourceThumb>` — the one thumbnail component (B-media.0, spec: the
  * founder-verdicted `mock-sheets/Source Media.dc.html`).
  *
- * It replaces the hand-rolled `<img>` in `transcription.tsx`,
+ * It replaces the hand-rolled `<img>` in the library shelf (then named
+ * `transcription.tsx`),
  * `intel/rising-card.tsx` and `intel/dossier-card.tsx`, which had grown three
  * copies of the same block and NONE of them an `onError` — so a dead poster
  * painted a browser broken-image glyph inside the striped box, the one state

@@ -99,21 +99,20 @@ loses information with no cue that anything was lost, which is exactly what the
 The sheets are the spec, with these recorded exceptions. **A lane must not
 "correct" one back to what the sheet draws.**
 
-- **`Library` is now `Transcription`** (founder-directed s74: *"the libary
-  (we should really rename it to Transcription) also needs the media/
-  thumbnail treatment, since it's mostly youtube/video based"*; shipped
-  s75 as B-media.1). `Library.dc.html` and the rail in all 16 sheets still
-  say "Library" — that text is superseded. The surface serves
-  `video_transcript` sources only, which is why every one of its row verbs
-  was already "Copy transcript". Live: route `/app/transcription` (with
-  `/app/library` kept permanently as a redirect so deep links and the
-  command palette survive), `components/transcription/`, scope class
-  `.transcription-surface`. **Deliberate boundary:** the rename is
-  surface-level. The data layer (`lib/library/`, `/api/library`,
-  `LibrarySourceRow`) keeps its name because it serves the generic
-  `sources` shelf, not this one surface. Revisit the name only if the
-  surface's source kinds widen beyond transcripts, at which point
-  "Transcription" becomes the wrong word.
+- **`Library` again — the s74 "Transcription" rename RETIRED s94.** The s74
+  exception (founder-directed: *"the libary (we should really rename it to
+  Transcription) also needs the media/thumbnail treatment, since it's mostly
+  youtube/video based"*; shipped s75 as B-media.1) carried its own boundary:
+  *"revisit the name only if the surface's source kinds widen beyond
+  transcripts, at which point 'Transcription' becomes the wrong word."* The
+  founder's §5.3 W2 ruling did exactly that — *"ONE Library surface;
+  transcription becomes an ingest kind + a filter, not a second route"* —
+  so the sheets' own "Library" text is authoritative again. Live since s94:
+  route `/app/library` (real surface, `/app/transcription` deleted),
+  `components/library/`, scope class `.library-surface`, the read widened
+  to every non-`prompt` source kind with the kind qtab lens. The data layer
+  (`lib/library/`, `/api/library`, `LibrarySourceRow`) never renamed, which
+  is why the retirement was cheap.
 
 ## Proposals — NOT yet verdicted (do not port)
 

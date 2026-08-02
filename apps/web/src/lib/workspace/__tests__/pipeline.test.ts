@@ -43,7 +43,7 @@ describe("assetStages", () => {
 
   it("every reached stage opens its artifact; unreached stages carry no link and read pending", () => {
     const stages = assetStages(asset({ draftId: "q" }));
-    expect(stages.find((s) => s.key === "captured")?.href).toBe("/app/transcription");
+    expect(stages.find((s) => s.key === "captured")?.href).toBe("/app/library");
     expect(stages.find((s) => s.key === "generated")?.href).toBe("/app/runs?run=run-1");
     expect(stages.find((s) => s.key === "published")).toMatchObject({
       state: "pending",

@@ -13,10 +13,11 @@ import {
   cardFacts,
   chipActive,
   chipTitle,
-  headerPills,
   restingChips,
   siteChips,
+  stateSeg,
   toggleChip,
+  truthLine,
   verdictStatus,
   type SiteFilters,
 } from "@/components/sites/sites-model";
@@ -79,7 +80,7 @@ export function Sites({
 
   const chips = useMemo(() => siteChips(records), [records]);
   const shown = useMemo(() => applyFilters(records, filters), [records, filters]);
-  const pills = headerPills(records, shown);
+  const seg = stateSeg(records);
 
   // Derived, not effect-synced: filtering away the selected card simply
   // leaves nothing selected until the operator moves again.
@@ -124,13 +125,37 @@ export function Sites({
           <span className="pill pill-idle">no origin configured</span>
         ) : source.kind === "error" ? (
           <span className="pill pill-err">origin unreachable</span>
+        ) : records.length === 0 ? (
+          // A seg over nothing is a dead control — the empty catalog keeps
+          // the plain count until there is a portfolio to lens.
+          <span className="pill pill-idle">0 built</span>
         ) : (
-          <>
-            <span className="pill pill-idle">{pills.built}</span>
-            <span className="pill pill-ok">{pills.approved}</span>
-          </>
+          // The W2 seg: the h1 pills became a real state filter. Its
+          // vocabulary is the catalog's recorded verdicts (stateSeg) — the
+          // sheet's Live/Draft fixture words wait on a deploy state that
+          // does not exist to read.
+          <div className="seg">
+            {seg.map((opt) => {
+              const on = filters.state === opt.state;
+              return (
+                <button
+                  key={opt.state ?? "all"}
+                  type="button"
+                  className={on ? "seg-opt on" : "seg-opt"}
+                  aria-pressed={on}
+                  onClick={() => setFilters((f) => ({ ...f, state: opt.state }))}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
         )}
         <div style={{ flex: 1 }} />
+        {(source.kind === "local" || source.kind === "remote") && records.length > 0 && (
+          // True of the read itself: parseCatalog sorts newest-built first.
+          <span className="t-label">newest first</span>
+        )}
       </div>
 
       <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -224,7 +249,7 @@ export function Sites({
         <div className="card">
           <div className="row">
             <span className="t-label" style={{ flex: 1 }}>
-              No sites match these chips — {records.length} are built, none in this slice.
+              No sites match this slice — {records.length} are built, none in it.
             </span>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFilters({})}>
               Clear filters
@@ -252,6 +277,9 @@ export function Sites({
                   ) : (
                     <span>site preview · hero</span>
                   )}
+                  {/* W2: the state rides the picture — "you read a gallery by
+                      its pictures". The word is still the recorded verdict. */}
+                  <span className={VERDICT_PILL[status]}>{VERDICT_WORDS[status]}</span>
                   {/*
                    * The old gallery's per-card record — one-liner, design
                    * register, build date — re-entering as a STATE, not a
@@ -275,10 +303,15 @@ export function Sites({
                   )}
                 </div>
                 <div className="site-meta">
-                  <span className="site-name" title={site.name}>
-                    {site.name}
-                  </span>
-                  <span className={VERDICT_PILL[status]}>{VERDICT_WORDS[status]}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span className="site-name" title={site.name}>
+                      {site.name}
+                    </span>
+                    {/* The truth line: no deploy state is recorded, so every
+                        card is honestly previews-only — a hostname appears
+                        the day the catalog carries one, never before. */}
+                    <div className="excerpt">{truthLine(site)}</div>
+                  </div>
                   <span className="card-link">Dossier →</span>
                 </div>
               </Link>
@@ -298,6 +331,12 @@ export function Sites({
             the workspace from {source.previewUpstream}
           </span>
         )}
+        {/* W2: the blog door — the contract's blog-loop join. The published
+            ledger lives on Settings (fetchPublishedView), the same door the
+            Dashboard's "Latest published" band opens. */}
+        <Link className="card-link" href="/app/settings">
+          Blog articles ride the same engine · the published ledger →
+        </Link>
       </div>
     </div>
   );

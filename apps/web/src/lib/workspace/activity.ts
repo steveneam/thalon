@@ -90,7 +90,7 @@ export function describeActivity(item: ActivityItem): ActivityView {
     case "source.ingested":
       return { summary: "Engine ingested a source", href, tone: "engine" };
     case "source.deleted":
-      return { summary: "You deleted a transcript from the library", href: "/app/transcription", tone: "operator" };
+      return { summary: "You deleted a transcript from the library", href: "/app/library", tone: "operator" };
     case "trend_snapshot.captured":
       return { summary: "Scout captured a trend snapshot", href, tone: "engine" };
     case "search_snapshot.captured":

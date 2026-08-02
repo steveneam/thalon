@@ -2,12 +2,13 @@ import type { LibrarySourceRow, WireSegment } from "@/lib/library/types";
 import { formatTimecode } from "@/lib/library/export";
 
 /**
- * Pure derivations behind the Transcription surface's bands, whose sheet is
- * still Library.dc.html (DOCTRINE 0 rebuild,
- * step 2). Every fact a shelf row states comes from here, so the honesty
- * rules stay unit-testable: a row says only what the ingest actually
- * recorded — no invented chunk counts, no invented "grounds N drafts", and
- * a pre-rider row (no title, no tags, no relevance) degrades to its URL.
+ * Pure derivations behind the Library surface (Library.dc.html, DOCTRINE 0 —
+ * rebuilt s94 on the founder's §5.3 ruling: ONE Library, kind is a filter,
+ * transcription is an ingest kind). Every fact a shelf row states comes from
+ * here, so the honesty rules stay unit-testable: a row says only what the
+ * ingest actually recorded — no invented chunk counts, no invented "grounds
+ * N drafts" — and a pre-rider row (no title, no tags, no relevance)
+ * degrades to its URL.
  */
 
 /** "ai, hooks , ai" → ["ai", "hooks"] — trimmed, deduped, capped to the ingest schema's 12. */
@@ -40,13 +41,63 @@ export function dayStamp(iso: string, now: Date): string {
   return at.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
+/* ── THE KIND LENS (§5.3, drawn as the sheet's qtab row) ──────────────────────
+   The wire's `kind` is the sources table's own open-ended column; the surface
+   humanizes the kinds it knows and shows an unknown token as itself — the
+   vocabulary is the data's, never a hard-coded fixture. The sheet's fixture
+   tabs (Video · Audio · Article · Capture · Text) are its DEMO shelf; the
+   real row is whatever kinds the tenant's shelf actually holds. ── */
+
+const KIND_WORDS: Record<string, string> = {
+  video_transcript: "Video",
+  url: "Article",
+  doc: "Doc",
+  site_crawl: "Site crawl",
+  exemplar: "Exemplar",
+  voice_sample: "Voice",
+  feature: "Feature",
+};
+
+/** The kind's human word — an unknown kind states its own token rather than hiding. */
+export function kindWord(kind: string): string {
+  return KIND_WORDS[kind] ?? kind;
+}
+
+export interface KindTab {
+  /** undefined = the All tab. */
+  kind?: string;
+  label: string;
+  count: number;
+}
+
+/**
+ * The qtab row: All first, then each kind the shelf actually holds with its
+ * real count — type is a lens over what EXISTS, never a route and never a
+ * zero-count fixture tab.
+ */
+export function kindTabs(rows: LibrarySourceRow[]): KindTab[] {
+  const counts = new Map<string, number>();
+  for (const row of rows) counts.set(row.kind, (counts.get(row.kind) ?? 0) + 1);
+  const kinds = [...counts.keys()].sort((a, b) => kindWord(a).localeCompare(kindWord(b)));
+  return [
+    { label: "All", count: rows.length },
+    ...kinds.map((kind) => ({ kind, label: kindWord(kind), count: counts.get(kind) ?? 0 })),
+  ];
+}
+
+/** Only a timed-transcript source has transcript doors — the read route itself is kind-guarded. */
+export function hasTranscript(row: LibrarySourceRow): boolean {
+  return row.kind === "video_transcript";
+}
+
 /**
  * The sheet's excerpt line for a shelf row — the facts this ingest recorded,
- * in the sheet's order. The sheet's "grounds N drafts" clause has no server
- * count behind it yet, so it is honestly absent rather than invented.
+ * in the sheet's order, led by the row's KIND word (§5.3: the kind is a
+ * legible fact, not a route). The sheet's "grounds N drafts" clause has no
+ * server count behind it yet, so it is honestly absent rather than invented.
  */
 export function sourceFacts(row: LibrarySourceRow): string {
-  const parts = ["Video"];
+  const parts = [kindWord(row.kind)];
   if (row.segmentCount !== null) {
     parts.push(`${row.segmentCount} segment${row.segmentCount === 1 ? "" : "s"}`);
   }
@@ -85,15 +136,9 @@ export function freeIngestNote(row: LibrarySourceRow): string | null {
 }
 
 /* ── THE VIEW KNOBS (founder s77: "re-introduce the good things (like filters,
-   sort by …) from the old design"; the s77 fan-out reached the same gap here
-   independently — "an unbounded shelf with no search, no filter and no sort").
-   Pure so the narrowing is unit-testable, and ONE grammar with lane 1's three
-   surfaces: Approve's `.sel-ctl` pickers plus a find box.
-
-   The verify round (T3 2/3) killed the finding's other half: the per-row tags
-   are NOT chip-shaped, so they are not a lying control — they are prose inside
-   a nowrap `.excerpt` that clips them out of view. The fix is therefore a real
-   tag control in the band, never the row text restyled into chips. ── */
+   sort by …) from the old design"; kept behind byte-true resting chrome). The
+   §5.3 kind lens joins them as `filters.kind` — one narrowing state, one
+   clearing rule, so the qtabs can never strand the cursor or hide a write. ── */
 
 export type ShelfSort = "newest" | "oldest" | "title";
 
@@ -101,10 +146,12 @@ export interface ShelfFilters {
   find: string;
   /** "" = every tag; otherwise the one tag being filtered on. */
   tag: string;
+  /** "" = every kind (the All qtab); otherwise the wire kind being lensed. */
+  kind: string;
   sort: ShelfSort;
 }
 
-export const SHELF_DEFAULTS: ShelfFilters = { find: "", tag: "", sort: "newest" };
+export const SHELF_DEFAULTS: ShelfFilters = { find: "", tag: "", kind: "", sort: "newest" };
 
 /** Every tag on the shelf, deduped and sorted — the tag filter's own vocabulary. */
 export function shelfTags(rows: LibrarySourceRow[]): string[] {
@@ -113,12 +160,13 @@ export function shelfTags(rows: LibrarySourceRow[]): string[] {
 
 /** True when any knob is off its default — what the surface must SAY it is doing. */
 export function shelfNarrowed(filters: ShelfFilters): boolean {
-  return filters.find.trim() !== "" || filters.tag !== "";
+  return filters.find.trim() !== "" || filters.tag !== "" || filters.kind !== "";
 }
 
 /**
  * Find matches the row's identity, its URL and its tags — the three things an
- * operator would type. Sort defaults to the route's own newest-first.
+ * operator would type. The kind qtab and the tag pick compose with it. Sort
+ * defaults to the route's own newest-first.
  */
 export function applyShelfFilters(
   rows: LibrarySourceRow[],
@@ -126,6 +174,7 @@ export function applyShelfFilters(
 ): LibrarySourceRow[] {
   const needle = filters.find.trim().toLowerCase();
   const matched = rows.filter((row) => {
+    if (filters.kind !== "" && row.kind !== filters.kind) return false;
     if (filters.tag !== "" && !row.tags.includes(filters.tag)) return false;
     if (needle === "") return true;
     const haystack = [sourceLead(row), row.uri ?? "", ...row.tags].join(" ").toLowerCase();

@@ -7,8 +7,10 @@ import { resolveTenantCtx } from "@/lib/tenant";
  * Library delete (founder direction, session 39): remove an ingested
  * transcript from the shelf. The repo owns the honesty rules — tenancy wall,
  * refuse-while-referenced, chunk/metric cascade, `source.deleted` audit row.
- * Only `video_transcript` sources are deletable from this surface; other
- * source kinds never belonged to the Library.
+ * The Library now lists every source kind (§5.3, s94) but delete stays
+ * `video_transcript`-scoped: the other kinds' cascade rules (an admitted
+ * Intel capture a dossier references, a demo crawl) are uncharted, and the
+ * surface gates its delete verb the same way.
  */
 export async function DELETE(_request: Request, { params }: { params: Promise<{ sourceId: string }> }) {
   const { sourceId } = await params;

@@ -37,7 +37,7 @@ Every surface belongs to exactly one act (its JOB), even where it links across:
 | act | job | surfaces |
 |---|---|---|
 | **ORIENT** | what is the machine doing; what needs me | Dashboard · Board (lens) · Runs |
-| **KNOW** | what is out there; what do we know | Intel · Leads · Library/Transcription · Source Media |
+| **KNOW** | what is out there; what do we know | Intel · Leads · Library · Source Media |
 | **MAKE** | turn intent into judged drafts | Create (+ wizard) · Composer (checkpoint) · Videos Overview / Dossier / Editor · Sites |
 | **GATE** | the human decision of record | Approve |
 | **SHIP** | when and where it goes out | Schedule · Channels |
@@ -129,17 +129,21 @@ send door (armed separately). Backend: leads/scores/outreach_sends. State:
 built, unresearched. M: lightweight-CRM tables, lead detail rails.
 P: none directly (no CRM in Postiz) — mark n/a rather than force it.
 
-**Library / Transcription** (`/app/library` AND `/app/transcription` — the
-two routes collapse to ONE at the rebuild) — job: the knowledge sources the
-judge grounds on: ingested docs/URLs/transcripts, free by default, AI-enhance
-per ingest (s86). Joins: source → Create grounding picks, → chunks/embeddings.
-Backend: sources/source_chunks, ingest engine. State: built, **researched +
-DRAWN s90 (W2; library §Library — the §5.3 ruling made legible)**: the ingest
-band names every kind it takes and carries the Free-transcript | AI-enhance
-seg (free default, enhance metered); kind is a qtab FILTER with counts, never
-a route; a mid-transcription source is a row state ("Transcribing · ~3m
-left"), not an absence. `/app/transcription` retires when the rebuild lands
-(build task, its own go). Awaiting the W2 verdict.
+**Library** (`/app/library` — ONE route since the s94 rebuild;
+`/app/transcription` DELETED with it, the s74 rename retired) — job: the
+knowledge sources the judge grounds on: ingested docs/URLs/transcripts, free
+by default, AI-enhance per ingest (s86). Joins: source → Create grounding
+picks, → chunks/embeddings. Backend: sources/source_chunks, ingest engine.
+State: **BUILT s94 to the W2 sheet** (approved s91): the read widened to
+every non-`prompt` source kind with `kind` on the wire; kind is the qtab
+FILTER with real counts, never a route; the Free-transcript | AI-enhance seg
+rests in the band (free default, enhance metered, cost words before the
+run); transcript doors gate on kind (the read/delete routes are kind-guarded
+server-side); the row region is bounded with a stated "+N more" foot;
+article/file/text ingest = a STATED deferral (no engine door yet —
+`packages/engine/src/ingest/ingest-web-url.ts` exists uncalled; wiring it is
+its own task). A mid-transcription row state has no data behind it while
+ingest is synchronous — the band's button carries the in-flight word.
 
 **Source Media** (media components; verdicted sheet s77, pre-programme) — job:
 the media the product holds — every image/poster/audio with provenance and
@@ -189,12 +193,15 @@ badges · the version rail that collapses four of the five no-affordance jobs).
 **Sites** (`/app/sites`) — job: the page family's artifacts — generated pages,
 the blog loop, publish-to-own-site. Joins: ← Create page family, → blog (the
 SEO/AEO farm, s70c doctrine: social mirrors the blog). Backend: webpage engine,
-public-assets door. State: built, **researched + DRAWN s90 (W2; library
-§Sites)**: state badge ON the preview shot (Lovable), live cards carry their
-hostname / drafts say "previews only" (Squarespace's the-address-is-the-fact),
-the h1 pills became the state filter seg, and the blog-loop join got its
-door (the published ledger). P: none (no site builder) — n/a stated.
-Awaiting the W2 verdict.
+public-assets door. State: **BUILT s94 to the W2 sheet** (approved s91):
+verdict pill ON the preview shot with an opaque backing over real heroes
+(the subtle channels are alpha tints — illegible on photos, seen live);
+truth line under every name — the catalog records no deploy state or
+hostname, so every card is honestly "previews only · minted {date}" and the
+live/hostname branch waits on a deploy fact; the h1 pills became the state
+filter seg in the VERDICT vocabulary (the recorded state, whole-portfolio
+census); the blog-loop door opens the published ledger on Settings (the
+Dashboard's own door). P: none (no site builder) — n/a stated.
 
 ### GATE
 
@@ -275,7 +282,7 @@ document on any unmarked dead citation and fails on citation rot forever after.
 | Runs | `apps/web/src/app/app/runs/page.tsx` | `apps/web/src/components/runs/` | `docs/research/mock-sheets/Runs.dc.html` | `packages/db/src/repos/fanout-runs.ts` · `packages/db/src/repos/create-runs.ts` (s87 — re-shape pending, §5.8) · `packages/db/src/repos/usage-ledger.ts` |
 | Intel | `apps/web/src/app/app/intel/page.tsx` | `apps/web/src/components/intel/` + `apps/web/src/lib/intel/types.ts` | `docs/research/mock-sheets/Intel.dc.html` | `packages/engine/src/trend/` · `packages/engine/src/search/` · `packages/db/src/repos/monitored-areas.ts` · `packages/db/src/repos/intel-captures.ts` |
 | Leads | `apps/web/src/app/app/leads/page.tsx` | `apps/web/src/components/leads/` | `docs/research/mock-sheets/Leads.dc.html` | `packages/engine/src/leads/` · `packages/engine/src/outreach/` · `packages/db/src/repos/leads.ts` · `packages/db/src/repos/outreach-sends.ts` |
-| Library / Transcription | `apps/web/src/app/app/library/page.tsx` **AND** `apps/web/src/app/app/transcription/page.tsx` (the §5.3 drift) | `apps/web/src/components/transcription/` + `apps/web/src/lib/library/` | `docs/research/mock-sheets/Library.dc.html` | `packages/engine/src/ingest/` · `packages/db/src/repos/sources.ts` · `packages/db/src/repos/source-chunks.ts` |
+| Library | `apps/web/src/app/app/library/page.tsx` (ONE route — the §5.3 drift resolved s94, `/app/transcription` deleted) | `apps/web/src/components/library/` + `apps/web/src/lib/library/` | `docs/research/mock-sheets/Library.dc.html` | `packages/engine/src/ingest/` · `packages/db/src/repos/sources.ts` · `packages/db/src/repos/source-chunks.ts` |
 | Source Media | no route — component family | `apps/web/src/components/media/` | Source Media sheet (s77, in `docs/research/mock-sheets/`) | `packages/platform/src/object-store.ts` · `packages/contracts/src/media.ts` (roles s87) |
 | Create home + wizard | `apps/web/src/app/app/create/page.tsx` · run route (planned — B-create.4) | `apps/web/src/components/create/` + `apps/web/src/lib/create/families.ts` | `docs/research/mock-sheets/Create.dc.html` · wizard sheet (planned — B-create.3) | `packages/engine/src/create/` · `packages/contracts/src/create-run.ts` · `packages/db/src/repos/create-runs.ts` |
 | Composer | `apps/web/src/app/app/create/run/` (planned — B-create.4) | (planned) | `docs/research/mock-sheets/Composer.dc.html` | `packages/engine/src/create/` (+ `packages/engine/src/create/edit.ts` (planned — create-shells lane)) · `packages/contracts/src/platform-settings.ts` |

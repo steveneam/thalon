@@ -89,8 +89,10 @@ describe("Sites — s79 verified fixes", () => {
   });
 
   it("S1: the surface renders the deep link filtered, with the chip visibly on", () => {
-    render(<Sites source={LOCAL} initialFilters={{ wave: 2.5 }} />);
-    expect(screen.getByText("1 of 7 built")).toBeInTheDocument();
+    const { container } = render(<Sites source={LOCAL} initialFilters={{ wave: 2.5 }} />);
+    expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(1);
+    // The census seg stays whole — the chip states the narrowing itself.
+    expect(screen.getByRole("button", { name: "All 7" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Wave 2.5" })).toHaveClass("cat-chip", "on");
   });
 
@@ -115,9 +117,9 @@ describe("Sites — s79 verified fixes", () => {
     expect(screen.getByRole("button", { name: "Gg · seven" })).toHaveClass("on");
     // The row keeps the sheet's bound — the pick takes a seat, it does not add one.
     expect(chipText().filter((c) => c !== "More →")).toHaveLength(PRIMARY_CHIPS);
-    // And one click on the named chip clears it.
+    // And one click on the named chip clears it — the whole grid returns.
     await user.click(screen.getByRole("button", { name: "Gg · seven" }));
-    expect(screen.getByText("7 built")).toBeInTheDocument();
+    expect(container.querySelectorAll(".site-grid > .site-card")).toHaveLength(7);
   });
 
   it("S2: every filter kind can be hoisted at once and the row still holds five", () => {

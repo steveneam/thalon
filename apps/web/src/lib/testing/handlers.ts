@@ -64,6 +64,7 @@ export function seedLibraryRow(
 ): LibrarySourceRow {
   const full: LibrarySourceRow = {
     id: `test-lib-${++librarySeq}`,
+    kind: "video_transcript",
     title: null,
     media: { state: "empty" },
     tags: [],
