@@ -218,6 +218,32 @@ Analytics fixture reconciliation (§s87 lead item 1 — `capability.ts` is
 the truth; the sheet's Facebook fixture still shows retired
 `post_impressions*`). "gogogo" boots the plan; it does not name a lane.
 
+**s91 LEAD TRACK, DONE (all lead-direct, zero founder hands):**
+1. **Pipeline board DRAWN** (`ef24402`): `Board.dc.html` redrawn in loop
+   order with the aligned feet row, judge chips, warn-tinted human gate;
+   measured 916 ≤ 940, zero clip; on canvas; **his verdict asked by text
+   mid-session** (`cbb0e9d`, with the analytics-lane GO ask).
+2. **Approve W1 rebuild SHIPPED** (`438b140`): state qtabs with live
+   counts · run-group bands with "Approve run · N" · real platform marks ·
+   inline verb keys (aria-keyshortcuts) · **the reject-reason learning
+   door wired end to end onto the merged `rejectDraft(..., reason?)` seat**
+   (prompt ask; blank = bare decision, no body on the wire) · the Composer
+   door resting unarmed with its reason. 87 tests green, dark+light
+   screenshot gate passed on real data.
+3. **Dashboard setup band SHIPPED** (`ac1d200`): Hex's "Set up your
+   workspace · N of 4" from four real reads, first pending step = the one
+   live door, dismissal per-tenant, self-retires at 4/4 (honestly absent
+   on dev — all four done). The toggle's Board option keeps routing to the
+   still-live `/app/board` until the pipeline-board verdict wires it.
+4. **Runs W1 re-shape SHIPPED** (`ca042fa`): running-now band ·
+   create-run parents with nested family (new read-only `/api/create/runs`
+   — no schema change) · orphans never minted a fake parent · five-state
+   seg · Clay day-total footer from `usage_ledger`. Per-run cost/durations
+   deliberately NOT drawn (no read exposes them — named in the commit).
+**Board route deletion stays GATED on his board verdict** (nothing deleted
+before its replacement is drawn — the toggle wires + the route deletes in
+one change when the text lands).
+
 ## Sprint 9 / s90 — **CLOSED: both lanes MERGED, W2 drawn, the plan restructured founder-hands-free** (verify on merged main exit 0, 3137/9)
 
 | lane | outcome |
