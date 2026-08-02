@@ -1217,3 +1217,27 @@ Canvas: https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
 
 Zero posts, zero credits, nothing armed except the previews auto-deploy you
 GO'd.
+
+## Wrap ping for the founder (s91 — mid-session: the pipeline board is drawn)
+
+Your W2 approval is banked — the Create home, wizard, Sites and Library
+builds are unblocked, and the Composer-route build queues for next session.
+
+**The pipeline board you asked for is drawn and on the canvas.** The
+Dashboard's Board view is now the whole pipeline, left to right: Intel
+picks → Generating → At the judge → In Approve → Scheduled → Published.
+Live counts on each column head, today's in/out at each column foot (the
+flow math lives in the board itself), and every card in Approve carries
+its judge ✓/✗ — the blocked one shows the judge's exact reason. One human
+gate in the whole line: Approve, and the board says so.
+https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30?file=Board.dc.html
+**One word decides it: "board approved"** — or name what to change.
+
+**One background lane wants your GO:** the Analytics mock still shows
+Facebook metrics the engine already retired — a lane would reconcile the
+sheet to the real capability tables. Engine-side, nothing needs your
+hands. **"GO analytics"** launches it; silence just leaves it queued.
+
+Meanwhile I'm building the surfaces you approved earlier (Approve first,
+then Dashboard and Runs) — no input needed from you on those. Zero posts,
+zero credits, nothing new armed.
