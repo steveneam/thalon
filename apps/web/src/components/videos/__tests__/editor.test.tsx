@@ -90,6 +90,7 @@ const DETAIL: ProjectDetail = {
       ref: "motion/keepers/beat-01.mp4",
       reason: null,
       provenance: {},
+      poster: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
     {
@@ -100,6 +101,7 @@ const DETAIL: ProjectDetail = {
       ref: "motion/rejects/beat-01-t2.mp4",
       reason: "hand clips through the watch face",
       provenance: {},
+      poster: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
     {
@@ -110,6 +112,7 @@ const DETAIL: ProjectDetail = {
       ref: "motion/keepers/beat-02.mp4",
       reason: null,
       provenance: {},
+      poster: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
   ],
@@ -326,7 +329,7 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
     await screen.findByRole("heading", { name: "film-16x9 v6" });
 
-    await user.click(screen.getByRole("button", { name: "Propose" }));
+    await user.click(screen.getByRole("button", { name: "Propose ⚡1" }));
     expect(await screen.findByText(/clear the second caption off the falcon/)).toBeInTheDocument();
     expect(screen.getByText("proposal")).toHaveClass("pill", "pill-warn");
     // The proposal lands ON THE TIMELINE — the second plate carries the mark.
@@ -375,7 +378,7 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     render(<VideoEditor projectId="p1" cutId="c1" />);
     await screen.findByRole("heading", { name: "film-16x9 v6" });
 
-    await user.click(screen.getByRole("button", { name: "Propose" }));
+    await user.click(screen.getByRole("button", { name: "Propose ⚡1" }));
     await screen.findByText("proposal");
     await user.click(screen.getByRole("button", { name: "Dismiss" }));
 
@@ -824,7 +827,7 @@ describe("VideoEditor — the s78 tail (s82 A6)", () => {
 
     await user.click(screen.getByRole("button", { name: "Render" }));
     expect(await screen.findByRole("button", { name: "Rendering…" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Propose" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Propose ⚡1" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "9:16" })).toBeEnabled();
   });
 

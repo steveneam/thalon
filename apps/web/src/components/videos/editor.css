@@ -34,18 +34,24 @@
 .editor-surface .take.on .thumb-md { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); }
 .editor-surface .take-cap { font-size: 11px; color: var(--n-900); }
 
-/* ── Multi-track timeline (the EDL surface: video · music · captions) ── */
+/* ── Multi-track timeline (the EDL surface: video · music · captions) ──
+     s95: tracks are colour-coded BY KIND (VEED) with sheet-local kind tokens —
+     deliberately NOT the ok/warn status colours, so status keeps its meaning
+     on this surface; video clips carry FRAME THUMBNAILS (Vimeo/VEED) — the
+     sheet's stripes stay the no-frame placeholder, real frames ride the build. */
 .editor-surface .tl-head { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--n-400); }
-.editor-surface .tl-body { position: relative; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 6px; }
+.editor-surface .tl-body { position: relative; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 6px; --tk-video: oklch(0.66 0.10 250); --tk-music: oklch(0.72 0.12 160); --tk-cap: oklch(0.68 0.11 300); }
 .editor-surface .lane { display: flex; align-items: center; gap: 10px; }
 .editor-surface .lane-hd { width: 74px; flex: none; font-size: 11.5px; font-weight: 500; color: var(--n-900); display: flex; flex-direction: column; line-height: 1.25; }
 .editor-surface .lane-hd small { font-size: 10px; color: var(--n-800); font-weight: 400; }
+.editor-surface .kdot { width: 8px; height: 8px; border-radius: 3px; flex: none; display: inline-block; margin-right: 5px; }
 .editor-surface .lane-tr { flex: 1; display: flex; gap: 3px; position: relative; }
-.editor-surface .blk { height: 34px; border-radius: 5px; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: flex-end; padding: 3px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); overflow: hidden; white-space: nowrap; }
-.editor-surface .blk.on { background: var(--act-subtle); border-color: var(--act); color: var(--n-1000); }
-.editor-surface .blk-music { height: 30px; background: repeating-linear-gradient(90deg, var(--n-400) 0 2px, var(--n-200) 2px 5px); border: 1px solid var(--n-500); position: relative; }
+.editor-surface .blk { height: 34px; border-radius: 5px; background: repeating-linear-gradient(135deg, var(--n-300), var(--n-300) 6px, var(--n-200) 6px, var(--n-200) 12px); border: 1px solid oklch(0.66 0.10 250 / 0.5); display: flex; align-items: flex-end; padding: 3px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); overflow: hidden; white-space: nowrap; }
+/* Selection is a RING, never a flat repaint that would hide the frame (s95). */
+.editor-surface .blk.on { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); color: var(--n-1000); }
+.editor-surface .blk-music { height: 30px; background: repeating-linear-gradient(90deg, oklch(0.72 0.12 160 / 0.45) 0 2px, var(--n-200) 2px 5px); border: 1px solid oklch(0.72 0.12 160 / 0.5); position: relative; }
 .editor-surface .cresc { position: absolute; top: -4px; width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); background: var(--heat-warm); }
-.editor-surface .blk-cap { height: 22px; border-radius: 4px; background: var(--n-200); border: 1px solid var(--n-500); }
+.editor-surface .blk-cap { height: 22px; border-radius: 4px; background: oklch(0.68 0.11 300 / 0.16); border: 1px solid oklch(0.68 0.11 300 / 0.45); }
 .editor-surface .blk-cap.on { background: var(--act-subtle); border-color: var(--act); }
 .editor-surface .playhead { position: absolute; top: 6px; bottom: 6px; left: calc(84px + (100% - 100px) * 0.34); width: 2px; background: var(--act); border-radius: 1px; z-index: 2; }
 .editor-surface .playhead::before { content: ""; position: absolute; top: -5px; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--act); }
@@ -59,6 +65,31 @@
 .editor-surface .prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid var(--n-400); background: var(--warn-subtle); border-radius: var(--r-card) var(--r-card) 0 0; font-size: 12.5px; }
 .editor-surface .blk.prop { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); color: var(--n-1000); }
 .editor-surface .prop-tag { font-family: var(--font-data); font-size: 9px; color: var(--warn); margin-left: 3px; }
+
+/* s95: credit badges at the metered verbs (VEED Magic Tools) — the cost is
+   learnt BEFORE the click, never after. EDL-only verbs stay unbadged:
+   applying a trim is free and the absence says so. */
+.editor-surface .cr { display: inline-flex; align-items: center; margin-left: 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--warn); }
+
+/* ⓘ + tooltip — the SHARED vocabulary, carried verbatim from Schedule/
+   Analytics so the sheets speak one dialect; shown on hover/focus exactly as
+   Analytics shows it (the sheet draws it OPEN, as every drawn tooltip is). */
+.editor-surface .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+.editor-surface .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+.editor-surface button.info { background: transparent; padding: 0; }
+.editor-surface .tip { position: absolute; z-index: 9; width: 252px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); }
+.editor-surface .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
+.editor-surface .tip .fr { display: inline-block; border: 1px solid var(--n-700); border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.editor-surface .tip { display: none; }
+.editor-surface .info:hover + .tip,
+.editor-surface .info:focus-visible + .tip { display: block; }
+
+/* s95b: the timeline tools row — manual EDL verbs on the SELECTED block.
+   Free, so unbadged (V4: absence says free); delete apart in the danger
+   colour (Leonardo). */
+.editor-surface .chip-danger { color: var(--err); }
+.editor-surface .chip-danger:hover { border-color: var(--err); color: var(--err); }
+.editor-surface .chipbtn svg { margin-right: 5px; }
 
 /*
  * ── App adaptations (each NAMED; the 1440×940 render stays indistinguishable
@@ -353,6 +384,32 @@
   --n-900: oklch(0.735 0.014 255);
   --n-1000: oklch(0.935 0.006 255);
 }
+
+/*
+ * ── s96 · the p1/s95b app adaptations (each NAMED — the sheet stays the
+ * geometry; nothing below moves a band) ──
+ */
+
+/*
+ * V2 — A REAL FRAME UNDER THE SHEET'S GEOMETRY. `.framed` marks a block/tile
+ * whose inline background carries the take's B-media.0 poster (composited
+ * under a bottom scrim where a label sits on it — the alpha-tint lesson:
+ * composite, never hope). The ink over a frame is PINNED to the dark
+ * register's light value, exactly as the player plate pins its ramp: a scrim
+ * is near-black in both themes, and a ramp token that flips light would put
+ * dark text on a dark scrim in light mode.
+ */
+.editor-surface .blk.framed { background-size: cover; background-position: center; color: oklch(0.935 0.006 255); }
+.editor-surface .beat-thumb.framed { background-size: cover; background-position: center; }
+.editor-surface .thumb-md.framed { background-size: cover; background-position: center; }
+.editor-surface .thumb-md.framed span { color: oklch(0.935 0.006 255); text-shadow: 0 1px 2px oklch(0 0 0 / 0.7); }
+
+/*
+ * s95b — the tools row refuses OUT LOUD, like every refusing control on this
+ * surface: `aria-disabled` keeps the chip focusable so it can answer in the
+ * notice band; the styling has to say "not now" on its own.
+ */
+.editor-surface .chipbtn[aria-disabled="true"] { cursor: not-allowed; opacity: 0.55; }
 
 .editor-surface .beats-scroll { flex: 1; min-height: 0; overflow-y: auto; }
 .editor-surface button.beat-row { width: 100%; font: inherit; color: inherit; background: transparent; border: none; border-top: 1px solid var(--n-400); text-align: left; cursor: pointer; }

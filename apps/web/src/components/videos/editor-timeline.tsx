@@ -3,9 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Edl } from "@thalon/contracts";
 import {
+  deleteBeat,
+  deleteCaptionLine,
+  insertCaptionForBeat,
+  insertCaptionLine,
   patchCaptionLine,
   patchMusic,
+  removeMusicCue,
   reorderBeat,
+  splitBeat,
   splitLane,
   trimBeat,
   trimBeatStart,
@@ -43,6 +49,9 @@ const SNAP_FRACTION = 0.01;
 
 /** One frozen empty set, so an unwired optional mark prop is not a new object per render. */
 const EMPTY_SET: ReadonlySet<number> = new Set();
+
+/** The unwired default for `frameFor` — every block falls back to the striped placeholder. */
+const NO_FRAME = () => null;
 
 /** The sheet's block label — "01", "02", … — and the beats rail's own grammar. */
 function ordinal(index: number): string {
@@ -100,6 +109,8 @@ export function EditorTimeline({
   propCaptions,
   propMusic,
   refusedCaptions = EMPTY_SET,
+  frameFor = NO_FRAME,
+  onNotice,
 }: {
   edl: Edl;
   selection: Selection;
@@ -127,6 +138,18 @@ export function EditorTimeline({
    * wire and cannot half-render.
    */
   refusedCaptions?: ReadonlySet<number>;
+  /**
+   * s95/V2 — a take ref's FRAME, as a fetchable src (the B-media.0 poster the
+   * editor resolves from the project's takes). Null keeps the sheet's striped
+   * placeholder: stripes mean "no frame derived yet", never a decoration.
+   */
+  frameFor?: (ref: string) => string | null;
+  /**
+   * s95b — where the tools row answers. Every refusal is a sentence in the
+   * notice band (the aria-disabled grammar this surface already keeps), and
+   * every applied verb states what changed and that ⌘Z undoes it.
+   */
+  onNotice: (line: string) => void;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<Drag | null>(null);
@@ -219,6 +242,133 @@ export function EditorTimeline({
     onEdl((current) => patchMusic(current, { offset }));
   };
 
+  /*
+   * s95b — THE TOOLS ROW's four verbs, each acting on the SELECTED block (the
+   * sheet's own words: "on the selected block"). All four are EDL-only edits
+   * through the same `onEdl` funnel every drag uses — free, so unbadged (V4:
+   * absence says free) — and every refusal is a sentence, never a dead chip.
+   * Split and Crop cut AT THE PLAYHEAD: the ruler places it, the chip acts,
+   * which gives the keyboard the frame precision the edge-drags give the mouse.
+   */
+  const playheadSec = playhead === null ? null : playhead * duration;
+
+  const onSplit = () => {
+    if (selection?.kind !== "beat") {
+      onNotice("Select a beat block first — Split cuts the selected beat at the playhead.");
+      return;
+    }
+    const i = selection.index;
+    const clip = beats[i];
+    const start = beatStarts(edl)[i] ?? 0;
+    if (playheadSec === null || playheadSec <= start || playheadSec >= start + clip.duration) {
+      onNotice(`Place the playhead inside ${clip.name} first — Split cuts at the playhead.`);
+      return;
+    }
+    const offset = quantize(playheadSec - start);
+    if (offset < 0.1 || clip.duration - offset < 0.1) {
+      onNotice(`Too close to the edge — each half of ${clip.name} needs at least 0.1s.`);
+      return;
+    }
+    onEdl((current) => splitBeat(current, i, offset));
+    onNotice(`Split ${clip.name} at ${offset}s — both halves ride the same take, hard cut at the seam.`);
+  };
+
+  const onCrop = () => {
+    if (selection === null) {
+      onNotice("Select a block first — Crop trims the selected block to end at the playhead.");
+      return;
+    }
+    if (selection.kind === "music") {
+      onNotice("The music bed has no crop — its offset, gain and tail easing live in the inspector below.");
+      return;
+    }
+    if (playheadSec === null) {
+      onNotice("Place the playhead first — Crop trims the selected block to end there.");
+      return;
+    }
+    if (selection.kind === "beat") {
+      const clip = beats[selection.index];
+      const start = beatStarts(edl)[selection.index] ?? 0;
+      if (playheadSec <= start || playheadSec >= start + clip.duration) {
+        onNotice(`Place the playhead inside ${clip.name} — Crop trims the beat to end there.`);
+        return;
+      }
+      const next = Math.max(0.1, quantize(playheadSec - start));
+      onEdl((current) => trimBeat(current, selection.index, { duration: next }));
+      onNotice(`Cropped ${clip.name} to ${next}s — the tail is trimmed, the take itself is untouched.`);
+      return;
+    }
+    const line = edl.captions?.lines[selection.index];
+    if (!line) return;
+    if (playheadSec <= line.fadeIn) {
+      onNotice(`Place the playhead after this plate fades in (${line.fadeIn}s) — Crop ends the plate there.`);
+      return;
+    }
+    onEdl((current) => patchCaptionLine(current, selection.index, { fadeOut: quantize(playheadSec) }));
+    onNotice(`Caption ${selection.index + 1} now ends at ${quantize(playheadSec)}s.`);
+  };
+
+  const onText = () => {
+    if (selection?.kind === "caption") {
+      const i = selection.index;
+      onEdl((current) => insertCaptionLine(current, i, "New caption"));
+      onSelect({ kind: "caption", index: i + 1 });
+      onNotice(`Added a plate after Caption ${i + 1} — type its text in the inspector below.`);
+      return;
+    }
+    if (selection?.kind === "beat") {
+      if (!edl.captions) {
+        onNotice(
+          "This cut has no caption style on record, so a plate cannot be added — a style is the compiler's and the judge's input, not something to invent here.",
+        );
+        return;
+      }
+      const i = selection.index;
+      const fadeIn = Math.min(beatStarts(edl)[i] ?? 0, duration);
+      // The insertion slot is deterministic from the CURRENT lines (the
+      // transform sorts by fadeIn), so the new plate can be selected without
+      // waiting for the state round-trip.
+      const at = edl.captions.lines.findIndex((l) => l.fadeIn > fadeIn);
+      const index = at === -1 ? edl.captions.lines.length : at;
+      onEdl((current) => insertCaptionForBeat(current, i, "New caption"));
+      onSelect({ kind: "caption", index });
+      onNotice(`Added a caption over ${beats[i].name} — type its text in the inspector below.`);
+      return;
+    }
+    onNotice("Select a beat or a caption plate first — Text adds a plate on the selected block.");
+  };
+
+  const onDeleteTool = () => {
+    if (selection === null) {
+      onNotice("Select a block first — Delete removes the selected block from this cut.");
+      return;
+    }
+    if (selection.kind === "beat") {
+      if (beats.length <= 1) {
+        onNotice("The last beat stays — a cut with no beats cannot render. Delete the version instead if the cut itself is wrong.");
+        return;
+      }
+      const name = beats[selection.index]?.name ?? "that beat";
+      onEdl((current) => deleteBeat(current, selection.index));
+      onSelect(null);
+      onNotice(`Removed ${name} from the working copy — the take stays on record. ⌘Z undoes.`);
+      return;
+    }
+    if (selection.kind === "caption") {
+      onEdl((current) => deleteCaptionLine(current, selection.index));
+      onSelect(null);
+      onNotice(`Removed Caption ${selection.index + 1} from the working copy. ⌘Z undoes.`);
+      return;
+    }
+    if (cue === undefined) {
+      onNotice("This cut is already silent — there is no music bed to delete.");
+      return;
+    }
+    onEdl((current) => removeMusicCue(current));
+    onSelect(null);
+    onNotice("Removed the music bed — the lane's silent state is the door to pick another. ⌘Z undoes.");
+  };
+
   const beginDrag = (drag: Drag, event: React.PointerEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -243,8 +393,55 @@ export function EditorTimeline({
         >
           Snap · {snapping ? "magnetic" : "off"}
         </button>
+        {/*
+          s95b — the manual tools row (Squarespace: the toolbar acts on the
+          selection; Arcade: tools at the timeline's edge; Leonardo: delete set
+          apart in the danger colour). All four are EDL-only, so unbadged; each
+          stays pressable and ANSWERS when it must refuse — the aria-disabled
+          grammar the aspect lens set.
+        */}
+        <button
+          type="button"
+          className="chipbtn"
+          aria-disabled={selection?.kind !== "beat" || undefined}
+          title="Split the selected beat at the playhead — an EDL edit, free"
+          onClick={onSplit}
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><circle cx="4" cy="4.5" r="1.9" /><circle cx="4" cy="11.5" r="1.9" /><path d="M5.7 5.6 13.5 13M5.7 10.4 13.5 3" /></svg>
+          Split
+        </button>
+        <button
+          type="button"
+          className="chipbtn"
+          aria-disabled={selection === null || selection.kind === "music" || undefined}
+          title="Trim the selected block to end at the playhead — an EDL edit, free"
+          onClick={onCrop}
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M4.5 1.5v10h10M1.5 4.5h10v10" /></svg>
+          Crop
+        </button>
+        <button
+          type="button"
+          className="chipbtn"
+          aria-disabled={selection === null || selection.kind === "music" || undefined}
+          title="Add a caption plate on the selected block — the judge gate reads the text at Approve"
+          onClick={onText}
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3.5 3.5h9M8 3.5v9.5" /></svg>
+          Text
+        </button>
+        <button
+          type="button"
+          className="chipbtn chip-danger"
+          aria-disabled={selection === null || undefined}
+          title="Remove the selected block from this cut — undoable, the source stays on record"
+          onClick={onDeleteTool}
+        >
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 4.5h10M6.3 4.5V3h3.4v1.5M4.7 4.5l.6 8h5.4l.6-8" /></svg>
+          Delete
+        </button>
         <span className="t-label" aria-live="polite">
-          {readout ?? "drag to reorder · trim at edges · blocks close ranks · Esc cancels"}
+          {readout ?? "on the selected block · drag reorders · edges trim"}
         </span>
         <div style={{ flex: 1 }} />
         <div className="seg" role="group" aria-label="Timeline zoom">
@@ -287,8 +484,13 @@ export function EditorTimeline({
           {playhead !== null && <div className="playhead" />}
 
           <div className="lane">
+            {/* s95 — the kind dot (VEED): sheet-local kind tokens, deliberately
+                NOT the ok/warn status colours, so status keeps its meaning. */}
             <div className="lane-hd">
-              Video
+              <span>
+                <span className="kdot" style={{ background: "var(--tk-video)" }} />
+                Video
+              </span>
               <small>beats · takes</small>
             </div>
             <div className="lane-tr" ref={trackRef}>
@@ -296,9 +498,21 @@ export function EditorTimeline({
                 <span className="t-label">This cut has no beat lane.</span>
               ) : (
                 beats.map((clip, i) => {
+                  /*
+                   * s95/V2 — the frame ON the block ("every reference puts
+                   * frame thumbnails on its timeline clips; ours were plain
+                   * blocks"). The take's poster rides as a cover background
+                   * under a bottom scrim so the ordinal stays legible (the
+                   * alpha-tint-over-photos lesson: composite, never hope);
+                   * no poster = the sheet's stripes, which now MEAN "no frame
+                   * derived yet". Selection is a ring, never a repaint that
+                   * would hide the frame.
+                   */
+                  const frame = frameFor(clip.source.ref);
                   const marks = [
                     selection?.kind === "beat" && selection.index === i ? "on" : "",
                     propBeats.has(i) ? "prop" : "",
+                    frame !== null ? "framed" : "",
                   ]
                     .filter(Boolean)
                     .join(" ");
@@ -307,7 +521,14 @@ export function EditorTimeline({
                       key={`${clip.name}-${i}`}
                       type="button"
                       className={marks === "" ? "blk" : `blk ${marks}`}
-                      style={{ width: `${widths[i]}%` }}
+                      style={{
+                        width: `${widths[i]}%`,
+                        ...(frame === null
+                          ? {}
+                          : {
+                              backgroundImage: `linear-gradient(180deg, oklch(0 0 0 / 0) 40%, oklch(0 0 0 / 0.62)), url("${frame}")`,
+                            }),
+                      }}
                       aria-pressed={selection?.kind === "beat" && selection.index === i}
                       /*
                        * The NAME is the accessible name, whatever the pixels do
@@ -413,7 +634,10 @@ export function EditorTimeline({
 
           <div className="lane">
             <div className="lane-hd">
-              Music
+              <span>
+                <span className="kdot" style={{ background: "var(--tk-music)" }} />
+                Music
+              </span>
               <small>cue · waveform</small>
             </div>
             <div className="lane-tr">
@@ -514,7 +738,10 @@ export function EditorTimeline({
 
           <div className="lane">
             <div className="lane-hd">
-              Captions
+              <span>
+                <span className="kdot" style={{ background: "var(--tk-cap)" }} />
+                Captions
+              </span>
               {/*
                 A PLATE IS TOO SMALL FOR A WORD, SO THE LANE CARRIES IT (s82
                 B2/B3). A caption plate is 22px tall and as narrow as its fade

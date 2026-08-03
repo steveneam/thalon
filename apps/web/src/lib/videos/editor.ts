@@ -127,6 +127,31 @@ export function deleteBeat(edl: Edl, index: number): Edl {
 }
 
 /**
+ * Split a beat at `offsetSec` seconds into its timeline duration (s95b — the
+ * tools row's Split, cutting the selected block at the playhead).
+ *
+ * Both halves ride the SAME source: the first keeps the clip's in-point and
+ * transition and ends at the cut; the second starts its source `offsetSec`
+ * further in and carries NO transitionIn — a split is a hard cut, and quietly
+ * inventing an xfade at it would smear the exact frame the operator chose.
+ * Refuses (returns the EDL unchanged) when either half would fall under the
+ * 0.1s floor every trim door already enforces.
+ */
+export function splitBeat(edl: Edl, index: number, offsetSec: number): Edl {
+  const lane = splitLane(edl);
+  if (index < 0 || index >= lane.beats.length) return edl;
+  const clip = lane.beats[index];
+  const offset = Math.round(offsetSec * 1e6) / 1e6;
+  if (offset < 0.1 || clip.duration - offset < 0.1) return edl;
+  const first = { ...clip, duration: offset };
+  const second = { ...clip, in: clip.in + offset, duration: clip.duration - offset, name: `${clip.name}-split` };
+  delete second.transitionIn;
+  const beats = [...lane.beats];
+  beats.splice(index, 1, first, second);
+  return joinLane(edl, { ...lane, beats });
+}
+
+/**
  * Insert a beat AFTER `index`, sourced from an existing take ref.
  *
  * The new beat copies the neighbour's duration and source KIND rather than
@@ -169,6 +194,40 @@ export function insertCaptionLine(edl: Edl, afterIndex: number, text: string): E
     : { text, x: Math.round(edl.output.width / 2), y: Math.round(edl.output.height * 0.8), fadeIn: 0, fadeOut: Math.min(3, duration), ramp: 0.4 };
   const next = [...lines];
   next.splice(at + 1, 0, line);
+  return { ...edl, captions: { ...edl.captions, lines: next } };
+}
+
+/**
+ * Add a caption plate OVER a beat (s95b — the tools row's Text on a selected
+ * beat): the plate spans the beat's own timeline window, so the text lands on
+ * the block the operator selected rather than wherever the last plate ended.
+ * Style and placement inherit from the nearest existing line (the same
+ * inheritance `insertCaptionLine` applies); the window is the compiler's own
+ * accumulation (offset_k = offset_{k-1} + dur_{k-1} − fade_k), clamped to the
+ * output duration. Refuses when the cut carries no caption style — a style
+ * cannot be invented here (the judge gate and the compiler both read it).
+ */
+export function insertCaptionForBeat(edl: Edl, beatIndex: number, text: string): Edl {
+  if (!edl.captions) return edl;
+  const lane = splitLane(edl);
+  if (beatIndex < 0 || beatIndex >= lane.beats.length) return edl;
+  let start = 0;
+  for (let i = 1; i <= beatIndex; i += 1) {
+    start += lane.beats[i - 1].duration - (lane.beats[i].transitionIn?.duration ?? 0);
+  }
+  const clip = lane.beats[beatIndex];
+  const fadeIn = Math.min(start, edl.output.duration);
+  const fadeOut = Math.min(start + clip.duration, edl.output.duration);
+  const lines = edl.captions.lines;
+  const near = lines.filter((l) => l.fadeIn <= fadeIn).at(-1) ?? lines[0];
+  const line: CaptionLine = near
+    ? { ...near, text, fadeIn, fadeOut }
+    : { text, x: Math.round(edl.output.width / 2), y: Math.round(edl.output.height * 0.8), fadeIn, fadeOut, ramp: 0.4 };
+  // Plates render in array order (captionPlates walks a cursor), so the new
+  // line lands where its fadeIn sorts, never appended out of sequence.
+  const at = lines.findIndex((l) => l.fadeIn > fadeIn);
+  const next = [...lines];
+  next.splice(at === -1 ? lines.length : at, 0, line);
   return { ...edl, captions: { ...edl.captions, lines: next } };
 }
 
@@ -279,6 +338,18 @@ export function setMusicSource(edl: Edl, ref: string, kind: VideoSourceKind = "t
     return { ...edl, audio: [{ source, offset: 0, gainDb: 0, mode: "encode" }] };
   }
   return { ...edl, audio: [{ ...cue, source, offset: 0, mode: "encode" }, ...rest] };
+}
+
+/**
+ * Drop the music cue (s95b — the tools row's Delete on the selected music
+ * block). A silent cut is legal and stays a CHOICE with a way back: the lane's
+ * empty state is already the door into the bed picker, so removing a bed never
+ * strands the cut. Gain/offset go with the cue — they were facts about it.
+ */
+export function removeMusicCue(edl: Edl): Edl {
+  if (edl.audio.length === 0) return edl;
+  const [, ...rest] = edl.audio;
+  return { ...edl, audio: rest };
 }
 
 /**

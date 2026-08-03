@@ -4,6 +4,7 @@ import type {
   VideoCutStatus,
   VideoTakeDisposition,
   VideoTakeKind,
+  VideoTakePoster,
 } from "@thalon/contracts";
 
 /**
@@ -35,6 +36,13 @@ export interface TakeView {
   reason: string | null;
   /** B7.1 provenance manifest (model, prompt, credits, mint date) — open shape. */
   provenance: Record<string, unknown>;
+  /**
+   * s96 (V2, the sheets' frame thumbnails): the B-media.0 poster the backfill
+   * derived, parsed off `meta.posterRef` at the serializer — a read widening,
+   * no schema change (the s90 windows stay frozen). Null = poster pending,
+   * which every consumer draws as the honest striped placeholder.
+   */
+  poster: VideoTakePoster | null;
   createdAt: string;
 }
 

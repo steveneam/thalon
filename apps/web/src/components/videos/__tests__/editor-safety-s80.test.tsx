@@ -80,6 +80,7 @@ const DETAIL: ProjectDetail = {
       ref: "motion/keepers/beat-01.mp4",
       reason: null,
       provenance: {},
+      poster: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
   ],

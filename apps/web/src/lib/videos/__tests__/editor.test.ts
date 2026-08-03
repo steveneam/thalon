@@ -6,16 +6,19 @@ import {
   deleteBeat,
   deleteCaptionLine,
   insertBeat,
+  insertCaptionForBeat,
   insertCaptionLine,
   laneDuration,
   musicCandidatesFor,
   nextVersionFor,
   patchCaptionLine,
   patchMusic,
+  removeMusicCue,
   reorderBeat,
   setMusicSource,
   setOutputDuration,
   setOverlayAt,
+  splitBeat,
   splitLane,
   swapBeatSource,
   swapCandidatesFor,
@@ -157,6 +160,7 @@ function take(overrides: Partial<TakeView>): TakeView {
     ref: "motion/keepers/beat-01.mp4",
     reason: null,
     provenance: {},
+    poster: null,
     createdAt: "2026-07-16T00:00:00.000Z",
     ...overrides,
   };
@@ -202,6 +206,72 @@ describe("deleteBeat / insertBeat", () => {
     expect(lane.beats[1].duration).toBe(5);
     expect(lane.beats[1].in).toBe(0);
     expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+});
+
+describe("splitBeat (s95b — the tools row's Split)", () => {
+  it("cuts one beat into two halves of the same source, hard cut at the seam", () => {
+    const next = splitBeat(fixture(), 1, 2);
+    const lane = splitLane(next);
+    expect(lane.beats.map((b) => b.name)).toEqual(["b1", "b2", "b2-split", "b3"]);
+    // First half: the clip's own in-point and transition, ending at the cut.
+    expect(lane.beats[1]).toMatchObject({ in: 1, duration: 2 });
+    expect(lane.beats[1].transitionIn).toEqual({ type: "xfade", duration: 0.5 });
+    // Second half: the source picked up where the cut landed, NO transition —
+    // a split is a hard cut, never a quietly invented xfade.
+    expect(lane.beats[2]).toMatchObject({ in: 3, duration: 3 });
+    expect(lane.beats[2].transitionIn).toBeUndefined();
+    expect(lane.overlay?.name).toBe("endcard");
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("refuses a cut that would leave either half under the 0.1s floor", () => {
+    const edl = fixture();
+    expect(splitBeat(edl, 1, 0.05)).toBe(edl);
+    expect(splitBeat(edl, 1, 4.95)).toBe(edl);
+    expect(splitBeat(edl, 9, 2)).toBe(edl);
+  });
+});
+
+describe("insertCaptionForBeat (s95b — the tools row's Text)", () => {
+  it("lands a plate spanning the selected beat's own window, inheriting placement", () => {
+    // b2 starts at 4.5 (5 − 0.5 xfade) and runs 5s.
+    const next = insertCaptionForBeat(fixture(), 1, "over b2");
+    const lines = next.captions?.lines ?? [];
+    expect(lines.map((l) => l.text)).toEqual(["line one", "over b2"]);
+    expect(lines[1]).toMatchObject({ fadeIn: 4.5, fadeOut: 9.5, x: 640 });
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("sorts by fadeIn, so a plate over the first beat lands before existing lines", () => {
+    const next = insertCaptionForBeat(fixture(), 0, "over b1");
+    expect((next.captions?.lines ?? []).map((l) => l.text)).toEqual(["over b1", "line one"]);
+  });
+
+  it("clamps the window to the output duration", () => {
+    // Stretch b3 so its window would run past the 16s output.
+    const stretched = trimBeat(fixture(), 2, { duration: 10 });
+    const next = insertCaptionForBeat(stretched, 2, "tail");
+    const line = (next.captions?.lines ?? []).at(-1);
+    expect(line?.fadeOut).toBe(16);
+  });
+
+  it("refuses when the cut carries no caption style — a style is never invented here", () => {
+    const bare = { ...fixture(), captions: undefined };
+    expect(insertCaptionForBeat(bare, 0, "x")).toBe(bare);
+  });
+});
+
+describe("removeMusicCue (s95b — the tools row's Delete on the music block)", () => {
+  it("drops the cue — a silent cut is legal and stays a choice with a way back", () => {
+    const next = removeMusicCue(fixture());
+    expect(next.audio).toEqual([]);
+    expect(() => edlSchema.parse(next)).not.toThrow();
+  });
+
+  it("an already-silent cut is returned untouched", () => {
+    const silent = { ...fixture(), audio: [] };
+    expect(removeMusicCue(silent)).toBe(silent);
   });
 });
 
@@ -284,6 +354,7 @@ describe("setMusicSource / musicCandidatesFor", () => {
     ref,
     reason: disposition === "reject" ? "muddy low end" : null,
     provenance: {},
+    poster: null,
     createdAt: "2026-07-17T10:00:00.000Z",
   });
 

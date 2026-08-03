@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VIDEO_DERIVE_ASPECTS, type Edl, type VideoCutAttribution, type VideoDeriveAspect } from "@thalon/contracts";
 import { TakeAudition, type AuditionKind } from "@/components/media/take-audition";
+import { srcOf } from "@/lib/media/resolve";
 import { EditorInspector } from "@/components/videos/editor-inspector";
 import { EditorTimeline, type Selection } from "@/components/videos/editor-timeline";
 import { aspectOf, proposalMarks, takeCaption } from "@/components/videos/editor-model";
@@ -100,12 +101,20 @@ const WORKING: Record<EditorVerb, string> = {
  *
  * The other two are genuine asks: re-timing a cut to 30s and re-briefing a beat
  * are judgement, not a transform, and they say so.
+ *
+ * s95/V4 — WHICH CHIPS WEAR THE ⚡ (cost learnt BEFORE the click, VEED). The
+ * sheet's fixture badges both Recut and Retake; the build renders what is
+ * TRUE of this engine: Recut rides the aspect lens's own derive — measured
+ * seeds, local, 0 credits — so it stays UNBADGED (V4's own rule: absence says
+ * free; a drawn cost on a free verb would be the inverse lie). Retake leads
+ * into metered work — Propose spends the agent call now, the mint spends
+ * vendor credits when armed — so it carries the mark.
  */
-const CHIPS: { label: string; local: "music" | "9:16" | null }[] = [
+const CHIPS: { label: string; local: "music" | "9:16" | null; metered?: boolean }[] = [
   { label: "Tighten to 30s", local: null },
   { label: "Recut 9:16", local: "9:16" },
   { label: "Swap music", local: "music" },
-  { label: "Retake a beat", local: null },
+  { label: "Retake a beat", local: null, metered: true },
 ];
 
 /**
@@ -469,6 +478,20 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   }, [dirty]);
 
   const beats = useMemo(() => (edl === null ? [] : splitLane(edl).beats), [edl]);
+  /**
+   * s95/V2 — take ref → poster src, once per detail read. The serializer
+   * already parsed `meta.posterRef` (queries.posterOf), so this is a lookup
+   * table, not a resolution: blocks, rail rows and strip tiles all read the
+   * same map, and a take with no poster stays the striped placeholder.
+   */
+  const posterSrc = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const take of detail?.takes ?? []) {
+      if (take.poster !== null) map.set(take.ref, srcOf(take.poster));
+    }
+    return map;
+  }, [detail]);
+  const frameFor = useCallback((ref: string) => posterSrc.get(ref) ?? null, [posterSrc]);
   const marks = useMemo(
     () => proposalMarks(proposal?.diff ?? null),
     [proposal],
@@ -804,6 +827,18 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           detail.takes.find((t) => t.ref === selectedClip.source.ref)?.kind ??
             (selectedClip.source.kind === "still" ? "still" : "motion"),
         );
+  /**
+   * s95b — what the retake door can say about cost BEFORE the click (V4). The
+   * only number this engine has on record is the selected beat's LAST mint
+   * (B7.1 provenance, `credits`); when it exists the door states it as the
+   * measured fact it is, and when it doesn't the ⚡ alone says "metered".
+   * Never an invented estimate.
+   */
+  const lastMintCredits: number | null = (() => {
+    if (selectedClip === undefined) return null;
+    const credits = detail.takes.find((t) => t.ref === selectedClip.source.ref)?.provenance.credits;
+    return typeof credits === "number" && Number.isFinite(credits) ? credits : null;
+  })();
   const keeperRefs = new Set(
     detail.takes.filter((t) => t.disposition === "keeper").map((t) => t.ref),
   );
@@ -875,7 +910,9 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
 
   return (
     <div className="content editor-surface" style={{ gap: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      {/* `position: relative` is the sheet's own header rule — the aspect ⓘ's
+          tip anchors against this row (s95b). */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, position: "relative" }}>
         <Link className="card-link" href={`/app/videos/${projectId}`}>
           ← {detail.name}
         </Link>
@@ -953,6 +990,38 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               </button>
             );
           })}
+        </div>
+        {/*
+          s95b — THE FRAMES NAMED (founder: "good to know what those numbers
+          mean"; Leonardo's Video Dimensions grammar). The tip is drawn OPEN in
+          the sheet as every drawn tooltip is; here it rides the shared
+          ⓘ/.tip vocabulary (hover/focus sibling — Analytics' own rule,
+          carried verbatim). One adaptation, stated: the sheet's closing line
+          offers "Recut ⚡" for an unrendered frame — this engine's recut is
+          the aspect lens's own derive, local and 0 credits, so the sentence
+          states THAT instead of a cost the verb does not have.
+        */}
+        <button type="button" className="info" aria-label="What the aspect frames mean">
+          i
+        </button>
+        <div className="tip" style={{ right: 236, top: 36 }}>
+          <span className="tip-h">WHAT THE FRAMES MEAN</span>
+          <div>
+            <span className="fr" style={{ width: 16, height: 9 }} />
+            <b>16:9</b> wide — the full video: YouTube, the blog, site embeds.
+          </div>
+          <div>
+            <span className="fr" style={{ width: 9, height: 16 }} />
+            <b>9:16</b> tall — short-form clips: TikTok, Reels, Shorts.
+          </div>
+          <div>
+            <span className="fr" style={{ width: 11, height: 11 }} />
+            <b>1:1</b> square — feed posts: LinkedIn, X, Instagram feed.
+          </div>
+          <div style={{ marginTop: 4, color: "var(--n-900)" }}>
+            One cut, three frames — switching opens this cut in that frame; a frame with no cut
+            yet derives one (measured seeds, 0 credits).
+          </div>
         </div>
         {/*
           Undo is bound to ⌘/Ctrl+Z, but a keyboard-only undo is an invisible
@@ -1064,6 +1133,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             }}
           >
             {chip.label}
+            {/* V4: the ⚡ marks the metered path — the ask feeds Propose (a
+                metered call) and the mint itself spends vendor credits when
+                armed. Free chips say so by absence. */}
+            {chip.metered && <span className="cr">⚡</span>}
           </button>
         ))}
         {/*
@@ -1091,7 +1164,18 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               : onPropose()
           }
         >
-          {running === "propose" ? "Proposing…" : "Propose"}
+          {running === "propose" ? (
+            "Proposing…"
+          ) : (
+            <>
+              Propose
+              {/* V4, sheet-verbatim: one metered agent call per press — the
+                  cost is on the control, learnt before the click. */}
+              <span className="cr" style={{ color: "var(--act-text)", opacity: 0.85 }}>
+                ⚡1
+              </span>
+            </>
+          )}
         </button>
       </div>
 
@@ -1451,6 +1535,8 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                * here. The +1 is display only, where a human reads it.
                */
               refusedCaptions={refusedLines}
+              frameFor={frameFor}
+              onNotice={setNotice}
             />
 
             {selection !== null && (
@@ -1723,7 +1809,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                     and the audition is a different verb from the swap.
                   */}
                   <div className="take on">
-                    <div className="thumb-md">
+                    {/* s95/V2 — the tile wears the take's real frame; the
+                        label composites over a scrim (never alpha over a
+                        photo). No poster = the shell's stripes, honestly. */}
+                    <div
+                      className={frameFor(selectedClip.source.ref) ? "thumb-md framed" : "thumb-md"}
+                      style={framedTile(frameFor(selectedClip.source.ref))}
+                    >
                       <span>in the cut</span>
                     </div>
                     <span className="take-cap" style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1763,7 +1855,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                             )
                           }
                         >
-                          <div className="thumb-md">
+                          <div
+                            className={frameFor(take.ref) ? "thumb-md framed" : "thumb-md"}
+                            style={framedTile(frameFor(take.ref))}
+                          >
                             <span>{take.disposition}</span>
                           </div>
                           <span className="take-cap">{takeName(take.ref)}</span>
@@ -1792,6 +1887,35 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                       </div>
                     );
                   })}
+                  {/*
+                    s95b — THE RETAKE DOOR (the sheet's dashed "+ retake" tile).
+                    A retake is a re-brief, and the re-brief door this surface
+                    already has is the copilot: pressing this scopes the ask to
+                    the selected beat and hands over the keyboard. The mint
+                    itself stays founder-gated (V10 — zero credit spend in
+                    build); the ⚡ states the metered path, with the last
+                    mint's recorded credits when the provenance carries them.
+                  */}
+                  <button
+                    type="button"
+                    className="take"
+                    aria-label={`Re-brief ${selectedClip.name} for a retake — fills the copilot ask; the mint spends vendor credits`}
+                    title="Fills the copilot ask with a retake brief for this beat — Propose then spends a metered call; the mint itself spends vendor credits"
+                    onClick={() => {
+                      setAsk(`Retake ${selectedClip.name}: `);
+                      askRef.current?.focus();
+                    }}
+                  >
+                    <div className="thumb-md" style={{ borderStyle: "dashed", background: "transparent" }}>
+                      <span>+ retake</span>
+                    </div>
+                    <span className="take-cap">
+                      re-brief this beat
+                      <span className="cr">
+                        {lastMintCredits === null ? "⚡" : `⚡${lastMintCredits} cr`}
+                      </span>
+                    </span>
+                  </button>
                 </>
               )}
             </div>
@@ -1819,7 +1943,16 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                   aria-pressed={selection?.kind === "beat" && selection.index === i}
                   onClick={() => setSelection({ kind: "beat", index: i })}
                 >
-                  <div className="beat-thumb" />
+                  {/* s95/V2 — the rail row wears its beat's frame too; no
+                      label sits on it, so no scrim. Stripes = no poster yet. */}
+                  <div
+                    className={frameFor(clip.source.ref) ? "beat-thumb framed" : "beat-thumb"}
+                    style={
+                      frameFor(clip.source.ref)
+                        ? { backgroundImage: `url("${frameFor(clip.source.ref)}")` }
+                        : undefined
+                    }
+                  />
                   <span style={{ flex: 1, minWidth: 0 }} className="beat-name">
                     {String(i + 1).padStart(2, "0")} · {clip.name}
                   </span>
@@ -1864,6 +1997,18 @@ function auditionKindFor(kind: string): AuditionKind | null {
   if (kind === "audio") return "audio";
   if (kind === "still") return null;
   return "motion";
+}
+
+/**
+ * s95/V2 — a labeled tile's frame, composited under a bottom scrim so the
+ * label stays legible over any photo (the alpha-tint lesson: composite, never
+ * hope). Null keeps the shell's striped placeholder untouched.
+ */
+function framedTile(src: string | null): React.CSSProperties | undefined {
+  if (src === null) return undefined;
+  return {
+    backgroundImage: `linear-gradient(180deg, oklch(0 0 0 / 0) 55%, oklch(0 0 0 / 0.6)), url("${src}")`,
+  };
 }
 
 /**

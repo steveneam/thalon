@@ -100,6 +100,23 @@ describe("getProjectDetail", () => {
     expect(detail!.cuts[1].edl).toMatchObject({ beats: 1, audio: "silent", width: 1280 });
   });
 
+  it("s96: serializes a take's B-media.0 poster; absent stays null (poster pending)", async () => {
+    const { ctx, projectId } = await seedProject();
+    const detail = await getProjectDetail(handle!.repos, ctx, projectId);
+    const keeper = detail!.takes[0];
+    expect(keeper.poster).toBeNull();
+    const poster = {
+      ref: { kind: "stored" as const, sha256: "a".repeat(64), ext: "webp" as const, width: 640, height: 360 },
+      provenance: "derived" as const,
+    };
+    await handle!.repos.videoTakes.setPoster(ctx, keeper.id, poster);
+    const after = await getProjectDetail(handle!.repos, ctx, projectId);
+    expect(after!.takes[0].poster).toMatchObject({
+      provenance: "derived",
+      ref: { kind: "stored", ext: "webp", width: 640 },
+    });
+  });
+
   it("playable follows meta.mediaRoot (absent → false, absolute path → true)", async () => {
     const { ctx, projectId } = await seedProject();
     expect((await getProjectDetail(handle!.repos, ctx, projectId))!.playable).toBe(false);

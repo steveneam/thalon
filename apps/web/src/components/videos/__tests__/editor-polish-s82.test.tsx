@@ -87,6 +87,7 @@ const TAKES: TakeView[] = [
     ref: "music-candidates/cello-03.mp3",
     reason: null,
     provenance: {},
+    poster: null,
     createdAt: "2026-07-20T00:00:00.000Z",
   },
   {
@@ -97,6 +98,7 @@ const TAKES: TakeView[] = [
     ref: "music-candidates/piano-01.mp3",
     reason: "too bright under the second caption",
     provenance: {},
+    poster: null,
     createdAt: "2026-07-20T00:00:00.000Z",
   },
 ];
@@ -128,6 +130,7 @@ function Timeline({
         propCaptions={propCaptions}
         propMusic={propMusic}
         refusedCaptions={refusedCaptions}
+        onNotice={vi.fn()}
       />
     </div>
   );

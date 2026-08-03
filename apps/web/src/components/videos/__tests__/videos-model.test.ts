@@ -49,6 +49,7 @@ function take(over: Partial<TakeView> = {}): TakeView {
     ref: over.ref ?? "motion/keepers/beat-01.mp4",
     reason: over.reason ?? null,
     provenance: over.provenance ?? {},
+    poster: null,
     createdAt: over.createdAt ?? "2026-07-20T00:00:00.000Z",
   };
 }

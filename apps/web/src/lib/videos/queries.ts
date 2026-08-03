@@ -2,11 +2,13 @@ import {
   edlSchema,
   videoCutAttributionSchema,
   videoCutLineageSchema,
+  videoTakePosterSchema,
   type TenantCtx,
   type VideoCutAttribution,
   type VideoCutStatus,
   type VideoTakeDisposition,
   type VideoTakeKind,
+  type VideoTakePoster,
 } from "@thalon/contracts";
 import type { Repos } from "@thalon/db";
 import { mediaRootOf } from "./media-root";
@@ -96,6 +98,21 @@ export function attributionOf(meta: unknown): VideoCutAttribution | null {
   return parsed.success ? parsed.data : null;
 }
 
+/**
+ * s96 (V2): a take's B-media.0 poster, off `meta.posterRef` — the same parse
+ * `resolveTakeMedia` applies client-side, done once at the serializer so the
+ * editor's frame thumbnails don't re-derive it per block. Absent or malformed
+ * resolves to null (poster pending — the honest striped placeholder), exactly
+ * as the resolver's own comment rules: "pending" and "none" are the same box.
+ */
+export function posterOf(meta: unknown): VideoTakePoster | null {
+  const raw =
+    typeof meta === "object" && meta !== null ? (meta as { posterRef?: unknown }).posterRef : undefined;
+  if (raw === undefined || raw === null) return null;
+  const parsed = videoTakePosterSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
+
 /** keepers before rejects within a slot; slotless (music candidates) last. */
 function takeOrder(a: TakeView, b: TakeView): number {
   if ((a.slot === null) !== (b.slot === null)) return a.slot === null ? 1 : -1;
@@ -182,6 +199,7 @@ export async function getProjectDetail(
           ref: t.ref,
           reason: t.reason,
           provenance: t.provenance as Record<string, unknown>,
+          poster: posterOf(t.meta),
           createdAt: t.createdAt.toISOString(),
         }),
       )

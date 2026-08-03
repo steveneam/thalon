@@ -51,6 +51,7 @@ const DETAIL: ProjectDetail = {
       ref: "motion/keepers/beat-01-the-watch.mp4",
       reason: null,
       provenance: { pinned: "4c4274dc", model: "test/mint" },
+      poster: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
     {
@@ -61,6 +62,7 @@ const DETAIL: ProjectDetail = {
       ref: "motion/rejects/beat-01-t1.mp4",
       reason: "hand clips through the watch face",
       provenance: {},
+      poster: null,
       createdAt: "2026-07-16T00:00:00.000Z",
     },
   ],
