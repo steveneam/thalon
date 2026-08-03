@@ -22,18 +22,20 @@ describe("Create's generation doors", () => {
     expect(shut.reason).toContain("lead");
   });
 
-  it("refuses post and page in the operator's own words, never silently", () => {
-    for (const family of ["post", "page"] as const) {
-      const door = createDoor(family, { hasLead: false });
-      expect(door.armed).toBe(false);
-      expect(door.reason).toBeTruthy();
-      expect(door.reason).toContain(family);
-    }
+  it("arms post unconditionally — the founder's s98 dogfood GO flipped the seam", () => {
+    expect(createDoor("post", { hasLead: false })).toEqual({ armed: true, reason: null });
+  });
+
+  it("refuses page in the operator's own words, never silently", () => {
+    const door = createDoor("page", { hasLead: false });
+    expect(door.armed).toBe(false);
+    expect(door.reason).toBeTruthy();
+    expect(door.reason).toContain("page");
   });
 
   it("a shut family is never generable from an upstream door", () => {
     expect(isGenerable("video")).toBe(true);
-    expect(isGenerable("post")).toBe(false);
+    expect(isGenerable("post")).toBe(true);
     expect(isGenerable("page")).toBe(false);
     // email carries no lead context from a trend card, so it cannot lead one.
     expect(isGenerable("email")).toBe(false);
@@ -46,13 +48,17 @@ describe("leadingExit — a primary button is a recommendation", () => {
   });
 
   it("hands the primary slot to a family that CAN run when the suggestion cannot", () => {
-    // The live case: every demo trend card is Bluesky-sourced, so the
-    // heuristic suggests `post` on all of them — the shut door.
-    expect(leadingExit("post", EXITS)).toBe("video");
+    // Since the s98 post arming the live shut suggestion is `page` alone.
     expect(leadingExit("page", EXITS)).toBe("video");
   });
 
+  it("keeps the armed suggestion now that its door opens — the s77 dead-primary case, healed", () => {
+    // The original live case: every demo trend card is Bluesky-sourced, so
+    // the heuristic suggests `post` on all of them. That door now runs.
+    expect(leadingExit("post", EXITS)).toBe("post");
+  });
+
   it("falls back to the suggestion rather than inventing a second shut exit", () => {
-    expect(leadingExit("post", ["page"])).toBe("post");
+    expect(leadingExit("page", ["page"])).toBe("page");
   });
 });

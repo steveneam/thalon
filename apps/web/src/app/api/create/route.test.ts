@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { POST } from "./route";
 
 /**
- * THE SEQUENCE GATE, EXECUTABLE (invariant): post/page generation waits on
- * the founder's recorded go-ahead, and the run door refuses them SERVER-side
+ * THE SEQUENCE GATE, EXECUTABLE (invariant): ungranted generation waits on
+ * the founder's recorded go-ahead, and the run door refuses it SERVER-side
  * — a hand-crafted POST cannot walk past the gate the surface states. The
  * refusal fires before any repo or driver is touched, so these tests need no
- * database. When his GO lands, `lib/create/families.ts` flips and these two
- * assertions are the ones to retire with it.
+ * database. The post assertion retired s98 with his dogfood GO (`post` armed
+ * in `lib/create/families.ts`); `page` still holds, awaiting its own word.
  */
 describe("POST /api/create — the run door's gates", () => {
   async function post(body: unknown): Promise<Response> {
@@ -20,16 +20,11 @@ describe("POST /api/create — the run door's gates", () => {
     );
   }
 
-  it("refuses a post brief with the seam's own sentence — the founder's sequence gate", async () => {
-    const res = await post({ family: "post", mode: "wizard", prompt: "hello" });
-    expect(res.status).toBe(409);
-    const data = (await res.json()) as { error: string };
-    expect(data.error).toContain("Live post generation isn’t wired to Create yet");
-  });
-
-  it("refuses a page brief the same way", async () => {
+  it("refuses a page brief with the seam's own sentence — the founder's sequence gate", async () => {
     const res = await post({ family: "page", mode: "wizard", prompt: "hello" });
     expect(res.status).toBe(409);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toContain("Live page generation isn’t wired to Create yet");
   });
 
   it("refuses an email brief that carries no lead — composing needs the recipient's context", async () => {

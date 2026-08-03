@@ -114,37 +114,33 @@ describe("Intel (exact-mock rebuild, Intel.dc.html)", () => {
    * reason; what changed is that a PRIMARY button is a recommendation, so it
    * only leads with an exit whose destination can actually run.
    */
-  it("leads with an exit Create can run, and keeps the shut suggestion visible with its reason", async () => {
+  it("leads with the suggestion now that its door runs — the s77 dead-primary case, healed", async () => {
     const user = userEvent.setup();
     render(<Intel />);
 
-    const leading = await screen.findByRole("button", { name: "Create video" });
+    // Every demo card is Bluesky-sourced, so `post` is suggested on all of
+    // them — the exact case that once landed on a disabled Generate. Since
+    // the s98 arming the suggestion keeps the primary slot it earns.
+    const leading = await screen.findByRole("button", { name: "Create post · suggested" });
     expect(leading).toHaveClass("btn-primary");
-    expect(leading.getAttribute("title")).toContain(
-      "pre-picked: thread-shaped topics compose best as posts",
-    );
-
-    // The suggestion is demoted, not deleted — same word, same reason.
-    const demoted = screen.getByRole("button", { name: "Post · suggested" });
-    expect(demoted).toHaveClass("btn-ghost");
-    expect(demoted).toHaveAttribute(
+    expect(leading).toHaveAttribute(
       "title",
       "pre-picked: thread-shaped topics compose best as posts",
     );
 
-    // And the shut families say so on the surface, not only in a title.
+    // The one still-shut family says so on the surface, not only in a title.
     expect(
-      screen.getByText(/post and page generation isn’t wired at Create yet/),
+      screen.getByText(/page generation isn’t wired at Create yet/),
     ).toBeInTheDocument();
 
     await user.click(leading);
     expect(push).toHaveBeenCalledWith(expect.stringContaining("/app/create?ctx=intel-capture-"));
   });
 
-  it("still promotes through the capture door on a demoted exit — the capture is worth recording either way", async () => {
+  it("still promotes through the capture door on a non-suggested exit — the capture is worth recording either way", async () => {
     const user = userEvent.setup();
     render(<Intel />);
-    await user.click(await screen.findByRole("button", { name: "Post · suggested" }));
+    await user.click(await screen.findByRole("button", { name: "Video" }));
     expect(push).toHaveBeenCalledWith(expect.stringContaining("/app/create?ctx=intel-capture-"));
   });
 

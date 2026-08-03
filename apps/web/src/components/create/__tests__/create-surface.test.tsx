@@ -252,20 +252,16 @@ describe("Create (exact-mock rebuild — the s90b ask-card sheet)", () => {
     );
   });
 
-  it("post states the open seam honestly — never a dead primary button", async () => {
+  it("post arms Generate — the s98 dogfood GO opened the seam this surface reads", async () => {
     const user = userEvent.setup();
     render(<CreateSurface {...BASE} />);
 
     await user.click(screen.getByRole("button", { name: "Post" }));
 
-    expect(screen.getByRole("button", { name: "Generate" })).toBeDisabled();
-    // The refusal comes from the shared seam (lib/create/families), so this
-    // sentence and the one Intel's exits show can never drift apart.
-    expect(screen.getByText(/Live post generation isn’t wired to Create yet/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Generate" })).toHaveAttribute(
-      "title",
-      expect.stringContaining("Live post generation isn’t wired to Create yet"),
-    );
+    // Armed via the shared seam (lib/create/families) — the same flip that
+    // opened POST /api/create, so surface and route can never disagree.
+    expect(screen.getByRole("button", { name: "Generate" })).toBeEnabled();
+    expect(screen.queryByText(/isn’t wired to Create yet/)).not.toBeInTheDocument();
   });
 
   it("the Email family without a lead context points at the lead-card exit", async () => {

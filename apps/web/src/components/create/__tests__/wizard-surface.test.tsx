@@ -212,17 +212,17 @@ describe("Create wizard (exact-mock build — the s90b amended sheet)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(/waiting on the founder’s go-ahead/);
   });
 
-  it("post family disarms Generate with the seam's reason — never a dead primary", async () => {
+  it("post family arms Generate — the s98 dogfood GO opened the seam the wizard reads", async () => {
     server.use(planHandler());
     const user = userEvent.setup();
     render(<WizardSurface {...BASE} initialPrompt="a post" initialFamily="post" context={null} />);
 
     await user.click(screen.getByRole("button", { name: "Next · Review plan" }));
     const generate = await screen.findByRole("button", { name: "Generate" });
-    expect(generate).toBeDisabled();
+    expect(generate).toBeEnabled();
     expect(generate).toHaveAttribute(
       "title",
-      expect.stringContaining("Live post generation isn’t wired to Create yet"),
+      expect.stringContaining("judge"),
     );
   });
 

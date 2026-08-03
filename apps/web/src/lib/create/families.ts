@@ -21,18 +21,20 @@ import type { CreateFamily } from "@/lib/intel/types";
  * shut destination is never dressed as the recommended path.
  *
  * ── ARMING ────────────────────────────────────────────────────────────────
- * The founder's s77 ruling is that post/page generation goes to arming, with
- * his sequence gate holding activation: *"we're not posting anything yet
- * until all the walks are verified and fixed."* Generation also SPENDS on
- * every click, so nothing here turns itself on.
+ * The founder's s77 ruling put post/page generation behind his sequence
+ * gate: *"we're not posting anything yet until all the walks are verified
+ * and fixed."* Generation SPENDS on every click, so nothing here turns
+ * itself on.
  *
- * When that GO lands, this file is the one place to change: flip the
- * family's `armed` to true and point Create's run door at the engine path
- * (`runFanout` for `post`, `runWebPageGeneration` for `page` — both already
- * exist and are exercised by `scripts/create-posts.ts` and the eval
- * dogfood; what is missing is only the route + service between them and
- * this surface, mirroring `/api/create/video`). Every sentence below, on
- * both surfaces, updates from that one edit.
+ * **`post` ARMED s98 (2026-08-03) on the founder's recorded GO** — "Go for
+ * the dogfood too", the B-create.5 gate (first real Create run, bluesky
+ * test grant). `POST /api/create` reads this same seam, so the flip armed
+ * the route and both surfaces at once; the run dispatches to `runFanout`
+ * per admitted destination with the shared judge pipeline intact
+ * (`packages/engine/src/create/dispatch.ts`).
+ *
+ * `page` stays shut: the GO covered the post dogfood, not page generation.
+ * When its word lands, flipping it here is still the whole edit.
  */
 
 export interface CreateDoor {
@@ -49,7 +51,6 @@ export interface DoorContext {
 }
 
 const UNWIRED_REASON: Record<string, string> = {
-  post: "Live post generation isn’t wired to Create yet — the engine and judge lane exist; the run door is waiting on the founder’s go-ahead.",
   page: "Live page generation isn’t wired to Create yet — the engine and judge lane exist; the run door is waiting on the founder’s go-ahead.",
 };
 
@@ -59,6 +60,7 @@ const NO_LEAD_REASON =
 /** The one answer to "can Create generate this?", with the sentence that says why not. */
 export function createDoor(family: CreateFamily, ctx: DoorContext): CreateDoor {
   if (family === "video") return { armed: true, reason: null };
+  if (family === "post") return { armed: true, reason: null };
   if (family === "email") {
     return ctx.hasLead ? { armed: true, reason: null } : { armed: false, reason: NO_LEAD_REASON };
   }
