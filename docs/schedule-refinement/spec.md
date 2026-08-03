@@ -19,6 +19,18 @@
 > carries the amendment block, `Calendar.dc.html` is archived, the ledger's
 > §Schedule rows are flipped, and the live spec pointers in `schedule.css` /
 > `schedule-surface.tsx` were repointed to `Schedule.dc.html`.
+>
+> **BUILT s96 (2026-08-03, `ea29e49`).** S1: `PipelineAsset.media`
+> (serializer-only; the draft's own `meta.mediaRefs` first image — the spec's
+> `meta.posterRef` citation was corrected against ground truth at kickoff,
+> rule 12) → `CalEvent.platform/media` → the chip's `.ev-media` through
+> SourceThumb's five states at this surface's 30×22 `.thumb-sm` override,
+> platform badge riding the thumb, Aa for text-only; `MEDIA_CHAINS.draft`
+> argued open in the chain ratchet; the workspace media door reads the
+> `social-media/` family beside `media/`. S2: the month mark carries the
+> platform glyph. S3: `placeColumn` returns `{placed, overflow}` — cap 2 by
+> mark priority, the `+N more at HH:MM · open day` door opens the agenda.
+> Pins: `__tests__/schedule-s96.test.tsx` + the model/chain suites.
 
 ## What "calendar" means now (re-grounded s94 — rule 12, no inherited claims)
 

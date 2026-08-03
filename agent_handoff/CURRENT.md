@@ -2,127 +2,110 @@
 
 ## Stamp
 
-2026-08-03 close of session 95 (syd4 — **zero credit spend, zero posts, zero
-founder console visits**). The s94-stamped plan ran WHOLE: Phase 1 (four
-sheets amended lead-direct, canvas synced) + Phase 2 — and Phase 2 closed
-IN-SESSION: the founder reviewed the sheets, asked two editor additions,
-both were drawn the same hour (**s95b**, from his directed Mobbin pull —
-Leonardo/Arcade/Squarespace), and he ruled: *"Everything else is ok … W3 is
-approved."* **All four amended sheets are LAW. Phase 3 is UNBLOCKED.**
-Verify on main at the wrap: **exit 0, 3265 passed / 9 skipped, 357 files**.
+2026-08-03 close of session 96 (syd4 — **zero credit spend, zero posts, zero
+founder console visits**). The W3-approved Phase 3 ran WHOLE, lead-direct, in
+the stamped order, each step committed at its own verified boundary:
+**editor p1+s95b** (`13f363d`) → **Overview/Dossier + V1's five affordances**
+(`591e9ec`) → **Schedule S1–S3** (`ea29e49`). Verify on main at the wrap:
+**exit 0, 3303 passed / 9 skipped**; every surface browser-passed live on
+real data at 1440×940.
 
-## WHAT IS NOW VERDICTED (headers carry the full records)
+## WHAT SHIPPED (the headers + specs carry the full records)
 
-**Videos Overview** — pill onto the thumb (opaque composite drawn in),
-no-preview words, takes·cuts·platforms family counts, kind token, no 0:00 on
-stills. **Video Dossier** — V1 drawn: version rail (crumb selector,
-✓-named cuts, published pill, compare radios, delete confirm in the
-Fibery/Resend register) + the Takes audition band. **Videos editor** — p1
-(frame-thumb blocks, kind-coloured tracks, ⚡ credit badges at metered
-verbs) **+ s95b: the aspect seg's ⓘ tooltip** (16:9 wide = full video:
-YouTube/blog/embeds · 9:16 tall = short-form: TikTok/Reels/Shorts · 1:1
-square = feed: LinkedIn/X/IG — frame glyphs per Leonardo; one cut, three
-frames, unrendered frame offers Recut ⚡) **+ the timeline tools row**
-(Split · Crop · Text · Delete, icon chips on the selected block, delete in
-the danger colour, EDL-only so unbadged; complements the copilot).
-**Schedule** — S1 density ruling (thumbs week+agenda only), S2 month
-grammar recorded, S3 concurrent cluster drawn (cap 2 + count-door),
-S4 done (Calendar.dc.html archived, spec pointers repointed).
+**Editor** — real frame thumbs on blocks/rail/strip (B-media.0 posters; ring
+selection, scrim composite), kind tokens + kdots, the ⓘ frames tip, the
+Split·Crop·Text·Delete tools row (new pure `splitBeat`/`insertCaptionForBeat`/
+`removeMusicCue`; refusals answer in the notice band), ⚡ at the metered verbs
+— **Propose ⚡1 · Retake ⚡ (+ the strip's retake door quoting the last mint's
+recorded credits); Recut UNBADGED on purpose** (this engine's recut is the
+local derive, 0 cr — absence says free, V4's own rule; the crescendo
+precedent). **Dossier** — the crumb + version flood, the marked strip (a name
+IS a mark — **Decision-5 HELD, no new columns**), ☆ Mark via the one save
+door, inline compare, delete with the repo's refusals + TRUE preservation
+words, the takes audition band (Swap on the picked tile → saves vN+1).
+**Overview** — pill onto the thumb (opaque composite), real take-poster cards
+(the s75 placeholder hold SPENT), "no preview yet" words, takes·cuts counts,
+kind token, no 0:00 on stills. **Schedule** — chips wear their draft's own
+image (serializer-only widening; `MEDIA_CHAINS.draft` argued open; the media
+door reads `social-media/` too) + platform badge + Aa; `placeColumn` capped
+at 2 with the `+N more · open day` agenda door; month-mark platform glyph.
+**NEW `scripts/backfill-take-posters.ts`** — the s77 door's missing runner
+(66 posters, local ffmpeg, 0 cr, idempotent).
 
-## Resume prompt (session 96, syd4)
+## Resume prompt (session 97, syd4)
 
-**Resume · Thalon** — W3 is APPROVED; nothing awaits a verdict. s96 = the
-Phase-3 builds, exact-mock from the verdicted sheets, in this order:
+**Resume · Thalon** — Phase 3 is BUILT; nothing awaits a verdict. Candidates,
+no fixed order (re-test at the opener, rule 11):
 
-1. **Editor p1 + s95b deltas** (smallest, pure surface):
-   `apps/web/src/components/videos/editor*.tsx` + scoped css — frame-thumb
-   blocks (real frames; stripes only where no render), kind-coloured tracks
-   + lane dots, ⚡ badges on Recut/Retake/Propose (+ retake door), the ⓘ
-   frames tooltip, the Split·Crop·Text·Delete tools row acting on the
-   selected block (EDL ops through the existing propose/apply seams — check
-   what `packages/engine` EDL verbs already exist before inventing routes).
-   Re-baseline the render-gate screenshot after.
-2. **Overview + Dossier deltas + V1's five affordances.** **Decision-5
-   pre-check FIRST**: named-variant + delete/restore must come from
-   `videoProjects`/`videoTakes`/`videoCuts` rows
-   (`packages/db/src/schema/video.ts` + repos) — a missing column is a
-   contract-window ask, FLAGGED, never built around (s90 windows frozen).
-   Cuts routes exist: `apps/web/src/app/api/videos/[projectId]/cuts/…`
-   (approve/derive/propose). Takes-audition plays existing take renders —
-   V10: replay fixtures, no live mints.
-3. **Schedule deltas**: event-media read widening `(new, serializer-only)`
-   on `fetchPlan`/`fetchQueueRows` (`lib/workspace/client.ts`) rendering
-   through SourceThumb's five states (never flatten the `.thumb-sm`
-   override rule) + the `placeColumn` cap (2 per instant + count-door;
-   the model's "split evenly" adaptation is SUPERSEDED — sheet header) +
-   month-mark platform glyph (S2 grammar). Suites under
-   `components/schedule/` extend with S1–S3 pins.
-4. **Interleavable, its own gate:** B-create.5 dogfood (first real Create
-   run, bluesky) — needs a spend statement + his GO. **Phase 4 after the
-   deltas:** V3 script-first gate (own decision session), then pass-3
-   states (V7/V9).
+1. **Phase 4 of the video arc:** the V3 script-first DECISION session
+   (criteria in `docs/video-arc/spec.md` §V3 — does a beat edit round-trip
+   faster than a timeline edit; does it cut the job-failure count), then
+   pass-3 states (V7 render honesty / V9 render gates across the four
+   surfaces).
+2. **B-create.5 dogfood** (first real Create run, bluesky) — its own gate:
+   needs a spend statement + his GO before any Generate click.
+3. **The `.data` split-brain defect** (found s96, PRE-EXISTING): with
+   `THALON_DATA_DIR` unset, repo-root scripts and the apps/web app resolve
+   DIFFERENT `.data` roots (root holds `assets/` from pin-mint; the app's
+   holds `posts/`/`social-media/`). The backfill script now pins the app
+   root; pin-mint and any other root-run script still carry the trap. A
+   doctor-class lie candidate — chart a one-root ratchet.
+4. **UX programme** — remaining un-passed rows in
+   `docs/research/ux-refinement-program.md` (rows 2/7/8/9 now BUILT s96).
 
-Lanes possible at steps 2/3 (disjoint file sets) — **every launch needs
-fresh founder approval; Mode B (`scripts/launch-lane.sh`) is the default**;
-step 1 is small enough to stay lead-direct.
-
-**Read first:** CLAUDE.md → this file → COORDINATION §s95 →
-`docs/video-arc/spec.md` (§s95 plan: Phase-1/2 records + Phase-3 order) →
-`docs/schedule-refinement/spec.md` → the four sheet headers in
-`docs/research/mock-sheets/` → runway §9.
+▎ ▸ **The one FLAGGED contract-window ask from s96:** the Dossier's drawn
+"Restore brings it back" needs a cut retire/restore column — NOT built
+around (s90 freeze); delete ships with the true preservation words. Raise at
+the next window with the founder.
+▎ ▸ **His s90 no-console-visits week is now OUT OF DATE (dated 2026-08-01)
+— re-test at the opener; the console batch stays PARKED on NEEDS-STEVEN
+until he says otherwise.**
+▎ ▸ **Design work = Fable 5 direct, never delegated** (standing s51); every
+lane/subagent launch needs fresh founder approval; Mode B default.
+▎ ▸ **The wizard's Generate spends when clicked** — door-gated; **zero
+credits spent to date** (the poster backfill + all renders were local).
+▎ ▸ **Traps worth keeping:** `next dev` runs at `localhost:3111` (`npm run
+dev`), started/stopped in-session for browser passes · scripts need
+`set -a; source apps/web/.env.local; set +a` AND the store-root pin (see
+backfill-take-posters.ts) · the chip's platform words live in aria-labels
+now — test queries go by role+name, not visible text · placeColumn returns
+`{placed, overflow}` since s96 · sheet-verbatim CSS = impeccable findings
+intentional (DOCTRINE 0, standing) · vitest doesn't typecheck (`npx tsc
+--noEmit -p apps/web`) · canvas writes need `finalize_plan` (UUID
+`f5d304cb-cd0e-484d-8542-7b6561e1ef30`) · plat-mark paths now in THREE
+copies (approve/analytics/schedule) — simplify candidate.
+▎ ▸ **⛔ SEQUENCE GATE unchanged AND executable:** post/page generation 409s
+at `POST /api/create` until his GO (flip `lib/create/families.ts`); bluesky
+armed for testing on his recorded words; queue consumer's key EMPTY; youtube
+CANNOT arm. **Nothing posted. Zero credits spent.**
+▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
+verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
+`.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
+▎ ▸ **State:** main = origin (this wrap) · staging rolls s93–s96 with the
+next auto-deploy · four social channels connected · dev PG live · 8899
+preview + sweeper user units keep running — NEVER hand-start the sweeper.
+▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and
+pushed; s97 boots on "gogogo" alone (this file + COORDINATION §s96 + the two
+specs carry the whole state).
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    doctor` · `bash ~/work/swordfish/provisioning/checks/needs-steven-hygiene.sh`.
 
-▎ ▸ **His s90 no-console-visits constraint: re-test at the opener** (dated
-2026-08-01; the week is nearly out — don't assume either way). Console batch
-stays PARKED on NEEDS-STEVEN until he says otherwise.
-▎ ▸ **Design work = Fable 5 direct, never delegated** (standing s51).
-▎ ▸ **The wizard's Generate spends when clicked** — door-gated, but a LIVE
-click is a real run. **Zero credits spent to date.**
-▎ ▸ **The s90 windows stay frozen** — the Decision-5 flag path in step 2 is
-the only sanctioned opener.
-▎ ▸ **impeccable hook notes:** schedule.css findings = pre-existing
-SHEET-VERBATIM ports (DOCTRINE 0), intentional, not suppressed.
-▎ ▸ **Traps worth keeping:** the ARCHIVE ratchet bans an archived sheet's
-literal filename in live code (`tests/repo-hygiene.test.ts`) ·
-spec-ground-truth re-checks every cited path after ANY file move · Bash cwd
-PERSISTS (`git -C`/absolute paths) · the RAIL hard-codes label lists ·
-alpha-tint pills illegible over photos (opaque composite = the pattern, now
-IN the Overview sheet) · vitest doesn't typecheck (`npx tsc --noEmit -p
-apps/web`) · Mobbin MCP errors are transient — retry in-session · canvas
-writes need `finalize_plan` (plan_token; full UUID
-`f5d304cb-cd0e-484d-8542-7b6561e1ef30`).
-▎ ▸ **⛔ SEQUENCE GATE unchanged AND executable:** post/page generation 409s
-at `POST /api/create` until his GO (flip `lib/create/families.ts`); bluesky
-armed for testing on his recorded words; queue consumer's key EMPTY; youtube
-CANNOT arm. **Nothing posted. Zero credits spent.**
-▎ ▸ **Standing:** stealth · hermes-relay = founder · every lane/subagent
-launch needs fresh founder approval · GATE ON EXIT CODE · verify-on-main =
-THE gate · rules 10/11/12 · platform logins live durably in `.context` · no
-AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (this wrap) · staging rolls s93–s95 with the
-next auto-deploy · four social channels connected · dev PG live · edge auth
-creds = `.context/staging-secrets-from-swordfish.md` · 8899 preview +
-sweeper user units keep running — NEVER hand-start the sweeper.
-▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and
-pushed; s96 boots on "gogogo" alone (this file + the two specs + the four
-verdicted sheet headers carry the whole build brief).
-
 ## Pointer
 
-CLAUDE.md → this file → COORDINATION.md (§s95) → `docs/video-arc/spec.md` →
+CLAUDE.md → this file → COORDINATION.md (§s96) → `docs/video-arc/spec.md` →
 `docs/schedule-refinement/spec.md` → `docs/research/ux-refinement-program.md`
 → `docs/research/mock-sheets/README.md` → NEEDS-STEVEN.md (PARKED header) →
 `docs/research/prior-art-portal-automation-s84.md` (BEFORE ANY PORTAL WORK).
 
-## Delta (session 95, both halves)
+## Delta (session 96)
 
-The first half drew the four-sheet block and sent the verdict ask; the
-founder answered IN-SESSION with two editor additions (ratio meaning + a
-manual tools row) — his directed re-pull found Leonardo's Video Dimensions
-control drawing exactly the frame-glyph grammar the ⓘ needed — both were
-drawn as s95b the same hour, and W3 was approved on the spot. The verdict
-loop that took a texted week for W1/W2 closed in one sitting. What remains:
-the Phase-3 builds (s96), the dogfood gate, Phase 4.
+The s95-stamped Phase 3 was executed exactly as ordered, with three truth
+calls made and recorded where they live: Recut unbadged (a free verb wears no
+cost), the Restore sentence withheld (no column backs it — flagged as the
+window ask), and the Schedule spec's `posterRef` citation corrected to
+`meta.mediaRefs` against ground truth (rule 12). The B-media.0 backfill door
+finally got a runner, and its first run exposed the pre-existing `.data`
+split-brain (rule 11 — the constraint was ours). What remains of the video
+arc: Phase 4 (V3 gate + pass-3 states); B-create.5 stays its own gate.

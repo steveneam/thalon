@@ -214,6 +214,23 @@ landing/marketing video.
 > acts on the selected block; complements the copilot, never replaces it).
 > Then his word: *"Everything else is ok … W3 is approved."*
 > **Phase 3 is UNBLOCKED — builds in the order below.**
+>
+> **Phase 3 EXECUTED s96 (2026-08-03), lead-direct, in order** (`13f363d` ·
+> `591e9ec` · `ea29e49`): editor p1+s95b deltas → Overview/Dossier + V1's
+> five affordances → Schedule S1–S3. Decision-5 pre-check HELD for
+> named-variant (a name IS a mark, through the one save door, no new
+> columns); the delete/restore half split — delete ships with the TRUE
+> preservation sentence, the sheet's "Restore brings it back" is NOT
+> rendered because no column records a retired cut: **the retire/restore
+> column is the flagged contract-window ask** for the next window (s90
+> freeze respected). One V4 truth adaptation, stated in code and test:
+> Recut stays unbadged (this engine's recut is the aspect lens's own local
+> derive, 0 credits — absence says free); Retake ⚡ + Propose ⚡1 are the
+> metered marks. B-media.0's backfill door got its missing runner
+> (`scripts/backfill-take-posters.ts`, 66 posters derived, 0 credits).
+> Verify 3303/9 exit 0; all four surfaces browser-passed on real data.
+> **Remaining in this arc: Phase 4** — the V3 script-first gate (own
+> decision session), then pass-3 states (V7/V9).
 
 **Where the arc actually stands (re-grounded s94, per rule 12 — no inherited
 claims):** the three sheets EXIST since the s72 verdicted export

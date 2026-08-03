@@ -192,6 +192,29 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s96 — **CLOSED** (boot 2026-08-03 "gogogo"; wrap = this session's verify)
+
+**Phase 3 ran WHOLE, lead-direct, in the stamped order, founder-hands-free
+(everything was W3-verdicted — nothing was asked of him): the three build
+steps committed at their own verified boundaries** (`13f363d` editor ·
+`591e9ec` Overview/Dossier · `ea29e49` Schedule), each with its own full
+verify at exit 0 and a live browser pass on real data at 1440×940.
+
+| track | outcome |
+|---|---|
+| Editor p1 + s95b (`13f363d`) | **SHIPPED** — frame thumbs on blocks/rail/strip (ring selection, scrim composite; stripes now MEAN "no frame derived yet"), kind tokens + kdots, the ⓘ frames tip (shared ⓘ/.tip dialect), the Split·Crop·Text·Delete tools row on the SELECTED block via NEW pure `splitBeat`/`insertCaptionForBeat`/`removeMusicCue` + existing verbs, every refusal a sentence in the notice band. **V4 truth call, stated:** Propose ⚡1 + Retake ⚡ (+ the strip's retake door quoting the beat's LAST recorded mint credits); **Recut stays UNBADGED** — this engine's recut is the aspect lens's own local derive at 0 credits, and absence says free by V4's own rule (the crescendo precedent: sheet grammar, true facts only). Crop = temporal crop-to-playhead (the spatial crop already lives in the inspector's reframe; inventing a crop window client-side would break measured-never-estimated). |
+| The poster backfill (`13f363d`) | **B-media.0's missing HANDLE built** — `scripts/backfill-take-posters.ts` (the s77 door had no runner; every take read poster-pending for 19 sessions). 66 posters derived, local ffmpeg, 0 credits, idempotent re-run proven. **Rule-11 catch on its first run:** with `THALON_DATA_DIR` unset the store resolves against CWD, so the script wrote 66 posters into a root no route reads (`./.data` vs the app's `apps/web/.data`) — merged, and the script now pins the app's own root. **The wider `.data` split-brain PRE-EXISTS** (root holds `assets/` from pin-mint runs; the app's holds `posts/`/`social-media/`): a next-session defect candidate, doctor-class. |
+| Overview + Dossier + V1 (`591e9ec`) | **SHIPPED** — Dossier: the crumb + the flood behind it, the marked strip (one chip per non-derived name; **a name IS a mark — Decision-5 pre-check HELD, no new columns**; derived cuts stay in the aspect band; default pick prefers a master chain), ☆ Mark through the one save door, inline compare off the radios, delete with the repo's refusals said first and the TRUE preservation sentence, the takes audition band (frozen TakeAudition seam; Swap rides the picked tile and saves vN+1). Overview: pill ONTO the thumb (opaque composite), real take-poster cards (**the s75 "placeholder until bmedia ready" hold is SPENT**), "no preview yet" words, takes·cuts row counts, kind token (one-prompt / image / imported — the only doors a project arrives by), still sheds its 0:00, timecode everywhere. **ONE stated deviation from the drawn sheet:** the delete confirm does NOT render "Restore brings it back" — no column records a retired cut and a hard delete has no way back; **the cut retire/restore column is the FLAGGED contract-window ask** for the next window (s90 freeze respected, never built around). |
+| Schedule S1–S3 (`ea29e49`) | **SHIPPED** — S1: `PipelineAsset.media` serializer widening (the draft's own `meta.mediaRefs` first image — the spec's `posterRef` citation corrected against ground truth at kickoff, rule 12; tolerant read, images only) → chip `.ev-media` through SourceThumb at this surface's 30×22 `.thumb-sm` override + platform badge + Aa mark; `MEDIA_CHAINS.draft` **argued open** in the chain ratchet (own attached media only; the Approve ruling holds; runs still resolve nothing); the workspace media door reads `social-media/` beside `media/` (closed family list). S2: month marks carry the platform glyph. S3: `placeColumn` → `{placed, overflow}`, cap 2 by mark priority, `+N more at HH:MM · open day` → agenda. Live pass: real draft thumbs (the meme-horse attachments), the capped Sat-25 cluster's door, all on the wire. |
+| Record hygiene | Ledger rows 2/7/8/9 flipped to **BUILT s96**; both specs carry execution records (video-arc §s95-plan Phase-3 block · schedule-refinement §BUILT s96); impeccable findings on dossier/videos css = sheet-verbatim ports (DOCTRINE 0, standing ruling, intentional, not suppressed). Simplify candidate noted in code: the platform-mark paths now live in THREE surface copies (approve · analytics · schedule) — consolidation into `components/media` is a future cleanup. |
+
+**DEFERRED, stated:** **Phase 4** — the V3 script-first gate (its own decision
+session, criteria in the spec), then pass-3 states (V7/V9). **B-create.5
+dogfood** unchanged: its own GO + spend statement, interleavable. **The
+retire/restore column** = the one flagged window ask from this session. The
+`.data` split-brain = a lead-actionable defect candidate for a next opener.
+Zero credits spent; nothing armed; zero founder hands.
+
 ## Sprint 9 / s95 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap = this session's verify)
 
 **The s94-stamped plan's Phase 1 + 2 ran as written, lead-direct, zero founder
