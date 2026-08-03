@@ -192,6 +192,30 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s98 — **CLOSED** (boot 2026-08-03 "gogogo. and Go for the dogfood too"; **THE FIRST LIVE CREATE-ORIGINATED POST** — zero credits, subscription tokens only)
+
+**The founder's turn carried two GOs and both executed: the post door ARMED
+(`ba850c0`) → B-create.5 dogfood END-TO-END through the real UI → a real
+judge defect caught, root-caused, fixed and live-proven (`abf145e`) → the
+draft PUBLISHED to Bluesky under the s83 test grant.** Wrap verify: exit 0,
+**3310 passed / 9 skipped** (both build commits carried their own full green).
+
+| track | outcome |
+|---|---|
+| Post door armed (`ba850c0`) | **"Go for the dogfood too" = the recorded GO.** `createDoor("post")` flipped in the ONE seam (`lib/create/families.ts`); route + both Create surfaces + Intel's exits opened from the same edit — the s77 dead-primary case healed live (post-suggested dossiers lead with "Create post · suggested" again). `page` stays shut awaiting its own word; its half of the sequence gate stays executable (route test). Six test files moved their pins to the armed truth. |
+| B-create.5 dogfood (the loop, real UI) | **The full healed journey ran on real data:** live intel card ("Why the US Is Restricting Access to Frontier AI Models", hot, 3h) → Post exit with title+angle+hook+source riding → guided wizard → platforms narrowed to **Bluesky only** (the grant's platform) → plan review stated the truth ("0 credits · 1 metered call") → **spend statement on the record before Generate** (draft + both tiers = `claude-cli/claude-opus-5`, founder's subscription; zero Higgsfield, zero gateway) → generate + judge → Composer → Approve. Draft: 297/300, on-voice, grounded. |
+| The judge defect the dogfood caught (`abf145e`) | **g3_screen recorded all-claims-supported + verdict:fail THREE consecutive times on the same body — its own notes arguing pass** ("Verdict should be pass; marking fail"). Root cause: **field order is generation order** — the output shape asked for `verdict` FIRST, so the model committed before weighing a single claim. Fix: verdict LAST in both transports (claude-cli inline instruction + the generateObject Zod schema; validation order-agnostic). **Proof: live golden:g3 full set 34/34 tier-verdicts — including g3-016, the s69 RED-PINNED residual, now passing screen** — plus new row **g3-017** (universalized imperative of prescribed advice, the dogfood's exact class). Every true-fail row still fails. The unchanged draft re-judged clean: screen ✓ final ✓ — queued. |
+| The live post | Approved through the queue UI → commitment row → `run-publish-queue.ts --once` **armed per-run** (`SOCIAL_QUEUE_ARMED` set for the one invocation; the key still rests EMPTY): **1 due / 1 published / 0 failed** → `at://…/3ms6ep6a3sm23`, verified live on `steveneam.bsky.social` via the public API, body = the judged draft verbatim. The second-ever automated live post; the FIRST originated by Create. |
+| Ops notes, stated | The daily token rail FIRED mid-golden-lap (2,023,817 vs the founder's standing 2M pin) — honored, then finished under a **per-process** `TENANT_DAILY_TOKEN_BUDGET=4000000` (the s68 raise precedent; `.env.local`'s 2M standing pin UNTOUCHED; dev server relaunched with the same per-process raise for the re-judge). Browser-driving quirk hit twice: chrome-devtools `fill` does not propagate into React controlled inputs here (the edit textarea + the schedule datetime both submitted stale values) — the datetime fallback was the product's own queue API; noted in memory. |
+
+**DEFERRED, stated:** **V9** (the render-gate pass across the four video
+surfaces) remains the video arc's ONE item — a full four-surface pass
+deserving its own session. **Page generation** stays gated. **The
+retire/restore column** stays the flagged window ask. The dogfood's UX
+observations (platform exclusion is one-way within a wizard session; the
+Composer verdict strip hides which hard gate failed behind "details ▸")
+fold into the V9/UX-programme window.
+
 ## Sprint 9 / s97 — **CLOSED** (boot 2026-08-03 "gogogo"; zero credit spend, zero posts, founder-hands-free)
 
 **Three boundaries, each committed on its own green: the `.data` split-brain
