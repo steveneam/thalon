@@ -63,13 +63,19 @@ const AI_EDIT_IDLE: AiEditState = {
  * here publishes; the judge gates — it never rewrites. Edits (hand or AI)
  * re-judge before a variant can leave.
  */
+/** The judge-detail read, honest in all three eras — reading · failed · read. */
+type DetailRead =
+  | { state: "reading" }
+  | { state: "failed" }
+  | { state: "read"; detail: DraftDetail };
+
 export function ComposerSurface({ runId }: { runId: string }) {
   const [status, setStatus] = useState<ReadState>("loading");
   const [run, setRun] = useState<CreateRunWire | null>(null);
   const [drafts, setDrafts] = useState<GridDraft[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [fits, setFits] = useState<Record<string, FitResponse | null>>({});
-  const [detail, setDetail] = useState<DraftDetail | null>(null);
+  const [detail, setDetail] = useState<DetailRead>({ state: "reading" });
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
   const [verbBusy, setVerbBusy] = useState<"save" | "rejudge" | null>(null);
@@ -132,14 +138,16 @@ export function ComposerSurface({ runId }: { runId: string }) {
     // says "reading" for the NEW tab rather than showing the old verdicts.
     Promise.resolve()
       .then(() => {
-        if (!cancelled) setDetail(null);
+        if (!cancelled) setDetail({ state: "reading" });
       })
       .then(() => fetchDraftDetail(activeId))
       .then((d) => {
-        if (!cancelled) setDetail(d);
+        // A 404 on a draft the grid lists IS a failed read, not a quiet null.
+        if (!cancelled) setDetail(d === null ? { state: "failed" } : { state: "read", detail: d });
       })
       .catch(() => {
-        /* the strip renders its unread state */
+        // A failed read NAMES itself — an eternal "reading…" is a lie (s98).
+        if (!cancelled) setDetail({ state: "failed" });
       });
     return () => {
       cancelled = true;
@@ -387,7 +395,7 @@ function LeftColumn({
   onApply,
 }: {
   active: GridDraft | null;
-  detail: DraftDetail | null;
+  detail: DetailRead;
   editing: boolean;
   editedBody: string;
   onStartEdit: () => void;
@@ -402,7 +410,9 @@ function LeftColumn({
     if (editing) bodyRef.current?.focus();
   }, [editing]);
 
-  const results = (detail?.judgeResults ?? []) as unknown as JudgeResultWithEvidence[];
+  const results = (detail.state === "read"
+    ? detail.detail.judgeResults
+    : []) as unknown as JudgeResultWithEvidence[];
   const marks = active ? checkMarks(active, results) : [];
   const failing = marks.find((m) => m.status === "fail" && !m.advisory);
   const term = active?.status === "blocked" ? hitTerm(failing?.label) : null;
@@ -534,20 +544,41 @@ function LeftColumn({
             </span>
           </div>
           <div className="jstrip-facts">
-            {detail === null ? (
+            {detail.state === "reading" ? (
               <span>reading the verdicts…</span>
+            ) : detail.state === "failed" ? (
+              <span role="alert">couldn’t read the verdicts — the record is on Approve</span>
             ) : (
-              marks
-                .filter((m) => m.status !== "fail" || m.advisory)
+              // Hard fails FIRST, wearing ✗ — the gate that blocks is the one
+              // fact this strip must never drop (s98 dogfood: "would block"
+              // over a row of ✓ marks named every gate but the failing one).
+              [...marks]
+                .sort(
+                  (a, b) =>
+                    Number(b.status === "fail" && !b.advisory) -
+                    Number(a.status === "fail" && !a.advisory),
+                )
                 .slice(0, 3)
-                .map((m) => (
-                  <span key={m.gate} title={m.title}>
-                    <span style={{ color: m.status === "pass" ? "var(--ok)" : "var(--n-800)" }}>
-                      {m.status === "pass" ? "✓" : "·"}
-                    </span>{" "}
-                    {m.label}
-                  </span>
-                ))
+                .map((m) => {
+                  const hardFail = m.status === "fail" && !m.advisory;
+                  return (
+                    <span key={m.gate} title={m.title}>
+                      <span
+                        style={{
+                          color: hardFail
+                            ? "var(--err)"
+                            : m.status === "pass"
+                              ? "var(--ok)"
+                              : "var(--n-800)",
+                        }}
+                      >
+                        {hardFail ? "✗" : m.status === "pass" ? "✓" : "·"}
+                      </span>{" "}
+                      {/* The bare gate word — the strip's top row states the failing line. */}
+                      {hardFail ? m.word : m.label}
+                    </span>
+                  );
+                })
             )}
             <span className="t-label" style={{ fontSize: 11 }}>
               it gates — it never rewrites

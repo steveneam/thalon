@@ -81,6 +81,15 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
   // is DERIVED from a stale stamp, so the effect never sets state synchronously
   // and a changed ask can never show the previous ask's verdicts.
   const [planRead, setPlanRead] = useState<{ key: string; state: PlanState } | null>(null);
+  // The FULL destination roster from the defaults read (asked === null) —
+  // chips render from it so an excluded platform stays visible and clickable.
+  // The plan itself honestly narrows to the ask; without this memory the
+  // narrowed plan drops the excluded chip and exclusion becomes one-way
+  // (found live in the s98 dogfood).
+  const [roster, setRoster] = useState<{
+    key: string;
+    platforms: CreatePlanWire["platforms"];
+  } | null>(null);
   const [briefOpen, setBriefOpen] = useState(false);
   const [run, setRun] = useState<RunState>({ state: "idle" });
 
@@ -95,6 +104,7 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
   // The chips' verdicts re-derive whenever the ask changes. The prompt does
   // not steer platform capability, so it does not retrigger the read.
   const planKey = JSON.stringify([family, asked, context?.captureId ?? null]);
+  const rosterKey = JSON.stringify([family, context?.captureId ?? null]);
   useEffect(() => {
     let cancelled = false;
     const b: CreateBriefWire = { family, mode: "wizard" };
@@ -102,7 +112,10 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
     if (asked !== null) b.platforms = asked;
     fetchCreatePlan(b)
       .then((plan) => {
-        if (!cancelled) setPlanRead({ key: planKey, state: { status: "success", plan } });
+        if (cancelled) return;
+        setPlanRead({ key: planKey, state: { status: "success", plan } });
+        // Only the defaults read carries every destination — that list is the roster.
+        if (asked === null) setRoster({ key: rosterKey, platforms: plan.platforms });
       })
       .catch((err) => {
         if (!cancelled)
@@ -114,7 +127,7 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
     return () => {
       cancelled = true;
     };
-  }, [family, asked, context, planKey]);
+  }, [family, asked, context, planKey, rosterKey]);
 
   const planState: PlanState =
     planRead && planRead.key === planKey ? planRead.state : { status: "loading" };
@@ -134,8 +147,14 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
     }
   }
 
+  // Chips draw from the roster so exclusion stays reversible; each still-asked
+  // chip wears the CURRENT plan's fresh verdict, an excluded one its last known.
+  const chipList = (roster && roster.key === rosterKey ? roster.platforms : plan?.platforms)?.map(
+    (p) => plan?.platforms.find((q) => q.platform === p.platform) ?? p,
+  );
+
   function togglePlatform(name: string) {
-    const visible = plan?.platforms.map((p) => p.platform) ?? [];
+    const visible = chipList?.map((p) => p.platform) ?? [];
     const current = asked ?? visible;
     setAsked(current.includes(name) ? current.filter((p) => p !== name) : [...current, name]);
   }
@@ -159,7 +178,7 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
   }
 
   const platChips = (interactive: boolean) =>
-    plan?.platforms.map((p) => {
+    chipList?.map((p) => {
       const off = asked !== null && !asked.includes(p.platform);
       const cls = `plat-chip${p.admitted ? "" : " warn"}${off ? " off" : ""}`;
       const cap = off ? "excluded" : p.admitted ? "✓ ready" : capWord(p.refusal?.code ?? "");
@@ -222,6 +241,9 @@ export function WizardSurface({ initialPrompt, initialFamily, context }: WizardS
                       className={family === f.id ? "seg-opt on" : "seg-opt"}
                       onClick={() => {
                         setFamily(f.id);
+                        // A new family means new routing defaults — the old
+                        // family's exclusions must not silently narrow it.
+                        setAsked(null);
                         setRun({ state: "idle" });
                       }}
                     >

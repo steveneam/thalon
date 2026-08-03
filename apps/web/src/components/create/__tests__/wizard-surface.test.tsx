@@ -131,6 +131,39 @@ describe("Create wizard (exact-mock build — the s90b amended sheet)", () => {
     expect(last.platforms).toEqual(["instagram", "facebook"]);
   });
 
+  // s98 dogfood: the real plan route derives verdicts ONLY for the asked
+  // platforms, so the narrowed re-read dropped the excluded chip and exclusion
+  // became one-way. The mock narrows the same way the route does — the chip
+  // must stay on the sheet, and the same click puts it back.
+  it("an excluded platform stays on the sheet and one click puts it back", async () => {
+    server.use(
+      http.post("/api/create/plan", async ({ request }) => {
+        const body = (await request.json()) as { platforms?: string[] };
+        const platforms = body.platforms
+          ? PLAN.platforms.filter((p) => body.platforms!.includes(p.platform))
+          : PLAN.platforms;
+        return HttpResponse.json({ plan: { ...PLAN, platforms } });
+      }),
+    );
+    const user = userEvent.setup();
+    const { container } = render(<WizardSurface {...BASE} context={CONTEXT} />);
+
+    await waitFor(() => expect(container.querySelectorAll(".plat-chip").length).toBe(3));
+    await user.click(screen.getByRole("button", { name: /Platforms/ }));
+    await user.click(screen.getByRole("button", { name: /Instagram/ }));
+
+    const excluded = await screen.findByRole("button", { name: /Instagram/ });
+    expect(within(excluded).getByText("excluded")).toBeInTheDocument();
+    expect(excluded).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(excluded);
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("button", { name: /Instagram/ })).getByText("✓ ready"),
+      ).toBeInTheDocument(),
+    );
+  });
+
   it("Review plan renders refusals verbatim, the real gates, and the cost with its grammar", async () => {
     server.use(planHandler());
     const user = userEvent.setup();

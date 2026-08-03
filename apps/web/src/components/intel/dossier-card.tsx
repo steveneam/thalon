@@ -115,7 +115,9 @@ export function DossierCard({
 
         <div style={{ display: "flex", gap: 16 }}>
           <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-            <h2 className="dossier-h">{card.headline}</h2>
+            <h2 className="dossier-h" title={card.fullText}>
+              {card.headline}
+            </h2>
             <div className="prov">
               <span style={{ fontWeight: 500, color: "var(--n-1000)" }}>@{card.prov.account}</span>
               {card.prov.views && (

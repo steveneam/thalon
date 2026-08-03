@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   bandOf,
+  HEADLINE_MAX,
+  headlineOf,
   parseReason,
   reasonViews,
   sourceLabel,
@@ -102,6 +104,32 @@ describe("intel view model (the sheet's own rows, built from the wire)", () => {
     expect(view.thumbLabel).toBe("post media");
     // A bluesky item is not video-native, so the suggested exit is the post door.
     expect(view.suggested.family).toBe("post");
+  });
+
+  // Founder report s99: a live YouTube card wore its whole title+description+
+  // transcript blob as the h2. The headline is the first line — the TrendItem
+  // contract's title position — and the verbatim text demotes to hover truth.
+  it("never wears the whole transcript as the headline — first line only, verbatim in the hover", () => {
+    const card = fixtureTrendCards.find((c) => c.id === "demo-trend-3")!;
+    const blob = "Why the US Is Restricting AI\nDiscover how the landscape is shifting.\n" + "spoken hook ".repeat(150);
+    const view = toDossierView({ ...card, text: blob }, NOW);
+    expect(view.headline).toBe("Why the US Is Restricting AI");
+    expect(view.fullText).toBe(blob);
+    const rising = toRisingView({ ...card, text: blob }, NOW);
+    expect(rising.text).toBe("Why the US Is Restricting AI");
+    expect(rising.fullText).toBe(blob);
+  });
+
+  it("cuts a single-line post at a word boundary and keeps a short one whole", () => {
+    const long = "word ".repeat(60).trim();
+    const cut = headlineOf(long);
+    expect(cut.length).toBeLessThanOrEqual(HEADLINE_MAX + 1);
+    expect(cut.endsWith("…")).toBe(true);
+    expect(cut).not.toContain("wor…"); // word boundary, never mid-word
+    const card = fixtureTrendCards.find((c) => c.id === "demo-trend-3")!;
+    const short = toDossierView(card, NOW);
+    expect(short.headline).toBe(card.text);
+    expect(short.fullText).toBeUndefined();
   });
 
   it("builds the rising row's mono data stamp, and drops what the source didn't report", () => {

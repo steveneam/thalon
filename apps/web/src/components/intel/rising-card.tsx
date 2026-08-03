@@ -57,6 +57,7 @@ export function RisingCard({
             <button
               type="button"
               className="row-open"
+              title={row.fullText}
               onFocus={() => onSelect?.(row.id)}
               onClick={() => onOpen?.(row.id)}
             >

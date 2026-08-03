@@ -407,6 +407,8 @@ const ADVISORY_GATES = new Set(["discoverability", "seo_aeo"]);
 
 export interface CheckMark {
   gate: string;
+  /** The gate's bare display word ("Grounding — screen") — no failing line appended. */
+  word: string;
   label: string;
   status: JudgeGateStatus;
   /** Advisory gates warn instead of failing — the sheet's ◐ in amber. */
@@ -496,9 +498,11 @@ export function checkMarks(draft: GridDraft, results: JudgeResultWithEvidence[])
     const status: JudgeGateStatus = gates[gate] ?? ((result?.verdict as JudgeGateStatus) ?? "pending");
     const advisory = ADVISORY_GATES.has(gate);
     const failing = status === "fail" ? firstFailingLine(result) : null;
-    const label = checkLabel(gate) + (failing ? ` — ${failing}` : "");
+    const word = checkLabel(gate);
+    const label = word + (failing ? ` — ${failing}` : "");
     return {
       gate,
+      word,
       label,
       status,
       advisory,

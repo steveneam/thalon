@@ -56,6 +56,8 @@ export interface DossierView {
   /** "rising 3h · catchable" — only rising/hot cards earn it. */
   freshness: string | null;
   headline: string;
+  /** The item's verbatim text when the headline cut it (hover truth); absent when the headline IS the whole text. */
+  fullText?: string;
   prov: {
     account: string;
     /** "24.6k views" — absent when the source reports no view count. */
@@ -84,6 +86,8 @@ export interface RisingView {
   media: MediaResolution;
   thumbLabel: string;
   text: string;
+  /** The item's verbatim text when the row's text cut it (hover truth); absent when the text is whole. */
+  fullText?: string;
   /** "YouTube · 12.1k · 5h ago" — the row's mono data stamp. */
   data: string;
   url?: string;
@@ -173,6 +177,28 @@ export function reasonViews(reasons: readonly string[]): ReasonView[] {
     }));
 }
 
+/**
+ * The headline is the item's TITLE, never its whole text. The TrendItem
+ * contract puts the title on the first line (video sources hand over
+ * `title\ndescription`, transcript hook after — trend/trend-source.ts), so
+ * everything past the first line break is body; a single-line post that runs
+ * past what the sheet's h2 wears (~two lines at 72ch) cuts at a word
+ * boundary. Nothing is lost: the verbatim text rides the hover title when
+ * cut, and the provenance link opens the original.
+ */
+export const HEADLINE_MAX = 160;
+export function headlineOf(text: string): string {
+  const first =
+    text
+      .split("\n")
+      .map((line) => line.trim())
+      .find((line) => line.length > 0) ?? "";
+  if (first.length <= HEADLINE_MAX) return first;
+  const cut = first.slice(0, HEADLINE_MAX);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > HEADLINE_MAX / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
 /** The striped placeholder's legend, in the sheet's own vocabulary. */
 function thumbLabel(card: TrendCard, big: boolean): string {
   if (card.source === "youtube") return "yt thumb";
@@ -182,6 +208,7 @@ function thumbLabel(card: TrendCard, big: boolean): string {
 export function toDossierView(card: TrendCard, now: number = Date.now()): DossierView {
   const views = typeof card.metrics.views === "number" ? card.metrics.views : null;
   const suggested = suggestedExit(card);
+  const headline = headlineOf(card.text);
   return {
     id: card.id,
     band: bandOf(card.score),
@@ -189,7 +216,8 @@ export function toDossierView(card: TrendCard, now: number = Date.now()): Dossie
     scoreTitle: `rank score ${card.score.toFixed(2)} of 1 — ${card.areaName}`,
     isOutlier: card.isOutlier,
     freshness: freshnessStamp(card, now),
-    headline: card.text,
+    headline,
+    ...(headline === card.text.trim() ? {} : { fullText: card.text }),
     prov: {
       account: card.account,
       views: views === null ? null : `${compactCount(views)} views`,
@@ -211,12 +239,14 @@ export function toDossierView(card: TrendCard, now: number = Date.now()): Dossie
 export function toRisingView(card: TrendCard, now: number = Date.now()): RisingView {
   const views = typeof card.metrics.views === "number" ? card.metrics.views : null;
   const band = bandOf(card.score);
+  const text = headlineOf(card.text);
   return {
     id: card.id,
     band: { word: band.word, pill: band.pill },
     media: trendCardMedia(card),
     thumbLabel: thumbLabel(card, false),
-    text: card.text,
+    text,
+    ...(text === card.text.trim() ? {} : { fullText: card.text }),
     data: [sourceLabel(card.source), views === null ? null : compactCount(views), timeAgo(card.publishedAt, now)]
       .filter((part): part is string => part !== null)
       .join(" · "),

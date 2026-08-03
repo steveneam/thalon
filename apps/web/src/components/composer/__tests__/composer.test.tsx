@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -151,6 +151,30 @@ describe("ComposerSurface", () => {
     const hit = await screen.findByText("guaranteed", { selector: ".hit" });
     expect(hit).toBeInTheDocument();
     expect(screen.getByText("it gates — it never rewrites")).toBeInTheDocument();
+  });
+
+  // s98 dogfood: "would block" rode over a row of ✓ marks that named every
+  // gate but the failing one — WHICH hard gate failed hid behind "details ▸".
+  it("the verdict strip names the failing gate FIRST, wearing ✗", async () => {
+    const { container } = render(<ComposerSurface runId="cr1" />);
+    await screen.findByText("would block");
+
+    await waitFor(() => {
+      const facts = container.querySelectorAll(".jstrip-facts > span[title]");
+      expect(facts.length).toBeGreaterThan(0);
+      // The blocking gate is the first fact, by its bare word.
+      expect(facts[0]?.textContent).toContain("✗");
+      expect(facts[0]?.textContent).toContain("Denylist");
+    });
+  });
+
+  it("a failed verdict read names itself — never an eternal “reading…”", async () => {
+    server.use(http.get("/api/drafts/:draftId", () => HttpResponse.error()));
+    const { container } = render(<ComposerSurface runId="cr1" />);
+    await screen.findByText("would block");
+
+    await screen.findByText("couldn’t read the verdicts — the record is on Approve");
+    expect(container.textContent).not.toContain("reading the verdicts…");
   });
 
   it("the fit band carries each variant's own counter with its reason verbatim", async () => {
