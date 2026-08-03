@@ -192,6 +192,24 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s97 — **CLOSED** (boot 2026-08-03 "gogogo"; zero credit spend, zero posts, founder-hands-free)
+
+**Three boundaries, each committed on its own green: the `.data` split-brain
+CLOSED as a workspace ratchet (`68d9873`) → the V3 script-first gate DECIDED
+(`0731366`) → V7 render honesty BUILT (`1ddcf2c`).** Wrap verify: exit 0,
+**3309 passed / 9 skipped**.
+
+| track | outcome |
+|---|---|
+| One-root ratchet (`68d9873`) | **The s96 defect candidate EXECUTED as chartered.** Relative `THALON_DATA_DIR` now anchors at the WORKSPACE root (walk-up to `.git`/workspaces `package.json` in `packages/platform/src/env.ts`; absolute values — Docker `/data`, hermetic tmpdirs — pass through). The defect had bitten THREE times (s79 dangling llm-cache pointers · s96's 66 orphaned posters · the sweeper writing sweeps the app never saw). Three stores merged into repo `.data` (app 171 objects in; ONE divergent embedding deliberately dropped so the s79 heal path re-embeds it as a miss); both stale pins retired (eval `useWebAppDataDir` ×5 callers + the backfill script's app-root pin). Ratchets: `packages/platform/src/__tests__/data-root.test.ts` (cwd-independence, every verify) + a doctor `data-root` row that flags any REGROWN stray store — which found a third store (`packages/engine/.data`) on its very first run. Browser-passed: Overview posters, the 9-take Dossier strip, Schedule — all 200 from the merged root. |
+| V3 gate (`0731366`) | **DECIDED — HOLD; script-first NOT adopted; timeline-primary stands.** Both criteria answered no on repo evidence: (1) a beat edit round-trip CONTAINS the timeline path's tail (save → local render → judge) and adds a metered Propose + vendor mint ahead of it — where text expresses what the timeline cannot, the copilot ask + s95b re-brief door already carry it, metered and secondary; (2) the s78 audit's 19 job failures were closed by TIMELINE-side work (verified in code: undo spine · beforeunload guard · parentCutId back-door · live chips · the s96 verbs), and the remaining gaps are exactly "what text cannot express". **Consequence: `beats→scene re-render` is NOT built.** Revisit trigger recorded: the re-brief door dominating dogfood usage. Record = video-arc spec §Phase 4a; Descript ledger row flipped. |
+| V7 (`1ddcf2c`) | **BUILT — real elapsed honesty.** Live `Rendering… 1m 04s` on the primary + preview buttons (from the job's recorded clocks, refreshed by the poll that read them — never a ticking estimate); a finished render names its real duration in the notice band; a failed one names how long it ran before the verbatim error; `runCutRender` stamps measured `elapsedMs` onto the `video_cut.rendered` event (absent when unmeasured, never invented); `elapsedWords` rolls to an h+m tier. V7 flipped to [BUILT s97 — HOLDS] in the spec. |
+
+**DEFERRED, stated:** **V9** — the render-gate pass across the four surfaces
+(screenshot-vs-sheet + the refused/empty/loading state matrix) is the video
+arc's ONE remaining item. **B-create.5 dogfood** unchanged (own GO + spend
+statement). **The retire/restore column** stays the flagged window ask.
+
 ## Sprint 9 / s96 — **CLOSED** (boot 2026-08-03 "gogogo"; wrap = this session's verify)
 
 **Phase 3 ran WHOLE, lead-direct, in the stamped order, founder-hands-free

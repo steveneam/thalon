@@ -106,8 +106,14 @@ V6. [SHIPPED s50 as B-ve.5 — HOLDS likewise] The aspect lens exists (derive do
     measured crop/pan handles, lineage stamps); vendor reframe stays rejected
     (225cr vs 0cr, founder ruling). Remaining aspect work is whatever the passes
     find against the sheets — the engine is built.
-V7. Render progress and durations are honest (Profound's checklist pattern; real
-    elapsed, no invented ETAs); a returned-to render names its state in words.
+V7. [BUILT s97 — HOLDS as a regression bar] Render progress and durations are
+    honest (Profound's checklist pattern; real elapsed, no invented ETAs); a
+    returned-to render names its state in words. Built across s82/s96/s97:
+    A4 adoption + in-flight words (s82), Overview/Dossier return badges (s96),
+    and s97's elapsed honesty — live `Rendering… 1m 04s` from the job's
+    recorded clocks, the finished render naming its real duration, the failed
+    one naming how long it ran, and `runCutRender`'s measured `elapsedMs` on
+    the `video_cut.rendered` event (absent when unmeasured, never invented).
 V8. The density doctrine (Create spec §Density) applies: inspector detail in
     popovers, preview popouts, tooltips for rationale; one open tooltip per sheet.
 V9. All four surfaces pass the render gate against their sheets; drift is a defect.
@@ -327,7 +333,10 @@ decision session (criteria already in V3), then pass-3 states (V7/V9).
 > onward) that operators reach for text-directed edits beyond the copilot
 > ask, i.e. the re-brief door coming to dominate editor usage.
 >
-> **Remaining in this arc: Phase 4b — pass-3 states (V7/V9).**
+> **Phase 4b, first half BUILT s97 (`1ddcf2c`): V7 elapsed honesty** — see
+> the V7 requirement's own record. **Remaining in this arc: V9** — the
+> render-gate pass across the four surfaces (screenshot-vs-sheet + the
+> refused/empty/loading state matrix); drift is a defect.
 
 **Interleave:** B-create.5 dogfood (the first real Create run) stays its own
 gate and can land before, between or after these — it needs a spend statement
