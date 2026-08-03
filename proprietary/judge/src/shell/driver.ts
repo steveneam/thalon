@@ -98,10 +98,16 @@ export function gatewayJudgeDriver(): JudgeModelDriver {
     // only, selected purely by runtime config. Same versioned prompt file,
     // same Zod boundary in ../validate-shell-output.ts.
     if (isClaudeCliModel(modelId)) {
+      // Field order is generation order: the model emits tokens in the shape
+      // it is told, so `verdict` must come LAST — after the per-claim
+      // analysis it is supposed to summarize. With verdict first, the model
+      // commits before weighing a single claim; the s98 dogfood draft
+      // 952331cc recorded all-claims-supported + verdict:fail three
+      // consecutive times under the old order.
       const out = await runClaudeCliJson({
         model: modelId,
         system,
-        prompt: `${prompt}\n\nReturn JSON: {"verdict": "pass" | "fail", "claims": [{"claim": string, "supported": boolean, "chunkRef"?: string}], "notes"?: string}`,
+        prompt: `${prompt}\n\nReturn JSON: {"claims": [{"claim": string, "supported": boolean, "chunkRef"?: string}], "notes"?: string, "verdict": "pass" | "fail"}\nWeigh every claim first; the verdict comes last and must follow from the claims.`,
       });
       return {
         candidate: parseCandidateJson(out.text),

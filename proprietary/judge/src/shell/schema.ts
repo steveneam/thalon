@@ -14,10 +14,14 @@ export const shellClaimSchema = z.object({
   chunkRef: z.string().optional(),
 });
 
+// Property order here is generation order for structured output
+// (`generateObject` serializes the JSON schema in definition order), so
+// `verdict` stays LAST — the model must weigh the claims before it rules.
+// Validation itself is order-agnostic; see driver.ts for the incident record.
 export const shellJudgeOutputSchema = z.object({
-  verdict: z.enum(["pass", "fail"]),
   claims: z.array(shellClaimSchema).default([]),
   notes: z.string().optional(),
+  verdict: z.enum(["pass", "fail"]),
 });
 
 export type ShellClaim = z.infer<typeof shellClaimSchema>;
