@@ -71,10 +71,19 @@ type Drag =
   | { kind: "music"; startOffset: number; startClientX: number; base: Edl }
   | { kind: "playhead" };
 
-/** Percentage widths for the beat lane — the sheet's own flex-and-percent lane. */
+/**
+ * Percentage widths for the beat lane — the sheet's own flex-and-percent lane.
+ * Denominated on the CUT's duration, the same axis the ruler, playhead,
+ * overlay and the other two lanes draw against (s99: the beat lane was
+ * normalized to its own sum, so an endcard tail put every beat edge on a
+ * different clock than the playhead over it). When an inconsistent EDL's
+ * beats outrun the declared duration, the longer of the two keeps the lane
+ * from overflowing — both lanes then share that axis.
+ */
 export function beatWidths(edl: Edl): number[] {
   const { beats } = splitLane(edl);
-  const total = beats.reduce((sum, clip) => sum + clip.duration, 0);
+  const beatsTotal = beats.reduce((sum, clip) => sum + clip.duration, 0);
+  const total = Math.max(edl.output.duration, beatsTotal);
   if (total <= 0) return beats.map(() => 0);
   return beats.map((clip) => (clip.duration / total) * 100);
 }
@@ -103,6 +112,7 @@ export function EditorTimeline({
   selection,
   onSelect,
   onEdl,
+  onGestureEnd,
   playhead,
   onPlayhead,
   propBeats,
@@ -115,8 +125,14 @@ export function EditorTimeline({
   edl: Edl;
   selection: Selection;
   onSelect: (selection: Selection) => void;
-  /** The editor's single edit funnel — the dirty bit and attribution reset live there. */
-  onEdl: (fn: (edl: Edl) => Edl) => void;
+  /**
+   * The editor's single edit funnel — the dirty bit and attribution reset
+   * live there. `coalesce` marks one continuous gesture: same-key applies
+   * collapse into ONE history entry (s99 — a drag must not flood the spine).
+   */
+  onEdl: (fn: (edl: Edl) => Edl, coalesce?: string | null) => void;
+  /** Gesture over — the next same-key apply starts a fresh history entry. */
+  onGestureEnd?: () => void;
   /** Playhead position as a fraction of the cut, or null when it has never been placed. */
   playhead: number | null;
   onPlayhead: (fraction: number) => void;
@@ -163,18 +179,28 @@ export function EditorTimeline({
   const duration = edl.output.duration;
   const cue = edl.audio[0];
 
+  // A j/k (or any) beat pick stays visible — the zoomed lane scrolls the
+  // selected block into view (s99: a keyboard step could land off-screen).
+  useEffect(() => {
+    if (selection?.kind !== "beat") return;
+    trackRef.current
+      ?.querySelector(".blk.on")
+      ?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [selection]);
+
   // Esc cancels the active drag losslessly — restore the drag's base EDL.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const drag = dragRef.current;
       if (event.key !== "Escape" || drag === null || drag.kind === "playhead") return;
-      onEdl(() => drag.base);
+      onEdl(() => drag.base, "drag");
+      onGestureEnd?.();
       dragRef.current = null;
       setReadout(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onEdl]);
+  }, [onEdl, onGestureEnd]);
 
   /** Pointer x → seconds along the beat lane. */
   const secAt = (clientX: number): number => {
@@ -200,7 +226,7 @@ export function EditorTimeline({
       const target = reorderTargetFor(edl, drag.index, center);
       setReadout(`${beats[drag.index]?.name ?? ""} → slot ${target + 1}`);
       if (target !== drag.index) {
-        onEdl((current) => reorderBeat(current, drag.index, target));
+        onEdl((current) => reorderBeat(current, drag.index, target), "drag");
         dragRef.current = { ...drag, index: target };
         onSelect({ kind: "beat", index: target });
       }
@@ -210,7 +236,7 @@ export function EditorTimeline({
       const start = beatStarts(edl)[drag.index] ?? 0;
       const next = Math.max(0.1, quantize(snap(sec) - start));
       setReadout(`${beats[drag.index]?.name ?? ""} · ${next}s`);
-      onEdl((current) => trimBeat(current, drag.index, { duration: next }));
+      onEdl((current) => trimBeat(current, drag.index, { duration: next }), "drag");
       return;
     }
     if (drag.kind === "trim-start") {
@@ -218,7 +244,7 @@ export function EditorTimeline({
       const delta = quantize(snap(sec) - start);
       if (delta !== 0) {
         setReadout(`${beats[drag.index]?.name ?? ""} · in ${quantize((beats[drag.index]?.in ?? 0) + delta)}s`);
-        onEdl((current) => trimBeatStart(current, drag.index, delta));
+        onEdl((current) => trimBeatStart(current, drag.index, delta), "drag");
       }
       return;
     }
@@ -228,8 +254,9 @@ export function EditorTimeline({
       const span = line.fadeOut - line.fadeIn;
       const fadeIn = Math.max(0, snap(sec - drag.grabOffsetSec));
       setReadout(`“${line.text.slice(0, 24)}” · ${fadeIn}s → ${quantize(fadeIn + span)}s`);
-      onEdl((current) =>
-        patchCaptionLine(current, drag.line, { fadeIn, fadeOut: quantize(fadeIn + span) }),
+      onEdl(
+        (current) => patchCaptionLine(current, drag.line, { fadeIn, fadeOut: quantize(fadeIn + span) }),
+        "drag",
       );
       return;
     }
@@ -239,7 +266,7 @@ export function EditorTimeline({
     const perPx = rect && rect.width > 0 ? duration / rect.width : 0;
     const offset = Math.max(0, quantize(drag.startOffset + (drag.startClientX - event.clientX) * perPx));
     setReadout(`music offset ${offset}s`);
-    onEdl((current) => patchMusic(current, { offset }));
+    onEdl((current) => patchMusic(current, { offset }), "drag");
   };
 
   /*
@@ -377,6 +404,7 @@ export function EditorTimeline({
   };
 
   const endDrag = () => {
+    onGestureEnd?.();
     dragRef.current = null;
     setReadout(null);
   };
@@ -445,11 +473,17 @@ export function EditorTimeline({
         </span>
         <div style={{ flex: 1 }} />
         <div className="seg" role="group" aria-label="Timeline zoom">
+          {/* At a clamp the press ANSWERS instead of silently no-opping (s99). */}
           <button
             type="button"
             className="seg-opt"
             aria-label="Zoom out"
-            onClick={() => setZoom((z) => Math.max(1, z / 1.5))}
+            aria-disabled={zoom <= 1 || undefined}
+            onClick={() =>
+              zoom <= 1
+                ? onNotice("Already at fit — the timeline shows the whole cut.")
+                : setZoom((z) => Math.max(1, z / 1.5))
+            }
           >
             −
           </button>
@@ -464,7 +498,12 @@ export function EditorTimeline({
             type="button"
             className="seg-opt"
             aria-label="Zoom in"
-            onClick={() => setZoom((z) => Math.min(8, z * 1.5))}
+            aria-disabled={zoom >= 8 || undefined}
+            onClick={() =>
+              zoom >= 8
+                ? onNotice("At maximum zoom (8×) already.")
+                : setZoom((z) => Math.min(8, z * 1.5))
+            }
           >
             +
           </button>
@@ -651,7 +690,9 @@ export function EditorTimeline({
                 */
                 <button
                   type="button"
-                  className="as-text-btn"
+                  // The picked door wears the same act ring every other
+                  // selectable wears (s99: it was the one unmarked selection).
+                  className={selection?.kind === "music" ? "as-text-btn on" : "as-text-btn"}
                   aria-pressed={selection?.kind === "music"}
                   title="This cut has no music — choose a bed from the project's candidates"
                   onClick={() => onSelect({ kind: "music" })}

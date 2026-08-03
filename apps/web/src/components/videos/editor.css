@@ -257,6 +257,9 @@
  * its own, since the native disabled look no longer applies.
  */
 .editor-surface .seg-opt[aria-disabled="true"] { cursor: not-allowed; opacity: 0.55; }
+/* s99: the answered-refusal grammar dims at EVERY control that carries it. */
+.editor-surface .btn[aria-disabled="true"] { opacity: 0.55; }
+.editor-surface .lane-tr .as-text-btn.on { box-shadow: 0 0 0 1px var(--act); border-radius: 4px; }
 .editor-surface button.take:disabled { cursor: default; }
 .editor-surface button.take:hover:not(:disabled) .thumb-md { border-color: var(--act); }
 

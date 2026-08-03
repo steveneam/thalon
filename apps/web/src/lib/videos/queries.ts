@@ -88,6 +88,21 @@ export function lineageViewFor(
  * malformed one resolves to null too: the write doors validate, so
  * malformed means a legacy hand-write, and the surface stays quiet.
  */
+/**
+ * s99: the one-prompt runner stamps `meta.onePrompt` on the cut it creates —
+ * engine authorship on record BEFORE the attributed save door touches the
+ * row. The surface reads the stamp's presence so the attribution line can
+ * say "the one-prompt run" instead of "no attribution recorded".
+ */
+export function hasOnePromptStamp(meta: unknown): boolean {
+  return (
+    typeof meta === "object" &&
+    meta !== null &&
+    typeof (meta as { onePrompt?: unknown }).onePrompt === "object" &&
+    (meta as { onePrompt?: unknown }).onePrompt !== null
+  );
+}
+
 export function attributionOf(meta: unknown): VideoCutAttribution | null {
   const raw =
     typeof meta === "object" && meta !== null
@@ -215,6 +230,7 @@ export async function getProjectDetail(
           edl: summarizeEdl(c.edl),
           lineage: lineageViewFor(c.meta, cuts),
           attribution: attributionOf(c.meta),
+          onePrompt: hasOnePromptStamp(c.meta),
           createdAt: c.createdAt.toISOString(),
         }),
       )

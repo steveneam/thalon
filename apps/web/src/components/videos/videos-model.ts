@@ -234,14 +234,19 @@ export function attributionLine(
   // carrying its full EDL instead of a summary) and needs the same sentence.
   // Provenance that only the browse surface can state is provenance the
   // operator does not have where they act.
-  cut: Pick<CutView, "attribution" | "createdAt">,
+  cut: Pick<CutView, "attribution" | "createdAt"> & { onePrompt?: boolean },
   now: number,
 ): string {
   const when = cardDate(cut.createdAt, now);
   // Nullish, not `=== null`: a payload cached from a deploy before this
   // field existed arrives undefined, and an unknown author is still unknown.
   const attribution = cut.attribution ?? null;
-  if (attribution === null) return `no attribution recorded · ${when}`;
+  if (attribution === null)
+    // s99: an engine-made row wearing the runner's own stamp names the
+    // engine — "no attribution recorded" was false for one-prompt cuts.
+    return cut.onePrompt === true
+      ? `the one-prompt run · ${when}`
+      : `no attribution recorded · ${when}`;
   if (attribution.authoredBy === "operator") return `your edit · ${when}`;
   const proposal = attribution.proposal;
   const ask = proposal?.ask ? ` · “${proposal.ask}”` : "";

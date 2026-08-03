@@ -155,7 +155,11 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   const [cut, setCut] = useState<CutDetail | null>(null);
   const [edl, setEdl] = useState<Edl | null>(null);
   const [dirty, setDirty] = useState(false);
-  const [running, setRunning] = useState<EditorVerb | null>(null);
+  // A SET, not a slot (s99): render + propose legitimately overlap, and a
+  // second verb must not erase the first's busy cue or re-arm its door.
+  const [running, setRunning] = useState<ReadonlySet<EditorVerb>>(new Set());
+  /** The aspect a derive is in flight FOR — its seg button wears the word. */
+  const [derivingAspect, setDerivingAspect] = useState<VideoDeriveAspect | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [refusals, setRefusals] = useState<CaptionRefusal[]>([]);
   const [job, setJob] = useState<RenderJobView | null>(null);
@@ -274,7 +278,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             setStatus("ready");
             return;
           }
-          return fetchCutDetail(projectId, target).then((found) => {
+          const landCut = (found: CutDetail | null) => {
             setCut(found);
             setEdl(found?.edl ?? null);
             // The stored EDL is what Discard returns to; history starts empty.
@@ -302,6 +306,24 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 }
               })
               .catch(() => undefined);
+          };
+          return fetchCutDetail(projectId, target).then((found) => {
+            // A stale ?cut= (deleted, or another tenant's) must not dress a
+            // project WITH cuts in the empty state (s99): fall back to the
+            // project's own current cut and SAY so.
+            if (found !== null || cutId === null) {
+              landCut(found);
+              return;
+            }
+            const fallback = defaultCutFor(project.cuts)?.id ?? null;
+            if (fallback === null || fallback === target) {
+              landCut(null);
+              return;
+            }
+            setNotice(
+              "That cut is no longer on record — opened the project’s current cut instead.",
+            );
+            return fetchCutDetail(projectId, fallback).then(landCut);
           });
         })
         .catch(() => setStatus("error")),
@@ -382,19 +404,32 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
    * (a new edit after an undo forks: the redone-away branch is gone, which is
    * the standard and the only one that cannot surprise).
    */
-  const apply = useCallback((fn: (edl: Edl) => Edl) => {
+  // One continuous GESTURE is one history entry (s99): a drag's every
+  // pointermove and a caption's every keystroke arrive with the same coalesce
+  // key, and only the first pushes the spine — the rest just move the working
+  // copy. A keyless apply (a discrete edit) always pushes and ends any run.
+  const coalesceRef = useRef<string | null>(null);
+  const apply = useCallback((fn: (edl: Edl) => Edl, coalesce: string | null = null) => {
     setEdl((current) => {
       if (current === null) return current;
-      setPast((stack) => [...stack, current].slice(-UNDO_LIMIT));
-      setFuture([]);
+      if (coalesce === null || coalesceRef.current !== coalesce) {
+        setPast((stack) => [...stack, current].slice(-UNDO_LIMIT));
+        setFuture([]);
+      }
+      coalesceRef.current = coalesce;
       return fn(current);
     });
     setDirty(true);
     setPending(null);
   }, []);
+  /** Gesture over — the NEXT same-key apply starts a fresh history entry. */
+  const endGesture = useCallback(() => {
+    coalesceRef.current = null;
+  }, []);
 
   /** Step back one edit. Dirty stays true — undoing to base is not the same as saving. */
   const undo = useCallback(() => {
+    coalesceRef.current = null;
     setPast((stack) => {
       if (stack.length === 0) return stack;
       const previous = stack[stack.length - 1];
@@ -409,6 +444,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   }, []);
 
   const redo = useCallback(() => {
+    coalesceRef.current = null;
     setFuture((stack) => {
       if (stack.length === 0) return stack;
       const [next, ...rest] = stack;
@@ -422,15 +458,22 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     });
   }, []);
 
-  /** Back to the stored version — the whole working copy, in one step. */
+  /**
+   * Back to the stored version — the whole working copy, in one step. The
+   * discarded copy goes ONTO the spine (s99): ⌘Z brings it back, so the door
+   * is reversible instead of confirmed.
+   */
   const discard = useCallback(() => {
     if (baseEdl === null) return;
-    setEdl(baseEdl);
-    setPast([]);
+    setEdl((current) => {
+      if (current !== null) setPast((stack) => [...stack, current].slice(-UNDO_LIMIT));
+      return baseEdl;
+    });
     setFuture([]);
     setDirty(false);
     setPending(null);
     setSelection(null);
+    coalesceRef.current = null;
   }, [baseEdl]);
 
   /*
@@ -557,7 +600,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
    * "Working…" no longer stands in for a sentence about what is happening.
    */
   function run(verb: EditorVerb, work: () => Promise<string | null>) {
-    setRunning(verb);
+    // The same door cannot fire twice mid-flight — a re-press while busy is
+    // how a metered call doubles (s99).
+    if (running.has(verb)) return;
+    setRunning((current) => new Set(current).add(verb));
     setNotice(null);
     setRefusals([]);
     work()
@@ -565,7 +611,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       .catch((err: unknown) => setNotice(err instanceof Error ? err.message : "that door refused"))
       // Scoped to this verb: with two doors legitimately in flight at once, a
       // blind clear would hand the other one's control back early.
-      .finally(() => setRunning((current) => (current === verb ? null : current)));
+      .finally(() =>
+        setRunning((current) => {
+          const next = new Set(current);
+          next.delete(verb);
+          return next;
+        }),
+      );
   }
 
   /**
@@ -706,8 +758,11 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       router.push(`/app/videos/${projectId}/edit?cut=${existing.id}`);
       return;
     }
+    setDerivingAspect(aspect);
     run("derive", async () => {
-      const { cut: derived } = await deriveCut(projectId, cut.id, aspect);
+      const { cut: derived } = await deriveCut(projectId, cut.id, aspect).finally(() =>
+        setDerivingAspect(null),
+      );
       router.push(`/app/videos/${projectId}/edit?cut=${derived.id}`);
       return `Derived ${derived.name} for ${aspect} — measured seeds, 0 credits.`;
     });
@@ -894,7 +949,17 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               onClick: onApprove,
               disabled: false,
             }
-          : { label: "Approved", verb: null, onClick: () => {}, disabled: true };
+          : {
+              // Answered, never a silent dead primary (s99): the press states
+              // where this cut's story continues.
+              label: "Approved",
+              verb: null,
+              onClick: () =>
+                setNotice(
+                  `${cut.name} v${cut.version} is approved — the gate ran, its verdict is on the record, and the queue lives on Approve.`,
+                ),
+              disabled: false,
+            };
 
   /*
    * THE VERSIONING BAND's three verbs (A1/A2/A3) — everything they need to
@@ -936,6 +1001,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
 
   return (
     <div className="content editor-surface" style={{ gap: 12 }}>
+      {/* j/k beat steps are a silent context change for screen readers
+          without this (s99) — the same announcer grammar the overview keeps. */}
+      <p aria-live="polite" className="sr-only">
+        {selection?.kind === "beat" && beats[selection.index]
+          ? `Selected beat ${selection.index + 1} of ${beats.length} — ${beats[selection.index].name}`
+          : ""}
+      </p>
       {/* `position: relative` is the sheet's own header rule — the aspect ⓘ's
           tip anchors against this row (s95b). */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, position: "relative" }}>
@@ -984,7 +1056,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             className={currentAspect === "16:9" ? "seg-opt on" : "seg-opt"}
             aria-pressed={currentAspect === "16:9"}
             aria-disabled={masterDoor.refusal !== null || undefined}
-            disabled={running === "derive"}
+            disabled={running.has("derive")}
             title={masterDoor.refusal ?? "Back to the 16:9 master this cut was derived from"}
             onClick={() =>
               masterDoor.refusal !== null ? setNotice(masterDoor.refusal) : masterDoor.go()
@@ -1006,13 +1078,14 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 className={currentAspect === aspect ? "seg-opt on" : "seg-opt"}
                 aria-pressed={currentAspect === aspect}
                 aria-disabled={refusal !== null || undefined}
-                disabled={running === "derive"}
+                disabled={running.has("derive")}
                 title={
                   refusal ?? `Switch to the ${aspect} cut, or derive one (measured seeds, 0 credits)`
                 }
                 onClick={() => (refusal !== null ? setNotice(refusal) : onAspect(aspect))}
               >
-                {aspect}
+                {/* The in-flight derive says so AT its own control (s99). */}
+                {derivingAspect === aspect ? WORKING.derive : aspect}
               </button>
             );
           })}
@@ -1027,10 +1100,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           the aspect lens's own derive, local and 0 credits, so the sentence
           states THAT instead of a cost the verb does not have.
         */}
-        <button type="button" className="info" aria-label="What the aspect frames mean">
-          i
-        </button>
-        <div className="tip" style={{ right: 236, top: 36 }}>
+        {/* The tip anchors to its OWN trigger (s99): the old header-row offset
+            detached from the ⓘ the moment the dirty-state controls mounted. */}
+        <span style={{ position: "relative", display: "inline-flex", flex: "none" }}>
+          <button type="button" className="info" aria-label="What the aspect frames mean">
+            i
+          </button>
+          <div className="tip" style={{ right: 0, top: "calc(100% + 8px)" }}>
           <span className="tip-h">WHAT THE FRAMES MEAN</span>
           <div>
             <span className="fr" style={{ width: 16, height: 9 }} />
@@ -1048,7 +1124,8 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             One cut, three frames — switching opens this cut in that frame; a frame with no cut
             yet derives one (measured seeds, 0 credits).
           </div>
-        </div>
+          </div>
+        </span>
         {/*
           Undo is bound to ⌘/Ctrl+Z, but a keyboard-only undo is an invisible
           one — the operator who most needs it is the one who does not know it
@@ -1080,7 +1157,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             type="button"
             className="btn btn-quiet btn-sm"
             onClick={discard}
-            title={`Throw away every unsaved edit and return to the stored v${cut.version}`}
+            title={`Return to the stored v${cut.version} — ⌘Z brings the discarded copy back (s99: reversible, so no confirm)`}
           >
             Discard changes → v{cut.version}
           </button>
@@ -1095,10 +1172,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          disabled={(primary.verb !== null && running === primary.verb) || primary.disabled}
+          disabled={(primary.verb !== null && running.has(primary.verb)) || primary.disabled}
           onClick={primary.onClick}
         >
-          {primary.verb !== null && running === primary.verb
+          {primary.verb !== null && running.has(primary.verb)
             ? WORKING[primary.verb]
             : primary.label}
         </button>
@@ -1145,6 +1222,20 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 return;
               }
               if (chip.local === "9:16") {
+                // The chip is the aspect seg's OWN door and keeps its OWN
+                // refusals — pressed dirty it must not silently leave the
+                // working copy behind (s99: the one exit that bypassed both
+                // the dirty refusal and the exit guard).
+                const refusal =
+                  currentAspect === "9:16"
+                    ? "You are already editing the 9:16 cut."
+                    : dirty
+                      ? "Save first — a derive reads the STORED EDL, so it cannot see your unsaved edits."
+                      : null;
+                if (refusal !== null) {
+                  setNotice(refusal);
+                  return;
+                }
                 onAspect("9:16");
                 return;
               }
@@ -1175,7 +1266,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          disabled={running === "propose"}
+          disabled={running.has("propose")}
           aria-disabled={dirty || undefined}
           title={
             dirty
@@ -1190,7 +1281,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               : onPropose()
           }
         >
-          {running === "propose" ? (
+          {running.has("propose") ? (
             "Proposing…"
           ) : (
             <>
@@ -1220,7 +1311,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              disabled={running === "save"}
+              disabled={running.has("save")}
               onClick={() => {
                 const to = exitTo;
                 setExitTo(null);
@@ -1279,10 +1370,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              disabled={running === "delete"}
+              disabled={running.has("delete")}
               onClick={onDelete}
             >
-              {running === "delete" ? WORKING.delete : `Delete v${cut.version} permanently`}
+              {running.has("delete") ? WORKING.delete : `Delete v${cut.version} permanently`}
             </button>
             <button
               type="button"
@@ -1295,8 +1386,17 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         </div>
       )}
 
-      {(notice !== null || refusals.length > 0) && (
-        <div className={refusals.length > 0 ? "card notice-band refused" : "card notice-band"} role="status">
+      {/* A failed render must show even with nothing else to say — broken
+          must never look like idle (s99). */}
+      {(notice !== null || refusals.length > 0 || job?.status === "error") && (
+        <div
+          className={
+            refusals.length > 0 || job?.status === "error"
+              ? "card notice-band refused"
+              : "card notice-band"
+          }
+          role="status"
+        >
           {notice !== null && <span className="t-label">{notice}</span>}
           {/*
             s82 B3 (the third part): a refusal NAMES the line it refused, in the
@@ -1437,7 +1537,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                     <button
                       type="button"
                       className="btn btn-ghost btn-sm"
-                      disabled={running === "preview" || previewJob?.job.status === "running"}
+                      disabled={running.has("preview") || previewJob?.job.status === "running"}
                       onClick={onPreview}
                     >
                       {previewJob?.job.status === "running"
@@ -1484,13 +1584,25 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                   type="button"
                   className="btn btn-ghost btn-sm"
                   onClick={() => {
-                    // Deliberately NOT the manual funnel: Apply carries its
-                    // attribution, and the save door replay-verifies it.
-                    setEdl(proposal.preview);
+                    // NOT the manual funnel (apply() clears `pending`; Apply
+                    // must SET it) — but the spine still records the pre-apply
+                    // copy, so ⌘Z steps back over an applied proposal (s99).
+                    // Undo also clears the attribution; a redo re-lands the
+                    // body as an ordinary unattributed edit the save door's
+                    // replay check treats like any manual one.
+                    setEdl((current) => {
+                      if (current !== null)
+                        setPast((stack) => [...stack, current].slice(-UNDO_LIMIT));
+                      return proposal.preview;
+                    });
+                    setFuture([]);
+                    coalesceRef.current = null;
                     setDirty(true);
                     setPending(proposal.attribution);
                     setProposal(null);
-                    setNotice("Applied to the working copy — Save records it as agent-authored.");
+                    setNotice(
+                      "Applied to the working copy — Save records it as agent-authored; ⌘Z steps back over it.",
+                    );
                   }}
                 >
                   Apply
@@ -1533,10 +1645,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
-                  disabled={running === "dismiss" || rejectReason.trim() === ""}
+                  disabled={running.has("dismiss") || rejectReason.trim() === ""}
                   onClick={onDismissProposal}
                 >
-                  Record the correction
+                  {running.has("dismiss") ? WORKING.dismiss : "Record the correction"}
                 </button>
               </div>
             )}
@@ -1546,6 +1658,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               selection={selection}
               onSelect={setSelection}
               onEdl={apply}
+              onGestureEnd={endGesture}
               playhead={playhead}
               onPlayhead={(fraction) => {
                 setPlayhead(fraction);
@@ -1787,10 +1900,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
-                  disabled={running === "save" || variantName.trim() === ""}
+                  disabled={running.has("save") || variantName.trim() === ""}
                   onClick={() => onSave(variantName)}
                 >
-                  {running === "save"
+                  {running.has("save")
                     ? WORKING.save
                     : `Save as ${variantName.trim() || "…"} v${nextVersionFor(
                         detail.cuts,
@@ -1936,7 +2049,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                     aria-label={`Re-brief ${selectedClip.name} for a retake — fills the copilot ask; the mint spends vendor credits`}
                     title="Fills the copilot ask with a retake brief for this beat — Propose then spends a metered call; the mint itself spends vendor credits"
                     onClick={() => {
-                      setAsk(`Retake ${selectedClip.name}: `);
+                      // APPEND like the chips row — a composed ask is never
+                      // thrown away (s99: the one overwrite left).
+                      setAsk((current) =>
+                        current.trim() === ""
+                          ? `Retake ${selectedClip.name}: `
+                          : `${current.trim()}; Retake ${selectedClip.name}: `,
+                      );
                       askRef.current?.focus();
                     }}
                   >
@@ -1967,6 +2086,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
             {beats.map((clip, i) => {
               const keeper = keeperRefs.has(clip.source.ref);
               const reject = rejectRefs.has(clip.source.ref);
+              // The reject's reason states itself AT the mark (s99): the strip
+              // only shows slot-MATES, so "the strip says why" was false for
+              // the in-cut take itself.
+              const rejectWhy = reject
+                ? (detail.takes.find((t) => t.ref === clip.source.ref)?.reason ??
+                  "no reason recorded")
+                : null;
               return (
                 <button
                   key={`${clip.name}-${i}`}
@@ -1975,6 +2101,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                     selection?.kind === "beat" && selection.index === i ? "beat-row on" : "beat-row"
                   }
                   aria-pressed={selection?.kind === "beat" && selection.index === i}
+                  aria-label={`Beat ${i + 1} — ${clip.name}, ${timecode(clip.duration)}${
+                    keeper
+                      ? ", rides a keeper take"
+                      : reject
+                        ? `, rides a rejected take: ${rejectWhy}`
+                        : ""
+                  }`}
                   onClick={() => setSelection({ kind: "beat", index: i })}
                 >
                   {/* s95/V2 — the rail row wears its beat's frame too; no
@@ -1997,7 +2130,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                       keeper
                         ? "this beat rides a keeper take"
                         : reject
-                          ? "this beat rides a REJECTED take — its reason is in the takes strip"
+                          ? `this beat rides a REJECTED take — ${rejectWhy}`
                           : "this source has no take row (a cut layer or an unregistered file)"
                     }
                   >
@@ -2009,8 +2142,8 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
           </div>
           <div style={{ padding: "10px 14px", borderTop: "1px solid var(--n-400)" }}>
             <span className="t-label">
-              Every take’s reason is on record · a beat marked ! rides a reject, and the strip says
-              why
+              Every take’s reason is on record · a beat marked ! rides a reject — the mark itself
+              says why
             </span>
           </div>
         </div>

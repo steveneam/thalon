@@ -68,7 +68,7 @@ export function EditorInspector({
   takes: TakeView[];
   selection: Exclude<Selection, null>;
   playable: boolean;
-  onEdl: (fn: (edl: Edl) => Edl) => void;
+  onEdl: (fn: (edl: Edl) => Edl, coalesce?: string | null) => void;
   onSelect: (selection: Selection) => void;
   onClose: () => void;
 }) {
@@ -162,7 +162,7 @@ function BeatFields({
   edl: Edl;
   index: number;
   playable: boolean;
-  onEdl: (fn: (edl: Edl) => Edl) => void;
+  onEdl: (fn: (edl: Edl) => Edl, coalesce?: string | null) => void;
   onSelect: (selection: Selection) => void;
 }) {
   const { beats } = splitLane(edl);
@@ -273,7 +273,7 @@ function CaptionFields({
 }: {
   edl: Edl;
   index: number;
-  onEdl: (fn: (edl: Edl) => Edl) => void;
+  onEdl: (fn: (edl: Edl) => Edl, coalesce?: string | null) => void;
   onSelect: (selection: Selection) => void;
 }) {
   const line = edl.captions?.lines[index];
@@ -285,8 +285,14 @@ function CaptionFields({
           text
           <input
             value={line.text}
+            // One typing burst = one history entry (s99): per-keystroke pushes
+            // evicted real edits off the bounded spine. Any discrete edit or
+            // an undo starts the next burst fresh.
             onChange={(event) =>
-              onEdl((current) => patchCaptionLine(current, index, { text: event.target.value }))
+              onEdl(
+                (current) => patchCaptionLine(current, index, { text: event.target.value }),
+                `caption-text:${index}`,
+              )
             }
           />
         </label>
@@ -375,7 +381,7 @@ function BedPicker({
   projectId: string;
   takes: TakeView[];
   currentRef: string | null;
-  onEdl: (fn: (edl: Edl) => Edl) => void;
+  onEdl: (fn: (edl: Edl) => Edl, coalesce?: string | null) => void;
 }) {
   const candidates = musicCandidatesFor(takes);
   if (candidates.length === 0) {
@@ -485,7 +491,7 @@ function MusicFields({
   edl: Edl;
   takes: TakeView[];
   playable: boolean;
-  onEdl: (fn: (edl: Edl) => Edl) => void;
+  onEdl: (fn: (edl: Edl) => Edl, coalesce?: string | null) => void;
 }) {
   /*
    * THE REMOVED TAIL IS HELD, NOT DESTROYED (s82 B1, `medium` R-lens).
@@ -865,6 +871,35 @@ function Reframe({
     onPatch(dragCropAxis(crop, axis, which, clampOrigin(value, size, bound), bound));
   };
 
+  // s99: role="slider" promises keys — arrows nudge the window (Shift ×5),
+  // the same clamped per-axis patch the pointer drag lands.
+  const nudge = (which: "start" | "end") => (event: React.KeyboardEvent) => {
+    if (hasExpression || !dims) return;
+    const step = event.shiftKey ? 40 : 8;
+    const dx = event.key === "ArrowLeft" ? -step : event.key === "ArrowRight" ? step : 0;
+    const dy = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
+    if (dx === 0 && dy === 0) return;
+    event.preventDefault();
+    let next = crop;
+    if (dx !== 0)
+      next = dragCropAxis(
+        next,
+        "x",
+        which,
+        clampOrigin((panEndpoint(next.x, which) ?? 0) + dx, next.width, dims.width),
+        dims.width,
+      );
+    if (dy !== 0)
+      next = dragCropAxis(
+        next,
+        "y",
+        which,
+        clampOrigin((panEndpoint(next.y, which) ?? 0) + dy, next.height, dims.height),
+        dims.height,
+      );
+    onPatch(next);
+  };
+
   const startStyle = rectStyle("start");
   const endStyle = hasPanAxis ? rectStyle("end") : null;
 
@@ -906,6 +941,7 @@ function Reframe({
                 }}
                 onPointerMove={moveDrag}
                 onPointerUp={() => (dragRef.current = null)}
+                onKeyDown={nudge("start")}
               />
             )}
             {endStyle && (
@@ -924,6 +960,7 @@ function Reframe({
                 }}
                 onPointerMove={moveDrag}
                 onPointerUp={() => (dragRef.current = null)}
+                onKeyDown={nudge("end")}
               />
             )}
           </div>

@@ -266,11 +266,13 @@ describe("VideoEditor (exact-mock rebuild — Videos.dc.html, step 2)", () => {
     await user.type(duration, "3");
     await user.tab();
 
-    // The lane re-proportions from the EDL, and the primary button becomes Save.
+    // The lane re-proportions from the EDL — s99: on the CUT's 12s axis (the
+    // ruler/playhead's own), so the trimmed tail reads as honest empty lane
+    // rather than the beats silently stretching onto a different clock.
     await waitFor(() =>
       expect(
         Array.from(container.querySelectorAll<HTMLElement>(".lane-tr .blk")).map((b) => b.style.width),
-      ).toEqual([`${(3 / 9) * 100}%`, `${(6 / 9) * 100}%`]),
+      ).toEqual([`${(3 / 12) * 100}%`, `${(6 / 12) * 100}%`]),
     );
     expect(screen.getByRole("button", { name: "Save as v7" })).toBeInTheDocument();
     expect(screen.getByText("unsaved · 0:12.0")).toBeInTheDocument();
@@ -1013,5 +1015,132 @@ describe("VideoEditor — a judge refusal marks the plate it refused (s82 B3)", 
     await user.click(row);
     const inspector = await screen.findByText("Caption 1", { selector: ".inspector-head .t-title" });
     expect(inspector).toBeInTheDocument();
+  });
+});
+
+/** s99 — the fe-check fix round's own pins (the five HIGHs first). */
+describe("s99 fixes: no silent destruction, no invisible failure, one gesture one undo", () => {
+  async function openDirty(user: ReturnType<typeof userEvent.setup>, container: HTMLElement) {
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    await user.click(container.querySelectorAll(".lane-tr .blk")[0]);
+    const duration = await screen.findByLabelText("duration (s)");
+    await user.clear(duration);
+    await user.type(duration, "3");
+    await user.tab();
+    await screen.findByRole("button", { name: "Save as v7" });
+  }
+
+  it("the Recut 9:16 chip REFUSES while dirty — it never leaves unsaved edits behind", async () => {
+    serve();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await openDirty(user, container);
+
+    push.mockClear();
+    await user.click(screen.getByRole("button", { name: /Recut 9:16/ }));
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByText(/Save first — a derive reads the STORED EDL/)).toBeInTheDocument();
+    // The working copy survives: still dirty, still on v7's save door.
+    expect(screen.getByRole("button", { name: "Save as v7" })).toBeInTheDocument();
+  });
+
+  it("a failed render is visible with nothing else to say — broken never looks like idle", async () => {
+    // The real path: a running render is adopted at load, then the poll
+    // returns the failure. Nothing else writes a notice, so before s99 the
+    // whole band stayed unmounted and the failure rendered nowhere.
+    const failed = job({
+      status: "error",
+      error: "ffmpeg exited 1",
+      finishedAt: "2026-07-28T10:02:00.000Z",
+    });
+    server.use(
+      http.get("/api/videos/p1", () => HttpResponse.json(DETAIL)),
+      http.get("/api/videos/p1/cuts/c1", () => HttpResponse.json(CUT)),
+      http.get("/api/videos/p1/render", ({ request }) => {
+        const url = new URL(request.url);
+        if (url.searchParams.has("jobId")) return HttpResponse.json(failed);
+        return HttpResponse.json({ jobs: [job()] });
+      }),
+    );
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await waitFor(() => expect(screen.getByText(/Render failed/)).toBeInTheDocument(), {
+      timeout: 9000,
+    });
+    expect(screen.getByText(/ffmpeg exited 1/)).toBeInTheDocument();
+    expect(container.querySelector(".notice-band.refused")).not.toBeNull();
+  }, 15000);
+
+  it("Discard is reversible — ⌘Z brings the discarded working copy back", async () => {
+    serve();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await openDirty(user, container);
+
+    await user.click(screen.getByRole("button", { name: /Discard changes/ }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Save as v7" })).toBeNull());
+    await user.keyboard("{Control>}z{/Control}");
+    expect(await screen.findByRole("button", { name: "Save as v7" })).toBeInTheDocument();
+  });
+
+  it("one typing burst in a caption is ONE undo step, not one per keystroke", async () => {
+    serve();
+    const user = userEvent.setup();
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    await user.click(container.querySelectorAll(".blk-cap")[0]);
+    const text = await screen.findByDisplayValue("one prompt");
+    await user.type(text, "XYZ");
+    expect(await screen.findByDisplayValue("one promptXYZ")).toBeInTheDocument();
+
+    // The spine depth IS the pin: three keystrokes leave ONE step, not three
+    // (before s99 each keystroke pushed, evicting real edits off the bound).
+    const undoBtn = await screen.findByRole("button", { name: "Undo" });
+    expect(undoBtn.getAttribute("title")).toContain("1 step back");
+
+    // And that one step is the whole burst.
+    await user.click(undoBtn);
+    expect(await screen.findByDisplayValue("one prompt")).toBeInTheDocument();
+  });
+
+  it("the beat lane and the ruler share ONE time axis — the cut's own duration", async () => {
+    // Beats summing under the declared duration must leave honest empty lane,
+    // never stretch to fill (which put every edge on a different clock).
+    serve(DETAIL, { ...CUT, edl: { ...EDL, video: [{ ...EDL.video[0], duration: 3 }, { ...EDL.video[1], duration: 3 }] } });
+    const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const widths = Array.from(container.querySelectorAll<HTMLElement>(".lane-tr .blk")).map(
+      (b) => b.style.width,
+    );
+    expect(widths).toEqual([`${(3 / 12) * 100}%`, `${(3 / 12) * 100}%`]);
+  });
+
+  it("the approved primary ANSWERS instead of sitting dead", async () => {
+    serve(DETAIL, { ...CUT, status: "approved", outputRef: "cuts/out.mp4" });
+    const user = userEvent.setup();
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+
+    const cta = screen.getByRole("button", { name: "Approved" });
+    expect(cta).not.toBeDisabled();
+    await user.click(cta);
+    expect(screen.getByText(/the queue lives on Approve/)).toBeInTheDocument();
+  });
+
+  it("a stale ?cut= opens the project's current cut and says so — never the empty state", async () => {
+    server.use(
+      http.get("/api/videos/p1", () => HttpResponse.json(DETAIL)),
+      http.get("/api/videos/p1/cuts/gone", () => new HttpResponse(null, { status: 404 })),
+      http.get("/api/videos/p1/cuts/c1", () => HttpResponse.json(CUT)),
+      http.get("/api/videos/p1/render", () => HttpResponse.json({ jobs: [] })),
+    );
+    render(<VideoEditor projectId="p1" cutId="gone" />);
+
+    expect(await screen.findByRole("heading", { name: "film-16x9 v6" })).toBeInTheDocument();
+    expect(screen.getByText(/That cut is no longer on record/)).toBeInTheDocument();
+    expect(screen.queryByText(/No cut to edit yet/)).toBeNull();
   });
 });

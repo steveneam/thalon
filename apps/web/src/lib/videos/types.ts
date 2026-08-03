@@ -90,6 +90,13 @@ export interface CutView {
    * wants every version naming what changed it.
    */
   attribution: VideoCutAttribution | null;
+  /**
+   * s99: the one-prompt runner's OWN stamp (`meta.onePrompt`) — an
+   * engine-authored row that predates the attributed save door must say the
+   * engine made it, never "no attribution recorded". Optional: additive on
+   * the wire; absent reads as no stamp.
+   */
+  onePrompt?: boolean;
   createdAt: string;
 }
 
