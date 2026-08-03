@@ -94,6 +94,7 @@ V3. **Script-first evaluation is a pass-2 decision gate, not a silent adoption**
     through the judge) with the timeline kept for what text cannot express (music,
     exact cuts). Criteria to judge it: does a beat edit round-trip to a rendered
     scene faster than a timeline edit; does it reduce the audit's job-failure count.
+    **DECIDED s97 — HOLD, not adopted** (record in §Phase 4a below).
 V4. Every metered AI action in the editor carries a **cost marker at the control**
     (VEED's credit badge): copilot verbs, B-ve.4 diffs, scene re-renders.
 V5. [SHIPPED s49 — HOLDS as a regression bar, not a build item] AI edits are
@@ -136,7 +137,8 @@ V10. Zero credit spend in build/test: renders in tests replay fixtures; live min
 **Engine:** nothing from the charter's bucket list remains to build (correction
 note). The D3 video settings slice shipped with the s87 contract window. The one
 candidate engine verb left is `beats→scene re-render`, and only if the V3 gate
-adopts script-first (its cost rides that decision).
+adopts script-first (its cost rides that decision). **Gate DECIDED s97: HOLD —
+the verb is not built** (§Phase 4a).
 
 **The Create ↔ Video joins (founder, s86: "the Video would be linked with the
 Create right in some cases?" — yes, three ways, two of which exist in the engine):**
@@ -288,6 +290,45 @@ the three amended sheets + the Schedule amendment — see
 **Phase 4 — after the deltas land:** the V3 script-first gate gets its own
 decision session (criteria already in V3), then pass-3 states (V7/V9).
 
+> **Phase 4a — the V3 gate DECIDED s97 (2026-08-03), lead-run on the stated
+> criteria: script-first is NOT adopted. HOLD — timeline-primary stands.**
+>
+> **Criterion 1 (round-trip speed): NO.** A beat edit round-trips to a
+> rendered scene strictly slower than a timeline edit wherever both can
+> express the change — the beat path CONTAINS the timeline path's whole tail
+> (save → local render → judge gate) and adds Propose (⚡1, metered) plus,
+> for any content change, a vendor mint ahead of it (kling3_0/soul-class
+> models on the takes' own provenance rows: minutes and credits, against the
+> timeline's local milliseconds at 0 cr). No recorded elapsed contradicts
+> this — no job or event row carries an elapsed time at all, and that
+> absence is V7's own work item, not this gate's. Where text expresses what
+> the timeline cannot (new footage from new words), the editor already
+> carries the script channel in its right place: the copilot ask + the s95b
+> re-brief retake door — metered, ⚡-marked, secondary by design.
+>
+> **Criterion 2 (the audit's job-failure count): NO.** The s78 walk's 19
+> failing jobs (15 no-affordance + 4 dead doors of 27) were driven down by
+> TIMELINE-side work, re-verified in code this session: the s80/s81 fixes,
+> V1's five affordances (s96), the s96 tools row
+> (`splitBeat`/`deleteBeat`/`insertCaptionForBeat`/`removeMusicCue`), the
+> bounded undo spine (`past`/`future` + `baseEdl` + Discard), the
+> beforeunload guard, back-to-master via `lineage.parentCutId`, and live
+> compose-don't-overwrite copilot chips. The gaps that remain (swap the
+> music bed for a different track · add a beat from the pool · pre-render
+> preview of an unsaved edit) are exactly "what text cannot express" — a
+> beats-primary panel fixes none of them.
+>
+> **Consequence:** the `beats→scene re-render` engine verb is NOT built —
+> its cost rode this gate and nothing else justified it. Credit discipline
+> also weighs the same way: a beats-primary loop puts the metered verb at
+> the centre of editing; the shipped design keeps free verbs primary and
+> metered verbs ⚡-marked at the control (V4/V10). Decision 1's
+> reversibility stands — the revisit trigger is dogfood evidence (B-create.5
+> onward) that operators reach for text-directed edits beyond the copilot
+> ask, i.e. the re-brief door coming to dominate editor usage.
+>
+> **Remaining in this arc: Phase 4b — pass-3 states (V7/V9).**
+
 **Interleave:** B-create.5 dogfood (the first real Create run) stays its own
 gate and can land before, between or after these — it needs a spend statement
 + his GO, and none of the above depends on it.
@@ -299,7 +340,7 @@ gate and can land before, between or after these — it needs a spend statement
 | s78 audit + s80/81 | jobs table, 5 no-affordance | **incorporated** (V1; baseline, not re-audited) |
 | VEED | multi-track by kind, credit badges, inspector | **incorporated** (V2/V4/V8) |
 | Vimeo | frame thumbnails, duration badges | **incorporated** (V2) |
-| Descript | script-first paradigm | **gated** (V3 pass-2 decision, criteria stated) |
+| Descript | script-first paradigm | **decided s97 — HOLD** (both criteria answered no; the copilot ask + re-brief door stay the script channel, secondary — §Phase 4a) |
 | Postiz | video editor | **n/a — does not exist**; settings schema slice → Create/D3 |
 | s44/s45 | 9:16 own-engine recut recipe | **incorporated** (V6 = B-ve.5) |
 | B-ve charter | .4 AI diffs / .5 aspect | **already built** (s49–s51; correction note — the spec's original 'remain' claim was false) |
