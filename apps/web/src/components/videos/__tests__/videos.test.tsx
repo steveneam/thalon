@@ -252,6 +252,18 @@ describe("VideosOverview (exact-mock rebuild — Videos Overview.dc.html, step 2
     expect(await screen.findByText(/npm run videos:import/)).toBeInTheDocument();
   });
 
+  it("the takes/cuts facts are DISTINCT doors — they deep-link to their evidence", async () => {
+    serveAll();
+    const user = userEvent.setup();
+    render(<VideosOverview />);
+    await screen.findByText("2 projects");
+
+    await user.click(screen.getByRole("link", { name: "1 take" }));
+    expect(push).toHaveBeenCalledWith("/app/videos/p1?open=takes");
+    await user.click(screen.getByRole("link", { name: "3 cuts" }));
+    expect(push).toHaveBeenCalledWith("/app/videos/p1?open=cuts");
+  });
+
   it("says a project record is unreadable rather than drawing it empty", async () => {
     server.use(
       http.get("/api/videos", () => HttpResponse.json({ projects: [SUMMARIES[0]] })),

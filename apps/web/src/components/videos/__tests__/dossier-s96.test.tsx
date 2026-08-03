@@ -193,7 +193,8 @@ describe("the compare radios (AI Studio)", () => {
     await open();
     await user.click(screen.getByRole("checkbox", { name: /Pick film-16x9 v2/ }));
     await user.click(screen.getByRole("button", { name: "Compare two versions" }));
-    expect(screen.getByRole("alert").textContent).toContain("Pick two versions");
+    // s99: an instruction is not an alarm — it rides the status register.
+    expect(screen.getByRole("status").textContent).toContain("Pick two versions");
   });
 
   it("arms on exactly two picks and renders the diff in the house grammar", async () => {
@@ -243,10 +244,63 @@ describe("the takes audition band (V1's fifth job)", () => {
     // The TILE (its name leads with the beat) — not the audition play door,
     // which shares the file name by the seam's own labeling.
     await user.click(
-      within(band).getByRole("button", { name: /^beat-01 · .*beat-01-alt\.mp4$/ }),
+      // s99: the tile's accessible name carries the verdict the sighted tile shows.
+      within(band).getByRole("button", { name: /^beat-01 · .*beat-01-alt\.mp4 — / }),
     );
     await user.click(await within(band).findByRole("button", { name: "Swap into cut" }));
     expect(await screen.findByText(/Swapped beat-01-alt\.mp4 in — saved as/)).toBeInTheDocument();
     expect(posted.name).toBe("film-16x9");
+  });
+});
+
+/** s99 — the fe-check fix round's own pins. */
+describe("s99 fixes: honest doors, honest registers, honest reads", () => {
+  it("closes the delete confirm when the picked cut changes — never a retargeted destructive door", async () => {
+    serve();
+    const user = userEvent.setup();
+    await open();
+    await user.click(screen.getByRole("button", { name: /Delete v2…/ }));
+    expect(screen.getByRole("alertdialog", { name: "Delete this version" })).toBeInTheDocument();
+
+    await user.click(document.querySelector(".ver-crumb") as HTMLElement);
+    await user.click(await screen.findByRole("option", { name: /film-16x9 v1/ }));
+    expect(screen.queryByRole("alertdialog", { name: "Delete this version" })).toBeNull();
+  });
+
+  it("Send-to-Approve on an unrendered cut ANSWERS with the reason instead of eating the click", async () => {
+    serve();
+    const user = userEvent.setup();
+    await open();
+    // Pick the draft v1 — no render exists for it.
+    await user.click(document.querySelector(".ver-crumb") as HTMLElement);
+    await user.click(await screen.findByRole("option", { name: /film-16x9 v1/ }));
+
+    const cta = screen.getByRole("button", { name: "Send cut to Approve" });
+    expect(cta).toHaveAttribute("aria-disabled", "true");
+    await user.click(cta);
+    expect(screen.getByRole("status").textContent).toContain("has no render yet");
+  });
+
+  it("a failed timeline read says so with a way back — never eternal “reading…”", async () => {
+    server.use(
+      http.get("/api/videos/p1", () => HttpResponse.json(DETAIL)),
+      http.get("/api/videos/p1/cuts/:cutId", () => HttpResponse.json({ error: "boom" }, { status: 500 })),
+      http.get("/api/videos/p1/render", () => new HttpResponse(null, { status: 404 })),
+    );
+    await open();
+
+    expect(
+      await screen.findByText(/Couldn’t read this version’s timeline/),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.queryByText("reading this version’s timeline…")).toBeNull();
+  });
+
+  it("the pick-two instruction is satisfiable — a one-version project hears the real path", async () => {
+    serve({ ...DETAIL, cuts: [DETAIL.cuts[0]] });
+    const user = userEvent.setup();
+    await open();
+    await user.click(screen.getByRole("button", { name: "Compare two versions" }));
+    expect(screen.getByRole("status").textContent).toContain("Only one version is on record");
   });
 });

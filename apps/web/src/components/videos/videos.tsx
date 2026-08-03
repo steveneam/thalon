@@ -134,7 +134,7 @@ export function VideosOverview() {
         if (picked === null) return;
         // A focused control owns its own Enter — the filters and the import
         // disclosure must still act after the operator has moved with j/k.
-        if ((event.target as HTMLElement | null)?.closest("button, a")) return;
+        if ((event.target as HTMLElement | null)?.closest('button, a, [role="link"]')) return;
         event.preventDefault();
         router.push(`/app/videos/${picked}`);
       },
@@ -372,7 +372,33 @@ export function VideosOverview() {
                       family(detail).map((part, i) => (
                         <span key={part.text} style={{ display: "contents" }}>
                           {i > 0 && <span className="sep">·</span>}
-                          <span className={part.door ? "fam-link" : "subtle"}>{part.text}</span>
+                          {part.door && part.target ? (
+                            // A DISTINCT door inside the card Link (anchor-in-
+                            // anchor is invalid, so a role=link span carries
+                            // it): the fact lands ON its evidence — the
+                            // dossier disclosure — not the page top (s99).
+                            <span
+                              role="link"
+                              tabIndex={0}
+                              className="fam-link"
+                              title={`open the ${part.target} on the dossier`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                router.push(`/app/videos/${summary.id}?open=${part.target}`);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key !== "Enter") return;
+                                e.preventDefault();
+                                e.stopPropagation();
+                                router.push(`/app/videos/${summary.id}?open=${part.target}`);
+                              }}
+                            >
+                              {part.text}
+                            </span>
+                          ) : (
+                            <span className={part.door ? "fam-link" : "subtle"}>{part.text}</span>
+                          )}
                         </span>
                       ))
                     )}

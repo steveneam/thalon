@@ -7,9 +7,19 @@ import { VideoDossier } from "@/components/videos/dossier";
  */
 export default async function VideoProjectPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ open?: string }>;
 }) {
   const { projectId } = await params;
-  return <VideoDossier projectId={projectId} />;
+  // ?open=takes|cuts — the overview's takes/cuts facts deep-link to their
+  // evidence instead of landing at the top (s99: every fact is a door).
+  const { open } = await searchParams;
+  return (
+    <VideoDossier
+      projectId={projectId}
+      initialOpen={open === "takes" || open === "cuts" ? open : null}
+    />
+  );
 }

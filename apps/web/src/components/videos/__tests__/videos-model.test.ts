@@ -144,14 +144,14 @@ describe("family — AMENDED s95: the project's own history rows (Riverside)", (
       [take({ id: "t1" }), take({ id: "t2" })],
     );
     expect(family(detail)).toEqual([
-      { text: "2 takes", door: true },
-      { text: "3 cuts", door: true },
+      { text: "2 takes", door: true, target: "takes" },
+      { text: "3 cuts", door: true, target: "cuts" },
     ]);
   });
 
   it("leaves a zero-cut project's dimension out instead of restating the pill", () => {
     expect(family(project([]))).toEqual([{ text: "no takes yet", door: false }]);
-    expect(family(project([], [take()]))).toEqual([{ text: "1 take", door: true }]);
+    expect(family(project([], [take()]))).toEqual([{ text: "1 take", door: true, target: "takes" }]);
   });
 
   /*

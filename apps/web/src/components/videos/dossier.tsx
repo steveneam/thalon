@@ -9,6 +9,7 @@ import {
   derivedElsewhere,
   derivedFrom,
   headlineCut,
+  projectKind,
   soleParentOf,
   staleAgainstParent,
   statePill,
@@ -64,15 +65,24 @@ function baseName(ref: string): string {
  * rejects-with-reasons, plus per-take pinned provenance — re-entering as a
  * STATE behind the record's own Runs row, never as extra resting chrome.
  */
-export function VideoDossier({ projectId }: { projectId: string }) {
+export function VideoDossier({
+  projectId,
+  initialOpen = null,
+}: {
+  projectId: string;
+  /** ?open=takes|cuts — an overview fact deep-links straight to its evidence (s99). */
+  initialOpen?: "takes" | "cuts" | null;
+}) {
   const [status, setStatus] = useState<ReadStatus>("loading");
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [pickedCutId, setPickedCutId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [takesOpen, setTakesOpen] = useState(false);
+  const [takesOpen, setTakesOpen] = useState(initialOpen === "takes");
   const [pickedTakeId, setPickedTakeId] = useState<string | null>(null);
   const [approving, setApproving] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  // s99: a notice carries its TONE — success, instruction and refusal are
+  // different facts and must not share the refusal's red register.
+  const [notice, setNotice] = useState<{ text: string; tone: "ok" | "info" | "err" } | null>(null);
   const [refusals, setRefusals] = useState<CaptionRefusal[]>([]);
   const [readAt, setReadAt] = useState(0);
   /*
@@ -83,9 +93,11 @@ export function VideoDossier({ projectId }: { projectId: string }) {
    * carries summaries by design, and Mark / Swap / the takes band all need
    * the real timeline.
    */
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(initialOpen === "cuts");
   const [markName, setMarkName] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  // Stamped with the cut it was opened FOR — a pick change closes it rather
+  // than silently retargeting the destructive door (s99 fe-check).
+  const [confirmDeleteFor, setConfirmDeleteFor] = useState<string | null>(null);
   const [working, setWorking] = useState<"mark" | "swap" | "delete" | null>(null);
   /** Compare picks (the AI-Studio radios): at most two cut ids. */
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -102,7 +114,10 @@ export function VideoDossier({ projectId }: { projectId: string }) {
    * pattern; a setState inside an effect body cascades renders and lint says
    * so).
    */
-  const [edlRead, setEdlRead] = useState<{ forId: string; found: CutDetail } | null>(null);
+  // "failed" is its own era — a broken timeline read must not wear the
+  // loading words forever (s99 fe-check); retryTick re-runs the same read.
+  const [edlRead, setEdlRead] = useState<{ forId: string; read: CutDetail | "failed" } | null>(null);
+  const [edlRetry, setEdlRetry] = useState(0);
   /** The audition band's picked tile — the one wearing the Swap door. */
   const [auditionTakeId, setAuditionTakeId] = useState<string | null>(null);
   /** A4's dossier half: renders already running when this surface loaded. */
@@ -173,14 +188,21 @@ export function VideoDossier({ projectId }: { projectId: string }) {
     let stale = false;
     void fetchCutDetail(projectId, pickedId)
       .then((found) => {
-        if (!stale && found !== null) setEdlRead({ forId: pickedId, found });
+        // A 404 on a cut this project lists is a failed read, not "loading".
+        if (!stale) setEdlRead({ forId: pickedId, read: found ?? "failed" });
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!stale) setEdlRead({ forId: pickedId, read: "failed" });
+      });
     return () => {
       stale = true;
     };
-  }, [projectId, pickedId]);
-  const pickedEdl = edlRead !== null && edlRead.forId === pickedId ? edlRead.found : null;
+  }, [projectId, pickedId, edlRetry]);
+  const pickedEdl =
+    edlRead !== null && edlRead.forId === pickedId && edlRead.read !== "failed"
+      ? edlRead.read
+      : null;
+  const edlFailed = edlRead !== null && edlRead.forId === pickedId && edlRead.read === "failed";
 
   /* A tile picked for one cut must not survive into another cut's band —
      adjusted DURING render (the TakeAudition seenRef pattern). */
@@ -254,14 +276,20 @@ export function VideoDossier({ projectId }: { projectId: string }) {
       .then((outcome) => {
         if (outcome.ok) {
           void load();
-          setNotice(`Cut ${outcome.cut.name} v${outcome.cut.version} passed the gate.`);
+          setNotice({
+            text: `Cut ${outcome.cut.name} v${outcome.cut.version} passed the gate.`,
+            tone: "ok",
+          });
         } else {
-          setNotice(outcome.error);
+          setNotice({ text: outcome.error, tone: "err" });
           setRefusals(outcome.failures);
         }
       })
       .catch((err: unknown) =>
-        setNotice(err instanceof Error ? err.message : "the approve door refused"),
+        setNotice({
+          text: err instanceof Error ? err.message : "the approve door refused",
+          tone: "err",
+        }),
       )
       .finally(() => setApproving(false));
   }
@@ -295,11 +323,14 @@ export function VideoDossier({ projectId }: { projectId: string }) {
         setMarkName(null);
         setPickedCutId(saved.id);
         void load();
-        setNotice(
-          `Marked ${picked.name} v${picked.version} as “${saved.name}” — the original is untouched and still on record.`,
-        );
+        setNotice({
+          text: `Marked ${picked.name} v${picked.version} as “${saved.name}” — the original is untouched and still on record.`,
+          tone: "ok",
+        });
       })
-      .catch((err: unknown) => setNotice(err instanceof Error ? err.message : "the mark refused"))
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the mark refused", tone: "err" }),
+      )
       .finally(() => setWorking(null));
   }
 
@@ -329,24 +360,30 @@ export function VideoDossier({ projectId }: { projectId: string }) {
       .then(({ cut: saved }) => {
         setPickedCutId(saved.id);
         void load();
-        setNotice(
-          `Swapped ${baseName(take.ref)} in — saved as ${saved.name} v${saved.version}; v${picked.version} is untouched.`,
-        );
+        setNotice({
+          text: `Swapped ${baseName(take.ref)} in — saved as ${saved.name} v${saved.version}; v${picked.version} is untouched.`,
+          tone: "ok",
+        });
       })
-      .catch((err: unknown) => setNotice(err instanceof Error ? err.message : "the swap refused"))
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the swap refused", tone: "err" }),
+      )
       .finally(() => setWorking(null));
   }
 
-  /** s96 · DELETE (V1) — the editor's door, from the dossier; refusals are the repo's own. */
+  /**
+   * s96 · DELETE (V1) — the editor's door, from the dossier; refusals are the
+   * repo's own. The confirm STAYS OPEN while the delete runs ("Deleting…" must
+   * actually paint — s99) and closes when the outcome lands.
+   */
   function onDelete() {
     if (picked === null) return;
-    setConfirmDelete(false);
     setWorking("delete");
     setNotice(null);
     deleteCut(projectId, picked.id)
       .then((outcome) => {
         if (!outcome.ok) {
-          setNotice(outcome.error);
+          setNotice({ text: outcome.error, tone: "err" });
           return;
         }
         setPickedCutId(null);
@@ -354,16 +391,26 @@ export function VideoDossier({ projectId }: { projectId: string }) {
         const file = outcome.file.removed
           ? ` Its render went with it (${outcome.file.ref}).`
           : ` ${outcome.file.reason ?? "Nothing was removed from disk."}`;
-        setNotice(`Deleted ${outcome.removed.name} v${outcome.removed.version}.${file}`);
+        setNotice({
+          text: `Deleted ${outcome.removed.name} v${outcome.removed.version}.${file}`,
+          tone: "ok",
+        });
       })
-      .catch((err: unknown) => setNotice(err instanceof Error ? err.message : "the delete refused"))
-      .finally(() => setWorking(null));
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the delete refused", tone: "err" }),
+      )
+      .finally(() => {
+        setWorking(null);
+        setConfirmDeleteFor(null);
+      });
   }
 
   /** s96 · COMPARE (V1, the AI-Studio radios) — two full EDLs, diffed the editor's way. */
   function onCompare() {
     if (compareIds.length !== 2) return;
     const [aId, bId] = compareIds;
+    // A spent pick-two instruction must not outlive its own success.
+    setNotice((held) => (held?.tone === "info" ? null : held));
     setCompared("loading");
     void Promise.all([fetchCutDetail(projectId, aId), fetchCutDetail(projectId, bId)])
       .then(([a, b]) => {
@@ -452,9 +499,12 @@ export function VideoDossier({ projectId }: { projectId: string }) {
           type="button"
           className="ver-crumb"
           aria-expanded={historyOpen}
+          title={`${picked.name} v${picked.version} · ${timecode(picked.edl.duration)}`}
           onClick={() => setHistoryOpen((open) => !open)}
         >
-          {picked.name} v{picked.version} · {timecode(picked.edl.duration)}{" "}
+          <span className="crumb-t">
+            {picked.name} v{picked.version} · {timecode(picked.edl.duration)}
+          </span>{" "}
           <span style={{ color: "var(--n-700)" }}>▾</span>
         </button>
         <span className={pill.className}>{pill.text}</span>
@@ -485,10 +535,13 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                     setPlaying(false);
                   }}
                 >
-                  <span className="ver-t">
+                  <span className="ver-t" title={`${cut.name} v${cut.version}`}>
                     {cut.name} v{cut.version}
                   </span>
-                  <span className="ver-a">
+                  <span
+                    className="ver-a"
+                    title={`${timecode(cut.edl.duration)} · ${cut.status} · ${attributionLine(cut, readAt)}`}
+                  >
                     {timecode(cut.edl.duration)} · {cut.status} · {attributionLine(cut, readAt)}
                   </span>
                 </button>
@@ -498,10 +551,12 @@ export function VideoDossier({ projectId }: { projectId: string }) {
         <Link className="btn btn-ghost btn-sm" href={editorHref}>
           Open in editor
         </Link>
+        {/* The surface's own s81 rule (versions.ts): a refusal must never
+            become a disabled button — the press ANSWERS with the reason. */}
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          disabled={approving || picked.status !== "rendered"}
+          aria-disabled={approving || picked.status !== "rendered" || undefined}
           title={
             picked.status === "rendered"
               ? "The caption gate runs on this cut — it gates, it never rewrites"
@@ -509,20 +564,53 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                 ? "This cut is already approved"
                 : "Render this cut first — the gate reads what actually renders"
           }
-          onClick={onApprove}
+          onClick={() => {
+            if (approving) return;
+            if (picked.status !== "rendered") {
+              setNotice({
+                text:
+                  picked.status === "approved"
+                    ? `${picked.name} v${picked.version} is already approved — the gate ran, and its verdict is on the record.`
+                    : `${picked.name} v${picked.version} has no render yet — the gate reads what actually renders. Render it in the editor first.`,
+                tone: "info",
+              });
+              return;
+            }
+            onApprove();
+          }}
         >
           {approving ? "Judging…" : "Send cut to Approve"}
         </button>
       </div>
 
       {(notice !== null || refusals.length > 0) && (
-        <div className="card gate-notice" role="alert">
-          {notice !== null && <span className="t-label">{notice}</span>}
-          {refusals.map((refusal) => (
-            <span key={refusal.line} className="t-label">
-              line {refusal.line} “{refusal.text}” — {refusal.matches.join("; ")}
-            </span>
-          ))}
+        // The band wears the notice's OWN tone — success is not an alarm —
+        // and it dismisses, so a spent instruction cannot go stale on screen.
+        <div
+          className={`card gate-notice tone-${refusals.length > 0 ? "err" : (notice?.tone ?? "err")}`}
+          role={refusals.length > 0 || notice?.tone === "err" ? "alert" : "status"}
+        >
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+              {notice !== null && <span className="t-label">{notice.text}</span>}
+              {refusals.map((refusal) => (
+                <span key={refusal.line} className="t-label">
+                  line {refusal.line} “{refusal.text}” — {refusal.matches.join("; ")}
+                </span>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="card-link as-text-btn"
+              aria-label="Dismiss this notice"
+              onClick={() => {
+                setNotice(null);
+                setRefusals([]);
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
@@ -543,9 +631,15 @@ export function VideoDossier({ projectId }: { projectId: string }) {
             aria-disabled={compareIds.length !== 2 || undefined}
             onClick={() => {
               if (compareIds.length !== 2) {
-                setNotice(
-                  "Pick two versions with the round marks first — Compare reads exactly two.",
-                );
+                // The instruction must be satisfiable — on a one-version
+                // project "pick two" points at a door that cannot arm (s99).
+                setNotice({
+                  text:
+                    cuts.length < 2
+                      ? "Only one version is on record — a second arrives with an edit, a swap or a ☆ mark; Compare reads exactly two."
+                      : "Pick two versions with the round marks first — Compare reads exactly two.",
+                  tone: "info",
+                });
                 return;
               }
               onCompare();
@@ -555,6 +649,16 @@ export function VideoDossier({ projectId }: { projectId: string }) {
               ? `Compare ${compareLabelFor(cuts, compareIds[0])} ↔ ${compareLabelFor(cuts, compareIds[1])}`
               : "Compare two versions"}
           </button>
+          {/* A pick whose radio left the strip still has a way back (s99). */}
+          {compareIds.length > 0 && (
+            <button
+              type="button"
+              className="card-link as-text-btn"
+              onClick={() => setCompareIds([])}
+            >
+              clear picks
+            </button>
+          )}
           <button
             type="button"
             className="btn btn-quiet btn-sm"
@@ -564,7 +668,9 @@ export function VideoDossier({ projectId }: { projectId: string }) {
               `Delete ${picked.name} v${picked.version} and the file it rendered — permanently`
             }
             onClick={() =>
-              deleteRefusal !== null ? setNotice(deleteRefusal) : setConfirmDelete(true)
+              deleteRefusal !== null
+                ? setNotice({ text: deleteRefusal, tone: "err" })
+                : setConfirmDeleteFor(picked.id)
             }
           >
             Delete v{picked.version}…
@@ -587,7 +693,14 @@ export function VideoDossier({ projectId }: { projectId: string }) {
             <div style={{ minWidth: 0 }}>
               <div className="ver-t">Brief · master</div>
               <div className="ver-a">
-                {detail.description === null ? "no brief recorded" : "your prompt"} ·{" "}
+                {/* One-prompt descriptions are ENGINE-stamped — crediting them
+                    as "your prompt" misassigns authorship (s99 fe-check). */}
+                {detail.description === null
+                  ? "no brief recorded"
+                  : projectKind(detail) === "one-prompt"
+                    ? "the run’s brief"
+                    : "your prompt"}{" "}
+                ·{" "}
                 {new Date(detail.createdAt).toLocaleDateString(undefined, {
                   day: "numeric",
                   month: "short",
@@ -623,10 +736,20 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                       <span>v{cut.version}</span>
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div className="ver-t">
+                      {/* Clipped identity/meta keeps its hover truth — the
+                          chip caps at 300px and two long names must never
+                          read identical with no route to the difference. */}
+                      <div className="ver-t" title={`v${cut.version} · ${cut.name}`}>
                         v{cut.version} <span className="ver-mark">✓ {cut.name}</span>
                       </div>
-                      <div className="ver-a">
+                      <div
+                        className="ver-a"
+                        title={
+                          running !== undefined
+                            ? undefined
+                            : `${timecode(cut.edl.duration)} · ${attributionLine(cut, readAt)}`
+                        }
+                      >
                         {running !== undefined
                           ? `rendering now — started ${elapsedLine(running.startedAt, readAt)}`
                           : `${timecode(cut.edl.duration)} · ${attributionLine(cut, readAt)}`}
@@ -681,7 +804,7 @@ export function VideoDossier({ projectId }: { projectId: string }) {
           no column records a retired cut), so that sentence is NOT rendered;
           the restore column is the flagged contract-window ask (s96 wrap).
         */}
-        {confirmDelete && (
+        {confirmDeleteFor === picked.id && (
           <div className="confirm" style={{ right: 24, top: 48 }} role="alertdialog" aria-label="Delete this version">
             <span className="t-title" style={{ fontSize: 13 }}>
               Delete {picked.name} v{picked.version} — “{statePill(picked).text}”?
@@ -696,7 +819,8 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                 type="button"
                 className="btn btn-ghost btn-sm"
                 style={{ flex: 1 }}
-                onClick={() => setConfirmDelete(false)}
+                disabled={working === "delete"}
+                onClick={() => setConfirmDeleteFor(null)}
               >
                 Keep it
               </button>
@@ -731,7 +855,13 @@ export function VideoDossier({ projectId }: { projectId: string }) {
               type="button"
               className="btn btn-ghost btn-sm"
               disabled={working === "mark" || markName.trim() === "" || pickedEdl === null}
-              title={pickedEdl === null ? "reading this version’s timeline…" : undefined}
+              title={
+                pickedEdl !== null
+                  ? undefined
+                  : edlFailed
+                    ? "couldn’t read this version’s timeline — Try again in the takes band"
+                    : "reading this version’s timeline…"
+              }
               onClick={onMark}
             >
               {working === "mark" ? "Marking…" : `Mark as ${markName.trim() || "…"}`}
@@ -859,8 +989,19 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                 All {detail.takes.length} takes →
               </button>
             </div>
-            <div className="ver-strip" style={{ paddingTop: 0 }}>
-              {pickedEdl === null ? (
+            <div className="ver-strip aud-strip" style={{ paddingTop: 0 }}>
+              {edlFailed ? (
+                <span className="t-label" role="alert">
+                  Couldn’t read this version’s timeline — auditioning and marking need it.{" "}
+                  <button
+                    type="button"
+                    className="card-link as-text-btn"
+                    onClick={() => setEdlRetry((tick) => tick + 1)}
+                  >
+                    Try again
+                  </button>
+                </span>
+              ) : pickedEdl === null ? (
                 <span className="t-label">reading this version’s timeline…</span>
               ) : auditionRows.length === 0 ? (
                 <span className="t-label">
@@ -880,7 +1021,13 @@ export function VideoDossier({ projectId }: { projectId: string }) {
                         type="button"
                         className="take-body"
                         aria-pressed={pickedTile}
-                        aria-label={`${beatName} · ${baseName(take.ref)}${inCut ? " — in the cut now" : ""}`}
+                        aria-label={`${beatName} · ${baseName(take.ref)} — ${
+                          inCut
+                            ? "in the cut now"
+                            : take.disposition === "keeper"
+                              ? "kept, unused"
+                              : `reject: ${take.reason ?? "no reason recorded"}`
+                        }`}
                         onClick={() => setAuditionTakeId(pickedTile ? null : take.id)}
                       >
                         <div
@@ -996,7 +1143,10 @@ export function VideoDossier({ projectId }: { projectId: string }) {
         <div className="card" style={{ display: "flex", flexDirection: "column" }}>
           <div className="card-head">
             <span className="t-title">The record</span>
-            <span className="t-label">every fact is a door</span>
+            {/* AMENDED s99 (sheet-amendment candidate): five of six rows are
+                deliberate non-doors until their evidence routes exist — the
+                sheet's "every fact is a door" would overstate them. */}
+            <span className="t-label">a recorded fact is a door — the rest say what isn’t on record yet</span>
           </div>
 
           <div className="fact-row" data-door="false">

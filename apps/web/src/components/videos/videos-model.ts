@@ -18,6 +18,8 @@ export interface FamilyPart {
   text: string;
   /** A door (the sheet's dotted family link); false = a plain subtle fact. */
   door: boolean;
+  /** Where the door leads — the dossier disclosure this fact's evidence lives behind (s99). */
+  target?: "takes" | "cuts";
 }
 
 export interface StatePill {
@@ -86,11 +88,12 @@ export function family(detail: ProjectDetail): FamilyPart[] {
   const parts: FamilyPart[] = [
     detail.takes.length === 0
       ? { text: "no takes yet", door: false }
-      : { text: plural(detail.takes.length, "take"), door: true },
+      : { text: plural(detail.takes.length, "take"), door: true, target: "takes" },
   ];
   // Left out at zero rather than restated — the state pill already says
   // "no cuts yet", exactly as the sheet's composing card carries two parts.
-  if (detail.cuts.length > 0) parts.push({ text: plural(detail.cuts.length, "cut"), door: true });
+  if (detail.cuts.length > 0)
+    parts.push({ text: plural(detail.cuts.length, "cut"), door: true, target: "cuts" });
   return parts;
 }
 
