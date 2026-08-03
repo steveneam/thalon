@@ -286,7 +286,7 @@ describe("video cuts repo (B-ve.1)", () => {
       edl: minimalEdl(),
     });
 
-    const rendered = await repos.videoCuts.recordRender(ctx, cut.id, "cuts/master-v1.mp4");
+    const rendered = await repos.videoCuts.recordRender(ctx, cut.id, "cuts/master-v1.mp4", 61_500);
     expect(rendered.status).toBe("rendered");
     expect(rendered.outputRef).toBe("cuts/master-v1.mp4");
 
@@ -306,6 +306,23 @@ describe("video cuts repo (B-ve.1)", () => {
 
     const events = await repos.events.list(ctx, { entityType: "video_cut", entityId: cut.id });
     expect(events.map((e) => e.event)).toEqual(["video_cut.created", "video_cut.rendered"]);
+    // V7 — the render's MEASURED wall time rides the rendered event…
+    const renderedEvent = events.find((e) => e.event === "video_cut.rendered");
+    expect(renderedEvent?.payload).toEqual({ outputRef: "cuts/master-v1.mp4", elapsedMs: 61_500 });
+
+    // …and an unmeasured render carries NO elapsed key at all — absent, never invented.
+    const { cut: second } = await repos.videoCuts.create(ctx, project.id, {
+      name: "master",
+      version: 2,
+      edl: minimalEdl(),
+    });
+    await repos.videoCuts.recordRender(ctx, second.id, "cuts/master-v2.mp4");
+    const secondEvents = await repos.events.list(ctx, {
+      entityType: "video_cut",
+      entityId: second.id,
+    });
+    const secondRendered = secondEvents.find((e) => e.event === "video_cut.rendered");
+    expect(secondRendered?.payload).toEqual({ outputRef: "cuts/master-v2.mp4" });
   });
 
   it("repo surface is pinned — approve landed at B-ve.4, stampLineage at B-ve.5, remove at the s82 window; nothing else has crept in", async () => {

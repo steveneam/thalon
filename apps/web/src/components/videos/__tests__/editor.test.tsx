@@ -793,9 +793,40 @@ describe("VideoEditor — a render survives leaving the page (s82 A4)", () => {
     expect(
       await screen.findByText(/a render is in flight for v6 — this page picked the job back up/),
     ).toBeInTheDocument();
-    // Adopting the job is what makes the primary button honest again.
-    expect(await screen.findByRole("button", { name: "Rendering…" })).toBeInTheDocument();
+    // Adopting the job is what makes the primary button honest again — and
+    // V7 puts the job's REAL elapsed (from its recorded startedAt) beside the
+    // word, so the name is matched by prefix.
+    expect(await screen.findByRole("button", { name: /^Rendering…/ })).toBeInTheDocument();
   });
+
+  it("a finished render names its REAL duration in the notice band (V7)", async () => {
+    serve(DETAIL, CUT, [job()]);
+    // The poll's answer: the same job, done, its recorded clocks 2m 08s apart.
+    // The notice derives from those clocks alone — deterministic, never wall time.
+    server.use(
+      http.get("/api/videos/p1/render", ({ request }) => {
+        const url = new URL(request.url);
+        if (url.searchParams.has("running")) return HttpResponse.json({ jobs: [job()] });
+        if (url.searchParams.get("jobId") === "j-resumed") {
+          return HttpResponse.json(
+            job({
+              status: "done",
+              outputRef: "cuts/film-16x9-v6.mp4",
+              finishedAt: "2026-07-28T10:02:08.000Z",
+            }),
+          );
+        }
+        return new HttpResponse(null, { status: 404 });
+      }),
+    );
+    render(<VideoEditor projectId="p1" cutId="c1" />);
+    await screen.findByRole("heading", { name: "film-16x9 v6" });
+    expect(
+      await screen.findByText("Rendered in 2m 08s — local x264, 0 credits.", undefined, {
+        timeout: 6000,
+      }),
+    ).toBeInTheDocument();
+  }, 10_000);
 
   it("names another cut's render rather than implying it is this one's", async () => {
     serve(TWO_VERSIONS, CUT, [job({ id: "j2", cutId: "c0" })]);

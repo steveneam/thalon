@@ -126,9 +126,16 @@ export function videoCutsRepo(db: Db) {
     /**
      * draft → rendered, guarded by the contracts rulebook: the render
      * completed and its output landed at `outputRef` (project-relative).
-     * The only status transition this window wires.
+     * The only status transition this window wires. `elapsedMs` is the
+     * render's MEASURED wall time (V7 — durations are honest): recorded
+     * when the caller measured one, absent otherwise, never invented.
      */
-    async recordRender(ctx: TenantCtx, id: string, outputRef: string): Promise<VideoCutRow> {
+    async recordRender(
+      ctx: TenantCtx,
+      id: string,
+      outputRef: string,
+      elapsedMs?: number,
+    ): Promise<VideoCutRow> {
       return db.transaction(async (tx) => {
         const [current] = await tx
           .select()
@@ -146,7 +153,7 @@ export function videoCutsRepo(db: Db) {
           entityType: "video_cut",
           entityId: row.id,
           event: "video_cut.rendered",
-          payload: { outputRef },
+          payload: { outputRef, ...(elapsedMs !== undefined ? { elapsedMs } : {}) },
         });
         return row;
       });

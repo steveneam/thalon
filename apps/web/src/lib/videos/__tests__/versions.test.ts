@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CutView, RenderJobView } from "../types";
-import { adoptableRender, deleteRefusalFor, inFlightLine, variantSaveNote } from "../versions";
+import { adoptableRender, deleteRefusalFor, elapsedWords, inFlightLine, variantSaveNote } from "../versions";
 
 /**
  * The version verbs' pure reads. The delete refusals are the interesting half:
@@ -150,5 +150,24 @@ describe("inFlightLine + adoptableRender — a render survives leaving the page"
     // rendered version — an EDL nobody can reproduce, claiming to be v6.
     expect(adoptableRender([preview], "c6")).toBeNull();
     expect(adoptableRender([render], "c9")).toBeNull();
+  });
+});
+
+describe("elapsedWords — a real duration in words, never an estimate (V7)", () => {
+  it("renders seconds alone under a minute, and m + zero-padded s above it", () => {
+    expect(elapsedWords("2026-08-03T10:00:00.000Z", "2026-08-03T10:00:34.000Z")).toBe("34s");
+    expect(elapsedWords("2026-08-03T10:00:00.000Z", "2026-08-03T10:02:08.400Z")).toBe("2m 08s");
+    expect(elapsedWords("2026-08-03T10:00:00.000Z", Date.parse("2026-08-03T10:01:00.000Z"))).toBe(
+      "1m 00s",
+    );
+    // An hours-old job (a stale adopted registry entry) rolls to h + m — it
+    // never prints a four-digit minute count.
+    expect(elapsedWords("2026-08-03T10:00:00.000Z", "2026-08-03T16:05:30.000Z")).toBe("6h 05m");
+  });
+
+  it("answers null for a reversed or unreadable pair — no fabricated number", () => {
+    expect(elapsedWords("2026-08-03T10:05:00.000Z", "2026-08-03T10:00:00.000Z")).toBeNull();
+    expect(elapsedWords("not a timestamp", "2026-08-03T10:00:00.000Z")).toBeNull();
+    expect(elapsedWords("2026-08-03T10:00:00.000Z", Number.NaN)).toBeNull();
   });
 });

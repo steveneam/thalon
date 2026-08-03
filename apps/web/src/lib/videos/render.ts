@@ -147,6 +147,7 @@ export async function runCutRender(
 ): Promise<string> {
   await mkdir(path.join(prepared.root, "cuts"), { recursive: true });
   const scratch = await mkdtemp(path.join(tmpdir(), "thalon-render-"));
+  const startedAt = Date.now();
   try {
     await executePlan(prepared.plan, {
       resolve: (ref: VideoSourceRef) => path.join(prepared.root, ref.ref),
@@ -156,6 +157,13 @@ export async function runCutRender(
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }
-  await repos.videoCuts.recordRender(ctx, prepared.cutId, prepared.outputRef);
+  // V7: the render's measured wall time rides the rendered event — a real
+  // elapsed, never an estimate.
+  await repos.videoCuts.recordRender(
+    ctx,
+    prepared.cutId,
+    prepared.outputRef,
+    Date.now() - startedAt,
+  );
   return prepared.outputRef;
 }

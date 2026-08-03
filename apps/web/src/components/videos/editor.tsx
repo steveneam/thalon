@@ -34,6 +34,7 @@ import type { CutDetail, CutView, ProjectDetail, RenderJobView } from "@/lib/vid
 import {
   adoptableRender,
   deleteRefusalFor,
+  elapsedWords,
   inFlightLine,
   variantSaveNote,
 } from "@/lib/videos/versions";
@@ -158,6 +159,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   const [notice, setNotice] = useState<string | null>(null);
   const [refusals, setRefusals] = useState<CaptionRefusal[]>([]);
   const [job, setJob] = useState<RenderJobView | null>(null);
+  /**
+   * V7 — WHEN THE JOB STATE WAS LAST READ. The live "Rendering… 1m 04s" words
+   * derive from `job.startedAt` against this timestamp, so the elapsed shown
+   * is exactly as fresh as the poll that produced it — a real duration read
+   * off recorded clocks, never a ticking estimate.
+   */
+  const [polledAt, setPolledAt] = useState<number>(() => Date.now());
   /*
    * A4 — WHAT WAS ALREADY RENDERING WHEN THIS SURFACE LOADED.
    *
@@ -288,7 +296,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 // Only a RENDER is adopted. A preview renders an unsaved EDL
                 // that a reload has already lost, so adopting one would land
                 // an unreproducible output on the cut as its version.
-                if (resumed !== null) setJob(resumed);
+                if (resumed !== null) {
+                  setJob(resumed);
+                  setPolledAt(Date.now());
+                }
               })
               .catch(() => undefined);
           });
@@ -308,9 +319,19 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       void fetchRenderJob(projectId, job.id).then((next) => {
         if (next === null) return;
         setJob(next);
+        setPolledAt(Date.now());
         if (next.status === "done") {
           setCut((current) =>
             current ? { ...current, status: "rendered", outputRef: next.outputRef } : current,
+          );
+          // V7 — the finished render names its real duration, from the job's
+          // own recorded clocks.
+          const took =
+            next.finishedAt === null ? null : elapsedWords(next.startedAt, next.finishedAt);
+          setNotice(
+            took === null
+              ? "Rendered — local x264, 0 credits."
+              : `Rendered in ${took} — local x264, 0 credits.`,
           );
         }
       });
@@ -348,6 +369,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       void fetchRenderJob(projectId, previewJob.job.id).then((next) => {
         if (next === null) return;
         setPreviewJob((current) => (current ? { ...current, job: next } : current));
+        setPolledAt(Date.now());
         if (next.status === "done") setPreview({ edl: previewJob.edl, ref: previewJob.ref });
       });
     }, 4000);
@@ -644,6 +666,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
     run("render", async () => {
       const { job: fired } = await startRender(projectId, cut.id);
       setJob(fired);
+      setPolledAt(Date.now());
       return "Rendering locally (0 credits) — minutes of x264; this page polls until it lands.";
     });
   }
@@ -856,7 +879,10 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
       ? { label: `Save as v${nextVersion}`, verb: "save", onClick: () => onSave(), disabled: false }
       : cut.status === "draft"
         ? {
-            label: job?.status === "running" ? "Rendering…" : "Render",
+            label:
+              job?.status === "running"
+                ? `Rendering… ${elapsedWords(job.startedAt, polledAt) ?? ""}`.trimEnd()
+                : "Render",
             verb: "render",
             onClick: onRender,
             disabled: job?.status === "running",
@@ -1295,7 +1321,15 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
               Caption {refusal.line + 1} “{refusal.text}” — {refusal.matches.join("; ")}
             </button>
           ))}
-          {job?.status === "error" && <span className="t-label">Render failed: {job.error}</span>}
+          {job?.status === "error" && (
+            <span className="t-label">
+              Render failed
+              {job.finishedAt !== null && elapsedWords(job.startedAt, job.finishedAt) !== null
+                ? ` after ${elapsedWords(job.startedAt, job.finishedAt)}`
+                : ""}
+              : {job.error}
+            </span>
+          )}
         </div>
       )}
 
@@ -1407,7 +1441,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                       onClick={onPreview}
                     >
                       {previewJob?.job.status === "running"
-                        ? "Rendering preview…"
+                        ? `Rendering preview… ${elapsedWords(previewJob.job.startedAt, polledAt) ?? ""}`.trimEnd()
                         : "Preview this edit — local, 0 credits"}
                     </button>
                   )}

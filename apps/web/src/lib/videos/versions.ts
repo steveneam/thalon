@@ -107,6 +107,24 @@ export function inFlightLine(
 }
 
 /**
+ * V7 — durations are honest. A REAL elapsed rendered as words ("34s",
+ * "2m 08s"), computed only from recorded timestamps; nothing here estimates,
+ * and a malformed or reversed pair answers null rather than a fabricated
+ * number.
+ */
+export function elapsedWords(startedAt: string, until: string | number): string | null {
+  const start = new Date(startedAt).getTime();
+  const end = typeof until === "number" ? until : new Date(until).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
+  const totalS = Math.floor((end - start) / 1000);
+  const h = Math.floor(totalS / 3600);
+  const m = Math.floor((totalS % 3600) / 60);
+  const s = totalS % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
+  return m === 0 ? `${s}s` : `${m}m ${String(s).padStart(2, "0")}s`;
+}
+
+/**
  * The running RENDER this surface should adopt and keep polling. Previews are
  * deliberately never adopted: adopting one would let an unsaved EDL's output
  * land on the cut as its `outputRef` when it finished — an EDL nobody can
