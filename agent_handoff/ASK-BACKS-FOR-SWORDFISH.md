@@ -1275,3 +1275,25 @@ Canvas: https://claude.ai/design/p/f5d304cb-cd0e-484d-8542-7b6561e1ef30
 **One word — "W3 approved" — unblocks the builds** (or name what to
 change). Build order on your GO: editor first, then the project pages, then
 Schedule. Zero credits spent, nothing posted, nothing armed.
+
+## Wrap ping for the founder (s95 close — W3 is banked, your two additions are drawn)
+
+Your W3 approval landed in-session — nothing more to text; ignore the ask
+above. Both of your additions went in before the wrap, drawn from a fresh
+Mobbin pass (Leonardo's editor was the best reference, as you suspected):
+
+**The ratio toggle now explains itself** — an ⓘ beside 16:9 / 9:16 / 1:1
+opens: 16:9 wide = the full video (YouTube, blog, site embeds) · 9:16 tall
+= short-form clips (TikTok, Reels, Shorts) · 1:1 square = feed posts
+(LinkedIn, X, IG feed) — each with a little frame shape so it reads at a
+glance, plus the key fact: one cut, three frames; switching previews the
+cut in that frame, and a frame not yet rendered offers Recut (⚡).
+
+**The timeline grew its tools row** — Split · Crop · Text · Delete sit
+right on the timeline, acting on whichever block you've selected (delete
+in red, like Leonardo). They're free edit moves so they carry no credit
+badge — only the buttons that spend say ⚡.
+
+All four sheets are now law; next session builds them: editor first, then
+the project pages (compare/named cuts/audition), then Schedule's
+thumbnails-in-cells. Zero credits spent, nothing posted, nothing armed.

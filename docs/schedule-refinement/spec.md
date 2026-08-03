@@ -1,7 +1,7 @@
 # The Schedule calendar refinement — plan + spec (the "calendar part", stamped s94)
 
-> **Status: DRAWN s95 — awaiting the founder's one-word W3 GO** (one verdict
-> covers this + the three video-arc sheet amendments — see
+> **Status: DRAWN s95 · W3 APPROVED (founder in-session, s95: "Everything
+> else is ok … W3 is approved") — THE BUILD IS UNBLOCKED** (Phase-3 item 3 in
 > `docs/video-arc/spec.md` §"The s95 execution plan"). Authored s94 on the
 > founder's direction: *"continue refining the plan and spec for the video and
 > calendar part as needed (mobbin, postiz, research etc)."*

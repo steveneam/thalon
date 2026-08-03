@@ -21,7 +21,28 @@
        Apply) stay unbadged — free is stated by absence
      · NO metrics, no new bands — the editor's paradigm question (Descript
        script-first, V3) is deliberately NOT drawn: it is a pass-2 gate with
-       its own criteria, not an amendment. -->
+       its own criteria, not an amendment.
+     AMENDED s95b — the founder's W3 additions, drawn the same session
+     (fresh Mobbin pull per his direction: Leonardo AI + the Resolve-register
+     editor set):
+     · THE ASPECT SEG SAYS WHAT IT MEANS (founder: "good to know what those
+       numbers mean"): an ⓘ beside the seg, tooltip drawn OPEN — each ratio
+       named as shape + format + platforms (16:9 wide = the full video:
+       YouTube/blog/site embeds · 9:16 tall = short-form clips: TikTok,
+       Reels, Shorts · 1:1 square = feed posts: LinkedIn, X, IG feed), and
+       the one-cut-three-frames fact: switching PREVIEWS this cut in that
+       frame, a frame with no render offers Recut (⚡). Reference: Leonardo's
+       Video Dimensions control (frame-shaped glyphs + ⓘ, ratio under each);
+       ⓘ/.tip vocabulary carried verbatim from Schedule/Analytics.
+     · THE TIMELINE GROWS A TOOLS ROW (founder: "features/functions rail —
+       clip/crop, delete, add/change text"): Split · Crop · Text · Delete as
+       icon chips in the timeline head, acting on the SELECTED block
+       (Squarespace: the toolbar acts on the selection; Arcade: tools at the
+       timeline's edge; Leonardo: the tool rail with delete set apart in the
+       danger colour). All four are EDL-only verbs — free, so UNBADGED, per
+       the V4 rule (cost is stated at metered verbs, absence says free). The
+       manual rail COMPLEMENTS the copilot front door (founder s72), never
+       replaces it. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
 <x-dc>
       <helmet data-dc-atomics>
@@ -63,6 +84,18 @@
              cost is learnt BEFORE the click, never after. EDL-only verbs stay
              unbadged: applying a trim is free and the absence says so. */
           .cr { display: inline-flex; align-items: center; margin-left: 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--warn); }
+          /* ⓘ + tooltip — the SHARED vocabulary, carried verbatim from
+             Schedule/Analytics so the sheets speak one dialect. */
+          .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
+          .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+          .tip { position: absolute; z-index: 9; width: 252px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); }
+          .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
+          .tip .fr { display: inline-block; border: 1px solid var(--n-700); border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+          /* s95b: the timeline tools row — manual EDL verbs on the SELECTED
+             block. Free, so unbadged (V4: absence says free). */
+          .chip-danger { color: var(--err); }
+          .chip-danger:hover { border-color: var(--err); color: var(--err); }
+          .chipbtn svg { margin-right: 5px; }
           .playhead { position: absolute; top: 6px; bottom: 6px; left: calc(84px + (100% - 100px) * 0.34); width: 2px; background: var(--act); border-radius: 1px; z-index: 2; }
           .playhead::before { content: ""; position: absolute; top: -5px; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--act); }
           /* ── Direct the edit — the agent-native front door (founder s72) ── */
@@ -108,15 +141,24 @@
             <div class="avatar">S</div>
           </div>
           <div class="content" style="gap:12px">
-            <div style="display:flex;align-items:center;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;position:relative">
               <a class="card-link" href="#">← Videos</a>
               <h1 class="t-headline">One-prompt launch film</h1>
               <span class="pill pill-idle">cut v1 · 42.3s</span>
               <span class="pill pill-ok">9 takes rendered</span>
               <div style="flex:1"></div>
               <div class="seg"><span class="seg-opt on">16:9</span><span class="seg-opt">9:16</span><span class="seg-opt">1:1</span></div>
+              <span class="info">i</span>
               <div class="btn btn-ghost btn-sm">Propose edits</div>
               <div class="btn btn-primary btn-sm">Send cut to Approve</div>
+              <!-- s95b: the frames named — drawn OPEN on the seg's ⓘ. -->
+              <div class="tip" style="right:236px;top:36px">
+                <span class="tip-h">WHAT THE FRAMES MEAN</span>
+                <div><span class="fr" style="width:16px;height:9px"></span><b>16:9</b> wide — the full video: YouTube, the blog, site embeds.</div>
+                <div><span class="fr" style="width:9px;height:16px"></span><b>9:16</b> tall — short-form clips: TikTok, Reels, Shorts.</div>
+                <div><span class="fr" style="width:11px;height:11px"></span><b>1:1</b> square — feed posts: LinkedIn, X, Instagram feed.</div>
+                <div style="margin-top:4px;color:var(--n-900)">One cut, three frames — switching previews this cut in that frame; a frame with no render yet offers Recut <span class="cr" style="margin:0">⚡</span>.</div>
+              </div>
             </div>
             <div class="copilot">
               <div class="cop-box">Direct the edit — <em>"tighten beat 04, land the crescendo on the close, recut for 9:16"</em> — the agent answers with a proposal on the timeline, never a silent change.</div>
@@ -147,7 +189,12 @@
                   <div class="tl-head">
                     <span class="t-title">Timeline</span>
                     <span class="pill pill-idle">Snap · magnetic</span>
-                    <span class="t-label">drag to reorder · trim at edges · blocks close ranks</span>
+                    <!-- s95b: the tools row — manual EDL verbs, free so unbadged. -->
+                    <div class="chipbtn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="4" cy="4.5" r="1.9"></circle><circle cx="4" cy="11.5" r="1.9"></circle><path d="M5.7 5.6 13.5 13M5.7 10.4 13.5 3"></path></svg>Split</div>
+                    <div class="chipbtn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4.5 1.5v10h10M1.5 4.5h10v10"></path></svg>Crop</div>
+                    <div class="chipbtn"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.5 3.5h9M8 3.5v9.5"></path></svg>Text</div>
+                    <div class="chipbtn chip-danger"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 4.5h10M6.3 4.5V3h3.4v1.5M4.7 4.5l.6 8h5.4l.6-8"></path></svg>Delete</div>
+                    <span class="t-label">on the selected block · drag reorders · edges trim</span>
                     <div style="flex:1"></div>
                     <div class="seg"><span class="seg-opt">−</span><span class="seg-opt on">fit</span><span class="seg-opt">+</span></div>
                   </div>

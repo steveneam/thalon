@@ -129,9 +129,10 @@ sheet law; no build lane opens on any of them before that.**
 
 **Status update (recorded s95): the D4 four were ratified and pass-1'd s86,
 and `Schedule.dc.html` is BUILT** (s86, `/app/schedule`) — the do-not-port
-bar no longer applies to it. Its s95 amendment block (S1–S3, the Schedule
-refinement pass) is the piece that awaits the W3 verdict, alongside the
-three video-arc sheet amendments.
+bar no longer applies to it. Its s95 amendment block (S1–S3) and the three
+video-arc sheet amendments are **W3 VERDICTED** (founder in-session s95,
+after his two editor additions were drawn as s95b): all four amended sheets
+are law, builds unblocked.
 
 - **`Analytics.dc.html`** — a NEW surface. Per-post table with honest per-platform
   N/A (LinkedIn reach/engagement read "partner-gated", Bluesky reach reads

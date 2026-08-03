@@ -202,8 +202,18 @@ landing/marketing video.
 > everywhere, the Dossier gained Resend's revert-confirm register, and the
 > Schedule month-media question closed NEGATIVE (no honest month treatment
 > found; thumbs stay week+agenda). Each sheet's header carries its amendment
-> record; renders verified at 1440×940, no clip. **Phase 2 (the single W3
-> verdict) is OPEN — Phase 3 waits on his word.**
+> record; renders verified at 1440×940, no clip.
+>
+> **Phase 2 CLOSED — W3 APPROVED (founder in-session, s95).** His review
+> asked two editor additions, drawn the same session as **s95b** (fresh
+> founder-directed pull: Leonardo's Video Dimensions glyphs + tool rail,
+> Arcade's timeline-edge tools, Squarespace's toolbar-on-selection): the
+> aspect seg's ⓘ names each frame (shape + format + platforms — 16:9 the
+> full video / 9:16 short-form clips / 1:1 feed posts) and the timeline
+> grows the Split · Crop · Text · Delete tools row (EDL-only, unbadged,
+> acts on the selected block; complements the copilot, never replaces it).
+> Then his word: *"Everything else is ok … W3 is approved."*
+> **Phase 3 is UNBLOCKED — builds in the order below.**
 
 **Where the arc actually stands (re-grounded s94, per rule 12 — no inherited
 claims):** the three sheets EXIST since the s72 verdicted export

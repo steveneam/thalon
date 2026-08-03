@@ -208,12 +208,19 @@ pull re-surfaced the banked Later screen itself top-ranked).
 | Schedule refinement (S1–S4) | **S1 was already drawn** (pass 1 s86 — the ledger's PENDING rows were stale against the sheet; flipped). Density ruling CLOSED NEGATIVE by the fresh pull: no product puts media in a month cell (Midday/Airtable/Toggl text-only) → thumbs stay week+agenda. **S2 recorded** as the month-mark grammar in the sheet's amendment block. **S3 DRAWN** — the Thu 11:00 concurrent cluster (cap 2 + count-door; first placement sat under the sheet's own open modal — moved; legend census updated to Published · 6). Kickoff verify ran: month + waiting-lane counts BUILT; the real gap = `placeColumn` (even split, no cap) + CalEvent's missing media — both Phase-3 build deltas. **S4 done**: `Calendar.dc.html` → `archive/` (its hold clause expired s86), and the grep-before-moving rule caught two LIVE spec pointers (`schedule.css` header + `schedule-surface.tsx` header cited Calendar.dc.html as port source) — repointed to `Schedule.dc.html` in the same change. |
 | Canvas + record hygiene | All four amended sheets **synced to canvas `f5d304cb`** (etag-checked writes; zero parity debt). Ledger rows 2/7/8/9 flipped to "AMENDED s95 (W3) · verdict OPEN"; §video Status block spent its s87 hold; README §Calendar exception RETIRED (now drawn), §Proposals gains the D4-ratified status line (a lane reading it would have refused the Schedule build); both specs carry execution records. impeccable findings on schedule.css = pre-existing sheet-verbatim ports (DOCTRINE 0), intentional, not suppressed. |
 
-**Phase 2 SENT: one W3 verdict ask** (wrap ping, hands-free — a single texted
-word covers all four amended sheets). **Phase 3 waits on his GO**, order
-stamped: editor p1 deltas → Overview/Dossier + V1's five affordances
-(Decision-5 pre-check first) → Schedule deltas (event-media read widening +
-the placeColumn cap). Zero credit spend; nothing armed; the s90 windows
-untouched.
+**Phase 2 CLOSED — W3 APPROVED, in-session.** The founder reviewed the four
+sheets and asked two editor additions, drawn the same session as **s95b**
+(fresh founder-directed pull — Leonardo's Video Dimensions glyphs + tool
+rail · Arcade's timeline-edge tools · Squarespace's toolbar-on-selection):
+the aspect seg's ⓘ names each frame (shape + format + platforms) and the
+timeline grows the Split · Crop · Text · Delete tools row (EDL-only,
+unbadged, acts on the selected block — complements the copilot). Then his
+word: *"Everything else is ok … W3 is approved."* Ledger rows 2/7/8/9 =
+VERDICTED; both specs flipped; canvas current. **Phase 3 is UNBLOCKED — s96
+builds in order:** editor p1+s95b deltas → Overview/Dossier + V1's five
+affordances (Decision-5 pre-check first) → Schedule deltas (event-media read
+widening + the placeColumn cap). Zero credit spend; nothing armed; the s90
+windows untouched.
 
 ## Sprint 9 / s94 — **CLOSED** (boot 2026-08-02 "gogogo"; wrap = this session's verify)
 
