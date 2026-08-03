@@ -105,8 +105,43 @@ const DETAIL: ProjectDetail = {
   ],
 };
 
+/** The picked cut's FULL EDL — the s96 on-demand read behind Mark/Swap/the takes band. */
+const FULL_EDL = {
+  version: 1,
+  name: "film-16x9",
+  output: {
+    width: 1280,
+    height: 720,
+    fps: 24,
+    duration: 42.3,
+    video: { mode: "encode", codec: "libx264", crf: 18, preset: "medium", pixFmt: "yuv420p" },
+  },
+  video: [
+    {
+      name: "beat-01",
+      source: { kind: "take", ref: "motion/keepers/beat-01-the-watch.mp4" },
+      in: 0,
+      duration: 42.3,
+    },
+  ],
+  audio: [],
+};
+
 function serve(detail: ProjectDetail = DETAIL) {
-  server.use(http.get("/api/videos/p1", () => HttpResponse.json(detail)));
+  server.use(
+    http.get("/api/videos/p1", () => HttpResponse.json(detail)),
+    http.get("/api/videos/p1/cuts/:cutId", ({ params }) =>
+      HttpResponse.json({
+        ...(detail.cuts.find((c) => c.id === params.cutId) ?? detail.cuts[0]),
+        edl: FULL_EDL,
+      }),
+    ),
+    http.get("/api/videos/p1/render", ({ request }) =>
+      new URL(request.url).searchParams.has("running")
+        ? HttpResponse.json({ jobs: [] })
+        : new HttpResponse(null, { status: 404 }),
+    ),
+  );
 }
 
 describe("VideoDossier (exact-mock rebuild — Video Dossier.dc.html, step 2)", () => {
@@ -117,30 +152,42 @@ describe("VideoDossier (exact-mock rebuild — Video Dossier.dc.html, step 2)", 
     expect(await screen.findByRole("heading", { name: "concept film" })).toBeInTheDocument();
     expect(container.querySelector(".content.dossier-surface")).not.toBeNull();
     expect(screen.getByRole("link", { name: "← Videos" })).toHaveAttribute("href", "/app/videos");
-    // The headline cut is the furthest-along one: v2, rendered.
-    expect(screen.getByRole("heading", { name: "concept film" }).nextElementSibling).toHaveClass(
-      "pill",
-      "pill-idle",
-    );
+    // s96 — the crumb (Synthesia) sits between the h1 and the state pill,
+    // naming the version you are on; the headline cut is v2, rendered.
+    const crumb = screen.getByRole("heading", { name: "concept film" }).nextElementSibling;
+    expect(crumb).toHaveClass("ver-crumb");
+    expect(crumb?.textContent).toContain("film-16x9 v2");
+    expect(crumb?.nextElementSibling).toHaveClass("pill", "pill-idle");
     expect(screen.getByRole("link", { name: "Open in editor" })).toHaveAttribute(
       "href",
       "/app/videos/p1/edit?cut=c2",
     );
 
-    // Version strip: two versions of the picked name (the 9:16 derive is its
-    // own name and belongs to the aspect band), one arrow, the picked one on.
-    expect(container.querySelectorAll(".ver-strip .ver")).toHaveLength(3); // 2 versions + the new-version tile
+    /*
+     * s96 — the strip is the MARKED set (the amended sheet's own words:
+     * "marked cuts ride this strip — the timestamp flood stays behind Cut
+     * history"): the Brief chip, one chip per non-derived NAME at its picked/
+     * latest version (the 9:16 derive belongs to the aspect band), then the
+     * ☆ Mark and + New version doors. v1 lives behind the crumb, not here.
+     */
+    const vers = container.querySelectorAll(".ver-strip .ver");
+    expect(vers).toHaveLength(4); // Brief + film-16x9 + ☆ Mark + New version
     expect(container.querySelectorAll(".ver-strip .ver-arrow")).toHaveLength(1);
-    expect(screen.getByText("film-16x9 v2 · 42.3s").closest(".ver")).toHaveClass("on");
+    expect(screen.getByText("✓ film-16x9").closest(".ver")).toHaveClass("on");
+    expect(screen.queryByText(/v1\b.*film-16x9/)).toBeNull();
   });
 
   it("names what changed every version, and never credits an unattributed one", async () => {
     serve();
+    const user = userEvent.setup();
     render(<VideoDossier projectId="p1" />);
     await screen.findByRole("heading", { name: "concept film" });
 
-    expect(screen.getByText(/your edit ·/)).toHaveClass("ver-a");
+    // The picked chip carries its attribution; the flood behind the crumb
+    // (s96) carries every OTHER version's, so v1's line lives there.
     expect(screen.getByText(/agent · test\/proposer · “tighten the middle”/)).toHaveClass("ver-a");
+    await user.click(document.querySelector(".ver-crumb") as HTMLElement);
+    expect(screen.getByText(/your edit ·/)).toHaveClass("ver-a");
 
     // A cut written before the attributed save door says so.
     serve({ ...DETAIL, cuts: [cut({ id: "c1", version: 1 })] });
@@ -179,7 +226,7 @@ describe("VideoDossier (exact-mock rebuild — Video Dossier.dc.html, step 2)", 
     render(<VideoDossier projectId="p1" />);
     await screen.findByRole("heading", { name: "concept film" });
 
-    expect(screen.getByText("film-9x16 v1 · 42.3s")).toHaveClass("clip-cap");
+    expect(screen.getByText("film-9x16 v1 · 0:42.3")).toHaveClass("clip-cap");
     expect(screen.getByText("1080×1920 · 8 beats")).toHaveClass("clip-kind");
     // The parent moved on since the pin and there is no auto-sync by design.
     expect(screen.getByText("parent now v4")).toHaveClass("pchip", "pill-warn");
@@ -232,8 +279,14 @@ describe("VideoDossier (exact-mock rebuild — Video Dossier.dc.html, step 2)", 
         }),
       ],
     });
+    const user = userEvent.setup();
     render(<VideoDossier projectId="p1" />);
     await screen.findByRole("heading", { name: "concept film" });
+
+    // s96: the default pick prefers the MASTER chain, so the recut-as-picked
+    // shape is reached the way an operator reaches it — through the crumb.
+    await user.click(document.querySelector(".ver-crumb") as HTMLElement);
+    await user.click(screen.getByRole("option", { name: /film-1x1 v2/ }));
 
     expect(
       screen.getByText(/none from this version · 1 elsewhere in this project, from film-16x9 v6/),
@@ -277,8 +330,10 @@ describe("VideoDossier (exact-mock rebuild — Video Dossier.dc.html, step 2)", 
     expect(await screen.findByText("hand clips through the watch face")).toBeInTheDocument();
     expect(screen.getByText("beat-01")).toBeInTheDocument();
 
-    // The pinned manifest follows the picked take.
-    await user.click(screen.getByRole("button", { name: /beat-01-the-watch\.mp4/ }));
+    // The pinned manifest follows the picked take — the PANEL's row, not the
+    // s96 audition band's tile, which shares the file name by design.
+    const panel = document.querySelector(".takes-panel") as HTMLElement;
+    await user.click(within(panel).getByRole("button", { name: /beat-01-the-watch\.mp4/ }));
     expect(await screen.findByText("4c4274dc")).toBeInTheDocument();
     expect(screen.getByText("test/mint")).toBeInTheDocument();
   });

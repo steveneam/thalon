@@ -139,28 +139,55 @@ describe("VideosOverview (exact-mock rebuild — Videos Overview.dc.html, step 2
     // The HEADLINE cut is the furthest-along one — approved, 42.3s.
     expect(within(card).getByText("approved")).toHaveClass("pill", "pill-ok");
     expect(within(card).getByText("0:42")).toHaveClass("dur");
-    // …and the family + provenance describe that same cut.
-    expect(within(card).getByText("2 versions")).toHaveClass("fam-link");
-    expect(within(card).getByText("1 aspect cut")).toHaveClass("fam-link");
+    // AMENDED s95 (Riverside): the family line is the project's own history
+    // rows — takes first, then cuts (raw counts; derived cuts are rows too).
     expect(within(card).getByText("1 take")).toHaveClass("fam-link");
-    expect(within(card).getByText("film-16x9 v2 · kling3-turbo")).toHaveClass("prov");
+    expect(within(card).getByText("3 cuts")).toHaveClass("fam-link");
+    // AMENDED s95 (ClickUp): the stamp's first token is the KIND.
+    const prov = card.querySelector(".prov") as HTMLElement;
+    expect(within(prov).getByText("imported")).toHaveClass("kind");
+    expect(prov.textContent).toBe("imported · kling3-turbo");
+    // The state pill rides the THUMB now (VEED), opaquely composited.
+    expect(within(card).getByText("approved").closest(".thumb-lg")).not.toBeNull();
   });
 
-  it("keeps the poster a placeholder and never invents a state or a badge", async () => {
+  it("s96: a take's B-media.0 poster frames the card, keepers first", async () => {
+    const poster = {
+      ref: { kind: "stored" as const, sha256: "c".repeat(64), ext: "webp" as const, width: 640, height: 360 },
+      provenance: "derived" as const,
+    };
+    server.use(
+      http.get("/api/videos", () => HttpResponse.json({ projects: [SUMMARIES[0]] })),
+      http.get("/api/videos/p1", () =>
+        HttpResponse.json({ ...P1, takes: [{ ...P1.takes[0], poster }] }),
+      ),
+    );
+    render(<VideosOverview />);
+    await screen.findByText("1 project");
+    const thumb = document.querySelector(".thumb-lg.framed") as HTMLElement;
+    expect(thumb).not.toBeNull();
+    expect(thumb.style.backgroundImage).toContain(`/api/media/${"c".repeat(64)}.webp`);
+    // The frame IS the preview — no placeholder words over it.
+    expect(screen.queryByText("no preview yet")).toBeNull();
+  });
+
+  it("says no-preview in words and never invents a state or a badge", async () => {
     serveAll();
     render(<VideosOverview />);
     await screen.findByText("2 projects");
 
-    // Founder s75: the striped placeholder stands until the media join ships.
-    expect(screen.getAllByText("no poster yet")).toHaveLength(2);
+    // AMENDED s95 (VEED): a thumb with no frame says so in WORDS — a
+    // deliberate tile, never a blank; no take here carries a poster yet.
+    expect(screen.getAllByText("no preview yet")).toHaveLength(2);
     expect(document.querySelector(".vgrid img, .vgrid video")).toBeNull();
+    expect(document.querySelector(".thumb-lg.framed")).toBeNull();
 
     const empty = screen.getByText("ship-notes explainer").closest(".vcard") as HTMLElement;
     expect(within(empty).getByText("no cuts yet")).toHaveClass("pill", "pill-idle");
     expect(within(empty).getByText("no takes yet")).toHaveClass("subtle");
     // Nothing assembled → no runtime badge at all, rather than a 0:00.
     expect(empty.querySelector(".dur")).toBeNull();
-    expect(within(empty).getByText("takes only · no cut yet")).toHaveClass("prov");
+    expect((empty.querySelector(".prov") as HTMLElement).textContent).toBe("imported · by you");
   });
 
   it("filters on the same cut the pill names", async () => {

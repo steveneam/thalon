@@ -70,36 +70,27 @@ function plural(n: number, word: string): string {
 }
 
 /**
- * The family line — the sheet's three derivative dimensions, mapped onto
- * the three this engine actually records: versions of the headline cut,
- * derived aspect cuts (each one a recut with its lineage pinned), and the
- * takes the project holds. A dimension with nothing in it is left out
- * rather than restated (the state pill already says "no cuts yet"), exactly
- * as the sheet's own second card carries two parts instead of three.
+ * The family line — AMENDED s95 (Riverside's "2 Recordings · 5 Edits"): the
+ * counts are the project's own HISTORY ROWS, takes first then cuts, exactly
+ * the two tables this engine keeps (videoTakes · videoCuts). Raw row counts
+ * on purpose — the s79 disagreement (card said "4 aspect cuts", the dossier's
+ * per-version band said "none yet") came from counting a DERIVED dimension
+ * two ways; a row count has one answer everywhere, and the crumb's flood in
+ * the dossier shows exactly these rows.
  *
- * Platform renders are the fourth dimension the sheet draws and this engine
+ * Platform renders are the third dimension the sheet draws and this engine
  * has no join for; the surface says that once, in the closing record line,
  * instead of implying zero on every card.
  */
-export function family(detail: ProjectDetail, cut: CutView | null): FamilyPart[] {
-  const versions = cut === null ? 0 : detail.cuts.filter((c) => c.name === cut.name).length;
-  // Scoped to the cut this card SPEAKS FOR — the same one the pill, the
-  // runtime badge and the provenance stamp describe, and the same one the
-  // dossier opens its aspect band on. It used to count every derived cut in
-  // the project, which broke the card's own one-rule doctrine twice: the
-  // card read "4 aspect cuts" while the dossier it opened said "none yet"
-  // (live s79, thalon-concept-film — the four hang off concept-film-16x9
-  // v6, not off the headline), and a headline cut that is ITSELF a recut
-  // counted itself among its own derivatives.
-  const recuts = derivedFrom(detail.cuts, cut).length;
-  const parts: FamilyPart[] = [];
-  if (versions > 0) parts.push({ text: plural(versions, "version"), door: true });
-  if (recuts > 0) parts.push({ text: plural(recuts, "aspect cut"), door: true });
-  parts.push(
+export function family(detail: ProjectDetail): FamilyPart[] {
+  const parts: FamilyPart[] = [
     detail.takes.length === 0
       ? { text: "no takes yet", door: false }
       : { text: plural(detail.takes.length, "take"), door: true },
-  );
+  ];
+  // Left out at zero rather than restated — the state pill already says
+  // "no cuts yet", exactly as the sheet's composing card carries two parts.
+  if (detail.cuts.length > 0) parts.push({ text: plural(detail.cuts.length, "cut"), door: true });
   return parts;
 }
 
@@ -115,11 +106,38 @@ export function mintModel(takes: TakeView[]): string | null {
   return models.size === 1 ? [...models][0] : null;
 }
 
-/** The sheet's mono provenance stamp: what the card's picture came from. */
+/**
+ * AMENDED s95 — the provenance stamp's first token is the project's KIND
+ * (ClickUp's per-card kind label). The kinds are the entry doors this engine
+ * actually has: the one-prompt runner stamps its own description, a project
+ * whose visual takes are all stills is an image, and everything else came
+ * through the import script — those are the only two doors a project can
+ * arrive by today, so "imported" is a fact, not a fallback guess.
+ */
+export function projectKind(detail: ProjectDetail): "one-prompt" | "image" | "imported" {
+  if (detail.description?.startsWith("One-prompt")) return "one-prompt";
+  const visual = detail.takes.filter((t) => t.kind !== "audio");
+  if (visual.length > 0 && visual.every((t) => t.kind === "still")) return "image";
+  return "imported";
+}
+
+/** The stamp AFTER the kind token: the mint model where every take agrees, else the headline cut. */
 export function provenance(detail: ProjectDetail, cut: CutView | null): string {
   const model = mintModel(detail.takes);
-  const head = cut === null ? "takes only · no cut yet" : `${cut.name} v${cut.version}`;
-  return model === null ? head : `${head} · ${model}`;
+  if (model !== null) return model;
+  if (projectKind(detail) === "imported") return "by you";
+  return cut === null ? "no cut yet" : `${cut.name} v${cut.version}`;
+}
+
+/**
+ * s96 (V2) — the CARD'S POSTER: a frame from the project's own takes,
+ * keepers first (the card should wear what the cut would), first-postered
+ * otherwise. Null keeps the amended sheet's honest words ("no preview yet")
+ * — never a blank, never a borrowed frame.
+ */
+export function cardPoster(detail: ProjectDetail): TakeView["poster"] {
+  const postered = detail.takes.filter((t) => t.poster !== null);
+  return (postered.find((t) => t.disposition === "keeper") ?? postered[0])?.poster ?? null;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

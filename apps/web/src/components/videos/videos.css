@@ -60,3 +60,25 @@
 .videos-surface .vcard:focus-visible, .videos-surface .newcard:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
 .videos-surface .imp-panel { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--n-900); }
 .videos-surface .imp-panel .t-data { color: var(--n-900); }
+
+/*
+ * ── s96 · the amended-sheet deltas (Videos Overview.dc.html AMENDED s95) ──
+ * Sheet-helmet ports first (verbatim), then the app adaptations, named.
+ */
+/* The state rides the PICTURE (VEED), opaquely composited — ok/warn subtle
+   channels are ~13% alpha tints and vanish over real posters, so the pill
+   backs itself with --n-bg first (the s94 Sites lesson, drawn into the sheet). */
+.videos-surface .thumb-lg .pill { position: absolute; top: 8px; left: 8px; }
+.videos-surface .thumb-lg .pill-ok, .videos-surface .thumb-lg .pill-warn { background-color: var(--n-bg); }
+.videos-surface .thumb-lg .pill-ok { background-image: linear-gradient(var(--ok-subtle), var(--ok-subtle)); }
+.videos-surface .thumb-lg .pill-warn { background-image: linear-gradient(var(--warn-subtle), var(--warn-subtle)); }
+/* The idle/err pills ride the thumb too in the build (the sheet's composing
+   card draws idle there); their subtle fills are equally alpha, so the same
+   opaque compositing applies — one rule, no tint left to chance. */
+.videos-surface .thumb-lg .pill-idle, .videos-surface .thumb-lg .pill-err { background-color: var(--n-bg); }
+.videos-surface .thumb-lg .pill-idle { background-image: linear-gradient(var(--n-300), var(--n-300)); }
+.videos-surface .thumb-lg .pill-err { background-image: linear-gradient(var(--err-subtle), var(--err-subtle)); }
+.videos-surface .kind { color: var(--n-900); font-weight: 600; }
+/* s96 — a thumb wearing a real take frame (B-media.0): cover, centred;
+   the striped placeholder stays the no-poster truth, with its words. */
+.videos-surface .thumb-lg.framed { background-size: cover; background-position: center; }

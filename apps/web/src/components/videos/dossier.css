@@ -129,3 +129,69 @@
 .dossier-surface .take-manifest dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; }
 .dossier-surface .take-manifest dt { font-size: 12px; color: var(--n-900); }
 .dossier-surface .take-manifest dd { margin: 0; word-break: break-all; }
+
+/*
+ * ── s96 · the V1 amendment (Video Dossier.dc.html AMENDED s95 — "THIS IS
+ * V1 DRAWN"). First the sheet helmet's own new classes, ported verbatim;
+ * then the app adaptations, each NAMED. ──
+ */
+.dossier-surface .ver-crumb { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 1px solid var(--n-400); border-radius: var(--r-ctl); font-size: 12.5px; font-weight: 600; background: var(--n-100); cursor: pointer; }
+.dossier-surface .ver-crumb:hover { border-color: var(--n-500); }
+.dossier-surface .ver-radio { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--n-600); flex: none; align-self: center; }
+.dossier-surface .ver-radio.sel { border-color: var(--act); background: var(--act); box-shadow: inset 0 0 0 2px var(--n-bg); }
+.dossier-surface .ver-mark { color: var(--ok); font-weight: 600; }
+.dossier-surface .confirm { position: absolute; z-index: 5; width: 300px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 11px; box-shadow: 0 14px 40px oklch(0 0 0 / 0.55); padding: 13px 14px; display: flex; flex-direction: column; gap: 9px; }
+.dossier-surface .confirm-note { font-size: 11.5px; color: var(--n-800); line-height: 1.45; }
+.dossier-surface .take { position: relative; display: flex; gap: 9px; align-items: center; padding: 7px 10px 7px 7px; border: 1px solid var(--n-400); border-radius: 8px; background: var(--n-bg); cursor: pointer; min-width: 0; }
+.dossier-surface .take:hover { border-color: var(--n-500); }
+.dossier-surface .take.play { border-color: var(--act); box-shadow: 0 0 0 1px var(--act); background: var(--n-100); }
+.dossier-surface .take .thumb-sm { width: 52px; height: 33px; }
+.dossier-surface .take-t { font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.dossier-surface .take-a { font-family: var(--font-data); font-size: 10px; color: var(--n-800); white-space: nowrap; }
+
+/*
+ * s96 adaptations, each named:
+ *  - the sheet's crumb/radio/chips are <div>s; real ones are buttons, and a
+ *    chip that holds BOTH a compare radio and a version pick splits into a
+ *    plain .ver span with two buttons inside (a button inside a button is
+ *    not markup a browser honours — the editor's audition lesson);
+ *  - the crumb's version flood and the compare rows are STATES (absent at
+ *    rest), drawn in the sheet's own .confirm register and the house diff
+ *    grammar respectively;
+ *  - a take tile wearing a real B-media.0 poster composites it under the
+ *    thumb (cover, centred) — stripes keep meaning "no frame derived yet";
+ *  - .numfield is the editor sheet's field register, restated here scoped
+ *    (the mark band asks for a name in the same grammar the variant band
+ *    uses there).
+ */
+.dossier-surface button.ver-radio { padding: 0; cursor: pointer; }
+.dossier-surface button.ver-radio:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+.dossier-surface .ver-body { display: flex; gap: 9px; align-items: center; min-width: 0; background: transparent; border: none; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.dossier-surface .ver-body:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+.dossier-surface .ver[data-door="false"] { cursor: default; }
+.dossier-surface .ver[data-door="false"]:hover { border-color: var(--n-400); }
+.dossier-surface button.ver-crumb { font-family: inherit; }
+.dossier-surface .ver-crumb:focus-visible, .dossier-surface .ver:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.dossier-surface .as-text-btn { background: none; border: none; padding: 0; font: inherit; color: var(--act); cursor: pointer; }
+.dossier-surface .crumb-pop { left: 0; top: 34px; width: 380px; max-height: 320px; overflow-y: auto; }
+.dossier-surface .crumb-row { display: flex; flex-direction: column; gap: 1px; padding: 6px 8px; border: none; border-radius: var(--r-ctl); background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.dossier-surface .crumb-row:hover { background: var(--n-200); }
+.dossier-surface .crumb-row.on { background: var(--n-300); box-shadow: inset 2px 0 0 var(--act); }
+.dossier-surface .crumb-row:focus-visible { outline: 2px solid var(--act); outline-offset: -2px; }
+.dossier-surface .mark-band { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 10px 16px; border-top: 1px solid var(--n-400); background: var(--n-bg); font-size: 12.5px; }
+.dossier-surface .cmp-panel { display: flex; flex-direction: column; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--n-400); background: var(--n-bg); font-size: 12.5px; }
+.dossier-surface .cmp-row { display: flex; align-items: center; gap: 10px; }
+.dossier-surface .numfield { display: flex; flex-direction: column; gap: 3px; font-size: 11.5px; color: var(--n-900); }
+.dossier-surface .numfield input { width: 100%; background: var(--n-100); border: 1px solid var(--n-400); border-radius: var(--r-ctl); padding: 5px 8px; font: 400 12.5px var(--font-ui); color: var(--n-1000); }
+.dossier-surface .numfield input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+.dossier-surface .take-body { display: flex; gap: 9px; align-items: center; min-width: 0; background: transparent; border: none; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.dossier-surface .take-body:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+.dossier-surface .take-t, .dossier-surface .take-a { overflow: hidden; text-overflow: ellipsis; }
+.dossier-surface .thumb-sm.framed { background-size: cover; background-position: center; }
+/* s96 — chips keep their natural width and the STRIP scrolls (the
+   Bounded-List Rule's sideways twin, already on this strip): without
+   flex:none a real project's chip count crushed every chip's text to
+   ellipsis dust instead of scrolling. The cap keeps one verbose
+   attribution line from making a chip the width of the card. */
+.dossier-surface .ver { flex: none; max-width: 300px; }
+.dossier-surface .take { flex: none; max-width: 300px; }

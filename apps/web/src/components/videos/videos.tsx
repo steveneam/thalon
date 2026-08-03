@@ -7,14 +7,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FILTERS,
   cardDate,
+  cardPoster,
   family,
   headlineCut,
   passesFilter,
+  projectKind,
   provenance,
   runtime,
   statePill,
   type FilterId,
 } from "@/components/videos/videos-model";
+import { srcOf } from "@/lib/media/resolve";
 import { fetchProjectDetail, fetchProjectSummaries } from "@/lib/videos/client";
 import type { ProjectDetail, ProjectSummary } from "@/lib/videos/types";
 import { useListKeys } from "@/lib/workspace/keyboard";
@@ -41,9 +44,10 @@ type ProjectRecord = ProjectDetail | typeof UNREADABLE;
  *    actually has (versions · aspect cuts · takes); platform renders are
  *    named once in the closing record line rather than implied zero on
  *    every card;
- *  - the poster stays the sheet's striped PLACEHOLDER (founder s75: "also
- *    have placeholder until bmedia ready") — a poster frame derived from
- *    video is not built yet;
+ *  - the poster is the project's own take frame (s96 — the B-media.0
+ *    posters are on the wire; the s75 "placeholder until bmedia ready" hold
+ *    is spent), and a card with no frame says "no preview yet" in WORDS —
+ *    the amended sheet's deliberate no-preview tile, never a blank;
  *  - importing media has no browser door: the band keeps the sheet's exact
  *    chrome and the two buttons open the disclosure that names the real
  *    path, instead of offering an upload that does not exist;
@@ -270,7 +274,14 @@ export function VideosOverview() {
         <div className="vgrid">
           {shown.map(({ summary, detail, cut }) => {
             const pill = detail === null ? null : statePill(cut);
-            const badge = detail === null ? null : runtime(cut);
+            const kind = detail === null ? null : projectKind(detail);
+            /*
+             * AMENDED s95: a STILL drops its duration badge — a still has no
+             * duration, and 0:00 was a claim about time an image does not
+             * have. The kind token says image instead.
+             */
+            const badge = detail === null || kind === "image" ? null : runtime(cut);
+            const poster = detail === null ? null : cardPoster(detail);
             const isPicked = summary.id === picked;
             return (
               <Link
@@ -280,8 +291,27 @@ export function VideosOverview() {
                 className={isPicked ? "vcard sel" : "vcard"}
                 onFocus={() => setPickedId(summary.id)}
               >
-                <div className="thumb-lg">
-                  <span>no poster yet</span>
+                {/*
+                  AMENDED s95 (VEED projects grid): the STATE rides the
+                  picture — pill on the thumb, opaquely composited (the s94
+                  Sites lesson: subtle tints vanish over real posters). The
+                  thumb wears the project's own take frame (s96 — the
+                  B-media.0 posters are finally on the wire), and with no
+                  frame it says so in WORDS: a deliberate no-preview tile,
+                  never a blank or a borrowed image.
+                */}
+                <div
+                  className={poster === null ? "thumb-lg" : "thumb-lg framed"}
+                  style={
+                    poster === null ? undefined : { backgroundImage: `url("${srcOf(poster)}")` }
+                  }
+                >
+                  {poster === null && <span>no preview yet</span>}
+                  {pill === null ? (
+                    <span className="pill pill-err">record unreadable</span>
+                  ) : (
+                    <span className={pill.className}>{pill.text}</span>
+                  )}
                   {badge && <span className="dur">{badge}</span>}
                 </div>
                 <div className="vbody">
@@ -289,11 +319,6 @@ export function VideosOverview() {
                     <span className="t-title" title={summary.name}>
                       {summary.name}
                     </span>
-                    {pill === null ? (
-                      <span className="pill pill-err">record unreadable</span>
-                    ) : (
-                      <span className={pill.className}>{pill.text}</span>
-                    )}
                   </div>
                   <div className="fam">
                     {detail === null ? (
@@ -302,7 +327,7 @@ export function VideosOverview() {
                         {summary.keepers + summary.rejects} takes on the list read
                       </span>
                     ) : (
-                      family(detail, cut).map((part, i) => (
+                      family(detail).map((part, i) => (
                         <span key={part.text} style={{ display: "contents" }}>
                           {i > 0 && <span className="sep">·</span>}
                           <span className={part.door ? "fam-link" : "subtle"}>{part.text}</span>
@@ -311,8 +336,15 @@ export function VideosOverview() {
                     )}
                   </div>
                   <div style={{ display: "flex", alignItems: "center" }}>
+                    {/* AMENDED s95 (ClickUp): the stamp's first token is the KIND. */}
                     <span className="prov">
-                      {detail === null ? "record unread" : provenance(detail, cut)}
+                      {detail === null ? (
+                        "record unread"
+                      ) : (
+                        <>
+                          <span className="kind">{kind}</span> · {provenance(detail, cut)}
+                        </>
+                      )}
                     </span>
                     <div style={{ flex: 1 }} />
                     <span className="t-data" title={`created ${summary.createdAt}`}>
@@ -333,9 +365,9 @@ export function VideosOverview() {
 
       <div style={{ display: "flex" }}>
         <span className="t-label">
-          Derivatives never clutter this grid — every project folds its versions, aspect cuts and
-          takes behind one card. Open a project for the full family. Platform renders aren’t joined
-          to a project yet, and posters wait on the media join, so no card claims either.
+          Derivatives never clutter this grid — every project folds its takes, cuts and versions
+          behind one card. Open a project for the full family. Platform renders aren’t joined to a
+          project yet, so no card claims one.
         </span>
       </div>
     </div>

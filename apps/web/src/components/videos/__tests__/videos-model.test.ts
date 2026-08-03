@@ -8,6 +8,7 @@ import {
   headlineCut,
   mintModel,
   passesFilter,
+  projectKind,
   provenance,
   runtime,
   soleParentOf,
@@ -120,8 +121,8 @@ describe("runtime — the poster's badge", () => {
   });
 });
 
-describe("family — the derivative dimensions this engine records", () => {
-  it("counts versions of the headline cut's name, aspect cuts, and takes", () => {
+describe("family — AMENDED s95: the project's own history rows (Riverside)", () => {
+  it("counts takes then cuts — raw row counts, one answer everywhere", () => {
     const head = cut({ id: "c2", name: "film-16x9", version: 2 });
     const detail = project(
       [
@@ -142,65 +143,43 @@ describe("family — the derivative dimensions this engine records", () => {
       ],
       [take({ id: "t1" }), take({ id: "t2" })],
     );
-    expect(family(detail, head)).toEqual([
-      { text: "2 versions", door: true },
-      { text: "1 aspect cut", door: true },
+    expect(family(detail)).toEqual([
       { text: "2 takes", door: true },
+      { text: "3 cuts", door: true },
     ]);
   });
 
-  it("leaves out a dimension with nothing in it instead of restating the pill", () => {
-    expect(family(project([]), null)).toEqual([{ text: "no takes yet", door: false }]);
-    const head = cut();
-    expect(family(project([head], [take()]), head)).toEqual([
-      { text: "1 version", door: true },
-      { text: "1 take", door: true },
-    ]);
+  it("leaves a zero-cut project's dimension out instead of restating the pill", () => {
+    expect(family(project([]))).toEqual([{ text: "no takes yet", door: false }]);
+    expect(family(project([], [take()]))).toEqual([{ text: "1 take", door: true }]);
   });
 
-  /**
-   * s79 V1, measured live on `thalon-concept-film`: the card read "4 aspect
-   * cuts" and the dossier it opened said "none yet", because the card counted
-   * every derived cut in the PROJECT while the dossier's band is per-version.
-   * Two of those four hung off a different cut — and one of them was the
-   * headline cut itself, counted among its own derivatives.
+  /*
+   * The s79 disagreement ("4 aspect cuts" on the card, "none yet" in the
+   * dossier's per-version band) came from counting a DERIVED dimension two
+   * ways. A raw row count cannot disagree with anything: the crumb's flood
+   * in the dossier lists exactly these rows. The ratchet survives by
+   * construction — this pin keeps derived cuts COUNTED (they are rows), not
+   * re-classified.
    */
-  describe("the aspect count is scoped to the cut the card speaks for", () => {
-    const head = cut({ id: "head", name: "film-1x1", version: 2 });
-    const lineage = (parentCutId: string) => ({
-      parentCutId,
-      aspect: "1:1",
-      parentName: "film-16x9",
-      parentVersion: 6,
-      parentLatestVersion: 8,
+  it("counts derived cuts as rows — they are cuts, and the dossier's flood shows them", () => {
+    const base = cut({ id: "base", name: "film-16x9", version: 6 });
+    const derived = cut({
+      id: "d1",
+      name: "film-1x1",
+      version: 1,
+      lineage: {
+        parentCutId: "base",
+        aspect: "1:1",
+        parentName: "film-16x9",
+        parentVersion: 6,
+        parentLatestVersion: 6,
+      },
     });
-
-    it("does not count recuts that hang off another version", () => {
-      const detail = project([
-        cut({ id: "base", name: "film-16x9", version: 6 }),
-        cut({ id: "d1", name: "film-1x1", version: 1, lineage: lineage("base") }),
-        head,
-        cut({ id: "d2", name: "film-9x16", version: 1, lineage: lineage("base") }),
-      ]);
-      expect(family(detail, head).map((p) => p.text)).not.toContain("3 aspect cuts");
-      expect(family(detail, head).some((p) => p.text.includes("aspect cut"))).toBe(false);
-    });
-
-    it("never counts the headline cut as one of its own aspect cuts", () => {
-      // The live shape: the cut the card speaks for is ITSELF a recut, so a
-      // project-wide "has lineage" count included it in its own family line.
-      const derivedHead = cut({ id: "head", name: "film-1x1", version: 2, lineage: lineage("base") });
-      const detail = project([cut({ id: "base", name: "film-16x9", version: 6 }), derivedHead]);
-      expect(family(detail, derivedHead).map((p) => p.text)).toEqual(["1 version", "no takes yet"]);
-    });
-
-    it("still counts the recuts that DO hang off it", () => {
-      const detail = project([
-        head,
-        cut({ id: "d1", name: "film-9x16", version: 1, lineage: lineage("head") }),
-      ]);
-      expect(family(detail, head).map((p) => p.text)).toContain("1 aspect cut");
-    });
+    expect(family(project([base, derived], [take()])).map((p) => p.text)).toEqual([
+      "1 take",
+      "2 cuts",
+    ]);
   });
 });
 
@@ -243,14 +222,14 @@ describe("derivedElsewhere / soleParentOf — what the dossier's empty band stil
   });
 });
 
-describe("provenance — visible, never guessed", () => {
-  it("names the cut, and the mint model when every take agrees on one", () => {
+describe("provenance — visible, never guessed (AMENDED s95: the kind token leads)", () => {
+  it("names the mint model when every take agrees on one", () => {
     const head = cut({ name: "film-16x9", version: 6 });
     const detail = project(
       [head],
       [take({ provenance: { model: "kling3-turbo" } }), take({ id: "t2", provenance: { model: "kling3-turbo" } })],
     );
-    expect(provenance(detail, head)).toBe("film-16x9 v6 · kling3-turbo");
+    expect(provenance(detail, head)).toBe("kling3-turbo");
   });
 
   it("drops the model when the takes disagree — a majority is not a fact", () => {
@@ -260,11 +239,28 @@ describe("provenance — visible, never guessed", () => {
       take({ id: "t3", provenance: { model: "seedance" } }),
     ];
     expect(mintModel(takes)).toBeNull();
-    expect(provenance(project([cut()], takes), cut())).toBe("film-16x9 v1");
+    // No agreed model and no one-prompt stamp: the project came through the
+    // import script — "by you" is the fact, and the kind token beside it
+    // (the surface's job) says "imported".
+    expect(provenance(project([cut()], takes), cut())).toBe("by you");
   });
 
-  it("says what a project with takes but no cut is", () => {
-    expect(provenance(project([], [take()]), null)).toBe("takes only · no cut yet");
+  it("falls back to the headline cut for a one-prompt project with no agreed model", () => {
+    const oneprompt = { ...project([cut()], [take()]), description: "One-prompt auto-run — x" };
+    expect(provenance(oneprompt, cut())).toBe("film-16x9 v1");
+    expect(provenance({ ...oneprompt, cuts: [] }, null)).toBe("no cut yet");
+  });
+
+  it("classifies the project KIND from the doors this engine actually has", () => {
+    expect(projectKind({ ...project([]), description: "One-prompt auto-run — x" })).toBe(
+      "one-prompt",
+    );
+    expect(projectKind(project([], [take({ kind: "still" })]))).toBe("image");
+    // Stills + a music candidate is still an image project — audio is not visual.
+    expect(
+      projectKind(project([], [take({ kind: "still" }), take({ id: "t2", kind: "audio", slot: null })])),
+    ).toBe("image");
+    expect(projectKind(project([], [take()]))).toBe("imported");
   });
 });
 
