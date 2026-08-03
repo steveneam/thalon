@@ -2,7 +2,7 @@ import { pathToFileURL } from "node:url";
 import { resolveDraftFormatSpec, tenantCtx } from "@thalon/contracts";
 import { openDb, type Repos } from "@thalon/db";
 import { findOrphans, getObjectStore, type ObjectStore } from "@thalon/platform";
-import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local";
+import { assertSoleDbWriter, loadEnvLocal } from "./env-local";
 
 /**
  * B4.6 orphan sweep — the documented GC stance's executable half (the
@@ -69,7 +69,6 @@ export async function sweepObjectStore(
 async function main(): Promise<void> {
   const deleteOrphans = process.argv.includes("--delete");
   loadEnvLocal();
-  useWebAppDataDir();
   await assertSoleDbWriter();
   const handle = await openDb();
   try {

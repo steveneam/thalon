@@ -14,7 +14,7 @@ import {
   type IngestDeps,
 } from "@thalon/engine";
 import { gatewayJudgeDriver, runJudgePipeline, type JudgeModelDriver } from "@thalon/judge";
-import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local";
+import { assertSoleDbWriter, loadEnvLocal } from "./env-local";
 
 export interface DogfoodInput {
   tenantSlug: string;
@@ -160,7 +160,6 @@ export const TENANT_ZERO: DogfoodInput = loadDogfoodInput(SELF_TENANT_PATH);
 
 async function main(): Promise<void> {
   loadEnvLocal();
-  useWebAppDataDir();
   await assertSoleDbWriter();
   // Optional argv: path to a tenant-run JSON (B2.1). No arg = tenant #0.
   const inputPath = process.argv[2];

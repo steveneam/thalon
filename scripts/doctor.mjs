@@ -244,6 +244,51 @@ async function deploySeam() {
   );
 }
 
+/**
+ * The one-root ratchet's REPORTING layer (s97). Resolution being
+ * cwd-independent is proved on every verify (packages/platform
+ * src/__tests__/data-root.test.ts); what doctor adds is watching the WORLD —
+ * before s97 it ran clean, exited 0 and said nothing while two `.data`
+ * stores diverged for weeks (s79 dangling cache pointers, the s96 backfill's
+ * orphaned posters, sweeps the app never saw). A populated object store
+ * anywhere but the canonical root means something is bypassing the seam.
+ */
+function dataRootSeam() {
+  const canonical = process.env.THALON_DATA_DIR
+    ? path.resolve(repoRoot, process.env.THALON_DATA_DIR)
+    : path.join(repoRoot, ".data");
+  const strays = [];
+  for (const base of ["apps", "packages", "eval"]) {
+    let entries;
+    try {
+      entries = readdirSync(path.join(repoRoot, base));
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      const objDir = path.join(repoRoot, base, entry, ".data", "objects");
+      try {
+        if (readdirSync(objDir).length > 0) strays.push(path.relative(repoRoot, objDir));
+      } catch {
+        /* absent — the healthy case */
+      }
+    }
+  }
+  if (strays.length > 0) {
+    return seamRow(
+      "data-root",
+      "not-live-ready",
+      `SPLIT-BRAIN regrowing: populated store(s) at ${strays.join(", ")} beside the canonical ${canonical} — something bypasses the workspace-anchored resolution (s79/s96 failure class)`,
+      "merge the stray tree into the canonical root, delete it, and find what wrote it",
+    );
+  }
+  return seamRow(
+    "data-root",
+    "live-ready",
+    `one store: ${canonical} (relative THALON_DATA_DIR anchors at the workspace root — packages/platform/src/env.ts; strays under apps/*/packages/*/eval/* would flag here)`,
+  );
+}
+
 function trendSeam() {
   return seamRow(
     "trend",
@@ -256,7 +301,7 @@ async function main() {
   // Executable ratchet: refuse to report from broken detection logic.
   selfCheck();
 
-  const rows = [await renderSeam(), await transcriptSeam(), await deploySeam(), trendSeam()];
+  const rows = [await renderSeam(), await transcriptSeam(), await deploySeam(), dataRootSeam(), trendSeam()];
   const missing = rows.filter((r) => r.status === "not-live-ready").length;
 
   console.log("");

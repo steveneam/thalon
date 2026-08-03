@@ -19,7 +19,6 @@
 // Relative imports on purpose: worktree lanes junction node_modules to the
 // main checkout, so "@thalon/*" would resolve to main's copy — the relative
 // path always runs THIS checkout's code.
-import path from "node:path";
 import { tenantCtx } from "../packages/contracts/src/index";
 import { openDb } from "../packages/db/src/index";
 import { backfillTakePosters } from "../packages/engine/src/index";
@@ -40,18 +39,6 @@ function mediaRootOf(meta: unknown): string | null {
 
 async function main(): Promise<void> {
   const only = arg("project");
-  /*
-   * THE STORE THE WEB APP READS, not the one this cwd implies. With
-   * THALON_DATA_DIR unset the local store resolves `.data` against the
-   * CURRENT directory — the web app's cwd is apps/web, a repo-root script's
-   * is not, and the first run of this script proved it: 66 posters written
-   * to a store no route reads, every one a 404 on the surface (rule 11 —
-   * the constraint was ours, not the platform's). Pinning the default to
-   * the app's own root makes both sides mean the same bytes.
-   */
-  if (!process.env.THALON_DATA_DIR && !process.env.OBJECT_STORE?.includes("s3")) {
-    process.env.THALON_DATA_DIR = path.resolve(__dirname, "../apps/web/.data");
-  }
   const handle = await openDb();
   const store = getObjectStore();
   const derivedAt = new Date().toISOString();

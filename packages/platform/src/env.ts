@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { z } from "zod";
 
 export type DbDriver = "pglite" | "postgres";
@@ -208,6 +210,49 @@ export type ThalonEnv = z.infer<typeof envSchema>;
 /** Structural env type: process.env satisfies it, and test fixtures need no NODE_ENV boilerplate. */
 export type EnvSource = Record<string, string | undefined>;
 
+/**
+ * A RELATIVE data dir must mean the same directory from every process in the
+ * workspace. Left to resolve against cwd, the default `.data` split into TWO
+ * stores — `next dev` (cwd `apps/web`) vs everything run at the repo root —
+ * and the split bit three times before this seam closed it: the s79 dangling
+ * llm-cache pointers (one cache index across two stores; scar in
+ * engine/ingest/embed.ts), the s96 backfill's 66 posters written where no
+ * route reads, and the sweep scheduler writing sweeps the app never saw.
+ * Relative values now anchor at the workspace root (nearest ancestor with
+ * `.git` or a workspaces `package.json`); absolute values — Docker's `/data`,
+ * every hermetic test's tmpdir — pass through untouched. Outside a workspace
+ * the old cwd behaviour stands.
+ */
+const workspaceRootByCwd = new Map<string, string | null>();
+
+function findWorkspaceRoot(from: string): string | null {
+  const cached = workspaceRootByCwd.get(from);
+  if (cached !== undefined) return cached;
+  let found: string | null = null;
+  for (let dir = from; ; ) {
+    if (existsSync(path.join(dir, ".git"))) {
+      found = dir;
+      break;
+    }
+    const pkgPath = path.join(dir, "package.json");
+    if (existsSync(pkgPath)) {
+      try {
+        if (JSON.parse(readFileSync(pkgPath, "utf8")).workspaces) {
+          found = dir;
+          break;
+        }
+      } catch {
+        // an unparsable package.json is not a workspace marker
+      }
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  workspaceRootByCwd.set(from, found);
+  return found;
+}
+
 export function readEnv(env: EnvSource = process.env): ThalonEnv {
   const present = Object.fromEntries(
     Object.entries(env).filter(([, v]) => v !== undefined && v !== ""),
@@ -219,7 +264,15 @@ export function readEnv(env: EnvSource = process.env): ThalonEnv {
       .join("; ");
     throw new Error(`invalid environment: ${issues}`);
   }
-  return parsed.data;
+  const out = parsed.data;
+  out.THALON_DATA_DIR = resolveDataDir(out.THALON_DATA_DIR, process.cwd());
+  return out;
+}
+
+/** Exported for the one-root ratchet test; readEnv is the only production caller. */
+export function resolveDataDir(dir: string, from: string): string {
+  if (path.isAbsolute(dir)) return dir;
+  return path.resolve(findWorkspaceRoot(from) ?? from, dir);
 }
 
 export interface SeamConfig {

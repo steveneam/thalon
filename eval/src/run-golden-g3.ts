@@ -5,7 +5,7 @@ import { openDb } from "@thalon/db";
 import { callTierJudge, gatewayJudgeDriver, type JudgeTier } from "@thalon/judge";
 import { readEnv, withGatewayGuard, modelTiers } from "@thalon/platform";
 import { parseJsonl } from "./dataset";
-import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local";
+import { assertSoleDbWriter, loadEnvLocal } from "./env-local";
 
 /**
  * LIVE golden-G3 runner (B1.5). Drives every `judge_g3_grounding` golden row
@@ -25,7 +25,6 @@ import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local"
  */
 async function main(): Promise<void> {
   loadEnvLocal();
-  useWebAppDataDir();
   await assertSoleDbWriter();
 
   const onlyIdx = process.argv.indexOf("--only");

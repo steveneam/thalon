@@ -18,7 +18,7 @@ import {
 } from "@thalon/engine";
 import { gatewayJudgeDriver, runJudgePipeline, type JudgeModelDriver } from "@thalon/judge";
 import { TENANT_ZERO } from "./dogfood";
-import { assertSoleDbWriter, loadEnvLocal, useWebAppDataDir } from "./env-local";
+import { assertSoleDbWriter, loadEnvLocal } from "./env-local";
 
 /**
  * B6.6: the page-loop dogfood — the WHOLE origination live loop as one
@@ -190,7 +190,6 @@ export const PAGE_LOOP_TENANT_ZERO: PageLoopDogfoodInput = pageLoopDogfoodInputS
 
 async function main(): Promise<void> {
   loadEnvLocal();
-  useWebAppDataDir();
   await assertSoleDbWriter();
   const inputPath = process.argv[2];
   const input = inputPath ? loadPageLoopDogfoodInput(inputPath) : PAGE_LOOP_TENANT_ZERO;

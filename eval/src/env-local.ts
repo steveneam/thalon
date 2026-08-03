@@ -21,15 +21,6 @@ export function loadEnvLocal(): void {
 }
 
 /**
- * `next dev` runs with cwd `apps/web`, so its default THALON_DATA_DIR
- * `.data` resolves to `apps/web/.data`. Point root-run CLIs at the same
- * directory so the dogfood run and the approve-queue UI share one dev DB.
- */
-export function useWebAppDataDir(): void {
-  process.env.THALON_DATA_DIR ??= fileURLToPath(new URL("../../apps/web/.data", import.meta.url));
-}
-
-/**
  * PGlite is single-process: if the dev server holds the shared dev DB open,
  * a CLI opening the same data dir sees stale state (the server's unflushed
  * writes are invisible) and two concurrent writers can corrupt the dir —
