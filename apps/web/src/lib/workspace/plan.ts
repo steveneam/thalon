@@ -4,6 +4,7 @@ import { judgeReasons } from "@/lib/approve-queue/judge-reasons";
 import { readLiveSweep } from "@/lib/intel/live";
 import { demoTenantSlug } from "@/lib/tenant";
 import type {
+  DraftCardMedia,
   PipelineAsset,
   PlanCadenceRule,
   PlannedSlotWire,
@@ -38,6 +39,34 @@ function toCadenceRules(raw: unknown): PlanCadenceRule[] {
   return Object.entries(parsed.data)
     .map(([platform, rule]) => ({ platform, ...rule }))
     .filter((r) => r.maxPerDay !== undefined || r.maxPerWeek !== undefined || r.minGapMinutes !== undefined);
+}
+
+/**
+ * s96 (Schedule S1) — the draft's first attached image off `meta.mediaRefs`,
+ * read TOLERANTLY (the `readDraftFitMedia` doctrine: this is a card asking
+ * "is there a picture?", not the publish door about to spend a platform
+ * call). Only a ref matching the object-key family shape resolves; anything
+ * else is null — a text-only card, never a crash and never a guessed image.
+ */
+/** The two content-addressed image families the workspace media door serves. */
+const STORED_MEDIA_REF = /^(?:media|social-media)\/([0-9a-f]{64})\.([a-z0-9]+)$/;
+
+export function draftCardMedia(meta: unknown): DraftCardMedia | null {
+  const raw = (meta as { mediaRefs?: unknown } | null | undefined)?.mediaRefs;
+  if (!Array.isArray(raw)) return null;
+  for (const entry of raw) {
+    const ref = (entry as { ref?: unknown } | null)?.ref;
+    const contentType = (entry as { contentType?: unknown } | null)?.contentType;
+    if (typeof ref !== "string") continue;
+    // Only an IMAGE draws as a thumbnail — a video attachment is real media
+    // the chip must not pretend to render as a still.
+    if (typeof contentType === "string" && !contentType.startsWith("image/")) continue;
+    const match = STORED_MEDIA_REF.exec(ref);
+    if (match === null) continue;
+    const alt = (entry as { altText?: unknown }).altText;
+    return { sha256: match[1], ext: match[2], alt: typeof alt === "string" ? alt : null };
+  }
+  return null;
 }
 
 /** Exported for its unit tests — the lineage derivation is the honesty-critical piece. */
@@ -75,6 +104,7 @@ export function toAsset(draft: Draft, judged: JudgeResult[], source: Source | nu
     reasons: judgeReasons(judged, draft.bodyHash).map((r) => `${r.gateLabel}: ${r.line}`),
     deployRef: deployed ? (meta.deployRef as string) : null,
     excerpt: toExcerpt(draft.body),
+    media: draftCardMedia(draft.meta),
   };
 }
 

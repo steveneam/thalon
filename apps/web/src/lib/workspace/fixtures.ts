@@ -65,6 +65,7 @@ function fixtureAsset(overrides: Partial<PipelineAsset> & { draftId: string }): 
     reasons: [],
     deployRef: null,
     excerpt: "Our launch video has no editor file. It has a build step.",
+    media: null,
     ...overrides,
   };
 }

@@ -29,6 +29,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     reasons: [],
     deployRef: null,
     excerpt: "Our launch video has no editor file.",
+    media: null,
     ...overrides,
   };
 }

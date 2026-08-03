@@ -397,3 +397,37 @@
 }
 .calendar-surface .plan-armed b { font-weight: 600; }
 .calendar-surface .plan-armed .btn { margin-left: auto; }
+
+/*
+ * ── s96 · the S1–S3 amendment (Schedule.dc.html AMENDED s95, W3-approved).
+ * Sheet-helmet ports first (verbatim), then the adaptations, named. ──
+ */
+/* S1 — the chip leads with its own picture; the platform is a BADGE on it. */
+.calendar-surface .ev { display: flex; align-items: center; gap: 5px; }
+.calendar-surface .ev .txt { min-width: 0; flex: 1; }
+.calendar-surface .ev .t { display: block; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); line-height: 1.2; }
+.calendar-surface .ev b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calendar-surface .ev-media { position: relative; width: 30px; height: 22px; flex: none; }
+.calendar-surface .ev-media .img { width: 100%; height: 100%; border-radius: 4px; border: 1px solid var(--n-500); background: repeating-linear-gradient(135deg, var(--n-300) 0 5px, var(--n-200) 5px 10px); display: flex; align-items: center; justify-content: center; font-size: 7px; color: var(--n-800); }
+.calendar-surface .ev-media.none .img { background: var(--n-bg); border-style: dashed; font-size: 9px; font-weight: 600; font-family: var(--font-data); }
+.calendar-surface .ev-media .badge { position: absolute; right: -4px; bottom: -4px; width: 13px; height: 13px; border-radius: 4px; background: var(--n-200); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; color: var(--n-1000); }
+.calendar-surface .ev-run { width: 22px; height: 22px; flex: none; border-radius: 4px; border: 1px solid var(--n-500); background: var(--n-bg); display: flex; align-items: center; justify-content: center; color: var(--n-800); }
+/* S3 — the run's remainder: a count with a door. */
+.calendar-surface .ev-more { position: absolute; left: 4px; right: 4px; border-radius: 6px; border: 1px dashed var(--n-500); background: var(--n-bg); padding: 2px 6px; font-family: var(--font-data); font-size: 9.5px; color: var(--n-900); text-align: center; cursor: pointer; }
+.calendar-surface .ev-more:hover { border-color: var(--n-600); color: var(--n-1000); }
+
+/*
+ * s96 adaptations, each named:
+ *  - the chip's picture renders through SourceThumb's five states, RE-SIZED
+ *    by this surface to the sheet's 30×22 (the per-surface `.thumb-sm`
+ *    override rule — mock-sheets README rule 6; the shared 64×40 would not
+ *    fit a 38px chip);
+ *  - a fallback badge initial for a platform the sheet never drew;
+ *  - the month mark's platform glyph (S2) rides inline before the text,
+ *    exactly the week badge's geometry at mark scale.
+ */
+.calendar-surface .ev-media .thumb-sm { width: 30px; height: 22px; border-radius: 4px; }
+.calendar-surface .ev-media .thumb-sm span { font-size: 7px; }
+.calendar-surface .badge-initial { font-family: var(--font-data); font-size: 8px; font-weight: 600; }
+.calendar-surface .ev-more:focus-visible { outline: 2px solid var(--act); outline-offset: 1px; }
+.calendar-surface .mark .badge { position: static; display: inline-flex; width: 13px; height: 13px; border-radius: 4px; background: var(--n-200); border: 1px solid var(--n-500); align-items: center; justify-content: center; color: var(--n-1000); margin-right: 4px; vertical-align: -2px; }

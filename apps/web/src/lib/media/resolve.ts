@@ -1,5 +1,6 @@
 import {
   deriveOrientation,
+  imageRefEnvelopeSchema,
   sourceThumbnailEnvelope,
   videoTakePosterSchema,
   type ImageRefEnvelope,
@@ -54,12 +55,14 @@ export const MEDIA_CHAINS = {
   /** A trend item: whatever the driver captured. Drivers never synthesize one. */
   trendItem: { fields: ["thumbnailUrl", "thumbnailWidth", "thumbnailHeight"] },
   /**
-   * Drafts and runs resolve NOTHING, deliberately. This is not an omission —
-   * it is the Approve ruling written down where a future reader will look for
-   * it. The import door (B-media proper) gives drafts real media of their own;
-   * until then the surface shows an honest striped placeholder.
+   * s96 (Schedule S1, founder-approved W3): a draft resolves its OWN attached
+   * post image — `meta.mediaRefs`, the exact bytes the publish door sends.
+   * This is the argued widening this table exists to make visible, and it
+   * does NOT touch the Approve ruling: a draft still never wears its run's or
+   * its grounding source's image; `mediaRefs` is the post's own media, not a
+   * borrowed provenance. Runs still resolve nothing.
    */
-  draft: { fields: [] },
+  draft: { fields: ["meta.mediaRefs"] },
   run: { fields: [] },
 } as const;
 
@@ -92,6 +95,28 @@ export function resolveTakeMedia(take: { meta?: unknown }): MediaResolution {
   // It is a row we cannot read, and the honest answer is the empty box.
   if (!parsed.success) return EMPTY;
   return resolvedFrom(parsed.data);
+}
+
+/**
+ * s96 (Schedule S1) — a draft's attached post image, from the plan wire's
+ * already-parsed `media` projection (the serializer read `meta.mediaRefs`
+ * tolerantly; this stays a pure map). Provenance is `operator` — attached
+ * media rides the operator's approval by the publish door's own doctrine
+ * ("the image itself rides the operator's approval"), which is the one
+ * provenance word that is true of it.
+ */
+export function resolveDraftCardMedia(
+  media: { sha256: string; ext: string; alt: string | null } | null,
+): MediaResolution {
+  if (media === null) return EMPTY;
+  const parsed = imageRefEnvelopeSchema.safeParse({
+    ref: { kind: "stored", sha256: media.sha256, ext: media.ext },
+    provenance: "operator",
+    ...(media.alt === null ? {} : { alt: media.alt }),
+  });
+  // A ref outside the closed ext set is one the door would refuse anyway —
+  // the honest answer is the empty box, never a broken-image claim.
+  return parsed.success ? resolvedFrom(parsed.data) : EMPTY;
 }
 
 /**

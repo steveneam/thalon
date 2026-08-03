@@ -1,5 +1,5 @@
 import { platformLabel } from "@/lib/workspace/format";
-import type { PipelineAsset, PlanCadenceRule, PlannedSlotWire, PlanPayload } from "@/lib/workspace/types";
+import type { DraftCardMedia, PipelineAsset, PlanCadenceRule, PlannedSlotWire, PlanPayload } from "@/lib/workspace/types";
 import { dayKey, projectSweepTicks, waitingSince, type WeekDay } from "@/lib/workspace/week";
 
 /**
@@ -96,6 +96,14 @@ export interface CalEvent {
   queueRowId?: string;
   /** Queued events only: the row's status word, so a failed commitment is not drawn as a live one. */
   queueStatus?: string;
+  /**
+   * s96 (S1): the raw platform id — the chip's badge glyph and the month
+   * mark's glyph both ride it (the WORDS left the chip; the mark carries the
+   * fact). Engine ticks carry none.
+   */
+  platform?: string;
+  /** s96 (S1): the draft's own attached image, from the plan wire. Null/absent = the Aa text mark. */
+  media?: DraftCardMedia | null;
 }
 
 /** The sheet's own heights: a gripped plan is 42px, everything else 38px. */
@@ -128,6 +136,8 @@ export function planEvents(
       id: `plan-${slot.draftId}`,
       kind: "plan" as const,
       draftId: slot.draftId,
+      platform: slot.platform,
+      media: asset?.media ?? null,
       at,
       day: dayKey(at),
       lead: `Planned · ${platformLabel(slot.platform)}`,
@@ -178,6 +188,8 @@ export function queueEvents(
         draftId: row.draftId,
         queueRowId: row.id,
         queueStatus: row.status,
+        platform: row.platform,
+        media: asset?.media ?? null,
         at,
         day: dayKey(at),
         lead: `Scheduled · ${platformLabel(row.platform)}`,
@@ -212,6 +224,8 @@ export function assetEvents(assets: PipelineAsset[]): CalEvent[] {
       return {
         id: `asset-${asset.draftId}`,
         kind: (published ? "done" : "closed") as EventKind,
+        platform: asset.platform,
+        media: asset.media,
         at,
         day: dayKey(at),
         lead: `${platform} · ${ending}`,
@@ -444,9 +458,17 @@ export function eventsInScope(events: CalEvent[], scope: Scope): CalEvent[] {
 // ---------------------------------------------------------------------------
 // Column layout
 //
-// APP ADAPTATION (the named kind): the sheet's fixture never puts two events
-// in the same hour; real days do. Concurrent events split the column evenly —
-// the standard time-grid rule — so nothing is hidden and nothing overlaps.
+// s96 (S3, the amended sheet): the even-split adaptation is SUPERSEDED. A
+// fan-out that went to four platforms at one instant used to split the slot
+// four ways — 25%-wide chips that clipped mid-word. The cap is the sheet's
+// own drawing: at most TWO chips share an overlapping run, the remainder
+// goes behind a "+N more" count that is a DOOR (it opens the day), and
+// WHICH two stay visible follows the month cells' own mark priority — what
+// waits on you and what will fire outrank what already happened. Nothing is
+// hidden silently: the count names exactly what it holds.
+
+/** At most this many chips share one overlapping run in the week grid. */
+export const COLUMN_CAP = 2;
 
 export interface PlacedEvent {
   event: CalEvent;
@@ -457,27 +479,59 @@ export interface PlacedEvent {
   widthPct: number;
 }
 
-export function placeColumn(events: CalEvent[], win: TimeWindow = DAY_WINDOW): PlacedEvent[] {
+/** A run's hidden remainder — the "+N more" door's whole fact. */
+export interface ColumnOverflow {
+  /** Stable per run: the day key + the run's first instant. */
+  key: string;
+  day: string;
+  at: Date;
+  /** Where the count renders — just under the run's chips. */
+  top: number;
+  hidden: CalEvent[];
+}
+
+export function placeColumn(
+  events: CalEvent[],
+  win: TimeWindow = DAY_WINDOW,
+): { placed: PlacedEvent[]; overflow: ColumnOverflow[] } {
   const sorted = [...events].sort((a, b) => a.at.getTime() - b.at.getTime());
   const spans = sorted.map((event) => {
     const start = hourOf(event.at);
     return { event, start, end: start + eventHeight(event.kind) / HOUR_PX };
   });
 
-  // Group into runs of mutually overlapping events, then split each run.
+  // Group into runs of mutually overlapping events, then place each run.
   const placed: PlacedEvent[] = [];
+  const overflow: ColumnOverflow[] = [];
   let run: typeof spans = [];
   let runEnd = -Infinity;
   const flush = () => {
-    run.forEach((span, index) => {
+    // Priority decides who stays VISIBLE; the visible pair then renders in
+    // time order so the column still reads left-to-right chronologically.
+    const ranked = [...run].sort((a, b) => byMarkPriority(a.event, b.event));
+    const shown = ranked
+      .slice(0, COLUMN_CAP)
+      .sort((a, b) => a.event.at.getTime() - b.event.at.getTime());
+    const hidden = ranked.slice(COLUMN_CAP).map((span) => span.event);
+    shown.forEach((span, index) => {
       placed.push({
         event: span.event,
         top: yOf(span.start, win),
         height: eventHeight(span.event.kind),
-        leftPct: (index / run.length) * 100,
-        widthPct: 100 / run.length,
+        leftPct: (index / shown.length) * 100,
+        widthPct: 100 / shown.length,
       });
     });
+    if (hidden.length > 0) {
+      const first = run[0];
+      overflow.push({
+        key: `${first.event.day}-${first.event.at.getTime()}`,
+        day: first.event.day,
+        at: first.event.at,
+        top: yOf(first.start, win) + eventHeight(first.event.kind) + 3,
+        hidden,
+      });
+    }
     run = [];
     runEnd = -Infinity;
   };
@@ -487,7 +541,7 @@ export function placeColumn(events: CalEvent[], win: TimeWindow = DAY_WINDOW): P
     runEnd = Math.max(runEnd, span.end);
   }
   if (run.length > 0) flush();
-  return placed;
+  return { placed, overflow };
 }
 
 /** Events outside the visible window — the quiet-hours bands' honest count. */

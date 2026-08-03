@@ -31,6 +31,7 @@ function asset(overrides: Partial<PipelineAsset> = {}): PipelineAsset {
     reasons: [],
     deployRef: null,
     excerpt: "a draft body",
+    media: null,
     ...overrides,
   };
 }

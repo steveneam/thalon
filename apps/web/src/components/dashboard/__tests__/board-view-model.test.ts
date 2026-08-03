@@ -48,6 +48,7 @@ function asset(overrides: Partial<PipelineAsset>): PipelineAsset {
     reasons: [],
     deployRef: null,
     excerpt: "Deterministic-video explainer",
+    media: null,
     ...overrides,
   };
 }

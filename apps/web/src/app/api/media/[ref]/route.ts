@@ -41,10 +41,22 @@ export async function GET(
   // here enumerates, and a bad ext never reaches the object store.
   if (!parsed) return new Response("Not Found", { status: 404 });
 
-  const key = objectKey("media", parsed.sha256, parsed.ext);
-  let bytes: Buffer | null;
+  /*
+   * s96 (Schedule S1) — the door now reads TWO image families: `media/`
+   * (derived posters, operator uploads) and `social-media/` (a draft's own
+   * attached post image — the bytes the publish door sends). Both are
+   * content-addressed in the same store; the sha IS the identity, so trying
+   * the second family on a first-family miss serves the same bytes the key
+   * would anywhere. The families are a CLOSED list — this door never takes a
+   * family from the URL, so nothing here can be steered at other prefixes.
+   */
+  const store = getObjectStore();
+  let bytes: Buffer | null = null;
   try {
-    bytes = await getContentAddressed(getObjectStore(), key);
+    for (const family of ["media", "social-media"]) {
+      bytes = await getContentAddressed(store, objectKey(family, parsed.sha256, parsed.ext));
+      if (bytes !== null) break;
+    }
   } catch (error) {
     if (error instanceof ContentAddressMismatchError) {
       // The stored object no longer hashes to its own key. Serving it would

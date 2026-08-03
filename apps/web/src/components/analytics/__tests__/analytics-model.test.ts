@@ -101,6 +101,7 @@ function asset(draftId: string, over: Partial<PipelineAsset> = {}): PipelineAsse
     reasons: [],
     deployRef: null,
     excerpt: "Launch film — what deterministic video changes",
+    media: null,
     ...over,
   };
 }

@@ -41,6 +41,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     reasons: [],
     deployRef: null,
     excerpt: "The pipeline thread — what deterministic video changes",
+    media: null,
     ...overrides,
   };
 }
@@ -133,11 +134,14 @@ describe("Schedule (exact-mock rebuild — the verdicted sheet; renamed from Cal
     seedPlan({ plannedSlots: [PLAN_SLOT] });
     render(<ScheduleSurface />);
 
-    const plan = await screen.findByText("Planned · LinkedIn");
-    const box = plan.closest(".ev");
+    const box = await screen.findByRole("button", { name: /^Planned · LinkedIn/ });
     expect(box).toHaveClass("ev-plan");
     expect(box).toHaveStyle({ top: "154px" }); // 09:30 → (9.5 − 6) × 44
-    expect(box?.textContent).toContain("09:30 · pipeline thread");
+    // s96 (S1): the clock leads, the post's own words carry the bold line,
+    // and a text-only draft keeps its slot with the Aa mark; the platform
+    // words live in the accessible name this query just used.
+    expect(box.querySelector(".t")?.textContent).toBe("09:30");
+    expect(box.querySelector(".ev-media.none .img")?.textContent).toBe("Aa");
     // s78b: drag IS wired, so the sheet's ⋮⋮ drag handle is drawn again —
     // this is "the change that wires drag" the previous note pointed at.
     expect(box?.querySelector(".grip")).not.toBeNull();
@@ -163,9 +167,9 @@ describe("Schedule (exact-mock rebuild — the verdicted sheet; renamed from Cal
     });
     const { container } = render(<ScheduleSurface />);
 
-    const published = (await screen.findByText("Blog · published ✓")).closest(".ev");
+    const published = await screen.findByRole("button", { name: /^Blog · published ✓/ });
     expect(published).toHaveClass("done", "ev-ok");
-    const rejected = screen.getByText("LinkedIn · rejected").closest(".ev");
+    const rejected = screen.getByRole("button", { name: /^LinkedIn · rejected/ });
     expect(rejected).toHaveClass("done");
     expect(rejected).not.toHaveClass("ev-ok");
     expect(container.querySelectorAll(".ev-ok")).toHaveLength(1);
@@ -211,7 +215,7 @@ describe("Schedule (exact-mock rebuild — the verdicted sheet; renamed from Cal
     const user = userEvent.setup();
     const { container } = render(<ScheduleSurface />);
 
-    await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
+    await user.click(await screen.findByRole("button", { name: /^Planned · LinkedIn/ }));
 
     const detail = container.querySelector(".detail") as HTMLElement;
     expect(detail).not.toBeNull();
@@ -278,7 +282,7 @@ describe("Schedule (exact-mock rebuild — the verdicted sheet; renamed from Cal
     const user = userEvent.setup();
     const { container } = render(<ScheduleSurface />);
 
-    await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
+    await user.click(await screen.findByRole("button", { name: /^Planned · LinkedIn/ }));
     const detail = container.querySelector(".detail") as HTMLElement;
     await user.click(within(detail).getByRole("button", { name: "Reschedule" }));
 
@@ -307,7 +311,7 @@ describe("Schedule (exact-mock rebuild — the verdicted sheet; renamed from Cal
     const user = userEvent.setup();
     const { container } = render(<ScheduleSurface />);
 
-    await user.click((await screen.findByText("Planned · LinkedIn")).closest(".ev") as HTMLElement);
+    await user.click(await screen.findByRole("button", { name: /^Planned · LinkedIn/ }));
     const detail = container.querySelector(".detail") as HTMLElement;
     await user.click(within(detail).getByRole("button", { name: "Remove" }));
 

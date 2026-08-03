@@ -35,6 +35,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     reasons: [],
     deployRef: null,
     excerpt: "The pipeline thread — what deterministic video changes",
+    media: null,
     ...overrides,
   };
 }
@@ -142,7 +143,10 @@ describe("the calendar's scheduled state", () => {
     expect(queued).not.toBeNull();
     expect(plan?.querySelector(".grip")).not.toBeNull();
     expect(queued?.querySelector(".grip")).toBeNull();
-    expect(queued?.textContent).toContain("Scheduled · LinkedIn");
+    // s96 (S1): the platform words left the chip's visible text — they live
+    // in the accessible name; the chip shows clock + the post's own words.
+    expect(queued?.getAttribute("aria-label")).toContain("Scheduled · LinkedIn");
+    expect(queued?.querySelector(".t")?.textContent).toBe("14:00");
   });
 
   it("the footer explains the two, and only once there is a commitment to explain", async () => {

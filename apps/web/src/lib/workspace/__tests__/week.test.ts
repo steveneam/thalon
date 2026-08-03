@@ -29,6 +29,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     reasons: [],
     deployRef: null,
     excerpt: "fixture excerpt",
+    media: null,
     ...overrides,
   };
 }

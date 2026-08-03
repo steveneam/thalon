@@ -105,7 +105,10 @@ describe("declared chains never borrow across entities", () => {
     source: ["meta.thumbnailUrl", "meta.thumbnailWidth", "meta.thumbnailHeight"],
     take: ["meta.posterRef", "ref", "provenance"],
     trendItem: ["thumbnailUrl", "thumbnailWidth", "thumbnailHeight"],
-    draft: [],
+    // s96 (Schedule S1, W3-approved): the ARGUED widening this ratchet exists
+    // to make visible — `meta.mediaRefs` is the draft's OWN attached post
+    // image (the bytes the publish door sends), never a borrowed provenance.
+    draft: ["meta.mediaRefs"],
     run: [],
   };
 
@@ -118,8 +121,10 @@ describe("declared chains never borrow across entities", () => {
     }
   });
 
-  it("keeps drafts and runs resolving NOTHING — the Approve ruling, written down", () => {
-    expect(MEDIA_CHAINS.draft.fields).toEqual([]);
+  it("a draft resolves only its OWN attached media; runs still resolve NOTHING", () => {
+    // The Approve ruling (s75) HOLDS: no run image, no grounding-source
+    // image — the one field here is the post's own attachment.
+    expect(MEDIA_CHAINS.draft.fields).toEqual(["meta.mediaRefs"]);
     expect(MEDIA_CHAINS.run.fields).toEqual([]);
   });
 

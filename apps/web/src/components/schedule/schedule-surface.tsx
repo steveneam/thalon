@@ -40,6 +40,8 @@ import {
   fetchQueueRows,
   type QueueRowWire,
 } from "@/components/approve/queue-client";
+import { SourceThumb } from "@/components/media/source-thumb";
+import { resolveDraftCardMedia } from "@/lib/media/resolve";
 import { platformLabel } from "@/lib/workspace/format";
 import { fetchViews, putView } from "@/lib/views/client";
 import { useListKeys } from "@/lib/workspace/keyboard";
@@ -774,20 +776,45 @@ export function ScheduleSurface() {
                       {clockLabel(instantOn(dragTo.day, dragTo.hour))}
                     </div>
                   )}
-                  {placeColumn(inWindow, win).map(({ event, top, height, leftPct, widthPct }) => (
-                    <EventBox
-                      key={event.id}
-                      event={event}
-                      top={top}
-                      height={height}
-                      leftPct={leftPct}
-                      widthPct={widthPct}
-                      selected={event.id === selectedId}
-                      onSelect={() => setSelectedId(event.id === selectedId ? null : event.id)}
-                      draggable={event.kind === "plan" && event.draftId !== null}
-                      onDragStart={(pointerEvent) => beginDrag(event, pointerEvent)}
-                    />
-                  ))}
+                  {(() => {
+                    const { placed, overflow } = placeColumn(inWindow, win);
+                    return (
+                      <>
+                        {placed.map(({ event, top, height, leftPct, widthPct }) => (
+                          <EventBox
+                            key={event.id}
+                            event={event}
+                            top={top}
+                            height={height}
+                            leftPct={leftPct}
+                            widthPct={widthPct}
+                            selected={event.id === selectedId}
+                            onSelect={() => setSelectedId(event.id === selectedId ? null : event.id)}
+                            draggable={event.kind === "plan" && event.draftId !== null}
+                            onDragStart={(pointerEvent) => beginDrag(event, pointerEvent)}
+                          />
+                        ))}
+                        {/* s96 (S3): the run's remainder is a COUNT with a door
+                            — it opens the day where every chip renders as a
+                            row. Nothing hidden silently. */}
+                        {overflow.map((over) => (
+                          <button
+                            key={over.key}
+                            type="button"
+                            className="ev-more"
+                            style={{ top: over.top }}
+                            title={over.hidden.map((e) => e.lead).join(" · ")}
+                            onClick={(clickEvent) => {
+                              clickEvent.stopPropagation();
+                              setDensity("agenda");
+                            }}
+                          >
+                            +{over.hidden.length} more at {clockLabel(over.at)} · open day
+                          </button>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -990,12 +1017,17 @@ function EventBox({
         top,
         height,
         // App adaptation (named): concurrent events split the column — the
-        // sheet's fixture never puts two in one hour, real days do.
+        // sheet's fixture never puts two in one hour, real days do (s96:
+        // capped at two, the remainder behind the +N door).
         left: `calc(4px + ${leftPct}%)`,
         right: "auto",
         width: `calc(${widthPct}% - 8px)`,
       }}
       aria-pressed={selected}
+      /* The WORDS that left the chip (s96) live here, where truncation and
+         geometry cannot reach them. */
+      aria-label={`${event.lead} · ${event.meta}${event.flagged ? " · breaks cadence" : ""}`}
+      title={`${event.lead} · ${event.meta}`}
       onClick={onSelect}
       {...(draggable
         ? {
@@ -1014,11 +1046,95 @@ function EventBox({
           ⋮⋮
         </span>
       )}
-      <b>
-        {event.lead} {event.flagged && <span className="flag">⚑</span>}
-      </b>
-      {event.meta}
+      {/*
+        s96 (S1, the amended sheet): the chip leads with its OWN PICTURE and
+        the platform rides as a BADGE on it — the words "Planned · LinkedIn"
+        left the chip (the dashed border and the badge already carry both
+        facts); they stay in the accessible name and the title, where
+        truncation cannot reach them. A text-only draft keeps the slot with
+        the Aa mark (absence is information); an engine tick is not a post
+        and keeps its clock glyph.
+      */}
+      {event.kind === "engine" ? (
+        <span className="ev-run" aria-hidden>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <circle cx="8" cy="8" r="5.7" />
+            <path d="M8 5v3.2l2.2 1.4" />
+          </svg>
+        </span>
+      ) : (
+        <ChipMedia event={event} />
+      )}
+      <span className="txt">
+        <span className="t">{clockLabel(event.at)}</span>
+        <b>
+          {event.excerpt || event.lead} {event.flagged && <span className="flag">⚑</span>}
+        </b>
+      </span>
     </button>
+  );
+}
+
+/**
+ * The chip's picture slot: the draft's own attached image through
+ * SourceThumb's five states (resolved · broken honest, sized by this
+ * surface's own `.thumb-sm` override — README rule 6), the sheet's dashed
+ * "Aa" tile when the post is text-only, and the platform badge riding
+ * whichever renders.
+ */
+function ChipMedia({ event }: { event: CalEvent }) {
+  const resolution = resolveDraftCardMedia(event.media ?? null);
+  return (
+    <span className={resolution.state === "empty" ? "ev-media none" : "ev-media"}>
+      {resolution.state === "empty" ? (
+        <span className="img" aria-hidden>
+          Aa
+        </span>
+      ) : (
+        <SourceThumb resolution={resolution} legend="post media" size="sm" />
+      )}
+      {event.platform !== undefined && <EvBadge platform={event.platform} />}
+    </span>
+  );
+}
+
+/**
+ * The platform badge — the sheet's own marks, verbatim from the W1 set
+ * (`plat-mark.tsx` carries the same paths for Approve and Analytics; a
+ * third surface copy is the standing pattern there, and consolidating the
+ * three into components/media is a simplify candidate, noted). A platform
+ * the sheet never drew gets its initial — honest, never an invented logo.
+ */
+const BADGE_PATHS: Record<string, string> = {
+  linkedin:
+    "M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z",
+  x: "M2.4 2.2h3.9l3.1 4.4 3.6-4.4h1.6l-4.5 5.4 4.8 6.4h-3.9l-3.3-4.7-3.9 4.7H2.1l4.9-5.9L2.4 2.2Z",
+  facebook:
+    "M9.6 15V8.9h2l.3-2.4H9.6V5c0-.7.2-1.2 1.2-1.2h1.3V1.7A17 17 0 0 0 10.2 1.6C8.3 1.6 7 2.8 7 4.8v1.7H5v2.4h2V15h2.6Z",
+  bluesky:
+    "M3.6 2.6C5.3 3.9 7.1 6.5 8 7.9c.9-1.4 2.7-4 4.4-5.3 1.2-.9 3.1-1.6 3.1.6 0 .4-.3 3.5-.4 4-.4 1.7-2.1 2.1-3.6 1.9 2.6.4 3.3 1.9 1.9 3.4-2.7 2.8-3.9-.7-4.2-1.6l-.2-.5-.2.5c-.3.9-1.5 4.4-4.2 1.6-1.4-1.5-.7-3 1.9-3.4-1.5.2-3.2-.2-3.6-1.9-.1-.5-.4-3.6-.4-4 0-2.2 1.9-1.5 3.1-.6Z",
+};
+
+const BADGE_GLOBE = new Set(["blog", "site", "web"]);
+
+function EvBadge({ platform }: { platform: string }) {
+  const key = platform.toLowerCase();
+  const label = platformLabel(platform);
+  return (
+    <span className="badge" title={label} aria-hidden>
+      {BADGE_GLOBE.has(key) ? (
+        <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <circle cx="8" cy="8" r="5.7" />
+          <path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11" />
+        </svg>
+      ) : BADGE_PATHS[key] ? (
+        <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor">
+          <path d={BADGE_PATHS[key]} />
+        </svg>
+      ) : (
+        <span className="badge-initial">{label.slice(0, 1)}</span>
+      )}
+    </span>
   );
 }
 
@@ -1040,12 +1156,22 @@ function MonthMark({ event }: { event: CalEvent }) {
   const title = event.carried
     ? `started waiting before this week — ${event.hours}h`
     : event.meta;
+  /*
+    s96 (S2, the RECORDED month grammar — Sprout): the mark leads with its
+    KIND colour (unchanged — the three-fact split stays the organizing
+    idea), and the platform GLYPH rides the mark exactly as the week chips'
+    badges do. The month cell is too small for honest media (the s95 pull's
+    NEGATIVE ruling), so the glyph is the whole platform fact here.
+  */
+  const glyph = event.platform !== undefined && <EvBadge platform={event.platform} />;
   return event.href ? (
     <Link href={event.href} className={className} title={title}>
+      {glyph}
       {text}
     </Link>
   ) : (
     <span className={className} title={title}>
+      {glyph}
       {text}
     </span>
   );

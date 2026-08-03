@@ -49,6 +49,7 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     reasons: [],
     deployRef: null,
     excerpt: "the pipeline thread",
+    media: null,
     ...overrides,
   };
 }
@@ -262,21 +263,53 @@ describe("scope, layout and labels", () => {
   });
 
   it("a lone event keeps the sheet's full-width box", () => {
-    const [placed] = placeColumn([events[0]]);
+    const {
+      placed: [placed],
+      overflow,
+    } = placeColumn([events[0]]);
     expect(placed.leftPct).toBe(0);
     expect(placed.widthPct).toBe(100);
     expect(placed.top).toBe(yOf(9));
     expect(placed.height).toBe(42);
+    expect(overflow).toEqual([]);
   });
 
-  it("concurrent events split the column instead of stacking on top of each other", () => {
+  it("two concurrent events split the column instead of stacking on top of each other", () => {
     const overlapping = [
       { ...events[0], id: "a", at: at(26, 9) },
       { ...events[0], id: "b", at: at(26, 9, 15) },
     ];
-    const placed = placeColumn(overlapping);
+    const { placed, overflow } = placeColumn(overlapping);
     expect(placed.map((p) => p.widthPct)).toEqual([50, 50]);
     expect(placed.map((p) => p.leftPct)).toEqual([0, 50]);
+    expect(overflow).toEqual([]);
+  });
+
+  /*
+   * s96 (S3, the amended sheet — SUPERSEDES the even split): a four-platform
+   * fan-out at one instant draws TWO chips; the remainder is a count that
+   * names exactly what it holds. Priority decides who stays visible (a
+   * commitment outranks an intention outranks a record), and the visible
+   * pair still renders in time order.
+   */
+  it("caps a run at two chips and puts the remainder behind the +N door", () => {
+    const cluster = [
+      { ...events[1], id: "d1", at: at(26, 11) },
+      { ...events[1], id: "d2", at: at(26, 11) },
+      { ...events[0], id: "p1", at: at(26, 11, 10) },
+      { ...events[0], id: "q1", kind: "queued" as const, at: at(26, 11, 5) },
+    ];
+    const { placed, overflow } = placeColumn(cluster);
+    expect(placed).toHaveLength(2);
+    // The queued commitment and the plan outrank the two published records…
+    expect(placed.map((p) => p.event.id).sort()).toEqual(["p1", "q1"]);
+    // …and the visible pair reads chronologically left to right.
+    expect(placed[0].event.id).toBe("q1");
+    expect(placed.map((p) => p.widthPct)).toEqual([50, 50]);
+    // The count holds EXACTLY the hidden events — nothing vanishes silently.
+    expect(overflow).toHaveLength(1);
+    expect(overflow[0].hidden.map((e) => e.id).sort()).toEqual(["d1", "d2"]);
+    expect(overflow[0].at.getTime()).toBe(at(26, 11).getTime());
   });
 
   it("counts what the collapsed quiet hours hide", () => {

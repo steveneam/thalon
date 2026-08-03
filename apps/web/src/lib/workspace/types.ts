@@ -120,6 +120,20 @@ export interface PipelineAsset {
    * over abstractions).
    */
   excerpt: string;
+  /**
+   * s96 (Schedule S1) — the draft's OWN first attached image, off
+   * `meta.mediaRefs` (the exact media the publish door sends), parsed
+   * tolerantly at the serializer. A read widening on this wire, no schema
+   * change; null = a text-only post, which the chip says with its Aa mark.
+   */
+  media: DraftCardMedia | null;
+}
+
+/** A stored image the workspace door can serve — sha + ext, plus the alt the drafting path recorded. */
+export interface DraftCardMedia {
+  sha256: string;
+  ext: string;
+  alt: string | null;
 }
 
 /** One planned slot (Phase-I window table) as a wire row — plans, not uploads; the publish door stays unarmed. */
