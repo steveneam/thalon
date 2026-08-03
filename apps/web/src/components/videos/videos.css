@@ -54,10 +54,21 @@
  *    buttons (never extra resting chrome): absent entirely until opened.
  */
 .videos-surface .fam .fam-link { color: var(--n-900); border-bottom: 1px dotted var(--n-600); }
+/* The span adaptation keeps the sheet's OWN hover (.fam a:hover above) — the
+   door must answer a probe (s99 fe-check: it read static). */
+.videos-surface .fam .fam-link:hover { color: var(--act); border-bottom-color: var(--act); }
 .videos-surface .vcard .t-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The count pill holds one box across every filter state: the widest text
+   sizes it invisibly, the live count fills it — the seg never lurches. */
+.videos-surface .count-pill { display: inline-grid; justify-items: center; }
+.videos-surface .count-pill > span { grid-area: 1 / 1; }
+.videos-surface .count-pill .count-sizer { visibility: hidden; }
 .videos-surface a.vcard, .videos-surface a.newcard { color: inherit; }
 .videos-surface .vcard.sel { border-color: var(--act); box-shadow: inset 2px 0 0 var(--act); }
 .videos-surface .vcard:focus-visible, .videos-surface .newcard:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+/* The import-disclosure toggles say OPEN at the control, not only via the
+   panel a band away (s99 fe-check) — the seg's own "on" accent vocabulary. */
+.videos-surface .btn[aria-expanded="true"] { border-color: var(--act); color: var(--act); }
 .videos-surface .imp-panel { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: var(--n-900); }
 .videos-surface .imp-panel .t-data { color: var(--n-900); }
 
@@ -81,4 +92,6 @@
 .videos-surface .kind { color: var(--n-900); font-weight: 600; }
 /* s96 — a thumb wearing a real take frame (B-media.0): cover, centred;
    the striped placeholder stays the no-poster truth, with its words. */
-.videos-surface .thumb-lg.framed { background-size: cover; background-position: center; }
+/* The poster layers OVER the base stripes (var from the card) — if the media
+   store no longer serves it, the placeholder shows instead of a blank. */
+.videos-surface .thumb-lg.framed { background-image: var(--poster), repeating-linear-gradient(135deg, var(--n-200), var(--n-200) 9px, var(--n-100) 9px, var(--n-100) 18px); background-size: cover; background-position: center; }

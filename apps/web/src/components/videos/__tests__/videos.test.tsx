@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -116,7 +116,13 @@ describe("VideosOverview (exact-mock rebuild — Videos Overview.dc.html, step 2
     serveAll();
     const { container } = render(<VideosOverview />);
 
-    expect(await screen.findByText("2 projects")).toHaveClass("pill", "pill-idle");
+    // s99: the visible count sits inside the pill beside its invisible sizer
+    // (the box that keeps the seg from lurching on filter clicks).
+    expect((await screen.findByText("2 projects")).closest(".pill")).toHaveClass(
+      "pill",
+      "pill-idle",
+      "count-pill",
+    );
 
     // The surface root carries the scope class the stylesheet is anchored to.
     expect(container.querySelector(".content.videos-surface")).not.toBeNull();
@@ -166,7 +172,9 @@ describe("VideosOverview (exact-mock rebuild — Videos Overview.dc.html, step 2
     await screen.findByText("1 project");
     const thumb = document.querySelector(".thumb-lg.framed") as HTMLElement;
     expect(thumb).not.toBeNull();
-    expect(thumb.style.backgroundImage).toContain(`/api/media/${"c".repeat(64)}.webp`);
+    // s99: the poster rides --poster so the striped placeholder stays layered
+    // beneath it — a pruned media ref degrades to the stripes, never a blank.
+    expect(thumb.style.getPropertyValue("--poster")).toContain(`/api/media/${"c".repeat(64)}.webp`);
     // The frame IS the preview — no placeholder words over it.
     expect(screen.queryByText("no preview yet")).toBeNull();
   });
@@ -217,6 +225,31 @@ describe("VideosOverview (exact-mock rebuild — Videos Overview.dc.html, step 2
     await user.click(screen.getByRole("button", { name: "Browse files" }));
     expect(await screen.findByText(/npm run videos:import/)).toBeInTheDocument();
     expect(screen.getByText(/There is no browser upload door yet/)).toBeInTheDocument();
+  });
+
+  // s99 fe-check: the pick had no way back to "nothing selected", and the
+  // invited drop gesture hit the browser default (navigating AWAY from the
+  // workspace). Both now land where they should.
+  it("Escape returns the j/k pick to the rest state", async () => {
+    serveAll();
+    const user = userEvent.setup();
+    const { container } = render(<VideosOverview />);
+    await screen.findByText("2 projects");
+
+    await user.keyboard("j");
+    expect(container.querySelector(".vcard.sel")).not.toBeNull();
+    await user.keyboard("{Escape}");
+    expect(container.querySelector(".vcard.sel")).toBeNull();
+  });
+
+  it("a dropped file opens the honest import disclosure instead of ejecting the workspace", async () => {
+    serveAll();
+    const { container } = render(<VideosOverview />);
+    await screen.findByText("2 projects");
+
+    expect(screen.queryByText(/npm run videos:import/)).toBeNull();
+    fireEvent.drop(container.querySelector(".videos-surface") as HTMLElement);
+    expect(await screen.findByText(/npm run videos:import/)).toBeInTheDocument();
   });
 
   it("says a project record is unreadable rather than drawing it empty", async () => {

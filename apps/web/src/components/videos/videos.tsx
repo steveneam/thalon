@@ -3,7 +3,7 @@
 import "@/components/videos/videos.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   FILTERS,
   cardDate,
@@ -138,6 +138,13 @@ export function VideosOverview() {
         event.preventDefault();
         router.push(`/app/videos/${picked}`);
       },
+      // The rest state ("nothing selected") is reachable again — a pick
+      // without a way back is a one-way door (s99 fe-check).
+      Escape: (event) => {
+        if (picked === null) return;
+        event.preventDefault();
+        setPickedId(null);
+      },
     },
   });
   useEffect(() => {
@@ -150,7 +157,25 @@ export function VideosOverview() {
       : `${shown.length} of ${summaries.length} projects`;
 
   return (
-    <div className="content videos-surface" style={{ gap: 16 }}>
+    <div
+      className="content videos-surface"
+      style={{ gap: 16 }}
+      // The band invites "Drop a video… or paste a URL" but no upload door
+      // exists yet — the browser default would NAVIGATE AWAY from the
+      // workspace on a drop (s99 fe-check). The invited gesture lands on the
+      // honest answer instead: the disclosure naming the real import path.
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        setImportOpen(true);
+      }}
+      onPaste={(e) => {
+        const paste = e.clipboardData;
+        if (paste.files.length > 0 || paste.getData("text/plain").trim().length > 0) {
+          setImportOpen(true);
+        }
+      }}
+    >
       {/* j/k selection is a silent context change for screen readers without this. */}
       <p aria-live="polite" className="sr-only">
         {picked === null
@@ -160,7 +185,17 @@ export function VideosOverview() {
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 className="t-headline">Videos</h1>
-        {status === "success" && <span className="pill pill-idle">{countPill}</span>}
+        {status === "success" && (
+          // The pill's box is sized by its WIDEST text for this dataset (the
+          // invisible sizer), so narrowing the filter never reflows the seg
+          // under the pointer — reserve the box, then fill it (s99 fe-check).
+          <span className="pill pill-idle count-pill">
+            <span className="count-sizer" aria-hidden="true">
+              {`${summaries.length} of ${summaries.length} projects`}
+            </span>
+            <span>{countPill}</span>
+          </span>
+        )}
         <div className="seg" role="group" aria-label="Project states">
           {FILTERS.map((option) => (
             <button
@@ -208,8 +243,9 @@ export function VideosOverview() {
         <div className="card imp-panel">
           <span className="t-label">How media actually gets in today</span>
           <span>
-            There is no browser upload door yet — a project and its takes enter through the import
-            script, which walks a folder and registers every file with its disposition and reason:
+            There is no browser upload door yet — and no URL registration either, the other half of
+            the band’s promise — a project and its takes enter through the import script, which
+            walks a folder and registers every file with its disposition and reason:
           </span>
           <span className="t-data">
             npm run videos:import -w @thalon/web -- --root &lt;folder&gt; --name &lt;project&gt;
@@ -302,8 +338,14 @@ export function VideosOverview() {
                 */}
                 <div
                   className={poster === null ? "thumb-lg" : "thumb-lg framed"}
+                  // The poster rides a custom property so .framed can layer it
+                  // OVER the striped placeholder — a poster the store no longer
+                  // serves degrades to the stripes, never a silent blank (CSS
+                  // backgrounds have no error channel to say more).
                   style={
-                    poster === null ? undefined : { backgroundImage: `url("${srcOf(poster)}")` }
+                    poster === null
+                      ? undefined
+                      : ({ "--poster": `url("${srcOf(poster)}")` } as CSSProperties)
                   }
                 >
                   {poster === null && <span>no preview yet</span>}
@@ -342,12 +384,18 @@ export function VideosOverview() {
                         "record unread"
                       ) : (
                         <>
-                          <span className="kind">{kind}</span> · {provenance(detail, cut)}
+                          <span className="kind">{kind}</span> · {provenance(detail)}
                         </>
                       )}
                     </span>
                     <div style={{ flex: 1 }} />
-                    <span className="t-data" title={`created ${summary.createdAt}`}>
+                    {/* The exact stamp rides BOTH channels — hover title and
+                        the accessible name (touch/AT can't open a title). */}
+                    <span
+                      className="t-data"
+                      title={`created ${summary.createdAt}`}
+                      aria-label={`created ${summary.createdAt}`}
+                    >
                       {cardDate(summary.createdAt, readAt)}
                     </span>
                   </div>

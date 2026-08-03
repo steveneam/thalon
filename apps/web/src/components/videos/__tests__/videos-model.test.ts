@@ -6,7 +6,7 @@ import {
   derivedFrom,
   family,
   headlineCut,
-  mintModel,
+  mintModels,
   passesFilter,
   projectKind,
   provenance,
@@ -224,31 +224,36 @@ describe("derivedElsewhere / soleParentOf — what the dossier's empty band stil
 
 describe("provenance — visible, never guessed (AMENDED s95: the kind token leads)", () => {
   it("names the mint model when every take agrees on one", () => {
-    const head = cut({ name: "film-16x9", version: 6 });
     const detail = project(
-      [head],
+      [cut({ name: "film-16x9", version: 6 })],
       [take({ provenance: { model: "kling3-turbo" } }), take({ id: "t2", provenance: { model: "kling3-turbo" } })],
     );
-    expect(provenance(detail, head)).toBe("kling3-turbo");
+    expect(provenance(detail)).toBe("kling3-turbo");
   });
 
-  it("drops the model when the takes disagree — a majority is not a fact", () => {
+  // AMENDED s99 (fe-check, live case thalon-concept-film): an imported
+  // project whose takes record SEVERAL mints must never read "by you" — the
+  // authorship slot counts the machine mints instead of crediting the operator.
+  it("counts the mints when the takes disagree — never 'by you' over machine mints", () => {
     const takes = [
       take({ provenance: { model: "kling3-turbo" } }),
       take({ id: "t2", provenance: { model: "kling3-turbo" } }),
       take({ id: "t3", provenance: { model: "seedance" } }),
     ];
-    expect(mintModel(takes)).toBeNull();
-    // No agreed model and no one-prompt stamp: the project came through the
-    // import script — "by you" is the fact, and the kind token beside it
-    // (the surface's job) says "imported".
-    expect(provenance(project([cut()], takes), cut())).toBe("by you");
+    expect(mintModels(takes)).toEqual(["kling3-turbo", "seedance"]);
+    expect(provenance(project([cut()], takes))).toBe("2 mint models");
   });
 
-  it("falls back to the headline cut for a one-prompt project with no agreed model", () => {
+  it("keeps 'by you' for the hand-imported project no mint touched", () => {
+    expect(provenance(project([cut()], [take()]))).toBe("by you");
+  });
+
+  // AMENDED s99: an engine-made project with all-empty manifests says the
+  // unknown out loud — never a cut identity standing in the authorship slot.
+  it("says 'model unrecorded' for a one-prompt project with no recorded mint", () => {
     const oneprompt = { ...project([cut()], [take()]), description: "One-prompt auto-run — x" };
-    expect(provenance(oneprompt, cut())).toBe("film-16x9 v1");
-    expect(provenance({ ...oneprompt, cuts: [] }, null)).toBe("no cut yet");
+    expect(provenance(oneprompt)).toBe("model unrecorded");
+    expect(provenance({ ...oneprompt, cuts: [] })).toBe("model unrecorded");
   });
 
   it("classifies the project KIND from the doors this engine actually has", () => {

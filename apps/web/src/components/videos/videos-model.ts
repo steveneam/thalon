@@ -99,11 +99,10 @@ export function family(detail: ProjectDetail): FamilyPart[] {
  * disagree or none records one. VISIBLE PROVENANCE (plan §5) wants the mint
  * named where it is known — never guessed from a majority.
  */
-export function mintModel(takes: TakeView[]): string | null {
-  const models = new Set(
-    takes.map((t) => t.provenance.model).filter((m): m is string => typeof m === "string"),
-  );
-  return models.size === 1 ? [...models][0] : null;
+export function mintModels(takes: TakeView[]): string[] {
+  return [
+    ...new Set(takes.map((t) => t.provenance.model).filter((m): m is string => typeof m === "string")),
+  ];
 }
 
 /**
@@ -121,12 +120,23 @@ export function projectKind(detail: ProjectDetail): "one-prompt" | "image" | "im
   return "imported";
 }
 
-/** The stamp AFTER the kind token: the mint model where every take agrees, else the headline cut. */
-export function provenance(detail: ProjectDetail, cut: CutView | null): string {
-  const model = mintModel(detail.takes);
-  if (model !== null) return model;
+/**
+ * The stamp AFTER the kind token — the sheet's grammar reserves this slot for
+ * AUTHORSHIP (the mint, or the operator's own hand). s99 amendment: "no model
+ * recorded" and "several models recorded" are different facts and neither may
+ * wear the other's word — a machine-minted import must never read "by you"
+ * (live case: three mint models on one imported project), and an engine-made
+ * project with unrecorded mints says the unknown out loud instead of standing
+ * a cut identity in the authorship slot.
+ */
+export function provenance(detail: ProjectDetail): string {
+  const models = mintModels(detail.takes);
+  if (models.length === 1) return models[0];
+  if (models.length > 1) return `${models.length} mint models`;
+  // No take records a mint: only a hand-imported project may claim the
+  // operator's authorship.
   if (projectKind(detail) === "imported") return "by you";
-  return cut === null ? "no cut yet" : `${cut.name} v${cut.version}`;
+  return "model unrecorded";
 }
 
 /**
