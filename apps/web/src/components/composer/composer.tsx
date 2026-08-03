@@ -12,6 +12,7 @@ import {
   fieldLabel,
   firstMediaKind,
   fitWords,
+  stripStatus,
   hasFirstComment,
   hitTerm,
   markBody,
@@ -19,6 +20,7 @@ import {
   previewActions,
   provenanceParts,
   sendToApproveHref,
+  videoProjectHref,
   wouldBlockCount,
 } from "@/components/composer/composer-model";
 import {
@@ -74,7 +76,8 @@ export function ComposerSurface({ runId }: { runId: string }) {
   const [run, setRun] = useState<CreateRunWire | null>(null);
   const [drafts, setDrafts] = useState<GridDraft[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [fits, setFits] = useState<Record<string, FitResponse | null>>({});
+  // Absent key = still measuring; "failed" = the read itself failed (s99).
+  const [fits, setFits] = useState<Record<string, FitResponse | "failed" | null>>({});
   const [detail, setDetail] = useState<DetailRead>({ state: "reading" });
   const [editing, setEditing] = useState(false);
   const [editedBody, setEditedBody] = useState("");
@@ -120,7 +123,8 @@ export function ComposerSurface({ runId }: { runId: string }) {
           if (!cancelled) setFits((prev) => ({ ...prev, [draft.id]: fit }));
         })
         .catch(() => {
-          /* the line renders its unmeasured state */
+          // The line SAYS it couldn't measure rather than measuring forever.
+          if (!cancelled) setFits((prev) => ({ ...prev, [draft.id]: "failed" }));
         });
     }
     return () => {
@@ -351,6 +355,7 @@ export function ComposerSurface({ runId }: { runId: string }) {
               }}
               active={active}
               fit={active ? (fits[active.id] ?? null) : null}
+              cutHref={videoProjectHref(run)}
             />
             <RightColumn
               active={active}
@@ -415,6 +420,7 @@ function LeftColumn({
     : []) as unknown as JudgeResultWithEvidence[];
   const marks = active ? checkMarks(active, results) : [];
   const failing = marks.find((m) => m.status === "fail" && !m.advisory);
+  const strip = stripStatus(active?.status ?? "", failing?.label ?? null);
   const term = active?.status === "blocked" ? hitTerm(failing?.label) : null;
   const marked = active && !editing ? markBody(active.body, term) : null;
 
@@ -527,19 +533,11 @@ function LeftColumn({
       {active && (
         <div className="jstrip">
           <div className="jstrip-top">
-            {active.status === "blocked" ? (
-              <span className="pill pill-err">would block</span>
-            ) : active.status === "judging" ? (
-              <span className="pill pill-idle">at the judge</span>
-            ) : (
-              <span className="pill pill-ok">passes</span>
-            )}
+            {/* All seven eras of the draft ladder — an approved or published
+                variant must not be told the human gate is still "next". */}
+            <span className={`pill ${strip.pill}`}>{strip.word}</span>
             <span style={{ fontSize: "12.5px" }}>
-              {active.status === "blocked"
-                ? (failing?.label ?? "blocked — the judge’s reason is on the record")
-                : active.status === "judging"
-                  ? "gates running on the current body"
-                  : "queued for Approve — the human gate is next"}
+              {strip.line}
               {term && marked ? " — marked in the body" : ""}
             </span>
           </div>
@@ -604,18 +602,24 @@ function MiddleColumn({
   onSelect,
   active,
   fit,
+  cutHref,
 }: {
   tabs: ReturnType<typeof composerTabs>;
   activeId: string | null;
   onSelect: (id: string) => void;
   active: GridDraft | null;
-  fit: FitResponse | null;
+  fit: FitResponse | "failed" | null;
+  /** The run's own video project, when it made one — the cut's record. */
+  cutHref: string | null;
 }) {
+  // A failed measure has no numbers to draw from — the preview shows the
+  // body whole rather than inventing a cut (the fit line names the failure).
+  const measured = fit !== null && fit !== "failed" ? fit : null;
   const cut =
-    fit && fit.supported && fit.fit.text.cutIndex < (active?.body.length ?? 0)
-      ? fit.fit.text.cutIndex
+    measured && measured.supported && measured.fit.text.cutIndex < (active?.body.length ?? 0)
+      ? measured.fit.text.cutIndex
       : null;
-  const hashtags = fit && fit.supported ? fit.fit.text.hashtags : [];
+  const hashtags = measured && measured.supported ? measured.fit.text.hashtags : [];
   const media = active ? firstMediaKind(active) : null;
   const actions = active ? previewActions(active.platform) : [];
 
@@ -694,7 +698,16 @@ function MiddleColumn({
                 )}
                 {media !== null && (
                   <div className="pv-media" style={{ height: 186 }}>
-                    <span>{media === "video" ? "video — the run’s cut" : `${media} — as attached`}</span>
+                    {media === "video" && cutHref !== null ? (
+                      // The stated cut is a DOOR to its own record (s99).
+                      <Link className="card-link" href={cutHref}>
+                        video — the run’s cut →
+                      </Link>
+                    ) : (
+                      <span>
+                        {media === "video" ? "video — the run’s cut" : `${media} — as attached`}
+                      </span>
+                    )}
                   </div>
                 )}
                 {actions.length > 0 && (
@@ -725,7 +738,7 @@ function RightColumn({
   onToggleMore,
 }: {
   active: GridDraft | null;
-  fit: FitResponse | null;
+  fit: FitResponse | "failed" | null;
   moreOpen: boolean;
   onToggleMore: () => void;
 }) {
@@ -733,9 +746,10 @@ function RightColumn({
   const more = active ? moreSettingsFields(active.platform) : [];
   const terms = active ? targetTerms(active) : [];
   const disc = active ? discoverability(terms, active.body) : null;
+  const measuredFit = fit !== null && fit !== "failed" ? fit : null;
   const suggested =
-    fit && fit.supported && fit.suggestedAt
-      ? new Date(fit.suggestedAt)
+    measuredFit && measuredFit.supported && measuredFit.suggestedAt
+      ? new Date(measuredFit.suggestedAt)
       : null;
 
   return (

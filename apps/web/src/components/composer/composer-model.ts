@@ -39,8 +39,10 @@ export interface ComposerTab {
  * `fit === null` = not measured yet — the dot stays ok rather than inventing
  * a warning nobody computed.
  */
-export function tabDot(draft: GridDraft, fit: FitResponse | null): TabDot {
+export function tabDot(draft: GridDraft, fit: FitResponse | "failed" | null): TabDot {
   if (draft.status === "blocked") return "err";
+  // An unmeasurable destination is a warning, not a clean bill (s99).
+  if (fit === "failed") return "warn";
   if (fit === null || !("supported" in fit) || fit.supported === false) return "ok";
   if (fit.fit.media.required && fit.fit.media.count === 0) return "err";
   if (!fit.fit.fits || fit.fit.text.overBy > 0) return "warn";
@@ -49,7 +51,7 @@ export function tabDot(draft: GridDraft, fit: FitResponse | null): TabDot {
 
 export function composerTabs(
   drafts: GridDraft[],
-  fits: Record<string, FitResponse | null>,
+  fits: Record<string, FitResponse | "failed" | null>,
 ): ComposerTab[] {
   return drafts.map((draft) => ({
     draftId: draft.id,
@@ -104,7 +106,11 @@ const NUM = new Intl.NumberFormat("en-GB");
  * (sheet rule). Every refusal message rides verbatim from the one engine
  * validator the queue producer also refuses on — one rule, one owner.
  */
-export function fitWords(fit: FitResponse | null): FitLineWords {
+export function fitWords(fit: FitResponse | "failed" | null): FitLineWords {
+  // s99: a FAILED measure is its own fact — "measuring…" that never resolves
+  // is the same lie the verdict strip's eternal "reading…" was.
+  if (fit === "failed")
+    return { count: "—", why: "couldn’t measure this destination", tone: "err" };
   if (fit === null) return { count: "—", why: "measuring…", tone: "none" };
   if (!fit.supported) {
     // A platform outside the social enum (the blog, the site) has no
@@ -132,6 +138,59 @@ export function fitWords(fit: FitResponse | null): FitLineWords {
   return { count, why: "Fits. The body posts whole — no cut.", tone: "ok" };
 }
 
+export interface StripStatus {
+  word: string;
+  pill: "pill-ok" | "pill-idle" | "pill-err";
+  /** What happens NEXT, in the ladder's own truth — never a stale "next". */
+  line: string;
+}
+
+/**
+ * s99 — THE STRIP'S STATUS, all seven eras. It read blocked / judging /
+ * "else", so an APPROVED and even a PUBLISHED variant wore "passes · queued
+ * for Approve — the human gate is next": a next that had already happened
+ * (found live on the s98 dogfood draft, which was published to Bluesky).
+ * The ladder is DRAFT_STATUSES / DRAFT_TRANSITIONS in @thalon/contracts.
+ */
+export function stripStatus(status: string, failingLabel: string | null): StripStatus {
+  switch (status) {
+    case "blocked":
+      return {
+        word: "would block",
+        pill: "pill-err",
+        line: failingLabel ?? "blocked — the judge’s reason is on the record",
+      };
+    case "rejected":
+      return {
+        word: "rejected",
+        pill: "pill-err",
+        line: "you rejected this variant — the correction is on record as an eval row",
+      };
+    case "judging":
+      return { word: "at the judge", pill: "pill-idle", line: "gates running on the current body" };
+    case "generated":
+      return {
+        word: "generated",
+        pill: "pill-idle",
+        line: "not judged yet — the gates run before it can queue",
+      };
+    case "approved":
+      return {
+        word: "approved",
+        pill: "pill-ok",
+        line: "you approved it — publishing is the queue’s own door",
+      };
+    case "published":
+      return { word: "published", pill: "pill-ok", line: "this variant is out — nothing left to do here" };
+    default:
+      return {
+        word: "passes",
+        pill: "pill-ok",
+        line: "queued for Approve — the human gate is next",
+      };
+  }
+}
+
 export interface Discoverability {
   have: number;
   total: number;
@@ -149,6 +208,17 @@ export function discoverability(terms: string[], body: string): Discoverability 
     total: terms.length,
     missing: missing[0] ?? null,
   };
+}
+
+/**
+ * s99 — THE CUT BEHIND A VIDEO VARIANT. The media band states "video — the
+ * run's cut" as a fact with nowhere to go, while the run's own children carry
+ * the `video_project` id the V-arc built all its evidence on (the Dossier's
+ * versions, verdicts and render clocks). Every fact is a door.
+ */
+export function videoProjectHref(run: CreateRunWire): string | null {
+  const child = run.children.find((c) => c.kind === "video_project" && !c.error);
+  return child ? `/app/videos/${child.id}` : null;
 }
 
 /** The Approve queue, scoped to this run's own drafts — the checkpoint's exit. */
@@ -176,8 +246,36 @@ export function provenanceParts(run: CreateRunWire, active: GridDraft | null): P
   ];
   const meta =
     active?.meta && typeof active.meta === "object" ? (active.meta as Record<string, unknown>) : null;
-  if (typeof active?.captureId === "string" && active.captureId) {
-    parts.push({ text: "from an Intel pick", href: "/app/intel" });
+  /*
+   * s99 — the Intel pick was read ONLY off `draft.captureId`, which the
+   * fan-out leaves null; the capture that actually seeded the run sits on
+   * `run.brief.context` on the very same wire, so the door never fired on a
+   * run that plainly came from Intel (found live on the s98 dogfood).
+   */
+  const context =
+    run.brief && typeof run.brief === "object"
+      ? ((run.brief as { context?: unknown }).context as
+          | { captureId?: unknown; title?: unknown }
+          | undefined)
+      : undefined;
+  const captureId =
+    typeof active?.captureId === "string" && active.captureId
+      ? active.captureId
+      : typeof context?.captureId === "string" && context.captureId
+        ? context.captureId
+        : null;
+  if (captureId !== null) {
+    const title = typeof context?.title === "string" && context.title ? context.title : null;
+    parts.push({
+      text: title ? `from an Intel pick — “${title}”` : "from an Intel pick",
+      href: "/app/intel",
+    });
+  }
+  // The profile VERSION the fan-out stamped: the exact voice this body was
+  // written against (the sheet's "profile v4"). It is on the wire.
+  const profileVersion = meta?.brandProfileVersion;
+  if (typeof profileVersion === "number") {
+    parts.push({ text: `profile v${profileVersion}`, href: "/app/profiles" });
   }
   const grounding = Array.isArray(meta?.groundingSourceIds) ? meta.groundingSourceIds.length : 0;
   if (grounding > 0) {

@@ -51,8 +51,41 @@ export function toErrorResponse(err: unknown): NextResponse {
   ) {
     return NextResponse.json({ error: err.message }, { status: 409 });
   }
+  /*
+   * s99 — A DRIVER ERROR IS NEVER A CALLER'S SENTENCE. Drizzle wraps a failed
+   * statement as "Failed query: select … params: <id>,<TENANT UUID>" and the
+   * catch-all below handed that whole string to the browser, where surfaces
+   * render refusals verbatim by design: the Composer printed the SQL and the
+   * tenant's own id into its error slot (found live, s99 fe-check). The detail
+   * belongs in the server log; the caller gets the fact and nothing else.
+   */
+  if (isDriverError(err)) {
+    console.error("[http-errors] driver error", err);
+    return NextResponse.json(
+      { error: "the database refused that operation — the detail is in the server log" },
+      { status: 500 },
+    );
+  }
   if (err instanceof Error) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
   return NextResponse.json({ error: "unknown error" }, { status: 500 });
+}
+
+/**
+ * A database-driver error, by the two shapes this stack actually produces:
+ * Drizzle's `Failed query:` wrapper (see packages/db rls-harness — the cause
+ * chain is the driver's) and node-postgres' own error, which carries a
+ * `severity` beside its SQLSTATE `code`. Walks the cause chain, since Drizzle
+ * nests the driver error inside its own.
+ */
+function isDriverError(err: unknown): boolean {
+  for (let step: unknown = err, depth = 0; step != null && depth < 5; depth++) {
+    if (typeof step !== "object") break;
+    const shape = step as { message?: unknown; severity?: unknown; code?: unknown; cause?: unknown };
+    if (typeof shape.message === "string" && shape.message.startsWith("Failed query:")) return true;
+    if (typeof shape.severity === "string" && typeof shape.code === "string") return true;
+    step = shape.cause;
+  }
+  return false;
 }

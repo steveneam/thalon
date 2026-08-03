@@ -61,4 +61,35 @@ describe("toErrorResponse — a state refusal is a conflict, never a bad request
     const res = toErrorResponse("something threw a string");
     expect(res.status).toBe(500);
   });
+
+  /*
+   * s99 (fe-check, live on the Composer): Drizzle's wrapper carries the whole
+   * statement AND its params — the tenant's own uuid among them — and the
+   * catch-all handed that string to the browser, where every surface renders
+   * a refusal verbatim by design. A driver error is not a caller's sentence.
+   */
+  it("never renders a driver error's SQL or params to the caller", async () => {
+    const drizzle = new Error(
+      'Failed query: select "id", "tenant_id" from "drafts" where id = $1 and tenant_id = $2\nparams: fixture-vd-youtube,8159220f-0604-4540-aa07-2936f1d171e3',
+    );
+    const res = toErrorResponse(drizzle);
+    expect(res.status).toBe(500);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("the database refused that operation — the detail is in the server log");
+    expect(body.error).not.toContain("select");
+    expect(body.error).not.toContain("8159220f");
+  });
+
+  it("catches the driver error nested in a cause chain, and pg's own shape", async () => {
+    const wrapped = new Error("could not save", {
+      cause: new Error("Failed query: insert into \"video_cuts\" … params: 8159220f-…"),
+    });
+    expect(toErrorResponse(wrapped).status).toBe(500);
+
+    const pgErr = Object.assign(new Error("duplicate key value violates unique constraint"), {
+      severity: "ERROR",
+      code: "23505",
+    });
+    expect(toErrorResponse(pgErr).status).toBe(500);
+  });
 });

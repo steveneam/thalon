@@ -13,7 +13,9 @@ import {
   previewActions,
   provenanceParts,
   sendToApproveHref,
+  stripStatus,
   tabDot,
+  videoProjectHref,
   wouldBlockCount,
 } from "@/components/composer/composer-model";
 import type { FitResponse } from "@/components/approve/queue-client";
@@ -262,5 +264,71 @@ describe("preview honesty", () => {
     expect(firstMediaKind(draft({ meta: { mediaRefs: [{ ref: "m1", mime: "image/png" }] } }))).toBe(
       "image",
     );
+  });
+});
+
+/** s99 — the fe-check fix round's pure-model pins. */
+describe("s99: the strip's seven eras, the failed measure, the doors that exist on the wire", () => {
+  it("never tells an approved or published variant that the human gate is next", () => {
+    expect(stripStatus("queued", null).line).toContain("the human gate is next");
+    expect(stripStatus("approved", null)).toMatchObject({ word: "approved", pill: "pill-ok" });
+    expect(stripStatus("approved", null).line).not.toContain("next");
+    expect(stripStatus("published", null).word).toBe("published");
+    expect(stripStatus("rejected", null)).toMatchObject({ word: "rejected", pill: "pill-err" });
+    expect(stripStatus("generated", null).line).toContain("not judged yet");
+    // A blocked draft still leads with the failing gate's own label.
+    expect(stripStatus("blocked", "Denylist — “guaranteed”").line).toBe("Denylist — “guaranteed”");
+  });
+
+  it("a failed fit measure says so — it never measures forever", () => {
+    expect(fitWords("failed")).toMatchObject({ tone: "err" });
+    expect(fitWords("failed").why).toContain("couldn’t measure");
+    // Still-measuring stays its own, quieter fact.
+    expect(fitWords(null)).toMatchObject({ why: "measuring…", tone: "none" });
+  });
+
+  it("an unmeasurable destination warns on its tab rather than reading clean", () => {
+    const draft = { status: "queued" } as never;
+    expect(tabDot(draft, "failed")).toBe("warn");
+    expect(tabDot(draft, null)).toBe("ok");
+  });
+});
+
+describe("s99: the provenance facts that were on the wire all along", () => {
+  it("finds the Intel pick on the RUN's brief when the draft carries no captureId", () => {
+    // The fan-out leaves draft.captureId null; the capture that seeded the
+    // run sits on run.brief.context — the door never fired (live, s98 run).
+    const seeded: CreateRunWire = {
+      ...run,
+      brief: {
+        prompt: "Launch film",
+        context: { captureId: "cap-9", title: "Why the US is Restricting Access" },
+      },
+    };
+    const parts = provenanceParts(seeded, draft({ captureId: null }));
+    const pick = parts.find((p) => p.text.startsWith("from an Intel pick"));
+    expect(pick).toBeDefined();
+    expect(pick?.text).toContain("Why the US is Restricting Access");
+    expect(pick?.href).toBe("/app/intel");
+    // Still absent when no capture rode in at all — never invented.
+    expect(provenanceParts(run, draft({})).some((p) => p.text.includes("Intel"))).toBe(false);
+  });
+
+  it("names the profile VERSION the body was written against — it is on the wire", () => {
+    const parts = provenanceParts(run, draft({ meta: { brandProfileVersion: 5 } }));
+    expect(parts.map((p) => p.text)).toContain("profile v5");
+  });
+
+  it("the run's own video project is a door — the media band's stated cut", () => {
+    expect(videoProjectHref(run)).toBeNull();
+    const withVideo: CreateRunWire = {
+      ...run,
+      children: [...run.children, { kind: "video_project", id: "vp1" }],
+    };
+    expect(videoProjectHref(withVideo)).toBe("/app/videos/vp1");
+    // A child that errored is not a door.
+    expect(
+      videoProjectHref({ ...run, children: [{ kind: "video_project", id: "vp2", error: "boom" }] }),
+    ).toBeNull();
   });
 });
