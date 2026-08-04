@@ -207,11 +207,13 @@ under the grant. Zero credits ever spent.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (`21c211a`, this wrap) · staging rolls s93–s101
+▎ ▸ **State:** main = origin (`4d01501`, this wrap) · staging rolls s93–s101
 with the next auto-deploy · four social channels connected · dev PG live ·
 8899 preview + sweeper user units keep running — NEVER hand-start the sweeper.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
-s102 boots on "gogogo" alone (this file + COORDINATION §s101 carry the state).
+s102 boots on "gogogo" alone. **The PLAN is COORDINATION §s102** (§s101 is
+what shipped) and `docs/control-arc/spec.md` is VERDICTED — read the plan
+before the history.
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
