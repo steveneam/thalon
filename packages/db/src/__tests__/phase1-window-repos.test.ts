@@ -184,7 +184,7 @@ describe("saved views (Phase-I window)", () => {
 
     const listed = await repos.savedViews.list(ctx, "leads");
     expect(listed.map((v) => v.name)).toEqual(["Hot pipeline"]);
-    expect(await repos.savedViews.list(ctx, "calendar")).toEqual([]);
+    expect(await repos.savedViews.list(ctx, "schedule")).toEqual([]);
 
     await repos.savedViews.remove(ctx, view.id);
     expect(await repos.savedViews.list(ctx, "leads")).toEqual([]);

@@ -31,8 +31,23 @@ export type PlannedSlot = z.infer<typeof plannedSlotSchema>;
 // (filters/sorts/density are surface vocabulary, data not schema); the
 // SURFACES list is the closed set the check constraint enforces.
 
-/** Surfaces designed with saved-view tabs (Phase D: the leads board + the calendar). Widening = a window change. */
-export const SAVED_VIEW_SURFACES = ["leads", "calendar"] as const;
+/**
+ * Surfaces designed with saved-view tabs. Widening = a window change.
+ *
+ * s102 (window 0027) fixed a LIVE bug rather than adding a feature. The
+ * calendar surface was renamed to Schedule at s86 and its code has asked for
+ * `"schedule"` ever since, but this list still said `"calendar"` — so
+ * `isSavedViewSurface("schedule")` was false, every read and write 400d, and
+ * **both call sites in `schedule-surface.tsx` swallow their errors by design**
+ * (a view preference must never surface an error over the plan). The result:
+ * Schedule's density/scope preference had never once persisted, silently, for
+ * sixteen sessions. Proven live before the fix — GET and PUT both 400.
+ *
+ * `"calendar"` is retired in the same window rather than kept as an alias: the
+ * surface it named no longer exists, and the migration carries the stranded
+ * rows forward under the new name instead of dropping the operator's setting.
+ */
+export const SAVED_VIEW_SURFACES = ["leads", "schedule"] as const;
 export type SavedViewSurface = (typeof SAVED_VIEW_SURFACES)[number];
 
 export function isSavedViewSurface(value: string): value is SavedViewSurface {

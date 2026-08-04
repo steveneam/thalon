@@ -65,9 +65,37 @@ describe("/api/views (Phase-I window store — the tenant-wide view record)", ()
     expect(views).toHaveLength(1);
   });
 
-  it("surfaces are separate shelves — a calendar view never leaks into the leads list", async () => {
-    await PUT(putReq({ surface: "calendar", name: "Week", config: {} }));
+  it("surfaces are separate shelves — a schedule view never leaks into the leads list", async () => {
+    await PUT(putReq({ surface: "schedule", name: "Week", config: {} }));
     const { views } = (await (await GET(getReq("leads"))).json()) as { views: unknown[] };
     expect(views).toHaveLength(0);
+  });
+
+  /**
+   * Window 0027, and the reason it exists. `schedule-surface.tsx` has asked
+   * for `"schedule"` since the s86 rename while the surface list still said
+   * `"calendar"`, so both doors 400d — and both call sites swallow their
+   * errors by design, so the operator's density/scope preference silently
+   * never persisted. Proven live before the fix; pinned here after it.
+   */
+  it("the SCHEDULE surface round-trips — the s86 rename's stranded door", async () => {
+    const put = await PUT(
+      putReq({ surface: "schedule", name: "Default", config: { density: "month", scope: "all" } }),
+    );
+    expect(put.status).toBe(200);
+
+    const read = await GET(getReq("schedule"));
+    expect(read.status).toBe(200);
+    const { views } = (await read.json()) as { views: Array<{ config: unknown }> };
+    expect(views).toHaveLength(1);
+    expect(views[0].config).toEqual({ density: "month", scope: "all" });
+  });
+
+  /** The retired name is gone, not quietly aliased — an unknown surface still refuses. */
+  it("the retired `calendar` name is refused, and the error names what IS accepted", async () => {
+    expect((await GET(getReq("calendar"))).status).toBe(400);
+    const { error } = (await (await GET(getReq("calendar"))).json()) as { error: string };
+    expect(error).toContain("schedule");
+    expect((await PUT(putReq({ surface: "calendar", name: "Week", config: {} }))).status).toBe(400);
   });
 });
