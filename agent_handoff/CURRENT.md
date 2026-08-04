@@ -66,7 +66,7 @@ UNTOUCHED and was not hit this session.
 ▎ ▸ **Design work = Fable 5 direct, never delegated** (standing s51); every
 lane/subagent launch needs fresh founder approval; Mode B default.
 ▎ ▸ **Traps worth keeping:** `next dev` at `localhost:3111` (`npm run dev`),
-started in-session — **s99 left it RUNNING; stop it or reuse it** · scripts
+started and STOPPED in-session (s99 left it stopped) · scripts
 need `set -a; source apps/web/.env.local; set +a` · chrome-devtools `fill`
 does NOT reach React controlled inputs (type via keyboard or use the API
 wire) · one workspace `.data` root since `68d9873`, NEVER re-pin · chip
