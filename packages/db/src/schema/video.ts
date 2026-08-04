@@ -38,6 +38,14 @@ export const videoProjects = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     meta: jsonb("meta").notNull().default({}),
+    /**
+     * Window 0026 — REMOVAL RETIRES, IT NEVER DESTROYS (founder call, s99
+     * close). A retired project leaves every read that does not explicitly
+     * ask for it, and NOTHING else changes: the row stays, its cuts stay,
+     * their rendered files stay on disk, and restore brings it back exactly.
+     * Nothing auto-purges it — the disk cost is accepted.
+     */
+    retiredAt: timestamp("retired_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -47,8 +55,14 @@ export const videoProjects = pgTable(
   },
   (t) => [
     // Re-creating a project by name returns the existing one — idempotency
-    // made structural (the search_targets get-or-create pattern).
+    // made structural (the search_targets get-or-create pattern). NOTE: this
+    // index does not exempt retired rows, and deliberately so — a retired
+    // project still HOLDS its name, which is why both the create door and the
+    // rename door refuse against it by name rather than letting Postgres
+    // raise a constraint the operator cannot see (window 0026).
     uniqueIndex("video_projects_tenant_name_idx").on(t.tenantId, t.name),
+    // Hot path since window 0026: the grid lists the tenant's LIVING projects.
+    index("video_projects_tenant_retired_idx").on(t.tenantId, t.retiredAt),
     tenantIsolation(),
   ],
 );
@@ -130,6 +144,15 @@ export const videoCuts = pgTable(
     /** Project-relative ref of the rendered output — set by recordRender. */
     outputRef: text("output_ref"),
     meta: jsonb("meta").notNull().default({}),
+    /**
+     * Window 0026 — the retire stamp that replaced s82's HARD delete. The
+     * old verb removed the row AND unlinked the rendered file; the sheet's
+     * confirm had been promising the opposite the whole time ("Restore brings
+     * it back exactly as it is now"). A retired cut KEEPS `output_ref` and
+     * KEEPS the file: a retire that deleted the render would make that
+     * promise a lie the first time anyone believed it.
+     */
+    retiredAt: timestamp("retired_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -148,6 +171,8 @@ export const videoCuts = pgTable(
     ),
     // Hot path: the project surface lists cuts by status.
     index("video_cuts_tenant_project_status_idx").on(t.tenantId, t.projectId, t.status),
+    // Hot path since window 0026: the version strip lists a project's LIVING cuts.
+    index("video_cuts_tenant_project_retired_idx").on(t.tenantId, t.projectId, t.retiredAt),
     check("video_cuts_status_check", sql.raw(`status in (${inList(VIDEO_CUT_STATUSES)})`)),
     tenantIsolation(),
   ],

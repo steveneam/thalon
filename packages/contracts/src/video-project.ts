@@ -309,12 +309,35 @@ export type Edl = z.infer<typeof edlSchema>;
 /* Project + takes + cuts — the film-tree shape as validated data.     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * A project's name — the ONE definition, shared by the create door and the
+ * rename door (window 0026). `(tenant, name)` is both a unique index and the
+ * get-or-create idempotency key, so the two doors must agree on what a legal
+ * name is: a name the create door would accept but rename would not (or the
+ * reverse) is a project reachable one way and unreachable the other.
+ * Trimmed at the door, because " Pillar" and "Pillar" colliding on nothing
+ * but leading whitespace is a duplicate wearing a disguise.
+ */
+export const videoProjectNameSchema = z.string().trim().min(1);
+
 export const videoProjectInputSchema = z.object({
-  name: z.string().min(1),
+  name: videoProjectNameSchema,
   description: z.string().optional(),
   meta: z.record(z.string(), z.unknown()).default({}),
 });
 export type VideoProjectInput = z.input<typeof videoProjectInputSchema>;
+
+/**
+ * Window 0026 — the rename door's input. Rename REFUSES on a name collision
+ * and never merges: `(tenant, name)` is the get-or-create key, so folding two
+ * projects together is what a "merge" would actually mean here (the founder's
+ * call at the s99 close). The refusal is enforced in the repo against LIVE
+ * *and* RETIRED rows alike — the unique index does not care that a row is
+ * retired, and a rename that failed on a constraint the operator cannot see
+ * would be a mystery rather than an answer.
+ */
+export const videoProjectRenameSchema = z.object({ name: videoProjectNameSchema });
+export type VideoProjectRename = z.infer<typeof videoProjectRenameSchema>;
 
 /** What a take IS (a cut is never a take — it is built FROM takes). */
 export const VIDEO_TAKE_KINDS = ["motion", "still", "audio"] as const;

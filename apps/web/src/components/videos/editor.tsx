@@ -13,7 +13,6 @@ import { aspectOf, proposalMarks, takeCaption } from "@/components/videos/editor
 import { attributionLine, staleAgainstParent, timecode } from "@/components/videos/videos-model";
 import {
   approveCut,
-  deleteCut,
   deriveCut,
   fetchCutDetail,
   fetchProjectDetail,
@@ -23,6 +22,7 @@ import {
   previewCut,
   proposeDiff,
   rejectProposal,
+  retireCut,
   saveCut,
   startRender,
   type CaptionRefusal,
@@ -86,7 +86,7 @@ const WORKING: Record<EditorVerb, string> = {
   derive: "Deriving…",
   propose: "Proposing…",
   dismiss: "Recording…",
-  delete: "Deleting…",
+  delete: "Retiring…",
 };
 
 /**
@@ -663,29 +663,28 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
   }
 
   /**
-   * A3 — DELETE THIS VERSION. The refusals are the repo's (and the surface
-   * states them before the press, from the same rule); this only runs once the
-   * operator has confirmed. The route removes the rendered file, so nothing is
-   * left on disk that the product can no longer name.
+   * A3 — RETIRE THIS VERSION (window 0026: removal retires, it never
+   * destroys). The refusals are the repo's (and the surface states them before
+   * the press, from the same rule); this only runs once the operator has
+   * confirmed. Nothing is unlinked — the version keeps its render and comes
+   * back exactly from the dossier's Cut history, which is what the notice says
+   * rather than leaving the operator to hope.
    */
-  function onDelete() {
+  function onRetire() {
     if (cut === null || detail === null) return;
-    const doomed = cut;
+    const leaving = cut;
     setConfirmDelete(false);
     run("delete", async () => {
-      const outcome = await deleteCut(projectId, doomed.id);
+      const outcome = await retireCut(projectId, leaving.id);
       // A refusal arrives as the door's own sentence — it goes in the notice
       // band verbatim, never as "that door refused".
       if (!outcome.ok) return outcome.error;
-      const remaining = detail.cuts.filter((c) => c.id !== doomed.id);
+      const remaining = detail.cuts.filter((c) => c.id !== leaving.id);
       const next = defaultCutFor(remaining);
       void fetchProjectDetail(projectId).then((p) => p && setDetail(p));
       if (next === null) router.replace(`/app/videos/${projectId}`);
       else router.replace(`/app/videos/${projectId}/edit?cut=${next.id}`, { scroll: false });
-      const file = outcome.file.removed
-        ? ` Its render went with it (${outcome.file.ref}).`
-        : ` ${outcome.file.reason ?? "Nothing was removed from disk."}`;
-      return `Deleted ${outcome.removed.name} v${outcome.removed.version}.${file}`;
+      return `Retired ${leaving.name} v${leaving.version} — it kept its render, and Cut history on the dossier brings it back exactly.`;
     });
   }
 
@@ -993,7 +992,7 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
    * no server can see that from a row.
    */
   const deleteRefusal = dirty
-    ? `Save or discard your unsaved edits first — deleting ${cut.name} v${cut.version} now would throw those edits away with it.`
+    ? `Save or discard your unsaved edits first — retiring ${cut.name} v${cut.version} now would throw those edits away with it.`
     : deleteRefusalFor(cut, detail.cuts);
 
   /** A4 — what is still rendering, in versions rather than job ids. */
@@ -1361,19 +1360,20 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
         is the plainer of the two answers.
       */}
       {confirmDelete && (
-        <div className="card notice-band refused" role="alertdialog" aria-label="Delete this version">
+        <div className="card notice-band refused" role="alertdialog" aria-label="Retire this version">
           <span className="t-label">
-            Delete {cut.name} v{cut.version}? Its EDL and its rendered file go with it and cannot be
-            recovered. Every other version of this project stays exactly as it is.
+            Retire {cut.name} v{cut.version}? It leaves the version strip, not the record — its EDL,
+            its rendered file and its judge verdicts all stay, and Cut history on the dossier brings
+            it back exactly as it is now. Every other version stays exactly as it is.
           </span>
           <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
             <button
               type="button"
               className="btn btn-primary btn-sm"
               disabled={running.has("delete")}
-              onClick={onDelete}
+              onClick={onRetire}
             >
-              {running.has("delete") ? WORKING.delete : `Delete v${cut.version} permanently`}
+              {running.has("delete") ? WORKING.delete : `Retire v${cut.version}`}
             </button>
             <button
               type="button"
@@ -1809,13 +1809,13 @@ export function VideoEditor({ projectId, cutId }: { projectId: string; cutId: st
                 aria-disabled={deleteRefusal !== null || undefined}
                 title={
                   deleteRefusal ??
-                  `Delete ${cut.name} v${cut.version} and the file it rendered — permanently`
+                  `Retire ${cut.name} v${cut.version} — it keeps its render, and Cut history brings it back`
                 }
                 onClick={() =>
                   deleteRefusal !== null ? setNotice(deleteRefusal) : setConfirmDelete(true)
                 }
               >
-                Delete this version
+                Retire this version
               </button>
             </div>
 

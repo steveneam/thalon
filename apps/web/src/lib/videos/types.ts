@@ -24,6 +24,18 @@ export interface ProjectSummary {
   createdAt: string;
 }
 
+/**
+ * Window 0026: one retired project, as the grid's restore door needs to name
+ * it. Same reasoning as `RetiredCutView` — not a `ProjectSummary`, because a
+ * retired project is not something to open, and the counts a summary carries
+ * would only invite doors that must not exist on it.
+ */
+export interface RetiredProjectView {
+  id: string;
+  name: string;
+  retiredAt: string;
+}
+
 export interface TakeView {
   id: string;
   /** Beat slot ("beat-01"); music candidates carry none. */
@@ -136,6 +148,23 @@ export interface RenderJobView {
   finishedAt: string | null;
 }
 
+/**
+ * Window 0026: one retired cut, as the Restore door needs to name it. It is
+ * deliberately NOT a `CutView` — a retired cut is not a thing you can play,
+ * derive from or approve, and handing the surface a full view would invite
+ * exactly those doors to sprout on it. What restore needs is a name, a
+ * version, when it left, and whether the render it kept is still on this box.
+ */
+export interface RetiredCutView {
+  id: string;
+  name: string;
+  version: number;
+  status: VideoCutStatus;
+  /** Non-null = the render it KEPT (retire never unlinks — window 0026). */
+  outputRef: string | null;
+  retiredAt: string;
+}
+
 export interface ProjectDetail {
   id: string;
   name: string;
@@ -145,4 +174,6 @@ export interface ProjectDetail {
   playable: boolean;
   takes: TakeView[];
   cuts: CutView[];
+  /** Window 0026: what "Cut history" holds — retired versions, restorable exactly. */
+  retired: RetiredCutView[];
 }

@@ -14,13 +14,17 @@ vi.mock("@/lib/repos", () => ({
 }));
 
 const { DELETE } = await import("./route");
+const { POST: RESTORE } = await import("./restore/route");
 
 /**
- * s82 A3 — the delete door. The three refusals themselves are the repo's and
- * are pinned in packages/db; what is pinned HERE is the door's own half: the
- * status it maps a refusal to (409, message verbatim — the operator reads it
- * in the notice band), the tenancy/project scoping, and the RENDERED FILE,
- * which no repo can reach and which a delete that skipped it would orphan.
+ * Window 0026 — the RETIRE door (s82's delete, made reversible) and its
+ * restore twin. The three refusals themselves are the repo's and are pinned in
+ * packages/db; what is pinned HERE is the door's own half: the status it maps
+ * a refusal to (409, message verbatim — the operator reads it in the notice
+ * band), the tenancy/project scoping, and — the reason this file changed at
+ * all — THE FILE ON DISK, which the old door deleted and this one must not
+ * touch. A retire that unlinked the render would make the sheet's confirm
+ * ("Restore brings it back exactly as it is now") a lie.
  */
 
 let handle: DbHandle | undefined;
@@ -38,7 +42,7 @@ beforeEach(async () => {
   repos = handle.repos;
   const tenant = await repos.tenants.create({ slug: "self", name: "Self" });
   ctx = tenantCtx(tenant.id);
-  root = await mkdtemp(path.join(tmpdir(), "thalon-delete-test-"));
+  root = await mkdtemp(path.join(tmpdir(), "thalon-retire-test-"));
 });
 
 afterEach(async () => {
@@ -75,45 +79,68 @@ function req(projectId: string, cutId: string) {
   ] as const;
 }
 
-describe("DELETE /api/videos/[projectId]/cuts/[cutId]", () => {
-  it("deletes the version AND the file it rendered — nothing is left on disk unnameable", async () => {
+describe("DELETE /api/videos/[projectId]/cuts/[cutId] — retire", () => {
+  it("retires the version and LEAVES THE RENDERED FILE ON DISK", async () => {
     const p = await project();
     await cut(p.id, 1);
-    const doomed = await cut(p.id, 2, "cuts/master-v2.mp4");
+    const leaving = await cut(p.id, 2, "cuts/master-v2.mp4");
     await mkdir(path.join(root, "cuts"), { recursive: true });
     await writeFile(path.join(root, "cuts/master-v2.mp4"), "not really an mp4");
 
-    const res = await DELETE(...req(p.id, doomed.id));
+    const res = await DELETE(...req(p.id, leaving.id));
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
-      removed: { version: number };
-      file: { removed: boolean; ref?: string };
+      retired: { version: number; outputRef: string | null };
+      changed: boolean;
     };
-    expect(body.removed.version).toBe(2);
-    expect(body.file).toEqual({ removed: true, ref: "cuts/master-v2.mp4" });
-    await expect(access(path.join(root, "cuts/master-v2.mp4"))).rejects.toThrow();
-    expect(await repos?.videoCuts.get(ctx, doomed.id)).toBeNull();
+    expect(body.retired.version).toBe(2);
+    expect(body.changed).toBe(true);
+    // The two facts that ARE window 0026, stated as assertions: the ref
+    // survives on the row, and the bytes survive on disk.
+    expect(body.retired.outputRef).toBe("cuts/master-v2.mp4");
+    await expect(access(path.join(root, "cuts/master-v2.mp4"))).resolves.toBeUndefined();
+    // Gone from the default read, which is what "retired" means here.
+    expect(await repos?.videoCuts.get(ctx, leaving.id)).toBeNull();
   });
 
-  it("takes the working-copy PREVIEW with it — it is addressed by the cut id and nothing could name it again", async () => {
+  it("leaves the working-copy PREVIEW alone too — a restore must find everything", async () => {
     const p = await project();
     await cut(p.id, 1);
-    const doomed = await cut(p.id, 2);
+    const leaving = await cut(p.id, 2);
     await mkdir(path.join(root, "cuts", "previews"), { recursive: true });
-    await writeFile(path.join(root, `cuts/previews/${doomed.id}.mp4`), "preview");
+    await writeFile(path.join(root, `cuts/previews/${leaving.id}.mp4`), "preview");
 
-    const res = await DELETE(...req(p.id, doomed.id));
+    const res = await DELETE(...req(p.id, leaving.id));
     expect(res.status).toBe(200);
-    await expect(access(path.join(root, `cuts/previews/${doomed.id}.mp4`))).rejects.toThrow();
-    // An unrendered version says so rather than claiming a file was removed.
-    expect((await res.json()).file).toMatchObject({ removed: false });
+    await expect(
+      access(path.join(root, `cuts/previews/${leaving.id}.mp4`)),
+    ).resolves.toBeUndefined();
+  });
+
+  it("404s a SECOND retire — the door reads the living set, where the cut no longer is", async () => {
+    const p = await project();
+    await cut(p.id, 1);
+    const leaving = await cut(p.id, 2);
+    expect((await DELETE(...req(p.id, leaving.id))).status).toBe(200);
+
+    // Not a converge-to-200: this door's pre-read is the DEFAULT read, so a
+    // retired cut is genuinely absent from where it looks — which is the same
+    // answer it gives for any other id that is not on the strip. (The repo's
+    // own retire still converges; it is simply not reachable from here, and
+    // the restore door is where a retired cut is addressable.)
+    const res = await DELETE(...req(p.id, leaving.id));
+    expect(res.status).toBe(404);
   });
 
   it("409s a ratified refusal and carries the reason VERBATIM", async () => {
     const p = await project();
     const first = await cut(p.id, 1, "cuts/master-v1.mp4");
     await cut(p.id, 2);
-    await repos?.videoCuts.approve(ctx, first.id, { gate: "g1-captions", verdict: "pass", lines: 0 });
+    await repos?.videoCuts.approve(ctx, first.id, {
+      gate: "g1-captions",
+      verdict: "pass",
+      lines: 0,
+    });
 
     const res = await DELETE(...req(p.id, first.id));
     expect(res.status).toBe(409);
@@ -123,12 +150,12 @@ describe("DELETE /api/videos/[projectId]/cuts/[cutId]", () => {
     expect(await repos?.videoCuts.get(ctx, first.id)).not.toBeNull();
   });
 
-  it("refuses the project's last cut, and leaves the project openable", async () => {
+  it("refuses the project's last living cut, and leaves the project openable", async () => {
     const p = await project();
     const only = await cut(p.id, 1);
     const res = await DELETE(...req(p.id, only.id));
     expect(res.status).toBe(409);
-    expect((await res.json()).error).toMatch(/only cut/);
+    expect((await res.json()).error).toMatch(/only remaining cut/);
   });
 
   it("404s a cut that belongs to ANOTHER project — the id alone is not authority", async () => {
@@ -148,14 +175,77 @@ describe("DELETE /api/videos/[projectId]/cuts/[cutId]", () => {
     expect((await DELETE(...req(p.id, "11111111-1111-4111-8111-111111111111"))).status).toBe(404);
   });
 
-  it("deletes the row even where the box has no media root, and SAYS the file was not touched", async () => {
+  it("retires where the box has no media root — there was never a file question to answer", async () => {
     // The honest case, not an error case: refs on record, media elsewhere.
     const p = await project(false);
     await cut(p.id, 1);
-    const doomed = await cut(p.id, 2, "cuts/master-v2.mp4");
-    const res = await DELETE(...req(p.id, doomed.id));
+    const leaving = await cut(p.id, 2, "cuts/master-v2.mp4");
+    const res = await DELETE(...req(p.id, leaving.id));
     expect(res.status).toBe(200);
-    expect((await res.json()).file.reason).toMatch(/no media root/);
-    expect(await repos?.videoCuts.get(ctx, doomed.id)).toBeNull();
+    expect((await res.json()).retired.outputRef).toBe("cuts/master-v2.mp4");
+    expect(await repos?.videoCuts.get(ctx, leaving.id)).toBeNull();
+  });
+});
+
+function restoreReq(projectId: string, cutId: string) {
+  return [
+    new Request(`http://test.local/api/videos/${projectId}/cuts/${cutId}/restore`, {
+      method: "POST",
+    }),
+    { params: Promise.resolve({ projectId, cutId }) },
+  ] as const;
+}
+
+describe("POST /api/videos/[projectId]/cuts/[cutId]/restore", () => {
+  it("brings the version back EXACTLY — same row, same render, on the strip again", async () => {
+    const p = await project();
+    await cut(p.id, 1);
+    const leaving = await cut(p.id, 2, "cuts/master-v2.mp4");
+    await mkdir(path.join(root, "cuts"), { recursive: true });
+    await writeFile(path.join(root, "cuts/master-v2.mp4"), "not really an mp4");
+    await DELETE(...req(p.id, leaving.id));
+
+    const res = await RESTORE(...restoreReq(p.id, leaving.id));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      restored: { id: string; version: number; outputRef: string | null };
+      changed: boolean;
+    };
+    expect(body.changed).toBe(true);
+    expect(body.restored.id).toBe(leaving.id);
+    expect(body.restored.outputRef).toBe("cuts/master-v2.mp4");
+    // Back on the default read, and the file it names is still there.
+    expect(await repos?.videoCuts.get(ctx, leaving.id)).not.toBeNull();
+    await expect(access(path.join(root, "cuts/master-v2.mp4"))).resolves.toBeUndefined();
+  });
+
+  it("converges: restoring a living version is a 200 saying nothing changed", async () => {
+    const p = await project();
+    const living = await cut(p.id, 1);
+    const res = await RESTORE(...restoreReq(p.id, living.id));
+    expect(res.status).toBe(200);
+    expect((await res.json()).changed).toBe(false);
+  });
+
+  it("404s a retired cut asked for through ANOTHER project's door", async () => {
+    const p = await project();
+    await cut(p.id, 1);
+    const target = await cut(p.id, 2);
+    await DELETE(...req(p.id, target.id));
+    const { project: other } = await repos!.videoProjects.create(ctx, { name: "other-film" });
+
+    const res = await RESTORE(...restoreReq(other.id, target.id));
+    expect(res.status).toBe(404);
+  });
+
+  it("404s when the PROJECT is retired — nothing restores into somewhere unreachable", async () => {
+    const p = await project();
+    await cut(p.id, 1);
+    const target = await cut(p.id, 2);
+    await DELETE(...req(p.id, target.id));
+    await repos!.videoProjects.retire(ctx, p.id);
+
+    const res = await RESTORE(...restoreReq(p.id, target.id));
+    expect(res.status).toBe(404);
   });
 });

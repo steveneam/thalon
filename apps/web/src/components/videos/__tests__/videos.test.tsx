@@ -57,6 +57,7 @@ const P1: ProjectDetail = {
   description: "the reference project",
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: true,
+  retired: [],
   takes: [
     {
       id: "t1",
@@ -99,6 +100,7 @@ const P2: ProjectDetail = {
   description: null,
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: false,
+  retired: [],
   takes: [],
   cuts: [],
 };

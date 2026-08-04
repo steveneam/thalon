@@ -1,21 +1,20 @@
-import {
-  InvalidPublishQueueTransitionError,
-  tenantCtx,
-  type EdlInput,
-  type TenantCtx,
-} from "@thalon/contracts";
+import { InvalidPublishQueueTransitionError, tenantCtx, type TenantCtx } from "@thalon/contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import { InvalidStateError, NotFoundError } from "../errors";
 import type { Repos } from "../repos";
 import { fixture, type Fixture } from "./helpers";
 
 /**
- * s82 contract-window repos (W1): the publish queue's first repository, and
- * the video cut delete verb with the founder-ratified refusals. Same
+ * s82 contract-window repos (W1): the publish queue's first repository. Same
  * discipline as phase1-window-repos.test.ts — every behavior test doubles as
  * the tenancy-wall proof and the B4.4 events-coverage pin for these repos'
  * write fns (publish_queue.enqueued / claimed / published / failed /
- * cancelled / released · video_cut.removed).
+ * cancelled / released).
+ *
+ * The video cut removal verb WAS pinned here too. Window 0026 turned it from
+ * a hard delete into a reversible retire, so its tests moved WHOLE to
+ * s100-window-0026-repos.test.ts rather than being copied — one home per
+ * lesson (AGENTS.md rule 8).
  */
 
 let fx: Fixture | undefined;
@@ -267,129 +266,5 @@ describe("publish queue repo (s82 W1)", () => {
     await expect(repos.publishQueue.cancel(other, queued.row.id)).rejects.toBeInstanceOf(
       NotFoundError,
     );
-  });
-});
-
-/** The smallest legal EDL — one beat, defaults everywhere. */
-function minimalEdl(name: string): EdlInput {
-  return {
-    name,
-    output: { width: 1280, height: 720, fps: 24, duration: 5 },
-    video: [
-      { name: "b1", source: { kind: "take", ref: "motion/keepers/clip-01.mp4" }, duration: 5 },
-    ],
-  };
-}
-
-async function projectWithCuts(repos: Repos, ctx: TenantCtx, count: number) {
-  const { project } = await repos.videoProjects.create(ctx, { name: "concept-film" });
-  const cuts = [];
-  for (let version = 1; version <= count; version += 1) {
-    const { cut } = await repos.videoCuts.create(ctx, project.id, {
-      name: "master",
-      version,
-      edl: minimalEdl(`master-v${version}`),
-      meta: {},
-    });
-    cuts.push(cut);
-  }
-  return { project, cuts };
-}
-
-describe("video cuts remove (s82 W1, founder call #2)", () => {
-  it("hard-deletes a draft version and hands back its outputRef for the file", async () => {
-    const { ctx, repos } = await setup();
-    const { project, cuts } = await projectWithCuts(repos, ctx, 2);
-    await repos.videoCuts.recordRender(ctx, cuts[1].id, "renders/master-v2.mp4");
-
-    const { removed } = await repos.videoCuts.remove(ctx, cuts[1].id);
-    expect(removed.id).toBe(cuts[1].id);
-    // The repo cannot reach the object store; the caller deletes the file, so
-    // the ref must survive the delete or the render is silently orphaned.
-    expect(removed.outputRef).toBe("renders/master-v2.mp4");
-    expect(await repos.videoCuts.get(ctx, cuts[1].id)).toBeNull();
-    expect(await repos.videoCuts.list(ctx, project.id)).toHaveLength(1);
-
-    const events = await repos.events.list(ctx, {
-      entityType: "video_cut",
-      entityId: cuts[1].id,
-    });
-    expect(events.map((e) => e.event)).toEqual([
-      "video_cut.created",
-      "video_cut.rendered",
-      "video_cut.removed",
-    ]);
-    const removedEvent = events.find((e) => e.event === "video_cut.removed");
-    expect((removedEvent?.payload as { outputRef?: string }).outputRef).toBe(
-      "renders/master-v2.mp4",
-    );
-  });
-
-  it("(a) refuses an APPROVED cut — deleting one deletes the judge receipt", async () => {
-    const { ctx, repos } = await setup();
-    const { cuts } = await projectWithCuts(repos, ctx, 2);
-    await repos.videoCuts.recordRender(ctx, cuts[1].id, "renders/master-v2.mp4");
-    await repos.videoCuts.approve(ctx, cuts[1].id, {
-      gate: "g1-captions",
-      verdict: "pass",
-      lines: 0,
-    });
-
-    await expect(repos.videoCuts.remove(ctx, cuts[1].id)).rejects.toBeInstanceOf(InvalidStateError);
-    await expect(repos.videoCuts.remove(ctx, cuts[1].id)).rejects.toThrow(/approved/);
-    expect(await repos.videoCuts.get(ctx, cuts[1].id)).not.toBeNull();
-  });
-
-  it("(b) refuses a LINEAGE PARENT of a living derived cut, and names the child", async () => {
-    const { ctx, repos } = await setup();
-    const { project, cuts } = await projectWithCuts(repos, ctx, 2);
-    const { cut: derived } = await repos.videoCuts.create(ctx, project.id, {
-      name: "master-9x16",
-      version: 1,
-      edl: minimalEdl("master-9x16-v1"),
-      meta: {},
-    });
-    await repos.videoCuts.stampLineage(ctx, derived.id, {
-      parentCutId: cuts[0].id,
-      aspect: "9:16",
-    });
-
-    await expect(repos.videoCuts.remove(ctx, cuts[0].id)).rejects.toThrow(/master-9x16/);
-    expect(await repos.videoCuts.get(ctx, cuts[0].id)).not.toBeNull();
-
-    // Delete the child first and the parent becomes deletable — the refusal
-    // guards the dangling pointer, not the parent forever.
-    await repos.videoCuts.remove(ctx, derived.id);
-    const { removed } = await repos.videoCuts.remove(ctx, cuts[0].id);
-    expect(removed.id).toBe(cuts[0].id);
-  });
-
-  it("(c) refuses the project's LAST cut — a project with nothing to open", async () => {
-    const { ctx, repos } = await setup();
-    const { cuts } = await projectWithCuts(repos, ctx, 1);
-    await expect(repos.videoCuts.remove(ctx, cuts[0].id)).rejects.toThrow(/only cut/);
-    expect(await repos.videoCuts.get(ctx, cuts[0].id)).not.toBeNull();
-  });
-
-  it("walls the tenant: a stranger's delete reads as absent, never as a refusal", async () => {
-    const { ctx, other, repos } = await setup();
-    const { cuts } = await projectWithCuts(repos, ctx, 2);
-    await expect(repos.videoCuts.remove(other, cuts[1].id)).rejects.toBeInstanceOf(NotFoundError);
-    expect(await repos.videoCuts.get(ctx, cuts[1].id)).not.toBeNull();
-  });
-
-  it("counts only the SAME project's cuts toward the last-cut refusal", async () => {
-    const { ctx, repos } = await setup();
-    // A second project's cuts must not make another project's only cut look
-    // deletable — the refusal is project-scoped, not tenant-scoped.
-    const { cuts: lonely } = await projectWithCuts(repos, ctx, 1);
-    const { project: second } = await repos.videoProjects.create(ctx, { name: "other-film" });
-    await repos.videoCuts.create(ctx, second.id, {
-      name: "master",
-      version: 1,
-      edl: minimalEdl("other-v1"),
-      meta: {},
-    });
-    await expect(repos.videoCuts.remove(ctx, lonely[0].id)).rejects.toThrow(/only cut/);
   });
 });

@@ -17,9 +17,12 @@ export interface DeletableCut {
 }
 
 /**
- * WHY THIS VERSION CANNOT BE DELETED — the founder's three ratified refusals
- * (plan §3 call #2), mirrored from `videoCuts.remove` in the same order the
- * repo applies them.
+ * WHY THIS VERSION CANNOT BE RETIRED — the founder's three ratified refusals
+ * (plan §3 call #2), mirrored from `videoCuts.retire` in the same order the
+ * repo applies them. Window 0026 made removal reversible and the refusals
+ * SURVIVED it: each protects something that would dangle inside a project
+ * that is still open, and reversibility does not repair a dangle while the
+ * retirement stands.
  *
  * Mirrored, not duplicated as policy: the repo is where the refusals are
  * ENFORCED (a client cannot talk its way past a transaction), and this is how
@@ -33,14 +36,14 @@ export interface DeletableCut {
  */
 export function deleteRefusalFor(cut: DeletableCut, cuts: readonly CutView[]): string | null {
   if (cut.status === "approved") {
-    return `${cut.name} v${cut.version} is approved — an approved cut carries its judge receipt, and deleting it would delete the evidence that the gate passed.`;
+    return `${cut.name} v${cut.version} is approved — an approved cut carries its judge receipt, and it stays on the strip as the evidence of what shipped.`;
   }
   if (cuts.length <= 1) {
-    return `${cut.name} v${cut.version} is this project's only cut — deleting it would leave the project with nothing to open. Deleting the project is a different, deliberate act.`;
+    return `${cut.name} v${cut.version} is this project's only remaining cut — retiring it would leave the project with nothing to open. Retiring the project is a different, deliberate act.`;
   }
   const child = cuts.find((row) => row.id !== cut.id && row.lineage?.parentCutId === cut.id);
   if (child) {
-    return `${cut.name} v${cut.version} is the lineage parent of ${child.name} v${child.version} — delete the derived cut first, or its provenance would point at nothing.`;
+    return `${cut.name} v${cut.version} is the lineage parent of ${child.name} v${child.version} — retire the derived cut first, or its provenance would point at something you can no longer see.`;
   }
   return null;
 }

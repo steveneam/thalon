@@ -62,6 +62,7 @@ function project(cuts: CutView[], takes: TakeView[] = []): ProjectDetail {
     description: null,
     createdAt: "2026-07-16T00:00:00.000Z",
     playable: true,
+    retired: [],
     takes,
     cuts,
   };

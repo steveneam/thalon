@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { TakeAudition, type AuditionKind } from "@/components/media/take-audition";
 import {
   attributionLine,
+  cardDate,
   derivedElsewhere,
   derivedFrom,
   headlineCut,
@@ -18,17 +19,25 @@ import {
 import { srcOf } from "@/lib/media/resolve";
 import {
   approveCut,
-  deleteCut,
   fetchCutDetail,
   fetchProjectDetail,
   fetchRunningJobs,
   mediaUrl,
+  restoreCut,
+  retireCut,
   saveCut,
   type CaptionRefusal,
 } from "@/lib/videos/client";
 import { compareEdls, type EdlComparison } from "@/lib/videos/compare";
 import { splitLane, swapBeatSource, swapCandidatesFor } from "@/lib/videos/editor";
-import type { CutDetail, CutView, ProjectDetail, RenderJobView, TakeView } from "@/lib/videos/types";
+import type {
+  CutDetail,
+  CutView,
+  ProjectDetail,
+  RenderJobView,
+  RetiredCutView,
+  TakeView,
+} from "@/lib/videos/types";
 import { deleteRefusalFor, variantSaveNote } from "@/lib/videos/versions";
 
 type ReadStatus = "loading" | "error" | "missing" | "success";
@@ -98,7 +107,7 @@ export function VideoDossier({
   // Stamped with the cut it was opened FOR — a pick change closes it rather
   // than silently retargeting the destructive door (s99 fe-check).
   const [confirmDeleteFor, setConfirmDeleteFor] = useState<string | null>(null);
-  const [working, setWorking] = useState<"mark" | "swap" | "delete" | null>(null);
+  const [working, setWorking] = useState<"mark" | "swap" | "delete" | "restore" | null>(null);
   /** Compare picks (the AI-Studio radios): at most two cut ids. */
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compared, setCompared] = useState<
@@ -163,6 +172,8 @@ export function VideoDossier({
   }, [watchingInFlight, projectId, load]);
 
   const cuts = detail?.cuts ?? [];
+  /** Window 0026: what Cut history's Restore door names. */
+  const retired = detail?.retired ?? [];
   // Derived, not effect-synced: the picked version falls back to the one the
   // headline pill speaks for, so a save that renames nothing still lands.
   // s96: the default pick prefers a MASTER chain — a derived aspect cut has
@@ -372,15 +383,16 @@ export function VideoDossier({
   }
 
   /**
-   * s96 · DELETE (V1) — the editor's door, from the dossier; refusals are the
-   * repo's own. The confirm STAYS OPEN while the delete runs ("Deleting…" must
-   * actually paint — s99) and closes when the outcome lands.
+   * s96 · RETIRE (V1, window 0026) — the editor's door, from the dossier;
+   * refusals are the repo's own. The confirm STAYS OPEN while it runs
+   * ("Retiring…" must actually paint — s99) and closes when the outcome lands.
+   * The notice names the way back, because there now IS one.
    */
-  function onDelete() {
+  function onRetire() {
     if (picked === null) return;
     setWorking("delete");
     setNotice(null);
-    deleteCut(projectId, picked.id)
+    retireCut(projectId, picked.id)
       .then((outcome) => {
         if (!outcome.ok) {
           setNotice({ text: outcome.error, tone: "err" });
@@ -388,21 +400,48 @@ export function VideoDossier({
         }
         setPickedCutId(null);
         void load();
-        const file = outcome.file.removed
-          ? ` Its render went with it (${outcome.file.ref}).`
-          : ` ${outcome.file.reason ?? "Nothing was removed from disk."}`;
         setNotice({
-          text: `Deleted ${outcome.removed.name} v${outcome.removed.version}.${file}`,
+          text: `Retired ${outcome.cut.name} v${outcome.cut.version} — it kept its render. Cut history brings it back exactly.`,
           tone: "ok",
         });
       })
       .catch((err: unknown) =>
-        setNotice({ text: err instanceof Error ? err.message : "the delete refused", tone: "err" }),
+        setNotice({ text: err instanceof Error ? err.message : "the retire refused", tone: "err" }),
       )
       .finally(() => {
         setWorking(null);
         setConfirmDeleteFor(null);
       });
+  }
+
+  /**
+   * Window 0026 · RESTORE — the confirm's promise, kept. It needs no confirm
+   * of its own: bringing a version back is additive and immediately visible,
+   * and the version it restores is named in the notice. The restored cut
+   * becomes the pick, because an operator who just asked for it back is asking
+   * to look at it.
+   */
+  function onRestore(cut: RetiredCutView) {
+    setWorking("restore");
+    setNotice(null);
+    restoreCut(projectId, cut.id)
+      .then((outcome) => {
+        if (!outcome.ok) {
+          setNotice({ text: outcome.error, tone: "err" });
+          return;
+        }
+        setPickedCutId(cut.id);
+        setHistoryOpen(false);
+        void load();
+        setNotice({
+          text: `Restored ${cut.name} v${cut.version} — back on the strip exactly as it was.`,
+          tone: "ok",
+        });
+      })
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the restore refused", tone: "err" }),
+      )
+      .finally(() => setWorking(null));
   }
 
   /** s96 · COMPARE (V1, the AI-Studio radios) — two full EDLs, diffed the editor's way. */
@@ -546,6 +585,44 @@ export function VideoDossier({
                   </span>
                 </button>
               ))}
+            {/*
+              Window 0026 — THE RESTORE DOOR the confirm has been promising.
+              It lives here because here is where the confirm sends the
+              operator ("its takes, credits and judge verdicts stay in Cut
+              history"), and a promise whose destination has no door is the
+              dead door this programme exists to stop shipping.
+            */}
+            {retired.length > 0 && (
+              <>
+                <span className="t-label" style={{ marginTop: 8 }}>
+                  Retired — off the strip, nothing lost; Restore brings one back exactly.
+                </span>
+                {retired.map((cut) => (
+                  <div key={cut.id} className="crumb-row" style={{ alignItems: "center" }}>
+                    <span className="ver-t" title={`${cut.name} v${cut.version}`}>
+                      {cut.name} v{cut.version}
+                    </span>
+                    <span className="ver-a">
+                      {cut.status}
+                      {cut.outputRef === null
+                        ? " · never rendered"
+                        : " · its render was kept"}{" "}
+                      · retired {cardDate(cut.retiredAt, readAt)}
+                    </span>
+                    <button
+                      type="button"
+                      className="card-link as-text-btn"
+                      style={{ marginLeft: "auto" }}
+                      disabled={working === "restore"}
+                      title={`Bring ${cut.name} v${cut.version} back to the strip, exactly as it was`}
+                      onClick={() => onRestore(cut)}
+                    >
+                      {working === "restore" ? "Restoring…" : "Restore"}
+                    </button>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
         <Link className="btn btn-ghost btn-sm" href={editorHref}>
@@ -665,7 +742,7 @@ export function VideoDossier({
             aria-disabled={deleteRefusal !== null || undefined}
             title={
               deleteRefusal ??
-              `Delete ${picked.name} v${picked.version} and the file it rendered — permanently`
+              `Retire ${picked.name} v${picked.version} — it keeps its render, and Restore brings it back`
             }
             onClick={() =>
               deleteRefusal !== null
@@ -673,7 +750,7 @@ export function VideoDossier({
                 : setConfirmDeleteFor(picked.id)
             }
           >
-            Delete v{picked.version}…
+            Retire v{picked.version}…
           </button>
           <button
             type="button"
@@ -797,22 +874,22 @@ export function VideoDossier({
         </div>
 
         {/*
-          The delete confirm, in the Fibery/Resend register the sheet draws:
-          it NAMES the version and states what survives, in words. ONE
-          adaptation, stated: the sheet also promises "Restore brings it
-          back" — no restore door exists (a hard delete has no way back and
-          no column records a retired cut), so that sentence is NOT rendered;
-          the restore column is the flagged contract-window ask (s96 wrap).
+          The retire confirm, in the Fibery/Resend register the sheet draws:
+          it NAMES the version and states what survives, in words. The s96
+          adaptation is RETIRED with window 0026 — the sheet's "Restore brings
+          it back exactly as it is now" was the one sentence this surface could
+          not honestly render, because a hard delete had no way back. Removal
+          now retires, the render is kept, and the sentence is the sheet's
+          verbatim.
         */}
         {confirmDeleteFor === picked.id && (
-          <div className="confirm" style={{ right: 24, top: 48 }} role="alertdialog" aria-label="Delete this version">
+          <div className="confirm" style={{ right: 24, top: 48 }} role="alertdialog" aria-label="Retire this version">
             <span className="t-title" style={{ fontSize: 13 }}>
-              Delete {picked.name} v{picked.version} — “{statePill(picked).text}”?
+              Retire {picked.name} v{picked.version} — “{statePill(picked).text}”?
             </span>
             <span className="confirm-note">
-              Its EDL and its rendered file go with it and cannot be recovered. Its takes, their
-              credits and every judge verdict stay on this project’s record, and every other
-              version stays exactly as it is.
+              It leaves this strip, not the record — its takes, credits and judge verdicts stay in{" "}
+              <b>Cut history</b>, and Restore brings it back exactly as it is now.
             </span>
             <div style={{ display: "flex", gap: 7 }}>
               <button
@@ -828,9 +905,9 @@ export function VideoDossier({
                 type="button"
                 className="btn btn-danger btn-sm"
                 disabled={working === "delete"}
-                onClick={onDelete}
+                onClick={onRetire}
               >
-                {working === "delete" ? "Deleting…" : "Delete cut"}
+                {working === "delete" ? "Retiring…" : "Retire cut"}
               </button>
             </div>
           </div>

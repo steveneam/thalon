@@ -325,7 +325,7 @@ describe("video cuts repo (B-ve.1)", () => {
     expect(secondRendered?.payload).toEqual({ outputRef: "cuts/master-v2.mp4" });
   });
 
-  it("repo surface is pinned — approve landed at B-ve.4, stampLineage at B-ve.5, remove at the s82 window; nothing else has crept in", async () => {
+  it("repo surface is pinned — approve landed at B-ve.4, stampLineage at B-ve.5, retire/restore at window 0026; nothing else has crept in", async () => {
     const { repos } = await setup();
     expect(Object.keys(repos.videoCuts).sort()).toEqual([
       "approve",
@@ -333,10 +333,13 @@ describe("video cuts repo (B-ve.1)", () => {
       "get",
       "list",
       "recordRender",
-      // s82 window (W1): the editor's delete verb, with the three
-      // founder-ratified refusals. Its behavior is pinned in
-      // s82-window-repos.test.ts — this list only guards the surface.
-      "remove",
+      // Window 0026: s82's hard `remove` BECAME `retire` — one door, not two,
+      // so the destructive path left the product entirely. Behaviour (the
+      // three founder-ratified refusals, the kept render, the way back) is
+      // pinned in s100-window-0026-repos.test.ts; this list guards the
+      // surface, and the absence of "remove" here is the point.
+      "restore",
+      "retire",
       "stampLineage",
     ]);
   });

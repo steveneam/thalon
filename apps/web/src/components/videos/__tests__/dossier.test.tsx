@@ -42,6 +42,7 @@ const DETAIL: ProjectDetail = {
   description: "a 40s film of the one-prompt flow",
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: true,
+  retired: [],
   takes: [
     {
       id: "t1",

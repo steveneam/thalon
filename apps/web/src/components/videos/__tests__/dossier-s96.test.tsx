@@ -83,6 +83,7 @@ const DETAIL: ProjectDetail = {
   description: "a 40s film",
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: true,
+  retired: [],
   takes: [
     take({ id: "t1", ref: "motion/keepers/beat-01.mp4", poster: POSTER }),
     take({ id: "t2", ref: "motion/rejects/beat-01-alt.mp4", disposition: "reject", reason: "flat motion" }),
@@ -157,18 +158,20 @@ describe("☆ Mark — save-as-named-variant through the one save door", () => {
   });
 });
 
-describe("the delete confirm (Fibery/Resend register)", () => {
-  it("names the version, states the TRUE survivors, and never promises Restore", async () => {
+describe("the retire confirm (Fibery/Resend register)", () => {
+  it("names the version, states the TRUE survivors, and NOW keeps the sheet's Restore promise", async () => {
     serve();
     const user = userEvent.setup();
     await open();
-    await user.click(screen.getByRole("button", { name: /Delete v2/ }));
-    const confirm = await screen.findByRole("alertdialog", { name: "Delete this version" });
-    expect(confirm.textContent).toContain("Delete film-16x9 v2");
-    expect(confirm.textContent).toContain("stay on this project’s record");
-    // No restore door exists — the sheet's Restore sentence is the flagged
-    // contract-window ask, never rendered as a promise the product can't keep.
-    expect(confirm.textContent).not.toMatch(/[Rr]estore/);
+    await user.click(screen.getByRole("button", { name: /Retire v2/ }));
+    const confirm = await screen.findByRole("alertdialog", { name: "Retire this version" });
+    expect(confirm.textContent).toContain("Retire film-16x9 v2");
+    expect(confirm.textContent).toContain("stay in");
+    // Window 0026 INVERTED this pin. It used to assert the ABSENCE of the
+    // sheet's Restore sentence, because a hard delete had no way back and the
+    // surface refused to promise one. Removal now retires, so the sentence is
+    // rendered — and the assertion that it must be there is the ratchet.
+    expect(confirm.textContent).toMatch(/Restore brings it back exactly as it is now/);
     await user.click(within(confirm).getByRole("button", { name: "Keep it" }));
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
@@ -180,7 +183,7 @@ describe("the delete confirm (Fibery/Resend register)", () => {
     });
     const user = userEvent.setup();
     await open();
-    await user.click(screen.getByRole("button", { name: /Delete v2/ }));
+    await user.click(screen.getByRole("button", { name: /Retire v2/ }));
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(screen.getByRole("alert").textContent).toContain("carries its judge receipt");
   });
@@ -259,12 +262,12 @@ describe("s99 fixes: honest doors, honest registers, honest reads", () => {
     serve();
     const user = userEvent.setup();
     await open();
-    await user.click(screen.getByRole("button", { name: /Delete v2…/ }));
-    expect(screen.getByRole("alertdialog", { name: "Delete this version" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Retire v2…/ }));
+    expect(screen.getByRole("alertdialog", { name: "Retire this version" })).toBeInTheDocument();
 
     await user.click(document.querySelector(".ver-crumb") as HTMLElement);
     await user.click(await screen.findByRole("option", { name: /film-16x9 v1/ }));
-    expect(screen.queryByRole("alertdialog", { name: "Delete this version" })).toBeNull();
+    expect(screen.queryByRole("alertdialog", { name: "Retire this version" })).toBeNull();
   });
 
   it("Send-to-Approve on an unrendered cut ANSWERS with the reason instead of eating the click", async () => {

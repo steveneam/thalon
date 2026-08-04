@@ -81,6 +81,7 @@ const DETAIL: ProjectDetail = {
   description: null,
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: false,
+  retired: [],
   takes: [
     {
       id: "t1",
@@ -692,16 +693,19 @@ describe("VideoEditor — version management (s82 A1–A3)", () => {
     render(<VideoEditor projectId="p1" cutId="c1" />);
     await screen.findByRole("heading", { name: "film-16x9 v6" });
 
-    // A hard delete with no undo behind it asks first, and names what goes.
-    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    // Reversible now (window 0026), but still a confirm: it names what goes
+    // AND states the way back, which is the whole register change.
+    await user.click(screen.getByRole("button", { name: "Retire this version" }));
     expect(
-      await screen.findByText(/Delete film-16x9 v6\?[\s\S]*cannot be recovered/),
+      await screen.findByText(/Retire film-16x9 v6\?[\s\S]*brings it back exactly/),
     ).toBeInTheDocument();
     expect(deleted).toBe(false);
 
-    await user.click(screen.getByRole("button", { name: "Delete v6 permanently" }));
+    await user.click(screen.getByRole("button", { name: "Retire v6" }));
     await waitFor(() => expect(deleted).toBe(true));
-    expect(await screen.findByText(/Deleted film-16x9 v6\. Its render went with it/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Retired film-16x9 v6 — it kept its render/),
+    ).toBeInTheDocument();
     // And it lands on what is left, rather than on a cut that no longer exists.
     expect(replace).toHaveBeenCalledWith("/app/videos/p1/edit?cut=c0", { scroll: false });
   });
@@ -712,20 +716,20 @@ describe("VideoEditor — version management (s82 A1–A3)", () => {
     server.use(
       http.delete("/api/videos/p1/cuts/c1", () => {
         deleted = true;
-        return HttpResponse.json({ removed: {}, file: { removed: false } });
+        return HttpResponse.json({ retired: {}, changed: true });
       }),
     );
     const user = userEvent.setup();
     render(<VideoEditor projectId="p1" cutId="c1" />);
     await screen.findByRole("heading", { name: "film-16x9 v6" });
 
-    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    await user.click(screen.getByRole("button", { name: "Retire this version" }));
     await user.click(await screen.findByRole("button", { name: "Keep it" }));
     expect(deleted).toBe(false);
-    expect(screen.queryByRole("button", { name: "Delete v6 permanently" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Retire v6" })).toBeNull();
   });
 
-  it("REFUSES to delete an approved cut, out loud, without disabling the control", async () => {
+  it("REFUSES to retire an approved cut, out loud, without disabling the control", async () => {
     /*
      * s81's standing lesson, applied to the newest verb on the surface: a
      * disabled button fires no tooltip and assistive tech skips it, so the
@@ -737,15 +741,15 @@ describe("VideoEditor — version management (s82 A1–A3)", () => {
     render(<VideoEditor projectId="p1" cutId="c1" />);
     await screen.findByRole("heading", { name: "film-16x9 v6" });
 
-    const del = screen.getByRole("button", { name: "Delete this version" });
+    const del = screen.getByRole("button", { name: "Retire this version" });
     expect(del).toBeEnabled();
     expect(del).toHaveAttribute("aria-disabled", "true");
     await user.click(del);
     expect(await screen.findByText(/approved — an approved cut carries its judge receipt/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /permanently/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Retire v6$/ })).toBeNull();
   });
 
-  it("refuses to delete the version you are holding unsaved edits to", async () => {
+  it("refuses to retire the version you are holding unsaved edits to", async () => {
     serve(TWO_VERSIONS);
     const user = userEvent.setup();
     const { container } = render(<VideoEditor projectId="p1" cutId="c1" />);
@@ -757,7 +761,7 @@ describe("VideoEditor — version management (s82 A1–A3)", () => {
     await user.type(duration, "3");
     await user.tab();
 
-    await user.click(screen.getByRole("button", { name: "Delete this version" }));
+    await user.click(screen.getByRole("button", { name: "Retire this version" }));
     expect(await screen.findByText(/Save or discard your unsaved edits first/)).toBeInTheDocument();
   });
 
@@ -770,7 +774,7 @@ describe("VideoEditor — version management (s82 A1–A3)", () => {
         HttpResponse.json(
           {
             error:
-              'video cut "film-16x9" v6 is the lineage parent of "film-9x16" v1 — delete the derived cut first, or its provenance would dangle',
+              'video cut "film-16x9" v6 is the lineage parent of "film-9x16" v1 — retire the derived cut first, or its provenance would dangle',
           },
           { status: 409 },
         ),
@@ -780,8 +784,8 @@ describe("VideoEditor — version management (s82 A1–A3)", () => {
     render(<VideoEditor projectId="p1" cutId="c1" />);
     await screen.findByRole("heading", { name: "film-16x9 v6" });
 
-    await user.click(screen.getByRole("button", { name: "Delete this version" }));
-    await user.click(await screen.findByRole("button", { name: "Delete v6 permanently" }));
+    await user.click(screen.getByRole("button", { name: "Retire this version" }));
+    await user.click(await screen.findByRole("button", { name: "Retire v6" }));
     expect(await screen.findByText(/is the lineage parent of "film-9x16" v1/)).toBeInTheDocument();
   });
 });

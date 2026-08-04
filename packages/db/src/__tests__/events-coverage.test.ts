@@ -17,8 +17,13 @@ import { fixture, type Fixture } from "./helpers";
  * repos (monitored areas · search targets/snapshots · waitlist) pin their
  * emissions the same way in sprint6-repos.test.ts, the Sprint-7 window's
  * (leads · lead scores) in sprint7-repos.test.ts, the B-ve.1 window's
- * (video projects · takes · cuts) in b-ve1-repos.test.ts, and the B-int.0
- * window's (tenant credentials vault) in b-int0-repos.test.ts.
+ * (video projects · takes · cuts) in b-ve1-repos.test.ts, the B-int.0
+ * window's (tenant credentials vault) in b-int0-repos.test.ts, and window
+ * 0026's retire/restore/rename verbs (video_cut.retired / restored ·
+ * video_project.retired / restored / renamed) in
+ * s100-window-0026-repos.test.ts — which also pins the other half of the
+ * rule: a no-op replay (re-retiring, re-restoring, renaming to the same
+ * name) appends NOTHING.
  */
 
 let fx: Fixture | undefined;

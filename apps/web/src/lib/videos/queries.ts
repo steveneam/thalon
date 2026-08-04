@@ -19,6 +19,8 @@ import type {
   EdlSummary,
   ProjectDetail,
   ProjectSummary,
+  RetiredCutView,
+  RetiredProjectView,
   TakeView,
 } from "./types";
 
@@ -164,6 +166,22 @@ export async function listProjectSummaries(
   return summaries.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+/**
+ * Window 0026 — what the grid's restore door points at. Kept as its own read
+ * rather than a flag on `listProjectSummaries` so that the counts work above
+ * (a takes+cuts read PER PROJECT) is never done for rows nobody is opening.
+ */
+export async function listRetiredProjects(
+  repos: Repos,
+  ctx: TenantCtx,
+): Promise<RetiredProjectView[]> {
+  const projects = await repos.videoProjects.list(ctx, { includeRetired: true });
+  return projects
+    .filter((p) => p.retiredAt !== null)
+    .map((p) => ({ id: p.id, name: p.name, retiredAt: p.retiredAt!.toISOString() }))
+    .sort((a, b) => b.retiredAt.localeCompare(a.retiredAt));
+}
+
 /** B-ve.3 editor read: one cut with its FULL EDL (tenancy-walled, project-checked). */
 export async function getCutDetail(
   repos: Repos,
@@ -194,9 +212,14 @@ export async function getProjectDetail(
 ): Promise<ProjectDetail | null> {
   const project = await repos.videoProjects.get(ctx, projectId);
   if (!project) return null;
-  const [takes, cuts] = await Promise.all([
+  const [takes, cuts, withRetired] = await Promise.all([
     repos.videoTakes.list(ctx, projectId),
     repos.videoCuts.list(ctx, projectId),
+    // Window 0026: the second read is what "Cut history" is made of. It is a
+    // separate call rather than a filter over one list because every OTHER
+    // consumer of `cuts` (lineage resolution, the strip, the version picker)
+    // must keep seeing living cuts only.
+    repos.videoCuts.list(ctx, projectId, { includeRetired: true }),
   ]);
   return {
     id: project.id,
@@ -204,6 +227,21 @@ export async function getProjectDetail(
     description: project.description,
     createdAt: project.createdAt.toISOString(),
     playable: mediaRootOf(project.meta) !== null,
+    retired: withRetired
+      .filter((c) => c.retiredAt !== null)
+      .map(
+        (c): RetiredCutView => ({
+          id: c.id,
+          name: c.name,
+          version: c.version,
+          status: c.status as VideoCutStatus,
+          outputRef: c.outputRef,
+          retiredAt: c.retiredAt!.toISOString(),
+        }),
+      )
+      // Most recently retired first — the one an operator is most likely to
+      // want back is the one they just let go of.
+      .sort((a, b) => b.retiredAt.localeCompare(a.retiredAt)),
     takes: takes
       .map(
         (t): TakeView => ({

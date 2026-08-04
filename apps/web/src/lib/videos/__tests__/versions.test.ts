@@ -52,14 +52,14 @@ describe("deleteRefusalFor — the founder's three ratified refusals, mirrored",
       },
     });
     expect(deleteRefusalFor(V6, [V6, child])).toBe(
-      "film-16x9 v6 is the lineage parent of film-9x16 v2 — delete the derived cut first, or its provenance would point at nothing.",
+      "film-16x9 v6 is the lineage parent of film-9x16 v2 — retire the derived cut first, or its provenance would point at something you can no longer see.",
     );
-    // The child itself is deletable — that IS the abandoned-recut case.
+    // The child itself is retirable — that IS the abandoned-recut case.
     expect(deleteRefusalFor(child, [V6, child])).toBeNull();
   });
 
   it("refuses the project's LAST cut, whatever its name or state", () => {
-    expect(deleteRefusalFor(V6, [V6])).toMatch(/only cut/);
+    expect(deleteRefusalFor(V6, [V6])).toMatch(/only remaining cut/);
   });
 
   it("applies the refusals in the repo's own order — approved outranks everything", () => {

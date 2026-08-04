@@ -7,14 +7,19 @@ import {
   type VideoCutLineage,
   type VideoCutStatus,
 } from "@thalon/contracts";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { InvalidStateError, NotFoundError } from "../errors";
 import { videoCuts, videoProjects } from "../schema";
 import type { Db } from "../types";
 import { appendEvent } from "./events";
+import type { RetiredReadOptions } from "./video-projects";
 
 /** One versioned cut and the EDL that built it (B-ve.1). */
 export type VideoCutRow = typeof videoCuts.$inferSelect;
+
+/** Window 0026: reads exclude retired cuts unless the caller opts in (the restore door). */
+const livingOnly = (opts?: RetiredReadOptions) =>
+  opts?.includeRetired ? [] : [isNull(videoCuts.retiredAt)];
 
 /**
  * The judge receipt the approve door DEMANDS (B-ve.4, ADR 0010 invariant:
@@ -84,6 +89,15 @@ export function videoCutsRepo(db: Db) {
               `video cut "${parsed.name}" v${parsed.version} conflicted but cannot be read back — cross-tenant key collision?`,
             );
           }
+          // Window 0026: a RETIRED cut still holds its (name, version) slot.
+          // Replaying onto it would hand the caller a cut none of their reads
+          // can see — and, worse, one whose EDL is the OLD one (create is
+          // idempotent, it never overwrites). Refuse and name the way out.
+          if (existing.retiredAt) {
+            throw new InvalidStateError(
+              `video cut "${parsed.name}" v${parsed.version} is retired — restore it, or save as a new version`,
+            );
+          }
           return { cut: existing, created: false };
         }
         await appendEvent(tx, ctx, {
@@ -96,20 +110,26 @@ export function videoCutsRepo(db: Db) {
       });
     },
 
-    async get(ctx: TenantCtx, id: string): Promise<VideoCutRow | null> {
+    async get(
+      ctx: TenantCtx,
+      id: string,
+      opts?: RetiredReadOptions,
+    ): Promise<VideoCutRow | null> {
       const [row] = await db
         .select()
         .from(videoCuts)
-        .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+        .where(
+          and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId), ...livingOnly(opts)),
+        )
         .limit(1);
       return row ?? null;
     },
 
-    /** The project surface's read: a project's cuts, optionally by status. */
+    /** The project surface's read: a project's LIVING cuts, optionally by status. */
     async list(
       ctx: TenantCtx,
       projectId: string,
-      filter?: { status?: VideoCutStatus },
+      filter?: { status?: VideoCutStatus } & RetiredReadOptions,
     ): Promise<VideoCutRow[]> {
       return db
         .select()
@@ -119,6 +139,7 @@ export function videoCutsRepo(db: Db) {
             eq(videoCuts.tenantId, ctx.tenantId),
             eq(videoCuts.projectId, projectId),
             ...(filter?.status ? [eq(videoCuts.status, filter.status)] : []),
+            ...livingOnly(filter),
           ),
         );
     },
@@ -253,31 +274,37 @@ export function videoCutsRepo(db: Db) {
     },
 
     /**
-     * s82 window (W1): delete a version — the editor's A3 verb, for the
-     * abandoned derived cut and the mis-saved variant. A HARD delete of the
-     * row; the rendered FILE is the caller's to remove, which is why the
-     * deleted row's `outputRef` comes back (a repo cannot reach the object
-     * store, and a delete that silently orphaned a render would be the
-     * quieter bug).
+     * Window 0026 — RETIRE a version. This is s82's A3 delete verb, and the
+     * founder's call at the s99 close turned it from destruction into
+     * reversal: **removal retires, it never destroys.** The row stays, its
+     * `output_ref` stays, and THE RENDERED FILE STAYS ON DISK — no caller
+     * unlinks anything any more. That is not tidiness, it is the only way the
+     * confirm the sheet has been drawing all along ("Restore brings it back
+     * exactly as it is now") can be true; a retire that deleted the render
+     * would make the product's own promise a lie. Nothing auto-purges a
+     * retired cut — the disk cost is accepted on the 180 GB box.
      *
-     * Three refusals, ratified by the founder at the s81 close (plan §3 call
-     * #2). Each is a typed `InvalidStateError` naming what stands in the way,
-     * because a verb that refuses without saying why is the dead door this
-     * session exists to stop shipping:
+     * The three refusals ratified by the founder at the s81 close SURVIVE the
+     * change, each re-scoped to LIVING rows, because every one of them
+     * protects something inside a project that is still open — and reversal
+     * does not repair a dangle that exists while the retirement stands:
      *
-     *   a. **an approved cut** — approval is a judge receipt (ADR 0010);
-     *      deleting one deletes the evidence that the gate passed.
-     *   b. **a lineage parent of a living derived cut** — the child's
-     *      provenance points here, and provenance that dangles is worse than
-     *      provenance absent.
-     *   c. **the project's last cut** — a project with zero cuts has no
-     *      recoverable state in the editor; deleting the project is a
-     *      different, deliberate act.
+     *   a. **an approved cut** — approval is a judge receipt (ADR 0010), and
+     *      it is the evidence of what shipped; hiding it from the strip hides
+     *      what the operator is answerable for.
+     *   b. **a lineage parent of a LIVING derived cut** — the child's
+     *      provenance points here, and provenance pointing at something the
+     *      operator cannot see is worse than provenance absent. Retire the
+     *      derived cut first (then the parent is free).
+     *   c. **the project's last LIVING cut** — a project with nothing left to
+     *      open is not a tidier project. Retiring the PROJECT is the verb for
+     *      that, and it has no such refusal.
      *
-     * Rejected-proposal eval rows live in their own table and are untouched:
-     * what the judge refused stays on the record whatever happens to the cut.
+     * Retiring an already-retired cut replays as a no-op — the first stamp
+     * stands and no event appends. Rejected-proposal eval rows live in their
+     * own table and are untouched: what the judge refused stays on the record.
      */
-    async remove(ctx: TenantCtx, id: string): Promise<{ removed: VideoCutRow }> {
+    async retire(ctx: TenantCtx, id: string): Promise<{ cut: VideoCutRow; retired: boolean }> {
       return db.transaction(async (tx) => {
         const [current] = await tx
           .select()
@@ -285,26 +312,35 @@ export function videoCutsRepo(db: Db) {
           .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
           .limit(1);
         if (!current) throw new NotFoundError("video_cut", id);
+        if (current.retiredAt) return { cut: current, retired: false };
 
         if (current.status === "approved") {
           throw new InvalidStateError(
-            `video cut "${current.name}" v${current.version} is approved — an approved cut carries its judge receipt and cannot be deleted`,
+            `video cut "${current.name}" v${current.version} is approved — an approved cut carries its judge receipt and stays on the strip`,
           );
         }
 
+        // Living siblings only: what is already retired cannot be left
+        // dangling by this retirement, and cannot keep the project openable.
         const siblings = await tx
-          .select({ id: videoCuts.id, name: videoCuts.name, version: videoCuts.version, meta: videoCuts.meta })
+          .select({
+            id: videoCuts.id,
+            name: videoCuts.name,
+            version: videoCuts.version,
+            meta: videoCuts.meta,
+          })
           .from(videoCuts)
           .where(
             and(
               eq(videoCuts.tenantId, ctx.tenantId),
               eq(videoCuts.projectId, current.projectId),
+              isNull(videoCuts.retiredAt),
             ),
           );
 
         if (siblings.length <= 1) {
           throw new InvalidStateError(
-            `video cut "${current.name}" v${current.version} is this project's only cut — deleting it would leave the project with nothing to open`,
+            `video cut "${current.name}" v${current.version} is this project's only remaining cut — retiring it would leave the project with nothing to open`,
           );
         }
 
@@ -315,26 +351,90 @@ export function videoCutsRepo(db: Db) {
         });
         if (child) {
           throw new InvalidStateError(
-            `video cut "${current.name}" v${current.version} is the lineage parent of "${child.name}" v${child.version} — delete the derived cut first, or its provenance would dangle`,
+            `video cut "${current.name}" v${current.version} is the lineage parent of "${child.name}" v${child.version} — retire the derived cut first, or its provenance would dangle`,
           );
         }
 
-        const [removed] = await tx
-          .delete(videoCuts)
+        const [row] = await tx
+          .update(videoCuts)
+          .set({ retiredAt: new Date(), updatedAt: new Date() })
           .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
           .returning();
         await appendEvent(tx, ctx, {
           entityType: "video_cut",
-          entityId: removed.id,
-          event: "video_cut.removed",
+          entityId: row.id,
+          event: "video_cut.retired",
           payload: {
-            name: removed.name,
-            version: removed.version,
-            status: removed.status,
-            outputRef: removed.outputRef,
+            name: row.name,
+            version: row.version,
+            status: row.status,
+            // The render it KEEPS — the retire's whole difference from s82's
+            // delete, stated in the audit spine rather than implied.
+            outputRef: row.outputRef,
           },
         });
-        return { removed };
+        return { cut: row, retired: true };
+      });
+    },
+
+    /**
+     * Window 0026 — RESTORE: clear the stamp and the cut is back on the strip
+     * exactly as it was, render and all. It reads WITH retired rows included
+     * (the sanctioned use of that opt-in — a restore door that could not see
+     * retired rows could not restore anything).
+     *
+     * One refusal: a cut whose (name, version) slot has been taken by a
+     * LIVING cut since it was retired cannot come back, because the unique
+     * index will not hold two. That is reachable — retire v3, save a new v3 —
+     * and refusing by name beats surfacing a constraint violation.
+     * Restoring a living cut replays as a no-op.
+     */
+    async restore(ctx: TenantCtx, id: string): Promise<{ cut: VideoCutRow; restored: boolean }> {
+      return db.transaction(async (tx) => {
+        const [current] = await tx
+          .select()
+          .from(videoCuts)
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .limit(1);
+        if (!current) throw new NotFoundError("video_cut", id);
+        if (!current.retiredAt) return { cut: current, restored: false };
+
+        const [taken] = await tx
+          .select({ id: videoCuts.id })
+          .from(videoCuts)
+          .where(
+            and(
+              eq(videoCuts.tenantId, ctx.tenantId),
+              eq(videoCuts.projectId, current.projectId),
+              eq(videoCuts.name, current.name),
+              eq(videoCuts.version, current.version),
+              isNull(videoCuts.retiredAt),
+            ),
+          )
+          .limit(1);
+        if (taken) {
+          throw new InvalidStateError(
+            `another cut now holds "${current.name}" v${current.version} — restoring this one would collide with it`,
+          );
+        }
+
+        const [row] = await tx
+          .update(videoCuts)
+          .set({ retiredAt: null, updatedAt: new Date() })
+          .where(and(eq(videoCuts.id, id), eq(videoCuts.tenantId, ctx.tenantId)))
+          .returning();
+        await appendEvent(tx, ctx, {
+          entityType: "video_cut",
+          entityId: row.id,
+          event: "video_cut.restored",
+          payload: {
+            name: row.name,
+            version: row.version,
+            outputRef: row.outputRef,
+            retiredAt: current.retiredAt.toISOString(),
+          },
+        });
+        return { cut: row, restored: true };
       });
     },
   };

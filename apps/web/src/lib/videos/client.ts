@@ -45,39 +45,27 @@ export async function saveCut(
   return asJson<{ cut: CutDetail; created: boolean }>(res);
 }
 
-export interface CutFileRemoval {
-  removed: boolean;
-  ref?: string;
-  reason?: string;
-}
-
-export interface RemovedCut {
+export interface StampedCut {
   id: string;
   name: string;
   version: number;
   outputRef: string | null;
 }
 
-export type DeleteCutOutcome =
-  | { ok: true; removed: RemovedCut; file: CutFileRemoval }
+export type CutStampOutcome =
+  | { ok: true; cut: StampedCut; changed: boolean }
   | { ok: false; error: string };
 
-/**
- * s82 A3 — delete a version. The three refusals are enforced in the repo and
- * arrive here as a 409 carrying the reason VERBATIM, which the surface puts in
- * the notice band: the operator reads why the door said no, not "that door
- * refused". Shaped like `approveCut` rather than throwing, for the same
- * reason — a refusal is an answer, not an exception.
- */
-export async function deleteCut(projectId: string, cutId: string): Promise<DeleteCutOutcome> {
-  const res = await fetch(`/api/videos/${projectId}/cuts/${cutId}`, { method: "DELETE" });
+/** The 409-carries-the-answer shape both stamp doors share. */
+async function cutStampDoor(url: string, method: "DELETE" | "POST", cutId: string, key: "retired" | "restored"): Promise<CutStampOutcome> {
+  const res = await fetch(url, { method });
   const body: unknown = await res.json().catch(() => null);
   if (res.ok) {
-    const parsed = (body ?? {}) as { removed?: RemovedCut; file?: CutFileRemoval };
+    const parsed = (body ?? {}) as Partial<Record<typeof key, StampedCut>> & { changed?: boolean };
     return {
       ok: true,
-      removed: parsed.removed ?? { id: cutId, name: "", version: 0, outputRef: null },
-      file: parsed.file ?? { removed: false, reason: "the door said nothing about the file" },
+      cut: parsed[key] ?? { id: cutId, name: "", version: 0, outputRef: null },
+      changed: parsed.changed !== false,
     };
   }
   const parsed = (body ?? {}) as { error?: unknown };
@@ -85,6 +73,83 @@ export async function deleteCut(projectId: string, cutId: string): Promise<Delet
     ok: false,
     error: typeof parsed.error === "string" ? parsed.error : `request failed: ${res.status}`,
   };
+}
+
+/**
+ * Window 0026 — RETIRE a version (s82's delete door, made reversible). The
+ * three refusals are enforced in the repo and arrive here as a 409 carrying
+ * the reason VERBATIM, which the surface puts in the notice band: the operator
+ * reads why the door said no, not "that door refused". Shaped like
+ * `approveCut` rather than throwing, for the same reason — a refusal is an
+ * answer, not an exception.
+ *
+ * Note what is NOT in the outcome any more: a file-removal report. Nothing is
+ * removed from disk, so there is nothing to report — the render stays, which
+ * is precisely what makes `restoreCut` able to bring the cut back exactly.
+ */
+export async function retireCut(projectId: string, cutId: string): Promise<CutStampOutcome> {
+  return cutStampDoor(`/api/videos/${projectId}/cuts/${cutId}`, "DELETE", cutId, "retired");
+}
+
+/** Window 0026 — bring a retired version back, render and all. */
+export async function restoreCut(projectId: string, cutId: string): Promise<CutStampOutcome> {
+  return cutStampDoor(
+    `/api/videos/${projectId}/cuts/${cutId}/restore`,
+    "POST",
+    cutId,
+    "restored",
+  );
+}
+
+export type ProjectDoorOutcome =
+  | { ok: true; name: string; changed: boolean }
+  | { ok: false; error: string };
+
+async function projectDoor(
+  url: string,
+  init: RequestInit,
+  key: "project" | "retired" | "restored",
+): Promise<ProjectDoorOutcome> {
+  const res = await fetch(url, init);
+  const body: unknown = await res.json().catch(() => null);
+  if (res.ok) {
+    const parsed = (body ?? {}) as Partial<Record<typeof key, { name?: string }>> & {
+      changed?: boolean;
+    };
+    return { ok: true, name: parsed[key]?.name ?? "", changed: parsed.changed !== false };
+  }
+  const parsed = (body ?? {}) as { error?: unknown };
+  return {
+    ok: false,
+    error: typeof parsed.error === "string" ? parsed.error : `request failed: ${res.status}`,
+  };
+}
+
+/**
+ * Window 0026 — rename a project. REFUSES on a collision (409, verbatim): the
+ * name is the get-or-create key, so renaming onto an existing one would merge
+ * two projects rather than rename one.
+ */
+export async function renameProject(projectId: string, name: string): Promise<ProjectDoorOutcome> {
+  return projectDoor(
+    `/api/videos/${projectId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    },
+    "project",
+  );
+}
+
+/** Window 0026 — retire a project: it leaves the grid, its whole tree intact. */
+export async function retireProject(projectId: string): Promise<ProjectDoorOutcome> {
+  return projectDoor(`/api/videos/${projectId}`, { method: "DELETE" }, "retired");
+}
+
+/** Window 0026 — bring a retired project back, whole. */
+export async function restoreProject(projectId: string): Promise<ProjectDoorOutcome> {
+  return projectDoor(`/api/videos/${projectId}/restore`, { method: "POST" }, "restored");
 }
 
 /* B-ve.5 — the aspect lens. */
