@@ -25,9 +25,17 @@ import { scheduleApprovedDraft } from "../schedule";
  *   2. The publish door's refusal ladder is UNTOUCHED. An unarmed platform's
  *      row fails closed with the door's own words, which is the correct
  *      behaviour and not a gap.
+ *   3. THE TWO GATES ARE **AND** (control-arc part A, s102). The master key
+ *      and the destination's own `off`/`review`/`live` must BOTH say yes.
+ *      Every armed test below therefore has to name a live destination —
+ *      when this landed, every one of them stopped publishing until it did,
+ *      which is the property working rather than a chore.
  */
 
 const NOW = new Date(Date.UTC(2026, 6, 28, 12, 0));
+
+/** Every destination authorized — what the tests that predate part A implicitly assumed. */
+const allLive = () => "live" as const;
 const EARLIER = new Date(Date.UTC(2026, 6, 28, 9, 0));
 const SLOT = new Date(Date.UTC(2026, 6, 28, 11, 0));
 const POST_BODY = "A short, fitting post about local work.";
@@ -188,7 +196,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
     const row = await queueRow(f);
     const publisher = createFakeSocialPublisher();
     const result = await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(publisher) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(publisher) },
       NOW,
     );
 
@@ -207,7 +215,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
     const row = await queueRow(f);
     const unarmed = resolveSocialPublisher("linkedin", {});
     const result = await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(unarmed) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(unarmed) },
       NOW,
     );
 
@@ -225,11 +233,11 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
     await queueRow(f);
     const unarmed = resolveSocialPublisher("linkedin", {});
     await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(unarmed) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(unarmed) },
       NOW,
     );
     const second = await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(unarmed) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(unarmed) },
       new Date(NOW.getTime() + 60_000),
     );
     expect(second.due).toEqual([]);
@@ -245,7 +253,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
 
     const publisher = createFakeSocialPublisher();
     const result = await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(publisher) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(publisher) },
       NOW,
     );
     expect(result.published.map((p) => p.id)).toEqual([first.id]);
@@ -271,7 +279,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
     const row = await queueRow(f);
     expect((await f.repos.drafts.get(f.ctx, row.draftId)).status).toBe("approved");
     await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(createFakeSocialPublisher()) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(createFakeSocialPublisher()) },
       NOW,
     );
     // And still approved after publishing: the social path records its truth
@@ -288,7 +296,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
 
     const publisher = createFakeSocialPublisher();
     const result = await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(publisher), staleAfterMinutes: 15 },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(publisher), staleAfterMinutes: 15 },
       NOW,
     );
     expect(result.released.map((r) => r.id)).toEqual([row.id]);
@@ -301,7 +309,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
     const row = await queueRow(f);
     await f.repos.publishQueue.claim(row.id, new Date(NOW.getTime() - 60_000));
     const result = await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(createFakeSocialPublisher()), staleAfterMinutes: 15 },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(createFakeSocialPublisher()), staleAfterMinutes: 15 },
       NOW,
     );
     expect(result.released).toEqual([]);
@@ -322,7 +330,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
       },
     };
     const result = await runDuePublishes(
-      { repos: racing, armed: true, resolvePublisher: fakeResolver(publisher) },
+      { repos: racing, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(publisher) },
       NOW,
     );
     expect(result.raced.map((r) => r.id)).toEqual([row.id]);
@@ -334,7 +342,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
     const f = await setup();
     const row = await queueRow(f);
     await runDuePublishes(
-      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(createFakeSocialPublisher()) },
+      { repos: f.repos, armed: true, resolveArmState: allLive, resolvePublisher: fakeResolver(createFakeSocialPublisher()) },
       NOW,
     );
     const events = await f.repos.events.list(f.ctx, { entityType: "publish_queue", entityId: row.id });
@@ -358,6 +366,7 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
       {
         repos: f.repos,
         armed: true,
+        resolveArmState: allLive,
         resolvePublisher: () => (platform: SocialPlatform) => {
           seen.push(platform);
           return createFakeSocialPublisher({ platform });
@@ -366,5 +375,150 @@ describe("runDuePublishes — ARMED (tests only; the lane ships no armed caller)
       NOW,
     );
     expect(seen).toEqual(["x"]);
+  });
+});
+
+/**
+ * Control-arc part A (s102). The founder's own note — *"arming is per-run; the
+ * queue consumer's key rests EMPTY"* — was a workaround for a gate that could
+ * not say what he meant: one boolean over every platform and every draft, so
+ * letting one Bluesky post out armed everything that was due. These pin the
+ * finer gate, and the invariant is that it can only ever NARROW a GO.
+ */
+describe("runDuePublishes — the per-destination arm gate", () => {
+  it("a master-armed pass with NO per-destination config publishes nothing at all", async () => {
+    const f = await setup();
+    const row = await queueRow(f);
+    const publisher = createFakeSocialPublisher();
+
+    const result = await runDuePublishes(
+      { repos: f.repos, armed: true, resolvePublisher: fakeResolver(publisher) },
+      NOW,
+    );
+
+    expect(result.published).toEqual([]);
+    expect(publisher.calls).toEqual([]);
+    expect(result.holds).toEqual([
+      expect.objectContaining({ id: row.id, platform: "linkedin", armState: "off" }),
+    ]);
+    // Untouched, not failed: a held row keeps its turn.
+    expect((await f.repos.publishQueue.get(f.ctx, row.id))?.status).toBe("pending");
+  });
+
+  it("`review` HOLDS the row for the operator rather than sending or failing it", async () => {
+    const f = await setup();
+    const row = await queueRow(f);
+    const publisher = createFakeSocialPublisher();
+
+    const result = await runDuePublishes(
+      {
+        repos: f.repos,
+        armed: true,
+        resolveArmState: () => "review",
+        resolvePublisher: fakeResolver(publisher),
+      },
+      NOW,
+    );
+
+    expect(publisher.calls).toEqual([]);
+    expect(result.holds[0]).toMatchObject({ id: row.id, armState: "review" });
+    expect(result.failed).toEqual([]);
+    expect((await f.repos.publishQueue.get(f.ctx, row.id))?.status).toBe("pending");
+  });
+
+  it("arms ONE destination without arming the other that is equally due", async () => {
+    const f = await setup({
+      social: { linkedin: { maxPostsPerDay: 2 }, x: { maxPostsPerDay: 2 } },
+    });
+    await queueRow(f); // linkedin
+    const draft = await approvedDraft(f, "a second body for the other platform");
+    await scheduleApprovedDraft(
+      { ctx: f.ctx, repos: f.repos },
+      { draftId: draft.id, platform: "x", scheduledAt: SLOT },
+      EARLIER,
+    );
+
+    const seen: SocialPlatform[] = [];
+    const result = await runDuePublishes(
+      {
+        repos: f.repos,
+        armed: true,
+        resolveArmState: ({ platform }) => (platform === "x" ? "live" : "off"),
+        resolvePublisher: () => (platform: SocialPlatform) => {
+          seen.push(platform);
+          return createFakeSocialPublisher({ platform });
+        },
+      },
+      NOW,
+    );
+
+    // THE point of part A: the blast radius is the destination that was named.
+    expect(seen).toEqual(["x"]);
+    expect(result.published).toHaveLength(1);
+    expect(result.holds).toEqual([expect.objectContaining({ platform: "linkedin", armState: "off" })]);
+  });
+
+  it("fails CLOSED — a resolver that throws leaves the destination off, and the pass carries on", async () => {
+    const f = await setup({
+      social: { linkedin: { maxPostsPerDay: 2 }, x: { maxPostsPerDay: 2 } },
+    });
+    await queueRow(f); // linkedin — its resolver throws
+    const draft = await approvedDraft(f, "the other tenant-mate row");
+    await scheduleApprovedDraft(
+      { ctx: f.ctx, repos: f.repos },
+      { draftId: draft.id, platform: "x", scheduledAt: SLOT },
+      EARLIER,
+    );
+
+    const result = await runDuePublishes(
+      {
+        repos: f.repos,
+        armed: true,
+        resolveArmState: ({ platform }) => {
+          if (platform === "linkedin") throw new Error("unreadable config");
+          return "live";
+        },
+        resolvePublisher: () => (platform: SocialPlatform) => createFakeSocialPublisher({ platform }),
+      },
+      NOW,
+    );
+
+    expect(result.holds).toEqual([expect.objectContaining({ platform: "linkedin", armState: "off" })]);
+    // One destination's unreadable config never stops the rest of the pass.
+    expect(result.published.map((p) => p.platform)).toEqual(["x"]);
+  });
+
+  it("an answer that is not one of the three states is off, not a truthy yes", async () => {
+    const f = await setup();
+    await queueRow(f);
+    const publisher = createFakeSocialPublisher();
+    const result = await runDuePublishes(
+      {
+        repos: f.repos,
+        armed: true,
+        resolveArmState: () => "LIVE" as never, // near-miss casing, the readArm lesson
+        resolvePublisher: fakeResolver(publisher),
+      },
+      NOW,
+    );
+    expect(publisher.calls).toEqual([]);
+    expect(result.holds[0].armState).toBe("off");
+  });
+
+  it("the DISARMED report still says which rows a live tick would have skipped", async () => {
+    const f = await setup();
+    const row = await queueRow(f);
+
+    const result = await runDuePublishes(
+      { repos: f.repos, resolveArmState: () => "review" },
+      NOW,
+    );
+
+    expect(result.armed).toBe(false);
+    expect(result.due).toHaveLength(1);
+    // A report listing a due row without saying it would be held describes a
+    // tick that would never happen.
+    expect(result.holds).toEqual([expect.objectContaining({ id: row.id, armState: "review" })]);
+    expect((await f.repos.publishQueue.get(f.ctx, row.id))?.status).toBe("pending");
   });
 });

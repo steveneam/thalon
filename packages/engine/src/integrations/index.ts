@@ -46,6 +46,7 @@ export {
   type PublishedWebItem,
 } from "./published";
 export {
+  passArmStateResolver,
   vaultSocialEnvView,
   vaultSocialMetricsResolver,
   vaultSocialPublisherResolver,

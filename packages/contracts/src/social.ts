@@ -44,9 +44,50 @@ const dailyCap = z
   .min(0)
   .max(SOCIAL_MAX_POSTS_PER_DAY_CEILING);
 
-/** Per-platform cadence knobs (0 = platform configured but paused). */
+/**
+ * Control-arc part A (s102): the ARM STATE — an authorization fact, held per
+ * DESTINATION rather than for the whole queue.
+ *
+ * `SOCIAL_QUEUE_ARMED` is one boolean over every platform and every draft, so
+ * letting a single Bluesky post out arms everything that is due. Klaviyo arms
+ * per MESSAGE, and its middle rung routes the recipient to a review tab
+ * instead of sending — which is Approve, arrived at independently. We take the
+ * granularity, not the vocabulary:
+ *
+ *   off     this destination is not authorized; due rows are not touched
+ *   review  due rows are HELD and surfaced as needing the operator
+ *   live    the consumer may publish this destination's due rows
+ *
+ * `off` is first because it is the default and the safe end of the ladder.
+ *
+ * ⛔ This NARROWS the blast radius of a GO, it does not widen it: the master
+ * env key and the per-destination state are AND, so a master-armed tick with
+ * no per-destination config publishes nothing at all.
+ *
+ * It lives HERE, not beside the queue vocabulary in `./publish-queue.ts` as
+ * the spec first drew it: that module already imports this one for
+ * `socialPlatformSchema`, so declaring the arm state there and reading it here
+ * is a circular import that leaves one of the two schemas in TDZ at barrel
+ * eval. Grounded and corrected s102.
+ */
+export const ARM_STATES = ["off", "review", "live"] as const;
+export type ArmState = (typeof ARM_STATES)[number];
+export const armStateSchema = z.enum(ARM_STATES);
+
+/**
+ * Per-platform cadence knobs.
+ *
+ * `maxPostsPerDay: 0` and `armState: "off"` are NOT the same fact and must
+ * never be collapsed: paused is a CADENCE answer ("no more today"), armed is
+ * an AUTHORIZATION answer ("may this destination publish at all"). A tenant
+ * can legitimately be `live` with a cap of 0 for the rest of the day.
+ *
+ * `armState` defaults to `off`, so every config written before s102 reads
+ * back unauthorized — absence disarms, which is this block's standing rule.
+ */
 export const socialCadenceSchema = z.object({
   maxPostsPerDay: dailyCap.default(1),
+  armState: armStateSchema.default("off"),
 });
 export type SocialCadence = z.infer<typeof socialCadenceSchema>;
 

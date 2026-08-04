@@ -1,4 +1,4 @@
-import { tenantCtx, type SocialPlatform } from "@thalon/contracts";
+import { tenantCtx, type ArmState, type SocialPlatform } from "@thalon/contracts";
 import type { PublishQueueRow, Repos } from "@thalon/db";
 import type { EnvSource } from "@thalon/platform";
 import { publishApprovedDraft } from "./publish";
@@ -16,6 +16,14 @@ import type { SocialPublisher } from "./registry";
  * sit `pending`. Arming, the per-platform GO and the per-post GO all stay
  * the founder's, and the standing sequence gate is verbatim: *"we're not
  * posting anything yet until all the walks are verified and fixed."*
+ *
+ * ⛔ TWO GATES, AND THEY ARE **AND** (control-arc part A, s102). The master
+ * key above says whether this deployment may publish at all; each
+ * DESTINATION additionally carries `off` / `review` / `live`, and only
+ * `live` is touched. Every way of not answering resolves to `off`, so a
+ * master-armed tick with no per-destination config publishes NOTHING. This
+ * makes a GO narrower than it was — its blast radius is exactly the
+ * destination it named, not everything that happened to be due.
  *
  * Structurally, not just by flag: `deps.resolvePublisher` has NO
  * network-reaching default (the B-pub.1 convention). An armed tick without
@@ -49,14 +57,33 @@ export function publishQueueArmed(env: EnvSource): boolean {
   return env[SOCIAL_QUEUE_ARM_KEY] === "true";
 }
 
+/** One due row's destination. Cross-tenant by nature: `listDue` reads every tenant, and arm state is per-tenant config. */
+export interface PublishDestination {
+  tenantId: string;
+  platform: SocialPlatform;
+}
+
 export interface RunDuePublishesDeps {
   repos: Repos;
   /**
-   * ARMED = write. Absent or false, the pass is a report: zero claims, zero
-   * transitions, zero platform calls. Callers derive it from
+   * The MASTER switch. Absent or false, the pass is a report: zero claims,
+   * zero transitions, zero platform calls. Callers derive it from
    * `publishQueueArmed(env)`; nothing defaults it to true.
    */
   armed?: boolean;
+  /**
+   * Control-arc part A (s102): the PER-DESTINATION arm state, ANDed with the
+   * master switch above. The master key says whether this deployment may
+   * publish at all; this says WHICH destinations a master-armed pass may
+   * touch — so the blast radius of a GO is exactly the destination it named,
+   * instead of everything that happens to be due.
+   *
+   * **Every way of not answering means `off`**: no resolver wired, a resolver
+   * that throws, a resolver that returns nothing recognizable. A master-armed
+   * tick with no per-destination config therefore publishes NOTHING, which is
+   * the point — the two gates are AND, never OR.
+   */
+  resolveArmState?: (destination: PublishDestination) => ArmState | Promise<ArmState>;
   /**
    * The publisher seam — REQUIRED when armed, no default (./publish.ts's
    * own posture). Resolved per tenant, because arming is tenant data since
@@ -85,11 +112,27 @@ export interface DuePublishFailure extends DuePublishItem {
   reason: string;
 }
 
+/** A due row the pass deliberately left alone, and which rung of the arm ladder left it. */
+export interface DuePublishHold extends DuePublishItem {
+  armState: Exclude<ArmState, "live">;
+}
+
 export interface RunDuePublishesResult {
-  /** Whether this pass could write at all. false = a report; nothing was touched. */
+  /** Whether the MASTER switch let this pass write at all. false = a report; nothing was touched. */
   armed: boolean;
   /** Rows whose time has come at `now`, across every tenant (the system-level read). */
   due: DuePublishItem[];
+  /**
+   * Due rows their DESTINATION would not let through (s102). `review` = held
+   * for the operator, which is Approve's own answer; `off` = the destination
+   * is not authorized, including every destination nobody has configured.
+   *
+   * Populated whether or not the pass is armed, because the whole disarmed
+   * pass is a description of what an armed one would do — `due` already reads
+   * that way, and a report listing ten due rows without saying nine are `off`
+   * describes a tick that would never happen.
+   */
+  holds: DuePublishHold[];
   /** Stale `processing` rows returned to `pending` at the top of the pass. Always empty while disarmed. */
   released: DuePublishItem[];
   /** Rows that reached the platform and were recorded. */
@@ -98,6 +141,30 @@ export interface RunDuePublishesResult {
   failed: DuePublishFailure[];
   /** Rows another consumer claimed first — the database resolved the race and this pass moved on. */
   raced: DuePublishItem[];
+}
+
+/**
+ * Resolve one destination's arm state, failing CLOSED at every step. An
+ * absent resolver, a throwing resolver and an unrecognized answer all mean
+ * `off` — the same exactly-one-value rule `publishQueueArmed` uses on the
+ * master key, because a value that nearly says yes must never arm a seam.
+ *
+ * The throw is swallowed on purpose and it is the only swallow in this file:
+ * one tenant's unreadable config must not stop the pass from serving every
+ * other tenant's rows, and the row it belongs to is reported as `off`
+ * (visible in `holds`) rather than silently dropped.
+ */
+async function resolveDestinationArm(
+  deps: RunDuePublishesDeps,
+  destination: PublishDestination,
+): Promise<Exclude<ArmState, "live"> | "live"> {
+  if (!deps.resolveArmState) return "off";
+  try {
+    const state = await deps.resolveArmState(destination);
+    return state === "live" || state === "review" ? state : "off";
+  } catch {
+    return "off";
+  }
 }
 
 function item(row: PublishQueueRow): DuePublishItem {
@@ -134,6 +201,7 @@ export async function runDuePublishes(
   const result: RunDuePublishesResult = {
     armed,
     due: [],
+    holds: [],
     released: [],
     published: [],
     failed: [],
@@ -150,11 +218,27 @@ export async function runDuePublishes(
   const due = await repos.publishQueue.listDue(now, deps.limit);
   result.due = due.map(item);
 
+  // The per-destination gate is resolved for EVERY due row, armed or not, and
+  // BEFORE any claim — so a held or unauthorized row is never touched and has
+  // nothing to walk back. Resolving it while disarmed costs a read and buys
+  // the ops door the truth: a report that lists ten due rows without saying
+  // nine of them are `off` describes a tick that would never happen.
+  const live: PublishQueueRow[] = [];
+  for (const row of due) {
+    const armState = await resolveDestinationArm(deps, {
+      tenantId: row.tenantId,
+      platform: row.platform as SocialPlatform,
+    });
+    if (armState === "live") live.push(row);
+    else result.holds.push({ ...item(row), armState });
+  }
+
   // Disarmed: the report IS the whole pass. Nothing above wrote, nothing
-  // below runs, and `due` says exactly what an armed tick would have tried.
+  // below runs, and `due` minus `holds` says exactly what an armed tick would
+  // have tried.
   if (!armed) return result;
 
-  for (const row of due) {
+  for (const row of live) {
     const ctx = tenantCtx(row.tenantId);
     // The claim's `status = 'pending'` predicate lives in the UPDATE, so
     // two consumers racing this row resolve in the database — the loser

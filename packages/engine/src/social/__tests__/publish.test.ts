@@ -336,6 +336,12 @@ describe("publishApprovedDraft — the happy path", () => {
 
     // The door hands the driver the platform's cadence block too (D1 settings
     // pass-through) — the platform call's full input, pinned.
+    //
+    // `toEqual` is exact on purpose, and s102 gave it a second job: the
+    // cadence block now also carries `armState`, which must NOT reach a
+    // driver. It is an authorization fact decided before this door, and
+    // putting it inside a third-party platform call would invite a driver to
+    // think it had a say. If it ever leaks, this line goes red.
     expect((publisher as FakeSocialPublisher).calls).toEqual([
       {
         draftId: draft.id,

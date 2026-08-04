@@ -178,6 +178,64 @@ destination set to `live` publishes only its own; absent config = `off`
 everywhere; the existing env var still means what it meant. Ratchet: a test
 pinning that an unresolvable destination is `off`.
 
+### BUILT s102 — and what building it corrected
+
+The engine half is **shipped and green**. Four things this section got wrong
+were found by grounding at build time, and the code follows the ground, not
+the prose above:
+
+1. **`ARM_STATES`/`armStateSchema` are in `packages/contracts/src/social.ts`,
+   not `publish-queue.ts`.** That module already imports `./social` for
+   `socialPlatformSchema`, and the arm state has to be read by
+   `socialCadenceSchema` — so declaring it there is a **circular import** that
+   leaves one of the two schemas in TDZ at barrel eval. It lives beside the
+   config block that carries it; `publish-queue.ts` carries a pointer.
+2. **The resolver takes a `{ tenantId, platform }` destination, not a
+   `string`.** `runDuePublishes` walks due rows across EVERY tenant (its
+   `listDue` is the system-level read) while arm state is per-tenant config,
+   so a bare destination string cannot answer the question. The seam is
+   `passArmStateResolver` in `packages/engine/src/integrations/social-arming.ts`,
+   which memoizes the profile read **per pass** — a tenant usually owns
+   several due rows, and an operator flipping a destination to `off` must be
+   obeyed by the next tick.
+3. **The tick ROUTE is not where arming happens, and it was not armed.**
+   `scripts/run-publish-queue.ts` is the one caller that wires `armed` +
+   `resolvePublisher`, so that is where the AND became real — the route still
+   has no publisher and cannot claim a row. It does now resolve the arm state
+   for its REPORT, so the ops door says which due rows a live tick would
+   actually touch; reading config gives it no new power. (Also corrected: the
+   route's docblock claimed `SOCIAL_QUEUE_ARMED` still needed adding to the
+   validated env schema. It has been in `packages/platform/src/env.ts` for
+   some time, resting empty.)
+4. **`armState` is withheld from the driver call.** The publish door passes
+   the cadence block through to each driver as `settings`; the arm state is an
+   authorization fact decided before that door, and handing it to a
+   third-party platform driver would invite one to think it had a say. Pinned
+   by the exact-match assertion in `publish.test.ts`.
+
+**The boundary this does NOT cross, stated because the two arming facts are
+easy to confuse:** `socialArmed` (credential + configuredness) still governs
+whether a platform may be published to *at all*, including a MANUAL publish
+from Approve. The arm state governs only whether the **unattended tick** may
+send that destination's due rows by itself. A destination at `off` therefore
+still publishes when an operator does it deliberately — that path has its own
+founder GO, and part A did not touch it.
+
+**Ratchets landed:** the AND gate (a master-armed pass with no per-destination
+config publishes nothing) · `review` holds rather than sends or fails · one
+destination arms without arming an equally-due sibling · fail-closed on a
+throwing resolver, with the rest of the pass unaffected · a near-miss value
+(`"LIVE"`) is `off`, not a truthy yes · the disarmed report still names what
+it would have held · and a **field-level** twin of the config-block ratchet,
+because the block-level one cannot see a field added inside a block being
+dropped, and a dropped `armState` would read as "not armed" with the
+operator's decision gone without a word.
+
+**Still owed (deliberately): the SURFACE half.** The seg control on the
+Integrations channel cards waits on that surface's research pass — part A's
+control cannot honestly be drawn onto a surface the definition of done still
+calls not ready.
+
 ---
 
 ## Part B — saved segments

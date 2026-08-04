@@ -55,7 +55,7 @@ const SAMPLES: Record<string, unknown> = {
   cadence: { linkedin: { maxPerDay: 1 } },
   routing: { "product-updates": ["linkedin"] },
   outreach: { dailyBatchCap: 5 },
-  social: { linkedin: { maxPostsPerDay: 2 } },
+  social: { linkedin: { maxPostsPerDay: 2, armState: "live" } },
   platformRouting: { video: ["tiktok"] },
 };
 
@@ -109,6 +109,58 @@ describe("brand profile config blocks (invariant: contract field ⇒ column ⇒ 
     }
     // Spot-check the s87 block specifically, since it is the one this file was written for.
     expect(active.platformRouting).toEqual({ video: ["tiktok"] });
+  });
+
+  /**
+   * s102, control-arc part A: the block-level round-trip above proves a BLOCK
+   * survives, which is the gap that shipped three times. It cannot see a field
+   * added INSIDE a block being dropped — and `armState` is an authorization
+   * fact, so a silent drop would read as "not armed" and the operator's
+   * decision would vanish without a word. This is the field-level twin.
+   *
+   * It is deliberately a real round-trip and not a schema assertion: zod
+   * strips unknown keys, so a field that is written but never declared, or
+   * declared but never persisted, dies here rather than in production.
+   */
+  it("a field INSIDE a block survives too — the arm state is not silently dropped", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await repos.brandProfiles.create(fx.ctx, {
+      config: {
+        voice: {},
+        denylist: [],
+        platformProfiles: {},
+        social: { bluesky: { maxPostsPerDay: 1, armState: "review" } },
+      } as BrandProfileConfigInput,
+      activate: true,
+    });
+
+    const active = (await repos.brandProfiles.getActive(fx.ctx)) as unknown as Record<
+      string,
+      unknown
+    >;
+    expect(active.social).toEqual({ bluesky: { maxPostsPerDay: 1, armState: "review" } });
+  });
+
+  /** Absence disarms INSIDE a block as well: a pre-s102 entry reads back unauthorized, never live. */
+  it("a config written without an arm state reads back as off", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await repos.brandProfiles.create(fx.ctx, {
+      config: {
+        voice: {},
+        denylist: [],
+        platformProfiles: {},
+        social: { bluesky: { maxPostsPerDay: 1 } },
+      } as BrandProfileConfigInput,
+      activate: true,
+    });
+
+    const active = (await repos.brandProfiles.getActive(fx.ctx)) as unknown as Record<
+      string,
+      unknown
+    >;
+    expect(active.social).toEqual({ bluesky: { maxPostsPerDay: 1, armState: "off" } });
   });
 
   it("absent blocks stay NULL — absence disarms, and is never a stored default", async () => {

@@ -1,5 +1,6 @@
 import {
   socialPublishConfigSchema,
+  type ArmState,
   type SocialPlatform,
   type SocialPublishConfig,
   type TenantCtx,
@@ -136,6 +137,46 @@ async function readSocialConfig(deps: SocialArmingDeps): Promise<SocialPublishCo
   const profile = await deps.repos.brandProfiles.getActive(deps.ctx);
   if (!profile || profile.social === undefined || profile.social === null) return null;
   return socialPublishConfigSchema.parse(profile.social);
+}
+
+/**
+ * Control-arc part A (s102): the consumer's `resolveArmState` seam — the
+ * QUEUE's per-destination arm state, read from the same tenant config block
+ * as everything else here, and wired once per pass.
+ *
+ * ⛔ SCOPE, because the two arming facts in this file are easy to confuse:
+ * `socialArmed` above answers *"may this platform be published to at all"* —
+ * credential + configuredness, the publish door's rungs (b/c), and it governs
+ * a MANUAL publish from Approve just as much as an automated one. This
+ * answers a narrower question: *"may the unattended TICK send this
+ * destination's due rows by itself"*. A destination at `off` therefore still
+ * publishes when an operator does it deliberately through Approve — that path
+ * has its own founder GO, and part A did not touch it.
+ *
+ * Fails closed at every step: no profile, no social block, no entry for the
+ * platform, or an entry written before s102 (whose `armState` defaults to
+ * `off`) all mean `off`.
+ *
+ * `runDuePublishes` walks due rows across EVERY tenant, and a tenant usually
+ * owns several, so the profile read is memoized for the life of the pass.
+ * Deliberately per-pass and no longer: an operator who flips a destination to
+ * `off` must be obeyed by the next tick, not by whenever a process-wide cache
+ * decided to expire.
+ */
+export function passArmStateResolver(deps: {
+  repos: SocialArmingRepos;
+  env: ThalonEnv;
+  ctxFor: (tenantId: string) => TenantCtx;
+}): (destination: { tenantId: string; platform: SocialPlatform }) => Promise<ArmState> {
+  const perTenant = new Map<string, Promise<SocialPublishConfig | null>>();
+  return async ({ tenantId, platform }) => {
+    let config = perTenant.get(tenantId);
+    if (!config) {
+      config = readSocialConfig({ repos: deps.repos, env: deps.env, ctx: deps.ctxFor(tenantId) });
+      perTenant.set(tenantId, config);
+    }
+    return (await config)?.[platform]?.armState ?? "off";
+  };
 }
 
 /**

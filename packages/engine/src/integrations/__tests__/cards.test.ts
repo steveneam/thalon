@@ -167,7 +167,10 @@ describe("listIntegrationCards — the arming rung (s78)", () => {
     const armed = await listIntegrationCards(deps(), {
       features: ALL_ON,
       now: NOW,
-      socialConfig: { linkedin: { maxPostsPerDay: 1 } },
+      // `armState` is the QUEUE's per-destination gate (s102) and is a
+      // different question from this card's `armed` — an entry in the block
+      // still arms the platform for a manual publish whatever the tick may do.
+      socialConfig: { linkedin: { maxPostsPerDay: 1, armState: "off" } },
     });
     expect(armed.find((c) => c.destination === "linkedin")?.armed).toBe(true);
 

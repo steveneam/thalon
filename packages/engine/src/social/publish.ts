@@ -3,6 +3,7 @@ import {
   resolveDraftFormatSpec,
   socialPlatformSchema,
   socialPublishConfigSchema,
+  type SocialCadence,
   type SocialPlatform,
   type SocialPublishConfig,
   type TenantCtx,
@@ -291,9 +292,15 @@ export async function publishApprovedDraft(
       draftId: draft.id,
       text: draft.body,
       media,
-      // The platform's own cadence block rides along (D1): per-tenant posting
-      // settings reach the driver without a second config read.
-      settings: cadence,
+      // The platform's own POSTING settings ride along (D1): per-tenant
+      // config reaches the driver without a second config read.
+      //
+      // `armState` is deliberately withheld (s102). It is an authorization
+      // fact about the queue, decided before anything reaches this door, and
+      // a driver can do nothing correct with it — handing it over would put
+      // an arming decision inside every third-party platform call, where a
+      // driver could one day read it and think it had a say.
+      settings: driverSettings(cadence),
     });
   } finally {
     // Always, on both paths — a refused publish must not leave an image
@@ -322,6 +329,17 @@ export async function publishApprovedDraft(
  * stored block must never be trusted shapeless (write-door validation is
  * the other half of the same contract).
  */
+/**
+ * What a DRIVER gets from the cadence block: its posting settings, never the
+ * arm state. Written as an explicit omit rather than a pick so a future
+ * per-platform setting (Reddit's `subreddit` is the precedent) reaches the
+ * driver by default — the thing that must be opted OUT of is authorization.
+ */
+function driverSettings(cadence: SocialCadence): Record<string, unknown> {
+  const { armState: _armState, ...settings } = cadence;
+  return settings;
+}
+
 function readSocialConfig(profile: BrandProfile): SocialPublishConfig | null {
   if (profile.social === undefined || profile.social === null) return null;
   return socialPublishConfigSchema.parse(profile.social);

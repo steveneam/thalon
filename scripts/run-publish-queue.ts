@@ -24,6 +24,7 @@
 import { tenantCtx } from "../packages/contracts/src/index";
 import { openDb } from "../packages/db/src/index";
 import {
+  passArmStateResolver,
   publishQueueArmed,
   runDuePublishes,
   vaultSocialPublisherResolver,
@@ -43,6 +44,12 @@ async function main(): Promise<void> {
       {
         repos: handle.repos,
         armed,
+        // Control-arc part A (s102): the master key above and this
+        // per-destination state are AND. A pass armed by the env key touches
+        // only destinations the tenant set to `live`; everything else is held
+        // and reported. Absent config = `off`, so arming the key alone
+        // publishes nothing.
+        resolveArmState: passArmStateResolver({ repos: handle.repos, env, ctxFor: tenantCtx }),
         // Per-tenant on purpose: arming is tenant data (B-int.3) and the
         // vault view opens per tenant.
         resolvePublisher: (tenantId) =>
@@ -52,9 +59,13 @@ async function main(): Promise<void> {
     );
     console.log(
       `pass (${result.armed ? "ARMED" : "report-only"}): ${result.due.length} due, ` +
+        `${result.holds.length} held by destination, ` +
         `${result.published.length} published, ${result.failed.length} failed, ` +
         `${result.released.length} released, ${result.raced.length} raced`,
     );
+    for (const row of result.holds) {
+      console.log(`  held ${row.platform} ${row.draftId}: destination is ${row.armState}`);
+    }
     for (const row of result.published) {
       console.log(`  published ${row.platform} ${row.draftId} → ${row.externalPostId}`);
     }

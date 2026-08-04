@@ -19,6 +19,14 @@ import { socialPlatformSchema } from "./social";
  * will go out at 09:30" the same fact.
  */
 
+/**
+ * The ARM STATE that gates this queue (`off` · `review` · `live`) is declared
+ * in `./social.ts` beside `socialCadenceSchema`, the per-destination config
+ * block that carries it. It would read better here, next to the vocabulary it
+ * gates — but this module already imports that one, so declaring it here is a
+ * cycle. See that file's header for the ladder and why it narrows a GO.
+ */
+
 export const PUBLISH_QUEUE_STATUSES = [
   "pending",
   "processing",
