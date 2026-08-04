@@ -1,11 +1,26 @@
 import type { Edl, EdlDiff, VideoCutAttribution, VideoDeriveAspect } from "@thalon/contracts";
 import { asJson } from "@/lib/approve-queue/client";
-import type { CutDetail, ProjectDetail, ProjectSummary, RenderJobView } from "./types";
+import type {
+  CutDetail,
+  ProjectDetail,
+  ProjectSummary,
+  RenderJobView,
+  RetiredProjectView,
+} from "./types";
 
-export async function fetchProjectSummaries(): Promise<ProjectSummary[]> {
+/**
+ * The videos index: the living projects and (window 0026) the retired ones
+ * the grid's Restore door names. ONE read for both halves — the route already
+ * answers with both, and a second round-trip for the retired list would be a
+ * second chance for the two to disagree.
+ */
+export async function fetchProjectSummaries(): Promise<{
+  projects: ProjectSummary[];
+  retired: RetiredProjectView[];
+}> {
   const res = await fetch("/api/videos");
-  const body = await asJson<{ projects: ProjectSummary[] }>(res);
-  return body.projects;
+  const body = await asJson<{ projects: ProjectSummary[]; retired?: RetiredProjectView[] }>(res);
+  return { projects: body.projects, retired: body.retired ?? [] };
 }
 
 export async function fetchProjectDetail(projectId: string): Promise<ProjectDetail | null> {

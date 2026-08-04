@@ -18,8 +18,14 @@ import {
   type FilterId,
 } from "@/components/videos/videos-model";
 import { srcOf } from "@/lib/media/resolve";
-import { fetchProjectDetail, fetchProjectSummaries } from "@/lib/videos/client";
-import type { ProjectDetail, ProjectSummary } from "@/lib/videos/types";
+import {
+  fetchProjectDetail,
+  fetchProjectSummaries,
+  renameProject,
+  restoreProject,
+  retireProject,
+} from "@/lib/videos/client";
+import type { ProjectDetail, ProjectSummary, RetiredProjectView } from "@/lib/videos/types";
 import { useListKeys } from "@/lib/workspace/keyboard";
 
 type ReadStatus = "loading" | "error" | "success";
@@ -68,6 +74,18 @@ export function VideosOverview() {
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [readAt, setReadAt] = useState(0);
   const pickedRef = useRef<HTMLAnchorElement | null>(null);
+  /*
+   * Window 0026 — the project doors. `renaming` is the card whose name is
+   * being edited (and the draft text), absent at rest like every other state
+   * on this surface; `notice` carries a door's own sentence, because a
+   * refusal here (a name collision) is an ANSWER the operator must read
+   * rather than a silent no-op.
+   */
+  const [renaming, setRenaming] = useState<{ id: string; draft: string } | null>(null);
+  const [retiredProjects, setRetiredProjects] = useState<RetiredProjectView[]>([]);
+  const [retiredOpen, setRetiredOpen] = useState(false);
+  const [notice, setNotice] = useState<{ text: string; tone: "ok" | "err" } | null>(null);
+  const [busy, setBusy] = useState(false);
 
   // The list read carries names and counts; a card's STATE lives on its cuts,
   // which only the per-project record read has. At browse scale that is the
@@ -77,7 +95,7 @@ export function VideosOverview() {
   const load = useCallback(
     () =>
       fetchProjectSummaries()
-        .then((list) =>
+        .then(({ projects: list, retired }) =>
           Promise.all(
             list.map((project) =>
               fetchProjectDetail(project.id)
@@ -88,6 +106,7 @@ export function VideosOverview() {
             ),
           ).then((read) => {
             setSummaries(list);
+            setRetiredProjects(retired);
             setRecords(new Map(read));
             setReadAt(Date.now());
             setStatus("success");
@@ -134,7 +153,16 @@ export function VideosOverview() {
         if (picked === null) return;
         // A focused control owns its own Enter — the filters and the import
         // disclosure must still act after the operator has moved with j/k.
-        if ((event.target as HTMLElement | null)?.closest('button, a, [role="link"]')) return;
+        // `[role="button"]` joined the list at window 0026: the card's own
+        // Rename…/Retire doors are role-bearing spans (anchor-in-anchor is
+        // invalid), and without it Enter on a focused Retire would fire the
+        // door AND navigate into the project it just retired.
+        if (
+          (event.target as HTMLElement | null)?.closest(
+            'button, a, [role="link"], [role="button"]',
+          )
+        )
+          return;
         event.preventDefault();
         router.push(`/app/videos/${picked}`);
       },
@@ -150,6 +178,83 @@ export function VideosOverview() {
   useEffect(() => {
     pickedRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [picked]);
+
+  /**
+   * Window 0026 — RENAME. The refusal (a name collision) is the repo's and
+   * arrives as a 409 carrying its sentence; it goes in the notice band
+   * verbatim and the field STAYS OPEN with the rejected name still in it, so
+   * the operator edits rather than retypes.
+   */
+  function commitRename() {
+    if (renaming === null) return;
+    const { id, draft } = renaming;
+    const name = draft.trim();
+    if (name === "") {
+      setNotice({ text: "A project needs a name — it is what the record is filed under.", tone: "err" });
+      return;
+    }
+    setBusy(true);
+    renameProject(id, name)
+      .then((outcome) => {
+        if (!outcome.ok) {
+          setNotice({ text: outcome.error, tone: "err" });
+          return;
+        }
+        setRenaming(null);
+        void load();
+        setNotice(
+          outcome.changed
+            ? { text: `Renamed to ${outcome.name}.`, tone: "ok" }
+            : { text: `Already called ${outcome.name} — nothing to change.`, tone: "ok" },
+        );
+      })
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the rename refused", tone: "err" }),
+      )
+      .finally(() => setBusy(false));
+  }
+
+  /** Window 0026 — RETIRE a project: off the grid, whole tree intact, reversible below. */
+  function onRetireProject(summary: ProjectSummary) {
+    setBusy(true);
+    setNotice(null);
+    retireProject(summary.id)
+      .then((outcome) => {
+        if (!outcome.ok) {
+          setNotice({ text: outcome.error, tone: "err" });
+          return;
+        }
+        setPickedId(null);
+        void load();
+        setNotice({
+          text: `Retired ${summary.name} — its takes, cuts and renders are untouched. Restore it under “Retired projects”.`,
+          tone: "ok",
+        });
+      })
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the retire refused", tone: "err" }),
+      )
+      .finally(() => setBusy(false));
+  }
+
+  /** Window 0026 — RESTORE: the whole tree comes back exactly as it left. */
+  function onRestoreProject(project: RetiredProjectView) {
+    setBusy(true);
+    setNotice(null);
+    restoreProject(project.id)
+      .then((outcome) => {
+        if (!outcome.ok) {
+          setNotice({ text: outcome.error, tone: "err" });
+          return;
+        }
+        void load();
+        setNotice({ text: `Restored ${project.name} — back on the grid, whole.`, tone: "ok" });
+      })
+      .catch((err: unknown) =>
+        setNotice({ text: err instanceof Error ? err.message : "the restore refused", tone: "err" }),
+      )
+      .finally(() => setBusy(false));
+  }
 
   const countPill =
     filter === "all"
@@ -258,6 +363,52 @@ export function VideosOverview() {
             <span className="t-data">music-candidates/</span> holds slotless audio. A reject
             without a reason is refused — the reasons are the learning material.
           </span>
+        </div>
+      )}
+
+      {/*
+        Window 0026 — the RENAME band. It lives OUTSIDE the grid on purpose: a
+        card is an anchor, and a text field inside one is a field the operator
+        cannot reliably click into. The dossier's ☆ Mark band is the same
+        shape for the same reason.
+      */}
+      {renaming !== null && (
+        <div className="card" style={{ padding: 12, display: "flex", gap: 8, alignItems: "center" }}>
+          <label className="numfield" style={{ flex: 1 }}>
+            rename to
+            <input
+              autoFocus
+              value={renaming.draft}
+              disabled={busy}
+              onChange={(e) => setRenaming({ ...renaming, draft: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") setRenaming(null);
+              }}
+            />
+          </label>
+          <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={commitRename}>
+            {busy ? "Renaming…" : "Rename"}
+          </button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setRenaming(null)}>
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {notice !== null && (
+        <div className={notice.tone === "err" ? "card notice-band refused" : "card notice-band"}>
+          <span className="t-label" role={notice.tone === "err" ? "alert" : "status"}>
+            {notice.text}
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            style={{ marginLeft: "auto" }}
+            onClick={() => setNotice(null)}
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -425,6 +576,56 @@ export function VideosOverview() {
                       {cardDate(summary.createdAt, readAt)}
                     </span>
                   </div>
+                  {/*
+                    Window 0026 — the project doors, in the card's own in-anchor
+                    door dialect (a role-bearing span, because an anchor inside
+                    an anchor is invalid markup). Retire needs no confirm: it
+                    destroys nothing, says so, and the Restore door below is
+                    named in the same sentence.
+                  */}
+                  <div className="fam">
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="fam-link"
+                      title={`Rename ${summary.name}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setNotice(null);
+                        setRenaming({ id: summary.id, draft: summary.name });
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setNotice(null);
+                        setRenaming({ id: summary.id, draft: summary.name });
+                      }}
+                    >
+                      Rename…
+                    </span>
+                    <span className="sep">·</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="fam-link"
+                      title={`Retire ${summary.name} — nothing is deleted, and Restore brings it back whole`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onRetireProject(summary);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onRetireProject(summary);
+                      }}
+                    >
+                      Retire
+                    </span>
+                  </div>
                 </div>
               </Link>
             );
@@ -434,6 +635,51 @@ export function VideosOverview() {
             <span className="t-label">One prompt → a full cut</span>
             <span className="prov">or import a folder you already have</span>
           </Link>
+        </div>
+      )}
+
+      {/*
+        Window 0026 — RETIRED PROJECTS, the destination the retire notice
+        names. Absent at rest (nothing retired = no band at all, not an empty
+        one), and a disclosure rather than a section, because it is a way back
+        rather than a place to work.
+      */}
+      {retiredProjects.length > 0 && (
+        <div className="card" style={{ padding: 12 }}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            aria-expanded={retiredOpen}
+            onClick={() => setRetiredOpen((open) => !open)}
+          >
+            Retired projects ({retiredProjects.length}) {retiredOpen ? "▾" : "▸"}
+          </button>
+          {retiredOpen && (
+            <>
+              <span className="t-label" style={{ display: "block", marginTop: 8 }}>
+                Off the grid, nothing lost — every take, cut and rendered file is exactly where it
+                was. Restore brings the project back whole.
+              </span>
+              {retiredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}
+                >
+                  <span className="t-title">{project.name}</span>
+                  <span className="prov">retired {cardDate(project.retiredAt, readAt)}</span>
+                  <div style={{ flex: 1 }} />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={busy}
+                    onClick={() => onRestoreProject(project)}
+                  >
+                    Restore
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
 

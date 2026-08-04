@@ -295,3 +295,118 @@ describe("VideosOverview (exact-mock rebuild — Videos Overview.dc.html, step 2
     expect(container.querySelector('[class*="border-border"]')).toBeNull();
   });
 });
+
+/**
+ * Window 0026 — the project doors on the grid. The refusals and the
+ * reversibility are pinned in packages/db and at the routes; what is pinned
+ * HERE is the operator's side of it: that Retire says what survives and names
+ * the way back, that the way back EXISTS on this surface (a promise whose
+ * destination has no door is the dead door this programme refuses), and that
+ * a rename collision is READ rather than swallowed.
+ */
+describe("VideosOverview — retire / restore / rename (window 0026)", () => {
+  it("retires a project, states what survives, and names where Restore lives", async () => {
+    let retired = false;
+    server.use(
+      http.get("/api/videos", () =>
+        HttpResponse.json(
+          retired
+            ? {
+                projects: [SUMMARIES[1]],
+                retired: [
+                  { id: "p1", name: "concept film", retiredAt: "2026-08-04T00:00:00.000Z" },
+                ],
+              }
+            : { projects: SUMMARIES, retired: [] },
+        ),
+      ),
+      http.get("/api/videos/p1", () => HttpResponse.json(P1)),
+      http.get("/api/videos/p2", () => HttpResponse.json(P2)),
+      http.delete("/api/videos/p1", () => {
+        retired = true;
+        return HttpResponse.json({ retired: { id: "p1", name: "concept film" }, changed: true });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<VideosOverview />);
+    await screen.findByText("2 projects");
+
+    await user.click(screen.getAllByRole("button", { name: "Retire" })[0]);
+
+    // The notice states the survivors and points at the door, in one sentence.
+    const notice = await screen.findByRole("status");
+    expect(notice.textContent).toMatch(/takes, cuts and renders are untouched/);
+    expect(notice.textContent).toMatch(/Retired projects/);
+
+    // And that door is really there — with the project inside it.
+    const disclosure = await screen.findByRole("button", { name: /Retired projects \(1\)/ });
+    await user.click(disclosure);
+    expect(await screen.findByText("concept film")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Restore" })).toBeInTheDocument();
+  });
+
+  it("restores a retired project back onto the grid, whole", async () => {
+    let restored = false;
+    server.use(
+      http.get("/api/videos", () =>
+        HttpResponse.json(
+          restored
+            ? { projects: SUMMARIES, retired: [] }
+            : {
+                projects: [SUMMARIES[1]],
+                retired: [
+                  { id: "p1", name: "concept film", retiredAt: "2026-08-04T00:00:00.000Z" },
+                ],
+              },
+        ),
+      ),
+      http.get("/api/videos/p1", () => HttpResponse.json(P1)),
+      http.get("/api/videos/p2", () => HttpResponse.json(P2)),
+      http.post("/api/videos/p1/restore", () => {
+        restored = true;
+        return HttpResponse.json({ restored: { id: "p1", name: "concept film" }, changed: true });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<VideosOverview />);
+    await screen.findByText("1 project");
+
+    await user.click(await screen.findByRole("button", { name: /Retired projects \(1\)/ }));
+    await user.click(screen.getByRole("button", { name: "Restore" }));
+
+    expect((await screen.findByRole("status")).textContent).toMatch(/back on the grid, whole/);
+    await waitFor(() => expect(screen.getByText("2 projects")).toBeInTheDocument());
+  });
+
+  it("carries a rename COLLISION verbatim and keeps the field open to edit", async () => {
+    server.use(
+      http.get("/api/videos", () => HttpResponse.json({ projects: SUMMARIES, retired: [] })),
+      http.get("/api/videos/p1", () => HttpResponse.json(P1)),
+      http.get("/api/videos/p2", () => HttpResponse.json(P2)),
+      http.patch("/api/videos/p1", () =>
+        HttpResponse.json(
+          {
+            error:
+              'another project is already called "ship-notes explainer" — names are unique, and renaming onto one would merge two projects into it',
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<VideosOverview />);
+    await screen.findByText("2 projects");
+
+    await user.click(screen.getAllByRole("button", { name: "Rename…" })[0]);
+    const field = await screen.findByLabelText("rename to");
+    await user.clear(field);
+    await user.type(field, "ship-notes explainer");
+    await user.click(screen.getByRole("button", { name: "Rename" }));
+
+    // The door's own sentence, not "that refused".
+    expect((await screen.findByRole("alert")).textContent).toMatch(/would merge two projects/);
+    // And the operator edits rather than retypes: the field is still open,
+    // still holding what they wrote.
+    expect(screen.getByLabelText("rename to")).toHaveValue("ship-notes explainer");
+  });
+});
