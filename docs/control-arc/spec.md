@@ -337,6 +337,23 @@ what the platform already tells us and what the publish path already sees.
 - [Deel · Slack integration](https://mobbin.com/screens/7b7a9f07-cad9-4c17-807a-d9e2df6f45ac) — a warning band on the integration itself naming a partial failure **with its count and a verb** ("Some of the Slack accounts couldn't be matched… [Match accounts]"). **TAKEN**: channel health surfaces as a band ON the card, carrying the number and the door — not a status colour.
 - [Cake Equity · messages](https://mobbin.com/screens/12174b3d-e825-4f83-8661-3c28ddcb0118) — the same facts at PER-MESSAGE altitude. **TAKEN**: health lives at two altitudes — the destination card (aggregate) and the published row (per item).
 
+### s102 — the Integrations surface's own research pass corroborates this
+The surface these land on had never had a research pass (its ledger row was
+`—` in every column); s102 ran it, and two results bear on part C:
+
+- **Deel re-surfaced independently**, top-ranked, from a query that named
+  neither it nor health — the "partial-degradation band ON the card, carrying
+  the count and the fix door" is now a twice-found result rather than a
+  once-liked screen.
+- **NEW, and it belongs to part C: the blast-radius disclosure.**
+  [Coda](https://mobbin.com/screens/8c9b4a22-2d88-4a27-b78c-51892a141f97)
+  lists, under a broken account, **the things that depend on it and what each
+  can no longer do**. A `needs_reauth` seat here is a dead end today — nothing
+  tells the operator that queued rows for that destination will fail. **After
+  part A the consumer knows exactly which ones**: they are its `holds`. So the
+  three parts join up on this card — A decides what may go, C says what is
+  landing, and the broken-credential state names what it is holding up.
+
 ### Done when
 A destination that has published states its last success and its last refusal
 verbatim; one that never has says so rather than reading clean; no rate renders
