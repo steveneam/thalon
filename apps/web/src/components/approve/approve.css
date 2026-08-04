@@ -176,3 +176,30 @@
 /* The Composer door rests UNARMED until the route exists (B-create.4) —
    visibly present, visibly not yet a door. */
 .approve-surface .door-unarmed { opacity: 0.55; cursor: not-allowed; }
+
+/*
+ * THE STALLED-CHAIN BAND (s100, the founder's own video run). A live
+ * one-prompt chain that blocked has stopped for good, and the surface used to
+ * say so in body-grey with no door beside it. It now names the stage, quotes
+ * the judge's failing claim and carries the re-judge door — so it needs the
+ * refusal channel to LOOK like one.
+ *
+ * Defined here, in the Approve scope, deliberately: `.notice-band` already
+ * exists in editor.css scoped to `.editor-surface`, so the markup alone
+ * rendered as plain text over here — the programme's own documented trap
+ * ("reusing the shared vocabulary means copying its CSS, not just its
+ * markup"). Same names, same channel, this surface's scope.
+ */
+.approve-surface .notice-band {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--n-400);
+  border-radius: var(--r-card);
+}
+.approve-surface .notice-band.refused { border-color: var(--err); background: var(--err-subtle); }
+.approve-surface .notice-band .t-label { color: var(--n-1000); }
+/* The judge's own words, quoted — monospace on the gate name only, so the
+   claim itself stays readable prose. */
+.approve-surface .notice-band .font-mono { font-family: var(--font-data); color: var(--err); }

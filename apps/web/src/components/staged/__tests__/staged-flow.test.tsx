@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { ApproveSurface } from "@/components/approve/approve-surface";
+import { StagedFlow } from "@/components/staged/staged-flow";
+import { server } from "@/lib/testing/server";
 import { FIXTURE_STORYBOARD_DRAFT_ID } from "@/lib/staged-flow/fixtures";
 
 /**
@@ -105,5 +108,162 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
     });
     await user.click(stagedRow);
     await screen.findByRole("region", { name: "Staged video flow" });
+  });
+});
+
+/**
+ * s100 — THE STALLED LIVE CHAIN. Found by the founder on his own video run:
+ * a one-prompt chain halted on a judge disagreement at stage 2 and the
+ * surface offered him nothing at all — no reason beyond three gate chips, and
+ * no door, because the pane deferred approve/reject/re-judge to "the draft
+ * panel's own doors" long after it had REPLACED that panel.
+ *
+ * The payload below is the real shape of that run (GET .../flow on the live
+ * projection), trimmed to what the surface reads.
+ */
+const LIVE_BLOCKED_DRAFT_ID = "6342b46d-fa4a-4688-941e-5916aaa18077";
+const LIVE_ANCHOR_DRAFT_ID = "2c271514-196e-48d1-af69-8dd3df5b97bb";
+
+function liveStalledFlow(blockedStatus: "blocked" | "queued" = "blocked") {
+  const stageDef = (key: string, title: string, produces: string) => ({
+    key,
+    title,
+    produces,
+    promptSlug: `${key}.v1`,
+  });
+  const draft = (id: string, status: string, format: string) => ({
+    id,
+    tenantId: "t1",
+    fanoutRunId: null,
+    sourceId: null,
+    platform: "video",
+    format,
+    body: "A 2.4 Trillion Parameter Week",
+    bodyHash: "hash-1",
+    meta: { title: "A 2.4 Trillion Parameter Week", scenes: [] },
+    status,
+    captureId: null,
+    generationKey: "g1",
+    createdAt: "2026-08-04T07:44:30.000Z",
+    updatedAt: "2026-08-04T07:44:30.000Z",
+  });
+  return {
+    source: "live",
+    family: "video",
+    plan: {
+      family: "video",
+      stages: [
+        stageDef("structure", "Structure", "storyboard"),
+        stageDef("scenes_effects", "Scenes & effects", "direction_doc"),
+        stageDef("polish", "Polish", "direction_doc"),
+      ],
+    },
+    stages: [
+      {
+        def: stageDef("structure", "Structure", "storyboard"),
+        status: "done",
+        draft: draft(LIVE_ANCHOR_DRAFT_ID, "queued", "storyboard"),
+        judgeResults: [],
+        candidates: null,
+      },
+      {
+        def: stageDef("scenes_effects", "Scenes & effects", "direction_doc"),
+        status: "current",
+        draft: draft(LIVE_BLOCKED_DRAFT_ID, blockedStatus, "direction_doc"),
+        judgeResults:
+          blockedStatus === "blocked"
+            ? [
+                {
+                  id: "j1",
+                  tenantId: "t1",
+                  draftId: LIVE_BLOCKED_DRAFT_ID,
+                  gate: "g3_screen",
+                  verdict: "fail",
+                  bodyHash: "hash-1",
+                  evidence: {
+                    claims: [
+                      { claim: "Swap the model underneath and the gates still hold.", verdict: "fail" },
+                    ],
+                  },
+                  model: null,
+                  promptVersion: null,
+                  latencyMs: null,
+                  createdAt: "2026-08-04T07:45:01.000Z",
+                },
+              ]
+            : [],
+        candidates: null,
+      },
+      {
+        def: stageDef("polish", "Polish", "direction_doc"),
+        status: "pending",
+        draft: null,
+        judgeResults: [],
+        candidates: null,
+      },
+    ],
+    currentIndex: 1,
+    presets: [],
+    captures: [],
+  };
+}
+
+describe("StagedFlow — a LIVE chain that STOPPED (s100, the founder's video run)", () => {
+  it("names the stage, quotes the judge's failing claim, and offers the one door that reaches a live draft", async () => {
+    server.use(
+      http.get(`/api/staged/${LIVE_ANCHOR_DRAFT_ID}/flow`, () =>
+        HttpResponse.json(liveStalledFlow()),
+      ),
+    );
+    render(<StagedFlow draftId={LIVE_ANCHOR_DRAFT_ID} />);
+    const band = await screen.findByRole("alert", { name: "This run stopped" });
+
+    // WHICH stage, and why nothing followed it.
+    expect(band.textContent).toMatch(/stopped at/);
+    expect(band.textContent).toMatch(/Scenes & effects/);
+    expect(band.textContent).toMatch(/nothing further was generated/);
+    // The judge's OWN words — not "a gate failed".
+    expect(band.textContent).toMatch(/Swap the model underneath and the gates still hold\./);
+    // And a door, which is the whole point: this used to be a dead end.
+    expect(within(band).getByRole("button", { name: "Re-judge this stage" })).toBeInTheDocument();
+  });
+
+  it("re-judges the BLOCKED stage's draft — not the anchor the operator happened to select", async () => {
+    let rejudged: string | null = null;
+    server.use(
+      http.get(`/api/staged/${LIVE_ANCHOR_DRAFT_ID}/flow`, () =>
+        HttpResponse.json(liveStalledFlow(rejudged ? "queued" : "blocked")),
+      ),
+      http.post("/api/drafts/:draftId/rejudge", ({ params }) => {
+        rejudged = params.draftId as string;
+        return HttpResponse.json({ ok: true });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<StagedFlow draftId={LIVE_ANCHOR_DRAFT_ID} />);
+    await user.click(await screen.findByRole("button", { name: "Re-judge this stage" }));
+
+    // The anchor is the STORYBOARD (stage 1, queued); the block is on stage 2.
+    // Re-judging what the operator clicked rather than what is blocked would
+    // look like it worked and change nothing.
+    await waitFor(() => expect(rejudged).toBe(LIVE_BLOCKED_DRAFT_ID));
+    // Once the block clears the band is gone — it describes a state, not a place.
+    await waitFor(() =>
+      expect(screen.queryByRole("alert", { name: "This run stopped" })).not.toBeInTheDocument(),
+    );
+  });
+
+  it("a live chain still mid-flight keeps its hands off — no band, no door", async () => {
+    server.use(
+      http.get(`/api/staged/${LIVE_ANCHOR_DRAFT_ID}/flow`, () =>
+        HttpResponse.json(liveStalledFlow("queued")),
+      ),
+    );
+    render(<StagedFlow draftId={LIVE_ANCHOR_DRAFT_ID} />);
+    await screen.findByRole("region", { name: "Staged video flow" });
+
+    expect(screen.queryByRole("button", { name: "Re-judge this stage" })).not.toBeInTheDocument();
+    // The honest refusal for the verbs that genuinely cannot reach a live draft.
+    expect(screen.getByText(/picking and tweaking aren’t wired for a live artifact/)).toBeInTheDocument();
   });
 });

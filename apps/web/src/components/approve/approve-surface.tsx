@@ -582,7 +582,11 @@ export function ApproveSurface() {
             style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}
           >
             {/* Keyed remount per anchor draft so the surface never shows a stale flow. */}
-            <StagedFlow key={selectedDraftId} draftId={selectedDraftId} />
+            <StagedFlow
+              key={selectedDraftId}
+              draftId={selectedDraftId}
+              onDraftChanged={() => void refreshAfterAction()}
+            />
           </section>
         ) : (
           // Keyed remount per draft, exactly as StagedFlow above it. The

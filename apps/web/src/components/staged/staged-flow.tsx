@@ -9,6 +9,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JudgeBadge } from "@/components/approve/judge-badge";
+import { reJudgeDraft } from "@/lib/approve-queue/client";
+import { judgeReasons } from "@/lib/approve-queue/judge-reasons";
 import { CandidatePicker } from "@/components/staged/candidate-picker";
 import { CaptureLog } from "@/components/staged/capture-log";
 import { DirectionEditor } from "@/components/staged/direction-editor";
@@ -22,6 +24,14 @@ import type { FlowStage, StagedEditKind, StagedFlowState, StoryboardContent } fr
 interface StagedFlowProps {
   /** Any stage draft of the chain (the grid's selected draft) — the flow anchors on it. */
   draftId: string;
+  /**
+   * Fired when this pane changes a DRAFT the parent queue also renders (the
+   * stalled re-judge). Without it the queue row keeps its old status chip
+   * while this pane shows the new one — two views of the same draft
+   * disagreeing on screen, which is the bug the s100 fix would otherwise have
+   * introduced while fixing another.
+   */
+  onDraftChanged?: () => void;
 }
 
 type FlowStatus = "loading" | "error" | "success";
@@ -37,7 +47,7 @@ const PREVIEW_FALLBACK_DURATION_MS = 4000;
  * Every interaction round-trips through the staged seam as a verbatim
  * RFC-6902 patch and lands in the capture log.
  */
-export function StagedFlow({ draftId }: StagedFlowProps) {
+export function StagedFlow({ draftId, onDraftChanged }: StagedFlowProps) {
   const [status, setStatus] = useState<FlowStatus>("loading");
   const [flow, setFlow] = useState<StagedFlowState | null>(null);
   const [viewIndex, setViewIndex] = useState(0);
@@ -102,12 +112,56 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
   const isCurrent = viewIndex === flow.currentIndex;
   const isFinal = viewIndex === flow.stages.length - 1;
   // A live flow is the s67 read-only projection of a REAL one-prompt chain —
-  // pick/edit/advance are demo-store endpoints, so their affordances hide;
-  // approve/reject/re-judge stay on the draft panel's own doors.
+  // pick/edit/advance are demo-store endpoints (they answer fixture ids only,
+  // so calling them on a live draft would 404), and their affordances stay
+  // hidden. That much is still right.
+  //
+  // What was NOT right: this deferred approve/reject/re-judge to "the draft
+  // panel's own doors" — a panel THIS COMPONENT replaced (s79 A2). The doors
+  // it pointed at stopped existing, and nobody re-pointed it, so a live chain
+  // that STOPPED had no door anywhere on the surface. Found by the founder
+  // (s100) on his own video run: it halted on a judge disagreement at stage 2
+  // and the surface offered him nothing at all.
   const readOnly = flow.source === "live";
   const stageDraft = stage.draft;
+  /**
+   * THE CHAIN HAS STOPPED AND THE RUNNER IS NOT COMING BACK. A blocked stage
+   * draft is terminal for an automated chain — the one-prompt runner advances
+   * only from a queued/approved stage — so the operator is the only thing that
+   * can move it, and they need the reason and a door. While a live chain is
+   * merely mid-flight this stays false and the surface keeps its hands off.
+   */
+  const stalledDraft =
+    readOnly && flow.stages[flow.currentIndex]?.draft?.status === "blocked"
+      ? flow.stages[flow.currentIndex].draft
+      : null;
+  const stalledStageTitle = flow.stages[flow.currentIndex]?.def.title ?? "this stage";
+  const stalledReasons = stalledDraft
+    ? judgeReasons(flow.stages[flow.currentIndex].judgeResults, stalledDraft.bodyHash)
+    : [];
   const acceptedKey = stageDraft ? `${stageDraft.id}:${stageDraft.bodyHash}` : "";
   const accepted: ReadonlySet<number> = new Set(acceptedByArtifact[acceptedKey] ?? []);
+
+  /**
+   * The stalled chain's one door. Re-judge goes through the DRAFT's own
+   * route (real repos, format-agnostic) rather than the staged demo store,
+   * which is exactly why it works here where pick/edit/advance cannot. The
+   * flow is re-fetched afterwards rather than patched: the re-judge may have
+   * moved the stage's status, and the projection is the thing that knows.
+   */
+  const onReJudgeStalled = async (blockedDraftId: string) => {
+    setBusy(true);
+    setActionError(null);
+    try {
+      await reJudgeDraft(blockedDraftId);
+      setFlow(await fetchStagedFlow(draftId));
+      onDraftChanged?.();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Re-judge failed");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const onEdit = (kind: StagedEditKind, patch: Rfc6902Op[], note?: string) => {
     if (!stageDraft) return;
@@ -150,6 +204,52 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
           {actionError}
         </p>
       )}
+      {/*
+        THE STALLED BAND (s100, the founder's own video run). A live chain that
+        blocked has stopped for good — the runner advances only from a
+        queued/approved stage — so this says which stage, WHY in the judge's
+        own words, and offers the one door that genuinely reaches a live draft:
+        re-judge, which re-runs the gates on the current body. Two gates
+        disagreeing is precisely the case a second reading can settle.
+      */}
+      {stalledDraft && (
+        <div className="notice-band refused" role="alert" aria-label="This run stopped">
+          <div className="flex flex-col gap-1.5">
+            <span className="t-label">
+              This run stopped at <b>{stalledStageTitle}</b> — the chain advances only from a stage
+              that passed, so nothing further was generated.
+            </span>
+            {stalledReasons.length > 0 ? (
+              <ul className="flex flex-col gap-1">
+                {stalledReasons.map((reason, i) => (
+                  <li key={`${reason.gate}-${i}`} className="t-label">
+                    <span className="font-mono">{reason.gateLabel}</span> — {reason.line}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className="t-label">
+                No claim-level detail was recorded for this block — a re-judge will produce a fresh
+                verdict.
+              </span>
+            )}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={busy}
+              onClick={() => void onReJudgeStalled(stalledDraft.id)}
+            >
+              {busy ? "Re-judging…" : "Re-judge this stage"}
+            </button>
+            <span className="t-label">
+              Editing the artifact itself isn’t wired for a live chain yet — a re-judge is the one
+              door that reaches it.
+            </span>
+          </div>
+        </div>
+      )}
       <StageContent
         stage={stage}
         presets={flow.presets}
@@ -165,16 +265,15 @@ export function StagedFlow({ draftId }: StagedFlowProps) {
         onAccept={onAccept}
       />
       <div className="mt-auto flex flex-wrap items-center gap-2">
-        {readOnly && (
+        {readOnly && stalledDraft === null && (
           <span className="text-xs text-muted-foreground">
-            {/* Both branches used to send the operator to a "draft panel" that
-                this pane replaces, and the blocked one sent them to Approve —
-                the surface they are already on. Neither door exists: a stage
-                artifact has no approve/reject/re-judge control anywhere today.
-                Stated as the refusal it is, rather than as a route (s79 A2). */}
-            {stageDraft?.status === "blocked"
-              ? "This stage is blocked — its verdicts are on the stage above, and re-judging a stage artifact isn’t wired yet."
-              : "Live one-prompt chain — read-only here: stage editing, approve and reject aren’t wired for a stage artifact yet."}
+            {/* Still the honest refusal for a chain that is merely mid-flight:
+                the stage-editing verbs are demo-store endpoints and genuinely
+                do not reach a live draft. What used to ALSO sit here — the
+                blocked branch, telling the operator re-judging "isn't wired
+                yet" — is now the stalled band below, which wires it. */}
+            Live one-prompt chain — read-only here: stage editing runs on the demo drivers, so
+            picking and tweaking aren’t wired for a live artifact yet.
           </span>
         )}
         {!readOnly && isCurrent && !isFinal && (
