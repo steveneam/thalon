@@ -1,5 +1,6 @@
 import {
   platformCapability,
+  readDraftMediaRefs,
   socialPlatformSchema,
   type PlatformCapability,
   type SocialPlatform,
@@ -385,16 +386,11 @@ export function platformFitLabel(platform: SocialPlatform): string {
  * authority on what actually travels.
  */
 export function readDraftFitMedia(meta: unknown): PlatformFitMedia[] {
-  const raw = (meta as { mediaRefs?: unknown } | null | undefined)?.mediaRefs;
-  if (!Array.isArray(raw)) return [];
-  const media: PlatformFitMedia[] = [];
-  for (const entry of raw) {
-    if (entry === null || typeof entry !== "object") continue;
-    const contentType = (entry as { contentType?: unknown }).contentType;
-    if (typeof contentType !== "string" || contentType.trim() === "") continue;
-    media.push({ contentType });
-  }
-  return media;
+  // s100: the shape and the tolerant read are the CONTRACTS' — this used to
+  // hand-roll them, and the Composer hand-rolled a different version reading a
+  // different field name (`mime`). One reader now, so a fit report and a media
+  // band cannot disagree about whether a draft carries anything.
+  return readDraftMediaRefs(meta).map(({ contentType }) => ({ contentType }));
 }
 
 /**

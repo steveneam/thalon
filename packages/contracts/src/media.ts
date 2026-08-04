@@ -303,3 +303,63 @@ export function isImageExt(ext: MediaExt): ext is MediaImageExt {
 export function isAudioExt(ext: MediaExt): ext is MediaAudioExt {
   return (MEDIA_AUDIO_EXTS as readonly string[]).includes(ext);
 }
+
+/* ------------------------------------------------------------------ */
+/* A draft's attached media — `meta.mediaRefs`, ONE reader (s100).     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * What a draft's `meta.mediaRefs` entry IS. Small, and deliberately so — the
+ * field is written by the drafting path and read by three very different
+ * consumers, and each of them had been reaching into the raw jsonb on its own.
+ *
+ * They did not agree. The Composer's media band read `mime`; the platform-fit
+ * reader and the publish door's own schema read `contentType`. Nothing writes
+ * mediaRefs yet, so the disagreement was unexercised — but it was a blind
+ * reader waiting for the first producer to land, and whichever name that
+ * producer chose, one consumer would have gone quiet in a way no test would
+ * catch: either the Composer showing no media on a draft that publishes an
+ * attachment, or the fit band reporting "carries no media at all" underneath a
+ * band saying "video". `contentType` wins because it is what the publish
+ * door's zod schema — the only one of the three that REFUSES — already
+ * enforced.
+ *
+ * The door keeps its own stricter policy on top (image/* only, at most one);
+ * that is the door's call about what it can send, not the shape of the fact.
+ */
+export const draftMediaRefSchema = z.object({
+  /** Content-addressed ref into our own store (`social-media/<sha256>.<ext>`). */
+  ref: z.string().min(1),
+  contentType: z.string().min(1),
+  altText: z.string().optional(),
+});
+export type DraftMediaRef = z.infer<typeof draftMediaRefSchema>;
+
+/**
+ * Read a draft's attached media out of its `meta`, tolerantly: this is stored
+ * jsonb from an earlier version of ourselves, so a malformed entry is SKIPPED
+ * rather than thrown over. Callers that must refuse bad data (the publish
+ * door) parse with their own schema instead — a reader used to decide what to
+ * DRAW must not be able to blank a surface by throwing.
+ */
+export function readDraftMediaRefs(meta: unknown): DraftMediaRef[] {
+  const raw = (meta as { mediaRefs?: unknown } | null | undefined)?.mediaRefs;
+  if (!Array.isArray(raw)) return [];
+  const refs: DraftMediaRef[] = [];
+  for (const entry of raw) {
+    const parsed = draftMediaRefSchema.safeParse(entry);
+    if (parsed.success) refs.push(parsed.data);
+  }
+  return refs;
+}
+
+/**
+ * The media FAMILY of a content type — the word a surface shows ("video",
+ * "image") or `null` for a content type in neither family. One derivation, so
+ * a band and a fit report can never disagree about what an attachment is.
+ */
+export function mediaKindOf(contentType: string): "image" | "video" | null {
+  if (contentType.startsWith("video/")) return "video";
+  if (contentType.startsWith("image/")) return "image";
+  return null;
+}

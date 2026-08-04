@@ -117,7 +117,15 @@ export function mintModels(takes: TakeView[]): string[] {
  * arrive by today, so "imported" is a fact, not a fallback guess.
  */
 export function projectKind(detail: ProjectDetail): "one-prompt" | "image" | "imported" {
-  if (detail.description?.startsWith("One-prompt")) return "one-prompt";
+  // s100: this used to sniff `description.startsWith("One-prompt")` — reading
+  // a PROSE SENTENCE to recover a fact the runner already records. The
+  // one-prompt path stamps `meta.onePrompt` on the project row at creation
+  // (direction draft, prompt source, aspect, fps) and even reads it back to
+  // detect a same-name-different-origin collision, so the origin was never in
+  // doubt; only this layer was guessing at it. Edit the description — or
+  // translate it, or start an imported project's blurb with those words — and
+  // the sniff was wrong in both directions.
+  if (detail.onePrompt) return "one-prompt";
   const visual = detail.takes.filter((t) => t.kind !== "audio");
   if (visual.length > 0 && visual.every((t) => t.kind === "still")) return "image";
   return "imported";

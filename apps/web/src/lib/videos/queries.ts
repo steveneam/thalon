@@ -227,6 +227,7 @@ export async function getProjectDetail(
     description: project.description,
     createdAt: project.createdAt.toISOString(),
     playable: mediaRootOf(project.meta) !== null,
+    onePrompt: hasOnePromptStamp(project.meta),
     retired: withRetired
       .filter((c) => c.retiredAt !== null)
       .map(

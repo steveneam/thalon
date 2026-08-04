@@ -172,6 +172,14 @@ export interface ProjectDetail {
   createdAt: string;
   /** meta.mediaRoot configured on this box → the media route will serve refs. */
   playable: boolean;
+  /**
+   * s100: THE PROJECT'S RECORDED ORIGIN — `meta.onePrompt` is present, i.e.
+   * the one-prompt runner made this project and stamped its direction draft,
+   * prompt source, aspect and fps on the row. A boolean rather than the meta
+   * itself, deliberately: project meta also holds `mediaRoot`, an ABSOLUTE
+   * path on the operator's box, which has no business crossing to a browser.
+   */
+  onePrompt: boolean;
   takes: TakeView[];
   cuts: CutView[];
   /** Window 0026: what "Cut history" holds — retired versions, restorable exactly. */

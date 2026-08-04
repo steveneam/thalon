@@ -92,6 +92,7 @@ const DETAIL: ProjectDetail = {
   description: null,
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: false,
+  onePrompt: false,
   retired: [],
   takes: [
     // beat-01's keeper carries a derived poster; beat-02's does not — the

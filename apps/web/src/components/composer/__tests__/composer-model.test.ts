@@ -258,12 +258,34 @@ describe("preview honesty", () => {
 
   it("media kind reads the draft's own refs, never invents one", () => {
     expect(firstMediaKind(draft({}))).toBeNull();
+    expect(
+      firstMediaKind(draft({ meta: { mediaRefs: [{ ref: "m1", contentType: "video/mp4" }] } })),
+    ).toBe("video");
+    expect(
+      firstMediaKind(draft({ meta: { mediaRefs: [{ ref: "m1", contentType: "image/png" }] } })),
+    ).toBe("image");
+    // A content type in neither family is still MEDIA — the band says the
+    // draft carries something rather than silently claiming it carries nothing.
+    expect(
+      firstMediaKind(draft({ meta: { mediaRefs: [{ ref: "m1", contentType: "application/pdf" }] } })),
+    ).toBe("media");
+  });
+
+  /**
+   * s100 — THE FIELD-NAME SPLIT, pinned so it cannot come back. This reader
+   * used `mime`; the engine's platform-fit reader and the publish door's
+   * schema both used `contentType`. Nothing writes mediaRefs yet, so nothing
+   * failed — the first producer to land would have silently blinded one side.
+   */
+  it("reads contentType — the name the publish door enforces — and ignores a stray `mime`", () => {
     expect(firstMediaKind(draft({ meta: { mediaRefs: [{ ref: "m1", mime: "video/mp4" }] } }))).toBe(
-      "video",
+      null,
     );
-    expect(firstMediaKind(draft({ meta: { mediaRefs: [{ ref: "m1", mime: "image/png" }] } }))).toBe(
-      "image",
-    );
+    expect(
+      firstMediaKind(
+        draft({ meta: { mediaRefs: [{ ref: "m1", contentType: "video/mp4", mime: "image/png" }] } }),
+      ),
+    ).toBe("video");
   });
 });
 

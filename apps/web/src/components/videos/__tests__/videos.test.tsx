@@ -57,6 +57,7 @@ const P1: ProjectDetail = {
   description: "the reference project",
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: true,
+  onePrompt: false,
   retired: [],
   takes: [
     {
@@ -100,6 +101,7 @@ const P2: ProjectDetail = {
   description: null,
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: false,
+  onePrompt: false,
   retired: [],
   takes: [],
   cuts: [],

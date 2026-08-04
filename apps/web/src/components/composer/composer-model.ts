@@ -3,6 +3,8 @@ import {
   facebookPostSettingsSchema,
   instagramPostSettingsSchema,
   linkedinPostSettingsSchema,
+  mediaKindOf,
+  readDraftMediaRefs,
   redditPostSettingsSchema,
   tiktokPostSettingsSchema,
   xPostSettingsSchema,
@@ -353,13 +355,13 @@ export function moreSettingsFields(platform: string): string[] {
 
 /** First media ref on the draft's meta, when generation attached one. */
 export function firstMediaKind(draft: GridDraft): string | null {
-  const meta = draft.meta && typeof draft.meta === "object" ? (draft.meta as Record<string, unknown>) : null;
-  const refs = meta?.mediaRefs;
-  if (!Array.isArray(refs) || refs.length === 0) return null;
-  const first = refs[0] as Record<string, unknown> | string;
-  if (typeof first === "string") return "media";
-  const mime = typeof first?.mime === "string" ? first.mime : null;
-  if (mime?.startsWith("video/")) return "video";
-  if (mime?.startsWith("image/")) return "image";
-  return "media";
+  // s100: this read `first.mime`, a field NOTHING writes — while the engine's
+  // fit reader and the publish door's schema both read `contentType`. Nothing
+  // produces mediaRefs yet, so the disagreement was unexercised; the moment a
+  // producer landed, this band would have shown nothing on a draft that
+  // publishes an attachment. One shared reader now (`@thalon/contracts`), and
+  // the family word comes from the same derivation the fit report uses.
+  const refs = readDraftMediaRefs(draft.meta);
+  if (refs.length === 0) return null;
+  return mediaKindOf(refs[0].contentType) ?? "media";
 }

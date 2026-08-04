@@ -1,4 +1,5 @@
 import {
+  draftMediaRefSchema,
   resolveDraftFormatSpec,
   socialPlatformSchema,
   socialPublishConfigSchema,
@@ -347,10 +348,11 @@ function utcDayStart(now: Date): Date {
  */
 const mediaRefsSchema = z
   .array(
-    z.object({
-      ref: z.string().min(1),
+    // s100: the SHAPE is the contracts' one definition (`draftMediaRefSchema`);
+    // what this door adds is its own policy — image/* only, at most one — which
+    // is a statement about what it can send, not about what a mediaRef is.
+    draftMediaRefSchema.extend({
       contentType: z.string().regex(/^image\//, "mediaRefs carry image/* content types only"),
-      altText: z.string().optional(),
     }),
   )
   .max(1);

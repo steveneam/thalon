@@ -339,8 +339,30 @@ describe("readDraftFitMedia — tolerant where the publish door is strict", () =
 
   it("skips entries it cannot read rather than crashing on them", () => {
     expect(
-      readDraftFitMedia({ mediaRefs: [null, 3, { ref: "a" }, { contentType: "" }, { contentType: "image/png" }] }),
+      readDraftFitMedia({
+        mediaRefs: [
+          null,
+          3,
+          { ref: "a" },
+          { contentType: "" },
+          { ref: "b", contentType: "image/png" },
+        ],
+      }),
     ).toEqual([{ contentType: "image/png" }]);
+  });
+
+  /**
+   * s100 TIGHTENED, deliberately: the shape is now the contracts' one
+   * definition (`draftMediaRefSchema`) shared with the Composer and the
+   * publish door, and it requires `ref`. A contentType with no ref used to
+   * count toward the ceiling here — but it names no bytes, so nothing could
+   * ever send it, and counting it could only produce a "too many images"
+   * refusal for media that does not exist. It is still refused, one door
+   * later: the publish door parses mediaRefs with its own stricter schema,
+   * which has always required `ref`.
+   */
+  it("does not count a contentType with no ref — a fit report describes what could actually be sent", () => {
+    expect(readDraftFitMedia({ mediaRefs: [{ contentType: "image/png" }] })).toEqual([]);
   });
 });
 

@@ -83,6 +83,7 @@ const DETAIL: ProjectDetail = {
   description: "a 40s film",
   createdAt: "2026-07-16T00:00:00.000Z",
   playable: true,
+  onePrompt: false,
   retired: [],
   takes: [
     take({ id: "t1", ref: "motion/keepers/beat-01.mp4", poster: POSTER }),

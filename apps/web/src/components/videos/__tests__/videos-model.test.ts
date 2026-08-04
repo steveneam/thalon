@@ -62,6 +62,7 @@ function project(cuts: CutView[], takes: TakeView[] = []): ProjectDetail {
     description: null,
     createdAt: "2026-07-16T00:00:00.000Z",
     playable: true,
+    onePrompt: false,
     retired: [],
     takes,
     cuts,
@@ -252,15 +253,25 @@ describe("provenance — visible, never guessed (AMENDED s95: the kind token lea
   // AMENDED s99: an engine-made project with all-empty manifests says the
   // unknown out loud — never a cut identity standing in the authorship slot.
   it("says 'model unrecorded' for a one-prompt project with no recorded mint", () => {
-    const oneprompt = { ...project([cut()], [take()]), description: "One-prompt auto-run — x" };
+    const oneprompt = { ...project([cut()], [take()]), onePrompt: true };
     expect(provenance(oneprompt)).toBe("model unrecorded");
     expect(provenance({ ...oneprompt, cuts: [] })).toBe("model unrecorded");
   });
 
-  it("classifies the project KIND from the doors this engine actually has", () => {
-    expect(projectKind({ ...project([]), description: "One-prompt auto-run — x" })).toBe(
-      "one-prompt",
-    );
+  it("classifies the project KIND from the RECORDED origin, never from prose", () => {
+    // s100: the kind comes off `meta.onePrompt` — the stamp the one-prompt
+    // runner writes on the project row — surfaced as `detail.onePrompt`.
+    expect(projectKind({ ...project([]), onePrompt: true })).toBe("one-prompt");
+    // The old sniff read `description.startsWith("One-prompt")`, so BOTH of
+    // these were wrong: a one-prompt project whose description the operator
+    // edited read as imported, and an imported project whose blurb happened to
+    // open with those words read as one-prompt. The stamp answers both.
+    expect(
+      projectKind({ ...project([], [take()]), description: "One-prompt auto-run — x" }),
+    ).toBe("imported");
+    expect(
+      projectKind({ ...project([]), onePrompt: true, description: "renamed by hand" }),
+    ).toBe("one-prompt");
     expect(projectKind(project([], [take({ kind: "still" })]))).toBe("image");
     // Stills + a music candidate is still an image project — audio is not visual.
     expect(
