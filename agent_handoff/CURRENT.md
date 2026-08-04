@@ -106,21 +106,40 @@ at 11:00 — **it failed every afternoon and healed itself every morning.**
 rebuilt to a sheet. Nothing is mid-flight. **The full ordered plan is
 COORDINATION §s102**; the short form:
 
-**PHASE 1 — correctness, no verdict needed.** The Intel bug carried since s100:
-**capture ids are in-process**, so an Intel exit silently vanishes or resolves
-to the **WRONG capture** after a restart. A wrong-target promote beats a dead
-door for severity. Do it first.
+**THE ARC IS VERDICTED** — his answer, verbatim: ***"A first, config, yes to
+the deps."*** `docs/control-arc/spec.md` has no open calls left. Note that
+*"A first"* orders the ARC; it does not put a feature ahead of a correctness
+bug, so Intel still leads.
 
-**PHASE 2 — the saved-views contract window: a PROVEN live bug.** Grounding the
-new spec found it (`docs/control-arc/spec.md` GT-2): `SAVED_VIEW_SURFACES` is
-still `["leads", "calendar"]`, but `schedule-surface.tsx` has asked for
-`"schedule"` since the s86 rename — every read/write 400s and **both call sites
-swallow it by design**, so Schedule's density/scope preference has never once
-persisted. Widen the list, migrate the CHECK, retire `"calendar"`, prove
-persistence across a restart. Justified on the bug alone; that it also lays the
-arc's only migration is a dividend, not the reason.
+**PHASE 1 — correctness.** The Intel bug carried since s100: **capture ids are
+in-process**, so an Intel exit silently vanishes or resolves to the **WRONG
+capture** after a restart. A wrong-target promote beats a dead door for
+severity. Do it first.
 
-**PHASE 3 — the Intel debt, gate-ordered.** Cheap first: the `--jobs intel`
+**PHASE 2 — control-arc part A, the session's main build. NO MIGRATION.**
+Grounding after his verdict made "config" cheaper than the spec assumed:
+`brand_profiles.social` already holds per-platform publishing config whose
+absent-platform state already means *"the refusal ladder's unarmed rung"*, so
+arm state is one field on `socialCadenceSchema` defaulting to `off`. Full
+wiring in spec §Part A. **Three traps it records, all from the repo's own
+history:** (1) the same config gap has shipped **THREE times** — a block added
+to the contract and dropped by the repo on create, unreadable for any real
+tenant; run `packages/db/src/__tests__/brand-profile-config-blocks.test.ts`;
+(2) never `z.record()` over an enum key — zod 4 makes it exhaustive; (3) do not
+overload `maxPostsPerDay: 0` — "paused" is a cadence answer, "armed" is an
+authorization answer. **The env var and the per-destination state are AND, not
+OR** (stricter than the spec's first draft, and reversible in one line).
+**Its surface half wants phase 5's Integrations pass first.**
+
+**PHASE 3 — the saved-views contract window: a PROVEN live bug.** Grounding the
+spec found it (GT-2): `SAVED_VIEW_SURFACES` is still `["leads", "calendar"]`,
+but `schedule-surface.tsx` has asked for `"schedule"` since the s86 rename —
+every read/write 400s and **both call sites swallow it by design**, so
+Schedule's density/scope preference has never once persisted. Widen the list,
+migrate the CHECK, retire `"calendar"`. Justified on the bug alone; that it
+also lays part B's only migration is a dividend, not the reason.
+
+**PHASE 4 — the Intel debt, gate-ordered.** Cheap first: the `--jobs intel`
 HARNESS selector (`scripts/surface-jobs.mjs` matches /angle/i against
 textContent — fix the selector, not the product). Then the s100 list: no
 `.btn:disabled` dress · `busy` doesn't name its running action and add-area/
@@ -132,20 +151,26 @@ accessible name · the 1.3s band pop shifts tabs 91px · no keyword path · the
 keyboard grammar is invisible. **STRUCK from this list: "no filter/sort/find
 over 58 cards"** — that is control-arc part B, solved once for every surface.
 
-**PHASE 4 — the last definition-of-done debt.** Integrations · Leads ·
-Profiles · Source Media are the only `—` rows left. **Integrations first** —
-control-arc parts A and C both land there, so the arc needs that pass anyway.
+**PHASE 5 — the last definition-of-done debt.** Integrations · Leads ·
+Profiles · Source Media are the only `—` rows left. **Integrations first, and
+consider pulling it ahead of phase 2's surface half** — part A's control cannot
+honestly be drawn onto a surface that has not had its research pass.
 
-**WAITING ON HIM, batched, blocking NOTHING above:** the three control-arc
-calls (**O-1** arm state as tenant config vs a `tenant_credentials` column ·
-**O-2** two new MIT deps · **O-3** order) plus the three s101 staged design
-calls. Both items are on NEEDS-STEVEN; *"A first, config, yes to the deps"*
-answers the arc completely. **Do not draw part B's sheet before O-2 lands** —
-a sheet for an unapproved feature is waste, and DOCTRINE 0 puts the sheet
-before the build, not before the decision.
+**DELIBERATELY NOT IN s102: parts B and C.** B is approved and its deps are
+approved, but *"A first"* is an order, and B owes a DRAWN SHEET before any
+build (DOCTRINE 0; the s101 staged rebuild is the precedent). Drawing that
+sheet is the natural s103 opener, its Mobbin sweep already banked. A half-built
+A beside a half-built B is worse than either finished.
 
-▎ ▸ **Founder calls made THIS session:** none new — s100's "doors now, rebuild
-next session" was executed as given.
+**WAITING ON HIM — now just ONE item, and it blocks nothing:** the three s101
+staged design calls (live-chain editing · the dropped "low-res stub" title ·
+one-scene-open-at-a-time). The control-arc calls are CLOSED and archived.
+
+▎ ▸ **Founder calls made THIS session:** ***"A first, config, yes to the
+deps"*** — the whole control arc verdicted in one line (order A→B→C · arm state
+as tenant config · both MIT deps approved). Archived on the closed board with
+its reasoning intact. s100's "doors now, rebuild next session" was also
+executed as given.
 ▎ ▸ **The lesson worth keeping:** the defect was invisible to every automated
 check because `xl:` is *valid CSS that reads as responsive design*. It only
 became a fact when the container was MEASURED. Two of the three s100 defects
@@ -193,7 +218,7 @@ s102 boots on "gogogo" alone (this file + COORDINATION §s101 carry the state).
    verify` before any new work.
 
 CLAUDE.md → this file → COORDINATION.md (**§s102 = the plan; §s101 = what
-shipped**) → `docs/control-arc/spec.md` (DRAFT, his verdict pending) →
+shipped**) → `docs/control-arc/spec.md` (**VERDICTED — no open calls**) →
 `docs/research/ux-refinement-program.md` (**Intel's row carries the full debt
 list; Staged is row 22**) → `docs/research/klaviyo-teardown-s101.md` →
 `docs/research/mock-sheets/README.md` → agent_handoff/NEEDS-STEVEN.md →

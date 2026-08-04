@@ -1,8 +1,10 @@
 # The control arc — spec
 
-**Status: DRAFT, awaiting the founder's verdict.** Nothing here is built.
-Authored s101 (2026-08-04) on his directive: *"incorporate all the good
-features, write a plan and spec and wiring for it."*
+**Status: VERDICTED s101 (2026-08-04) — his answer, verbatim: *"A first,
+config, yes to the deps."*** All three open calls are closed (see §Open calls).
+Nothing here is built yet; **part A is the approved next build.**
+Authored s101 on his directive: *"incorporate all the good features, write a
+plan and spec and wiring for it."*
 
 **Research inputs this spec answers to:**
 `docs/research/klaviyo-teardown-s101.md` (the feature findings),
@@ -111,9 +113,31 @@ armState(destination) -> "live" | "review" | "off"
 - **Contract (new)**: `armStateSchema` (new) + `ARM_STATES` (new) in
   `packages/contracts/src/publish-queue.ts` — beside the queue vocabulary it
   gates, not in a new file.
-- **Storage**: per-destination arm state is tenant CONFIG, not a new table.
-  It rides the existing tenant profile config surface; **no migration.**
-  *(Open call O-1 below: config vs a column on `tenant_credentials`.)*
+- **Storage — O-1 ANSWERED "config", and grounding found the exact home, with
+  no migration at all.** `brand_profiles.social` already exists
+  (`packages/db/src/schema/tenancy.ts`) holding `socialPublishConfigSchema`
+  from `packages/contracts/src/social.ts` — *"per-platform social publishing
+  config; null = the publish door is disarmed for this tenant"*, with **an
+  absent platform already meaning "the refusal ladder's unarmed rung."** Arm
+  state is one new field on `socialCadenceSchema`, defaulting to `off`. The
+  semantics we want are already this block's semantics.
+  **THREE TRAPS, all recorded in the repo, all of which would bite here:**
+  1. **The same gap has shipped THREE times** (`outreach` s54, `social`, and
+     `platformRouting` s87): a config block added to the contract and *not*
+     carried by the repo on create, so it is accepted at the write door and
+     silently dropped and no real tenant can ever read it back. The ratchet
+     that now catches a fourth is
+     `packages/db/src/__tests__/brand-profile-config-blocks.test.ts` —
+     **run it, and extend it if the new field is not covered by block-level
+     round-tripping.**
+  2. **zod 4: never `z.record()` over an enum key** — it is EXHAUSTIVE and
+     would demand every platform be configured at once.
+     `socialPublishConfigSchema` dodges this with explicit optional fields per
+     platform; follow that, do not "tidy" it into a record.
+  3. `maxPostsPerDay: 0` already means *"configured but paused"*. **Arm state
+     is NOT that** — paused is a cadence answer ("no more today"), armed is an
+     authorization answer ("may this destination publish at all"). Keep them
+     separate; do not overload the zero.
 - **Engine**: `packages/engine/src/social/queue-consumer.ts` — `armed?: boolean`
   becomes `armed?: (destination: string) => ArmState`, defaulting every
   destination to `off`. **The disarmed-by-default doctrine is unchanged and
@@ -121,9 +145,17 @@ armState(destination) -> "live" | "review" | "off"
   not a configuration detail") governs, and a resolver that throws or returns
   nothing means `off`.
 - **Route**: `apps/web/src/app/api/social/queue/tick/route.ts` resolves the
-  per-destination state instead of reading one env var. `SOCIAL_QUEUE_ARMED=true`
-  keeps working as "every connected destination is `live`" so the current live
-  grant does not change meaning mid-flight.
+  per-destination state *in addition to* the env var. **REFINED s101 after
+  grounding, and it is stricter than this spec's first draft:** the two are
+  **AND**, not OR — `SOCIAL_QUEUE_ARMED` stays the master switch (its
+  ships-disarmed doctrine untouched) and the per-destination state SELECTS
+  which destinations a master-armed tick may touch. A master-armed tick with
+  no per-destination config therefore touches **nothing**. The first draft
+  said the env var alone would mean "every connected destination is live", for
+  back-compat; grounding showed there is no live grant to preserve — the key
+  rests EMPTY between runs by his own standing note, and the two live posts
+  were each armed deliberately. So the back-compat concern was imaginary and
+  the strict reading costs nothing. **Reversible in one line if he disagrees.**
 - **Surface**: the arm state renders on each channel card in
   `apps/web/src/components/settings/integrations.tsx`, in the
   `CREDENTIAL_CARD_STATES` register from `packages/contracts/src/integrations.ts`.
@@ -277,14 +309,16 @@ in `packages/engine/src/fanout/fanout.ts` and the fan-out profiles under
   the Board s91 and the s101 staged pass: that grammar promises editable
   wiring, and our loop is linear with one human gate.
 
-## Open calls for the founder
+## Open calls — ALL CLOSED s101
 
-- **O-1 (part A):** per-destination arm state as tenant profile config (no
-  migration) or as a column on `tenant_credentials` (a contract window, but the
-  state then lives beside the credential it governs). **Lead's recommendation:
-  config first** — it is reversible and needs no window.
-- **O-2 (part B):** two new MIT dependencies. A dep add is a stop-and-report by
-  standing rule, so this is his call, not a lane's.
-- **O-3 (order):** the arc is written A → B → C. A is smallest and improves
-  safety; B is largest and closes a recorded debt. **Lead's recommendation: A
-  first**, then the Mobbin sweep that unblocks B.
+His answer, verbatim: ***"A first, config, yes to the deps."***
+
+- **O-1 — CONFIG.** Per-destination arm state is tenant config. Grounding then
+  found it needs **no migration at all**: `brand_profiles.social` already holds
+  per-platform publishing config whose absent-platform state already means
+  "unarmed". See part A's Storage block, including the three recorded traps.
+- **O-2 — YES.** `@react-querybuilder/core` + `@react-querybuilder/drizzle`
+  (both MIT) are approved. The dep add lands with part B, not before.
+- **O-3 — A FIRST.** Build order is A → B → C. Note this orders the ARC; the
+  Intel capture-id correctness bug is not part of the arc and still precedes
+  all of it (COORDINATION §s102 phase 1).

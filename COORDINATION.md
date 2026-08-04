@@ -212,15 +212,21 @@ the same session.** Wrap verify: exit 0, **3338 passed / 9 skipped**.
 | **V9 · Composer** — the gate, round 2 (`<this wrap>`) | **The re-run gate came back `matches_sheet: false`** (58 agents, 41 confirmed) and its four HIGHs were real: (1) **every door on the surface rendered GREY** — a blanket `.composer-surface a { color: inherit }` landed after the shell's `.screen a { color: var(--act) }` at equal specificity and won for every anchor, including the three doors round 1 had just added; scoped to the simulated post only, and **measured live: all four doors now compute to exactly `--act`** · (2) the ⓘ tooltips were native `title=` attributes where the sheet draws a designed popover — the sheet's `.tip` block is ported, both tips are real elements, keyboard-reachable, `nativeTitles: 0` · (3) the fit band stretched a single destination across 1,174px, stranding the count 1,038px from the platform it measures — **exactly the founder's own one-destination dogfood shape** — now capped at the sheet's tile width (band 1174→236px, gap 1038→97px) · (4) a platform REFUSING the post wore an amber dot while the band below painted it red; a refusal is now err, and an over-length post (which still ships, cut) stays warn — my own test caught that ordering. Verified by live probe + screenshot, both themes. |
 | Ops notes, stated | Credits ran out mid-Composer-gate on Fable 5; the session continued on Opus 5 and the gate was resumed from its own run id (the completed walkthrough replayed from cache). No credits spent on any vendor mint; no live posts; the post door stayed armed but unused. Two of my own new tests failed first and were right to: they caught that `adoptableRender` only adopts RUNNING jobs, and that ⌘Z inside a text field is deliberately left to the browser. |
 
-## Sprint 9 / s102 — **PLANNED** (written at the s101 close on his directive: *"plan out what tasks to carry out next session while still maintaining and working on the other tasks"*)
+## Sprint 9 / s102 — **PLANNED, and the arc is VERDICTED** (his answer at the s101 close, verbatim: *"A first, config, yes to the deps"*)
 
-**Spec of record for the new work: `docs/control-arc/spec.md`** (DRAFT, awaiting
-his verdict) + its rule-10 memo `docs/research/prior-art-saved-segments-s101.md`.
+**Spec of record: `docs/control-arc/spec.md` — VERDICTED, no open calls left.**
+Rule-10 memo: `docs/research/prior-art-saved-segments-s101.md`.
 
-**The ordering principle: correctness before capability, and nothing that needs
-his word blocks anything that doesn't.** Three of the arc's decisions are his
-(dep add, arming mechanism, order) — they are batched on NEEDS-STEVEN as ONE
-text-sized question. Everything below runs without them.
+**The ordering principle: correctness before capability.** His *"A first"*
+orders the ARC (A → B → C); it does not put a feature ahead of a correctness
+bug, so the Intel capture-id defect still leads. Part A is otherwise the
+session's main build.
+
+**What his verdict unblocked, and one thing grounding then made cheaper:**
+O-1 "config" resolves to **`brand_profiles.social`, which already exists** —
+per-platform publishing config whose absent-platform state already means "the
+refusal ladder's unarmed rung". **Part A needs NO MIGRATION.** O-2 approves the
+two MIT deps, which land with part B, not before.
 
 ### Phase 1 — correctness (no verdict needed; do first)
 
@@ -229,9 +235,31 @@ text-sized question. Everything below runs without them.
    resolves to the **WRONG capture** after a restart. A wrong-target promote is
    worse than a dead door.
 
-### Phase 2 — the saved-views contract window (a PROVEN live bug, and the arc's only migration)
+### Phase 2 — **control-arc part A** (his approved next build; no migration)
 
-2. **`SAVED_VIEW_SURFACES` widens; the CHECK constraint migrates with it.**
+2. **Per-destination arming.** Spec §Part A carries the full wiring. In order:
+   `armStateSchema` + `ARM_STATES` into `packages/contracts/src/publish-queue.ts`;
+   one `armState` field on `socialCadenceSchema` in
+   `packages/contracts/src/social.ts` defaulting to `off`; the repo carry-through
+   (**this is where the same gap shipped THREE times — run
+   `packages/db/src/__tests__/brand-profile-config-blocks.test.ts` and extend it
+   if a field inside an existing block escapes its block-level round-trip**);
+   `packages/engine/src/social/queue-consumer.ts`'s `armed?: boolean` becomes a
+   per-destination resolver defaulting to `off`; then
+   `apps/web/src/app/api/social/queue/tick/route.ts` ANDs it with the master env
+   var. **Ratchets:** an unresolvable destination is `off`; a master-armed tick
+   with no per-destination config publishes NOTHING.
+   **The surface half needs phase 4's Integrations pass first** — it lands on a
+   surface his definition of done still calls not ready, so do the research pass
+   before drawing the control (see phase 4).
+   **Two traps recorded in the spec, both from the repo itself:** never
+   `z.record()` over an enum key (zod 4 makes it exhaustive), and do not
+   overload `maxPostsPerDay: 0` — "paused" is a cadence answer, "armed" is an
+   authorization answer.
+
+### Phase 3 — the saved-views contract window (a PROVEN live bug, and part B's only migration)
+
+3. **`SAVED_VIEW_SURFACES` widens; the CHECK constraint migrates with it.**
    Grounding for the spec proved a live bug (spec GT-2): the list in
    `packages/contracts/src/workspace.ts` is `["leads", "calendar"]`, but its one
    caller `apps/web/src/components/schedule/schedule-surface.tsx` asks for
@@ -243,12 +271,12 @@ text-sized question. Everything below runs without them.
    dividend, not the reason, so this is not "starting the arc unverdicted".
    Done when the preference survives a restart, proven live.
 
-### Phase 3 — the Intel debt, gate-ordered (no verdict needed)
+### Phase 4 — the Intel debt, gate-ordered (no verdict needed)
 
-3. **The `--jobs intel` HARNESS selector** (cheap, do early): it reports the
+4. **The `--jobs intel` HARNESS selector** (cheap, do early): it reports the
    angle radios as "no affordance" because `scripts/surface-jobs.mjs` matches
    /angle/i against textContent. Fix the selector, not the product.
-4. **The rest of the s100 gate's list**, in its recorded severity order: no
+5. **The rest of the s100 gate's list**, in its recorded severity order: no
    `.btn:disabled` dress anywhere on the surface · `busy` locks everything
    without naming the running action, and add-area/save-description run OUTSIDE
    it (double-submittable) · dismiss is terminal and irreversible while the
@@ -265,29 +293,39 @@ text-sized question. Everything below runs without them.
    primitive, solved once for every surface, not a filter box on Intel. It
    moves to control-arc part B and is struck from the Intel list.
 
-### Phase 4 — draw what the research has already earned, and clear the last DOD debt
+### Phase 5 — clear the last definition-of-done debt (and unblock part A's surface)
 
-5. ~~Mobbin sweep for the arc~~ — **DONE s101, on his mid-turn directive**
+6. ~~Mobbin sweep for the arc~~ — **DONE s101, on his mid-turn directive**
    (*"use mobbin-mcp so you can find some examples of a high quality UX/UI with
    those new features"*). All three parts are swept and verdicted in
    `docs/control-arc/spec.md` + the reference library. **What it leaves owed is
    the SHEET**: part B has no drawn sheet, and DOCTRINE 0 says the sheet comes
    first — the s101 staged rebuild is the precedent. Draw it lead-direct once
    O-2 lands, not before (a sheet for a feature he has not approved is waste).
-6. **The four surfaces his definition of done calls NOT READY** — Integrations ·
+7. **The four surfaces his definition of done calls NOT READY** — Integrations ·
    Leads · Profiles · Source Media. These are the last `—` rows in the coverage
    ledger; with Staged done at s101 they are the whole remaining debt, and each
    is a research pass, not a rebuild. **Integrations goes first of the four** —
    control-arc parts A and C both land on that surface, so its pass is a
-   prerequisite the arc will need anyway.
+   prerequisite the arc will need anyway. **Consider pulling it ahead of phase
+   2's surface half** — part A's control cannot honestly be drawn onto a surface
+   that has not had its pass.
 
-### Verdict-blocked, batched (one text answers all six)
+### Still waiting on him — now just ONE item
 
-Control arc **O-1** (arm state as config vs a `tenant_credentials` column;
-lead recommends config), **O-2** (two new MIT deps — a dep add is a
-stop-and-report by standing rule), **O-3** (arc order; lead recommends A first).
-Plus the three s101 staged design calls already on his board. **Nothing above
-waits on any of them.**
+The three **s101 staged design calls** (live-chain editing · the dropped
+"low-res stub" title · one-scene-open-at-a-time). They block nothing; the
+surface works either way. The control-arc calls are **CLOSED** — *"A first,
+config, yes to the deps"*.
+
+### Deferred out of s102 on purpose
+
+**Part B (saved segments) and part C (channel health).** B is approved and its
+deps are approved, but *"A first"* is an order, and B additionally owes a DRAWN
+SHEET before any build (DOCTRINE 0; the s101 staged rebuild is the precedent).
+Drawing that sheet is the natural s103 opener now that its Mobbin sweep is
+banked. **Do not start B in s102** — a half-built A and a half-built B is worse
+than either finished.
 
 ## Sprint 9 / s101 — **CLOSED** (boot 2026-08-04 "gogogo" + a Klaviyo research directive; **the LAST un-rebuilt surface is rebuilt**; zero credits, zero live posts)
 
