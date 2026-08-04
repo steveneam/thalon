@@ -248,22 +248,22 @@
 .intel-surface .dossier-cols > * {
   min-width: 0;
 }
-/* The pick list is BOUNDED, but the bound must clear the REAL maximum.
-   s77 (founder: "the side scroll is also in the way"): 176px held 307px of
-   content, so a normal dossier — four titles plus three angles — scrolled
-   inside the card, putting a scrollbar in the middle of the one band the
-   operator is reading. That is the Bounded-List Rule applied to a list that
-   is not actually unbounded: the dossier's shape is structurally capped at
-   4 + 3 by the generator. So the bound now clears that maximum and stays
-   only as a safety valve for a pathological payload. */
-.intel-surface .pick-rows {
-  /* Measured against the structural maximum, not guessed: 4 titles + 3 angles
-     + the two group labels = 359px, and a title that wraps to a second line
-     needs room beyond that. 420px clears it; the bound survives only as a
-     safety valve for a pathological payload. */
-  max-height: 420px;
-  overflow-y: auto;
-}
+/* The pick list has NO bound, because the CONTRACT is the bound.
+   s77 (founder: "the side scroll is also in the way") replaced a 176px clamp
+   with a 420px one, "measured against the structural maximum: 4 titles +
+   3 angles". That maximum was GUESSED, and it was wrong — the generator's own
+   contract is `titles.min(3).max(5)` + `angles.min(2).max(3)`
+   (packages/engine/src/trend/dossier-schemas.ts), i.e. up to EIGHT options,
+   not seven. Live on the dev shelf the band held 522px inside a 420px box and
+   the eighth option — an angle — was sliced through the middle of its own
+   sentence, radio and copy button included, with the HOOK label painted over
+   the cut (s100 gate, render blocker: the s77 clipping had come straight
+   back one option later).
+   The fix is not a bigger guess. A list the schema caps at 8 rows is not an
+   unbounded list, so it needs no scroll container at all — which is also what
+   the sheet draws: 'Ready to create' grows to its content. The ratchet that
+   keeps this true is `intel-pick-list-bound.test.ts`, which fails if the
+   contract ever stops bounding the list. */
 
 /* ── Search tab (DESIGNED, not ported: Intel.dc.html draws the tab but no
    Search panel — founder s74 asked for a consistent redesign, so these two
