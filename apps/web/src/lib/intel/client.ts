@@ -50,8 +50,25 @@ export async function updateArea(
   return (await asJson<{ area: AreaRow }>(res)).area;
 }
 
+/**
+ * A trend card's id is `<areaId>:<the platform's own item id>`, and on
+ * Bluesky the platform's id is an AT-URI —
+ * `at://did:plc:…/app.bsky.feed.post/3ms7…` — which contains SLASHES. Dropped
+ * raw into a path template those slashes become path separators, so the
+ * request lands on a route that does not exist: proven live, 404 raw vs 200
+ * encoded, on 30 of the 58 cards on the dev shelf.
+ *
+ * That is why this exists as one function rather than two template literals:
+ * `fetchCreateContext` below already encoded, these two did not, and nothing
+ * made the difference visible until half the list stopped working. Encoding
+ * the segment is not a style choice here — it is the only reason a Bluesky
+ * card can be promoted or dismissed at all (s100 gate).
+ */
+const trendCardPath = (cardId: string, verb: "dismiss" | "promote") =>
+  `/api/intel/trends/${encodeURIComponent(cardId)}/${verb}`;
+
 export async function dismissTrend(cardId: string): Promise<IntelCapture> {
-  const res = await fetch(`/api/intel/trends/${cardId}/dismiss`, { method: "POST" });
+  const res = await fetch(trendCardPath(cardId, "dismiss"), { method: "POST" });
   return (await asJson<{ capture: IntelCapture }>(res)).capture;
 }
 
@@ -59,7 +76,7 @@ export async function promoteTrend(
   cardId: string,
   pick: { family: CreateFamily; titleIndex?: number; angleIndex?: number },
 ): Promise<{ capture: IntelCapture; createHref: string }> {
-  const res = await fetch(`/api/intel/trends/${cardId}/promote`, {
+  const res = await fetch(trendCardPath(cardId, "promote"), {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(pick),
