@@ -30,7 +30,22 @@ function today(hour: number, minute = 0): Date {
   return d;
 }
 
+/**
+ * Fixture provenance times are anchored to a FIXED hour of today, never to
+ * `Date.now()` — found the hard way at s101. `decidedAt` used to be
+ * "two hours ago", which between 13:00 and 14:00 local lands in the 11:00
+ * bucket and joins the four slots this file pins at 11:00, so the count-door
+ * read "+6 more" instead of "+2" and the test failed EVERY AFTERNOON. It went
+ * green again on its own each morning, which is the worst kind of red.
+ *
+ * The rule this encodes: a fixture time derived from the wall clock can drift
+ * into a fixture time pinned to a literal hour. 04:00 is chosen because this
+ * file pins 9 and 11 and nothing else.
+ */
+const ANCHOR_HOUR = 4;
+
 function asset(overrides: Partial<PipelineAsset> & { draftId: string }): PipelineAsset {
+  const anchor = today(ANCHOR_HOUR).getTime();
   return {
     runId: "run-1",
     platform: "linkedin",
@@ -38,9 +53,9 @@ function asset(overrides: Partial<PipelineAsset> & { draftId: string }): Pipelin
     status: "approved",
     sourceKind: "url",
     capturedAt: null,
-    generatedAt: new Date(Date.now() - 30 * 3_600_000).toISOString(),
+    generatedAt: new Date(anchor - 30 * 3_600_000).toISOString(),
     judgedAt: null,
-    decidedAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+    decidedAt: new Date(anchor - 2 * 3_600_000).toISOString(),
     publishedAt: null,
     gates: [],
     reasons: [],

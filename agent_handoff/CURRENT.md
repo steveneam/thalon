@@ -3,11 +3,12 @@
 ## Stamp
 
 2026-08-04 close of session 101 (syd4 — **the LAST un-rebuilt surface is
-rebuilt: the staged pane has a sheet and speaks it**; plus the Klaviyo
-teardown he asked for). Boot was "gogogo, audit things through mobbin-mcp and
-postiz lens as needed" + a Klaviyo research directive. Wrap verify on main:
-**exit 0, 3381 passed / 9 skipped** (s100 was 3377/9). Zero credits, zero live
-posts.
+rebuilt**, and the Klaviyo findings are a **grounded spec with a next-session
+plan**). Boot was "gogogo, audit things through mobbin-mcp and postiz lens as
+needed" + a Klaviyo research directive; he then asked for the features to be
+incorporated as a spec + plan, and mid-turn for a Mobbin sweep of them. Wrap
+verify on main: **exit 0, 3381 passed / 9 skipped** (s100 was 3377/9). Zero
+credits, zero live posts.
 
 ## WHAT SHIPPED (COORDINATION §s101 carries the full record)
 
@@ -62,35 +63,86 @@ trigger-split vs conditional-split as a naming distinction for the fan-out
 profiles · (5) scores on objects — **LATER, dependency named: D2** · (6)
 benchmarks — REJECT (one tenant), parked with its trigger.
 
+**THE CONTROL ARC — spec, wiring and plan** (`docs/control-arc/spec.md`, DRAFT
+pending his verdict). The Klaviyo findings became three independently shippable
+parts (A per-destination arming · B saved segments · C channel health, plus D a
+free naming fix), each with its exact wiring — file paths, schemas, which
+migrations are needed and which are not. **It passes the spec-ground-truth
+ratchet**, so every path and schema it cites either exists or is marked `(new)`.
+
+**Grounding it first — rule 12 — changed the plan twice before it was written,
+and found a live bug:**
+- **The saved-views primitive part B needs was ALREADY BUILT at s61** (table,
+  repo, route, client, contracts) and has sat nearly unused. Part B is an
+  extension, not a new family — the exact s87 ve4 trap, caught this time.
+- **`SAVED_VIEW_SURFACES` still says `["leads","calendar"]`** while Schedule
+  has asked for `"schedule"` since the s86 rename, so every read and write
+  400s and **both call sites swallow it by design**. Schedule's density/scope
+  preference has never once persisted, silently. Proven, not inferred.
+
+**Rule 10 ran before any of it was planned** —
+`docs/research/prior-art-saved-segments-s101.md`. Verdict **TAKE+**:
+`@react-querybuilder/core` + `@react-querybuilder/drizzle` (both MIT,
+registry-verified, headless, and their Drizzle peer range covers our 0.45.2)
+for the predicate model and its SQL serialization; we hand-write only the
+per-surface column allowlist the library deliberately leaves to the caller,
+which is the part that makes a browser-supplied predicate safe.
+
+**A Mobbin sweep for all three parts, on his mid-turn directive** — recorded in
+the spec and the reference library. The finding that shaped part B: the
+best-in-class pattern is **not a segment-builder surface** but three additions
+to a list that already exists (view strip · chips that read as sentences ·
+"Save as a new view" in the filter row). Contractbook is TAKEN whole;
+AutoSend's three-naked-dropdowns modal is recorded as the ANTI-pattern because
+it is what we would otherwise have built.
+
+**One latent flake found and fixed** while gating this work: a Schedule test
+whose fixture derived `decidedAt` from `Date.now()` collided with slots pinned
+at 11:00 — **it failed every afternoon and healed itself every morning.**
+
 ## Resume prompt (session 102, syd4)
 
-**Resume · Thalon** — every live surface has now been touched by the research
-and every one is rebuilt to a sheet. Nothing is mid-flight.
+**Resume · Thalon** — every live surface has been touched by the research and
+rebuilt to a sheet. Nothing is mid-flight. **The full ordered plan is
+COORDINATION §s102**; the short form:
 
-**THE HIGHEST ITEM IS STILL NOT A UX ONE — it is the Intel correctness bug
-carried since s100: capture ids are in-process**, so an Intel exit silently
-vanishes or resolves to the WRONG capture after a restart. Do that first.
+**PHASE 1 — correctness, no verdict needed.** The Intel bug carried since s100:
+**capture ids are in-process**, so an Intel exit silently vanishes or resolves
+to the **WRONG capture** after a restart. A wrong-target promote beats a dead
+door for severity. Do it first.
 
-**Then the rest of the Intel debt list** (itemised on its ledger row,
-gate-ordered): no `.btn:disabled` dress anywhere on the surface · `busy` locks
-everything without saying which action runs, and add-area/save-description run
-OUTSIDE it (double-submittable) · dismiss is terminal and irreversible while
-the Search tab's dismissed targets get Restore · the sweep schedule is armed
-with no door · no filter/sort/find over 58 cards with 4 visible at a time —
-**note that Klaviyo's segment finding (memo §1) argues this last one should be
-solved once, properly, rather than as a filter box on Intel.**
+**PHASE 2 — the saved-views contract window: a PROVEN live bug.** Grounding the
+new spec found it (`docs/control-arc/spec.md` GT-2): `SAVED_VIEW_SURFACES` is
+still `["leads", "calendar"]`, but `schedule-surface.tsx` has asked for
+`"schedule"` since the s86 rename — every read/write 400s and **both call sites
+swallow it by design**, so Schedule's density/scope preference has never once
+persisted. Widen the list, migrate the CHECK, retire `"calendar"`, prove
+persistence across a restart. Justified on the bug alone; that it also lays the
+arc's only migration is a dividend, not the reason.
 
-**Cheap and worth doing early:** the `--jobs intel` HARNESS bug — it reports
-the angle radios as "no affordance" because `surface-jobs.mjs` matches
-/angle/i against textContent. Fix the selector, not the product.
+**PHASE 3 — the Intel debt, gate-ordered.** Cheap first: the `--jobs intel`
+HARNESS selector (`scripts/surface-jobs.mjs` matches /angle/i against
+textContent — fix the selector, not the product). Then the s100 list: no
+`.btn:disabled` dress · `busy` doesn't name its running action and add-area/
+save-description run OUTSIDE it · dismiss is terminal while Search's targets
+get Restore · the sweep schedule is armed with no door · no attribution on
+model-written text · a judge-gated dossier says "not armed yet" · copy buttons
+lie · the × that PAUSES wears the destroy glyph · reason bars have no
+accessible name · the 1.3s band pop shifts tabs 91px · no keyword path · the
+keyboard grammar is invisible. **STRUCK from this list: "no filter/sort/find
+over 58 cards"** — that is control-arc part B, solved once for every surface.
 
-**Three OPEN CALLS are waiting for him in `Staged.dc.html`'s header** — they
-are questions the sheet asks, not decisions taken for him: (a) a live chain
-gets facts, not a form — is "read here, edit in Videos" the right split, or
-should live stage editing become a bucket? (b) the preview lost its "(low-res
-stub)" title, since his own report was that the scenes are not placeholder;
-(c) scenes collapse to one-open-at-a-time, which kills the 3219px scroll but
-means you cannot eyeball all nine narrations at once.
+**PHASE 4 — the last definition-of-done debt.** Integrations · Leads ·
+Profiles · Source Media are the only `—` rows left. **Integrations first** —
+control-arc parts A and C both land there, so the arc needs that pass anyway.
+
+**WAITING ON HIM, batched, blocking NOTHING above:** the three control-arc
+calls (**O-1** arm state as tenant config vs a `tenant_credentials` column ·
+**O-2** two new MIT deps · **O-3** order) plus the three s101 staged design
+calls. Both items are on NEEDS-STEVEN; *"A first, config, yes to the deps"*
+answers the arc completely. **Do not draw part B's sheet before O-2 lands** —
+a sheet for an unapproved feature is waste, and DOCTRINE 0 puts the sheet
+before the build, not before the decision.
 
 ▎ ▸ **Founder calls made THIS session:** none new — s100's "doors now, rebuild
 next session" was executed as given.
@@ -116,7 +168,12 @@ sheet-verbatim CSS = impeccable findings intentional (DOCTRINE 0) · **a shared
 class is only shared if its CSS is** — and s101 adds its sibling: **a NEW class
 name can COLLIDE with the shell** (`.dir.screen` hit `.screen` and turned three
 caption rows into 940px screens; caught by counting DOM nodes, not by looking)
-· canvas writes need `finalize_plan` (UUID `f5d304cb-cd0e-484d-8542-7b6561e1ef30`).
+· canvas writes need `finalize_plan` (UUID `f5d304cb-cd0e-484d-8542-7b6561e1ef30`)
+· **a fixture time derived from `Date.now()` can drift into a fixture time
+pinned to a literal hour** — `schedule-s96.test.tsx` had `decidedAt = now − 2h`
+against slots pinned at 11:00, so it failed EVERY AFTERNOON between 13:00 and
+14:00 and went green again by itself each morning (found + fixed s101; fixture
+times are now anchored to a fixed hour of today, never to the wall clock).
 ▎ ▸ **⛔ SEQUENCE GATE, current truth:** **post = ARMED** (founder GO s98);
 **page still 409s** at `POST /api/create` until his word; bluesky = the one
 platform granted for live testing; queue consumer's key rests EMPTY — arming
@@ -135,7 +192,8 @@ s102 boots on "gogogo" alone (this file + COORDINATION §s101 carry the state).
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    verify` before any new work.
 
-CLAUDE.md → this file → COORDINATION.md (§s101) →
+CLAUDE.md → this file → COORDINATION.md (**§s102 = the plan; §s101 = what
+shipped**) → `docs/control-arc/spec.md` (DRAFT, his verdict pending) →
 `docs/research/ux-refinement-program.md` (**Intel's row carries the full debt
 list; Staged is row 22**) → `docs/research/klaviyo-teardown-s101.md` →
 `docs/research/mock-sheets/README.md` → agent_handoff/NEEDS-STEVEN.md →
