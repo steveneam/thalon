@@ -137,6 +137,25 @@ describe("intel captures (Phase-I window)", () => {
       repos.intelCaptures.record(ctx, { kind: "made_up" as never, payload: {} }),
     ).rejects.toThrow();
   });
+
+  /**
+   * s102: the pipeline board reads recent PICKS. Filtering by kind after the
+   * bound would let a run of dismissals push a real pick past the limit and
+   * render "you picked nothing" — so the filter is SQL, inside the bound.
+   */
+  it("filters by kind inside the bound, so a pick under a wall of dismissals is still found", async () => {
+    const { ctx, repos } = await setup();
+    await repos.intelCaptures.record(ctx, { kind: "trend_promote", payload: { title: "the one" } });
+    for (let i = 0; i < 12; i += 1) {
+      await repos.intelCaptures.record(ctx, { kind: "trend_dismiss", payload: { i } });
+    }
+
+    const picks = await repos.intelCaptures.listRecent(ctx, { kind: "trend_promote", limit: 5 });
+    expect(picks.map((p) => p.payload)).toEqual([{ title: "the one" }]);
+    // Unfiltered, the same bound sees only the dismissals that buried it.
+    const recent = await repos.intelCaptures.listRecent(ctx, { limit: 5 });
+    expect(recent.every((r) => r.kind === "trend_dismiss")).toBe(true);
+  });
 });
 
 describe("saved views (Phase-I window)", () => {

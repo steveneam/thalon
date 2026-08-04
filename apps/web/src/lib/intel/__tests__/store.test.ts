@@ -7,6 +7,7 @@ import {
   listTrendCards,
   promoteLead,
   promoteTrendCard,
+  recordFallbackCapture,
   resetIntelStore,
   resolveCreateContext,
   targetSearchQuery,
@@ -17,7 +18,7 @@ beforeEach(() => resetIntelStore());
 describe("intel fake-driver store", () => {
   it("dismiss removes the card from the list and records the capture payload", () => {
     const card = fixtureTrendCards[0];
-    const capture = dismissTrendCard(card.id);
+    const capture = recordFallbackCapture(dismissTrendCard(card.id));
     expect(listTrendCards().map((c) => c.id)).not.toContain(card.id);
     expect(capture).toMatchObject({
       kind: "trend_dismiss",
@@ -29,7 +30,7 @@ describe("intel fake-driver store", () => {
 
   it("promote keeps the card and captures the exit family plus the picked title/angle/hook", () => {
     const card = fixtureTrendCards[1];
-    const { capture } = promoteTrendCard(card.id, { family: "video", titleIndex: 1, angleIndex: 0 });
+    const capture = promoteTrendCard(card.id, { family: "video", titleIndex: 1, angleIndex: 0 });
     expect(capture.kind).toBe("trend_promote");
     expect(capture.payload).toMatchObject({
       family: "video",
@@ -47,7 +48,7 @@ describe("intel fake-driver store", () => {
   describe("the optional angle really is optional", () => {
     it("rides as nothing when no angle was picked, while the title still defaults to the first", () => {
       const card = fixtureTrendCards[1];
-      const { capture } = promoteTrendCard(card.id, { family: "post" });
+      const capture = promoteTrendCard(card.id, { family: "post" });
       expect(capture.payload.angle).toBeUndefined();
       expect(capture.payload.title).toBe(card.dossier!.titles[0]);
     });
@@ -55,7 +56,7 @@ describe("intel fake-driver store", () => {
     it("rides when it WAS picked", () => {
       const card = fixtureTrendCards[1];
       const last = card.dossier!.angles.length - 1;
-      const { capture } = promoteTrendCard(card.id, { family: "post", angleIndex: last });
+      const capture = promoteTrendCard(card.id, { family: "post", angleIndex: last });
       expect(capture.payload.angle).toBe(card.dossier!.angles[last]);
     });
 
@@ -68,14 +69,14 @@ describe("intel fake-driver store", () => {
 
     it("resolves into a Create context carrying no angle", () => {
       const card = fixtureTrendCards[1];
-      const { capture } = promoteTrendCard(card.id, { family: "post" });
+      const capture = recordFallbackCapture(promoteTrendCard(card.id, { family: "post" }));
       expect(resolveCreateContext(capture.id).angle).toBeUndefined();
     });
   });
 
   it("promote and dismiss write SYMMETRIC base payloads through the one capture door (wave-3 §3.6)", () => {
     const card = fixtureTrendCards[0];
-    const promoted = promoteTrendCard(card.id, { family: "post" }).capture;
+    const promoted = promoteTrendCard(card.id, { family: "post" });
     const dismissed = dismissTrendCard(card.id);
     const base = ["source", "externalId", "areaName", "score", "text", "url"];
     for (const key of base) {
@@ -85,7 +86,7 @@ describe("intel fake-driver store", () => {
 
   it("resolveCreateContext round-trips a promote capture into the structured Create context", () => {
     const card = fixtureTrendCards[2];
-    const { capture } = promoteTrendCard(card.id, { family: "page", titleIndex: 2 });
+    const capture = recordFallbackCapture(promoteTrendCard(card.id, { family: "page", titleIndex: 2 }));
     const context = resolveCreateContext(capture.id);
     expect(context).toMatchObject({
       captureId: capture.id,
@@ -105,7 +106,7 @@ describe("intel fake-driver store", () => {
   });
 
   it("target-this captures the query with its family and resolves to a keyword context", () => {
-    const { capture } = targetSearchQuery("what is content automation");
+    const capture = recordFallbackCapture(targetSearchQuery("what is content automation"));
     expect(capture).toMatchObject({ kind: "search_target_this", ref: "what is content automation" });
     expect(resolveCreateContext(capture.id)).toMatchObject({
       kind: "search_target_this",
@@ -115,7 +116,7 @@ describe("intel fake-driver store", () => {
   });
 
   it("a lead promote resolves with the lead's id and DNA — the →Email compose needs both (B-crm.4 front half)", () => {
-    const { capture } = promoteLead({
+    const capture = recordFallbackCapture(promoteLead({
       leadId: "lead-1",
       family: "email",
       name: "Sam Reyes",
@@ -125,7 +126,7 @@ describe("intel fake-driver store", () => {
       notes: "met at the trade expo",
       painPoint: "website never brings in local work",
       score: 0.9,
-    });
+    }));
     expect(resolveCreateContext(capture.id)).toMatchObject({
       kind: "lead_promote",
       family: "email",
@@ -139,9 +140,31 @@ describe("intel fake-driver store", () => {
   });
 
   it("a dismiss capture is feedback, not context — resolving it is a 404", () => {
-    const capture = dismissTrendCard(fixtureTrendCards[0].id);
+    const capture = recordFallbackCapture(dismissTrendCard(fixtureTrendCards[0].id));
     expect(() => resolveCreateContext(capture.id)).toThrowError(IntelStoreError);
     expect(() => resolveCreateContext("intel-capture-nope")).toThrowError(IntelStoreError);
+  });
+
+  /**
+   * The s102 phase-1 defect, pinned at its own seat. The fallback used to id
+   * captures off a per-process counter, so the SECOND process to mint a
+   * capture handed out `intel-capture-1` again — and a `?ctx=` link made
+   * before a restart resolved to a stranger's pick instead of 404ing. The
+   * durable seat fixes this with real uuids; this pins the fallback, which is
+   * what an unseeded dev db still runs on.
+   */
+  it("a fallback id is never re-issued, so a stale link cannot land on someone else's capture", () => {
+    const first = recordFallbackCapture(
+      promoteTrendCard(fixtureTrendCards[0].id, { family: "post" }),
+    );
+    resetIntelStore(); // the restart
+    const second = recordFallbackCapture(
+      promoteTrendCard(fixtureTrendCards[1].id, { family: "video" }),
+    );
+
+    expect(second.id).not.toBe(first.id);
+    // The pre-restart link is GONE, not silently re-pointed at `second`.
+    expect(() => resolveCreateContext(first.id)).toThrowError(IntelStoreError);
   });
 
   it("an out-of-range dossier pick is a loud 400, never a silent fallback", () => {
@@ -156,7 +179,7 @@ describe("intel fake-driver store", () => {
   });
 
   it("reset restores the full demo dataset (test isolation, like the staged store)", () => {
-    dismissTrendCard(fixtureTrendCards[0].id);
+    recordFallbackCapture(dismissTrendCard(fixtureTrendCards[0].id));
     resetIntelStore();
     expect(listTrendCards()).toHaveLength(fixtureTrendCards.length);
     expect(listIntelCaptures()).toHaveLength(0);

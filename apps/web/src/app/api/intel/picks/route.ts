@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
-import { listIntelCaptures } from "@/lib/intel/store";
+import { listCapturesOfKind } from "@/lib/intel/captures";
 import type { CreateFamily, IntelPickWire } from "@/lib/intel/types";
 
 /**
  * The pipeline board's Intel-picks read (s91 board sheet: the column holds
- * PICKS only). A pick is a `trend_promote` capture; this route projects the
- * capture store — the same in-memory fake-driver seat the promote/dismiss
- * doors write through (durable capture rows = the next contract window, per
- * the store's own note) — so the board shows exactly what was picked this
- * session, and an empty list on a fresh process is TRUE, not a bug.
+ * PICKS only). A pick is a `trend_promote` capture, and since s102 those are
+ * durable rows — so the board shows what this workspace has picked, not what
+ * one process happened to remember. The read is bounded and filtered in SQL
+ * (the Bounded-List Rule: the door caps too); an empty list means nothing has
+ * been picked, which is the only thing it has ever been allowed to mean.
  */
 export async function GET() {
   const str = (v: unknown): string | null =>
     typeof v === "string" && v.length > 0 ? v : null;
-  const picks: IntelPickWire[] = listIntelCaptures()
-    .filter((capture) => capture.kind === "trend_promote")
+  const picks: IntelPickWire[] = (await listCapturesOfKind("trend_promote"))
     .map((capture) => ({
       captureId: capture.id,
       at: capture.at,

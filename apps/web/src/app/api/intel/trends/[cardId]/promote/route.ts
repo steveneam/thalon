@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { recordCapture } from "@/lib/intel/captures";
 import { findLiveTrendCard } from "@/lib/intel/live";
 import { IntelStoreError, promoteTrendCard } from "@/lib/intel/store";
 import { getRepos } from "@/lib/repos";
@@ -31,7 +32,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ car
     const repos = await getRepos();
     const ctx = await resolveTenantCtx(repos);
     const liveCard = ctx ? await findLiveTrendCard(ctx.tenantId, cardId) : null;
-    const { capture } = promoteTrendCard(liveCard ?? cardId, parsed.data);
+    // The capture is SEATED durably (s102) — the `?ctx=` id below outlives the
+    // process that minted it, so an operator's Create link survives a deploy.
+    const capture = await recordCapture(promoteTrendCard(liveCard ?? cardId, parsed.data));
     return NextResponse.json({
       capture,
       createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,

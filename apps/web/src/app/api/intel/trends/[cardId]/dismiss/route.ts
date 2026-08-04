@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordCapture } from "@/lib/intel/captures";
 import { findLiveTrendCard } from "@/lib/intel/live";
 import { dismissTrendCard, IntelStoreError } from "@/lib/intel/store";
 import { getRepos } from "@/lib/repos";
@@ -20,7 +21,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ ca
     const repos = await getRepos();
     const ctx = await resolveTenantCtx(repos);
     const liveCard = ctx ? await findLiveTrendCard(ctx.tenantId, cardId) : null;
-    const capture = dismissTrendCard(liveCard ?? cardId);
+    const capture = await recordCapture(dismissTrendCard(liveCard ?? cardId));
     if (liveCard && ctx) {
       const evalCase = await repos.evalCases.recordIntelDismiss(ctx, {
         kind: "trend_dismiss",

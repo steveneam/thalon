@@ -1,4 +1,9 @@
-import { intelCaptureSchema, type IntelCaptureInput, type TenantCtx } from "@thalon/contracts";
+import {
+  intelCaptureSchema,
+  type CaptureKind,
+  type IntelCaptureInput,
+  type TenantCtx,
+} from "@thalon/contracts";
 import { and, desc, eq } from "drizzle-orm";
 import { intelCaptures } from "../schema";
 import type { Db } from "../types";
@@ -42,13 +47,28 @@ export function intelCapturesRepo(db: Db) {
       return row ?? null;
     },
 
-    /** Station 02's list read: newest first, bounded (the Bounded-List Rule is a UI law — the door caps too). */
-    async listRecent(ctx: TenantCtx, opts?: { limit?: number }): Promise<IntelCaptureRow[]> {
+    /**
+     * Station 02's list read: newest first, bounded (the Bounded-List Rule is
+     * a UI law — the door caps too).
+     *
+     * `kind` filters in SQL rather than in the caller, because filtering after
+     * the bound silently under-reports: the pipeline board wants the recent
+     * PICKS, and a tenant whose last 200 captures are mostly dismissals would
+     * hand it a short list that reads as "you picked nothing" (s102).
+     */
+    async listRecent(
+      ctx: TenantCtx,
+      opts?: { limit?: number; kind?: CaptureKind },
+    ): Promise<IntelCaptureRow[]> {
       const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 200);
       return db
         .select()
         .from(intelCaptures)
-        .where(eq(intelCaptures.tenantId, ctx.tenantId))
+        .where(
+          opts?.kind
+            ? and(eq(intelCaptures.tenantId, ctx.tenantId), eq(intelCaptures.kind, opts.kind))
+            : eq(intelCaptures.tenantId, ctx.tenantId),
+        )
         .orderBy(desc(intelCaptures.createdAt))
         .limit(limit);
     },

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { recordCapture } from "@/lib/intel/captures";
 import { targetSearchQuery } from "@/lib/intel/store";
 
 const bodySchema = z.object({
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "A query to target is required." }, { status: 400 });
   }
-  const { capture } = targetSearchQuery(parsed.data.query, parsed.data.family);
+  const capture = await recordCapture(targetSearchQuery(parsed.data.query, parsed.data.family));
   return NextResponse.json({
     capture,
     createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,

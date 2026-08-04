@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { toErrorResponse } from "@/lib/http-errors";
+import { recordCapture } from "@/lib/intel/captures";
 import { promoteLead } from "@/lib/intel/store";
 import { getRepos } from "@/lib/repos";
 import { resolveTenantCtx } from "@/lib/tenant";
@@ -34,17 +35,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `lead "${parsed.data.id}" not found` }, { status: 404 });
     }
     const latest = await repos.leadScores.latestByLead(ctx, lead.id);
-    const { capture } = promoteLead({
-      leadId: lead.id,
-      family: parsed.data.family,
-      name: lead.name,
-      company: lead.company,
-      role: lead.role,
-      website: lead.website,
-      notes: lead.notes,
-      painPoint: lead.painPoint,
-      score: latest?.score ?? null,
-    });
+    const capture = await recordCapture(
+      promoteLead({
+        leadId: lead.id,
+        family: parsed.data.family,
+        name: lead.name,
+        company: lead.company,
+        role: lead.role,
+        website: lead.website,
+        notes: lead.notes,
+        painPoint: lead.painPoint,
+        score: latest?.score ?? null,
+      }),
+    );
     return NextResponse.json({
       capture,
       createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,

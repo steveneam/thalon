@@ -3,6 +3,7 @@ import { fixtureDraftDetails, fixtureDraftsByRun, fixtureRuns } from "@/lib/appr
 import { fixtureHorizonCards, fixtureSweep } from "@/lib/intel/fixtures";
 import {
   dismissTrendCard,
+  recordFallbackCapture,
   IntelStoreError,
   listTrendCards,
   promoteTrendCard,
@@ -287,7 +288,9 @@ export const handlers = [
   ),
   http.post("/api/intel/trends/:cardId/dismiss", ({ params }) => {
     try {
-      return HttpResponse.json({ capture: dismissTrendCard(params.cardId as string) });
+      return HttpResponse.json({
+        capture: recordFallbackCapture(dismissTrendCard(params.cardId as string)),
+      });
     } catch (err) {
       return intelError(err);
     }
@@ -299,7 +302,7 @@ export const handlers = [
         titleIndex?: number;
         angleIndex?: number;
       };
-      const { capture } = promoteTrendCard(params.cardId as string, body);
+      const capture = recordFallbackCapture(promoteTrendCard(params.cardId as string, body));
       return HttpResponse.json({
         capture,
         createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,
@@ -378,7 +381,7 @@ export const handlers = [
   }),
   http.post("/api/intel/search/target-this", async ({ request }) => {
     const body = (await request.json()) as { query: string; family?: CreateFamily };
-    const { capture } = targetSearchQuery(body.query, body.family);
+    const capture = recordFallbackCapture(targetSearchQuery(body.query, body.family));
     return HttpResponse.json({
       capture,
       createHref: `/app/create?ctx=${encodeURIComponent(capture.id)}`,
