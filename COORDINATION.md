@@ -212,7 +212,105 @@ the same session.** Wrap verify: exit 0, **3338 passed / 9 skipped**.
 | **V9 · Composer** — the gate, round 2 (`<this wrap>`) | **The re-run gate came back `matches_sheet: false`** (58 agents, 41 confirmed) and its four HIGHs were real: (1) **every door on the surface rendered GREY** — a blanket `.composer-surface a { color: inherit }` landed after the shell's `.screen a { color: var(--act) }` at equal specificity and won for every anchor, including the three doors round 1 had just added; scoped to the simulated post only, and **measured live: all four doors now compute to exactly `--act`** · (2) the ⓘ tooltips were native `title=` attributes where the sheet draws a designed popover — the sheet's `.tip` block is ported, both tips are real elements, keyboard-reachable, `nativeTitles: 0` · (3) the fit band stretched a single destination across 1,174px, stranding the count 1,038px from the platform it measures — **exactly the founder's own one-destination dogfood shape** — now capped at the sheet's tile width (band 1174→236px, gap 1038→97px) · (4) a platform REFUSING the post wore an amber dot while the band below painted it red; a refusal is now err, and an over-length post (which still ships, cut) stays warn — my own test caught that ordering. Verified by live probe + screenshot, both themes. |
 | Ops notes, stated | Credits ran out mid-Composer-gate on Fable 5; the session continued on Opus 5 and the gate was resumed from its own run id (the completed walkthrough replayed from cache). No credits spent on any vendor mint; no live posts; the post door stayed armed but unused. Two of my own new tests failed first and were right to: they caught that `adoptableRender` only adopts RUNNING jobs, and that ⌘Z inside a text field is deliberately left to the browser. |
 
-## Sprint 9 / s102 — **PLANNED, and the arc is VERDICTED** (his answer at the s101 close, verbatim: *"A first, config, yes to the deps"*)
+## Sprint 9 / s102 — **CLOSED, all five phases shipped** (boot "gogogo"; zero credits, zero live posts)
+
+Wrap verify on main: **exit 0, 3414 passed / 9 skipped** (s101 was 3381/9).
+Five commits, `4fa663a`…`ea7b4cb`.
+
+| phase | what landed |
+|---|---|
+| **1 · Intel capture ids** (`4fa663a`) | **The capture spine goes DURABLE.** Ids were `intel-capture-${counter}` in one process's memory while the `?ctx=` link they mint is a URL an operator sits on across a deploy — so after a restart that link either 404d or **resolved to a DIFFERENT capture that had taken the same number**, briefing Create from someone else's pick. The durable table has existed since s61 and had **never been written to** (dev PG: 0 rows). store.ts splits — the four ACTIONS build a draft, the SEATS persist it; `captures.ts` is the door. Two strictnesses: a durable seat never silently degrades to memory (that re-mints the bug quietly), and a **non-uuid id never reaches the uuid column** — `intel-capture-3` would throw `invalid input syntax for type uuid` and surface as a 500 where 404 is honest. `listRecent` gained a SQL kind filter: filtering after the bound let a run of dismissals push a real pick past the limit, and the board would render "you picked nothing". **Proven live against dev Postgres, not PGlite**: promoted a card, confirmed the row + its event, restarted the server, resolved the pre-restart id in the fresh process. |
+| **2 · Control-arc part A** (`f0eb16e`) | **Arming becomes per-destination, and the gate gets NARROWER.** `off`/`review`/`live` per destination, ANDed with the master key — a master-armed tick with **no per-destination config publishes NOTHING**. No migration (`brand_profiles.social` already held the semantics). **Grounding corrected the spec four times and the code follows the ground:** ARM_STATES cannot live in `publish-queue.ts` (it already imports `social.ts` — a cycle leaving a schema in TDZ at barrel eval) · the resolver takes `{tenantId, platform}` because `runDuePublishes` is cross-tenant while arm state is per-tenant config, memoized **per pass** so an operator's flip is obeyed next tick · the tick ROUTE was never armed — `scripts/run-publish-queue.ts` is the one armed caller, so that is where the AND became real; the route resolves arm state for its REPORT only and gains no publisher · `armState` is **withheld from the driver call** (an authorization fact has no business inside a third-party platform call). Ratchets incl. a **FIELD-level twin** of the config-block ratchet, which could only ever see whole blocks vanish. **Nothing is armed by this change.** |
+| **3 · Saved views, window 0027** (`23ceea2`) | **Schedule's saved view had NEVER once persisted.** `schedule-surface.tsx` has asked for `"schedule"` since the s86 rename while `SAVED_VIEW_SURFACES` still said `"calendar"` — every read and write 400d, and **both call sites swallow their errors by design**, so density/scope silently reset on every visit for sixteen sessions. Proven live before (both 400) and after (both 200; survives a restart; the surface renders Month·Needs-you from the server). The migration **RENAMES** the stranded rows: dev PG's one row was Schedule's own `{density,scope,expanded}`, orphaned by the rename — and the generated migration would have **FAILED** on any db holding one, since a CHECK cannot be added over violating rows. |
+| **4 · Intel debt** (`6ed5725`) | **Nine of the gate's items, plus the harness bug.** `busy` names its action · add-area/save-description no longer double-submit (**the guard is a REF** — two presses in one tick read the same rendered state, which is how it shipped submittable twice) · copy buttons stop lying (the write is awaited; `navigator.clipboard?.` swallowed the whole call) · the × that PAUSES wears a pause mark · reason bars carry a name and value · machine-written text is attributed · the j/k grammar is visible · the count pill reserves its box (the 1.3s pop shifted tabs 91px). **The `.btn:disabled` dress was PROMOTED TO THE SHELL** — s79 wrote that promotion up for the lead and four surfaces copied the local block meanwhile; the ratchet followed it, so it now protects the four surfaces nobody has passed. HARNESS: `--jobs intel` matched /angle/i against textContent, but an angle radio's text IS the angle sentence; it matches the role contract now and **earns its name** by clicking an angle off. |
+| **5 · Integrations research pass** (`ea7b4cb`) | **The row's first pass, and on the HONESTY half we were already ahead** — no product in the set distinguishes an env-filled seat from a stored credential, names the consuming driver, or separates connected from armed; ElevenLabs' verbatim `HTTP 401` band is our own rule arrived at independently. Gaps are all SHAPE: the connected/available SPLIT with counts (we render one flat `cards.map`) · **the blast-radius disclosure (Coda)** — a broken account lists what depends on it, and after part A the consumer knows exactly which rows those are · the partial-degradation band (Deel, **re-surfaced independently** from a query naming neither it nor health — twice-found, not once-liked) · the honest "managed elsewhere" state for an envOverride seat. No pixel moved; the row still owes p1. |
+
+**Found while fixing, recorded not fixed:** at MONTH density Schedule's day-cell
+chips clip their own text — a two-line chip keeps a one-line box. Month was
+always clickable, but **nothing had ever restored INTO it**, which is why
+sixteen sessions of gates never sat on it.
+
+---
+
+## Sprint 9 / s103 — **PLANNED** (the arc continues under his standing *"A first, config, yes to the deps"*; no new verdict needed)
+
+**Spec of record: `docs/control-arc/spec.md`** — part A's engine half is BUILT
+(its build record and the four grounding corrections are in the spec); part B
+is approved with its deps approved; part C is unstarted.
+
+**The ordering principle, unchanged: a SHEET before a build.** DOCTRINE 0, and
+the s101 staged rebuild is the precedent.
+
+### Phase 1 — control-arc part B, opening with the DRAWN SHEET
+
+1. **Draw part B's sheet, lead-direct** (design work = Fable 5, never
+   delegated — standing s51). Its Mobbin sweep is banked in the spec, and the
+   finding that shapes it is structural: **the best-in-class pattern is NOT a
+   segment-builder surface** but three additions to a list that already exists
+   — a view strip, chips that read as sentences, and "Save as a new view" in
+   the filter row. Contractbook is TAKEN whole; AutoSend's three-naked-
+   dropdowns modal is the recorded ANTI-pattern, because it is what we would
+   otherwise have built.
+2. **Then build it.** Two things make B cheaper than it looks and both were
+   proven, not assumed: the saved-views primitive it extends was **built at
+   s61** (table, repo, route, client, contracts), and **its only migration was
+   laid at s102** (window 0027 widened `SAVED_VIEW_SURFACES` while fixing a
+   live bug). The approved deps — `@react-querybuilder/core` +
+   `@react-querybuilder/drizzle`, both MIT — land here, not before. We
+   hand-write only the per-surface column allowlist the library deliberately
+   leaves to the caller, which is the part that makes a browser-supplied
+   predicate safe (rule-10 memo: `docs/research/prior-art-saved-segments-s101.md`).
+
+### Phase 2 — part A's SURFACE half (the prerequisite is now cleared)
+
+3. **The arm control on the Integrations channel cards.** s102 phase 5 ran
+   that surface's research pass, so the control can now be drawn honestly. It
+   is a **seg** (`live | review | off`) in the shell's own `.seg` vocabulary —
+   a toggle cannot express `review`, and `review` is the whole point. Spec
+   §Part A carries the drawn shape (Mistral's per-row Enabled column · Base44's
+   state word UNDER the name, never a bare coloured dot · WRITER's inert
+   control that states its reason and points at its unlock).
+4. **Land the connected/available SPLIT in the same pass** — it is the research
+   pass's own top finding, and an arm control reads better on a split list than
+   in a flat grid of every destination that exists.
+
+### Phase 3 — the Integrations p1 the research pass earned
+
+5. The pass's other three takes: **the blast-radius disclosure** on a
+   `needs_reauth` seat (Coda — a broken credential names what it is holding
+   up, and after part A those rows are the consumer's `holds`), the honest
+   **"managed elsewhere"** state for an `envOverride` seat (Bolt.new — the
+   box fills it and the vault door is not where you change it), and **class
+   grouping** (`card.class` exists and does nothing).
+
+### Phase 4 — the last three definition-of-done rows
+
+6. **Leads · Profiles · Source Media** — the only `—` rows left once
+   Integrations carries its research. Each is a research pass, not a rebuild.
+
+### Carried, recorded not fixed (each with its reason, on its ledger row)
+
+- **Schedule's month-density chips clip their own text** — a two-line chip
+  keeps a one-line box. Found by the phase-3 restore: month was always
+  clickable, but nothing had ever restored INTO it, so no gate had sat on it.
+- **Intel's dossier-absence REASON does not reach the wire** — unarmed vs
+  model failure vs **denylist** all read identically, so a judge verdict was
+  being reported as a billing problem. s102 made the copy state what is true
+  and stop asserting a cause; carrying the real reason (engine result →
+  snapshot → wire) is a contract-window ask.
+- Intel **dismiss reversibility** (Search's targets get Restore; a dismissal
+  is a capture plus an in-memory set, so an Undo is a design question) · the
+  **sweep schedule's missing door** (`cadenceMinutes` is live today) · the
+  add-chip's **missing keyword path**.
+
+### Still waiting on him — ONE item, blocking nothing
+
+The three **s101 staged design calls** (live-chain editing · the dropped
+"low-res stub" title · one-scene-open-at-a-time).
+
+---
+
+## Sprint 9 / s102 — the plan as it was written (his answer at the s101 close, verbatim: *"A first, config, yes to the deps"*)
 
 **Spec of record: `docs/control-arc/spec.md` — VERDICTED, no open calls left.**
 Rule-10 memo: `docs/research/prior-art-saved-segments-s101.md`.
