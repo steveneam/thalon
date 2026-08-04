@@ -240,7 +240,12 @@ landing/marketing video.
 > preservation sentence, the sheet's "Restore brings it back" is NOT
 > rendered because no column records a retired cut: **the retire/restore
 > column is the flagged contract-window ask** for the next window (s90
-> freeze respected). One V4 truth adaptation, stated in code and test:
+> freeze respected). **DECIDED s99 (founder): removal RETIRES, never
+> destroys** — `retired_at` on `video_cuts` AND `video_projects` in window
+> 0026, running at the s100 opener; retired rows keep their rendered file and
+> nothing auto-purges, so the sheet's "Restore brings it back exactly"
+> becomes honourable and gets rendered. Today's hard `deleteCut` BECOMES the
+> retire door. Record: COORDINATION §"Contract window 0026". One V4 truth adaptation, stated in code and test:
 > Recut stays unbadged (this engine's recut is the aspect lens's own local
 > derive, 0 credits — absence says free); Retake ⚡ + Propose ⚡1 are the
 > metered marks. B-media.0's backfill door got its missing runner
@@ -354,7 +359,12 @@ decision session (criteria already in V3), then pass-3 states (V7/V9).
 > recorded but deliberately did not fix is on the surfaces' own
 > `docs/research/ux-refinement-program.md` rows, and the two contract-window
 > asks (a project delete/rename verb + a recorded project ORIGIN; the standing
-> retire/restore column) go to the founder at the next window.
+> retire/restore column) went to the founder at the s99 close and are
+> **ANSWERED**: two became contract window 0026 (retire/restore on cuts and
+> projects + rename, running at the s100 opener), and the origin ask
+> dissolved on grounding — the runner already stamps `meta.onePrompt` on the
+> project row, so only the display layer needed fixing. COORDINATION
+> §"Contract window 0026" carries the decisions.
 
 **Interleave:** B-create.5 dogfood (the first real Create run) stays its own
 gate and can land before, between or after these — it needs a spend statement

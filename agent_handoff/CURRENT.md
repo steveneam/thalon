@@ -49,15 +49,35 @@ unknown defects. Broadening the product (more platforms, YouTube intel, OAuth
 callbacks) all needs his hands, and he is in a hands-free stretch — so
 quality on the loop he already runs is the highest-value hands-free work.
 
-1. **Warm-up (~30 min): the `meta.mediaRefs` shared reader.** The Composer's
-   `firstMediaKind()` reads `mime`; the engine's `readDraftFitMedia` and the
-   publish door's `mediaRefsSchema` read `contentType`. NOTHING writes the
-   field yet — free to fix now, a silent blind reader the moment media lands.
-2. **MAIN: Intel, the full treatment** — the prior-art/research pass its row
+1. **FIRST: contract window 0026 — DECIDED, his call at the s99 close.**
+   Runs at the opener, frozen before any surface work. `retired_at`
+   (nullable timestamptz) on **both** `video_cuts` and `video_projects` +
+   retire/restore verbs + rename on projects. **Removal RETIRES, it never
+   destroys**: retired rows KEEP their rendered file, nothing auto-purges,
+   and the Dossier's drawn "Restore brings it back exactly" becomes
+   honourable and gets rendered. **Rename REFUSES on a name collision** —
+   `(tenant, name)` is unique AND the get-or-create key, so a merge would
+   fold two projects together. Reads exclude retired by default with an
+   explicit opt-in for the restore door. Today's HARD `deleteCut` (s82 A3,
+   removes the file) BECOMES the retire door — one door, not two; that is a
+   real refactor of copy + tests, not a rename. Full record + reasoning:
+   COORDINATION.md §"Contract window 0026".
+2. **Warm-up, two ~10-line honesty fixes** (both grounded s99, neither needs
+   him): (a) the `meta.mediaRefs` shared reader — the Composer's
+   `firstMediaKind()` reads `mime` while the engine's `readDraftFitMedia` and
+   the publish door's `mediaRefsSchema` read `contentType`; nothing writes
+   the field yet, so it is free NOW and a silent blind reader the moment
+   media lands. (b) `projectKind()` reads the runner's own
+   `meta.onePrompt` stamp instead of sniffing
+   `description.startsWith("One-prompt")` — **this was the third window ask
+   and it DISSOLVED on grounding**: the origin is already recorded on the
+   project row (`one-prompt-video.ts:234-256`), only the display layer
+   ignores it.
+3. **MAIN: Intel, the full treatment** — the prior-art/research pass its row
    never got (rule 10), then the fe-check gate against `Intel.dc.html`, then
    the fix round. The front door of the loop, and the surface his own bug
    report proved has never been looked at properly.
-3. **If time holds: the Approve gate** — every draft crosses it, and it is
+4. **If time holds: the Approve gate** — every draft crosses it, and it is
    the one surface where he makes the actual decision.
 
 **Deliberately NOT next, stated:** page generation (needs his own word) ·
@@ -66,13 +86,11 @@ for its own sake) · the s96 simplify candidate (plat-mark paths in three
 surface copies → `components/media`; fold into whatever session touches those
 files).
 
-▎ ▸ **THREE FLAGGED contract-window asks** (raise together at the next
-window): the Dossier's drawn "Restore brings it back" needs a cut
-retire/restore column (standing since s96) · a project **delete/rename** verb
-(`video-projects` repo has only create/setMediaRoot/setAudioBed/get/list — the
-grid already shows two near-duplicate one-prompt runs nobody can clean up) ·
-a **recorded project ORIGIN** (`projectKind` decides the engine-authorship
-mark by sniffing whether the description starts "One-prompt").
+▎ ▸ **The three flagged window asks are CLOSED — he answered all three at the
+s99 close** (see item 1 above + COORDINATION §"Contract window 0026"). Two
+became window 0026 (retire/restore on cuts AND projects, plus rename); the
+third dissolved on grounding into a warm-up fix. **Nothing about this window
+needs him again** — it is decided, and the shape is written down.
 ▎ ▸ **Token rail:** the founder's standing 2M/day pin in `.env.local` is
 UNTOUCHED and was not hit this session.
 ▎ ▸ **Design work = Fable 5 direct, never delegated** (standing s51); every
