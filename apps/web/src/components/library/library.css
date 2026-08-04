@@ -78,32 +78,13 @@
 .library-surface .find-input::placeholder { color: var(--n-800); font-weight: 400; }
 .library-surface .find-input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
 
-/* ── A REFUSED CONTROL MUST NOT LOOK ARMED (s79 verify round, T1 3/3) ──
+/* ── A REFUSED CONTROL MUST NOT LOOK ARMED ──
  *
- * Measured before the fix: the disabled Ingest button computed `opacity: 1`
- * and `cursor: pointer` — pixel- and feel-identical to a live one. Nothing
- * upstream dims it: `.btn` (workspace.css) sets `cursor: pointer`
- * unconditionally with no `:disabled` companion, Astryx's reset declares
- * `:where(:disabled) { cursor: default }` at zero specificity, and Tailwind's
- * preflight explicitly sets `opacity: 1` on `button` to kill the UA's own
- * dimming. So every disabled `.btn` in the workspace renders as armed.
- *
- * TWO CORRECTIONS FROM THE VERIFY ROUND, both load-bearing:
- *
- * 1. The finding claimed sibling surfaces already scope `.btn:disabled`. They
- *    did NOT — this is a SHELL-WIDE gap in a lead-owned file; the scoped rule
- *    is the surface-legal form and the shell promotion stays written up for
- *    the lead.
- * 2. Dimming must never make RUNNING look like NOT-READY. The busy controls
- *    are `disabled={busy}` — transient, not refusals — so they flip their own
- *    label ("Ingesting…") and carry `aria-busy`. The word carries the
- *    distinction the dim cannot.
+ * s79 found this here (the disabled Ingest button computed `opacity: 1` and
+ * `cursor: pointer`, pixel- and feel-identical to a live one) and wrote up the
+ * shell promotion for the lead, scoping the rule to this surface meanwhile.
+ * The s100 Intel gate found the same defect on a fifth surface, so **s102
+ * PROMOTED it to `app/app/workspace.css`** and this local block is gone —
+ * the shell's version carries the full rationale, covers `aria-disabled` too,
+ * and reaches the surfaces nobody has passed yet, which this one never could.
  */
-.library-surface .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-/* …and a refused control must not answer the cursor either. Each variant's
-   RESTING values are restated (workspace.css) rather than `inherit`, which
-   would take the parent's background and not the button's own. */
-.library-surface .btn-primary:disabled:hover { background: var(--act); color: var(--act-text); }
-.library-surface .btn-ghost:disabled:hover { background: transparent; border-color: var(--n-400); }
-.library-surface .btn-quiet:disabled:hover { background: transparent; color: var(--n-900); }
-.library-surface .btn-danger:disabled:hover { background: transparent; border-color: var(--n-400); }

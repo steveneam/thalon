@@ -45,11 +45,37 @@ export function DossierCard({
   const [angleIndex, setAngleIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
-  function copy(key: string, text: string) {
-    void navigator.clipboard?.writeText(text);
-    setCopied(key);
+  /**
+   * "copied" must MEAN copied (s100 gate). This fired the write and reported
+   * success in the same breath — the promise was never awaited and
+   * `navigator.clipboard?.` swallows the whole call when the API is absent, so
+   * the word appeared just as confidently over an insecure origin, a denied
+   * permission, or no clipboard at all. An operator then pastes the previous
+   * thing they copied and never learns why.
+   *
+   * The word now follows the write. A failure says so at the same control,
+   * with the text still selectable on the row above.
+   */
+  async function copy(key: string, text: string) {
+    try {
+      if (!navigator.clipboard) throw new Error("no clipboard");
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+    } catch {
+      setCopied(`failed-${key}`);
+    }
     // The one copy-feedback grammar: the word swaps back on its own.
-    window.setTimeout(() => setCopied((current) => (current === key ? null : current)), 1500);
+    window.setTimeout(
+      () => setCopied((current) => (current === key || current === `failed-${key}` ? null : current)),
+      1500,
+    );
+  }
+
+  /** What a copy control renders: its own outcome, never a shared one. */
+  function copyWord(key: string): string {
+    if (copied === key) return "copied";
+    if (copied === `failed-${key}`) return "couldn’t copy";
+    return "copy";
   }
 
   /*
@@ -153,10 +179,32 @@ export function DossierCard({
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
             <span className="sec-label">Why it’s moving</span>
+            {/*
+              THE BAR IS THE ONLY PLACE THE MAGNITUDE LIVES, and to a screen
+              reader it was nothing at all (s100 gate): a bare `<div>` whose
+              width was the whole message, with the full sentence hidden in a
+              `title` that only a mouse can reach. The row now carries its own
+              name and value — the reason, the magnitude, and the verbatim
+              sentence the sighted operator gets on hover — so the ranking's
+              explanation is not mouse-only.
+            */}
             {card.reasons.map((reason) => (
-              <div className="reason" key={reason.title} title={reason.title}>
+              <div
+                className="reason"
+                key={reason.title}
+                title={reason.title}
+                role="group"
+                aria-label={`${reason.name}: ${reason.text}. ${reason.title}`}
+              >
                 <span className="rname">{reason.name}</span>
-                <div className="bar-trough">
+                <div
+                  className="bar-trough"
+                  role="meter"
+                  aria-valuenow={Math.round(reason.percent)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${reason.name} strength`}
+                >
                   <div
                     className="bar-fill"
                     style={{ width: `${reason.percent}%`, background: reason.heat }}
@@ -169,12 +217,38 @@ export function DossierCard({
 
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span className="sec-label">Ready to create</span>
-            {card.titles.length === 0 && card.angles.length === 0 ? (
-              // Live cards carry no dossier until title/angle generation arms —
-              // the honest note renders instead, never fabricated titles.
+            {/*
+              ATTRIBUTION, because every one of these lines is MACHINE-WRITTEN
+              and nothing said so (s100 gate). The headline above is the
+              source's own words and is provenanced down to the account; the
+              titles, angles and hook beside it are generated, and the operator
+              was left to tell them apart by feel. The repo's standing rule is
+              that machine-authored text names its author (the s99 videos round
+              — "model unrecorded" rather than "by you"), and this column was
+              the one place on Intel it did not.
+            */}
+            {(card.titles.length > 0 || card.angles.length > 0) && (
               <span className="t-label">
-                Ready titles &amp; angles arm with the gateway top-up — the exits below still carry
-                this item’s full context into Create.
+                Written for you from the item above — yours to edit at Create.
+              </span>
+            )}
+            {card.titles.length === 0 && card.angles.length === 0 ? (
+              /*
+                No dossier — and this line used to name ONE cause it cannot
+                know (s100 gate). A card arrives dossier-less for at least
+                three reasons: generation is not armed, the model failed after
+                its retries, or the DENYLIST dropped the whole dossier — and
+                the last is a judge verdict being reported to the operator as
+                a billing problem. `generateDossiers` records the real reason
+                in its `failed` list; nothing carries it to the wire, so the
+                card genuinely does not know which happened.
+                Until the reason rides along (recorded on the ledger row as
+                the real remedy), the copy states what IS true and stops
+                asserting a cause.
+              */
+              <span className="t-label">
+                No ready titles or angles for this card — the exits below still carry this item’s
+                full context into Create.
               </span>
             ) : (
               <div className="pick-rows" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -212,7 +286,7 @@ export function DossierCard({
                         aria-label={`Copy title: ${title}`}
                         onClick={() => copy(`title-${i}`, title)}
                       >
-                        {copied === `title-${i}` ? "copied" : "copy"}
+                        {copyWord(`title-${i}`)}
                       </button>
                     </div>
                   ))}
@@ -260,7 +334,7 @@ export function DossierCard({
                         aria-label={`Copy angle: ${angle}`}
                         onClick={() => copy(`angle-${i}`, angle)}
                       >
-                        {copied === `angle-${i}` ? "copied" : "copy"}
+                        {copyWord(`angle-${i}`)}
                       </button>
                     </div>
                   ))}
@@ -298,7 +372,7 @@ export function DossierCard({
                   aria-label="Copy hook"
                   onClick={() => copy("hook", card.hook ?? "")}
                 >
-                  {copied === "hook" ? "copied" : "copy"}
+                  {copyWord("hook")}
                 </button>
               </div>
             )}

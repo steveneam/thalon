@@ -39,6 +39,23 @@ export function RisingCard({
         <span className="t-label">
           {rows.length} card{rows.length === 1 ? "" : "s"}
         </span>
+        <div style={{ flex: 1 }} />
+        {/*
+          THE KEYBOARD GRAMMAR WORKED AND WAS INVISIBLE (s100 gate). j/k/↵ has
+          moved this list since the surface shipped and nothing anywhere said
+          so, which makes it a feature only its author can find. The legend
+          rides the head of the list it drives — the videos surfaces' own
+          j/k-legend pattern — and only when there is something to move
+          through, so an empty list is not taught a shortcut it cannot use.
+        */}
+        {rows.length > 0 && (
+          <span className="t-label" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <kbd className="kbd">j</kbd>
+            <kbd className="kbd">k</kbd> move
+            <span aria-hidden>·</span>
+            <kbd className="kbd">↵</kbd> open
+          </span>
+        )}
       </div>
       <div className="card-rows">
         {rows.length === 0 && (

@@ -80,6 +80,15 @@ export function WatchChips({
               {area.name}
               {area.paused && " · paused"}
             </button>
+            {/*
+              THE GLYPH SAID THE OPPOSITE OF THE VERB (s100 gate). This control
+              pauses — history is kept, the chip stays — but it wore `×`, the
+              universal destroy mark, so the one reversible verb on the band
+              read as the one destructive one. The prose ("An area PAUSES,
+              never deletes") was right and invisible; the mark is what the
+              operator actually reads. Pause/resume glyphs now, and the pair is
+              symmetric so neither state looks like the odd one out.
+            */}
             <button
               type="button"
               className="x"
@@ -88,7 +97,7 @@ export function WatchChips({
               title={area.paused ? "Resume this area" : "Pause this area — history is kept"}
               onClick={() => onSetPaused?.(area.id, !area.paused)}
             >
-              {area.paused ? "↺" : "×"}
+              {area.paused ? "▶" : "❙❙"}
             </button>
           </span>
         ))}

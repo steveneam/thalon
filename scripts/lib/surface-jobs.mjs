@@ -681,13 +681,36 @@ export const JOBS = {
       {
         name: "ride a trend WITHOUT an angle after clicking the angle off",
         async run(page) {
-          const angle = await page.evaluate(() => {
-            const els = Array.from(document.querySelectorAll("button, [role='button']"));
-            const hit = els.find((el) => /angle/i.test(el.textContent || ""));
-            return hit ? (hit.textContent || "").trim().slice(0, 40) : null;
-          });
-          if (!angle) throw new NoAffordance("no angle control on the dossier");
-          return `angle control present: ${JSON.stringify(angle)} (toggle-off truth is the seam's, checked in the lane's tests)`;
+          // THE SELECTOR WAS THE BUG, NOT THE PRODUCT (s100 gate → fixed
+          // s102). This matched /angle/i against textContent, but an angle
+          // radio's text IS the angle sentence — which does not contain the
+          // word "angle" — so the harness reported "no affordance" on a
+          // control that has been there since s77. A selector that describes
+          // the copy rather than the ROLE fails exactly this way; match the
+          // accessibility contract the surface actually publishes.
+          const SEL = "[role='radiogroup'][aria-label='Suggested angles'] [role='radio']";
+          const first = await page.$(SEL);
+          if (!first) throw new NoAffordance("no angle radios on the dossier");
+
+          // And now the job earns its name: pick an angle, then click the
+          // marked one again and prove it goes back to unpicked. That is the
+          // founder's own s77 finding ("the buttons cant be deselected"), and
+          // it is checkable right here rather than deferred to a unit test.
+          const read = () =>
+            page.$$eval(SEL, (els) => els.map((el) => el.getAttribute("aria-checked") === "true"));
+
+          await first.click();
+          const picked = await read();
+          if (!picked.some(Boolean)) throw new NoAffordance("clicking an angle does not mark it");
+
+          await first.click();
+          const cleared = await read();
+          if (cleared.some(Boolean)) {
+            throw new NoAffordance(
+              "clicking the marked angle again leaves it marked — the optional angle cannot be ridden off",
+            );
+          }
+          return `angle rides and un-rides (${picked.length} angles offered; marked → cleared)`;
         },
       },
       {

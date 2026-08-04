@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DossierCard, type DossierPick } from "@/components/intel/dossier-card";
 import {
@@ -27,6 +27,9 @@ export type IntelTab = "trends" | "search";
 
 type Status = "loading" | "error" | "success";
 
+/** The sweep's running word — the button renders it and the live region announces it. */
+const SWEEPING = "Sweeping…";
+
 /**
  * The Intel surface, rebuilt exactly from Intel.dc.html (DOCTRINE 0 — the
  * sheet is the blueprint): the header band with its tabs and the honest
@@ -52,7 +55,23 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
   const [payload, setPayload] = useState<TrendsPayload | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [cursorId, setCursorId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  /**
+   * The running action, by NAME — not a bare boolean (s100 gate). `busy`
+   * locked every control on the surface while saying nothing about what was
+   * running, so a dismiss, a sweep and a promote were indistinguishable from
+   * a hung page. The name is what the running control renders in place of its
+   * label, and what the live region announces.
+   */
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const busy = busyAction !== null;
+  /**
+   * The double-submit guard is a REF, not the state above. Two presses in one
+   * tick both read the same rendered `busyAction` — React has not committed
+   * the first `setBusyAction` yet — so a state check cannot stop the second
+   * call, which is exactly how add-area shipped double-submittable. The ref
+   * is written synchronously and is the thing that actually refuses.
+   */
+  const busyRef = useRef<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   // The clock is stamped when the read LANDS, not per render: every "3h ago"
   // on screen is "as of this read", and re-renders (typing in the add-area
@@ -82,16 +101,34 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
     void load();
   }
 
-  async function withBusy(action: () => Promise<unknown>) {
-    setBusy(true);
+  /**
+   * Claim the surface's ONE action slot under `name` — the running action in
+   * the operator's words ("Sweeping…", "Dismissing…"). A second call while one
+   * is in flight is refused, not queued. **The caller owns the error**, so a
+   * door with its own error line (the watch form) can keep the operator where
+   * they are instead of throwing them to a surface-level band.
+   */
+  async function runNamed<T>(name: string, action: () => Promise<T>): Promise<T> {
+    if (busyRef.current !== null) {
+      throw new Error(`${busyRef.current.replace(/…$/, "")} is still running — one at a time.`);
+    }
+    busyRef.current = name;
+    setBusyAction(name);
+    try {
+      return await action();
+    } finally {
+      busyRef.current = null;
+      setBusyAction(null);
+    }
+  }
+
+  /** The card actions' form: a refusal surfaces VERBATIM in the surface's own band — never a fake spinner. */
+  async function withBusy(name: string, action: () => Promise<unknown>) {
     setActionError(null);
     try {
-      await action();
+      await runNamed(name, action);
     } catch (err) {
-      // A driver refusal surfaces VERBATIM — never a fake spinner.
       setActionError(err instanceof Error ? err.message : "Action failed");
-    } finally {
-      setBusy(false);
     }
   }
 
@@ -137,7 +174,7 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
   function dismiss(cardId: string) {
     // Hand the dossier to the next card before the list reloads.
     const next = rising.at(0);
-    void withBusy(async () => {
+    void withBusy("Dismissing…", async () => {
       await dismissTrend(cardId);
       setExpandedId(next ? next.id : null);
       if (cursorId === cardId) setCursorId(null);
@@ -146,7 +183,7 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
   }
 
   function promote(cardId: string, pick: DossierPick) {
-    void withBusy(async () => {
+    void withBusy("Opening Create…", async () => {
       const { createHref } = await promoteTrend(cardId, pick);
       router.push(createHref);
     });
@@ -156,10 +193,22 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
     <div className="content intel-surface" style={{ gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <h1 className="t-headline">Intel</h1>
-        {tab === "trends" && status === "success" && (
-          <span className="pill pill-idle">
+        {/*
+          THE COUNT RESERVES ITS OWN BOX (s100 gate). This rendered only on
+          success, so the read landing ~1.3s in inserted a pill and shoved the
+          tabs 91px sideways — under a cursor already on its way to one. The
+          slot is always there; only its CONTENT waits for the read, which is
+          the honest split (we do not know the number yet, we do know there
+          will be one).
+        */}
+        {tab === "trends" && (
+          <span
+            className="pill pill-idle"
+            style={{ visibility: status === "success" ? "visible" : "hidden" }}
+            aria-hidden={status !== "success"}
+          >
             <span className="dot" style={{ background: "var(--heat-rising)" }} />
-            {cards.length} rising
+            {status === "success" ? `${cards.length} rising` : "0 rising"}
           </span>
         )}
         <div style={{ display: "flex", marginLeft: 10 }}>
@@ -188,14 +237,17 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
               type="button"
               className="btn btn-ghost btn-sm"
               disabled={busy || status !== "success"}
+              aria-busy={busyAction === SWEEPING}
               onClick={() =>
-                withBusy(async () => {
+                withBusy(SWEEPING, async () => {
                   await sweepNow();
                   await load();
                 })
               }
             >
-              Sweep now
+              {/* The running control says so itself — a dim alone cannot tell
+                  "running" from "not ready" (the s79 library lesson). */}
+              {busyAction === SWEEPING ? SWEEPING : "Sweep now"}
             </button>
           </>
         )}
@@ -206,28 +258,45 @@ export function Intel({ initialTab = "trends" }: { initialTab?: IntelTab }) {
       ) : (
         <>
           {/* j/k moves the selection silently for screen readers without this
-              (the approve queue's live-region precedent). */}
+              (the approve queue's live-region precedent). The running action
+              rides the same region: `busy` disables every control on the
+              surface, so a reader that is not told WHAT is running just finds
+              a page that stopped answering. */}
           <p aria-live="polite" className="sr-only">
-            {cursorId ? `Selected: ${rising.find((c) => c.id === cursorId)?.text ?? ""}` : ""}
+            {busyAction ??
+              (cursorId ? `Selected: ${rising.find((c) => c.id === cursorId)?.text ?? ""}` : "")}
           </p>
 
           {status === "success" && payload && (
             <WatchChips
               areas={toWatchViews(payload.areas)}
               busy={busy}
+              /*
+                s100 gate: add-area and save-description were the two doors
+                that ran OUTSIDE `withBusy` — they awaited their own fetch with
+                nothing disabled, so a second press submitted a second time and
+                created a duplicate area. They go through the same gate as
+                every other action now, and it REFUSES a second call rather
+                than queueing it. They stay `async` because the form owns the
+                error and clears its own fields on success.
+              */
               onCreate={async (input) => {
-                await createArea(input);
-                await load();
+                await runNamed("Adding the area…", async () => {
+                  await createArea(input);
+                  await load();
+                });
               }}
               onSetPaused={(areaId, paused) =>
-                void withBusy(async () => {
+                void withBusy(paused ? "Pausing…" : "Resuming…", async () => {
                   await updateArea(areaId, { status: paused ? "paused" : "active" });
                   await load();
                 })
               }
               onDescribe={async (areaId, description) => {
-                await updateArea(areaId, { description });
-                await load();
+                await runNamed("Saving the description…", async () => {
+                  await updateArea(areaId, { description });
+                  await load();
+                });
               }}
             />
           )}

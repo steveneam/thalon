@@ -145,6 +145,41 @@
 .btn-danger:hover { background: var(--err-subtle); border-color: var(--err); }
 .btn-sm { height: 27px; padding: 0 10px; font-size: 12.5px; }
 
+/* ── A REFUSED CONTROL MUST NOT LOOK ARMED — promoted to the shell, s102 ──
+ *
+ * Nothing upstream dims a refused button: `.btn` above sets `cursor: pointer`
+ * unconditionally, Astryx's reset declares `:where(:disabled){cursor:default}`
+ * at zero specificity, and Tailwind's preflight sets `opacity: 1` on `button`
+ * to kill the UA's own dimming. So a disabled `.btn` rendered pixel- and
+ * feel-identical to a live one, workspace-wide.
+ *
+ * The s79 library round found this, wrote "this is a SHELL-WIDE gap in a
+ * lead-owned file; the shell promotion stays written up for the lead", and
+ * scoped it to `.library-surface`. Four surfaces then copied that block. The
+ * s100 Intel gate found the same defect again, which made Intel the fifth —
+ * so the fix moves here rather than being pasted a fifth time. A per-surface
+ * rule cannot protect Integrations, Leads, Profiles or Source Media, and
+ * those are precisely the surfaces nobody has passed yet.
+ *
+ * `aria-disabled` rides the same dress: the s81 grammar prefers an inert
+ * control that STAYS focusable and states its reason over a hard `disabled`
+ * (staged s101 — 26 of 41 controls hard-disabled on a live run), and that
+ * grammar only reads if the two look alike.
+ *
+ * Dimming must never make RUNNING look like NOT-READY: `disabled={busy}`
+ * controls flip their own label ("Sweeping…") and carry `aria-busy`. The word
+ * carries the distinction the dim cannot.
+ */
+.btn:disabled,
+.btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+/* …and a refused control must not answer the cursor either. Each variant's
+   RESTING values are restated rather than `inherit`, which would take the
+   parent's background and not the button's own. */
+.btn-primary:disabled:hover, .btn-primary[aria-disabled="true"]:hover { background: var(--act); color: var(--act-text); }
+.btn-ghost:disabled:hover, .btn-ghost[aria-disabled="true"]:hover { background: transparent; border-color: var(--n-400); }
+.btn-quiet:disabled:hover, .btn-quiet[aria-disabled="true"]:hover { background: transparent; color: var(--n-900); }
+.btn-danger:disabled:hover, .btn-danger[aria-disabled="true"]:hover { background: transparent; border-color: var(--n-400); }
+
 /* ── Pills ── */
 .pill { display: inline-flex; align-items: center; gap: 5px; height: 21px; padding: 0 9px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
 .pill-ok   { background: var(--ok-subtle); color: var(--ok); }
