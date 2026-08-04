@@ -34,25 +34,37 @@ design.
 ## Resume prompt (session 100, syd4)
 
 **Resume · Thalon** — the video arc is CLOSED; the Create loop is live
-end-to-end; no arc is mid-flight. Candidates, no fixed order (re-test at the
-opener, rule 11):
+end-to-end; no arc is mid-flight. **THE PLAN BELOW IS FOUNDER-APPROVED** (his
+words at the s99 close, after I put it to him: *"ok go with that plan next
+session"*). Rule 11 still applies to the FACTS — re-ground each item at the
+opener — but the ORDER is his call, not a candidate list.
 
-1. **UX programme** — the remaining un-passed rows in
-   `docs/research/ux-refinement-program.md`. The four video rows and Composer
-   now carry full s99 gate records; the untouched surfaces (Integrations,
-   Intel, Leads, Profiles) are the honest next front. **Intel especially** —
-   the founder found a live defect there this session, and its row still
-   reads "untouched — not ready".
-2. **The `meta.mediaRefs` split reader** (s99 gate finding, back-end): the
-   Composer reads `mime`, the engine's `readDraftFitMedia` + the publish
-   door's `mediaRefsSchema` read `contentType`. Unexercised today; whichever
-   producer lands first, one reader goes blind. One shared reader BEFORE the
-   media pass.
-3. **More Create dogfood** — the post door is armed and proven; each run is
-   subscription-only until media enters. Page generation still needs its OWN
-   founder word.
-4. **Simplify candidate** (s96, still open): plat-mark paths in THREE surface
-   copies (approve/analytics/schedule) → `components/media`.
+**The frame he approved:** gate the live loop (Intel → Create → Composer →
+Approve → Schedule), Intel first. Two reasons on record: (a) he caught a live
+Intel defect himself this session and that row still reads "untouched — not
+ready" — no research pass, no verdict, never gated; (b) the s99 gates found
+~150 confirmed findings and ~a dozen HIGH across four surfaces that were all
+already considered finished, so every built-but-ungated surface is carrying
+unknown defects. Broadening the product (more platforms, YouTube intel, OAuth
+callbacks) all needs his hands, and he is in a hands-free stretch — so
+quality on the loop he already runs is the highest-value hands-free work.
+
+1. **Warm-up (~30 min): the `meta.mediaRefs` shared reader.** The Composer's
+   `firstMediaKind()` reads `mime`; the engine's `readDraftFitMedia` and the
+   publish door's `mediaRefsSchema` read `contentType`. NOTHING writes the
+   field yet — free to fix now, a silent blind reader the moment media lands.
+2. **MAIN: Intel, the full treatment** — the prior-art/research pass its row
+   never got (rule 10), then the fe-check gate against `Intel.dc.html`, then
+   the fix round. The front door of the loop, and the surface his own bug
+   report proved has never been looked at properly.
+3. **If time holds: the Approve gate** — every draft crosses it, and it is
+   the one surface where he makes the actual decision.
+
+**Deliberately NOT next, stated:** page generation (needs his own word) ·
+more Create dogfood (the loop is proven — do it when there is a reason, not
+for its own sake) · the s96 simplify candidate (plat-mark paths in three
+surface copies → `components/media`; fold into whatever session touches those
+files).
 
 ▎ ▸ **THREE FLAGGED contract-window asks** (raise together at the next
 window): the Dossier's drawn "Restore brings it back" needs a cut

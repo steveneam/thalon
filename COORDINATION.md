@@ -212,6 +212,21 @@ the same session.** Wrap verify: exit 0, **3338 passed / 9 skipped**.
 | **V9 · Composer** — the gate, round 2 (`<this wrap>`) | **The re-run gate came back `matches_sheet: false`** (58 agents, 41 confirmed) and its four HIGHs were real: (1) **every door on the surface rendered GREY** — a blanket `.composer-surface a { color: inherit }` landed after the shell's `.screen a { color: var(--act) }` at equal specificity and won for every anchor, including the three doors round 1 had just added; scoped to the simulated post only, and **measured live: all four doors now compute to exactly `--act`** · (2) the ⓘ tooltips were native `title=` attributes where the sheet draws a designed popover — the sheet's `.tip` block is ported, both tips are real elements, keyboard-reachable, `nativeTitles: 0` · (3) the fit band stretched a single destination across 1,174px, stranding the count 1,038px from the platform it measures — **exactly the founder's own one-destination dogfood shape** — now capped at the sheet's tile width (band 1174→236px, gap 1038→97px) · (4) a platform REFUSING the post wore an amber dot while the band below painted it red; a refusal is now err, and an over-length post (which still ships, cut) stays warn — my own test caught that ordering. Verified by live probe + screenshot, both themes. |
 | Ops notes, stated | Credits ran out mid-Composer-gate on Fable 5; the session continued on Opus 5 and the gate was resumed from its own run id (the completed walkthrough replayed from cache). No credits spent on any vendor mint; no live posts; the post door stayed armed but unused. Two of my own new tests failed first and were right to: they caught that `adoptableRender` only adopts RUNNING jobs, and that ⌘Z inside a text field is deliberately left to the browser. |
 
+**s100 IS CHARTERED — founder-approved at the s99 close.** He asked for a
+recommendation and a plan, and approved it verbatim: *"ok go with that plan
+next session."* **Gate the live loop (Intel → Create → Composer → Approve →
+Schedule), Intel first**, with the `meta.mediaRefs` shared reader as a ~30-min
+warm-up and the Approve gate if time holds. The argument he approved: he
+caught a live Intel defect himself this session while Intel's row still reads
+"untouched — not ready" (no research pass, no verdict, never gated), and the
+s99 gates found ~150 confirmed findings / ~a dozen HIGH across four surfaces
+that were ALL already considered finished. Everything that would broaden the
+product needs his hands and he is hands-free, so quality on the loop he
+already runs is the best hands-free work available. Explicitly NOT next: page
+generation (his own word) · more dogfood (proven) · the s96 simplify
+candidate (fold in opportunistically). Full plan + reasoning in
+`agent_handoff/CURRENT.md` §Resume prompt.
+
 **ONE THING THE GATE FOUND THAT IS NOT UI:** `meta.mediaRefs` has **two
 competing field names** — the Composer's `firstMediaKind()` reads `mime`,
 while the engine's `readDraftFitMedia()` and the publish door's
