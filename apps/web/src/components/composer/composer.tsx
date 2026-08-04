@@ -366,7 +366,18 @@ export function ComposerSurface({ runId }: { runId: string }) {
           </div>
 
           <span className="zlabel">EVERY DESTINATION AT A GLANCE — FIT + REFUSALS</span>
-          <div className="fitband" style={{ gridTemplateColumns: `repeat(${drafts.length}, 1fr)` }}>
+          {/* s99 — the tile CAPS at the sheet's own width so a one-destination
+              run (the founder's s98 dogfood shape) reads as one fact instead
+              of stranding the count 1,038px from the platform it measures. */}
+          <div
+            className="fitband"
+            style={{
+              gridTemplateColumns: `repeat(${drafts.length}, minmax(0, 1fr))`,
+              // Fills at the sheet's five (~236px each at 1176); at one it stops
+              // rather than stretching a single fact across the whole band.
+              maxWidth: drafts.length * 236,
+            }}
+          >
             {drafts.map((draft) => {
               const words = fitWords(fits[draft.id] ?? null);
               return (
@@ -817,11 +828,15 @@ function RightColumn({
         <span className="t-label" style={{ fontSize: 11 }}>
           generated from this platform&apos;s schema
         </span>
-        <span
-          className="info"
-          title="each platform declares its own settings — a video destination declares more (YouTube: title · thumbnail · made-for-kids; TikTok: privacy · duet · stitch), on their own tabs"
-        >
-          i
+        <span className="info-wrap">
+          <button type="button" className="info" aria-label="Why each destination shows different settings">
+            i
+          </button>
+          <span className="tip" role="tooltip">
+            <span className="tip-h">WHY THE ROWS DIFFER</span>
+            Each platform declares its own settings — a video destination declares more (YouTube:
+            title · thumbnail · made-for-kids; TikTok: privacy · duet · stitch), on their own tabs.
+          </span>
         </span>
       </div>
 
@@ -882,12 +897,22 @@ function RightColumn({
           <dd>
             <span className="t-label" style={{ fontSize: 11 }}>
               joins when Analytics has real history — nothing invented before that{" "}
-              <span
-                className="info"
-                style={{ verticalAlign: -3 }}
-                title="A forecast needs measured posts. The analytics loop records how every published post actually does; once that history exists, this row predicts from it. Until then a number here would be fiction — honesty beats polish."
-              >
-                i
+              {/* The sheet's ONE deliberately-open tip (s90c: the forecast's
+                  honesty is the explanation most worth pre-answering). */}
+              <span className="info-wrap" style={{ verticalAlign: -3 }}>
+                <button
+                  type="button"
+                  className="info"
+                  aria-label="Why there is no prediction yet"
+                >
+                  i
+                </button>
+                <span className="tip" role="tooltip">
+                  <span className="tip-h">WHY THERE IS NO PREDICTION YET</span>
+                  A forecast needs measured posts. The analytics loop records how every published
+                  post actually does; once that history exists, this row predicts from it. Until
+                  then a number here would be fiction — honesty beats polish.
+                </span>
               </span>
             </span>
           </dd>

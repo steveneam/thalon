@@ -192,6 +192,48 @@ none blocks another, and none touches the sheets. Launch = Mode B via
 **Sequencing note:** if only two lanes are wanted, drop `d2-window` — it is
 the one with the weakest near-term payoff by its own charter.
 
+## Sprint 9 / s99 — **CLOSED** (boot 2026-08-03 "gogogo" + his mid-session bug report; **V9 SHIPPED — the video arc's last item, and with it the arc**; zero credits, zero live posts)
+
+**The founder's one-word boot spent on V9, interrupted once by his own live
+report — "in the Intel feature, why are you taking the whole transcript and
+putting it into the title!!!?" — which was a real defect and got fixed first.
+Three of the four video surfaces passed their render gate first time; the
+Composer FAILED its gate (`matches_sheet: false`) and was fixed and
+re-verified live. Every confirmed finding behind all four gates was fixed in
+the same session.** Wrap verify: exit 0, **3338 passed / 9 skipped**.
+
+| track | outcome |
+|---|---|
+| **The founder's Intel bug** (`93d0045`) | **Real, and worse than it looked.** The Intel card never had a title field: the dossier's `<h2>` and the rising rows were wired to the trend item's raw `text`, which for video sources is the platform's whole `title + description + transcript hook` blob — **1,947 characters rendering as the headline on live dev data**. The sheet's fixture was a short one-line post, so the mock never exposed it. Fix in the display model: the headline is the FIRST LINE (where the TrendItem contract puts the title), word-boundary-cut at 160 for a long single-line post, with the verbatim text demoted to hover truth and the source link still opening the original. Live-confirmed after the fix: h2 = 55 chars, hover = the full 1,947. |
+| **V9 · Videos Overview** (`4505e9e`) | **GATE PASSED** (fe-check {built}, 21 agents; sheet-true both themes at 1440×940; refused/empty/loading distinct). Fix round: the provenance grammar amended — **a machine-minted import no longer reads "by you"** (live case `thalon-concept-film`: three recorded mint models, credited to the operator), several mints now say "N mint models", and a one-prompt project with empty manifests says "model unrecorded" instead of standing a cut identity in the authorship slot · the take poster layers OVER the stripes (a pruned media ref degrades to the placeholder, never a silent blank) · fam-link hover restored · the count pill got a sizer so the filter seg stops lurching under the pointer · **drop/paste land on the honest import disclosure** (the browser default was navigating AWAY from the workspace, discarding state) · disclosure toggles mark open at the control · Escape clears the j/k pick · the exact created stamp joined the accessible name. |
+| **V9 · Video Dossier** (`9a63573`) | **GATE PASSED** (37 agents; state matrix distinct including missing-vs-refused). 27 confirmed findings; fixed: the notice band carries its TONE (success ≠ instruction ≠ refusal, dismissable, spent instructions cleared) · **the delete confirm is stamped to its cut** — a pick change closes it rather than silently retargeting a destructive door · "Deleting…" actually paints · Send-to-Approve follows the surface's own s81 grammar (aria-disabled + an answered press, never a hard-disabled silent CTA) · the pick-two compare instruction branches satisfiable on one-version projects · a failed EDL read names itself with Try again · every clipped identity wears hover truth (the gate's one rendered defect) · the brief chip credits "the run's brief" on one-prompt · **the Overview's takes/cuts facts became real deep-link doors** (`?open=takes\|cuts`). |
+| **V9 · Video editor** (`8d1ed8f`) | **GATE PASSED** (41 agents; four-state matrix distinct; the s95b deviations re-confirmed deliberate). 31 confirmed, five HIGH — all fixed: the "Recut 9:16" chip kept the aspect seg's own dirty refusal (**it was the one exit that destroyed unsaved edits past both the refusal and the exit guard**) · a failed render mounts its own band even with an empty notice (broken ≠ idle) · **one gesture = one undo entry** (a coalesce key through `apply` — a drag pushed per pointermove and a caption per keystroke, evicting real edits off the bounded spine; pinned by a test proving 3 keystrokes leave 1 step) · Discard pushes the discarded copy onto the spine so ⌘Z brings it back · **the beat lane draws on the CUT's duration** — the axis the ruler, playhead, overlay and both other lanes already shared. Plus `running` as a Set, a stale `?cut=` falling back with a sentence, one-prompt attribution reaching the surface via a new `meta.onePrompt` projection, reject reasons at the mark, keyboard-bound crop windows, answered zoom clamps. |
+| **V9 · Composer** — round 1 (`749b833`) | The walkthrough ran, then **credits ran out mid-gate on Fable 5 with 8 of 9 phase agents unfinished** — stated, not papered over; the session moved to Opus 5 and the gate was resumed from its own run id. Round 1's headline is a leak: **Drizzle's `Failed query: … params: <tenant uuid>` was rendering VERBATIM in the browser** on all three verbs, because surfaces print refusals word-for-word by design and `toErrorResponse`'s catch-all passed the driver's message straight through. Driver errors are now a 500 carrying the fact alone, detail server-side. Also: the fit band names a FAILED measure instead of "measuring…" forever · **the verdict strip speaks all seven draft eras** (the s98 published draft was still being told the human gate was "next") · the Intel-pick door reads `run.brief.context` (the fan-out leaves `draft.captureId` null, so it never fired) · `profile v{n}` is a door · the video media band's stated cut links to its own project. |
+| **V9 · Composer** — the gate, round 2 (`<this wrap>`) | **The re-run gate came back `matches_sheet: false`** (58 agents, 41 confirmed) and its four HIGHs were real: (1) **every door on the surface rendered GREY** — a blanket `.composer-surface a { color: inherit }` landed after the shell's `.screen a { color: var(--act) }` at equal specificity and won for every anchor, including the three doors round 1 had just added; scoped to the simulated post only, and **measured live: all four doors now compute to exactly `--act`** · (2) the ⓘ tooltips were native `title=` attributes where the sheet draws a designed popover — the sheet's `.tip` block is ported, both tips are real elements, keyboard-reachable, `nativeTitles: 0` · (3) the fit band stretched a single destination across 1,174px, stranding the count 1,038px from the platform it measures — **exactly the founder's own one-destination dogfood shape** — now capped at the sheet's tile width (band 1174→236px, gap 1038→97px) · (4) a platform REFUSING the post wore an amber dot while the band below painted it red; a refusal is now err, and an over-length post (which still ships, cut) stays warn — my own test caught that ordering. Verified by live probe + screenshot, both themes. |
+| Ops notes, stated | Credits ran out mid-Composer-gate on Fable 5; the session continued on Opus 5 and the gate was resumed from its own run id (the completed walkthrough replayed from cache). No credits spent on any vendor mint; no live posts; the post door stayed armed but unused. Two of my own new tests failed first and were right to: they caught that `adoptableRender` only adopts RUNNING jobs, and that ⌘Z inside a text field is deliberately left to the browser. |
+
+**ONE THING THE GATE FOUND THAT IS NOT UI:** `meta.mediaRefs` has **two
+competing field names** — the Composer's `firstMediaKind()` reads `mime`,
+while the engine's `readDraftFitMedia()` and the publish door's
+`mediaRefsSchema` both read `contentType`. Nothing writes mediaRefs onto
+drafts today, so it is unexercised — but whichever producer lands first, one
+reader goes blind (either the media band shows nothing on a draft that
+publishes an attachment, or the fit band says "carries no media at all" under
+a band that says "video — the run's cut"). **One shared reader before the
+media pass** — first item for whoever opens that bucket.
+
+**DEFERRED, stated:** the video arc has **no items left** — V9 was the last.
+What the four gates recorded but did NOT fix (each on its
+`docs/research/ux-refinement-program.md` row): project delete/rename + a
+recorded project ORIGIN (kind still rests on a prose sniff) and the standing
+retire/restore column = **contract-window asks** · judge-receipt and
+grounding/publish evidence routes · the approved-cut→Approve-queue join ·
+takes-panel filter/search at 58 takes · derived-cut compare · a render-cancel
+verb · browser-Back-while-dirty · the sheet's `.otio export` claim (the drop
+was honest — the SHEET needs reconciling) · Composer more-settings inputs,
+the cover-frame picker and a video variant's player. **Page generation** stays
+gated on the founder's own word.
+
 ## Sprint 9 / s98 — **CLOSED** (boot 2026-08-03 "gogogo. and Go for the dogfood too"; **THE FIRST LIVE CREATE-ORIGINATED POST** — zero credits, subscription tokens only)
 
 **The founder's turn carried two GOs and both executed: the post door ARMED

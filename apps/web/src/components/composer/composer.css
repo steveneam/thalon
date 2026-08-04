@@ -61,6 +61,16 @@
 
 .composer-surface .info { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--n-600); color: var(--n-800); font-size: 9px; font-weight: 600; cursor: help; flex: none; font-family: var(--font-data); }
 .composer-surface .info:hover { color: var(--n-1000); border-color: var(--n-800); }
+/* s99 — the sheet's DESIGNED popover (Composer.dc.html:259), which the port
+   had dropped for a native `title=`: an OS tooltip on a ~1s delay, keyboard-
+   unreachable and invisible on touch, where the sheet draws the forecast's
+   honesty as the one deliberately-open tip. Same hover/focus-sibling
+   vocabulary the editor surface already keeps. */
+.composer-surface .info-wrap { position: relative; display: inline-flex; flex: none; }
+.composer-surface .tip { position: absolute; z-index: 9; width: 208px; background: var(--n-100); border: 1px solid var(--n-500); border-radius: 9px; box-shadow: 0 10px 30px oklch(0 0 0 / 0.5); padding: 9px 11px; font-size: 11.5px; line-height: 1.45; color: var(--n-1000); right: 0; bottom: calc(100% + 9px); display: none; }
+.composer-surface .tip .tip-h { font-family: var(--font-data); font-size: 10px; color: var(--n-800); display: block; margin-bottom: 4px; }
+.composer-surface .info:hover + .tip,
+.composer-surface .info:focus-visible + .tip { display: block; }
 
 /* ── App adaptations (the NAMED kind only) ──
    1. REAL TABS/VERBS: the sheet's spans ship as buttons; `.screen a` paints
@@ -72,7 +82,16 @@
       refusal verbatim at the control.
    5. The fitband's column count follows the run's real destination count
       (inline grid-template-columns) — five is the sheet's fixture, not a law. */
-.composer-surface a { color: inherit; }
+/* s99 — DOORS READ AS DOORS. This was a blanket `a { color: inherit }`, and
+   because it lands after the shell's `.screen a { color: var(--act) }` at the
+   same specificity it won for EVERY anchor here: the run door, the Intel
+   pick, `profile v5`, `details ▸` and the cut door all rendered body-grey
+   while the sheet (theme.css:54) paints them --act. The shell already dresses
+   buttons (.btn-*) and the crumb sets its own inherit inline, so the blanket
+   bought nothing the sheet wanted. Only the PREVIEW's simulated post keeps
+   inherit — inside it an anchor is the platform's own body text, not a door
+   of ours. */
+.composer-surface .pv a { color: inherit; }
 .composer-surface .ptab { background: none; border: none; font-family: inherit; }
 .composer-surface .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .composer-surface .dot-ok { background: var(--ok); }

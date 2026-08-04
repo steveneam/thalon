@@ -116,7 +116,16 @@ V7. [BUILT s97 — HOLDS as a regression bar] Render progress and durations are
     the `video_cut.rendered` event (absent when unmeasured, never invented).
 V8. The density doctrine (Create spec §Density) applies: inspector detail in
     popovers, preview popouts, tooltips for rationale; one open tooltip per sheet.
-V9. All four surfaces pass the render gate against their sheets; drift is a defect.
+V9. [SHIPPED s99 — the arc's last item] All four surfaces pass the render gate
+    against their sheets; drift is a defect. Passed first time: Videos Overview
+    (`4505e9e`, 21 agents) · Video Dossier (`9a63573`, 37) · the editor
+    (`8d1ed8f`, 41). **The Composer FAILED its gate** (58 agents,
+    `matches_sheet: false`) on four HIGHs — every door rendering grey, native
+    `title=` where the sheet draws a popover, the fit band degenerating at one
+    destination, and a platform refusal understated as amber — all four fixed
+    and re-verified by live probe + screenshot. Each surface carried its own
+    fix round in the same session; the confirmed findings are the commits' own
+    records, the deferred ones are on the ux-refinement-program rows.
 V10. Zero credit spend in build/test: renders in tests replay fixtures; live mints
      stay founder-gated per the standing credit discipline.
 
@@ -334,9 +343,18 @@ decision session (criteria already in V3), then pass-3 states (V7/V9).
 > ask, i.e. the re-brief door coming to dominate editor usage.
 >
 > **Phase 4b, first half BUILT s97 (`1ddcf2c`): V7 elapsed honesty** — see
-> the V7 requirement's own record. **Remaining in this arc: V9** — the
-> render-gate pass across the four surfaces (screenshot-vs-sheet + the
-> refused/empty/loading state matrix); drift is a defect.
+> the V7 requirement's own record. **Phase 4b, second half SHIPPED s99: V9,
+> and with it THE ARC.** All four surfaces now hold against their sheets
+> (Overview `4505e9e` · Dossier `9a63573` · editor `8d1ed8f` · Composer
+> `749b833` + the gate-round-2 fixes), each with the refused/empty/loading
+> matrix distinct in both themes at 1440×940. **Three passed first time; the
+> Composer's gate FAILED** (`matches_sheet: false`) and its four HIGHs were
+> fixed and re-verified live. Every confirmed finding behind those gates was
+> fixed in the same session. **Nothing in this arc remains.** What the gates
+> recorded but deliberately did not fix is on the surfaces' own
+> `docs/research/ux-refinement-program.md` rows, and the two contract-window
+> asks (a project delete/rename verb + a recorded project ORIGIN; the standing
+> retire/restore column) go to the founder at the next window.
 
 **Interleave:** B-create.5 dogfood (the first real Create run) stays its own
 gate and can land before, between or after these — it needs a spend statement

@@ -44,8 +44,17 @@ export function tabDot(draft: GridDraft, fit: FitResponse | "failed" | null): Ta
   // An unmeasurable destination is a warning, not a clean bill (s99).
   if (fit === "failed") return "warn";
   if (fit === null || !("supported" in fit) || fit.supported === false) return "ok";
+  // s99 — A REFUSAL IS RED ON THE TAB TOO. `!fits` means the platform will
+  // not take this post as written (the engine's own verdict — e.g. "TikTok
+  // accepts image/jpeg, image/png, image/webp — this draft carries
+  // video/mp4"), and the fit band already paints it on --err-subtle. The dot
+  // is the AT-A-GLANCE channel, so understating it there is the one place the
+  // operator is most likely to read. A cut/trim (overBy) still ships: warn.
   if (fit.fit.media.required && fit.fit.media.count === 0) return "err";
-  if (!fit.fit.fits || fit.fit.text.overBy > 0) return "warn";
+  // Over-length still SHIPS (cut at the ceiling) — that stays a warning. A
+  // `!fits` for any other reason is the platform refusing the post outright.
+  if (fit.fit.text.overBy > 0) return "warn";
+  if (!fit.fit.fits) return "err";
   return "ok";
 }
 

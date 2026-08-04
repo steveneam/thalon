@@ -332,3 +332,14 @@ describe("s99: the provenance facts that were on the wire all along", () => {
     ).toBeNull();
   });
 });
+
+/** s99 gate round 2 — the render gate's own HIGH findings. */
+describe("s99 gate: a refusal is red on the tab, not amber", () => {
+  it("a platform refusing the post outright wears err — over-length still ships cut", () => {
+    // The gate's live case: TikTok refuses video/mp4 (fits:false, overBy:0)
+    // while the fit band already paints that fact on --err-subtle.
+    expect(tabDot(draft({}), fit({ fits: false }))).toBe("err");
+    // A cut/trim ships — that stays the warning it was.
+    expect(tabDot(draft({}), fit({ overBy: 12, fits: false }))).toBe("warn");
+  });
+});
