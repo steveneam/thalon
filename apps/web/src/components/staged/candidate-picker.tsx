@@ -1,7 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { formatMsAsClock } from "@/lib/approve-queue/formats/clip-plan";
 import type { StageCandidate } from "@/lib/staged-flow/types";
 
@@ -13,54 +11,61 @@ interface CandidatePickerProps {
 }
 
 /**
- * Pick-from-2-3-candidates per stage: the operator reacts to visible,
- * summarized takes — never a blank prompt box. Each card shows the take's
- * angle plus the concrete numbers (scenes, duration, feel) and the first
- * scene's direction as a taste of the whole.
+ * Pick-from-2-3-takes per stage (rebuilt s101 to `Staged.dc.html`): the
+ * operator reacts to visible, summarised takes — never a blank prompt box.
+ *
+ * One column, not `md:grid-cols-2 xl:grid-cols-3`. The old grid used VIEWPORT
+ * breakpoints inside a 560px pane, so on a 1440px screen three take cards
+ * split ~170px each and every fact on them wrapped. The take's facts and its
+ * verb are what the operator reads; at this width they read as rows.
  */
 export function CandidatePicker({ stageTitle, candidates, busy, onPick }: CandidatePickerProps) {
   return (
-    <div aria-label={`${stageTitle} candidates`} role="group" className="flex flex-col gap-2">
-      <p className="text-sm text-muted-foreground">
-        {candidates.length} takes for <span className="font-medium text-foreground">{stageTitle}</span> — pick one to
-        continue. Every pick is captured (it trains one-prompt mode&rsquo;s defaults).
+    <div aria-label={`${stageTitle} candidates`} role="group" style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+      <p className="t-label">
+        {candidates.length} takes for <b style={{ color: "var(--n-1000)" }}>{stageTitle}</b> — pick one to
+        continue. Every pick is captured; it trains one-prompt mode&rsquo;s defaults.
       </p>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {candidates.map((candidate) => {
+      <div className="takes">
+        {candidates.map((candidate, i) => {
           const doc = candidate.doc;
           const scenes = doc?.scenes ?? candidate.storyboard?.scenes ?? [];
           const totalMs = doc ? doc.scenes.reduce((sum, s) => sum + s.durationMs, 0) : null;
           const firstVisual = doc?.scenes[0]?.visual;
+          const motion = doc?.scenes[0]?.motion;
           return (
-            <div key={candidate.id} className="flex flex-col gap-2 rounded-lg border border-border p-3">
-              <div className="flex items-start justify-between gap-2">
-                <h4 className="text-sm font-semibold text-foreground">{candidate.label}</h4>
-                {doc && (
-                  <Badge variant="secondary" className="font-mono text-2xs">
-                    {doc.scenes[0]?.motion}
-                  </Badge>
-                )}
+            <div key={candidate.id} className={`take${i === 0 ? " pick" : ""}`}>
+              <div className="hd">
+                <span className="ti">{candidate.label}</span>
+                {motion && <span className="pill pill-idle">{motion}</span>}
+                <div style={{ flex: 1 }} />
+                <button
+                  type="button"
+                  className={`btn btn-sm ${i === 0 ? "btn-primary" : "btn-ghost"}`}
+                  aria-label={`Pick candidate ${candidate.label}`}
+                  aria-disabled={busy}
+                  onClick={() => {
+                    if (busy) return;
+                    onPick(candidate.id);
+                  }}
+                >
+                  Use this take
+                </button>
               </div>
-              <p className="text-xs text-muted-foreground">{candidate.summary}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="t-label">
                 {scenes.length} scenes
                 {totalMs !== null && ` · ${formatMsAsClock(totalMs)}`}
                 {doc && ` · ${doc.aspect} · ${doc.pacing} pacing`}
               </p>
+              <p className="t-label" style={{ color: "var(--n-900)" }}>
+                {candidate.summary}
+              </p>
               {firstVisual && (
-                <p className="text-xs text-foreground italic">
-                  Scene 1: {firstVisual}
+                <p className="dir vis">
+                  <span className="tag">Scene 1</span>
+                  <span className="txt">{firstVisual}</span>
                 </p>
               )}
-              <Button
-                size="sm"
-                className="mt-auto"
-                disabled={busy}
-                aria-label={`Pick candidate ${candidate.label}`}
-                onClick={() => onPick(candidate.id)}
-              >
-                Use this take
-              </Button>
             </div>
           );
         })}

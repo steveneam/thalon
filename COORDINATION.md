@@ -212,6 +212,87 @@ the same session.** Wrap verify: exit 0, **3338 passed / 9 skipped**.
 | **V9 · Composer** — the gate, round 2 (`<this wrap>`) | **The re-run gate came back `matches_sheet: false`** (58 agents, 41 confirmed) and its four HIGHs were real: (1) **every door on the surface rendered GREY** — a blanket `.composer-surface a { color: inherit }` landed after the shell's `.screen a { color: var(--act) }` at equal specificity and won for every anchor, including the three doors round 1 had just added; scoped to the simulated post only, and **measured live: all four doors now compute to exactly `--act`** · (2) the ⓘ tooltips were native `title=` attributes where the sheet draws a designed popover — the sheet's `.tip` block is ported, both tips are real elements, keyboard-reachable, `nativeTitles: 0` · (3) the fit band stretched a single destination across 1,174px, stranding the count 1,038px from the platform it measures — **exactly the founder's own one-destination dogfood shape** — now capped at the sheet's tile width (band 1174→236px, gap 1038→97px) · (4) a platform REFUSING the post wore an amber dot while the band below painted it red; a refusal is now err, and an over-length post (which still ships, cut) stays warn — my own test caught that ordering. Verified by live probe + screenshot, both themes. |
 | Ops notes, stated | Credits ran out mid-Composer-gate on Fable 5; the session continued on Opus 5 and the gate was resumed from its own run id (the completed walkthrough replayed from cache). No credits spent on any vendor mint; no live posts; the post door stayed armed but unused. Two of my own new tests failed first and were right to: they caught that `adoptableRender` only adopts RUNNING jobs, and that ⌘Z inside a text field is deliberately left to the browser. |
 
+## Sprint 9 / s101 — **CLOSED** (boot 2026-08-04 "gogogo" + a Klaviyo research directive; **the LAST un-rebuilt surface is rebuilt**; zero credits, zero live posts)
+
+Wrap verify on main: **exit 0, 3381 passed / 9 skipped** (s100 was 3377/9).
+
+**THE STAGED SURFACE — sheet AUTHORED and BUILT in one session**, which was his
+own call at the s100 close (*"doors now, rebuild next session"*, with the sheet
+first). It was the last surface in the workspace wearing wave-0 bridge styling,
+and **the only live surface that was never in the UX programme's coverage
+ledger at all** — a debt with no row, which is the one kind that table cannot
+catch. It has a row now, and the next audit should start from the file list.
+
+**His report was "the layout of it in the Approve section looks horrible", and
+the cause was one mistake made twice, nested:** Tailwind `xl:` VIEWPORT
+breakpoints laying out a CONTAINER that is 560px wide whatever the viewport.
+Measured live at 1440×940 before touching anything:
+
+| | before | after |
+|---|---|---|
+| direction editor | **182px**, beside a **342px** preview stub | the full column |
+| its inner grid | three **46.7px** columns (hence "Aspect (compile-time frame)" on four lines) | chips, no grid |
+| clipped elements | **4** (incl. 240px of his own CTA off the right edge) | **0** |
+| pane height | **3219px** in a 764px box | **1120px** in 644 |
+| hard-`disabled` controls on a live run | **26 of 41** | **1 of 21** |
+| preview at the bottom of the scroll | gone — you scrubbed blind | **pinned, still on screen** |
+
+The one remaining hard-disabled control is the locked stage's rail button,
+whose reason ("not generated yet") is its own adjacent line.
+
+**Its first research pass, same session** (ux-refinement-program §Staged):
+Artlist Studio → direction as CHIPS · Elicit → every stage says what it
+PRODUCED (ours said "done · queued", two status words and no artifact) · Gemini
+Gems → the ask pinned above the steps (this surface stated its origin nowhere)
+· Grain + Copy.ai + Asana → an outline is an index, one item open · ElevenLabs
+→ the frame drawn honestly at its aspect. **Node canvases REJECTED for the
+third time**, same reason as the Board s91 (they promise editable wiring; our
+chain is linear with one human gate). **Postiz: nothing to take, stated** — it
+has no staged-generation surface at all.
+
+**Two structural results beyond the layout:**
+- **`storyboard-cards.tsx` DELETED** — it and the direction editor's
+  near-duplicate scene cards became one `scene-index.tsx`, because the sheet
+  draws ONE shape for both artifacts. The two had already drifted apart on how
+  they render an absent visual line, which is what a shared drawing prevents.
+- **A live chain now gets FACTS, not a greyed editor.** The verbs that
+  genuinely cannot reach a live draft are absent with one sentence saying why,
+  instead of 26 controls rendered and disabled.
+- **The bridge-burndown ratchet fired and was lowered in the same change**, as
+  designed — the whole `components/staged/` block left the map at zero.
+
+**The sheet was AMENDED in its own session, in its own header** (the verdict
+row moved out of the card head, where four gate chips wrapped it to three
+lines). And **rule 6 caught a collision inside the sheet itself**: the first
+draw named a row `.dir.screen`, which hit the SHELL's `.screen` and turned
+three caption rows into 940px screens — found by counting DOM nodes, not by
+looking.
+
+**KLAVIYO TEARDOWN** (his second ask) — `docs/research/klaviyo-teardown-s101.md`.
+Docs + architecture, not visual: Mobbin has one Klaviyo screen and the memo
+says so rather than inventing a UI review. The short list, by value-per-risk:
+1. **Per-step arming** — their per-MESSAGE `draft`/`manual`/`live`, where
+   `manual` routes the recipient to a "Needs Review" tab. That both
+   **independently validates Approve** (a category leader converged on
+   hold-queue-review) and beats us on granularity: we arm a whole run, they arm
+   a message. Arming a *platform or stage* would let Bluesky go live while
+   LinkedIn stays in review — and it makes the live grant safer, not looser.
+2. **Segments — live saved predicates over an event stream** (vs static lists).
+   This is the RIGHT answer to the Intel debt "no filter, no sort, no find over
+   58 cards": not a filter box on one surface, but saved views everywhere.
+   **Charter candidate; prior-art sweep first per rule 10.**
+3. **Channel health** (their deliverability hub, translated) — a real gap no
+   surface owns: Channels says a credential is connected, nothing says posts
+   are landing. Parked with its trigger.
+4. Trigger-split vs conditional-split as a naming distinction for the fan-out
+   profiles. 5. Scores on objects — **LATER, dependency named: D2**. 6.
+   Benchmarks — REJECT (one tenant), parked with its trigger.
+
+Backend verified and mostly a *don't*: Django/Celery/Cassandra/Kafka/Flink at
+170k events/sec is four orders of magnitude from us. The transferable lesson is
+structural — they kept the event log separable from the aggregates, which is
+what let them swap the whole bus without touching the product.
+
 ## Sprint 9 / s100 — **CLOSED** (boot 2026-08-04 "gogogo"; zero credits, zero live posts; the founder interrupted twice with live reports and both were real)
 
 **Window 0026 opened and FROZE at the opener as chartered, then two warm-up

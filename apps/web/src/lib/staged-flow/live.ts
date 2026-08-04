@@ -6,7 +6,7 @@ import {
 } from "@thalon/contracts";
 import { NotFoundError, type Draft, type JudgeResult, type Repos } from "@thalon/db";
 import type { GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
-import type { FlowStage, StagedFlowState } from "./types";
+import type { FlowStage, StagedFlowState, StagedOrigin } from "./types";
 import { isStagedDraftFormat } from "./types";
 
 /**
@@ -138,7 +138,44 @@ export async function getLiveStagedFlow(
     plan,
     stages,
     currentIndex,
+    origin: await readOrigin(repos, ctx, chain[0] ?? anchor),
     presets: [],
     captures: [],
   };
+}
+
+/**
+ * WHERE THE CHAIN CAME FROM, read off the record — never sniffed, never
+ * invented (s101). The one-prompt video runner writes a `kind: 'prompt'`
+ * source whose meta carries `{origin, sourceUrl}` and NO prompt text, and it
+ * writes no create_runs row, so `prompt` stays null on this path and the band
+ * simply does not claim one. A missing or unreadable source is not an error
+ * here: the chain is still perfectly inspectable without its origin line.
+ */
+async function readOrigin(
+  repos: Repos,
+  ctx: TenantCtx,
+  head: Draft,
+): Promise<StagedOrigin> {
+  const origin: StagedOrigin = {
+    prompt: null,
+    kind: null,
+    sourceUrl: null,
+    runId: head.fanoutRunId ?? null,
+  };
+  if (!head.sourceId) return origin;
+  let source;
+  try {
+    source = await repos.sources.get(ctx, head.sourceId);
+  } catch {
+    return origin;
+  }
+  if (!source) return origin;
+  const meta = (source.meta ?? {}) as { origin?: unknown; sourceUrl?: unknown; prompt?: unknown };
+  if (typeof meta.origin === "string") origin.kind = meta.origin;
+  if (typeof meta.sourceUrl === "string") origin.sourceUrl = meta.sourceUrl;
+  else if (typeof source.uri === "string" && source.uri) origin.sourceUrl = source.uri;
+  // Only if a door actually recorded one. Today none on this path does.
+  if (typeof meta.prompt === "string" && meta.prompt.trim()) origin.prompt = meta.prompt.trim();
+  return origin;
 }

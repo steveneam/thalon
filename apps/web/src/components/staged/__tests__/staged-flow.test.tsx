@@ -40,7 +40,12 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
     expect(within(surface).getByText("Illustrated gradients")).toBeInTheDocument();
 
     // The structural gate, mirrored in the UI: nothing to advance until a pick.
-    expect(within(surface).getByRole("button", { name: "Generate Polish" })).toBeDisabled();
+    // s101: inert verbs answer the press with a reason (the s81 grammar the
+    // rest of the product uses) rather than going hard-disabled.
+    expect(within(surface).getByRole("button", { name: "Generate Polish" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     expect(within(surface).getByText("Pick a candidate to continue.")).toBeInTheDocument();
   });
 
@@ -49,10 +54,16 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
     const surface = await openStagedSurface(user);
 
     await user.click(within(surface).getByRole("button", { name: "View stage 1: Structure" }));
-    const cards = within(surface).getByRole("group", { name: "Storyboard cards" });
-    expect(within(cards).getByText("Hook — the 3am dashboard")).toBeInTheDocument();
-    expect(within(cards).getByText("Teams stitch together five tools to answer one question.")).toBeInTheDocument();
-    // The per-stage preview seam renders the low-res stub with the scene timeline.
+    // s101: ONE scene index for both artifact formats (was "Storyboard cards"
+    // plus a near-duplicate set of cards inside the direction editor).
+    const scenes = within(surface).getByRole("group", { name: "Scenes" });
+    expect(within(scenes).getByRole("button", { name: /Hook — the 3am dashboard/ })).toBeInTheDocument();
+    // One scene open at a time: opening scene 2 reveals its narration.
+    await user.click(within(scenes).getByRole("button", { name: /Scene 2: Problem/ }));
+    expect(
+      within(scenes).getByText("Teams stitch together five tools to answer one question."),
+    ).toBeInTheDocument();
+    // The preview seam renders the composed frame with the scene timeline.
     const preview = within(surface).getByRole("region", { name: "Stage preview" });
     expect(within(preview).getByRole("button", { name: "Preview scene 2: Problem" })).toBeInTheDocument();
   });
@@ -63,10 +74,14 @@ describe("StagedFlow — the B5.4 advanced-mode surface", () => {
 
     // Pick a take: the stage resolves to a judged direction_doc draft.
     await user.click(within(surface).getByRole("button", { name: "Pick candidate Kinetic typography" }));
-    await within(surface).findByRole("group", { name: "Direction editor" });
+    await within(surface).findByRole("group", { name: "Direction" });
     expect(within(surface).getByText(/1 interaction/)).toBeInTheDocument();
 
-    // A form tweak round-trips as a captured patch (pacing is a doc-level style field).
+    // A form tweak round-trips as a captured patch (pacing is a doc-level
+    // style field). s101: the form sits behind "Edit direction" — at rest the
+    // direction reads as chips, because five labelled inputs at this pane's
+    // real width resolved to three 46.7px columns.
+    await user.click(within(surface).getByRole("button", { name: "Edit direction" }));
     await user.selectOptions(within(surface).getByRole("combobox", { name: "Pacing" }), "fast");
     await within(surface).findByText(/2 interactions/);
 
@@ -263,7 +278,11 @@ describe("StagedFlow — a LIVE chain that STOPPED (s100, the founder's video ru
     await screen.findByRole("region", { name: "Staged video flow" });
 
     expect(screen.queryByRole("button", { name: "Re-judge this stage" })).not.toBeInTheDocument();
-    // The honest refusal for the verbs that genuinely cannot reach a live draft.
-    expect(screen.getByText(/picking and tweaking aren’t wired for a live artifact/)).toBeInTheDocument();
+    // The honest refusal, ONE sentence in the foot (s101) — and the verbs are
+    // ABSENT rather than rendered-and-greyed: 26 of 41 controls used to ship
+    // hard-disabled on a live run, a working editor's dress over nothing.
+    expect(screen.getByText(/Stage editing reaches demo artifacts only/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Edit direction" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Accept scene/ })).not.toBeInTheDocument();
   });
 });

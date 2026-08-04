@@ -37,6 +37,7 @@ import { isStagedDraftFormat } from "@/lib/staged-flow/types";
 import { useListKeys } from "@/lib/workspace/keyboard";
 import type { GridDraft, PanelJudgeResult } from "@/lib/approve-queue/types";
 import "@/components/approve/approve.css";
+import "@/components/staged/staged.css";
 
 /** ?run=/?draft= from the mount-time URL — SSR-safe, router-free (see deepLinkRef below). */
 function readDeepLink(): { runId: string | null; draftId: string | null } {

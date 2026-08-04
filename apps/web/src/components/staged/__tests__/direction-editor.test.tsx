@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { directionDocSchema, renderDirectionMd, type DirectionDoc } from "@thalon/contracts";
 import { describe, expect, it, vi } from "vitest";
 import { fixtureStylePresets } from "@/lib/staged-flow/fixtures";
-import { DirectionEditor } from "../direction-editor";
+import { DirectionFacts } from "../direction-editor";
 
 const doc: DirectionDoc = directionDocSchema.parse({
   docVersion: "direction.v1",
@@ -35,55 +35,65 @@ const doc: DirectionDoc = directionDocSchema.parse({
   cta: "Start free",
 });
 
-function setup() {
+function setup(editable = true) {
   const onEdit = vi.fn();
-  const onAccept = vi.fn();
   render(
-    <DirectionEditor
+    <DirectionFacts
       doc={doc}
       docKey="hash-1"
       presets={fixtureStylePresets}
+      editable={editable}
       busy={false}
-      accepted={new Set()}
       onEdit={onEdit}
-      onAccept={onAccept}
     />,
   );
-  return { onEdit, onAccept };
+  return { onEdit };
 }
 
-describe("DirectionEditor — form view", () => {
+/**
+ * s101 — the founder's report ("Aspect (compile-time frame)" wrapping three
+ * lines, the title truncated). The style fields were five labelled inputs in a
+ * grid whose VIEWPORT breakpoints resolved to three 46.7px columns inside the
+ * 560px pane. They are chips now: value first, label as the small print.
+ */
+describe("DirectionFacts — the direction as chips", () => {
+  it("states aspect, fps, pacing and the CTA at rest, with no form in the way", () => {
+    setup();
+    const facts = screen.getByRole("group", { name: "Direction" });
+    expect(facts.textContent).toContain("16:9");
+    expect(facts.textContent).toContain("30");
+    expect(facts.textContent).toContain("medium");
+    expect(facts.textContent).toContain("Start free");
+    // The editor is behind a door, not lying open in a 46px column.
+    expect(screen.queryByRole("combobox", { name: "Pacing" })).not.toBeInTheDocument();
+  });
+
+  /**
+   * A LIVE one-prompt chain used to render this whole editor and hard-disable
+   * it — 26 of 41 controls dead on arrival. Absent beats greyed: the facts are
+   * still readable, the doors that cannot work are simply not drawn.
+   */
+  it("a read-only chain gets the facts and NO edit doors at all", () => {
+    setup(false);
+    expect(screen.getByRole("group", { name: "Direction" }).textContent).toContain("16:9");
+    expect(screen.queryByRole("button", { name: "Edit direction" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Raw .md" })).not.toBeInTheDocument();
+  });
+
   it("a doc-level field commits one replace op", async () => {
     const user = userEvent.setup();
     const { onEdit } = setup();
 
+    await user.click(screen.getByRole("button", { name: "Edit direction" }));
     await user.selectOptions(screen.getByRole("combobox", { name: "Pacing" }), "fast");
     expect(onEdit).toHaveBeenCalledWith("tweak", [{ op: "replace", path: "/pacing", value: "fast" }], "document");
-  });
-
-  it("a scene tweak commits replaces on exactly the changed fields; blank nullable fields become null", async () => {
-    const user = userEvent.setup();
-    const { onEdit } = setup();
-
-    await user.click(screen.getByRole("button", { name: "Tweak scene 1" }));
-    await user.clear(screen.getByRole("textbox", { name: "Scene 1 on-screen text" }));
-    await user.selectOptions(screen.getByRole("combobox", { name: "Scene 1 motion" }), "dramatic");
-    await user.click(screen.getByRole("button", { name: "Save tweak" }));
-
-    expect(onEdit).toHaveBeenCalledWith(
-      "tweak",
-      [
-        { op: "replace", path: "/scenes/0/onScreenText", value: null },
-        { op: "replace", path: "/scenes/0/motion", value: "dramatic" },
-      ],
-      "scene 1",
-    );
   });
 
   it("a profile style preset replaces the style fields, including every scene's motion", async () => {
     const user = userEvent.setup();
     const { onEdit } = setup();
 
+    await user.click(screen.getByRole("button", { name: "Edit direction" }));
     await user.click(screen.getByRole("button", { name: "Apply preset Short-form vertical" }));
     expect(onEdit).toHaveBeenCalledWith(
       "preset",
@@ -96,22 +106,19 @@ describe("DirectionEditor — form view", () => {
       "short-vertical",
     );
   });
-
-  it("per-beat accept chips report the scene index", async () => {
-    const user = userEvent.setup();
-    const { onAccept } = setup();
-    await user.click(screen.getByRole("button", { name: "Accept scene 2" }));
-    expect(onAccept).toHaveBeenCalledWith(1);
-  });
 });
 
-describe("DirectionEditor — raw strict-md view (same schema as the form)", () => {
+describe("DirectionFacts — raw strict-md view (same schema as the chips)", () => {
+  async function openRaw(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole("button", { name: "Raw .md" }));
+    return screen.getByRole("textbox", { name: "Raw direction.md" }) as HTMLTextAreaElement;
+  }
+
   it("shows the byte-exact rendered document and applies a valid edit as a structured diff patch", async () => {
     const user = userEvent.setup();
     const { onEdit } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Raw direction.md" }));
-    const textarea = screen.getByRole("textbox", { name: "Raw direction.md" }) as HTMLTextAreaElement;
+    const textarea = await openRaw(user);
     expect(textarea.value).toBe(renderDirectionMd(doc));
 
     fireEvent.change(textarea, {
@@ -130,8 +137,7 @@ describe("DirectionEditor — raw strict-md view (same schema as the form)", () 
     const user = userEvent.setup();
     const { onEdit } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Raw direction.md" }));
-    const textarea = screen.getByRole("textbox", { name: "Raw direction.md" }) as HTMLTextAreaElement;
+    const textarea = await openRaw(user);
     fireEvent.change(textarea, {
       target: { value: textarea.value.replace("- motion: snappy", "- motion: wobbly") },
     });
@@ -147,7 +153,7 @@ describe("DirectionEditor — raw strict-md view (same schema as the form)", () 
     const user = userEvent.setup();
     const { onEdit } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Raw direction.md" }));
+    await openRaw(user);
     await user.click(screen.getByRole("button", { name: "Apply raw edit" }));
 
     expect(screen.getByRole("status")).toHaveTextContent("No changes to apply.");

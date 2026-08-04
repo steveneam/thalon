@@ -101,6 +101,30 @@ export interface FlowStage {
   candidates: StageCandidate[] | null;
 }
 
+/**
+ * WHERE THIS CHAIN CAME FROM (s101). The staged surface carried no answer to
+ * the operator's first question — "what did I ask for?" — anywhere on screen;
+ * the founder's own run showed nine scenes with no statement of their origin.
+ *
+ * Every field is nullable ON PURPOSE and the surface states only what is
+ * recorded. The one-prompt VIDEO runner does not persist the operator's raw
+ * prompt (its source row is `kind: 'prompt'` carrying `origin` +
+ * `sourceUrl`, and no create_runs row is written), so `prompt` is genuinely
+ * null on that path — a band that invented one would be exactly the kind of
+ * plausible fiction rule 5 exists to stop. When the prompt IS recorded the
+ * band says it; when only the grounding URL is, it says that.
+ */
+export interface StagedOrigin {
+  /** The operator's ask, verbatim, when the door that started this chain recorded one. */
+  prompt: string | null;
+  /** The recorded origin stamp (e.g. `one_prompt_video`) — read, never sniffed from prose. */
+  kind: string | null;
+  /** The grounding source's URL, when it has one. */
+  sourceUrl: string | null;
+  /** The fanout run these drafts belong to — the door back to Runs. */
+  runId: string | null;
+}
+
 /** The whole staged flow, anchored at any of its stage drafts. */
 export interface StagedFlowState {
   /**
@@ -115,6 +139,8 @@ export interface StagedFlowState {
   plan: StagePlan;
   stages: FlowStage[];
   currentIndex: number;
+  /** Where the chain came from — see StagedOrigin; every field independently nullable. */
+  origin: StagedOrigin;
   /** Style presets from the ACTIVE profile's platform config (runtime data). */
   presets: StylePreset[];
   /** Every captured interaction so far, oldest first (the edit_diff telemetry). */

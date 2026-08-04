@@ -27,6 +27,10 @@ export const FIXTURE_STAGED_PLATFORM_PROFILE_VERSION = "staged-video.v1";
 
 export const FIXTURE_STAGE_PLAN = VIDEO_STAGE_PLAN;
 
+/** The demo chain's written ask — the origin band's populated state (s101). */
+export const FIXTURE_DEMO_PROMPT =
+  "a 60-second explainer on why our launch film is a build artifact, not an export";
+
 /** Base timestamp all store clocks tick from (deterministic — no Date.now in the fake seam). */
 export const FIXTURE_STAGED_BASE_MS = Date.parse("2026-07-02T09:00:00.000Z");
 

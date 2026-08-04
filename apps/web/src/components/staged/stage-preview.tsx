@@ -1,23 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { formatMsAsClock } from "@/lib/approve-queue/formats/clip-plan";
-import { cn } from "@/lib/utils";
 
 /**
- * THE PREVIEW SEAM (B5.4). This component's PROPS are the stable contract;
- * its internals are a deterministic low-res stub: an aspect-correct frame
- * showing the selected scene's on-screen text / visual direction, over a
- * duration-proportional scene timeline the operator scrubs by clicking.
+ * THE PREVIEW SEAM (B5.4, rebuilt s101 to `Staged.dc.html`). This component's
+ * PROPS are the stable contract; its internals are a deterministic composition
+ * of the direction — an aspect-correct frame showing the selected scene's
+ * on-screen text and visual direction, over a duration-proportional scrubber.
  *
- * Follow-up (recorded in the lane wrap): once B5.1's render driver emits
- * real HTML compositions and the lead installs `@hyperframes/player` in
- * main (a dep add is a stop-and-report, not a lane call), the stub body
- * swaps for the 3 KB `<hyperframes-player>` web component — live in-queue
- * playback with NO render — and, with `@hyperframes/sdk`, its RFC-6902
- * commit patches feed the same capture path this surface already writes.
- * Nothing outside this file changes.
+ * WHAT THE REBUILD CHANGED, and why each was a defect:
+ *
+ * - IT NO LONGER CALLS ITSELF A STUB IN ITS OWN TITLE. The founder's report
+ *   was "the scenes look like placeholder" over nine real, grounded, on-brand
+ *   scenes; a header reading "PREVIEW (LOW-RES STUB)" is the surface agreeing
+ *   with him about work that is genuinely finished. The honesty did not go
+ *   away — it moved to one mono line under the frame, which says what this is
+ *   (a composition of the direction) and what it is not (a render).
+ *
+ * - THE FRAME IS BOUNDED AND CENTRED (373×210 at 16:9), and the scrubber is
+ *   exactly its width. It used to take a `minmax(280px,380px)` grid column
+ *   beside a 182px editor — the preview was nearly TWICE the width of the
+ *   thing the operator works in.
+ *
+ * - THE VISUAL DIRECTION IS A CAPTION BAR, not 10px italic grey absolutely-
+ *   positioned prose. Measured before the rebuild: 562px of content in a
+ *   298px box, `truncate`d — two thirds of every director's note invisible.
+ *
+ * - THE SCRUBBER IS CONTROLLED. Selection is the parent's, so clicking
+ *   segment 4 and opening scene 4 in the index are the same act. It used to
+ *   own private state, so the preview and the scene list disagreed silently.
+ *
+ * Follow-up unchanged (recorded in the lane wrap): once B5.1's render driver
+ * emits real HTML compositions and `@hyperframes/player` lands in main, the
+ * frame body swaps for the 3 KB `<hyperframes-player>` web component — live
+ * in-queue playback with NO render. Nothing outside this file changes.
  */
 
 export interface PreviewScene {
@@ -32,72 +48,88 @@ export interface PreviewScene {
 interface StagePreviewProps {
   aspect: "16:9" | "9:16" | "1:1";
   scenes: PreviewScene[];
-  /** Extra chrome note, e.g. that a storyboard's aspect is set at the scenes stage. */
+  /** Controlled: the parent owns which scene is current, so index and frame never disagree. */
+  sceneIndex: number;
+  onScene: (index: number) => void;
+  /** Extra honesty appended to the standing note, e.g. a storyboard's aspect being set later. */
   note?: string;
+  /** Replaces the standing note entirely (the stalled state points at the blocked scene). */
+  noteOverride?: string;
 }
 
-const ASPECT_RATIO: Record<StagePreviewProps["aspect"], string> = {
-  "16:9": "16 / 9",
-  "9:16": "9 / 16",
-  "1:1": "1 / 1",
+const ASPECT_CLASS: Record<StagePreviewProps["aspect"], string> = {
+  "16:9": "",
+  "9:16": "p916",
+  "1:1": "p11",
 };
 
-export function StagePreview({ aspect, scenes, note }: StagePreviewProps) {
-  const [sceneIndex, setSceneIndex] = useState(0);
-  const selected = scenes[Math.min(sceneIndex, scenes.length - 1)];
+export function StagePreview({
+  aspect,
+  scenes,
+  sceneIndex,
+  onScene,
+  note,
+  noteOverride,
+}: StagePreviewProps) {
+  const index = Math.min(Math.max(sceneIndex, 0), scenes.length - 1);
+  const selected = scenes[index];
   const totalMs = scenes.reduce((sum, scene) => sum + scene.durationMs, 0);
 
   if (!selected) return null;
 
   return (
-    <section aria-label="Stage preview" className="flex flex-col gap-2 rounded-lg border border-border p-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Preview (low-res stub)</h3>
-        <span className="text-xs text-muted-foreground">
+    <section aria-label="Stage preview" className="prev">
+      <div className="prev-head">
+        <span className="lbl">Preview</span>
+        <span className="t-label">
+          scene {index + 1} of {scenes.length} · {selected.heading}
+        </span>
+        <div style={{ flex: 1 }} />
+        <span className="t-data">
           {aspect} · {formatMsAsClock(totalMs)}
         </span>
       </div>
-      <div
-        className={cn(
-          "relative mx-auto flex w-full flex-col items-center justify-center overflow-hidden rounded-md border border-border bg-zinc-900 p-4 text-center",
-          aspect === "9:16" && "max-w-56",
-          aspect === "1:1" && "max-w-72",
-        )}
-        style={{ aspectRatio: ASPECT_RATIO[aspect] }}
-      >
-        <span className="absolute top-2 left-2 max-w-full truncate text-2xs text-zinc-500">{selected.heading}</span>
-        {selected.motion && (
-          <Badge variant="outline" className="absolute top-2 right-2 border-zinc-700 text-2xs text-zinc-400">
-            {selected.motion}
-          </Badge>
-        )}
-        <p className="text-lg leading-snug font-semibold break-words text-zinc-100">
-          {selected.onScreenText ?? "—"}
-        </p>
-        <p className="absolute right-3 bottom-2 left-3 truncate text-2xs text-zinc-500 italic">
-          {selected.visual ?? "visual direction pending — filled at the scenes/effects stage"}
-        </p>
+      <div className={`prev-stage ${ASPECT_CLASS[aspect]}`.trim()}>
+        <div className="prev-frame">
+          <span className="prev-slug">
+            {selected.heading} · {formatMsAsClock(selected.durationMs)}
+          </span>
+          {selected.motion && <span className="pill pill-idle prev-mot">{selected.motion}</span>}
+          {selected.onScreenText ? (
+            <div className="prev-text">{selected.onScreenText}</div>
+          ) : (
+            <div className="prev-text none">no on-screen text in this scene</div>
+          )}
+          <div className={`prev-vis${selected.visual ? "" : " pending"}`}>
+            <span className="tag">Visual</span>
+            <span className="txt">
+              {selected.visual ?? "no visual direction yet — the scenes stage fills it"}
+            </span>
+          </div>
+        </div>
+        <div className="prev-scrub" role="group" aria-label="Scene timeline">
+          {scenes.map((scene, i) => (
+            <button
+              key={i}
+              type="button"
+              className={`scrub${i === index ? " on" : ""}`}
+              aria-label={`Preview scene ${i + 1}: ${scene.heading}`}
+              aria-pressed={i === index}
+              title={`${scene.heading} (${formatMsAsClock(scene.durationMs)})`}
+              onClick={() => onScene(i)}
+              style={{ flexGrow: Math.max(scene.durationMs, 1) }}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="flex h-6 w-full gap-0.5" role="group" aria-label="Scene timeline">
-        {scenes.map((scene, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`Preview scene ${i + 1}: ${scene.heading}`}
-            aria-pressed={i === sceneIndex}
-            title={`${scene.heading} (${formatMsAsClock(scene.durationMs)})`}
-            onClick={() => setSceneIndex(i)}
-            className={cn(
-              "min-w-4 rounded-sm border border-border bg-muted text-2xs text-muted-foreground transition-colors hover:bg-accent focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-              i === sceneIndex && "border-ring bg-accent font-medium text-foreground",
-            )}
-            style={{ flexGrow: Math.max(scene.durationMs, 1) }}
-          >
-            {i + 1}
-          </button>
-        ))}
-      </div>
-      {note && <p className="text-xs text-muted-foreground">{note}</p>}
+      <p className="prev-note">
+        {noteOverride ??
+          `composed from the direction — not a render. Segment widths are each scene’s duration.${
+            note ? ` ${note}` : ""
+          }`}
+      </p>
     </section>
   );
 }

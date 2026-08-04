@@ -69,13 +69,15 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // language out of the dossier the mock DOES draw (Video Dossier.dc.html),
   // the s74 Search-tab precedent. The old implementation went in the same
   // change (DOCTRINE 0 rule 3).
-  ["components/staged/candidate-picker.tsx", 7],
-  ["components/staged/capture-log.tsx", 3],
-  ["components/staged/direction-editor.tsx", 25],
-  ["components/staged/stage-preview.tsx", 14],
-  ["components/staged/stage-rail.tsx", 7],
-  ["components/staged/staged-flow.tsx", 12],
-  ["components/staged/storyboard-cards.tsx", 32],
+  // The whole components/staged/ block left the map at the s101 exact-mock
+  // rebuild — the LAST un-rebuilt surface in the workspace, and the last
+  // block of bridged tokens outside the shared ui/ primitives and the two
+  // surfaces with no sheet of their own. It was rebuilt from the sheet
+  // AUTHORED that session (Staged.dc.html), speaks that sheet's own ported
+  // classes via components/staged/staged.css, and sits at ZERO. Two files
+  // left entirely: storyboard-cards.tsx was DELETED (DOCTRINE 0 rule 3) —
+  // it and the direction editor's near-duplicate scene cards became one
+  // scene-index.tsx, because the sheet draws ONE shape for both artifacts.
   ["components/ui/badge.tsx", 28],
   ["components/ui/button.tsx", 36],
   ["components/ui/card.tsx", 4],

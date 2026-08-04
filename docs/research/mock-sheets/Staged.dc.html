@@ -1,0 +1,679 @@
+<!doctype html>
+<!-- MOCK SHEET OF RECORD — 'Staged' — AUTHORED s101, lead-direct (founder call
+     at the s100 close: "doors now, rebuild next session" + "draw the sheet
+     FIRST"). This is the LAST un-rebuilt surface in the workspace: it had no
+     sheet of its own and still wore wave-0 bridge styling inside the Approve
+     detail column. Founder's report, verbatim: "the layout of it in the
+     Approve section looks horrible."
+
+     THE DIAGNOSIS IS MEASURED, NOT SQUINTED AT (s101, live at 1440×940):
+     the staged pane is 560px wide and used `xl:` VIEWPORT breakpoints to lay
+     out a CONTAINER that is never viewport-wide — twice, nested. Result:
+     the direction editor got 182px and the low-res stub preview got 342px
+     (the editor, the thing you work in, at HALF the width of the stub), and
+     inside those 182px a 3-column grid resolved to three 46.7px columns —
+     which is why "Aspect (compile-time frame)" wrapped to four lines. Four
+     elements clipped (title 173/154, pacing select 54/45, CTA 394/154 —
+     240px of the founder's own sentence invisible — preview visual 562/298).
+     Nine scene cards stacked in that 182px column made the pane 3219px tall
+     inside a 764px viewport, so the preview scrolled away and you scrubbed
+     blind. And on a LIVE run 26 of 41 controls were hard-`disabled`: a whole
+     form of dead doors dressed as a working editor.
+
+     THE RESEARCH PASS (its first — ux-refinement-program.md §Staged):
+     Artlist Studio (direction as compact CHIPS, never a stack of labelled
+     selects) · Elicit (every step carries WHAT IT PRODUCED, not two status
+     words) · Google Gemini Gems (the ASK pinned above the steps) · Grain +
+     Copy.ai (an outline is an index; one item open at a time) · ElevenLabs
+     (the frame drawn honestly at its aspect, credits//facts in the head) ·
+     Asana Draft-with-AI (collapse discipline). REJECTED: FLORA + ElevenLabs
+     Flows node canvases (same reason the Board rejected node graphs — that
+     grammar promises editable wiring; our chain is linear with one human
+     gate) · WRITER's "Nailed it / Missed the mark" agent-rating (we capture
+     real edits as eval rows; a thumbs poll would be a weaker signal wearing
+     a stronger one's clothes). Postiz: NOTHING to take, stated — it has no
+     staged-generation surface at all; its draft→schedule flip is a status
+     change, not a multi-stage artifact review.
+
+     AMENDED IN ITS OWN SESSION (s101, at the build's screenshot gate): the
+     first draw left the JUDGE VERDICT off the card head. The plain draft
+     detail card carries its verdict where the operator looks first, and the
+     staged pane is its sibling — so the head now reads
+     [status pill] Staged video [what it is] … [#id], and the VERDICT sits in
+     its own row under the stage rail. It was tried in the head first and
+     wrapped it to three lines: four gate chips need the column's full width,
+     and directly under the rail is where "which stage" was just answered.
+     Recorded rather than silently fixed, because the sheet is the spec: when
+     the build and the drawing disagree, one of them changes ON PURPOSE and
+     says so.
+
+     OPEN CALLS FOR THE FOUNDER (this sheet asks, it does not decide):
+     1. On a LIVE one-prompt run the direction is FACTS, not a form — the
+        editor is absent, not greyed. Stage editing genuinely only reaches
+        the demo store. Is "read it here, edit it in the Video editor" the
+        right split, or should live stage editing become a build bucket?
+     2. The preview keeps its honest mono line but LOSES the "(low-res stub)"
+        title — you said the scenes are not placeholder and they are not.
+     3. Scenes collapse to one-open-at-a-time. That is what kills the 3219px
+        scroll; it also means you cannot eyeball all nine narrations at once.
+     View: open this file with theme.css in the same dir; helmet ~= head. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="./theme.css"></head><body>
+<x-dc>
+      <helmet data-dc-atomics>
+        <link rel="stylesheet" href="./theme.css" />
+        <style>
+          /* Approve's own atomics that this surface sits inside — same values,
+             because this IS the Approve detail column. */
+          .split { flex: 1; display: grid; grid-template-columns: 600px 1fr; gap: 14px; min-height: 0; }
+          .split > * { min-width: 0; }
+          .q-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .q-row { align-items: flex-start; }
+          .qtabs { display: flex; align-items: center; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--n-400); }
+          .qtab { font-size: 12px; padding: 6px 10px 8px; color: var(--n-900); display: inline-flex; gap: 6px; align-items: baseline; }
+          .qtab.on { color: var(--n-1000); font-weight: 600; box-shadow: inset 0 -2px 0 var(--act); }
+          .qtab .n { font-size: 10.5px; font-family: var(--font-data); color: var(--n-800); }
+          .run-hd { display: flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--n-bg); border-bottom: 1px solid var(--n-400); font-size: 11px; color: var(--n-800); }
+          .plat-dot { width: 16px; height: 16px; border-radius: 4px; background: var(--n-300); border: 1px solid var(--n-500); display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--n-1000); vertical-align: -4px; }
+          .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--n-300); border: 1px solid var(--n-500); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+          .notice-band { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--n-400); border-radius: var(--r-card); }
+          .notice-band.refused { border-color: var(--err); background: var(--err-subtle); }
+          .notice-band .t-label { color: var(--n-1000); }
+          .notice-band .gate { font-family: var(--font-data); color: var(--err); }
+
+          /* ── The staged pane. ONE COLUMN. Every width below is a share of
+             512px (the 562px detail card minus its 24px gutters) — no
+             viewport breakpoint decides anything inside this card. ── */
+          .staged-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 24px 18px; display: flex; flex-direction: column; gap: 13px; }
+          /* A scroll column's children must never SHRINK to fit — that is the
+             whole point of scrolling. Without this the stage rail collapsed to
+             a 1px line the moment the content exceeded the card. */
+          .staged-scroll > * { flex: none; }
+          .staged-scroll > :first-child { margin-top: 14px; }
+
+          /* The ASK of record (Gemini). The one fact this surface never had:
+             what was actually requested. Quiet, one line, always at the top. */
+          .ask { display: flex; align-items: baseline; gap: 8px; padding: 8px 11px; background: var(--n-bg); border: 1px solid var(--n-400); border-radius: 8px; }
+          .ask .k { font-size: 11px; font-weight: 600; color: var(--n-800); flex: none; text-transform: uppercase; letter-spacing: 0.04em; }
+          .ask .v { font-size: 12.5px; color: var(--n-900); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+
+          /* The stage rail. Each step carries WHAT IT MADE (Elicit), and the
+             connector is a BORDER, never a text arrow — an arrow that wraps
+             leads a line with nothing to its left, which is what shipped. */
+          .stage-rail { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid var(--n-400); border-radius: 8px; overflow: hidden; }
+          .stage-step { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-left: 1px solid var(--n-400); background: var(--n-bg); min-width: 0; }
+          .stage-step:first-child { border-left: none; }
+          .stage-step .hd { display: flex; align-items: center; gap: 6px; min-width: 0; }
+          .stage-step .n { font-family: var(--font-data); font-size: 10px; color: var(--n-700); flex: none; }
+          .stage-step .ti { font-size: 12.5px; font-weight: 600; color: var(--n-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .stage-step .made { font-size: 11px; color: var(--n-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .stage-step.done { background: var(--n-100); }
+          .stage-step.done .ti { color: var(--n-900); }
+          .stage-step.done .made { color: var(--n-800); }
+          .stage-step.on { background: var(--act-subtle); box-shadow: inset 0 -2px 0 var(--act); }
+          .stage-step.on .ti { color: var(--n-1000); }
+          .stage-step.on .made { color: var(--n-900); }
+          .stage-step .tick { color: var(--ok); font-size: 11px; font-weight: 600; flex: none; }
+          .stage-step .lock { color: var(--n-600); font-size: 10px; flex: none; }
+
+          /* The preview. FULL WIDTH of the column — it is the thing the
+             operator came to look at, and 512px is the widest honest frame
+             this card can give it. No "(low-res stub)" in the title: the
+             honesty is one mono line under the frame, where it belongs. */
+          /* PINNED. The founder scrolled nine scene cards and the preview left
+             the screen — so he scrubbed blind. The frame + its scrubber stick
+             to the top of the scroll region while the scene index moves under
+             them; the ask and the rail (read-once orientation) scroll away. */
+          .prev { display: flex; flex-direction: column; gap: 7px; position: sticky; top: 0; z-index: 1; background: var(--n-100); padding: 14px 0 9px; margin-top: 0 !important; border-bottom: 1px solid var(--n-400); }
+          .prev-head { display: flex; align-items: baseline; gap: 8px; }
+          .prev-head .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--n-800); }
+          /* The frame is BOUNDED, and the scrubber is exactly its width — a
+             timeline wider than the frame it belongs to reads unmoored. Sizes
+             are explicit per aspect so the shape is the spec, not a guess. */
+          .prev-stage { align-self: center; display: flex; flex-direction: column; gap: 6px; width: 373px; }
+          .prev-stage.p916 { width: 146px; }
+          .prev-stage.p11 { width: 230px; }
+          .prev-frame { position: relative; width: 100%; height: 210px; border: 1px solid var(--n-400); border-radius: 8px; background: oklch(0.118 0.008 262); overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 26px 26px 44px; }
+          .p916 .prev-frame { height: 260px; }
+          .p11 .prev-frame { height: 230px; }
+          .prev-slug { position: absolute; top: 9px; left: 11px; font-family: var(--font-data); font-size: 9.5px; letter-spacing: 0.04em; color: var(--n-700); text-transform: uppercase; }
+          .prev-mot { position: absolute; top: 7px; right: 9px; }
+          .prev-text { font-size: 20px; font-weight: 600; line-height: 1.2; letter-spacing: -0.015em; text-align: center; color: oklch(0.97 0.004 255); overflow-wrap: anywhere; }
+          .prev-text.none { font-size: 12.5px; font-weight: 400; color: var(--n-700); font-style: italic; letter-spacing: 0; }
+          /* THE VISUAL DIRECTION — a caption BAR, not 10px italic grey
+             absolutely-positioned prose truncated at 298px of 562. It is a
+             director's instruction, so it gets a tag and room to wrap. */
+          .prev-vis { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 7px; align-items: flex-start; padding: 7px 11px 8px; background: linear-gradient(transparent, oklch(0.10 0.008 262 / 0.94) 42%); }
+          .prev-vis .tag { font-family: var(--font-data); font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--act); flex: none; padding-top: 1px; }
+          .prev-vis .txt { font-size: 11.5px; line-height: 1.35; color: var(--n-900); min-width: 0; }
+          .prev-vis.pending .tag { color: var(--n-700); }
+          .prev-vis.pending .txt { color: var(--n-700); font-style: italic; }
+          /* Duration-proportional scrubber — the one thing that already
+             worked; kept, with the selected segment reading as selected. */
+          .prev-scrub { display: flex; gap: 2px; height: 22px; }
+          .scrub { flex: 1; border: 1px solid var(--n-400); border-radius: 4px; background: var(--n-200); font-family: var(--font-data); font-size: 9.5px; color: var(--n-800); display: flex; align-items: center; justify-content: center; min-width: 14px; cursor: pointer; }
+          .scrub:hover { background: var(--n-300); color: var(--n-1000); }
+          .scrub.on { background: var(--act); border-color: var(--act); color: var(--act-text); font-weight: 500; }
+          .prev-note { font-family: var(--font-data); font-size: 10.5px; color: var(--n-800); line-height: 1.45; }
+
+          /* Direction as CHIPS (Artlist), not five stacked labelled fields in
+             a 46px column. Values first — the label lives in the value. */
+          .facts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+          .fact { display: inline-flex; align-items: baseline; gap: 5px; height: 24px; padding: 0 9px; border: 1px solid var(--n-400); border-radius: var(--r-pill); background: var(--n-bg); font-size: 12px; color: var(--n-1000); white-space: nowrap; }
+          .fact .k { font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--n-700); }
+          .fact.set { border-color: var(--n-500); }
+          .fact.empty { color: var(--n-800); font-style: italic; }
+          .fact.cta { max-width: 100%; }
+          .fact.cta .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+          /* Scenes: an INDEX, one open at a time (Grain / Copy.ai / Asana).
+             Nine cards stacked open is what made the pane 3219px tall. */
+          .scenes { border: 1px solid var(--n-400); border-radius: 8px; overflow: hidden; }
+          .scene { border-top: 1px solid var(--n-400); background: var(--n-bg); }
+          .scene:first-child { border-top: none; }
+          .scene-hd { display: flex; align-items: center; gap: 9px; padding: 8px 11px; cursor: pointer; min-width: 0; }
+          .scene-hd:hover { background: var(--n-200); }
+          .scene .n { font-family: var(--font-data); font-size: 10px; color: var(--n-700); flex: none; width: 11px; }
+          .scene .ti { font-size: 12.5px; font-weight: 600; color: var(--n-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+          .scene .dur { font-family: var(--font-data); font-size: 10.5px; color: var(--n-800); flex: none; }
+          .scene .acc { color: var(--ok); font-size: 11px; font-weight: 600; flex: none; }
+          .scene.open { background: var(--n-100); }
+          .scene.open .ti { color: var(--n-1000); }
+          .scene-body { display: flex; flex-direction: column; gap: 9px; padding: 0 11px 11px 31px; }
+          .scene-body .narr { font-size: 13px; line-height: 1.55; color: var(--n-1000); }
+          /* Every non-narration line is a LABELLED direction row — the founder
+             read "visual hint: …" as filler precisely because it wore body
+             copy's grey with no tag saying what kind of thing it is. */
+          .dir { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; line-height: 1.45; }
+          .dir .tag { font-family: var(--font-data); font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; flex: none; width: 52px; padding-top: 2px; color: var(--n-700); }
+          .dir .txt { color: var(--n-900); min-width: 0; }
+          .dir.vis .tag { color: var(--act); }
+          .dir.vis .txt { color: var(--n-1000); }
+          .dir.onscreen .txt { color: var(--n-1000); font-weight: 500; }
+          .dir.pending .txt { color: var(--n-700); font-style: italic; }
+
+          /* Candidate takes (advanced mode) — one column, facts on a line. */
+          .takes { display: flex; flex-direction: column; gap: 8px; }
+          .take { display: flex; flex-direction: column; gap: 6px; padding: 11px 12px; border: 1px solid var(--n-400); border-radius: 8px; background: var(--n-bg); }
+          .take.pick { border-color: var(--act); box-shadow: inset 0 0 0 1px var(--act-subtle); }
+          .take .hd { display: flex; align-items: center; gap: 8px; }
+          .take .ti { font-size: 13px; font-weight: 600; }
+
+          /* The capture log — telemetry is "extra info" under the s90
+             minimal-interaction doctrine, so it rests as ONE foot line. */
+          .cap { display: flex; align-items: center; gap: 8px; padding-top: 2px; }
+          .foot { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border-top: 1px solid var(--n-400); flex-wrap: wrap; }
+          .lede { font-size: 12.5px; color: var(--n-900); }
+        </style>
+      </helmet>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           S1 — THE FOUNDER'S OWN CASE: a LIVE one-prompt chain, direction
+           stage, mid-flight. This is the screen he called horrible.
+           ════════════════════════════════════════════════════════════════ -->
+      <div class="screen" data-screen-label="Staged · live one-prompt run">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 8 4l5 4.5"></path><path d="M4.5 7.5V13h7V7.5"></path></svg>Home</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v2.2M8 12v2.2M1.8 8H4M12 8h2.2"></path></svg>Intel</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"></path></svg>Create</div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">10</span></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"></rect><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"></path></svg>Schedule</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 13.2V9.6M6.6 13.2V5.4M10.4 13.2v-5M14.2 13.2V3.2"></path></svg>Analytics</div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path></svg>Leads</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2.5" width="3.4" height="11" rx="0.8"></rect><rect x="8.2" y="2.5" width="3.4" height="11" rx="0.8" transform="rotate(7 9.9 8)"></rect></svg>Library</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"></rect><path d="M7 6.2v3.6L10 8z"></path></svg>Videos</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M2.5 8h11M8 2.5c2 1.8 2 9.2 0 11"></path></svg>Sites</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.7"></circle><path d="M8 5v3.2l2.2 1.4"></path></svg>Runs</div>
+          <div style="margin-top:auto"></div>
+          <div class="nav-sep"></div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="6" r="2.4"></circle><rect x="3.5" y="10.2" width="9" height="3.4" rx="1.7"></rect></svg>Profiles</div>
+          <div class="nav-item"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 5.2h10M3 10.8h10"></path><circle cx="6.2" cy="5.2" r="1.6"></circle><circle cx="9.8" cy="10.8" r="1.6"></circle></svg>Settings</div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Self</span>
+            <span class="crumb">profile v5</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 10</span>
+            <span class="kbd">⌘K</span>
+            <div class="btn btn-primary btn-sm">+ Create</div>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content">
+            <div style="display:flex;align-items:center;gap:10px">
+              <h1 class="t-headline">Approve</h1>
+              <span class="pill pill-warn">5 waiting</span>
+              <span class="pill pill-err">8 blocked</span>
+              <div style="flex:1"></div>
+              <div class="btn btn-ghost btn-sm">Newest first</div>
+              <div class="btn btn-ghost btn-sm">All families</div>
+              <div class="btn btn-primary btn-sm">Approve all waiting (2)</div>
+            </div>
+            <div class="t-label" style="margin-top:-10px">2 of 5 waiting can be approved together — 3 staged drafts advance through their own flow.</div>
+            <div class="split">
+              <!-- ── the queue column, unchanged (Approve.dc.html's) ── -->
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="qtabs">
+                  <span class="qtab on">All <span class="n">22</span></span>
+                  <span class="qtab">Waiting <span class="n">5</span></span>
+                  <span class="qtab">Blocked <span class="n">8</span></span>
+                  <span class="qtab">Approved <span class="n">7</span></span>
+                  <span class="qtab">Rejected <span class="n">2</span></span>
+                </div>
+                <div style="flex:1;overflow:hidden">
+                  <div class="run-hd">Run · 4 Aug, 07:44 · 1 draft</div>
+                  <div class="row q-row sel">
+                    <div class="thumb-sm"><span>storyboard</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">A 2.4 Trillion Parameter Week</div>
+                      <div class="excerpt">direction · <em>“Alibaba just put out a 2.4 trillion parameter model, and…”</em></div>
+                    </div>
+                    <span class="pill pill-warn">Waiting</span>
+                    <span class="t-data">07:44</span>
+                  </div>
+                  <div class="run-hd">Run · 4 Aug, 07:42 · 1 draft</div>
+                  <div class="row q-row">
+                    <div class="thumb-sm"><span>storyboard</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">A 2.4 Trillion Parameter Week</div>
+                      <div class="excerpt">storyboard · <em>“Alibaba just put out a 2.4 trillion param…”</em></div>
+                    </div>
+                    <span class="pill pill-warn">Waiting</span>
+                    <span class="t-data">07:42</span>
+                  </div>
+                  <div class="run-hd">Run · 3 Aug, 10:51 · 1 draft</div>
+                  <div class="row q-row">
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">The frontier models you build on are quietly turning from o…</div>
+                      <div class="excerpt"><span class="plat-dot"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M4.2 5.9H1.9V14h2.3V5.9ZM3 2a1.3 1.3 0 1 0 0 2.7A1.3 1.3 0 0 0 3 2Zm5.6 3.7c-1.2 0-1.9.6-2.2 1.1V5.9H6.1V14h2.3V9.6c0-1 .2-1.9 1.4-1.9s1.2 1.1 1.2 2V14h2.3V9.2c0-2.2-1.2-3.5-2.9-3.5Z"></path></svg></span> single-post · <em>“This quarter: inventory which foundation models y…”</em></div>
+                    </div>
+                    <span class="pill pill-ok">Approved</span>
+                    <span class="t-data">10:51</span>
+                  </div>
+                  <div class="run-hd">Run · 28 Jul, 16:20 · 1 draft</div>
+                  <div class="row q-row">
+                    <div style="flex:1;min-width:0">
+                      <div class="q-title">Bluesky app passwords are the whole auth story on the A…</div>
+                      <div class="excerpt"><span class="plat-dot">B</span> single-post</div>
+                    </div>
+                    <span class="pill pill-ok">Approved</span>
+                    <span class="t-data">16:20</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--n-400)">
+                  <span class="t-label">22 of 22</span>
+                  <div style="flex:1"></div>
+                  <span class="t-data">a · r · e aren’t wired for a staged draft</span>
+                  <span class="kbd">j</span><span class="kbd">k</span><span class="t-label">row</span>
+                </div>
+              </div>
+
+              <!-- ══════════ THE STAGED PANE — the rebuild ══════════ -->
+              <div class="card" style="display:flex;flex-direction:column;min-height:0;overflow:hidden">
+                <div class="card-head">
+                  <span class="pill pill-warn">Waiting</span>
+                  <span class="t-title">Staged video</span>
+                  <span class="t-label">one-prompt run · 3 stages</span>
+                  <div style="flex:1"></div>
+                  <span class="t-data" title="Deep link · draft 7c41e0a2">#7c41e0a2</span>
+                </div>
+                <div class="staged-scroll">
+
+                  <!-- The ask of record — Gemini's pinned prompt. This surface
+                       never showed what was requested; now it always does. -->
+                  <div class="ask">
+                    <span class="k">Asked</span>
+                    <span class="v">“the 2.4T parameter week — what actually breaks when frontier models get cheap”</span>
+                    <a class="card-link" href="#">Run&nbsp;→</a>
+                  </div>
+
+                  <!-- The rail. Each step says what it PRODUCED (Elicit). -->
+                  <div class="stage-rail">
+                    <div class="stage-step done">
+                      <div class="hd"><span class="n">1</span><span class="ti">Structure</span><span class="tick">✓</span></div>
+                      <div class="made">9 scenes · passed</div>
+                    </div>
+                    <div class="stage-step on">
+                      <div class="hd"><span class="n">2</span><span class="ti">Scenes &amp; effects</span></div>
+                      <div class="made">9 scenes · 1:10 · queued</div>
+                    </div>
+                    <div class="stage-step">
+                      <div class="hd"><span class="n">3</span><span class="ti">Polish</span><span class="lock">🔒</span></div>
+                      <div class="made">not generated yet</div>
+                    </div>
+                  </div>
+
+                  <!-- The judge's verdict for the stage being VIEWED, under
+                       the rail that selects it: four gate chips need the
+                       column's full width (they wrapped the card head to
+                       three lines when the build tried them there). -->
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+                    <span class="pill pill-ok">Pass</span>
+                    <span class="t-data">g1: pass</span>
+                    <span class="t-data">g3_screen: pass</span>
+                    <span class="t-data">g3_final: pass</span>
+                  </div>
+
+                  <!-- The preview: FULL WIDTH, honest frame, no apology in
+                       its own title. 512 × 288 at 16:9. -->
+                  <div class="prev">
+                    <div class="prev-head">
+                      <span class="lbl">Preview</span>
+                      <span class="t-label">scene 1 of 9 · Hook</span>
+                      <div style="flex:1"></div>
+                      <span class="t-data">16:9 · 30fps · 1:10</span>
+                    </div>
+                    <div class="prev-stage">
+                      <div class="prev-frame">
+                        <span class="prev-slug">Hook · 0:09</span>
+                        <span class="pill pill-idle prev-mot">dramatic</span>
+                        <div class="prev-text">Same week.</div>
+                        <div class="prev-vis">
+                          <span class="tag">Visual</span>
+                          <span class="txt">Two model names set in large plain type on opposite halves of a dark frame, thin divider between them, no logos or imagery.</span>
+                        </div>
+                      </div>
+                      <div class="prev-scrub">
+                        <span class="scrub on" style="flex:9">1</span>
+                        <span class="scrub" style="flex:7">2</span>
+                        <span class="scrub" style="flex:8">3</span>
+                        <span class="scrub" style="flex:9">4</span>
+                        <span class="scrub" style="flex:8">5</span>
+                        <span class="scrub" style="flex:7">6</span>
+                        <span class="scrub" style="flex:8">7</span>
+                        <span class="scrub" style="flex:8">8</span>
+                        <span class="scrub" style="flex:6">9</span>
+                      </div>
+                    </div>
+                    <div class="prev-note">composed from the direction — not a render. Segment widths are each scene’s duration. The rendered cut lands in Videos.</div>
+                  </div>
+
+                  <!-- Direction as chips (Artlist). Facts, because this is a
+                       live chain — see the foot for why there is no form. -->
+                  <div class="facts">
+                    <span class="fact set"><span class="k">aspect</span>16:9</span>
+                    <span class="fact set"><span class="k">fps</span>30</span>
+                    <span class="fact set"><span class="k">pacing</span>medium</span>
+                    <span class="fact set cta"><span class="k">cta</span><span class="v">That’s the engine we’re building at Thalon.</span></span>
+                  </div>
+
+                  <!-- Scenes as an INDEX, one open (Grain / Copy.ai). -->
+                  <div class="scenes">
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">1</span><span class="ti">Hook</span><span class="dur">0:09</span></div>
+                    </div>
+                    <div class="scene open">
+                      <div class="scene-hd"><span class="n">2</span><span class="ti">The obvious reaction</span><span class="dur">0:07</span></div>
+                      <div class="scene-body">
+                        <div class="narr">Everyone’s first instinct is to swap. Cheaper tokens, same benchmark scores — why wouldn’t you.</div>
+                        <div class="dir onscreen"><span class="tag">On-screen</span><span class="txt">Why wouldn’t you?</span></div>
+                        <div class="dir vis"><span class="tag">Visual</span><span class="txt">A single price-per-token figure, then the same figure struck through and replaced, on plain type.</span></div>
+                        <div class="dir"><span class="tag">Motion</span><span class="txt">static</span></div>
+                      </div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">3</span><span class="ti">The reframe</span><span class="dur">0:08</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">4</span><span class="ti">What actually breaks</span><span class="dur">0:09</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">5</span><span class="ti">What we built instead</span><span class="dur">0:08</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">6</span><span class="ti">The queue</span><span class="dur">0:07</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">7</span><span class="ti">Corrections compound</span><span class="dur">0:08</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">8</span><span class="ti">Where the model sits</span><span class="dur">0:08</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">9</span><span class="ti">Close</span><span class="dur">0:06</span></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- The read-only truth in ONE sentence, plus the door that
+                     genuinely reaches a live chain. No greyed-out form. -->
+                <div class="foot">
+                  <span class="lede">Read-only — this chain ran itself. Stage editing reaches demo artifacts only.</span>
+                  <div style="flex:1"></div>
+                  <a class="card-link" href="#">Edit in Videos →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           S2 — THE STALLED CHAIN (the founder's s100 bug, now with its
+           band). Same skeleton; the band sits directly under the rail
+           because it is the only thing that matters on this screen.
+           ════════════════════════════════════════════════════════════════ -->
+      <div class="screen" data-screen-label="Staged · the chain stopped" style="margin-top:40px">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve<span class="nav-count">10</span></div>
+          <div style="margin-top:auto"></div>
+        </nav>
+        <div class="main">
+          <div class="topbar">
+            <span style="font-size:13px;font-weight:600">Self</span>
+            <span class="crumb">profile v5</span>
+            <div style="flex:1"></div>
+            <span class="pill pill-warn">Needs you · 10</span>
+            <div class="avatar">S</div>
+          </div>
+          <div class="content">
+            <div style="display:flex;align-items:center;gap:10px">
+              <h1 class="t-headline">Approve</h1>
+              <span class="pill pill-err">8 blocked</span>
+            </div>
+            <div class="split">
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="qtabs"><span class="qtab on">All <span class="n">22</span></span><span class="qtab">Blocked <span class="n">8</span></span></div>
+                <div class="run-hd">Run · 4 Aug, 07:44 · 1 draft</div>
+                <div class="row q-row sel">
+                  <div class="thumb-sm"><span>storyboard</span></div>
+                  <div style="flex:1;min-width:0">
+                    <div class="q-title">A 2.4 Trillion Parameter Week</div>
+                    <div class="excerpt">direction · <em>“Alibaba just put out a 2.4 trillion parameter model…”</em></div>
+                  </div>
+                  <span class="pill pill-err">Blocked</span>
+                </div>
+              </div>
+
+              <div class="card" style="display:flex;flex-direction:column;min-height:0;overflow:hidden">
+                <div class="card-head">
+                  <span class="pill pill-err">Blocked</span>
+                  <span class="t-title">Staged video</span>
+                  <span class="t-label">one-prompt run · stopped at stage 2</span>
+                  <div style="flex:1"></div>
+                  <span class="t-data">#7c41e0a2</span>
+                </div>
+                <div class="staged-scroll">
+                  <div class="ask">
+                    <span class="k">Asked</span>
+                    <span class="v">“the 2.4T parameter week — what actually breaks when frontier models get cheap”</span>
+                    <a class="card-link" href="#">Run&nbsp;→</a>
+                  </div>
+                  <div class="stage-rail">
+                    <div class="stage-step done">
+                      <div class="hd"><span class="n">1</span><span class="ti">Structure</span><span class="tick">✓</span></div>
+                      <div class="made">9 scenes · passed</div>
+                    </div>
+                    <div class="stage-step on" style="background:var(--err-subtle);box-shadow:inset 0 -2px 0 var(--err)">
+                      <div class="hd"><span class="n">2</span><span class="ti">Scenes &amp; effects</span><span class="tick" style="color:var(--err)">✗</span></div>
+                      <div class="made">9 scenes · blocked</div>
+                    </div>
+                    <div class="stage-step">
+                      <div class="hd"><span class="n">3</span><span class="ti">Polish</span><span class="lock">🔒</span></div>
+                      <div class="made">never reached</div>
+                    </div>
+                  </div>
+
+                  <div class="notice-band refused">
+                    <span class="t-label">This run stopped at <b>Scenes &amp; effects</b> — the chain advances only from a stage that passed, so nothing further was generated.</span>
+                    <span class="t-label"><span class="gate">g3_screen</span> — “the claim ‘a hundred times cheaper’ is not carried by any provided source; the nearest supported figure is a price-per-token comparison.”</span>
+                    <div style="display:flex;align-items:center;gap:9px;margin-top:4px;flex-wrap:wrap">
+                      <div class="btn btn-primary btn-sm">Re-judge this stage</div>
+                      <span class="t-label" style="color:var(--n-900)">Two gates disagreed on one sentence — a second reading can settle it.</span>
+                    </div>
+                  </div>
+
+                  <div class="prev">
+                    <div class="prev-head">
+                      <span class="lbl">Preview</span>
+                      <span class="t-label">scene 4 of 9 · What actually breaks</span>
+                      <div style="flex:1"></div>
+                      <span class="t-data">16:9 · 1:10</span>
+                    </div>
+                    <div class="prev-stage">
+                      <div class="prev-frame">
+                        <span class="prev-slug">What actually breaks · 0:09</span>
+                        <span class="pill pill-idle prev-mot">push-in</span>
+                        <div class="prev-text">A hundred times cheaper.</div>
+                        <div class="prev-vis">
+                          <span class="tag">Visual</span>
+                          <span class="txt">The phrase alone on a dark frame, the word “hundred” set larger than the rest.</span>
+                        </div>
+                      </div>
+                      <div class="prev-scrub">
+                        <span class="scrub" style="flex:9">1</span><span class="scrub" style="flex:7">2</span><span class="scrub" style="flex:8">3</span>
+                        <span class="scrub on" style="flex:9">4</span><span class="scrub" style="flex:8">5</span><span class="scrub" style="flex:7">6</span>
+                        <span class="scrub" style="flex:8">7</span><span class="scrub" style="flex:8">8</span><span class="scrub" style="flex:6">9</span>
+                      </div>
+                    </div>
+                    <div class="prev-note">the blocked claim lives in scene 4 — its segment is selected.</div>
+                  </div>
+                </div>
+                <div class="foot">
+                  <span class="lede">Read-only — this chain ran itself.</span>
+                  <div style="flex:1"></div>
+                  <a class="card-link" href="#">Edit in Videos →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           S3 — ADVANCED MODE (demo drivers): the candidate pick, then the
+           same skeleton with its verbs present. The ONLY place a form
+           appears, because it is the only place editing reaches.
+           ════════════════════════════════════════════════════════════════ -->
+      <div class="screen" data-screen-label="Staged · advanced mode" style="margin-top:40px">
+        <nav class="rail">
+          <div class="rail-brand"><div class="rail-mark"></div><div class="rail-name">Thalon</div></div>
+          <div class="nav-item on"><svg class="nav-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M5.5 8.2 7.3 10l3.4-3.6"></path></svg>Approve</div>
+          <div style="margin-top:auto"></div>
+        </nav>
+        <div class="main">
+          <div class="topbar"><span style="font-size:13px;font-weight:600">Self</span><span class="crumb">profile v5</span><div style="flex:1"></div><div class="avatar">S</div></div>
+          <div class="content">
+            <div style="display:flex;align-items:center;gap:10px"><h1 class="t-headline">Approve</h1></div>
+            <div class="split">
+              <!-- LEFT: the pick, drawn in the queue's slot so the pane's own
+                   geometry is visible at the same 562px. -->
+              <div class="card" style="display:flex;flex-direction:column;min-height:0">
+                <div class="card-head"><span class="t-title">Queue</span></div>
+                <div class="row q-row sel">
+                  <div class="thumb-sm"><span>direction</span></div>
+                  <div style="flex:1;min-width:0"><div class="q-title">Deterministic video, explained</div><div class="excerpt">direction · advanced mode</div></div>
+                  <span class="pill pill-idle">Demo</span>
+                </div>
+              </div>
+
+              <div class="card" style="display:flex;flex-direction:column;min-height:0;overflow:hidden">
+                <div class="card-head">
+                  <span class="pill pill-idle">Demo</span>
+                  <span class="t-title">Staged video</span>
+                  <span class="t-label">advanced mode · no spend</span>
+                  <div style="flex:1"></div>
+                  <span class="t-data">#a13f0b77</span>
+                </div>
+                <div class="staged-scroll">
+                  <div class="ask">
+                    <span class="k">Asked</span>
+                    <span class="v">“explain why our launch film is a build artifact, not an export”</span>
+                  </div>
+                  <div class="stage-rail">
+                    <div class="stage-step done"><div class="hd"><span class="n">1</span><span class="ti">Structure</span><span class="tick">✓</span></div><div class="made">7 scenes · passed</div></div>
+                    <div class="stage-step on"><div class="hd"><span class="n">2</span><span class="ti">Scenes &amp; effects</span></div><div class="made">pick 1 of 3 takes</div></div>
+                    <div class="stage-step"><div class="hd"><span class="n">3</span><span class="ti">Polish</span><span class="lock">🔒</span></div><div class="made">not generated yet</div></div>
+                  </div>
+
+                  <div class="t-label">3 takes for <b style="color:var(--n-1000)">Scenes &amp; effects</b> — pick one to continue. Every pick is captured; it trains one-prompt mode’s defaults.</div>
+                  <div class="takes">
+                    <div class="take pick">
+                      <div class="hd"><span class="ti">Plain-type, no imagery</span><span class="pill pill-idle">static</span><div style="flex:1"></div><div class="btn btn-primary btn-sm">Use this take</div></div>
+                      <div class="t-label">7 scenes · 0:58 · 16:9 · medium pacing</div>
+                      <div class="dir vis"><span class="tag">Scene 1</span><span class="txt">One sentence per frame, set large on flat charcoal — no stock footage anywhere in the cut.</span></div>
+                    </div>
+                    <div class="take">
+                      <div class="hd"><span class="ti">Terminal-and-diff</span><span class="pill pill-idle">push-in</span><div style="flex:1"></div><div class="btn btn-ghost btn-sm">Use this take</div></div>
+                      <div class="t-label">9 scenes · 1:12 · 16:9 · fast pacing</div>
+                      <div class="dir vis"><span class="tag">Scene 1</span><span class="txt">A diff view scrolls behind the narration; the added lines land on the beat.</span></div>
+                    </div>
+                    <div class="take">
+                      <div class="hd"><span class="ti">Shot-by-shot build</span><span class="pill pill-idle">dramatic</span><div style="flex:1"></div><div class="btn btn-ghost btn-sm">Use this take</div></div>
+                      <div class="t-label">6 scenes · 0:49 · 16:9 · slow pacing</div>
+                      <div class="dir vis"><span class="tag">Scene 1</span><span class="txt">Each cut assembles from its own components on screen, then holds.</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Once picked, the same skeleton — with verbs, because
+                       advanced mode is the one place editing lands. -->
+                  <div class="facts" style="margin-top:2px">
+                    <span class="fact set"><span class="k">aspect</span>16:9</span>
+                    <span class="fact set"><span class="k">fps</span>30</span>
+                    <span class="fact set"><span class="k">pacing</span>medium</span>
+                    <span class="fact empty"><span class="k">cta</span>none</span>
+                    <div style="flex:1"></div>
+                    <div class="btn btn-ghost btn-sm">Edit direction</div>
+                    <div class="btn btn-quiet btn-sm">Raw .md</div>
+                  </div>
+
+                  <div class="scenes">
+                    <div class="scene open">
+                      <div class="scene-hd"><span class="n">1</span><span class="ti">The claim</span><span class="dur">0:08</span><span class="acc">accepted ✓</span></div>
+                      <div class="scene-body">
+                        <div class="narr">Our launch video has no editor file. It has a build step.</div>
+                        <div class="dir onscreen"><span class="tag">On-screen</span><span class="txt">No editor file.</span></div>
+                        <div class="dir vis"><span class="tag">Visual</span><span class="txt">One sentence set large on flat charcoal, nothing else in frame.</span></div>
+                        <div style="display:flex;gap:7px;padding-top:2px">
+                          <div class="btn btn-ghost btn-sm">Tweak</div>
+                          <div class="btn btn-quiet btn-sm">↑</div>
+                          <div class="btn btn-quiet btn-sm">↓</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">2</span><span class="ti">Every scene a component</span><span class="dur">0:09</span></div>
+                    </div>
+                    <div class="scene">
+                      <div class="scene-hd"><span class="n">3</span><span class="ti">No export queue</span><span class="dur">0:08</span></div>
+                    </div>
+                  </div>
+
+                  <div class="cap">
+                    <span class="t-data">6 interactions captured as replayable edit records</span>
+                    <div style="flex:1"></div>
+                    <span class="card-link">Show</span>
+                  </div>
+                </div>
+                <div class="foot">
+                  <div class="btn btn-primary">Generate Polish →</div>
+                  <span class="lede">a stage advances only after its draft passes the judge</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+</body></html>

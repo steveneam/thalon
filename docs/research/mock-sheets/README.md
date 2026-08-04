@@ -1,6 +1,8 @@
 # Mock sheets — THE SPEC OF RECORD (founder-verdicted, s72)
 
-These 16 sheets + `theme.css` are the founder-approved claude-design mock
+These sheets + `theme.css` are the founder-approved claude-design mock
+(16 at the s72 export; `Staged.dc.html` was authored later — see its section
+below)
 (canvas project `f5d304cb`), exported verbatim at s72. **They are the
 blueprint, not inspiration** — the founder's words on seeing wave-0's
 bridge-repaint approach:
@@ -111,6 +113,43 @@ The sheets are the spec, with these recorded exceptions. **A lane must not
   to every non-`prompt` source kind with the kind qtab lens. The data layer
   (`lib/library/`, `/api/library`, `LibrarySourceRow`) never renamed, which
   is why the retirement was cheap.
+
+## Sheets AUTHORED after the s72 export
+
+These are not part of the founder-verdicted canvas export. They are drawn
+lead-direct in the sheets' language, on a founder call, and each says in its
+own header what it asks him and what it decided.
+
+### `Staged.dc.html` — AUTHORED s101 (founder call at the s100 close)
+
+The staged-flow pane inside the Approve detail column: the LAST surface in the
+workspace still wearing wave-0 bridge styling, and the only live surface that
+never had a sheet at all. His call, at the s100 close, was *"doors now, rebuild
+next session"* — with the sheet drawn FIRST.
+
+**Drawn and PORTED in the same session**, which the standing contract allows
+only because he asked for both. Three screens: the live one-prompt run (the
+state he called horrible), the stalled chain (his s100 bug, with the band that
+fixed it), and advanced mode (the one place a form appears, because it is the
+one place editing lands).
+
+Two things about this sheet that are worth carrying into the next one:
+
+- **It was AMENDED in its own session, in its own header, rather than quietly
+  corrected.** At the build's screenshot gate the judge verdict wrapped the
+  card head to three lines, so it moved to its own row under the stage rail.
+  The sheet is the spec; when the build and the drawing disagree, one of them
+  changes on purpose and says which.
+- **Rule 6 caught a collision inside the sheet itself.** The first draw named
+  an on-screen-text row `.dir.screen`, which hit the SHELL's `.screen`
+  (1440×940 flex box) and silently turned three caption rows into full
+  screens. Found by counting DOM nodes, not by looking. It is `.dir.onscreen`.
+  The sheets' vocabulary is small and shared — a new class name is a lookup,
+  never a guess.
+
+It carries three OPEN CALLS for the founder in its header (live-chain editing,
+the dropped "low-res stub" title, and one-scene-open-at-a-time). Those are
+questions, not decisions taken on his behalf.
 
 ## Proposals — NOT yet verdicted (do not port)
 

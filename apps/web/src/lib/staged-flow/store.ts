@@ -20,6 +20,7 @@ import {
   FIXTURE_STAGED_TENANT_ID,
   FIXTURE_STORYBOARD_DRAFT_ID,
   fixtureStoryboardMeta,
+  FIXTURE_DEMO_PROMPT,
   fixtureStylePresets,
   type PolishCandidateTheme,
   type ScenesCandidateTheme,
@@ -286,6 +287,14 @@ export function getStagedFlow(draftId: string): StagedFlowState | null {
     plan: FIXTURE_STAGE_PLAN,
     stages,
     currentIndex: current,
+    // The demo fixture DID start from a written ask, so it says so — this is
+    // the populated shape of the band the live path can only half-fill.
+    origin: {
+      prompt: FIXTURE_DEMO_PROMPT,
+      kind: "demo",
+      sourceUrl: null,
+      runId: null,
+    },
     presets: fixtureStylePresets,
     captures: state.captures,
   };
