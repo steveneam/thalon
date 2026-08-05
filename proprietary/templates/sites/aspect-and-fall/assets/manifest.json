@@ -1,0 +1,65 @@
+[
+  {
+    "file": "hero.webp",
+    "pinnedHash": "730a471bf9630f86179175669585d6b908562c7149acc47d9662bfdb73e00e0b",
+    "width": 2048,
+    "height": 1152,
+    "quality": 82
+  },
+  {
+    "file": "before.webp",
+    "pinnedHash": "2d1b2a342360e191f10ad56e5d3af25fea13576941373ff1496268937a2950ad",
+    "width": 1024,
+    "height": 768,
+    "quality": 82
+  },
+  {
+    "file": "onsite.webp",
+    "pinnedHash": "986a5a5a2834f1b694c4010f0ed69d5578824c196614c37f51f98f53d2b13f32",
+    "width": 1024,
+    "height": 768,
+    "quality": 82
+  },
+  {
+    "file": "twin-feb.webp",
+    "pinnedHash": "1e325523fa480a89c15de12ee56aeac4816d85b30c0d1f58ce3624489f4e2157",
+    "width": 1600,
+    "height": 900,
+    "quality": 82
+  },
+  {
+    "file": "twin-may.webp",
+    "pinnedHash": "d3c94907ba54b345c8872f54bb2e020649a84ae9bb090361513e353727d07471",
+    "width": 1600,
+    "height": 900,
+    "quality": 82
+  },
+  {
+    "file": "twin-jul.webp",
+    "pinnedHash": "1ebc341a942dad08f3e5859fbe2cccd7acd9369f19bc33368b1106ad99ac7d98",
+    "width": 1600,
+    "height": 900,
+    "quality": 82
+  },
+  {
+    "file": "twin-oct.webp",
+    "pinnedHash": "8360da67d468f1dd2bbe43351d20d11a50e73876075ef4f905316ea17d9c2ee4",
+    "width": 1600,
+    "height": 900,
+    "quality": 82
+  },
+  {
+    "file": "asbuilt.webp",
+    "pinnedHash": "2aa8b7f97479cf668acc112e4d4f6c1ecef3dce1bf56871d9e989fcfd694dada",
+    "width": 2048,
+    "height": 1152,
+    "quality": 82
+  },
+  {
+    "file": "studio.webp",
+    "pinnedHash": "82d93dbb5d4393deba70809a703f1c218e627516e4da51cad37b15df00394bae",
+    "width": 1024,
+    "height": 1024,
+    "quality": 82
+  }
+]

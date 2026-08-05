@@ -1,0 +1,20 @@
+{
+  "slug": "aspect-and-fall",
+  "name": "Aspect & Fall",
+  "vertical": "garden-landscape-design",
+  "oneLiner": "A garden and landscape design studio whose page is the drawing set itself — what a space becomes, month by month and year by year.",
+  "axes": {
+    "primary": "otherworldly-animation",
+    "secondary": "editorial-print"
+  },
+  "paletteSeed": "drafting paper (warm off-white), graphite (a warm near-black, never pure) and non-photo blue for the setting-out grid — the drafting-pencil blue that deliberately does not reproduce; the ONE colour rule is that the only saturated colour on the page belongs to PLANTS and changes with the month, so nothing decorative is ever coloured — honest to a discipline where the colour on a plan IS the planting",
+  "typeDirection": "Spectral (roman + italic — the italic carries the Latin binomials as horticultural print has always set them) + Sometype Mono (every piece of sheet apparatus: title block, labels, dimensions, readouts) — TWO families only, because a real drawing sheet has exactly two lettering registers; both OFL, vendored, both portfolio-new",
+  "motionBudget": "one scroll clock and no second animation system: the calendar year runs Jan→Dec across a pinned drawing sheet, and one clock sets the coloured-pencil fill in the beds, which species are lit in their own colour, the terrace's shade polygon as the canopy leafs, three live readouts, the playhead crossing the interest calendar, and a photograph of the same corner cross-fading through four seasons — the expert instrument and its lay twin at equal weight, never a picture appended to a diagram; the maturity chapter (year 1/3/10) is three static states, not a second clock; reduced-motion freezes at high summer with the whole calendar readable, and no-JS keeps every chapter, the full calendar and the wink's line in the markup; THE WINK lands at high summer only — a leader line on the plan pointing at the sunny end of the terrace, annotated 'CAT SITS HERE', the kind of dry margin note a real designer actually pencils in",
+  "wave": 4,
+  "built": "2026-08-05",
+  "verdict": {
+    "status": "awaiting",
+    "note": "Site B of the landing arc (docs/landing-arc/spec.md). Built with site A's three ratchets applied from the opener: the SCHEMATIC test rejected the banked naturalistic 'one tree through four seasons' outright (a drawn tree is a picture of a THING) and moved the instrument to the drawing the discipline actually produces — a plan-view planting plan with canopy circles at mature spread, plus a seasonal interest calendar. The claude-design mock ran in front of the pre-plan and found four real faults, including two silent killers of position:sticky.",
+    "at": "2026-08-05"
+  }
+}

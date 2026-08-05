@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aspect &amp; Fall — garden &amp; landscape design</title>
+<meta name="description" content="A garden and landscape design studio. We draw what a space becomes — month by month, and year by year." />
+<style>
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-300.woff2") format("woff2");
+    font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-400.woff2") format("woff2");
+    font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-600.woff2") format("woff2");
+    font-weight: 600; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-300-italic.woff2") format("woff2");
+    font-weight: 300; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-400-italic.woff2") format("woff2");
+    font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Sometype"; src: url("fonts/sometype-mono-var.woff2") format("woff2");
+    font-weight: 400 700; font-style: normal; font-display: swap; }
+
+  :root {
+    --paper:      #F2EEE4;   /* drafting paper */
+    --paper-2:    #EAE5D8;   /* the sheet the instrument is drawn on */
+    --ink:        #26271F;   /* graphite — warm near-black, never pure */
+    --ink-soft:   #56574C;
+    --ink-label:  #8C8C7E;
+    --blue:       #8FAEC4;   /* non-photo blue — the setting-out layer */
+    --blue-faint: #CFDCE4;
+    --rule:       rgba(38,39,31,.22);
+    /* the ONLY saturated colours on this page belong to plants */
+    --sp-winter:  #8A9488;
+    --sp-spring:  #9BB06A;
+    --sp-summer:  #4E7343;
+    --sp-autumn:  #B4763A;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+    font-weight: 300; font-size: 18px; line-height: 1.62;
+    text-wrap: pretty; -webkit-font-smoothing: antialiased;
+  }
+  /* NOTE: no `overflow` is set on any ancestor of the sticky stage.
+     `overflow-x:hidden` computes overflow-y:auto, which makes the element a
+     scroll container and silently breaks position:sticky. Found in the mock. */
+
+  a { color: var(--ink); text-underline-offset: .22em; text-decoration-thickness: 1px; }
+  a:hover { color: var(--sp-summer); }
+  img { display: block; max-width: 100%; }
+
+  .mono, .lbl { font-family: "Sometype", ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .lbl {
+    font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-label); font-weight: 500;
+  }
+  .lbl-ink { color: var(--ink-soft); }
+  .rule { height: 1px; background: var(--ink); opacity: .22; border: 0; }
+
+  .wrap { padding: 0 clamp(20px, 4vw, 56px); }
+  .sheet {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--blue-faint) 1px, transparent 1px),
+      linear-gradient(90deg, var(--blue-faint) 1px, transparent 1px);
+    background-size: 32px 32px; background-position: -1px -1px;
+  }
+
+  h1, h2, h3 { font-weight: 300; letter-spacing: -.015em; margin: 0; line-height: 1.06; }
+  .h1 { font-size: clamp(38px, 6.4vw, 78px); line-height: .96; }
+  .h2 { font-size: clamp(28px, 3.4vw, 42px); }
+  .h3 { font-size: clamp(22px, 2.4vw, 30px); }
+  .lead { font-size: clamp(16px, 1.15vw, 19px); line-height: 1.62; color: var(--ink-soft); }
+  em { font-style: italic; }
+  .sci { font-style: italic; }
+
+  /* ---------- 00 hero ---------- */
+  .hero { position: relative; height: 100svh; min-height: 560px; }
+  .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero-veil {
+    position: absolute; inset: 0;
+    /* Two veils, not one: the vertical pass seats the top and bottom rails,
+       and the angled pass darkens only the left column the type sits in — a
+       single flat veil readable enough for the sub-line dulled the backlit
+       grasses that are the reason the photograph works. */
+    background:
+      linear-gradient(102deg, rgba(18,20,14,.66) 0%, rgba(18,20,14,.34) 34%, rgba(18,20,14,0) 62%),
+      linear-gradient(180deg, rgba(18,20,14,.44) 0%, rgba(18,20,14,.04) 42%, rgba(18,20,14,.52) 100%);
+  }
+  .hero-in {
+    position: relative; height: 100%; display: flex; flex-direction: column;
+    justify-content: space-between; padding: clamp(20px,3vw,38px) clamp(20px,4vw,56px);
+    color: #F4F1E8;
+  }
+  .hero .lead { color: rgba(244,241,232,.88); max-width: 34em; }
+  .hero .lbl { color: rgba(244,241,232,.72); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+
+  /* ---------- 01 survey ---------- */
+  .split { display: grid; grid-template-columns: minmax(0,.82fr) minmax(0,1.18fr); gap: clamp(28px,4vw,60px); align-items: start; }
+  .frame { border: 1px solid rgba(38,39,31,.34); background: rgba(255,255,255,.42); padding: clamp(12px,1.4vw,20px); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .pair figure { margin: 0; }
+  .pair img { width: 100%; height: clamp(140px,17vw,210px); object-fit: cover; }
+  figcaption { margin-top: 7px; }
+
+  /* ---------- 02 the instrument ---------- */
+  .year { background: var(--paper-2); display: grid; grid-template-columns: minmax(0,31%) minmax(0,1fr); }
+  .chapters { padding: 0 clamp(20px,2.6vw,38px) 0 clamp(20px,4vw,56px); }
+  .chap { min-height: 88vh; display: flex; flex-direction: column; justify-content: center; }
+  .chap-i { opacity: .32; transition: opacity .45s ease; }
+  .chap.on .chap-i { opacity: 1; }
+  .chap h3 { margin: 10px 0 8px; }
+
+  .stage-col { position: relative; }
+  .stage {
+    position: sticky; top: 0; height: 100svh;
+    display: grid; grid-template-rows: auto 1px minmax(0,1fr) clamp(150px,23vh,268px) auto;
+    gap: 9px; padding: clamp(14px,1.5vw,22px) clamp(16px,2vw,30px) clamp(12px,1.4vw,20px);
+  }
+  .tblock { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: start; }
+  .readouts { display: flex; gap: clamp(10px,1.5vw,26px); align-items: flex-end; }
+  .readout { font-family: "Sometype", monospace; font-size: clamp(15px,1.5vw,21px); line-height: 1.05; font-weight: 500; }
+  .plan-box { position: relative; min-height: 0; }
+  .plan-box svg { width: 100%; height: 100%; display: block; }
+  .twin { position: relative; min-height: 0; background: rgba(38,39,31,.05); overflow: hidden; }
+  .twin img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    /* the bench, walls and drystone piers sit low in the frame, and they are
+       what proves all four months are the same corner — a centred crop cuts
+       them off, so the crop is anchored low. */
+    object-position: 50% 72%;
+    opacity: 0; transition: opacity .55s ease;
+  }
+  .twin img.on { opacity: 1; }
+  .twin figcaption {
+    position: absolute; left: 10px; bottom: 8px; margin: 0;
+    background: rgba(242,238,228,.86); padding: 3px 8px;
+  }
+  .cal svg { width: 100%; display: block; }
+
+  /* ---------- 03 maturity ---------- */
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: clamp(14px,2vw,26px); }
+  .three svg { width: 100%; height: auto; display: block; border: 1px solid rgba(38,39,31,.25); background: rgba(255,255,255,.36); }
+
+  /* ---------- 04 the set ---------- */
+  .dark { background: var(--ink); color: var(--paper); }
+  .dark .lead { color: rgba(242,238,228,.7); }
+  .dark .lbl { color: rgba(242,238,228,.5); }
+  .set { border-top: 1px solid rgba(242,238,228,.22); }
+  .set > div {
+    display: grid; grid-template-columns: minmax(0,210px) minmax(0,1fr); gap: clamp(16px,3vw,44px);
+    padding: 15px 0; border-bottom: 1px solid rgba(242,238,228,.22);
+  }
+  .set .mono { font-size: 12px; letter-spacing: .16em; padding-top: 3px; }
+
+  /* ---------- 05 / 06 ---------- */
+  .built { position: relative; height: 84svh; min-height: 460px; }
+  .built img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .built-veil {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(102deg, rgba(18,20,14,.5) 0%, rgba(18,20,14,.2) 40%, rgba(18,20,14,0) 68%),
+      linear-gradient(180deg, rgba(18,20,14,.04) 38%, rgba(18,20,14,.6) 100%);
+  }
+  .card { border: 1px solid rgba(38,39,31,.4); padding: clamp(16px,1.6vw,24px); }
+  .studio-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .studio-imgs img { width: 100%; height: clamp(220px,26vw,320px); object-fit: cover; }
+
+  .sec { padding: clamp(56px,7vw,104px) 0; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    body { font-size: 17px; }
+    .split, .three, .studio-imgs, .pair { grid-template-columns: minmax(0,1fr); }
+    /* The stage sits ABOVE the chapters and holds the top half of the screen.
+       It must be a COLUMN FLEX container, not a one-column grid: in a single
+       grid column the stage's own cell is only as tall as the stage, so
+       position:sticky has nothing to travel inside and the instrument simply
+       scrolls away — measured at top:-1099px before this fix. Sticky therefore
+       moves onto .stage-col, which travels the whole flex container. */
+    .year { display: flex; flex-direction: column; }
+    .stage-col { order: -1; position: sticky; top: 0; z-index: 2; }
+    .stage {
+      position: static; height: 52svh;
+      grid-template-rows: auto 1px minmax(0,1fr) auto; gap: 7px;
+    }
+    .stage .twin, .stage .cal { display: none; }
+    /* chapters pass UNDER the stage, so each one is sized to put its own
+       heading in the visible lower half rather than behind the sheet. */
+    .chap { min-height: 46svh; padding: 26px 0 22px; }
+    .chapters { padding: 0 clamp(20px,4vw,56px); }
+    /* the full title block does not fit a phone: it wrapped into the readouts
+       and the two collided. Stack them, and drop to the short sheet name. */
+    .tblock { grid-template-columns: minmax(0,1fr); gap: 6px; }
+    .readouts { justify-content: space-between; gap: 10px; }
+    .long { display: none; }
+    .mobile-only { display: block; }
+    .mobile-only .cal svg { height: 190px; }
+  }
+  @media (min-width: 901px) { .mobile-only { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 00 · HERO ============ -->
+<header class="hero" id="top">
+  <img src="assets/hero.webp" alt="A mature designed garden in late-summer evening light: backlit grasses and drifts of salvia on both sides of a mown grass path, a broad old tree against a clipped hedge beyond." width="2048" height="1152" />
+  <div class="hero-veil"></div>
+  <div class="hero-in">
+    <div class="row">
+      <div class="mono" style="font-size:13px;letter-spacing:.3em;text-transform:uppercase">Aspect &amp; Fall</div>
+      <div class="lbl">Garden &amp; landscape design</div>
+    </div>
+    <div>
+      <h1 class="h1">A garden is not a<br />picture. It is a<br /><em>length of time.</em></h1>
+      <p class="lead" style="margin-top:22px">
+        We draw what a space becomes — month by month, and year by year.
+        This one was a drawing eleven years ago.
+      </p>
+    </div>
+    <div class="row">
+      <div class="lbl">Scroll — the drawing is underneath</div>
+      <div class="lbl">Sheet 07 · As built · Year 11</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 01 · SURVEY ============ -->
+<section class="sheet sec" aria-labelledby="s-survey">
+  <div class="wrap split">
+    <div>
+      <p class="lbl">Sheet 01 · Survey</p>
+      <h2 class="h2" id="s-survey" style="margin:14px 0 18px">Aspect, and fall.</h2>
+      <p class="lead">
+        Every garden begins with two facts, and neither is a matter of taste:
+        which way it faces, and which way the water goes. Everything after that
+        is a decision. These two are given — so we measure them before we draw
+        a line.
+      </p>
+      <p class="lead" style="margin-top:16px">
+        It is also where the studio got its name.
+      </p>
+    </div>
+    <div>
+      <div class="frame" style="height:clamp(300px,30vw,392px)">
+        <svg viewBox="0 0 660 384" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%" role="img"
+             aria-label="Survey drawing: the plot boundary, the house, three contour lines rising two point four metres to the north-east, an arrow showing the fall to the south-west, a north point, and the midsummer sun path.">
+          <rect x="42" y="28" width="576" height="328" fill="none" stroke="#26271F" stroke-width="1.4" />
+          <rect x="72" y="54" width="152" height="98" fill="#26271F" opacity=".09" stroke="#26271F" />
+          <text x="82" y="78" class="mono" font-family="Sometype, monospace" font-size="11" fill="#56574C" letter-spacing="1.4">HOUSE</text>
+          <path d="M42 118 Q230 106 618 94"  fill="none" stroke="#8FAEC4" stroke-width="1" />
+          <path d="M42 190 Q230 175 618 158" fill="none" stroke="#8FAEC4" stroke-width="1" />
+          <path d="M42 264 Q230 247 618 226" fill="none" stroke="#8FAEC4" stroke-width="1" />
+          <text x="486" y="90"  font-family="Sometype, monospace" font-size="10" fill="#7C9BB2">+2.40</text>
+          <text x="486" y="154" font-family="Sometype, monospace" font-size="10" fill="#7C9BB2">+1.20</text>
+          <text x="486" y="222" font-family="Sometype, monospace" font-size="10" fill="#7C9BB2">+0.00</text>
+          <line x1="330" y1="106" x2="330" y2="300" stroke="#26271F" stroke-width="1" stroke-dasharray="5 4" />
+          <polygon points="330,314 324,296 336,296" fill="#26271F" />
+          <text x="344" y="292" font-family="Sometype, monospace" font-size="10" fill="#26271F" letter-spacing="1.2">FALL — 1:24 TO THE SOUTH-WEST</text>
+          <circle cx="566" cy="82" r="26" fill="none" stroke="#26271F" stroke-width="1" />
+          <polygon points="566,60 561,86 571,86" fill="#26271F" />
+          <text x="561" y="54" font-family="Sometype, monospace" font-size="11" fill="#26271F">N</text>
+          <path d="M120 336 A176 176 0 0 1 472 336" fill="none" stroke="#B4763A" stroke-width="1" stroke-dasharray="3 5" />
+          <text x="86" y="352" font-family="Sometype, monospace" font-size="10" fill="#B4763A" letter-spacing="1.2">SUN PATH · 21 JUNE</text>
+        </svg>
+      </div>
+      <div class="pair">
+        <figure>
+          <img src="assets/before.webp" alt="The same plot before work: a patchy worn lawn, close-boarded fencing down both sides, cracked concrete slabs, and standing water in the low corner, under flat overcast light." width="1024" height="768" loading="lazy" />
+          <figcaption class="lbl">Before — the standing water tells you where the fall goes</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/onsite.webp" alt="Hands holding a partial drawing flat against rough ground, weighted at the corners with stones." width="1024" height="768" loading="lazy" />
+          <figcaption class="lbl">The drawing, read where it will be built</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 · THE INSTRUMENT ============ -->
+<section class="year" id="year" aria-labelledby="s-year">
+  <div class="chapters">
+    <div style="height:24vh"></div>
+    <p class="lbl">Sheet 04 · The year</p>
+    <h2 class="h2" id="s-year" style="margin:12px 0 14px">Twelve months<br />on one drawing.</h2>
+    <p class="lead">
+      Scroll, and the plan runs a year beside a photograph of the same corner.
+      Nothing on the sheet is decoration: the colour is the planting, the
+      circles are canopy spread at maturity, and the grey is shade at noon.
+    </p>
+    <div style="height:20vh"></div>
+
+    <article class="chap" data-month="2">
+      <div class="chap-i">
+        <p class="lbl lbl-ink">February</p>
+        <h3 class="h3">The bones show.</h3>
+        <p class="lead">
+          Nothing is in leaf, so the drawing is doing all the work — the line of
+          the path, the height of the wall, where the light gets in. If a garden
+          fails, it fails in February.
+        </p>
+      </div>
+    </article>
+
+    <article class="chap" data-month="5">
+      <div class="chap-i">
+        <p class="lbl lbl-ink">May</p>
+        <h3 class="h3">The easy month.</h3>
+        <p class="lead">
+          Everything is fresh, nothing has gone over, and every garden in the
+          country looks competent — which is exactly why we do not design for
+          it. Count what is actually in flower on this plan in May. Then look
+          again at September.
+        </p>
+      </div>
+    </article>
+
+    <article class="chap" data-month="7">
+      <div class="chap-i">
+        <p class="lbl lbl-ink">July</p>
+        <h3 class="h3">Shade is the product.</h3>
+        <p class="lead">
+          By high summer the canopy is doing what it was planted to do. Half the
+          terrace is in shade by two o'clock and the west end stays in sun until
+          eight — which is the difference between a terrace and a patio nobody
+          sits on. <em>(The plan has always carried a note against that sunny
+          end: cat sits here.)</em>
+        </p>
+      </div>
+    </article>
+
+    <article class="chap" data-month="10">
+      <div class="chap-i">
+        <p class="lbl lbl-ink">October</p>
+        <h3 class="h3">The second season.</h3>
+        <p class="lead">
+          Seed heads, bark and late colour. We plant for October the way other
+          people plant for June — and the calendar below is how you check that
+          we did.
+        </p>
+      </div>
+    </article>
+
+    <div style="height:26vh"></div>
+  </div>
+
+  <div class="stage-col">
+    <div class="stage sheet">
+
+      <div class="tblock">
+        <p class="lbl" style="margin:0"><span class="long">Aspect &amp; Fall · </span>Sheet 04<span class="long"> · Planting plan</span> · 1:100</p>
+        <div class="readouts">
+          <div><p class="lbl" style="margin:0">In flower</p><p class="readout" id="r-flower">5/13</p></div>
+          <div><p class="lbl" style="margin:0">Canopy shade</p><p class="readout" id="r-shade">38%</p></div>
+          <div><p class="lbl" style="margin:0">Sun off terrace</p><p class="readout" id="r-sun">20:10</p></div>
+          <div style="min-width:5.2em;text-align:right"><p class="lbl" style="margin:0">Month</p><p class="readout" id="r-month">JUL</p></div>
+        </div>
+      </div>
+      <hr class="rule" />
+
+      <div class="plan-box">
+        <svg id="plan" viewBox="0 0 1180 520" preserveAspectRatio="xMidYMid meet" role="img"
+             aria-label="Planting plan in plan view: the house and terrace, a hatched path curving across the plot, and 13 planting circles drawn at mature canopy spread.">
+          <rect x="6" y="6" width="1168" height="508" fill="none" stroke="#26271F" stroke-width="1.1" opacity=".65" />
+          <rect x="38" y="30" width="252" height="118" fill="#26271F" opacity=".08" stroke="#26271F" />
+          <text x="52" y="56" font-family="Sometype, monospace" font-size="11" fill="#56574C" letter-spacing="1.5">HOUSE</text>
+          <!-- the shade polygon covers only the part of the terrace the canopy
+               actually reaches; the west end stays in sun, which is where the
+               wink's note points. Geometry and copy have to agree. -->
+          <rect id="shade" x="374" y="30" width="122" height="118" fill="#26271F" opacity=".33" />
+          <rect x="290" y="30" width="206" height="118" fill="none" stroke="#26271F" stroke-dasharray="3 4" opacity=".5" />
+          <text x="304" y="140" font-family="Sometype, monospace" font-size="10" fill="#56574C" letter-spacing="1.3">TERRACE</text>
+          <path d="M168 148 C232 258 520 262 600 350 C664 420 830 456 1108 452"
+                fill="none" stroke="#26271F" stroke-width="14" opacity=".11" stroke-linecap="round" />
+          <path d="M168 148 C232 258 520 262 600 350 C664 420 830 456 1108 452"
+                fill="none" stroke="#26271F" stroke-width="1" opacity=".42" stroke-dasharray="2 5" />
+          <g id="canopy">
+          <g><circle data-fill="1" cx="432" cy="250" r="80" fill="#4E7343" opacity="0.33" /><circle cx="432" cy="250" r="80" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" /></g>
+          <g><circle data-fill="1" cx="882" cy="152" r="72" fill="#4E7343" opacity="0.33" /><circle cx="882" cy="152" r="72" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" /></g>
+          <g><circle data-fill="1" cx="980" cy="348" r="62" fill="#9BB06A" opacity="0.65" /><circle cx="980" cy="348" r="62" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" /></g>
+          <g><circle data-fill="1" cx="212" cy="350" r="48" fill="#4E7343" opacity="0.65" /><circle cx="212" cy="350" r="48" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" /></g>
+          <g><circle data-fill="1" cx="1090" cy="226" r="38" fill="#4E7343" opacity="0.33" /><circle cx="1090" cy="226" r="38" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="604" cy="432" r="30" fill="#7C6FA0" opacity="0.65" /><circle cx="604" cy="432" r="30" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="560" cy="330" r="20" fill="#4E7343" opacity="0.33" /><circle cx="560" cy="330" r="20" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="352" cy="392" r="29" fill="#7C6FA0" opacity="0.65" /><circle cx="352" cy="392" r="29" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="734" cy="258" r="26" fill="#7C6FA0" opacity="0.65" /><circle cx="734" cy="258" r="26" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="266" cy="254" r="26" fill="#4E7343" opacity="0.33" /><circle cx="266" cy="254" r="26" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="792" cy="446" r="27" fill="#4E7343" opacity="0.33" /><circle cx="792" cy="446" r="27" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="120" cy="238" r="23" fill="#4E7343" opacity="0.33" /><circle cx="120" cy="238" r="23" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          <g><circle data-fill="1" cx="176" cy="298" r="19" fill="#4E7343" opacity="0.33" /><circle cx="176" cy="298" r="19" fill="none" stroke="#26271F" stroke-width="1" opacity=".5" stroke-dasharray="3 3" /></g>
+          </g>
+          <g id="wink" opacity="1">
+            <circle cx="330" cy="112" r="3" fill="#26271F" />
+            <line x1="330" y1="112" x2="516" y2="60" stroke="#26271F" stroke-width=".9" />
+            <text x="524" y="63" font-family="Sometype, monospace" font-size="11" fill="#26271F" letter-spacing="1.2">CAT SITS HERE</text>
+          </g>
+          <g id="leaders">
+          <line x1="488.0" y1="194.0" x2="532" y2="179" stroke="#26271F" stroke-width=".8" opacity=".7" />
+          <text x="538" y="176" font-family="Sometype, monospace" font-size="9.5" fill="#56574C" letter-spacing="1.1">MULTI-STEM · 4m SPREAD</text>
+          <line x1="932.4" y1="101.6" x2="974" y2="89" stroke="#26271F" stroke-width=".8" opacity=".7" />
+          <text x="980" y="86" font-family="Sometype, monospace" font-size="9.5" fill="#56574C" letter-spacing="1.1">WHITE BARK · WINTER</text>
+          <line x1="1023.4" y1="304.6" x2="1062" y2="295" stroke="#26271F" stroke-width=".8" opacity=".7" />
+          <text x="1068" y="292" font-family="Sometype, monospace" font-size="9.5" fill="#56574C" letter-spacing="1.1">BRACTS JUN–JUL</text>
+          </g>
+        </svg>
+      </div>
+
+      <figure class="twin" style="margin:0">
+        <img src="assets/twin-feb.webp" alt="The same corner of the garden in February: bare stems, low light, structure visible." width="1600" height="900" loading="lazy" data-twin="2" />
+        <img src="assets/twin-may.webp" alt="The same corner in May: fresh growth, blossom above the bed." width="1600" height="900" loading="lazy" data-twin="5" />
+        <img src="assets/twin-jul.webp" class="on" alt="The same corner in July: full canopy, deep shade across the terrace edge." width="1600" height="900" loading="lazy" data-twin="7" />
+        <img src="assets/twin-oct.webp" alt="The same corner in October: seed heads, rust and gold, low autumn sun." width="1600" height="900" loading="lazy" data-twin="10" />
+        <figcaption class="lbl" id="twin-cap">The same corner · summer, photographed in July</figcaption>
+      </figure>
+
+      <div class="cal">
+        <div class="row" style="margin-bottom:3px">
+          <p class="lbl" style="margin:0">Sheet 05 · Interest calendar — what is doing something, and when</p>
+          <p class="lbl" style="margin:0"><span style="background:#4E7343;display:inline-block;width:8px;height:8px"></span> in flower &nbsp; <span style="background:rgba(38,39,31,.25);display:inline-block;width:8px;height:8px"></span> structure, bark, seed</p>
+        </div>
+        <svg id="cal" viewBox="0 0 900 172" preserveAspectRatio="none" role="img"
+             aria-label="Interest calendar: 13 species by twelve months, showing which are in flower and which carry structural interest in each month.">
+          <text x="0" y="10.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Amelanchier lamarckii</text>
+          <rect x="215.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="3.0" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="441.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="21.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Betula utilis jacquemontii</text>
+          <rect x="215.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="271.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="328.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="384.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" />
+          <text x="0" y="31.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Cornus kousa</text>
+          <rect x="215.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="24.6" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="554.0" y="24.6" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="610.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="723.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="42.6" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Hydrangea quercifolia</text>
+          <rect x="215.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="610.5" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="667.0" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="723.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="53.4" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Molinia caerulea Transparent</text>
+          <rect x="215.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="46.2" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="667.0" y="46.2" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="723.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="64.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Salvia nemorosa Caradonna</text>
+          <rect x="215.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="497.5" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="75.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Allium Purple Sensation</text>
+          <rect x="215.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="67.8" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="497.5" y="67.8" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="610.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="667.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="85.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Geranium Rozanne</text>
+          <rect x="215.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="780.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="96.6" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Verbena bonariensis</text>
+          <rect x="215.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="780.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="107.4" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Anemone Honorine Jobert</text>
+          <rect x="215.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="667.0" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="723.5" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="780.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="118.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Sesleria autumnalis</text>
+          <rect x="215.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="111.0" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="723.5" y="111.0" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="780.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="0" y="129.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Helleborus argutifolius</text>
+          <rect x="215.0" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="271.5" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="328.0" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="384.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" />
+          <text x="0" y="139.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Narcissus Thalia</text>
+          <rect x="215.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="132.6" width="54.5" height="8.2" fill="#D4C79A" opacity=".85" /><rect x="384.5" y="132.6" width="54.5" height="8.2" fill="#D4C79A" opacity=".85" /><rect x="441.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+          <text x="242.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JAN</text>
+          <text x="298.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">FEB</text>
+          <text x="355.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">MAR</text>
+          <text x="411.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">APR</text>
+          <text x="468.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">MAY</text>
+          <text x="524.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JUN</text>
+          <text x="581.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JUL</text>
+          <text x="637.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">AUG</text>
+          <text x="694.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">SEP</text>
+          <text x="750.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">OCT</text>
+          <text x="807.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">NOV</text>
+          <text x="863.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">DEC</text>
+          <line id="head" x1="581.2" x2="581.2" y1="0" y2="147.4" stroke="#26271F" stroke-width="1.4" />
+        </svg>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- The interest calendar again, for narrow screens, where it will not fit
+     inside the pinned sheet. Same drawing, no playhead. -->
+<section class="sheet mobile-only" style="padding:44px 0 52px" aria-labelledby="s-cal-m">
+  <div class="wrap">
+    <p class="lbl">Sheet 05 · Interest calendar</p>
+    <h2 class="h3" id="s-cal-m" style="margin:12px 0 6px">What is doing something, and when.</h2>
+    <p class="lbl" style="margin:0 0 12px">
+      <span style="background:#4E7343;display:inline-block;width:8px;height:8px"></span> in flower &nbsp;
+      <span style="background:rgba(38,39,31,.25);display:inline-block;width:8px;height:8px"></span> structure, bark, seed
+    </p>
+    <div class="cal">
+      <svg id="cal-m" viewBox="0 0 900 172" preserveAspectRatio="none" role="img"
+           aria-label="Interest calendar: 13 species by twelve months, showing which are in flower and which carry structural interest in each month.">
+        <text x="0" y="10.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Amelanchier lamarckii</text>
+        <rect x="215.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="3.0" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="441.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="21.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Betula utilis jacquemontii</text>
+        <rect x="215.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="271.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="328.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="384.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" />
+        <text x="0" y="31.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Cornus kousa</text>
+        <rect x="215.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="24.6" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="554.0" y="24.6" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="610.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="723.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="42.6" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Hydrangea quercifolia</text>
+        <rect x="215.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="610.5" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="667.0" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="723.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="53.4" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Molinia caerulea Transparent</text>
+        <rect x="215.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="46.2" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="667.0" y="46.2" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="723.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="64.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Salvia nemorosa Caradonna</text>
+        <rect x="215.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="497.5" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="75.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Allium Purple Sensation</text>
+        <rect x="215.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="67.8" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="497.5" y="67.8" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="610.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="667.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="85.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Geranium Rozanne</text>
+        <rect x="215.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="780.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="96.6" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Verbena bonariensis</text>
+        <rect x="215.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="780.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="107.4" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Anemone Honorine Jobert</text>
+        <rect x="215.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="667.0" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="723.5" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="780.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="118.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Sesleria autumnalis</text>
+        <rect x="215.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="111.0" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="723.5" y="111.0" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="780.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="0" y="129.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Helleborus argutifolius</text>
+        <rect x="215.0" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="271.5" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="328.0" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="384.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" />
+        <text x="0" y="139.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Narcissus Thalia</text>
+        <rect x="215.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="132.6" width="54.5" height="8.2" fill="#D4C79A" opacity=".85" /><rect x="384.5" y="132.6" width="54.5" height="8.2" fill="#D4C79A" opacity=".85" /><rect x="441.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
+        <text x="242.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JAN</text>
+        <text x="298.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">FEB</text>
+        <text x="355.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">MAR</text>
+        <text x="411.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">APR</text>
+        <text x="468.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">MAY</text>
+        <text x="524.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JUN</text>
+        <text x="581.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JUL</text>
+        <text x="637.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">AUG</text>
+        <text x="694.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">SEP</text>
+        <text x="750.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">OCT</text>
+        <text x="807.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">NOV</text>
+        <text x="863.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">DEC</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 · MATURITY ============ -->
+<section class="sheet sec" aria-labelledby="s-years">
+  <div class="wrap">
+    <div class="split" style="align-items:end">
+      <div>
+        <p class="lbl">Sheet 06 · Maturity</p>
+        <h2 class="h2" id="s-years" style="margin-top:12px">Year one looks thin.<br />It is meant to.</h2>
+      </div>
+      <p class="lead" style="max-width:40em">
+        The circles are mature spread, drawn to scale. Plant at the spacing that
+        looks right on day one and you are digging half of it out in year four.
+        This is the part of the job that is hardest to sell and cheapest to get
+        right — so we draw it, and you can hold us to the drawing.
+      </p>
+    </div>
+    <hr class="rule" style="margin:26px 0" />
+    <div class="three">
+      <div><p class="lbl lbl-ink" style="margin:0 0 8px">Year 1 · as planted</p>
+        <svg viewBox="0 0 300 120" id="y1" role="img" aria-label="The same plan at year one: small circles, wide gaps.">
+          <circle cx="104.4" cy="48.3" r="5.36" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="220.4" cy="23.1" r="4.82" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="245.6" cy="73.6" r="4.15" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="47.7" cy="74.1" r="3.22" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="274.0" cy="42.2" r="2.55" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="148.7" cy="95.2" r="2.01" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="137.4" cy="69.0" r="1.4" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="83.8" cy="84.9" r="1.94" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="182.2" cy="50.4" r="1.74" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="61.6" cy="49.4" r="1.74" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="197.2" cy="98.9" r="1.81" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="24.0" cy="45.3" r="1.54" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="38.4" cy="60.7" r="1.4" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+        </svg></div>
+      <div><p class="lbl lbl-ink" style="margin:0 0 8px">Year 3</p>
+        <svg viewBox="0 0 300 120" id="y3" role="img" aria-label="The same plan at year three: circles roughly half their mature size, beginning to meet.">
+          <circle cx="104.4" cy="48.3" r="11.13" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="220.4" cy="23.1" r="10.02" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="245.6" cy="73.6" r="8.63" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="47.7" cy="74.1" r="6.68" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="274.0" cy="42.2" r="5.29" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="148.7" cy="95.2" r="4.17" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="137.4" cy="69.0" r="2.78" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="83.8" cy="84.9" r="4.04" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="182.2" cy="50.4" r="3.62" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="61.6" cy="49.4" r="3.62" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="197.2" cy="98.9" r="3.76" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="24.0" cy="45.3" r="3.2" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="38.4" cy="60.7" r="2.64" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+        </svg></div>
+      <div><p class="lbl lbl-ink" style="margin:0 0 8px">Year 10 · the drawing</p>
+        <svg viewBox="0 0 300 120" id="y10" role="img" aria-label="The same plan at year ten: circles at full mature spread, touching and overlapping as drawn.">
+          <circle cx="104.4" cy="48.3" r="20.62" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="220.4" cy="23.1" r="18.55" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="245.6" cy="73.6" r="15.98" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="47.7" cy="74.1" r="12.37" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="274.0" cy="42.2" r="9.79" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="148.7" cy="95.2" r="7.73" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="137.4" cy="69.0" r="5.15" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="83.8" cy="84.9" r="7.47" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="182.2" cy="50.4" r="6.7" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="61.6" cy="49.4" r="6.7" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="197.2" cy="98.9" r="6.96" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="24.0" cy="45.3" r="5.93" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+          <circle cx="38.4" cy="60.7" r="4.9" fill="#4E7343" opacity=".15" stroke="#26271F" stroke-width=".6" />
+        </svg></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 · THE SET ============ -->
+<section class="dark sec" aria-labelledby="s-set">
+  <div class="wrap split">
+    <div>
+      <p class="lbl">The set</p>
+      <h2 class="h2" id="s-set" style="margin:14px 0 16px">Seven drawings<br />and a calendar.</h2>
+      <p class="lead">
+        You keep these. Any competent contractor can build from them, and you
+        can hand them to whoever has the garden next.
+      </p>
+    </div>
+    <div class="set">
+      <div><p class="mono" style="margin:0">01 · SURVEY</p><p class="lead" style="margin:0">Levels, aspect, existing trees, drainage, and what stays.</p></div>
+      <div><p class="mono" style="margin:0">02 · SETTING OUT</p><p class="lead" style="margin:0">Dimensioned, so it can be pegged out on the ground without us there.</p></div>
+      <div><p class="mono" style="margin:0">03 · HARD LANDSCAPE</p><p class="lead" style="margin:0">Materials, falls, build-ups and edge details.</p></div>
+      <div><p class="mono" style="margin:0">04 · PLANTING PLAN</p><p class="lead" style="margin:0">Every plant at mature spread, with a schedule of numbers and sizes.</p></div>
+      <div><p class="mono" style="margin:0">05 · INTEREST CALENDAR</p><p class="lead" style="margin:0">What is doing something, month by month, for the whole year.</p></div>
+      <div><p class="mono" style="margin:0">06 · MAINTENANCE</p><p class="lead" style="margin:0">In plain words. Two pages, not twenty.</p></div>
+      <div><p class="mono" style="margin:0">07 · AS BUILT</p><p class="lead" style="margin:0">Issued at handover, with whatever actually changed on site.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 · AS BUILT ============ -->
+<section class="built" aria-labelledby="s-built">
+  <img src="assets/asbuilt.webp" alt="The garden from the hero view again, in early morning light: mist off the lawn, the path running away between deep borders." width="2048" height="1152" loading="lazy" />
+  <div class="built-veil"></div>
+  <div class="hero-in">
+    <div></div>
+    <div>
+      <p class="lbl" style="color:rgba(244,241,232,.7)">Sheet 07 · As built · year eleven</p>
+      <h2 class="h2" id="s-built" style="margin-top:12px;max-width:18em;color:#F4F1E8">The drawing you just read is this garden. We only waited.</h2>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 · STUDIO ============ -->
+<footer class="sheet sec" aria-labelledby="s-studio">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <p class="lbl">The studio</p>
+        <h2 class="h2" id="s-studio" style="margin:14px 0 16px">Two of us,<br />twelve gardens a year.</h2>
+        <p class="lead">
+          We survey, we draw, and we visit while it is built. We do not maintain
+          gardens and we do not sell plants — which means there is nothing in the
+          plan that we profit from.
+        </p>
+      </div>
+      <div class="studio-imgs">
+        <img src="assets/studio.webp" alt="An experienced designer at a drawing board, seen from behind and to one side, working on a planting plan in low side light." width="1024" height="1024" loading="lazy" />
+        <div class="card">
+          <p class="lbl" style="margin:0">Enquiries</p>
+          <p style="font-size:clamp(18px,1.7vw,22px);margin:10px 0 4px">hello@aspectandfall.example</p>
+          <hr class="rule" style="margin:16px 0" />
+          <p class="lbl" style="margin:0">First visit</p>
+          <p class="lead" style="font-size:16px;margin:6px 0 0">
+            Two hours on site, no fee. You get our honest read on what the space
+            can be — including “leave it alone”, when that is the answer.
+          </p>
+        </div>
+      </div>
+    </div>
+    <hr class="rule" style="margin:44px 0 14px" />
+    <div class="row">
+      <p class="lbl" style="margin:0">Aspect &amp; Fall is a fictional studio, built to demonstrate this factory. Imagery is AI-generated.</p>
+      <p class="lbl" style="margin:0"><a href="guide/">Method note → /guide</a></p>
+    </div>
+  </div>
+</footer>
+
+<!-- The planting schedule, as data. Real plants, real months: a landscape page
+     that invented its botany would fail the one test its own audience can run.
+     f = months in flower · i = months carrying structural interest (bark, seed
+     head, autumn colour) · r = mature canopy or clump radius at plan scale.
+     Every SVG above was generated from this block; the script below only
+     animates it. -->
+<script type="application/json" id="plant-schedule">
+[
+ {"n":"Amelanchier lamarckii",        "x":432,  "y":250, "r":80, "f":[4],            "i":[4,10,11],     "c":"#9BB06A", "lead":"MULTI-STEM · 4m SPREAD"},
+ {"n":"Betula utilis jacquemontii",   "x":882,  "y":152, "r":72, "f":[],             "i":[11,12,1,2,3], "c":"#8A9488", "lead":"WHITE BARK · WINTER"},
+ {"n":"Cornus kousa",                 "x":980,  "y":348, "r":62, "f":[6,7],          "i":[9,10],        "c":"#9BB06A", "lead":"BRACTS JUN–JUL"},
+ {"n":"Hydrangea quercifolia",        "x":212,  "y":350, "r":48, "f":[7,8,9],        "i":[10,11],       "c":"#4E7343", "lead":null},
+ {"n":"Molinia caerulea Transparent", "x":1090, "y":226, "r":38, "f":[8,9],          "i":[10,11],       "c":"#B4763A", "lead":null},
+ {"n":"Salvia nemorosa Caradonna",    "x":604,  "y":432, "r":30, "f":[5,6,7,8,9],    "i":[],            "c":"#7C6FA0", "lead":null},
+ {"n":"Allium Purple Sensation",      "x":560,  "y":330, "r":20, "f":[5,6],          "i":[7,8],         "c":"#7C6FA0", "lead":null},
+ {"n":"Geranium Rozanne",             "x":352,  "y":392, "r":29, "f":[6,7,8,9,10],   "i":[],            "c":"#7C6FA0", "lead":null},
+ {"n":"Verbena bonariensis",          "x":734,  "y":258, "r":26, "f":[7,8,9,10],     "i":[11],          "c":"#7C6FA0", "lead":null},
+ {"n":"Anemone Honorine Jobert",      "x":266,  "y":254, "r":26, "f":[8,9,10],       "i":[],            "c":"#C9BFA4", "lead":null},
+ {"n":"Sesleria autumnalis",          "x":792,  "y":446, "r":27, "f":[9,10],         "i":[11],          "c":"#B4763A", "lead":null},
+ {"n":"Helleborus argutifolius",      "x":120,  "y":238, "r":23, "f":[1,2,3],        "i":[12],          "c":"#8FA85C", "lead":null},
+ {"n":"Narcissus Thalia",             "x":176,  "y":298, "r":19, "f":[3,4],          "i":[],            "c":"#D4C79A", "lead":null}
+]
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  /* The plant schedule is read from the JSON block above, which is the SINGLE
+     source of truth: the static SVG in the markup was generated from it, and
+     this script only animates what is already drawn. That is what keeps the
+     no-JS claim on /guide true rather than aspirational. */
+  var P = JSON.parse(document.getElementById("plant-schedule").textContent);
+  var MON = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  var NS = "http://www.w3.org/2000/svg";
+  var $ = function (id) { return document.getElementById(id); };
+  var el = function (t, a) {
+    var e = document.createElementNS(NS, t);
+    for (var k in a) { e.setAttribute(k, a[k]); }
+    return e;
+  };
+  var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+
+  /* The plan, the interest calendar and the three maturity plots are all in
+     the markup already, generated from the schedule above. Nothing here draws
+     them — this only takes hold of the parts the clock moves. */
+  var fills = [].slice.call(document.querySelectorAll("#canopy [data-fill]"));
+  var head = $("head");
+  var LX = 214, RX = 892, CW = (RX - LX) / 12;
+
+  /* ---- the clock ---- */
+  var twins = [].slice.call(document.querySelectorAll(".twin img"));
+  var chaps = [].slice.call(document.querySelectorAll(".chap"));
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function setMonth(mf) {
+    var m = Math.max(1, Math.min(12, mf)), flowering = 0;
+    /* leaf-out: bare until March, filling through spring, full by June,
+       dropping through November. Ramping it to May instead put the plan at
+       full canopy shade in a month whose own photograph shows a birch barely
+       in leaf. */
+    var leaf = clamp01((m - 3) / 3) * clamp01((11.6 - m) / 1.6);
+
+    P.forEach(function (p, i) {
+      var fl = p.f.some(function (f) { return Math.abs(f - m) < 0.7; });
+      if (fl) { flowering++; }
+      var season = m < 4 ? "#8A9488" : m < 6 ? "#9BB06A" : m < 9 ? "#4E7343" : "#B4763A";
+      fills[i].setAttribute("fill", fl ? p.c : season);
+      fills[i].setAttribute("opacity", String(0.05 + leaf * 0.28 + (fl ? 0.32 : 0)));
+    });
+
+    $("shade").setAttribute("opacity", String(0.05 + leaf * 0.3));
+    $("r-flower").textContent = flowering + "/" + P.length;
+    $("r-shade").textContent = Math.round(4 + leaf * 34) + "%";
+    /* when the sun comes off the terrace: ~15:40 midwinter, ~20:10 midsummer.
+       Kept inside believable latitudes — this page argues for honest numbers. */
+    var t = 14.6 + Math.sin(clamp01((m - 2.6) / 9) * Math.PI) * 5.6;
+    var hh = Math.floor(t), mm = Math.round((t - hh) * 6) * 10;
+    if (mm >= 60) { hh += 1; mm = 0; }
+    $("r-sun").textContent = hh + ":" + (mm < 10 ? "0" + mm : mm);
+    $("r-month").textContent = MON[Math.round(m) - 1];
+    /* THE WINK — high summer only, and it is in the July copy too so it
+       survives with JS off. */
+    $("wink").setAttribute("opacity", (m > 6.3 && m < 8.7) ? "1" : "0");
+
+    var hx = LX + (m - 1) * CW + CW / 2;
+    head.setAttribute("x1", hx); head.setAttribute("x2", hx);
+
+    /* There are four photographs and twelve months, so the twin is labelled by
+       SEASON — otherwise the caption names a month the title block is not on,
+       and the sheet contradicts itself in the reader's eye. The month the
+       photograph was actually taken stays on the label, because it is a fact
+       about the photograph rather than about the clock. */
+    var pick = (m < 3 || m >= 12) ? 2 : m < 6 ? 5 : m < 9 ? 7 : 10;
+    twins.forEach(function (img) {
+      img.classList.toggle("on", Number(img.dataset.twin) === pick);
+    });
+    $("twin-cap").textContent = "The same corner · " +
+      ({ 2:"winter, photographed in February", 5:"spring, photographed in May",
+         7:"summer, photographed in July",     10:"autumn, photographed in October" })[pick];
+  }
+
+  var yr = $("year"), ticking = false;
+  var stageCol = document.querySelector(".stage-col");
+  var narrow = window.matchMedia("(max-width: 900px)");
+
+  /* The chapters are the score and the clock follows them. Running the year
+     linearly against scroll instead put the sheet on OCTOBER while the reader
+     was still on the July chapter — the instrument contradicting the prose
+     beside it, which is the one thing this page cannot afford. Each chapter
+     declares its month; the clock interpolates between them. */
+  var anchors = [];
+  function measure() {
+    var yrTop = yr.getBoundingClientRect().top + window.scrollY;
+    anchors = [{ pos: 0, m: 1 }];
+    chaps.forEach(function (c) {
+      var b = c.getBoundingClientRect();
+      anchors.push({
+        pos: b.top + window.scrollY + b.height / 2 - yrTop,
+        m: Number(c.dataset.month)
+      });
+    });
+    anchors.push({ pos: yr.offsetHeight, m: 12 });
+  }
+  function monthAt(px) {
+    for (var i = 0; i < anchors.length - 1; i++) {
+      var a = anchors[i], b = anchors[i + 1];
+      if (px <= b.pos) {
+        var t = (px - a.pos) / ((b.pos - a.pos) || 1);
+        return a.m + (b.m - a.m) * Math.max(0, Math.min(1, t));
+      }
+    }
+    return 12;
+  }
+  function onScroll() {
+    if (ticking) { return; }
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      ticking = false;
+      var r = yr.getBoundingClientRect();
+      /* The reading line sits inside whatever the reader can actually see.
+         On narrow screens the pinned sheet covers the top of the viewport, so
+         a line measured from 0 marks a chapter active while its heading is
+         still behind the sheet — the defect ⑳ shipped on mobile. */
+      var guard = narrow.matches ? stageCol.getBoundingClientRect().bottom : 0;
+      var line = guard + (window.innerHeight - guard) * 0.45;
+      setMonth(monthAt(-r.top + line));
+      chaps.forEach(function (c) {
+        var b = c.getBoundingClientRect();
+        c.classList.toggle("on", b.top <= line && b.bottom >= line);
+      });
+    });
+  }
+
+  if (reduce.matches) {
+    /* frozen at high summer, with the whole calendar readable and no fades */
+    setMonth(7);
+    chaps.forEach(function (c) { c.classList.add("on"); });
+  } else {
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", function () { measure(); onScroll(); });
+    window.addEventListener("load", function () { measure(); onScroll(); });
+    onScroll();
+  }
+})();
+</script>
+</body>
+</html>

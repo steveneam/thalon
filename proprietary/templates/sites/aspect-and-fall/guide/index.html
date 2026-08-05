@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Method note — Aspect &amp; Fall</title>
+<meta name="description" content="How the Aspect & Fall page was designed and built, and what in it is real." />
+<style>
+  @font-face { font-family: "Spectral"; src: url("../fonts/spectral-300.woff2") format("woff2");
+    font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("../fonts/spectral-400.woff2") format("woff2");
+    font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("../fonts/spectral-300-italic.woff2") format("woff2");
+    font-weight: 300; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Sometype"; src: url("../fonts/sometype-mono-var.woff2") format("woff2");
+    font-weight: 400 700; font-style: normal; font-display: swap; }
+
+  :root { --paper:#F2EEE4; --ink:#26271F; --ink-soft:#56574C; --ink-label:#8C8C7E; --blue-faint:#CFDCE4; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    background-image:
+      linear-gradient(var(--blue-faint) 1px, transparent 1px),
+      linear-gradient(90deg, var(--blue-faint) 1px, transparent 1px);
+    background-size: 32px 32px; background-position: -1px -1px;
+    font-family: "Spectral", Georgia, serif; font-weight: 300;
+    font-size: 18px; line-height: 1.62; text-wrap: pretty;
+  }
+  .wrap { max-width: 78ch; margin: 0 auto; padding: clamp(40px,7vw,88px) clamp(20px,5vw,40px); }
+  a { color: var(--ink); }
+  a:hover { color: #4E7343; }
+  h1 { font-weight: 300; font-size: clamp(30px,4vw,44px); line-height: 1.06; letter-spacing: -.015em; margin: 14px 0 8px; }
+  h2 { font-weight: 300; font-size: clamp(20px,2.2vw,26px); margin: 40px 0 10px; letter-spacing: -.01em; }
+  p { color: var(--ink-soft); margin: 0 0 14px; }
+  .lbl { font-family: "Sometype", monospace; font-size: 10px; letter-spacing: .18em;
+         text-transform: uppercase; color: var(--ink-label); margin: 0; }
+  hr { height: 1px; background: var(--ink); opacity: .22; border: 0; margin: 34px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid rgba(38,39,31,.16);
+           vertical-align: top; color: var(--ink-soft); }
+  th { font-family: "Sometype", monospace; font-size: 10px; letter-spacing: .16em;
+       text-transform: uppercase; color: var(--ink-label); font-weight: 500; }
+  code, .mono { font-family: "Sometype", monospace; font-size: .88em; }
+  .note { border-left: 2px solid rgba(38,39,31,.3); padding-left: 18px; }
+  ul { color: var(--ink-soft); padding-left: 1.1em; }
+  li { margin-bottom: 7px; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="lbl">Aspect &amp; Fall · method note</p>
+  <h1>How this page was made, and what in it is real.</h1>
+  <p><a href="../">← back to the page</a></p>
+
+  <hr />
+
+  <h2>First, the disclosure</h2>
+  <p>
+    <strong>Aspect &amp; Fall is not a real company.</strong> It is a fictional
+    garden and landscape design studio, invented as a demonstration of what this
+    build process produces. There is no studio, no client, and no garden at that
+    address — the enquiry address is a reserved example domain and reaches nobody.
+  </p>
+  <p>
+    <strong>Every photograph on the page is AI-generated.</strong> None of them
+    is a photograph of a real place. They were generated for this page, and the
+    exact model, prompt and cost of each is listed below.
+  </p>
+  <p>
+    There are no invented testimonials, awards, client names or project counts
+    anywhere on the page. “Two of us, twelve gardens a year” is a description of
+    the fictional studio's scale and nothing more.
+  </p>
+
+  <h2>What <em>is</em> real</h2>
+  <p>
+    The botany. Every species named on the plan and in the interest calendar is a
+    real plant, and its flowering and interest months are its real ones —
+    <span class="mono">Helleborus argutifolius</span> in January to March,
+    <span class="mono">Narcissus</span> ‘Thalia’ in March and April,
+    <span class="mono">Salvia nemorosa</span> ‘Caradonna’ from late May,
+    <span class="mono">Molinia caerulea</span> ‘Transparent’ carrying seed heads
+    into November, <span class="mono">Betula utilis</span> var.
+    <span class="mono">jacquemontii</span> earning its place entirely in winter.
+    A page arguing that a drawing tells the truth about months would be a poor
+    joke if the months were made up.
+  </p>
+  <p>
+    The drawing conventions are real too: plan view, canopy circles at mature
+    spread, leader lines to letterspaced labels, contours and spot levels on the
+    survey, a north point, a scale, and a numbered sheet set. That is what a
+    landscape practice actually issues.
+  </p>
+  <p class="note">
+    The numbers in the title block — how many species are in flower, the
+    percentage of the garden under canopy shade, the hour the sun comes off the
+    terrace — are computed from the same plant model that draws the plan, on the
+    same scroll clock. They are consistent with the drawing rather than typed in
+    beside it. They describe a garden that does not exist, but they are not
+    decorative.
+  </p>
+
+  <h2>The instrument, and why it is a diagram</h2>
+  <p>
+    The page has one moving part: a calendar year, driven by scrolling. It sets
+    the coloured-pencil fill in the beds, which species are lit in their own
+    colour, the shade the canopy throws across the terrace, the three readouts,
+    the playhead crossing the interest calendar, and which of four photographs of
+    the same garden corner is showing.
+  </p>
+  <p>
+    The original idea for this page was a naturalistic tree drawn in code, turning
+    through four seasons. It was rejected before a line of it was drawn, on a test
+    this factory learned the expensive way on an earlier site: <em>does the real
+    discipline produce this drawing?</em> A hand-drawn tree is a picture of a
+    thing, and pictures of things do not converge in code — they read as
+    illustration. A plan-view planting drawing is not a picture of a garden; it is
+    the document a landscape architect actually hands over. So the instrument
+    became that, and the photographs carry the feeling instead. The division of
+    labour on every page here is the same: <strong>the photographs carry the
+    feeling, the diagram carries the evidence.</strong>
+  </p>
+
+  <h2>The four seasons are one place</h2>
+  <p>
+    The four photographs beside the plan are deliberately the same corner: the
+    same paving, the same wall, the same bench, the same birches. They were made
+    by generating the July frame first and then editing that image into February,
+    May and October, so that the only thing changing is the season.
+  </p>
+  <p>
+    Two takes were rejected on the way, and both rejections are the honest kind
+    worth recording. The first February attempt drifted to a different viewpoint,
+    which would have quietly turned “the same corner” into a false caption. The
+    first May attempt came back with the hydrangea in full flower — botanically
+    wrong for May, and in direct contradiction of this page's own interest
+    calendar sitting six inches below it.
+  </p>
+
+  <h2>Provenance — every image on the page</h2>
+  <div class="scroll">
+  <table>
+    <thead>
+      <tr><th>Slot</th><th>Model</th><th>Credits</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hero — the garden at year eleven</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only, first take</td></tr>
+      <tr><td>The site before</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only, first take</td></tr>
+      <tr><td>The drawing on site</td><td class="mono">nano_banana_2</td><td class="mono">2.00</td><td>text-precise seat; the sheet in frame is blank by composition, not by instruction</td></tr>
+      <tr><td>Twin · July</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only — the anchor frame for the other three</td></tr>
+      <tr><td>Twin · February</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame; second take (first drifted viewpoint)</td></tr>
+      <tr><td>Twin · May</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame; second take (first flowered out of season)</td></tr>
+      <tr><td>Twin · October</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame, first take</td></tr>
+      <tr><td>As built</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the hero frame — same view, different hour</td></tr>
+      <tr><td>The studio</td><td class="mono">nano_banana_2</td><td class="mono">2.00</td><td>text-precise seat, first take</td></tr>
+      <tr><td colspan="2"><strong>Kept 9 of 11 generated</strong></td><td class="mono"><strong>13.00</strong></td><td>two rejects, both named above</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:14px">
+    Every image was minted on a paid tier and pinned to content-addressed storage
+    with its full provenance record — model, prompt, parameters, credits, licence
+    tier and timestamp — at the moment it was made. The page references no vendor
+    URL and loads nothing from a third-party host.
+  </p>
+
+  <h2>How it is built</h2>
+  <ul>
+    <li>One self-contained <code>index.html</code>: no framework, no build step, no external requests of any kind.</li>
+    <li>Two typefaces, both open-licensed and served from this directory —
+        <strong>Spectral</strong> for reading and for the Latin names,
+        <strong>Sometype Mono</strong> for every piece of drawing-sheet
+        apparatus. A real sheet has two lettering registers; so does this page.</li>
+    <li>The plan, the survey, the interest calendar and the three maturity
+        diagrams are all drawn in SVG at load. They cost nothing to generate and
+        they can respond to the visitor, which a photograph cannot.</li>
+    <li>The one colour rule: <strong>saturated colour belongs to plants only</strong>,
+        and it changes with the month. Nothing decorative on this page is coloured.</li>
+    <li><strong>Reduced motion</strong> freezes the clock at high summer, shows every
+        chapter at once and runs no cross-fades. <strong>With JavaScript off</strong>,
+        every chapter, the whole interest calendar and the plan are all still there
+        in the markup — including the note on the terrace.</li>
+  </ul>
+
+  <hr />
+  <p class="lbl">A demonstration page. The studio is fictional; the plants are not.</p>
+  <p><a href="../">← back to the page</a></p>
+
+</div>
+</body>
+</html>

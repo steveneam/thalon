@@ -134,6 +134,23 @@ Any barrier object — gate, railing, fence, screen, grille — carries the cage
 risk, not just glazing. The compose-out is an opening with no leaf across it:
 **an archway with the door swung flat against the wall**, a gap in a hedge, a
 bare stone opening. Third take, first attempt at the new framing, keeper.
+Corollary (㉑ Aspect & Fall, s105 — **the edit seat holds MATERIALS but not
+VIEWPOINT**): a four-season sequence of one place was built by minting the
+summer frame and editing it into the other three on a transformations/editing
+seat. *"Keep the camera position, the framing … identical to the reference"*
+kept the paving, walls, bench and trees — and still recomposed the shot into a
+different view, which would have quietly made the caption "the same corner" a
+lie. What worked first time was **naming the composition as a list of elements
+and their positions in frame** ("a drystone pier at the left edge and another
+at the right, the rendered wall running horizontally across the middle, the
+bench against it on the left, paving filling the lower third"). Describe the
+FRAME as a layout, not as a reference to obey.
+Corollary (㉑, s105 — **generated botany lies, and the page's own data catches
+it**): a "mid-May" edit came back with the hydrangea in full flower, which is
+botanically wrong and contradicted the interest calendar printed directly below
+it. Any generated image asserting a season, a count, a species or a time must
+be checked against what the page's own instrument says — §casting (3) extended
+from copy to DATA. It was cheaper to re-mint than to soften the calendar.
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that
@@ -338,6 +355,50 @@ register live in an inner scene where being a drawing or model IS the story.
 Corollary for place-based verticals (real estate, hospitality, food): nature
 is load-bearing — greenery, trees, and setting sell the story; a bare subject
 on a bare background fails the register even when technically clean.
+
+**A PINNED INSTRUMENT HAS FOUR SILENT KILLERS (㉑ Aspect & Fall, s105 — all
+four found by RENDERING, none visible to types, lint or 3,441 tests).** A
+scroll instrument that does not pin is not a degraded page, it is a page with
+no product: the chapters scroll past driving nothing. Check all four by
+measuring `getBoundingClientRect().top` of the pinned element — it must read
+`0` while the section is in view, and anything else means one of these:
+
+1. **The sticky element's column does not stretch.** `align-items:flex-start`
+   on the stage row cancels flex's default stretch, so the sticky column is one
+   viewport tall inside a 4,000px section and has no travel. Measured at 992px
+   inside 4,290px. Leave the row stretching, or use grid.
+2. **Any `overflow` on ANY ancestor.** `overflow-x:hidden` computes
+   `overflow-y:auto`, which makes that element a scroll container and breaks
+   `position:sticky` against the viewport outright — measured at `top:-1843px`.
+   This one is invisible in the source and survives every other fix. A page
+   wrapper with `overflow-x:hidden` is the usual culprit.
+3. **The narrow layout collapses the travel.** In a single-column layout the
+   stage's own cell is only as tall as the stage, so the same failure returns
+   on phones only. Move `position:sticky` onto the column and make the section
+   a column flex container.
+4. **The reading line is measured from zero.** When the pinned stage covers the
+   top of the viewport, a chapter-activation test measured from `0` marks a
+   chapter active while its heading is still *behind* the sheet (⑳ shipped this
+   on mobile). Measure the line from the stage's bottom edge on narrow screens.
+
+**THE CLOCK FOLLOWS THE PROSE, NOT THE SCROLLBAR (㉑, s105).** Driving the
+instrument linearly against section progress put the sheet on OCTOBER while the
+reader was still on the July chapter — the instrument contradicting the words
+beside it, which is the one failure a data-instrument page cannot survive. Give
+each chapter its month/day/state as a `data-` attribute and interpolate the
+clock between those anchors. The chapters are the score; the instrument follows.
+
+**STATIC-FIRST IS A HONESTY GATE, NOT A PERF GATE (㉑, s105).** Build the
+instrument's geometry as real markup generated from the data, and let the
+script only *animate* what is already drawn. Built the other way — JS creating
+every circle, bar and label on load — the page renders an empty frame with
+JavaScript off, **while `/guide` claims the opposite in writing**. That is a
+false statement on the honesty page, which is worse than the missing feature.
+The rule that prevents it: **a single source of truth** — the schedule/data
+lives in one inert `<script type="application/json">` block, the static SVG is
+generated from it, and the runtime reads the same block. Nothing can drift.
+**Corollary, general: every claim the `/guide` page makes is a claim that has
+to be TESTED, not intended.**
 
 **Before you call the site done:**
 - Run **at least three iteration passes**, each executing BOTH lanes of
