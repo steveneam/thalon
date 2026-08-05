@@ -3,9 +3,16 @@
 ## Stamp
 
 2026-08-05 close of session 103 (syd4 — boot was "gogogo" alone). Wrap verify
-on main: **exit 0, 3441 passed / 9 skipped** (s102 was 3414/9). Three commits,
-`353f8b9`…`37cbce5`. Zero credits, zero live posts, nothing armed, the queue
-consumer's master key still EMPTY.
+on main: **exit 0, 3441 passed / 9 skipped** (s102 was 3414/9).
+
+**Six commits.** Three code: `353f8b9` part A2's engine · `6944e9d` the arm
+control's write door · `37cbce5` the surface. Three docs: `921a124` the s103
+record · `648318a` the landing-arc spec · `791a0ba` his ordering call — plus
+this stamp fix, which is necessarily the tip. **The check that matters is not
+the sha but the state: tree clean, main == origin, verified at wrap.**
+
+Zero credits, zero live posts, nothing armed, the queue consumer's master key
+still EMPTY.
 
 ## WHAT SHIPPED (COORDINATION §s103 carries the full record)
 
@@ -177,7 +184,7 @@ posts total, both bluesky, both under the grant. Zero credits ever spent.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (`37cbce5` + this wrap) · staging rolls s93–s103
+▎ ▸ **State:** tree clean and main == origin (verified at wrap; the tip is this stamp fix) · staging rolls s93–s103
 with the next auto-deploy · **no new migration this session** (A2 and the write
 door are both migration-free) · four social channels connected · dev PG live ·
 8899 preview + sweeper user units keep running — NEVER hand-start the sweeper.
