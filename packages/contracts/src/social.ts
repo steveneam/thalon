@@ -116,6 +116,21 @@ export type PostingScope = (typeof POSTING_SCOPES)[number];
 export const postingScopeSchema = z.enum(POSTING_SCOPES);
 
 /**
+ * The Integrations arm control's write body (s103): ONE flip per request.
+ *
+ * A union rather than one bag with every field optional, because the two
+ * flips are different facts — a destination's own state, or the tenant-wide
+ * mode — and a bag would accept `{}` (a write that changes nothing) and
+ * `{platform}` without a state. The door should not have to re-check what the
+ * shape can simply refuse.
+ */
+export const socialArmingWriteSchema = z.union([
+  z.object({ platform: socialPlatformSchema, armState: armStateSchema }),
+  z.object({ postingScope: postingScopeSchema }),
+]);
+export type SocialArmingWrite = z.infer<typeof socialArmingWriteSchema>;
+
+/**
  * Per-platform cadence knobs.
  *
  * `maxPostsPerDay: 0` and `armState: "off"` are NOT the same fact and must
