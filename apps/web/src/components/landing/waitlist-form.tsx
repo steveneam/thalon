@@ -135,12 +135,16 @@ export function WaitlistForm({ id }: { id: string }) {
           required
           autoComplete="email"
           placeholder="you@company.com"
-          className="h-11 min-w-0 flex-1 rounded-lg border bg-background/70 px-3.5 text-sm placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="h-11 min-w-0 flex-1 border border-foreground/25 bg-transparent px-3.5 text-sm placeholder:text-muted-foreground/70 focus-visible:border-foreground focus-visible:outline-none"
         />
+        {/* s109: the glare sweep and the amber glow were the genre default
+            this page now refuses by name, and the one-colour rule bars a
+            saturated CTA outright (a colour always means a gate verdict).
+            Solid ink, square, no animation — a door, not an advert. */}
         <button
           type="submit"
           disabled={state.phase === "busy"}
-          className="cta-glare h-11 shrink-0 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[0_0_28px_-6px] shadow-primary/50 transition-opacity hover:opacity-85 disabled:opacity-50"
+          className="h-11 shrink-0 bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-85 disabled:opacity-50"
         >
           {state.phase === "busy" ? "Joining…" : "Join the waitlist"}
         </button>

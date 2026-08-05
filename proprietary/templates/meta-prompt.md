@@ -236,6 +236,23 @@ roughly 3× the frames of a locked-off one. (Also: the vendor may answer a
 literal `generate_video` with a **preset recommendation and NO job** — the call
 returns a suggestion, nothing renders, and nothing is charged. Re-send with
 `declined_preset_id` and confirm a job id came back before waiting on it.)
+Corollary (Thalon's own landing, s109 — **the frame-density rule is about the
+FRAME, not the CAMERA**): the s108 corollary above reads "a panning take needs
+roughly 3× the frames of a locked-off one", and it was applied here to a
+**locked-off** take of water over a stone sill — which then needed **81
+frames** where ㉒'s locked-off bloom ships 36. Turbulent water changes every
+pixel of the lower half of the frame every frame with the camera nailed down,
+so "locked-off" predicted nothing. Measured adjacent-frame difference against
+㉒'s shipped bloom (1.26, the benchmark that reads well): 41 frames → 1.88,
+61 → 1.56, **81 → 1.24**, 121 (native) → 0.93. **Restated: density is set by
+how much of the frame is MOVING** — a locked-off shot of a turbulent subject
+needs tracking-take density, and the only way to know is the measurement, which
+takes a minute. (Same session, second confirmation: the vendor answered the
+literal `generate_video` with a **preset recommendation and NO job** exactly as
+s108 predicted — nothing rendered, nothing charged — and re-sending with
+`declined_preset_id` returned a real job id. It also **substituted the model
+twice**: `soul_2` ran as `text2image_soul_v2` and `seedance_2_0` ran as
+`seedance_2_0_fast`. Record what RAN.)
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that

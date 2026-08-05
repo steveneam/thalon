@@ -51,61 +51,64 @@ export const FAQ: FaqItem[] = [
   },
 ];
 
-export interface Feature {
-  key: "intel" | "create" | "everywhere";
+export interface TodayItem {
   name: string;
-  tagline: string;
-  description: string;
+  detail: string;
 }
 
-export const FEATURES: Feature[] = [
+/**
+ * WHAT THE ENGINE DOES TODAY. Each line was grounded against the repo at s109
+ * before it was written — the surfaces under `apps/web/src/app/app/`, the
+ * seams under `packages/engine/src/`, and the gate vocabulary in
+ * `packages/contracts/src/judge.ts`. Nothing here is a roadmap item.
+ */
+export const TODAY: TodayItem[] = [
   {
-    key: "intel",
     name: "Intel",
-    tagline: "Spot what's rising before it peaks",
-    description:
-      "Describe the topic areas you care about. Thalon watches them across platforms and search, flags outliers with plain-language “why it's rising” reasons, and turns any trend card into a draft in one click.",
+    detail:
+      "You name the topic areas. Thalon watches them through official platform APIs and scores what moves with deterministic maths — relevance, engagement ratios, velocity — and every card carries the reason it surfaced.",
   },
   {
-    key: "create",
     name: "Create",
-    tagline: "One prompt, every format",
-    description:
-      "Give Thalon a prompt and your profile. It drafts platform-shaped posts, scripted videos with captions, and full landing pages — grounded in your sources, in your voice.",
-  },
-  {
-    key: "everywhere",
-    name: "Everywhere",
-    tagline: "Approve once, ship it all",
-    description:
-      "Every draft is judged against your sources and denylist before it reaches your queue. You approve, edit, or reject — then take it to every platform you publish on.",
-  },
-];
-
-export const STEPS = [
-  {
-    name: "Profile",
-    detail: "Describe your brand once — voice, platforms, topics, sources, denylist.",
-  },
-  {
-    name: "Generate",
-    detail: "One prompt fans out into posts, video scripts, and pages, grounded in your sources.",
+    detail:
+      "One prompt fans out into platform-shaped posts, scripted video with captions, and full web pages, written from your sources in your voice rather than pasted between them.",
   },
   {
     name: "Approve",
-    detail: "The judge blocks anything ungrounded; you click approve on what ships.",
+    detail:
+      "The judge gates every draft before it reaches your queue, and what arrives carries its verdicts with it. You approve, edit or reject; your corrections become the cases it is measured against.",
   },
-] as const;
+];
 
 /**
- * §8.2 honest proof band — a pre-launch product has no logos or
- * testimonials to show, so the band shows engineering facts instead, each
- * one checkable in this repository or its CI (honest-claims rule, ADR
- * 0006): the test-suite floor is CI-verified (818+ on main as of
- * 2026-07-07 — stated as 800+ so the claim only grows truer), the $0
- * demo-render cost is the recorded B6.3 result, the six platforms are the
- * FAQ's drafting list verbatim, and zero-without-a-click is the
- * architecture itself.
+ * WHAT IT DOES NOT DO. The look-first sweep found no page in this category
+ * that ships a section like this, which is most of the reason to ship one.
+ * Every line is a real limit of the engine as it stands, and each is a limit
+ * this repository can be read to confirm:
+ *
+ *  - unattended posting: `SOCIAL_QUEUE_ARMED` exists in
+ *    `packages/platform/src/env.ts`, and the publish queue's master key is
+ *    empty, so nothing goes out on its own whatever any control says.
+ *  - instagram: `DESTINATIONS.instagram.driver` is literally
+ *    `"instagram-text-refusal"` — connectable, but it refuses image posts.
+ *  - rankings: the honest-claims rule (ADR 0006 §5). We optimise what is
+ *    checkable and promise nothing about position.
+ */
+export const NOT_YET: string[] = [
+  "Unattended posting is off. The queue is built and the key that arms it is empty, so today a human is always in the loop.",
+  "Instagram connects, but its driver refuses image posts for now and says so on the card rather than failing quietly.",
+  "We optimise what is checkable — titles, structure, structured data, answer-engine files. We do not promise rankings, because no honest tool can.",
+  "Bring-your-own-AI-keys is planned, not shipped. Generation runs through a managed gateway today.",
+];
+
+/**
+ * The honest proof band — a pre-launch product has no logos or testimonials
+ * to show, so the band shows engineering facts instead, and the bar (s109) is
+ * that **each one resolves to a single query or a single command.** The test
+ * floor is the suite on main; the two middle figures come from the recorded
+ * run this page's instrument walks the reader through, pinned in
+ * `run-snapshot.ts`; zero-without-a-click is the architecture itself.
+ * Honest-claims rule, ADR 0006 §5.
  */
 export interface Stat {
   value: string;
@@ -113,37 +116,23 @@ export interface Stat {
 }
 
 export const STATS: Stat[] = [
-  { value: "800+", label: "automated tests gate every change we ship" },
-  { value: "$0", label: "render cost for the demo videos Thalon made of itself" },
-  { value: "6", label: "platforms drafted for at launch" },
+  // 3,454 green on main at s109; stated as 3,400+ so the claim only grows truer.
+  { value: "3,400+", label: "automated tests gate every change we ship" },
+  // Both from the recorded run the instrument below walks through — pinned in
+  // lib/landing/run-snapshot.ts and asserted in landing-run-snapshot.test.ts.
+  { value: "681", label: "claims our own judge ruled on in the run below" },
+  { value: "46", label: "of those claims it refused to let through" },
   { value: "0", label: "posts ever shipped without a human click" },
 ];
 
 /**
- * §5 "old way vs new way" strip — the honest two-column: every left-side
- * pain is generic reality, every right-side line describes something the
- * product actually does today (watching = official-API trend sweeps;
- * context carry = the intel→create capture handoff; the judge gate).
+ * ⚠ THE "PLATFORMS" STAT WAS REMOVED HERE, AND ON PURPOSE (s109). It read
+ * "6 — platforms drafted for at launch", which is not checkable against
+ * anything: `SOCIAL_PLATFORMS` carries EIGHT, shipped authoring profiles in
+ * `proprietary/profiles/` cover FOUR, and publish drivers exist for SIX (one
+ * of which is a typed refusal). Three defensible numbers means the claim was
+ * really a vibe. The four above each resolve to one query or one command.
  */
-export const OLD_WAY = {
-  title: "The old way",
-  items: [
-    "Watch every platform yourself and hope you catch what's rising",
-    "Rewrite the same announcement five times, once per platform",
-    "Copy context between tools that forget it instantly",
-    "Publish and pray nobody checks the claim your AI invented",
-  ],
-};
-
-export const NEW_WAY = {
-  title: "With Thalon",
-  items: [
-    "Describe your topics once — Thalon watches them and explains why something's moving",
-    "One prompt fans out into posts, video scripts, and pages",
-    "Context flows from trend card to draft — you never retype it",
-    "A judge checks every claim against your sources before you ever see the draft",
-  ],
-};
 
 export interface Tier {
   name: string;

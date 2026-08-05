@@ -1,0 +1,706 @@
+/**
+ * The landing's own register (bridge-burndown.test.ts: "Landing/brand files
+ * are out of scope: the landing keeps its own register").
+ *
+ * EVERY selector in this file is scoped under `.landing-surface` — the
+ * surface-css scope ratchet (mock-sheets README rule 6). The workspace's
+ * stylesheets and this one must never restyle each other.
+ *
+ * THE ONE COLOUR RULE, borrowed in principle from ㉒ Small Hours, where a
+ * swatch always means a molecule: **on this page a colour always means a gate
+ * verdict, never a decoration.** Ground is warm paper, ink is a near-black
+ * that leans blue and is never pure, and the only saturated values on the
+ * page are `pass`, `blocked` and `waiting`. A consequence worth stating: this
+ * page cannot grow a gradient CTA without breaking its own rule — which is
+ * exactly the AI-landing default the look-first sweep refused.
+ */
+
+.landing-surface {
+  --lp-paper: #f6f4ef;
+  --lp-paper-2: #fffdf9;
+  --lp-ink: #14181c;
+  --lp-ink-2: #5b6570;
+  --lp-rule: #ddd8cf;
+  --lp-pass: #2f6b4f;
+  --lp-blocked: #a83226;
+  --lp-waiting: #8a6a1f;
+
+  background: var(--lp-paper);
+  color: var(--lp-ink);
+  border-top: 1px solid var(--lp-rule);
+  padding: clamp(72px, 9vw, 120px) 0;
+
+  /* The secondary axis, `novel-typography`: ONE serif for prose and display,
+     ONE mono for instrument apparatus. The workspace keeps Geist; this
+     variable is inert outside `.landing-surface`. */
+  font-family: var(--font-newsreader), ui-serif, Georgia, serif;
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+.landing-surface .gs-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 32px);
+}
+
+.landing-surface .lp-narrow {
+  max-width: 780px;
+}
+
+/* ── hero ──────────────────────────────────────────────────────────── */
+.landing-surface.lp-hero {
+  border-top: 0;
+  padding: clamp(32px, 5vw, 56px) 0 clamp(56px, 7vw, 88px);
+}
+
+.landing-surface .lp-h1 {
+  font-size: clamp(38px, 6.2vw, 82px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  margin: 12px 0 0;
+  max-width: 15ch;
+  text-wrap: balance;
+}
+
+.landing-surface .lp-h1 em {
+  font-style: italic;
+}
+
+.landing-surface .lp-sub {
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.55;
+  color: var(--lp-ink-2);
+  max-width: 48ch;
+  margin: clamp(18px, 2vw, 26px) 0 0;
+}
+
+.landing-surface .lp-form {
+  margin-top: clamp(22px, 2.5vw, 30px);
+  max-width: 520px;
+}
+
+.landing-surface .lp-heroart {
+  margin: clamp(36px, 4.5vw, 60px) 0 0;
+  border: 1px solid var(--lp-rule);
+  overflow: hidden;
+  aspect-ratio: 16 / 7;
+}
+
+.landing-surface .lp-heroart img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── proof band ────────────────────────────────────────────────────── */
+.landing-surface.lp-proof {
+  padding: clamp(36px, 4vw, 52px) 0;
+}
+
+.landing-surface .lp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(18px, 3vw, 40px);
+  margin: 0;
+}
+
+.landing-surface .lp-stat-v {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.landing-surface .lp-stat-l {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--lp-ink-2);
+}
+
+/* ── honest scope ──────────────────────────────────────────────────── */
+.landing-surface .lp-lede {
+  color: var(--lp-ink-2);
+  max-width: 58ch;
+  margin: 16px 0 0;
+  line-height: 1.6;
+}
+
+.landing-surface .lp-three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 3.5vw, 48px);
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+.landing-surface .lp-three h3 {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  margin: 0 0 10px;
+}
+
+.landing-surface .lp-three p {
+  margin: 0;
+  color: var(--lp-ink-2);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.landing-surface .lp-notyet {
+  margin-top: clamp(32px, 4vw, 48px);
+  border: 1px solid var(--lp-ink);
+  padding: clamp(20px, 2.5vw, 30px);
+}
+
+.landing-surface .lp-notyet ul {
+  margin: 14px 0 0;
+  padding-left: 20px;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .lp-notyet li {
+  margin: 9px 0;
+  line-height: 1.6;
+  max-width: 74ch;
+}
+
+/* ── pricing ───────────────────────────────────────────────────────── */
+.landing-surface .lp-tiers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 24px);
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+.landing-surface .lp-tiers > div {
+  position: relative;
+  border: 1px solid var(--lp-rule);
+  background: var(--lp-paper-2);
+  padding: clamp(18px, 2vw, 26px);
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-surface .lp-tiers > div.is-featured {
+  border-color: var(--lp-ink);
+}
+
+.landing-surface .lp-flag {
+  position: absolute;
+  top: -9px;
+  left: 18px;
+  background: var(--lp-ink);
+  color: var(--lp-paper);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+}
+
+.landing-surface .lp-tiers h3 {
+  font-size: 19px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.landing-surface .lp-aud {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .lp-price {
+  margin: 16px 0 0;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.landing-surface .lp-price span {
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .lp-tiers ul {
+  margin: 18px 0 0;
+  padding-left: 18px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--lp-ink-2);
+  flex: 1;
+}
+
+.landing-surface .lp-tiers a {
+  display: block;
+  margin-top: 22px;
+  text-align: center;
+  padding: 10px 14px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--lp-ink);
+  border: 1px solid var(--lp-ink);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.landing-surface .lp-tiers a:hover {
+  background: var(--lp-ink);
+  color: var(--lp-paper);
+}
+
+.landing-surface .lp-tiers > div.is-featured a {
+  background: var(--lp-ink);
+  color: var(--lp-paper);
+}
+
+.landing-surface .lp-tiers > div.is-featured a:hover {
+  opacity: 0.86;
+}
+
+/* ── faq + close ───────────────────────────────────────────────────── */
+.landing-surface .lp-faq {
+  margin-top: clamp(28px, 3.5vw, 44px);
+  border-top: 1px solid var(--lp-rule);
+}
+
+.landing-surface .lp-faq details {
+  border-bottom: 1px solid var(--lp-rule);
+  padding: 18px 2px;
+}
+
+.landing-surface .lp-faq summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 16.5px;
+  font-weight: 500;
+}
+
+.landing-surface .lp-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.landing-surface .lp-faq summary svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.landing-surface .lp-faq details[open] summary svg {
+  transform: rotate(45deg);
+}
+
+.landing-surface .lp-faq p {
+  margin: 12px 0 0;
+  color: var(--lp-ink-2);
+  line-height: 1.7;
+  font-size: 15px;
+  max-width: 68ch;
+}
+
+.landing-surface .lp-close {
+  margin-top: clamp(48px, 6vw, 72px);
+}
+
+.landing-surface .lp-close h3 {
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+  max-width: 22ch;
+}
+
+.landing-surface .lp-close > p {
+  margin: 12px 0 0;
+  color: var(--lp-ink-2);
+  line-height: 1.6;
+}
+
+.landing-surface .lp-stamp {
+  margin-top: 26px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .lp-stamp a {
+  color: var(--lp-ink);
+}
+
+.landing-surface .gs-kicker {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--lp-ink-2);
+  margin: 0;
+}
+
+.landing-surface .gs-h2 {
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  margin: 14px 0 0;
+  max-width: 22ch;
+}
+
+/* ── the spine ─────────────────────────────────────────────────────────
+   Killer 1 (㉑ s105): the sticky column's cell must STRETCH. Grid stretches
+   by default, so the stage's cell is as tall as the chapter column and the
+   sticky element has real travel. Do not add align-items here. */
+.landing-surface .gs-spine {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: clamp(32px, 4vw, 56px);
+  margin-top: clamp(40px, 5vw, 64px);
+}
+
+.landing-surface .gs-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.landing-surface .gs-ledger {
+  width: 100%;
+  border: 1px solid var(--lp-ink);
+  background: var(--lp-paper-2);
+  padding: clamp(16px, 2vw, 22px);
+}
+
+.landing-surface .gs-cap {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  border-bottom: 1px solid var(--lp-rule);
+  padding-bottom: 10px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .gs-clock {
+  white-space: nowrap;
+  color: var(--lp-ink);
+}
+
+.landing-surface .gs-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.landing-surface .gs-row {
+  display: grid;
+  /* A FIXED verdict column, not `auto`. With auto the column resized per row
+     and the reason set ragged-left against a right edge — three hard-to-read
+     lines on the longest one. Fixed width lets the reason left-align on a
+     consistent edge while the verdict word keeps the right. */
+  grid-template-columns: 14px minmax(0, 1fr) 166px;
+  gap: 12px;
+  align-items: start;
+  padding: 11px 0;
+  border-bottom: 1px dotted var(--lp-rule);
+}
+
+.landing-surface .gs-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: #cfc8bc;
+}
+
+/* The one colour rule, applied. */
+.landing-surface .gs-row.is-pass .gs-dot {
+  background: var(--lp-pass);
+}
+.landing-surface .gs-row.is-blocked .gs-dot {
+  background: var(--lp-blocked);
+}
+.landing-surface .gs-row.is-waiting .gs-dot {
+  background: var(--lp-waiting);
+}
+
+.landing-surface .gs-claim {
+  display: block;
+  min-width: 0;
+}
+
+.landing-surface .gs-quote {
+  display: block;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.landing-surface .gs-quote::before {
+  content: "\201C";
+}
+.landing-surface .gs-quote::after {
+  content: "\201D";
+}
+
+.landing-surface .gs-meta {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .gs-verdict {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.landing-surface .gs-verdict b {
+  display: block;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Left-aligned on a fixed column: ragged-LEFT prose is what made the long
+   reasons hard to read, and the reason is the part that has to be legible —
+   a gate you cannot read is a gate you cannot trust. */
+.landing-surface .gs-verdict i {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  text-align: left;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .gs-row.is-pass .gs-verdict b {
+  color: var(--lp-pass);
+}
+.landing-surface .gs-row.is-blocked .gs-verdict b {
+  color: var(--lp-blocked);
+}
+.landing-surface .gs-row.is-waiting .gs-verdict b {
+  color: var(--lp-waiting);
+}
+
+/* An undecided row is present but visibly not yet ruled on. */
+.landing-surface .gs-row.is-pending .gs-quote,
+.landing-surface .gs-row.is-pending .gs-meta {
+  opacity: 0.45;
+}
+
+.landing-surface .gs-bar {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+  margin-top: 16px;
+}
+
+.landing-surface .gs-bar i {
+  flex: 1;
+  background: #e0dacf;
+}
+
+.landing-surface .gs-bar i.is-on {
+  background: var(--lp-ink);
+}
+
+.landing-surface .gs-readouts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  border-top: 1px solid var(--lp-ink);
+  padding-top: 14px;
+}
+
+.landing-surface .gs-readouts div {
+  min-width: 0;
+}
+
+.landing-surface .gs-readouts dt {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  color: var(--lp-ink-2);
+}
+
+.landing-surface .gs-readouts dd {
+  margin: 2px 0 0;
+  font-size: clamp(20px, 2.2vw, 27px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ── the chapters ──────────────────────────────────────────────────── */
+.landing-surface .gs-chapters {
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-surface .gs-chap {
+  min-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0.34;
+  transition: opacity 0.35s ease;
+}
+
+.landing-surface .gs-chap.is-on {
+  opacity: 1;
+}
+
+.landing-surface .gs-n {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--lp-ink-2);
+  margin: 0 0 10px;
+}
+
+.landing-surface .gs-chap h3 {
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+  margin: 0;
+}
+
+.landing-surface .gs-body {
+  color: var(--lp-ink-2);
+  margin: 14px 0 0;
+  max-width: 44ch;
+  line-height: 1.6;
+}
+
+/* ── narrow ────────────────────────────────────────────────────────────
+   Killer 3 (㉑ s105): in one column the stage's own cell is only as tall as
+   the stage, so sticky has no travel. The stage keeps `position: sticky` and
+   pins to the top of the viewport while the chapters scroll beneath it. */
+@media (max-width: 900px) {
+  .landing-surface .gs-spine {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* NOT sticky below 900px. Measured at 390×844 the ledger is 1087px tall —
+     243px taller than the viewport — so pinning it leaves a reading band of
+     zero and the chapter headings render behind the sheet. The instrument
+     shows its completed state here instead (see gate-instrument.tsx). */
+  .landing-surface .gs-stage {
+    position: static;
+    height: auto;
+    padding: 0 0 8px;
+    display: block;
+  }
+
+  /* With nothing pinned, the chapters are prose and do not need a viewport of
+     scroll travel each — that travel existed only to drive the sheet. */
+  .landing-surface .gs-chap {
+    min-height: 0;
+    opacity: 1;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--lp-rule);
+  }
+
+  .landing-surface .gs-chapters {
+    margin-top: 28px;
+  }
+
+  .landing-surface .gs-row {
+    grid-template-columns: 14px minmax(0, 1fr);
+  }
+
+  .landing-surface .gs-verdict {
+    grid-column: 2;
+    text-align: left;
+    max-width: none;
+    margin-top: 4px;
+  }
+
+  .landing-surface .gs-readouts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-surface .lp-stats,
+  .landing-surface .lp-three,
+  .landing-surface .lp-tiers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-surface .lp-heroart {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 620px) {
+  .landing-surface .lp-three,
+  .landing-surface .lp-tiers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-surface .gs-chap {
+    transition: none;
+  }
+}
+
+/* ── the moving band ───────────────────────────────────────────────────
+   The frames are absolutely stacked and EXACTLY ONE carries `.is-on`. The
+   aspect-ratio box reserves the space before any frame decodes, so the band
+   cannot shift layout (the perf floor is "no layout shift", not "small"). */
+.landing-surface .wb-band {
+  position: relative;
+  margin-top: clamp(28px, 3.5vw, 44px);
+  aspect-ratio: 16 / 9;
+  background: #e7e2d8;
+  overflow: hidden;
+  border: 1px solid var(--lp-rule);
+}
+
+.landing-surface .wb-band img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.landing-surface .wb-band img.is-on {
+  opacity: 1;
+}
+
+.landing-surface .wb-cap {
+  margin: 18px 0 0;
+  color: var(--lp-ink-2);
+  max-width: 56ch;
+  line-height: 1.6;
+}
+
+/* Reduced motion holds the first frame and never scrubs: every frame after
+   the poster is hidden outright, so there is nothing for the scroll to
+   select. `:not(:first-child)` beats `.is-on` on specificity here because it
+   is a compound of the same weight declared later — kept explicit rather
+   than relying on order alone. */
+@media (prefers-reduced-motion: reduce) {
+  .landing-surface .wb-band img:not(:first-of-type) {
+    display: none;
+  }
+
+  .landing-surface .wb-band img:first-of-type {
+    opacity: 1;
+  }
+}

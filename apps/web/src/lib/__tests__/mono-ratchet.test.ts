@@ -33,7 +33,12 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   ["app/blog/[slug]/page.tsx", 2],
   ["app/blog/page.tsx", 3],
   ["app/brand/page.tsx", 3],
-  ["app/page.tsx", 5],
+  // s109: BURNED TO ZERO by the landing rebuild — the moment this seed was
+  // written for ("Landing files … burn down at wave 4, the landing's own
+  // register decision"). The page's mono is now data apparatus only: gate
+  // names, verdicts and readout labels inside the instrument, none of it
+  // uppercase and none of it section scaffolding.
+  ["app/page.tsx", 0],
   // components/board/leads-board.tsx burned to zero at the s76 leads-board
   // wire — the lead pipeline came back as components/leads/leads-board.tsx in
   // the sheet's own type roles (its one DATA label rides the theme's mono
@@ -49,8 +54,6 @@ const PINNED: ReadonlyMap<string, number> = new Map([
   // correctly refused to reach outside its file set, so the lead deleted the
   // component here. Only the pure `heatBand` banding remains, which carries
   // no mono violation — the pin burned to zero exactly as predicted.
-  ["components/landing/feature-showcase.tsx", 3],
-  ["components/landing/hero-vignette.tsx", 4],
   ["components/landing/site-footer.tsx", 1],
   // leads/ burned to zero at the s75 exact-mock rebuild — the ported surface
   // speaks the sheet's own type roles, and its DATA labels ride the theme's

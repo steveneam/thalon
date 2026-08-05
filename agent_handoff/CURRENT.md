@@ -2,239 +2,221 @@
 
 ## Stamp
 
-2026-08-05 close of session 108 (syd4 — boot was `gogogo`).
-Wrap verify on main: **exit 0, 3454 passed / 9 skipped** (3453 → 3454: the
-static-stack ratchet, generalised off the manifest).
+2026-08-05 close of session 109 (syd4 — boot was `gogogo`, plus his note that
+he will not look at Whitethorn until it is complete because it is *"an example
+of what you can create fully without my supervision"*).
 
-**One substantive commit.** ⑳ **Whitethorn's Day-84 handoff MOVES.** **The check
-that matters is not the sha but the state: tree clean, main == origin, verify
-exit 0, all confirmed at wrap.**
+Wrap verify on main: **exit 0, 3469 passed / 9 skipped** (3454 → 3469: 11 new snapshot-honesty assertions plus the rewritten landing pins).
 
-**⚠ THE BLOCKER IS GONE. THE CAPSTONE IS NEXT:**
-⑳ ✅ built, approved, **now moving** → ㉑ ✅ built and moving → ㉒ ✅ built and
-moving → **THE THALON LANDING PAGE ← THE NEXT ACTION** → then **D (vineyard) and
-E (café/coffee) on leftover credit.**
+**THE CAPSTONE IS BUILT.** ⑳ ✅ → ㉑ ✅ → ㉒ ✅ → **THE THALON LANDING PAGE ✅
+(this session)** → **D (vineyard) and E (café) are next, on leftover credit.**
+
+**Credits: 343.98** (spent **17.74** — two hero candidates at 0.12 plus the
+17.50 take). **The 180cr ring-fence is now RELEASED, not merely unspent: the
+front door it existed to protect is built and cost under 18cr.** So the whole
+**343.98 is available for D and E**, against a full-scope estimate of ~230 for
+the pair. Both fit, comfortably, for the first time in the arc.
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
-**Credits: 361.72** (spent 17.50, reconciled live). **The 180cr ring-fence for
-the Thalon landing is UNTOUCHED — and the leftover is now ~181.72, not the ~109
-the spec projected, because every site landed far under its line.**
 
-## WHAT SHIPPED — the page finally shows the dog walking
+## WHAT SHIPPED — the front door argues from receipts
 
-▎ **Six chapters measuring a limp evening out, and the page never once showed
-him walk.** Now the instrument hands off to a photograph that **moves**: 61
-stills scrubbed by the same scroll that drives the gait study. **One clock read
-twice** — no timer, no autoplay, no second rAF loop — so the added motion spends
-the site's stated motion budget rather than breaking it.
+▎ **`/` is no longer the AI-landing default.** The mandated look-first sweep
+found the genre is one page drawn a hundred times — near-black, a headline
+whose last word glows in a gradient, a gradient CTA pill — and that **Thalon's
+own landing was already wearing it.** The page now runs on paper, in the same
+register as the three A+ sites it was ordered to learn from, with a display
+serif and a **one-colour rule borrowed in principle from ㉒: a colour on this
+page always means a GATE VERDICT, never a decoration.** A consequence worth
+keeping: the page cannot grow a gradient CTA without breaking its own rule.
 
-▎ **THE SPEC'S CONSTRUCTION WAS WRONG, AND THE REPO'S OWN COROLLARY SAID SO.**
-The arc spec scheduled ⑳ as `start_image` = the pinned Day-84 still, `end_image`
-= "the same dog mid-stride". ㉑'s seasons and ㉒'s bloom are **one-way
-transformations** where an end frame is a genuinely different picture — but **a
-trot is a CYCLE**, and its last frame looks like its first. That `end_image`
-would have bought a near-duplicate of the start frame at s106's registration
-coin-flip (~50% of seeds drift). Built as a **single `start_image` with no
-`end_image`**: zero registration risk *by construction*, one already-approved
-asset, **first take, 17.50cr against a ~72cr line**. s107 said *the cheapest
-registered edit is the one you never make*; cyclic motion goes one further —
-**there is no second endpoint to mint at all.**
+▎ **The spine is a REAL RUN, not a mock-up.** Eight of the **681 claims** this
+workspace's judge actually ruled on (**635 cleared, 46 stopped**; 128 judge
+runs over 28 body versions of 21 drafts), read out of dev Postgres and pinned.
+The ledger **fills as you scroll** — a row is invisible until the fan-out
+writes it, undecided until its gate runs, and only then shows its fate.
 
-▎ **The honesty constraint drove the PROMPT, not the review.** Day 84 reads 0/5
-lameness and 94% symmetry, so the brief named the failure modes as explicit
-negatives (not galloping, not bounding, feet low, never all four airborne) and
-landed a sound even trot first take. **The pinned still turned out to already BE
-a trot** — the only thing over-claiming was its alt text ("running at full
-stretch"), now corrected. `/guide` discloses the generation and the constraint.
+▎ **It shows our own rejects, verbatim** — including the pair that is the whole
+product in two lines: *"Swap the model underneath and the gates still hold"*
+was **stopped** as an unsupported assertion, while *"Swapping the model
+underneath leaves the gates holding"* **passed** once it was stated in a form
+the sources supported. Same idea, different evidence, different verdict.
 
-## THE FIND — the count passed, and the scrub was still wrong
+▎ **Two mints, 17.74cr.** A hero still (`text2image_soul_v2`, 0.12cr) and a 5s
+locked-off take (`seedance_2_0_fast`, 17.50cr) of water held above a stone sill
+and passing over it — **one `start_image`, NO `end_image`**, the s108
+cyclic-motion corollary applied at its first opportunity. Both pinned with
+provenance, and **the models recorded are the ones that RAN** — the vendor
+substituted both, and answered the first video call with a preset suggestion
+and no job, exactly as s108 predicted.
 
-▎ **s107 learned to COUNT the lit frames. s108's correction: a count proves a
-scrub is ALIVE, it does not prove it is AIMED.** The new ratchet passed
-perfectly — 61/61 decoded, exactly one lit at every sampled position, strictly
-monotonic 0→60. A **visibility-bucketed** sweep then showed the sequence was
-mis-mapped: across the band's full centre travel, frames 0 and 60 sat at the
-clamps, and **34 of 61 frames — over half the shipped bytes — were only
-reachable while the band was under half on screen.** In the prime window the
-reader saw frames 17–43 and nothing else. Ending the sweep a sixth of a viewport
-early at each end moved that to **10–50, 33 distinct frames.** *The invariant
-check and the aim check are different questions, and only the first has a
-ratchet.*
+▎ **`/guide` now exists for Thalon's own front door.** The page making the
+strongest honesty claims was the only one in the estate not showing its working.
 
-▎ **Three more, all measured, none visible in source:** **frame density is set
-by the CAMERA, not by precedent** — ㉑ ships 18/sequence and ㉒ ships 36, but both
-are *locked-off*; this take **tracks**, so adjacent-frame difference measured
-**9.24 at native 24fps against the bloom's 1.26**, and 36 would have been
-visibly steppy (shipped 61) · **the vendor answered the literal call with a
-preset suggestion and NO job** — nothing rendered, nothing charged, but a build
-assuming the mint was running would have waited on a job that did not exist ·
-**`close.webp` is deleted, not orphaned** — trot-00 measured 6.41 against it,
-less than one adjacent-frame step, and the bijection is manifest↔disk so dead
-weight would have passed every ratchet silently.
+## THE FINDS — six, and only two were visible by looking
+
+1. **THE LEDGER WAS ONE CHAPTER LATE.** Standing on the chapter headed *g3 ·
+   the grounding*, the instrument had decided ONE row; every g3 verdict landed
+   a chapter later, under the discoverability heading. Every hand-written
+   `decidedAt` was one too high. Alive, monotonic, lit — and answering the
+   wrong question at every stop. **Fixed structurally:** the index is now
+   DERIVED from the row's gate, so a row cannot hold a disagreeing opinion.
+2. **TWO OF THE FIVE NEW RATCHETS WERE DECORATION.** "Static-first" and
+   "exactly one lit frame" both passed *with their subject deleted* —
+   Testing-Library's `render` runs effects, so `live` was already true and the
+   assertions never saw the server markup they claimed to check. Rewritten
+   against `renderToStaticMarkup` and re-broken three ways to confirm red.
+3. **THE PAGE WAS BROKEN ON A PHONE.** The pinned ledger measures **1087px in
+   an 844px viewport** — the reading band was *negative*, chapter 02 never
+   activated, and headings sat behind the sheet while the instrument claimed
+   the reader was on them. Narrow screens no longer pin; they show the
+   completed run, the same trade the no-JS reader makes.
+4. **The mock printed the answer before the chapters asked** (spine-level) and
+   **reproduced the s107 clock lag** (1 of 6 chapters correct until fixed).
+5. **The CTAs still wore the genre default** — the page's own "refuses the
+   default" test caught `cta-glare` and an amber glow two components away.
+6. **The row is a CLAIM, not a draft.** An earlier snapshot paired claim
+   strings with real draft ids, which would have asserted a link the database
+   does not contain — several of the best blocked sentences sit inside drafts
+   that were revised and later **approved**.
 
 ## The ratchets this session bought
 
-**Executable:** the s107 static-stack check keyed off an inert JSON data block,
-so it covered ㉒ alone and **⑳'s stack would have shipped uncovered** (*"a ratchet
-applied to three assets out of four is not applied"*). It now keys off the
-**manifest** — which every site has — and counts lit frames **per sequence**, so
-a two-sequence page cannot pass by lighting two of one and none of the other. ㉑
-is skipped by design (runtime-built frames behind a `.still` fallback).
-**Proven to FAIL on both real defects — a second lit frame, and a missing frame
-— before it was trusted.**
-**Documentary:** three corollaries in `proprietary/templates/meta-prompt.md`
-(**READ BEFORE ANY MINT**) — cyclic motion has no end frame · a count proves
-ALIVE not AIMED · frame density is set by the camera (plus the preset-interception
-trap). A **correction block in `docs/landing-arc/spec.md`** on the keyframe pair,
-written there because **site E's pour is cyclic too**.
+**Executable:** `landing-run-snapshot.test.ts` (11 assertions — arithmetic
+consistency · the sequence gate may never claim a post went out unreviewed ·
+the sample cannot be read as a rate · both outcomes shown · every stop carries
+a reason · **no third-party or prospect data reaches the public page** · every
+row decides on the chapter naming its gate) plus 5 rewritten pins in
+`landing-page.test.tsx` including a **"refuses the genre default"** check.
+**All proven to fail on real defects before being trusted.**
+**Structural:** `decidedAt()` derives from the gate; `BRAND_SEQUENCES` +
+`export-brand-assets.ts` derive the frame sequence deterministically from the
+pinned mp4, so the 81 frames are regenerable rather than hand-cut.
+**Documentary:** a frame-density corollary in the meta-prompt.
 
-## Resume prompt (session 109, syd4)
+## Resume prompt (session 110, syd4)
 
-**Resume · Thalon** — nothing is mid-flight. **The plan is COORDINATION §s104
-(the PLANNED block), minus what shipped.**
+**Resume · Thalon** — nothing is mid-flight. The arc's four sites are built.
 
-**⚠ Open with the meta-prompt in hand.** It gained three corollaries this
-session, and the landing page is the most expensive thing in the arc to get
-wrong.
-
-**1 — THE THALON LANDING PAGE. THE CAPSTONE, AND IT IS NOW UNBLOCKED.** A, B and
-C are complete *including their generated moments*, which was his stated
-precondition — *"so that way, you have the full landing page to learn from
-rather than just mock."* It inherits a **proven scroll-scrub component** and
-three finished pages. **NOT a portfolio site:** the portfolio sells fictional
-businesses to imagined customers; this sells Thalon to people who will actually
-land on it, and **it must be honest about what the engine does TODAY.** Mint
-budget **ring-fenced at 180cr, still intact**. Stealth unchanged — **where it is
-served and under what name is his separate call**, and building it does not
-decide it. Per standing method the **claude-design mock runs in FRONT of the
-pre-plan** (both, never either). Which of the three instruments becomes the
-landing's spine *cannot be decided from the spec* — that is decided by having
-built them, which is the whole reason for this order.
-
-**2 — SITES D AND E**, after the landing. **The arithmetic improved a lot:**
-every site landed under its line (2.40 + 13.00 + 35.00 + 17.50 = **67.90 total**
-against ~262 allocated), so the leftover after the ring-fence is **~181.72, not
-the ~109 the spec projected** — **both now fit at lean-to-full scope** rather
-than one-or-the-other. D = vineyard (hero beat **veraison**; **its secondary axis
-is an OPEN DRAW** — C took exceptional-palette) · E = a coffee **brand**, whose
-**animation IS the page**. **If only one fits, still build E.** ⚠ **Read the s108
-correction first:** D's veraison is a one-way transformation, E's beans→grounds→
-pour is correctly two chained segments — **but the pour itself is cyclic**, so
-ask which kind each motion is before reaching for a keyframe pair. Full brief:
+**1 — SITES D AND E**, the spend-down. **343.98cr available against ~230 for
+both at full scope — the ring-fence is released and both fit.** D = vineyard, hero beat
+**veraison**, secondary axis an OPEN DRAW · E = a coffee **brand** whose
+**animation IS the page**. **If only one fits, still build E.** ⚠ Read the
+s108 correction AND the new s109 corollary first: **veraison is a one-way
+transformation (keyframe pair), the pour is CYCLIC (one frame, no end frame)**,
+and **frame density is set by how much of the FRAME moves, not by the camera** —
+a locked-off shot of a turbulent subject needs tracking-take density (this
+session: 81 frames for locked-off water where ㉒'s bloom ships 36). Full brief:
 `docs/landing-arc/spec.md` §SITES D AND E.
 
-**3 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
-out on their own"**, untrue while the queue's master key is empty and **nothing
-in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the DISCLOSURE, not a
-door.** Arming from the UI is his sequence-gate call, NOT in scope.
+**2 — PHASE 0** (~1hr): the s103 seg still offers **Live — "Due posts go out on
+their own"**, untrue while the queue's master key is empty. **Ship the
+DISCLOSURE, not a door.**
 
-**4 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
-(DOCTRINE 0). Both MIT deps approved. Finding banked in `docs/control-arc/spec.md`.
+**3 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
+(DOCTRINE 0). Both MIT deps approved.
 
-**CARRIED, recorded not fixed:** ㉒'s **mobile vertical rhythm is airier than it
-should be** — a chapter heading clears the pinned sheet at some scroll positions
-and not others, so a reader can meet a paragraph before its title; every
-correctness invariant holds there, so this is ergonomics and it is the first
-thing a fix round should buy · Schedule's month-density chips clip their own
-text · the Intel **dossier-absence REASON does not reach the wire** (a
-contract-window ask) · Intel dismiss reversibility · the sweep schedule's
-missing door · the add-chip's missing keyword path · **㉑'s July hydrangea reads
-as a round mophead where the calendar names *Hydrangea quercifolia*** (oakleaf,
-conical) — cosmetic, inherited from s105.
+**OWED, and stated rather than glossed:** the meta-prompt asks for **three**
+iteration passes running BOTH lanes of `iteration-pass-checklist.md`. This
+session ran **two** (the fault lane found the six finds above; the ambition
+lane bought the display serif, the band's move out of the hero to after the
+argument, and the honest-scope section). **A third pass is owed on the landing
+page** and should run before D and E, not after.
 
-**WAITING ON HIM — none blocking:** **⑳'s moving band** — the design verdict is
-his and STANDS (`gogogo design is approved`, s105); the walk is the one part of
-that page he has not seen · ㉒'s verdict (`site.json` is loudly `awaiting`) ·
-㉑'s verdict, and **the casting reversal inside it** — the studio's one human is
-an experienced WOMAN at the board, one word to flip · the Higgsfield **expiry
-date** (pacing aid only) · the three s101 staged design calls. All on
+**CARRIED, recorded not fixed:** **`/blog` and `/brand` still scope `.dark`** and
+now differ in register from `/` — a real public-site inconsistency, deliberately
+not fixed in the same change as the capstone · ㉒'s mobile vertical rhythm ·
+Schedule's month-density chips clip their text · the Intel dossier-absence
+REASON does not reach the wire · Intel dismiss reversibility · the sweep
+schedule's missing door · the add-chip's missing keyword path · ㉑'s July
+hydrangea reads as a mophead where the calendar names *Hydrangea quercifolia*.
+
+**WAITING ON HIM — none blocking:** **the whole landing page** (he asked not to
+be shown Whitethorn until complete; the landing is the same class of
+deliverable) · **where `/` is served and under what name — still his call, and
+building it did not decide it** · ㉑'s and ㉒'s verdicts · ㉑'s casting reversal
+· the Higgsfield expiry date · the three s101 staged design calls. All on
 NEEDS-STEVEN.
 
-▎ ▸ **The lesson, NINTH session running, and it moved again: RUN IT, MOVE IT,
-COUNT IT — then check WHERE the count lands.** s105 said render it. s106 said a
-still page hides what a scrub exposes. s107 said a moving page hides what only a
-count exposes. **s108: a passing count hides whether the motion is AIMED** — the
-scrub was alive, monotonic and correct, and was spending half its bytes off the
-edge of the reader's eye.
-▎ ▸ **Traps worth keeping:** **CYCLIC motion (a gait, a pour, a spin, a flame)
-has NO end frame to mint — one `start_image`, no `end_image`** · **frame density
-is set by the CAMERA: a panning take needs ~3× the frames of a locked-off one,
-measure adjacent-frame difference against a sequence that reads well** · **the
-vendor may answer `generate_video` with a PRESET SUGGESTION AND NO JOB — re-send
-with `declined_preset_id` and confirm a job id** · **the vendor SUBSTITUTES the
-model — record what RAN (`seedance_2_0_fast`), not what you requested, or
-`/guide` lies** · **a stacked `<img>` scrub needs its "shown" index SEEDED FROM
-THE DOM — starting at `-1` strands the markup's initial frame lit and it
-composites over everything** · **`margin:0 auto` on a GRID ITEM shrink-wraps it —
-add `width:100%`** · **an rAF-scheduled scroll handler has NOT run when you read
-the DOM straight after `scrollTo` — await two frames** · **seedance ignores
-`width`/`height`; resolution is `resolution`+`mode`, defaults to 720p WITH audio,
-and 720p/5s/fast/silent = 17.50cr** · `npm run verify | tail` REPORTS TAIL'S EXIT
-CODE — redirect to a file and echo `$?` · `pgrep -f <pattern>` MATCHES ITS OWN
-COMMAND LINE — use `pgrep -x` · the Bash tool's cwd PERSISTS between calls ·
-scripts need `set -a; source apps/web/.env.local; set +a` ·
-`html{scroll-behavior:smooth}` silently defeats `window.scrollTo` in an evaluate
-— set `scrollBehavior='auto'` first · chrome-devtools `fill` does NOT reach React
-controlled inputs · vitest does NOT typecheck (`npx tsc --noEmit -p apps/web`
-FROM THE REPO ROOT) · eslint runs from `apps/web` · **portfolio sites trip the
-impeccable design hook — false positive by construction** · vendor mint URLs
-expire in 30–60 min — **download and pin immediately** · `packages/db` exposes
-`repos` as its ONLY query API.
+▎ ▸ **The lesson, TENTH session running: RUN IT, MOVE IT, COUNT IT, CHECK WHERE
+IT LANDS — and now, CHECK THE TEST ITSELF.** s108 said a passing count hides
+whether motion is aimed. **s109: a passing TEST hides whether it is testing
+anything** — two ratchets written this session passed with their subject
+deleted, and only breaking them on purpose found it. The previous session's
+answer keeps becoming the next session's blind spot.
+▎ ▸ **Traps worth keeping:** **Testing-Library's `render` RUNS EFFECTS — it
+cannot see server markup; use `renderToStaticMarkup` for any no-JS claim** ·
+**a hand-written index that duplicates a derivable fact WILL drift — derive it**
+· **measure the pinned element against the VIEWPORT before shipping a phone
+layout** (1087px sheet, 844px screen) · **frame density is set by how much of
+the FRAME moves, not the camera** · **the vendor SUBSTITUTES the model — record
+what RAN** · **the vendor may answer `generate_video` with a preset and NO
+job — re-send with `declined_preset_id`** · `pkill -f <pattern>` MATCHES ITS OWN
+COMMAND LINE and will kill your shell — same trap as `pgrep -f`, use `-x` ·
+a `//` comment is INVALID inside a JSX opening tag — use `{/* */}` above it ·
+`npm run verify | tail` REPORTS TAIL'S EXIT CODE · the Bash tool's cwd PERSISTS ·
+eslint runs FROM `apps/web`, tsc FROM THE REPO ROOT · scripts need
+`set -a; source apps/web/.env.local; set +a` · `html{scroll-behavior:smooth}`
+defeats `window.scrollTo` — set `scrollBehavior='auto'` first · vendor mint URLs
+expire in 30–60 min, download immediately · `packages/db` exposes `repos` as its
+ONLY query API · **portfolio + landing files trip the impeccable design hook by
+construction — the landing keeps its own register, which `bridge-burndown`
+states in writing**.
 ▎ ▸ **⛔ SEQUENCE GATE, unchanged:** post = ARMED (founder GO s98); page still
 409s at `POST /api/create`; bluesky is the one platform granted for live
 testing; the queue consumer's key rests EMPTY. Two live posts total, both
-bluesky. **This session spent 17.50 credits and posted nothing.**
+bluesky. **This session spent 17.74 credits and posted nothing.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
 ▎ ▸ **State:** tree clean and main == origin (verified at wrap) · staging rolls
-s93–s108 with the next auto-deploy · **no new migration this session** · four
+s93–s109 with the next auto-deploy · **no new migration this session** · four
 social channels connected · dev PG live · 8899 preview + sweeper user units keep
-running — NEVER hand-start the sweeper.
+running — NEVER hand-start the sweeper. **A `next dev` on :3111 was started this
+session for the browser pass and stopped at the wrap.**
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
-s109 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
-`docs/landing-arc/spec.md` is the spec of record — **A, B and C ALL BUILT AND
-ALL MOVING; the capstone is the next action.**
+s110 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
+`docs/landing-arc/spec.md` is the spec of record — **the capstone is DONE; D
+and E are the remaining work and both now fit.**
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    verify` before any new work.
 
-CLAUDE.md → this file → COORDINATION.md (**§s108 = what shipped · §s104 = the
-plan**) → `docs/landing-arc/spec.md` (**A+B+C BUILT AND MOVING; read the s108
-CORRECTION block on the keyframe pair and the s107 one on the D axis**) →
-`proprietary/templates/meta-prompt.md` (**READ BEFORE ANY MINT — three new
-corollaries**) → `proprietary/templates/sites/whitethorn/` (the newest precedent;
-its PREPLAN carries the s108 finds) →
-`proprietary/templates/sites/small-hours/` → `docs/control-arc/spec.md` (**A + A2
-BUILT; B owes a SHEET**) → `docs/research/ux-refinement-program.md` →
+CLAUDE.md → this file → COORDINATION.md (**§s109 = what shipped · §s104 = the
+plan**) → `docs/landing-arc/spec.md` (**A+B+C AND THE CAPSTONE BUILT; D and E
+remain**) → `docs/landing-arc/thalon-landing-PREPLAN.md` (**the newest
+precedent — its CORRECTION block and its six build findings**) →
+`proprietary/templates/meta-prompt.md` (**READ BEFORE ANY MINT — four new
+corollaries**) → `proprietary/templates/sites/whitethorn/` →
+`proprietary/templates/sites/small-hours/` → `docs/control-arc/spec.md` (**A +
+A2 BUILT; B owes a SHEET**) → `docs/research/ux-refinement-program.md` →
 agent_handoff/NEEDS-STEVEN.md → `docs/research/prior-art-portal-automation-s84.md`
 (BEFORE ANY PORTAL WORK). `docs/video-arc/spec.md` is a CLOSED record.
 
-## Delta (session 108)
+## Delta (session 109)
 
-The blocker is gone, and the thing that found the defect was not the thing that
-was supposed to find it.
+The front door now argues from receipts instead of adjectives.
 
-⑳ Whitethorn spent six chapters measuring a limp evening out and never once
-showed the dog walking. It does now, and it cost one take — because the spec's
-own instruction to mint a second keyframe was wrong. A trot is a cycle, not a
-transformation: its last frame looks like its first, so the "end frame" the plan
-called for would have been a near-duplicate of the start, bought at a fifty-fifty
-registration risk. One start frame, no end frame, first take, 17.50 credits
-against a seventy-two credit line.
+Every landing page in this category asserts that its AI is good. This one
+asserts something checkable and much stranger — that it stops things — and then
+proves it by showing eight sentences its own judge refused, verbatim, out of
+six hundred and eighty-one it ruled on. The best of them is a pair: the same
+idea stated two ways, blocked as a flat assertion and admitted once the sources
+supported it. No copy could make that argument as well as the artefact does.
 
-Then the ratchet passed — sixty-one frames decoded, exactly one lit at every
-sampled position, strictly monotonic from zero to sixty — and the scrub was still
-wrong. Mapped across the band's full travel, more than half the frames were only
-reachable while the band was mostly off the screen, and a reader looking straight
-at it saw a third of what had been shipped. Nothing failed. Nothing could have
-failed, because "exactly one frame is lit" and "the frames are landing where
-someone is looking" are different claims, and only the first one had a test.
+The build's real lesson was not about design. Five ratchets were written to
+keep the page honest, and when each was deliberately broken to prove it went
+red, **two of them did not** — they had been passing while testing nothing,
+because the test harness runs effects and never saw the server markup the
+assertions claimed to inspect. The same hour, driving the page found the ledger
+running a full chapter behind its own headings, and measuring it on a phone
+found a pinned sheet two hundred and forty-three pixels taller than the screen
+it was pinned to. Three defects, none visible in a screenshot, none caught by
+types or lint or three and a half thousand tests.
 
-That is the ninth session running that the finding has been a version of *run it
-and read it*, and it has now sharpened three sessions in a row. s106: a still
-page hides what a scrub exposes. s107: a moving page hides what only a count
-exposes. s108: **a passing count hides whether the motion is aimed.** Each time
-the previous session's answer became the next session's blind spot — which is
-the actual pattern worth carrying, more than any one of the checks.
+That is the tenth session running that the finding has been a version of *run
+it and read it*, and it moved again. s106: a still page hides what a scrub
+exposes. s107: a moving page hides what only a count exposes. s108: a passing
+count hides whether the motion is aimed. **s109: a passing test hides whether
+it is testing anything at all.**

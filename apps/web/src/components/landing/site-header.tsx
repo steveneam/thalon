@@ -40,9 +40,13 @@ export function SiteHeader() {
           >
             Workspace
           </Link>
+          {/* s109: was a primary-tinted pill. The landing's one-colour rule
+              (a colour means a gate verdict, never a decoration) leaves no
+              room for an accent CTA, and the header is shared, so it goes
+              neutral everywhere rather than only on `/`. */}
           <Link
             href="/#waitlist"
-            className="rounded-lg border border-primary/40 px-3.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+            className="border border-foreground px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-foreground hover:text-background"
           >
             Join the waitlist
           </Link>

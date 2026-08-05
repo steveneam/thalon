@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Thalon — the gate</title>
+<style>
+  :root{
+    --paper:#f6f4ef;        /* warm ground */
+    --ink:#14181c;          /* near-black, blue-leaning, never pure */
+    --ink-2:#5b6570;
+    --rule:#ddd8cf;
+    /* THE ONLY SATURATED COLOUR ON THIS PAGE IS A GATE VERDICT. */
+    --pass:#2f6b4f;
+    --blocked:#a83226;
+    --waiting:#8a6a1f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:16px/1.55 ui-serif,Georgia,serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12px;letter-spacing:.04em}
+  h1,h2,h3{font-weight:500;letter-spacing:-.02em;margin:0}
+  h1{font-size:clamp(40px,6.4vw,86px);line-height:1.02}
+  h2{font-size:clamp(26px,3.2vw,40px);line-height:1.1}
+  h3{font-size:22px}
+  p{margin:0 0 1em}
+  section{padding:110px 0;border-top:1px solid var(--rule)}
+
+  /* ---------- HERO ---------- */
+  .hero{border-top:0;padding:64px 0 90px}
+  .kicker{color:var(--ink-2);text-transform:uppercase}
+  .hero .sub{font-size:20px;color:var(--ink-2);max-width:44ch;margin-top:24px}
+  .heroart{margin-top:48px;height:400px;background:#e7e2d8;border:1px solid var(--rule);
+           display:flex;align-items:center;justify-content:center;color:#a49b8c}
+
+  /* ---------- THE SPINE: pinned ledger + chapters ---------- */
+  .spine{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:56px;align-items:start}
+  .stage-col{position:sticky;top:0;height:100vh;display:flex;align-items:center}
+  .ledger{width:100%;border:1px solid var(--ink);background:#fffdf9;padding:22px}
+  .ledger .cap{display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);
+               padding-bottom:10px;margin-bottom:14px;color:var(--ink-2)}
+  .row{display:grid;grid-template-columns:18px 1fr auto;gap:12px;align-items:center;
+       padding:9px 0;border-bottom:1px dotted var(--rule)}
+  .dot{width:9px;height:9px;border-radius:50%;background:#cfc8bc}
+  .row.pass .dot{background:var(--pass)}
+  .row.blocked .dot{background:var(--blocked)}
+  .row.waiting .dot{background:var(--waiting)}
+  .row .what{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .verdict{font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-2)}
+  .row.blocked .verdict{color:var(--blocked)}
+  .row.pass .verdict{color:var(--pass)}
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px;
+            border-top:1px solid var(--ink);padding-top:14px}
+  .readouts div{font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-2)}
+  .readouts b{display:block;font-size:26px;color:var(--ink);font-family:ui-serif,Georgia,serif;font-weight:500}
+  .gatebar{display:flex;gap:2px;margin-top:16px;height:6px}
+  .gatebar i{flex:1;background:#e0dacf}
+  .gatebar i.on{background:var(--ink)}
+
+  .chapters{display:flex;flex-direction:column}
+  .chap{min-height:88vh;display:flex;flex-direction:column;justify-content:center;opacity:.34}
+  .chap.on{opacity:1}
+  .chap .n{color:var(--ink-2);margin-bottom:10px}
+  .chap p{color:var(--ink-2);max-width:46ch;margin-top:14px}
+
+  /* ---------- THE BLOCKED WALL ---------- */
+  .wall{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--rule);
+        border:1px solid var(--rule);margin-top:40px}
+  .card{background:var(--paper);padding:24px}
+  .card .claim{font-size:18px;margin-bottom:12px}
+  .card .why{font-family:ui-monospace,monospace;font-size:12px;color:var(--blocked);line-height:1.5}
+
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:48px}
+  .three h3{margin-bottom:10px}
+  .three p{color:var(--ink-2);font-size:15px}
+
+  .today{border:1px solid var(--ink);padding:28px;margin-top:40px}
+  .today ul{margin:0;padding-left:20px;color:var(--ink-2)}
+  .today li{margin:6px 0}
+  footer{padding:60px 0;color:var(--ink-2)}
+  @media (max-width:900px){
+    .spine{grid-template-columns:1fr;gap:0}
+    .stage-col{height:auto;position:sticky;top:0;padding:14px 0;background:var(--paper)}
+    .wall,.three{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<div class="wrap hero">
+  <div class="mono kicker">Thalon — content engine with the gate on the inside</div>
+  <h1>It writes a lot.<br />What matters is what it <em>refuses to send.</em></h1>
+  <p class="sub">One prompt becomes posts, videos and pages — every one of them
+     checked against your own sources and your own denylist before you ever see it,
+     and none of them leaves without your click.</p>
+  <div class="heroart">[ minted hero — the moving moment ]</div>
+</div>
+
+<!-- ============ THE SPINE ============ -->
+<section>
+  <div class="wrap">
+    <div class="mono kicker">The instrument — a real run, recorded</div>
+    <h2 style="margin-top:14px;max-width:20ch">Watch one prompt go through the gates.</h2>
+
+    <div class="spine" style="margin-top:56px">
+      <!-- pinned stage -->
+      <div class="stage-col">
+        <div class="ledger">
+          <div class="cap mono"><span>DRAFT LEDGER · tenant: self · 8 of 21 shown</span><span id="clock">—</span></div>
+
+          <div class="row" data-at="2" data-fate="pass"><i class="dot"></i><span class="what">LinkedIn — “Three Claude releases in eight weeks…”</span><span class="verdict"></span></div>
+          <div class="row" data-at="3" data-fate="blocked" data-why="blocked · ungrounded"><i class="dot"></i><span class="what">X — “Anthropic shipped three releases in two months”</span><span class="verdict"></span></div>
+          <div class="row" data-at="2" data-fate="pass"><i class="dot"></i><span class="what">Web page — “Inside Thalon: a content engine that judges…”</span><span class="verdict"></span></div>
+          <div class="row" data-at="3" data-fate="blocked" data-why="blocked · ungrounded"><i class="dot"></i><span class="what">X — “The architecture stays put.”</span><span class="verdict"></span></div>
+          <div class="row" data-at="3" data-fate="blocked" data-why="blocked · ungrounded"><i class="dot"></i><span class="what">X — “Swap the model underneath and the gates still hold.”</span><span class="verdict"></span></div>
+          <div class="row" data-at="4" data-fate="waiting" data-why="waiting on you"><i class="dot"></i><span class="what">Bluesky — “Bluesky app passwords are the whole auth story…”</span><span class="verdict"></span></div>
+          <div class="row" data-at="3" data-fate="blocked" data-why="blocked · discoverability"><i class="dot"></i><span class="what">Blog — “Bluesky app passwords” (entity absent from body)</span><span class="verdict"></span></div>
+          <div class="row" data-at="4" data-fate="waiting" data-why="waiting on you"><i class="dot"></i><span class="what">Storyboard — “A 2.4 Trillion Parameter Week”</span><span class="verdict"></span></div>
+
+          <div class="gatebar"><i></i><i></i><i></i><i></i></div>
+
+          <div class="readouts">
+            <div>Drafted<b id="r-drafted">0</b></div>
+            <div>Judged<b id="r-judged">0</b></div>
+            <div>Stopped<b id="r-stopped">0</b></div>
+            <div>Sent unreviewed<b>0</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- chapters that drive it -->
+      <div class="chapters">
+        <div class="chap on"><div class="mono n">01 — THE PROMPT</div>
+          <h3>One line, and the sources you trust.</h3>
+          <p>You describe the brand once: voice, platforms, topics, the sources
+             a claim may rest on, and the words you never want published.</p></div>
+
+        <div class="chap"><div class="mono n">02 — THE FAN-OUT</div>
+          <h3>It becomes every shape at once.</h3>
+          <p>The same idea, written natively for each destination — not one post
+             pasted six times. A post, a script with captions, a full page.</p></div>
+
+        <div class="chap"><div class="mono n">03 — G1 · THE SCREEN</div>
+          <h3>Your denylist runs first.</h3>
+          <p>Before anything is judged for truth it is screened for the words and
+             topics you ruled out. That check is deterministic.</p></div>
+
+        <div class="chap"><div class="mono n">04 — G3 · THE GROUNDING</div>
+          <h3>Every claim, back to a source you gave it.</h3>
+          <p>Each sentence that asserts something is checked against your sources.
+             The ones that cannot be traced do not proceed. This is where most
+             things die — and it should be.</p></div>
+
+        <div class="chap"><div class="mono n">05 — THE QUEUE</div>
+          <h3>Only survivors reach you.</h3>
+          <p>What is left arrives with its whole history attached: which gate it
+             passed, on what evidence, and what its siblings failed on.</p></div>
+
+        <div class="chap"><div class="mono n">06 — THE CLICK</div>
+          <h3>Nothing leaves without it.</h3>
+          <p>Approve, edit or reject. Every correction becomes a row the engine
+             learns from. Zero posts have ever left this engine unreviewed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE BLOCKED WALL ============ -->
+<section>
+  <div class="wrap">
+    <div class="mono kicker">Receipts</div>
+    <h2 style="margin-top:14px;max-width:24ch">These are real sentences our own engine refused to publish.</h2>
+    <p style="color:var(--ink-2);margin-top:18px;max-width:56ch">Taken verbatim from
+       this workspace's judge records. We are showing you our own rejects because a
+       gate you cannot see is a gate you cannot trust.</p>
+
+    <div class="wall">
+      <div class="card"><div class="claim">“Anthropic shipped three releases in two months”</div>
+        <div class="why">g3_final · fail — claim not supported by any provided source</div></div>
+      <div class="card"><div class="claim">“The architecture stays put.”</div>
+        <div class="why">g3_final · fail — unsupported assertion</div></div>
+      <div class="card"><div class="claim">“Swap the model underneath and the gates still hold.”</div>
+        <div class="why">g3_screen · fail — unsupported assertion</div></div>
+      <div class="card"><div class="claim">“Bluesky app passwords…”</div>
+        <div class="why">discoverability · fail — the body NEVER says the subject's canonical
+          entity “Bluesky app passwords” — no answer engine can surface it</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT IT DOES TODAY ============ -->
+<section>
+  <div class="wrap">
+    <div class="mono kicker">Honest scope</div>
+    <h2 style="margin-top:14px">What it does today.</h2>
+    <div class="three">
+      <div><h3>Intel</h3><p>You name the areas. It watches them through official
+        platform APIs and scores what moves — with the reason attached.</p></div>
+      <div><h3>Create</h3><p>One prompt fans out into posts, scripted video with
+        captions, and full web pages, grounded in your sources.</p></div>
+      <div><h3>Approve</h3><p>The judge gates every draft. You approve, edit or
+        reject. Your corrections tune your own results.</p></div>
+    </div>
+
+    <div class="today">
+      <div class="mono kicker" style="margin-bottom:12px">And what it does not — stated plainly</div>
+      <ul>
+        <li>Unattended posting is <b>off</b>. The queue exists; the key that arms it is empty.</li>
+        <li>Instagram is connectable but the driver refuses image posts today.</li>
+        <li>We optimise what is checkable. We do not promise rankings.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap mono">THALON · a real run, recorded 2026-08-05 · /guide explains how this page was made</footer>
+
+<script>
+(function(){
+  var chaps=[].slice.call(document.querySelectorAll('.chap'));
+  var rows =[].slice.call(document.querySelectorAll('.row'));
+  var bars =[].slice.call(document.querySelectorAll('.gatebar i'));
+  var clock=document.getElementById('clock');
+  var rD=document.getElementById('r-drafted'),rJ=document.getElementById('r-judged'),
+      rS=document.getElementById('r-stopped');
+  /* chapter index -> what the ledger has been through by then. The clock
+     follows the PROSE: the stage named is the chapter the reader is ON. */
+  var STAGE=['—','fan-out','g1 · screen','g3 · grounding','queue','your click'];
+  var raf=0;
+  function tick(){
+    raf=0;
+    var line=window.innerHeight*0.5;
+    /* NEAREST anchor, not the last one whose centre we passed. The naive
+       "last passed" rule marks chapter N-1 active while the reader is
+       squarely on N — the s107 clock-lag, and this mock reproduced it
+       exactly until it was counted. Interpolate a continuous position
+       across chapter centres, then round. */
+    var centres=chaps.map(function(c){var h=c.querySelector('h3')||c;
+      var r=h.getBoundingClientRect(); return r.top+r.height/2;});
+    var last=0;
+    for(var n=0;n<centres.length;n++) if(centres[n]<=line) last=n;
+    var k=last;
+    if(last<centres.length-1){
+      var span=centres[last+1]-centres[last];
+      if(span>0) k=last+Math.max(0,Math.min(1,(line-centres[last])/span));
+    }
+    var seg=Math.max(0,Math.min(chaps.length-1,Math.round(k)));
+    chaps.forEach(function(c,i){c.classList.toggle('on',i===seg);});
+    clock.textContent=STAGE[Math.min(STAGE.length-1,seg)];
+    bars.forEach(function(b,i){b.classList.toggle('on',i<=seg-2);});
+
+    /* THE FILL IS THE INSTRUMENT. A row is invisible until the fan-out has
+       written it, present-but-undecided until its gate runs, and only then
+       does it show its fate. Printing every verdict up front spends the
+       page's whole argument in the first second (mock v1 did exactly that). */
+    var drafted=0,judged=0,stopped=0;
+    rows.forEach(function(r){
+      var at=+r.getAttribute('data-at'), fate=r.getAttribute('data-fate');
+      r.classList.remove('pass','blocked','waiting');
+      if(seg<1){ r.style.opacity=0; return; }
+      r.style.opacity=1; drafted++;
+      if(seg>=at){
+        judged++; r.classList.add(fate);
+        r.querySelector('.verdict').textContent = r.getAttribute('data-why')||'pass';
+        if(fate==='blocked') stopped++;
+      } else {
+        r.querySelector('.verdict').textContent='';
+      }
+    });
+    rD.textContent=drafted; rJ.textContent=judged; rS.textContent=stopped;
+  }
+  function schedule(){ if(!raf) raf=requestAnimationFrame(tick); }
+  window.addEventListener('scroll',schedule,{passive:true});
+  window.addEventListener('resize',schedule);
+  tick();
+})();
+</script>
+</body>
+</html>

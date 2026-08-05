@@ -2,10 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import { metadata as blogMetadata } from "@/app/blog/page";
 
 // layout.tsx pulls next/font/google, which needs the Next compiler — stub
-// the two fonts so the metadata export is importable under vitest.
+// the fonts so the metadata export is importable under vitest. Every face
+// declared in layout.tsx needs an entry here: the mock is exhaustive, not
+// partial, so adding a font without adding it here fails this file (s109
+// added Newsreader for the landing's display type and did exactly that).
 vi.mock("next/font/google", () => ({
   Geist: () => ({ variable: "--font-geist-sans" }),
   Geist_Mono: () => ({ variable: "--font-geist-mono" }),
+  Newsreader: () => ({ variable: "--font-newsreader" }),
 }));
 
 /**

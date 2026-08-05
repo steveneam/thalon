@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -12,6 +12,26 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+});
+
+/**
+ * The landing's display + prose face (s109, the `novel-typography` secondary
+ * axis). Loaded here because that is where Next wants font declarations, but
+ * USED only inside `.landing-surface` — the workspace keeps Geist, and the
+ * variable is inert everywhere else.
+ *
+ * Newsreader rather than a fashion serif: the page is a document about
+ * evidence, so it wants a bookish text face that also holds up at display
+ * size, with a real italic (the hero's "refuses to send" leans on it). It
+ * follows the pattern all three A+ sites landed on — ONE serif for prose and
+ * ONE mono for instrument apparatus, because the discipline being depicted
+ * has exactly two lettering registers.
+ */
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -50,7 +70,7 @@ export default function RootLayout({
       // the Theme provider owns them after). Scoped to this one element,
       // exactly the theme-stamping pattern this flag exists for.
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

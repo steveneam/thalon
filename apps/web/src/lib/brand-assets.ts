@@ -74,6 +74,25 @@ export const BRAND_ASSETS = {
     pinnedHash: "3ac2b35ffc22d128cb433184829cbed260332dc0f1f5b1aef1ccc824161a32df",
     quality: 78,
   },
+  /**
+   * s109 — the landing's hero: water held still above a low stone sill, and
+   * water passing over it. The page's argument as a natural object, which is
+   * the §casting (8)+(9) answer for a precision vertical: nature at the
+   * subject's own geometry, light and air, no people.
+   *
+   * ⚠ Deliberately NOT a gate. The s104 Whitethorn corollary: a prompted
+   * "gate" renders as a mullioned lattice and reads as BARS, and any barrier
+   * object carries that risk. Water over stone is an opening, not a leaf
+   * across one. It is also frame 0 of the `weir` sequence below, so the still
+   * hero and the moving band are the same place.
+   */
+  weirHero: {
+    src: "/brand/weir-hero.webp",
+    width: 1920,
+    height: 1080,
+    pinnedHash: "62efcdca87a4ed98042b8a2797bd8a79d4eaaa4888e2eaa6856c8e54a3acf347",
+    quality: 78,
+  },
 } as const satisfies Record<string, BrandAsset>;
 
 export type BrandAssetKey = keyof typeof BRAND_ASSETS;
@@ -190,3 +209,56 @@ export const WORKSPACE_ASSETS = {
 } as const satisfies Record<string, BrandAsset>;
 
 export type WorkspaceAssetKey = keyof typeof WORKSPACE_ASSETS;
+
+/**
+ * A minted VIDEO derived to a scroll-scrubbable frame sequence (s109, the
+ * landing arc's capstone).
+ *
+ * Why frames and not the mp4: seeking a compressed video lands on keyframes,
+ * so scrubbing `video.currentTime` on scroll janks. Extracting to stills is
+ * deterministic and decodes without seek cost — the technique proved across
+ * all three A+ sites. The mp4 stays the pinned original; these are derives.
+ */
+export interface BrandSequence {
+  /** Public URL directory holding `<name>-NN.webp`. */
+  dir: string;
+  /** How many frames the sequence ships. */
+  frames: number;
+  width: number;
+  height: number;
+  quality: number;
+  /** Content hash of the pinned original mp4. */
+  pinnedHash: string;
+}
+
+export const BRAND_SEQUENCES = {
+  /**
+   * The weir — water held above a stone sill, and water passing over it.
+   *
+   * ⚠ FRAME COUNT IS MEASURED, NOT CHOSEN (s108 corollary, refined here).
+   * That corollary says density is set by the CAMERA: locked-off takes need
+   * roughly a third of a tracking take's frames (㉒'s locked-off bloom ships
+   * 36). This take is ALSO locked-off and needs 81 — because the rule is
+   * really about how much of the FRAME is moving, and turbulent water changes
+   * every pixel of the lower half every frame even with the camera nailed
+   * down. Measured adjacent-frame difference against ㉒'s shipped bloom
+   * (1.26, a sequence that reads well): 41 frames → 1.88, 61 → 1.56,
+   * **81 → 1.24**, 121 (native) → 0.93. 81 is the count that matches the
+   * benchmark; 36 would have been visibly steppy.
+   */
+  weir: {
+    dir: "/brand/weir",
+    frames: 81,
+    width: 960,
+    height: 540,
+    quality: 58,
+    pinnedHash: "d0afcc1b6465158ea13a0dd66c3363c61f0358eb43e2e3bc8655d4d3476ee538",
+  },
+} as const satisfies Record<string, BrandSequence>;
+
+export type BrandSequenceKey = keyof typeof BRAND_SEQUENCES;
+
+/** The public path of frame `i` of a sequence, zero-padded to two digits. */
+export function sequenceFrameSrc(seq: BrandSequence, i: number): string {
+  return `${seq.dir}/f${String(i).padStart(2, "0")}.webp`;
+}

@@ -232,6 +232,53 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s109 — **SHIPPED: THE CAPSTONE. Thalon's landing page is rebuilt on a real recorded run** (boot "gogogo"; 17.74 credits, zero live posts)
+
+**The arc's capstone is built.** `/` is no longer the dark-cinematic AI-default
+page it was; it is a light, instrument-led document whose spine is **one real
+run this engine performed on itself, walked gate by gate.**
+
+- **Pre-plan of record:** `docs/landing-arc/thalon-landing-PREPLAN.md` (carries
+  the look-first sweep, the axis draw, the mint plan, a CORRECTION block and
+  the six build findings). The claude-design mock is preserved at
+  `docs/landing-arc/mock/thalon-landing-mock.html`.
+- **The instrument runs on recorded data, not a mock-up.** `run-snapshot.ts`
+  holds 8 of the **681 claims** this workspace's judge really ruled on
+  (**635 cleared / 46 stopped**, 128 judge runs over 28 body versions of 21
+  drafts), read out of dev Postgres at build time and pinned by
+  `landing-run-snapshot.test.ts`.
+- **The row is a CLAIM, not a draft** — the judge verdicts claims, and several
+  of the strongest blocked sentences sit inside drafts that were revised and
+  later approved. An earlier version paired claims with draft ids and would
+  have asserted a link the database does not contain.
+- **Two mints, 17.74cr against the 180cr ring-fence, which is therefore
+  RELEASED** — the front door it protected is built, so the full **343.98
+  remaining is available for D and E** (~230 buys both at full scope): two hero
+  candidates on `text2image_soul_v2` (0.12cr each, one kept) and a 5s
+  locked-off take on `seedance_2_0_fast` (17.50cr), **one `start_image` and NO
+  `end_image`** — the s108 cyclic-motion corollary applied at its first
+  opportunity. Both pinned with provenance; the models RECORDED are the ones
+  that ran, not the ones requested (the vendor substituted both).
+- **`/guide` now exists for Thalon's own front door** — the one page making the
+  strongest honesty claims was the only one not showing its working.
+
+**Six findings, four of them invisible to looking** — full detail in the
+PREPLAN's close. The two that matter most: **the ledger was one chapter late**
+(every hand-written `decidedAt` off by one; fixed structurally by deriving the
+index from the gate), and **two of the five new ratchets were decoration** —
+"static-first" and "exactly one lit frame" both passed with their subject
+deleted, because Testing-Library's `render` runs effects and never saw the
+server markup they claimed to check. Rewritten against `renderToStaticMarkup`
+and re-broken three ways to confirm red.
+
+**The page was also broken on a phone**, and only measurement said so: the
+pinned ledger measures **1087px in an 844px viewport**, so the reading band was
+negative. Narrow screens no longer pin; they show the completed run.
+
+**CARRIED:** `/blog` and `/brand` still scope `.dark` and now differ in register
+from `/` — a real inconsistency, deliberately not fixed in the same change as
+the capstone.
+
 ## Sprint 9 / s108 — **SHIPPED: ⑳'s Day-84 motion. THE ARC'S THREE SITES ARE FULLY FINISHED AND THE CAPSTONE IS UNBLOCKED**
 
 **Boot was `gogogo`.** The inherited next action was item 1 of the s107 stamp —
