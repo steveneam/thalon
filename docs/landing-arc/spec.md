@@ -1,4 +1,4 @@
-# Landing arc — three A+ sites, then Thalon's own landing page
+# Landing arc — three A+ sites, then Thalon's landing page, then two more on the remainder
 
 > **Status: IN BUILD. Site A ⑳ Whitethorn BUILT s104 and APPROVED s105
 > (`gogogo design is approved`). Site B ㉑ Aspect & Fall BUILT s105, awaiting
@@ -162,11 +162,18 @@ Balance **551.22** at the s105 close. Allocation:
 
 | Line | Allocation | Note |
 |---|---|---|
-| ㉑ Aspect & Fall — 3 season transitions @1080p | ~135cr | 45cr each; keyframes already pinned, no new mint risk |
-| **Site C** — stills + the bloom centrepiece | ~100cr | 2 takes @1080p + ~10cr of stills |
-| **⑳ Whitethorn** — the Day-84 handoff, moving | ~90cr | 2 takes; the honesty constraint above makes a retake likely |
+**Segment cost, measured s105:** a **4-second 1080p silent segment is 36cr**
+(5s is 45cr). Four seconds is ample for a scrubbed transition — the visitor
+drives the timeline, nothing plays — so **4s @1080p @36cr is the default unit**,
+and it has the useful property of sitting UNDER the ≥40cr ping threshold.
+
+| Line | Allocation | Note |
+|---|---|---|
+| ㉑ Aspect & Fall — 3 season transitions | ~108cr | 3 × 36cr; keyframes already pinned, no new mint risk |
+| **Site C** — stills + the bloom centrepiece | ~82cr | 2 takes × 36 + ~10cr of stills |
+| **⑳ Whitethorn** — the Day-84 handoff, moving | ~72cr | 2 takes; the honesty constraint makes a retake likely |
 | **Thalon landing — RING-FENCED** | **180cr** | reserved first, spent last, still intact |
-| Reserve — retakes + variant coverage | ~46cr | spend down at the end, do not bank |
+| **→ leftover for sites D + E** | **~109cr** | see §7; this is the spend-down target |
 
 **The ≥40cr-per-mint ping rule, as read by the lead:** his *"dont have to be
 stingy"* raises the ceiling rather than deleting the rule. 1080p video is 45cr
@@ -233,6 +240,79 @@ that is the standing rule and this arc does not get an exception.
 7. **Fix round.** Every site in the portfolio's history has had one. Budget for
    it up front rather than discovering it at zero credits.
 
+## SITES D AND E — founder direction, s105 close. **AFTER the Thalon landing, on leftover credit**
+
+> *"can you add a motion version of Orchard house, but can call it site D or
+> something, maybe a vineyard/winery? and also a site E for a cafe, maybe the
+> motion can be coffee beans transitioing to coffee pouring into a cup … but
+> actually, do site D and E after thalon with any left over credit."*
+
+**These are the SPEND-DOWN TARGET, and that is an upgrade to the disposal
+rule.** The sunset means unspent credit evaporates, and §5 previously pointed
+the remainder at "variant coverage for the Thalon landing". Two more portfolio
+sites are plainly worth more than alternate crops of one — and it matches his
+original reason for this whole arc: *"so that we have more options."*
+
+**Sequencing is his and is explicit: the Thalon landing is finished FIRST.**
+D and E are conditional on what actually remains, and **scope scales to the
+balance rather than the plan slipping.** Honest arithmetic below.
+
+### The three-keyframe question — his model needs one correction
+
+He described the café motion as **three** states: beans → ground coffee → pour.
+**No seat on the roster accepts three ordered keyframes** — `seedance_2_0`,
+`flux_3_video` and `minimax_h3` all expose `start_image` + `end_image` only
+(verified s105). So a three-state sequence is **two chained transitions**:
+beans→grounds, then grounds→pour, with the middle frame minted once and used as
+*both* the end of the first and the start of the second so the join is seamless.
+
+**This is better than a single call, not a compromise:** two segments give the
+scroll two scrub ranges and a real **dwell point** on the ground coffee, which
+is exactly where the copy about grind and freshness wants to land. The same
+chaining is what ㉑'s Feb→May→Jul→Oct already needs.
+
+### Site D — vineyard / winery
+
+| | |
+|---|---|
+| **Banked idea** | `seasons-tree` again, but as **generated motion** rather than the cross-fade `orchard-house` actually ships |
+| **The motion** | **VERAISON** — the moment the grapes turn from green to purple. One chained sequence through the vine's year, with veraison as the hero beat |
+| **Axis pair** | `otherworldly-animation` + `exceptional-palette` — **portfolio-new** (verified: nothing holds this pair; `orchard-house` is +cinematic, `whitethorn` +data-instrument, `aspect-and-fall` +editorial-print) |
+| **Name candidates** | **Veraison** (the term IS the motion, and it earns its own section the way *Whitethorn* and *Aspect & Fall* do — but it is a common industry word and may collide, so check) · *Southfacing* · *Marl & Cane* |
+| **Overlap to beat** | `orchard-house` (seasons, fruit) — differentiate on register: a winery sells a **vintage**, i.e. one specific year that will never repeat, where the orchard sells a repeating cycle |
+| **Schematic test** | What the discipline itself produces: **Brix / sugar-ripeness readings and a harvest window.** Available as the instrument — but keep it LIGHTER than ㉑'s, because on this site the motion is the hero and a second full data-instrument would repeat site B |
+
+### Site E — café
+
+| | |
+|---|---|
+| **The motion (his, verbatim)** | **beans → ground coffee → coffee pouring into a cup**, as two chained scrubbed segments |
+| **Axis pair** | `otherworldly-animation` + `soft-organic` — **portfolio-new** (verified) |
+| **Name candidates** | decided at pre-plan per method; *Slow Pour* · *Bell & Bird* · *Morningside* |
+| **Overlap to beat — this one is REAL and must be answered in the pre-plan** | `first-crack` is already a coffee ROASTERY (data-instrument + cinematic; its signature is the roast curve). **His motion is the differentiator and should be leaned on hard:** first-crack shows *production* (the roast), site E shows *what the customer receives* (bean → grind → pour). Per the social-register dial a café is a SOCIAL purchase — humans in frame, the room, warmth — where first-crack is instrument-led craft. Different buyer, different register |
+| **Why the motion is a good portfolio addition** | it is a **material transformation**, not a time-lapse. Every motion in this arc so far is time passing (a recovery, a year, a bloom). Beans→grounds→pour is matter changing state, which is a genuinely new motion grammar for the portfolio |
+
+### Honest arithmetic — both may not fit, and that is the correct outcome
+
+Leftover after the four committed lines is **~109cr**, and that assumes takes
+land. Scope tiers, so the plan degrades instead of breaking:
+
+| Tier | Per site | What it is |
+|---|---|---|
+| **Full** | ~110cr | hero + supporting stills + 3 motion segments |
+| **Lean** | ~60cr | hero + 2–3 stills + 2 motion segments + code-drawn instrument |
+| **Minimum** | ~40cr | **one** motion sequence — the one that matters — plus stills at ~1cr each and everything else code-drawn |
+
+**If only one fits, build E.** D's seasons motion is the same beat ㉑ will
+already have shipped, whereas E's bean→grind→pour is a new motion grammar the
+portfolio does not own. **If the earlier sites overrun, D and E do not happen
+at all** — the Thalon landing is the priority and its ring-fence is never
+raided to fund a portfolio site.
+
+**Two lean sites beat one full site here**, on his own stated rationale for the
+arc: options, not polish.
+
+
 ## Then: the Thalon landing page
 
 The capstone, and the reason the other three come first.
@@ -259,7 +339,13 @@ stated reason for this order.
 **Budget: ring-fenced.** The landing page's mint allowance is reserved before
 the first A+ mint, so a fix round on site B can never eat the front door.
 
-## Budget — 584.12 credits, and the shape of the spend
+## Budget — SUPERSEDED by §5 of THE VIDEO TURN (s105)
+
+> **The table below is the s103 original and is kept for the record only.** It
+> predates the video turn, the measured 36cr/4s segment price, and sites D+E.
+> **The live allocation is §5 above**, against the s105 balance of 551.22.
+
+## ~~Budget — 584.12 credits, and the shape of the spend~~ *(historical)*
 
 Estimates, not commitments; `get_cost` preflight governs every actual mint.
 
@@ -295,6 +381,9 @@ Planned by this spec:
 - `proprietary/templates/sites/<vet-slug>/` *(new)*
 - `proprietary/templates/sites/<garden-slug>/` *(new)*
 - `proprietary/templates/sites/<perfumery-slug>/` *(new)*
+- `proprietary/templates/sites/<vineyard-slug>/` *(new — site D, conditional on
+  leftover credit after the Thalon landing)*
+- `proprietary/templates/sites/<cafe-slug>/` *(new — site E, same condition)*
 - the Thalon landing page's home *(planned — the repo already serves a landing
   at `/`; whether this replaces it or is built beside it is decided at build
   time, and the existing landing keeps its own register either way)*
@@ -302,10 +391,17 @@ Planned by this spec:
 ## Done when
 
 Three new portfolio sites exist, each carrying a working scroll instrument
-rather than a still hero, each verdicted through the same loop every other site
-went through; and Thalon has a landing page built by someone who had just built
-those three. The credit is spent rather than forfeited, and nothing about the
-stealth posture changed without him saying so.
+rather than a still hero **and each carrying a generated moving moment**, each
+verdicted through the same loop every other site went through; and Thalon has a
+landing page built by someone who had just built those three, inheriting a
+proven scroll-scrub component rather than a mock.
+
+**Then, on whatever credit remains and only after the landing is finished:**
+sites D (vineyard) and E (café), at whatever scope the remainder funds — full,
+lean or a single motion sequence. **The credit is spent rather than forfeited**
+(the sunset makes that the whole point), the Thalon landing's ring-fence is
+never raided to pay for a portfolio site, and nothing about the stealth posture
+changed without him saying so.
 
 ## Open calls — his, and each is one line
 
@@ -317,3 +413,9 @@ stealth posture changed without him saying so.
    are one word to overrule and cheap to change before a mint.
 3. **Where the Thalon landing is served, and under what name.** Stealth is
    unchanged and this is his call — building it does not decide it.
+4. **Site D's name** — *Veraison* is the strongest candidate because the word
+   IS the motion, but it is a common industry term and may collide; alternatives
+   are *Southfacing* and *Marl & Cane*. Decided at pre-plan, one word to overrule.
+5. **Whether site E is too close to `first-crack`.** The lead's read: no, because
+   first-crack sells the ROAST (production, instrument-led) and E sells the CUP
+   and the room (a social purchase, humans in frame). Flagged rather than assumed.

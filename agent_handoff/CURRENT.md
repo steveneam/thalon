@@ -156,21 +156,54 @@ finished pages to learn from — *"rather than just mock."* NOT a portfolio site
 Stealth unchanged; **where it is served and under what name is his separate
 call.** Mint budget **ring-fenced at 180cr and still intact.**
 
-**Budget, fully allocated against 551.22 — the sunset means SPEND, not save:**
-㉑ three season transitions ~135 · site C bloom + stills ~100 · ⑳ Day-84 moving
-~90 · **Thalon landing 180 RING-FENCED** · ~46 reserve for retakes and variant
-coverage (spend down at the end, do not bank). **The ≥40cr ping rule as the lead
+**4 — SITES D AND E, on the leftover, and ONLY after the landing is finished.**
+His direction at the close: a **vineyard/winery** (site D — the seasons idea as
+real generated motion, hero beat **veraison**, when the grapes turn colour) and
+a **café** (site E — his motion, verbatim: **beans → ground coffee → coffee
+pouring into a cup**). **They are the SPEND-DOWN TARGET, which upgrades the
+disposal rule** — two more portfolio sites beat alternate crops of the landing
+page, and it matches his own reason for the arc: *"so that we have more
+options."* Full brief: `docs/landing-arc/spec.md` §SITES D AND E.
+
+▎ **One correction to his model, already verified:** he described the café
+motion as three states. **No seat on the roster takes three ordered keyframes** —
+`seedance_2_0`, `flux_3_video` and `minimax_h3` all expose `start_image` +
+`end_image` only. So it is **two chained transitions** (beans→grounds,
+grounds→pour) with the middle frame minted once and used as both the end of the
+first and the start of the second. **Better than one call, not a compromise:**
+two scrub ranges and a real dwell on the grounds, which is where the copy about
+grind wants to land.
+
+▎ **Overlaps to beat, both flagged not assumed:** D vs `orchard-house` (a winery
+sells a VINTAGE — one year that never repeats — where the orchard sells a
+repeating cycle) · **E vs `first-crack`, which is the real one** (first-crack
+sells the ROAST, instrument-led production; E sells the CUP and the room, a
+social purchase with humans in frame). E's motion is also the portfolio's first
+**material transformation** rather than time passing — every other motion in the
+arc is a clock.
+
+**Budget, fully allocated against 551.22 — the sunset means SPEND, not save.**
+**Measured s105: a 4s 1080p silent segment is 36cr** (5s is 45cr), and 4s is
+ample for a scrubbed transition since the visitor drives the timeline — so
+**36cr is the default unit, and it sits under the ≥40cr ping threshold.**
+㉑ 3 transitions ~108 · site C bloom + stills ~82 · ⑳ Day-84 moving ~72 ·
+**Thalon landing 180 RING-FENCED** · **→ ~109 left for D + E.**
+Scope tiers so the plan degrades instead of breaking: full ~110 · lean ~60 ·
+minimum ~40 (one motion sequence, stills at ~1cr, everything else code-drawn).
+**If only one fits, build E** — D's seasons motion repeats a beat ㉑ will already
+have shipped. **If the earlier sites overrun, D and E do not happen, and that is
+correct: the landing's ring-fence is never raided to fund a portfolio site.** **The ≥40cr ping rule as the lead
 reads it:** *"dont be stingy"* raises the ceiling rather than deleting the rule,
 so ≥40cr mints get **named in the session summary** instead of stopping the
 build for each. One word reverses that.
 
-**4 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
+**5 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
 out on their own"**, which is not true while the queue's master key is empty
 and **nothing in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the
 DISCLOSURE, not a door.** Arming the queue from the UI is his sequence-gate
 call and is NOT in scope.
 
-**5 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
+**6 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
 (DOCTRINE 0). Both MIT deps approved. Shaping finding banked in
 `docs/control-arc/spec.md`: not a segment-builder surface but three additions
 to a list that already exists.

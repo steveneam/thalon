@@ -328,6 +328,49 @@ page**, **phase 0**, and control-arc part B.
 
 ---
 
+### The arc turned at the close — three founder messages, and the spec now runs to FIVE sites
+
+**All three are amendments, and all three are in `docs/landing-arc/spec.md`
+(§THE VIDEO TURN, §SITES D AND E).**
+
+1. ***"dont have to be stingy with the higgsfield credit."*** Owned: A and B
+   spent 2.40 and 13.00cr against a ~120cr line while the balance evaporates.
+   The error was not preferring code instruments to video — that was right —
+   it was **not doing BOTH**. **The technique was PROVED, not asserted:**
+   `seedance_2_0` takes `start_image` + `end_image`; job `139d81f8` ran ㉑'s
+   already-pinned Feb and May frames for **17.50cr** and returned a locked-off
+   camera with the season genuinely turning. Engineering note carried forward:
+   **do not scrub the mp4 via `currentTime`** (h264 seeks to keyframes and
+   janks) — extract a frame sequence and scrub that.
+2. ***"a top down view doesnt really display the full beauty and power."***
+   Accepted. ㉑'s stage inverts: the photograph leads at full size running the
+   generated scrubbed transition, the planting plan becomes the reading
+   instrument beside it. **The schematic test is NOT walked back** — it is what
+   made the page credible, and he endorsed it the same session. Noted for
+   accuracy: `orchard-house` is not 3D either, it cross-fades painterly stills;
+   **neither seasons page had ever shown generated motion.**
+3. ***"apply that motion to site A and site C too"*** and ***"add a site D
+   (vineyard) and E (café) … after thalon with any left over credit."*** Each
+   site's motion is the moment its own story already turns on and is currently
+   a still — ⑳'s is the **Day-84 handoff** (six chapters measure a limp evening
+   out and the page never shows the dog walking), ㉑'s is three season
+   transitions, C's is the bloom. **⑳'s carries an honesty constraint the
+   others do not:** it depicts a clinical outcome, so it must match what the
+   instrument says or it undoes the Day-12 dip the page was praised for.
+
+**Measured price finding: a 4s 1080p silent segment is 36cr** (5s is 45cr), and
+4s is ample when the visitor scrubs rather than plays — so 36cr is the default
+unit **and it sits under the ≥40cr ping threshold.** Allocation against 551.22:
+㉑ ~108 · C ~82 · ⑳ ~72 · **Thalon landing 180 RING-FENCED** · **~109 left for
+D + E**, which are the spend-down target and are built only after the landing.
+
+**One correction to his café idea, verified:** no seat takes three ordered
+keyframes, so beans → grounds → pour is **two chained transitions** sharing the
+middle frame — better than one call, because it gives the scroll two ranges and
+a dwell on the grounds.
+
+---
+
 ## Sprint 9 / s104 — **SHIPPED: site A of three. B, C, the Thalon landing and phase 0 all remain** (the plan block below is what was written)
 
 **One commit, `4bc9604`: ⑳ WHITETHORN — the landing arc's first site.** His
