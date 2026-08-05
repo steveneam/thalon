@@ -168,7 +168,10 @@ softness.*
 session — the portfolio serves off the 8899 preview unit instead** ·
 **`npm run verify | tail` REPORTS TAIL'S EXIT CODE, not verify's — a pipeline
 masks the gate; redirect to a file and echo `$?`** (cost a false green this
-session) · **the Bash tool's cwd PERSISTS between calls — `cd` to the repo root
+session) · **`pgrep -f <pattern>` MATCHES ITS OWN COMMAND LINE — a wait-loop
+polling `pgrep -f "vitest run"` never exits, because the loop's own bash `-c`
+string contains that text; it read as a hung build twice. Use `pgrep -x <exe>`
+or check for a sentinel in the log instead** · **the Bash tool's cwd PERSISTS between calls — `cd` to the repo root
 in the same command** (bit twice) · scripts need `set -a; source
 apps/web/.env.local; set +a` · **`json.dump` escapes non-ASCII by default —
 pass `ensure_ascii=False` or every em-dash becomes `—`** · chrome-devtools
