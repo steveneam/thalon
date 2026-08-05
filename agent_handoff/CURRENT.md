@@ -6,10 +6,11 @@
 Wrap verify on main: **exit 0, 3441 passed / 9 skipped** (unchanged from
 s102–s104 — this session added no engine code).
 
-**Five commits.** `bc58922` ⑳ approved · `b180be0` **㉑ Aspect & Fall** ·
+**Seven commits.** `bc58922` ⑳ approved · `b180be0` **㉑ Aspect & Fall** ·
 `34db9af` the s105 record · `7b6365f` **the video turn** (his three closing
-messages) · `5065827` **sites D + E specced**. **The check that matters is not
-the sha but the state: tree clean, main == origin, verified at wrap.**
+messages) · `5065827` **sites D + E specced** · `b58df2d` **site E re-specced
+as spine-led** · plus this restamp. **The check that matters is not the sha but
+the state: tree clean, main == origin, verify exit 0, all confirmed at wrap.**
 
 **⚠ THE ARC IS NOW FIVE SITES + THE LANDING, AND ITS ORDER IS HIS:**
 ⑳ ✅ approved → ㉑ ✅ built (owes its video pass) → **site C** → **THE THALON
