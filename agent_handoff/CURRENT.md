@@ -50,35 +50,68 @@ version 5. **Workspace restored to its as-found state.**
 
 ## Resume prompt (session 104, syd4)
 
-**Resume · Thalon** — nothing is mid-flight; s103's phases 0 and 2 are fully
-executed and pushed. **The plan is COORDINATION §s103** (its shipped-block is
-what happened; the plan text below it is what remains).
+**Resume · Thalon** — nothing is mid-flight; s103's phases 0 and 2 are executed
+and pushed. **The plan is COORDINATION §s104**, set by his direction at the
+s103 close: ***"go ahead with 1 and 2, next session. but also next session, i
+want you to plan to do more landing pages…"***
 
-**PHASE 1 — control-arc part B, and it OPENS WITH A DRAWN SHEET.** It was the
-s103 plan's phase 1 and was deliberately not started: phase 2 was promoted
-ahead of it because it completed the founder's own directive while B is my
-recommendation. **B is untouched and is the opener.** Approved, with its two
-MIT deps approved (`@react-querybuilder/core` + `@react-querybuilder/drizzle`),
-but **DOCTRINE 0 says the sheet comes first** and B has none — the s101 staged
-rebuild is the precedent. Its Mobbin sweep is banked in
-`docs/control-arc/spec.md`; the finding that shapes it: **not a segment-builder
-surface** but three additions to a list that already exists — view strip ·
-chips that read as sentences · "Save as a new view" in the filter row.
-Contractbook TAKEN whole; AutoSend's three-naked-dropdowns modal is the
-recorded ANTI-pattern. **Its only migration was laid at s102** (window 0027
-widened `SAVED_VIEW_SURFACES`) and the saved-views primitive it extends was
-built at s61 — B is an extension, not a new family. **Design work = Fable 5
-lead-direct, never delegated** (standing s51).
+**PHASE 0 — the honesty gap s103 OPENED (small, ~an hour, and it goes first).**
+The seg shipped at s103 offers **Live — "Due posts go out on their own."** That
+is **not true today**: the queue's master key rests empty, and **nothing in
+`apps/web` mentions `SOCIAL_QUEUE_ARMED`** (verified — it lives only in
+`packages/platform/src/env.ts`, the engine, the tick route, the scripts). Same
+defect class s103 caught twice: a control asserting what the engine will not
+do. **Ship the DISCLOSURE, not a door** — say the queue is off at the box level
+and that Live takes effect when it is armed. **Arming the queue from the UI is
+his sequence-gate call and is NOT in scope.**
 
-**PHASE 2 — the Integrations p1's REMAINING three takes.** s103 landed two of
-four (the split, and the arm control the row was waiting for). Still owed: the
-**blast-radius disclosure** on a `needs_reauth` seat — richer now, because
-part A's `holds` name exactly which rows a broken credential is holding up —
-the honest **"managed elsewhere"** state for an `envOverride` seat, and
-**class grouping** (`card.class` exists and still does nothing).
+**PHASE 1 — control-arc part B, and it OPENS WITH A DRAWN SHEET.** Untouched at
+s103 by design (phase 2 was promoted because it completed his own directive).
+Approved, both MIT deps approved (`@react-querybuilder/core` +
+`@react-querybuilder/drizzle`), but **DOCTRINE 0 says the sheet comes first**
+and B has none — the s101 staged rebuild is the precedent. Mobbin sweep banked
+in `docs/control-arc/spec.md`; the shaping finding: **not a segment-builder
+surface** but three additions to a list that already exists — view strip · chips
+that read as sentences · "Save as a new view" in the filter row. Contractbook
+TAKEN whole; AutoSend's three-naked-dropdowns modal = the recorded ANTI-pattern.
+Migration laid s102 (window 0027), primitive built s61 — B is an extension.
+**Design work = Fable 5 lead-direct, never delegated** (standing s51).
 
-**PHASE 3 — the last three `—` rows:** Leads · Profiles · Source Media. Each
-is a research pass, not a rebuild.
+**PHASE 2 — the LANDING ARC. SPEC OF RECORD: `docs/landing-arc/spec.md`**
+(written s103, ground-truth ratchet green). Three founder decisions, two
+amending standing method:
+· **The A+ family becomes NEW SITES, not upgrades** — spend each banked
+animation idea on a NEW vertical so the portfolio gains OPTIONS, not polish.
+`wagtail-and-co`, `orchard-house` and `stem-and-vow` are **untouched** and keep
+their verdicts.
+· **claude-design RESTORED for the initial mock** — *"actually did help the
+landing page have a bit more clarity and structure."* **AMENDS** the s62
+loop-A/B call that retired it to OPTIONAL (meta-prompt §How-to step 3).
+**Not a reversal: the mandatory pre-plan stays, the mock comes back in FRONT of
+it. Both, never either.**
+· **HIGGSFIELD IS BEING SUNSET** (*"i plan to not continue it"*) → the balance
+is **use-it-or-lose-it: 584.12 credits, Plus** (verified live s103, unchanged
+since s79). **Unspent credit at the end gets spent DOWN on variant coverage,
+not banked** — the normal disposal rule inverts.
+
+The three sites: scroll-dog → **veterinary practice** (his call) · seasons-tree
+→ **garden & landscape design studio** · bloom video → **botanical perfumery**.
+The last two are my recommendation under *"and etc."* — each a one-word
+overrule, and cheap to change **before a mint**. Then the **Thalon landing
+page** as the capstone, which is the whole reason for that order. It is NOT a
+portfolio site: **stealth is unchanged, and where it is served and under what
+name is his separate call** — building it does not decide it. Its mint budget
+is **ring-fenced before the first A+ mint**.
+
+**⚠ ONE BLOCKING FACT — the EXPIRY DATE, and only he has it.** ≥3 weeks → his
+order (three sites → landing) · **<1 week → build the Thalon landing FIRST** off
+banked knowledge, because an unfinished front door is the one outcome we cannot
+buy back · in between → landing second, budget ring-fenced first. **Ask at the
+opener if he has not said.**
+
+**Scope honesty:** 0+1+2 is a lot for one session. Phase 0 ≈ an hour; part B is
+a real build; the arc is three sites plus a capstone. **Expect the arc to run
+past s104** — the spec is written so it can.
 
 **CARRIED, recorded not fixed (all with reasons, on their ledger rows):**
 Schedule's **month-density chips clip their own text** · the Intel
@@ -87,9 +120,18 @@ vs **denylist** all read the same; carrying the reason is a contract-window
 ask) · Intel dismiss reversibility · the sweep schedule's missing door · the
 add-chip's missing keyword path.
 
-**WAITING ON HIM — still just ONE item, and it blocks nothing:** the three
-s101 staged design calls (live-chain editing · the dropped "low-res stub"
-title · one-scene-open-at-a-time).
+**WAITING ON HIM — one BLOCKING, two not:** ⚠ **the Higgsfield EXPIRY DATE**
+(blocks only the landing arc's ORDER, nothing else — ask at the opener) · the
+two verticals I picked under his *"and etc."* (garden design · botanical
+perfumery — one word each, cheap until the first mint) · the three s101 staged
+design calls (live-chain editing · the dropped "low-res stub" title ·
+one-scene-open-at-a-time). All three are on NEEDS-STEVEN.
+
+**CORRECTED ON HIS BOARD, s103:** the A2 FYI written at the s102 close told him
+*"a channel you add next month posts automatically."* **That was wrong** and
+building it found out — connecting writes no posting entry, and honouring the
+sentence would have burned posts terminally. NEEDS-STEVEN now carries the
+correction beside the original claim rather than quietly replacing it.
 
 ▎ ▸ **Founder call made DURING s103:** the arm flip's storage shape — **in
 place on the active row + one event per flip**, rather than a new brand-profile

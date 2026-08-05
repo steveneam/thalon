@@ -232,6 +232,82 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s104 — **PLANNED at the s103 close, on his direction**
+
+His words: ***"go ahead with 1 and 2, next session. but also next session, i
+want you to plan to do more landing pages…"*** So s104 carries three things,
+and the third is now specced rather than pending.
+
+### Phase 0 — the honesty gap s103 opened (small, and it goes first)
+
+The seg shipped at s103 offers **Live — "Due posts go out on their own."**
+That sentence is **not true today**: the queue's master key rests empty, so
+nothing goes out unattended whatever the control says, and **nothing in
+`apps/web` mentions `SOCIAL_QUEUE_ARMED`** (verified s103 — it lives only in
+`packages/platform/src/env.ts`, the engine, the tick route and the scripts).
+That is the same defect class s103 caught twice: a control asserting what the
+engine will not do. **Ship the DISCLOSURE, not a door** — the card says the
+queue is off at the box level and that Live takes effect when it is armed.
+Arming the queue from the UI is his sequence-gate call and is NOT in scope.
+
+### Phase 1 — control-arc part B, opening with the DRAWN SHEET
+
+Unchanged from the s103 plan, which deliberately did not start it. Approved,
+both MIT deps approved, **DOCTRINE 0 says the sheet comes first** and B has
+none. Mobbin sweep banked in `docs/control-arc/spec.md`; the shaping finding is
+that this is **not a segment-builder surface** but three additions to a list
+that already exists. Migration laid s102 (window 0027), primitive built s61.
+**Design work = Fable 5 lead-direct, never delegated** (standing s51).
+
+### Phase 2 — the LANDING ARC, specced s103: `docs/landing-arc/spec.md`
+
+**Three founder decisions, two of which amend standing method:**
+
+1. **The A+ family becomes NEW SITES, not upgrades.** The animation-upgrade
+   family was banked as three upgrades to `wagtail-and-co` (scroll-dog),
+   `orchard-house` (seasons-tree) and `stem-and-vow` (bloom video). His call:
+   spend each idea on a NEW vertical so the portfolio gains **options**, not
+   polish — *"the A+ dog walking animation idea can be a Vet landing page now
+   and etc."* The three existing sites are untouched and keep their verdicts.
+2. **claude-design RESTORED for the initial mock** — *"i think using claude
+   design for the initial mock actually did help the landing page have a bit
+   more clarity and structure."* This AMENDS the s62 loop-A/B call that retired
+   it to OPTIONAL (meta-prompt §How-to step 3). **It is not a reversal:** the
+   mandatory pre-plan stays exactly as it is and the mock comes back in front
+   of it. Both, never either.
+3. **HIGGSFIELD IS BEING SUNSET** — *"i plan to not continue it."* The balance
+   is now **use-it-or-lose-it: 584.12 credits, Plus plan** (verified live s103;
+   unchanged since s79, so nothing has been spent in twenty-odd sessions). This
+   makes the own-visual-engine directive materially more urgent and puts a
+   clock on the whole arc. **Unspent credit at the end should be spent down on
+   variant coverage, not banked** — the normal disposal rule inverts.
+
+**The three sites** (his vertical for A; B and C are my recommendation under
+*"and etc."*, each a one-word overrule): scroll-dog → **veterinary practice** ·
+seasons-tree → **garden & landscape design studio** (the instrument IS the
+pitch — a designer sells what a space becomes over a year) · bloom video →
+**botanical perfumery** (bloom→scent, and it rescues the idea from being a
+florist twice).
+
+**Then the Thalon landing page**, which is the reason for the order — *"take in
+all that knowledge."* It is NOT a portfolio site: stealth is unchanged and
+where it is served and under what name is **his separate call**; building it
+does not decide it. Its mint budget is **ring-fenced before the first A+ mint**
+so a fix round cannot eat the front door.
+
+**⚠ THE ONE BLOCKING FACT — the EXPIRY DATE, and only he has it.** His order
+(three sites → landing) is right on the merits. **But if the credit dies inside
+a week the order INVERTS**, because an unfinished front door is the one outcome
+we cannot buy back. Ladder in the spec: ≥3 weeks → his order · <1 week →
+landing FIRST off banked knowledge · in between → landing second with its
+budget ring-fenced first.
+
+**Honest scope note:** phases 0+1+2 is a lot for one session. Phase 0 is
+roughly an hour; part B is a real build; the landing arc is three sites plus a
+capstone. Expect the arc to run past s104 — the spec is written so it can.
+
+---
+
 ## Sprint 9 / s103 — **SHIPPED: phases 0 and 2** (the plan below is what was written; this block is what happened)
 
 **Three commits.** `353f8b9` part A2's engine · `6944e9d` the arm control's
