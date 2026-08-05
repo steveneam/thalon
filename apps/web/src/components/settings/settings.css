@@ -54,3 +54,31 @@
 .settings-surface .connect-field { display: flex; flex-direction: column; gap: 4px; }
 .settings-surface .connect-field input { height: 32px; padding: 0 10px; border: 1px solid var(--n-400); border-radius: var(--r-ctl); background: var(--n-bg); color: var(--n-1000); font: 400 13px var(--font-ui); }
 .settings-surface .connect-field input:focus-visible { outline: 2px solid var(--act); outline-offset: -1px; }
+
+/*
+ * The connected/available SPLIT and the arm controls on it (s103, control-arc
+ * parts A + A2 — the split is the s102 research pass's own top finding).
+ *
+ * The group head wears the sheet's existing `.card-head` rhythm rather than a
+ * new one: it is the same object (a titled band with a count and a control on
+ * the right), so restating its metrics would be a second vocabulary for one
+ * idea. Named app adaptation, not sheet drift — the sheet draws ONE flat grid
+ * because it was drawn before either group existed.
+ */
+.settings-surface .int-group-head { display: flex; align-items: center; gap: 9px; padding: 2px 2px 0; }
+
+/*
+ * The per-destination gate, sitting BELOW the card's state lines and above
+ * its actions: it is a decision about the card, not one of the card's verbs.
+ * The top border is the same hairline the seat rows use — it separates the
+ * fact ("connected as @x") from the instruction ("and the queue may…").
+ */
+.settings-surface .int-arm { display: flex; flex-direction: column; gap: 6px; padding-top: 9px; border-top: 1px solid var(--n-400); }
+.settings-surface .int-arm-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+
+/*
+ * The scope control rides the connected group's head, so it stays narrow and
+ * lets its own sentence wrap under the whole band rather than inside the row.
+ */
+.settings-surface .int-scope { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; max-width: 460px; }
+.settings-surface .int-scope .int-sub { text-align: right; }

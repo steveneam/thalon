@@ -23,8 +23,10 @@ import {
   fetchIntegrationCards,
   fetchPendingQueueCount,
   fetchPublishedView,
+  setIntegrationArming,
   validateIntegration,
   type WireIntegrationCard,
+  type WirePostingScope,
   type WireProbeOutcome,
   type WirePublishedView,
 } from "@/lib/integrations/client";
@@ -36,6 +38,19 @@ type ReadStatus = "loading" | "error" | "success";
 
 /** The ledger is bounded like every row region — the count states the rest. */
 const PUBLISHED_SHOWN = 12;
+
+/**
+ * The scope control's key in the keyed busy/error maps. It is tenant-wide, so
+ * it cannot key by destination — and it must not collide with one either.
+ */
+const SCOPE_KEY = "__posting_scope__";
+
+/** The queue gate's three states, in ladder order: safest end first. */
+const ARM_OPTIONS = [
+  { value: "off", label: "Off", hint: "Due posts are held and say so." },
+  { value: "review", label: "Review", hint: "Due posts wait for you in Approve." },
+  { value: "live", label: "Live", hint: "Due posts go out on their own." },
+] as const;
 
 /**
  * Settings → Integrations — STEP 2 of the two-step rebuild: the byte-true
@@ -67,6 +82,10 @@ export function Integrations() {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  /** Part A2's tenant-wide mode. The server is the record; this mirrors the last read. */
+  const [postingScope, setPostingScope] = useState<WirePostingScope>("selective");
+  /** Which arm control is mid-write — keyed by entity, so one card's spinner never sits on another (the s77 rule). */
+  const [armBusy, setArmBusy] = useState<string | null>(null);
   const [probes, setProbes] = useState<Record<string, WireProbeOutcome>>({});
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
   /** Pending queue rows per destination, for the disconnect confirm (absent/null = count unavailable). Keyed by entity — a resolve landing after the confirm moved on must not show one card's count under another (the s77 keyed-state rule). */
@@ -105,7 +124,8 @@ export function Integrations() {
     () =>
       fetchIntegrationCards()
         .then((payload) => {
-          setCards(payload);
+          setCards(payload.cards);
+          setPostingScope(payload.postingScope);
           setReadAt(Date.now());
           setCardsStatus("success");
         })
@@ -169,8 +189,189 @@ export function Integrations() {
     }
   }
 
+  /**
+   * The arm write, and the one place the surface is allowed to be optimistic
+   * about nothing: the server answers, then the cards are re-read. An arm
+   * state that renders before it is stored is exactly the class of lie this
+   * surface exists not to tell.
+   */
+  async function runArm(
+    key: string,
+    change: Parameters<typeof setIntegrationArming>[0],
+    onError: string,
+  ) {
+    setArmBusy(key);
+    setActionErrors((e) => ({ ...e, [key]: "" }));
+    try {
+      await setIntegrationArming(change);
+      await loadCards();
+    } catch (err) {
+      setActionErrors((e) => ({ ...e, [key]: err instanceof Error ? err.message : onError }));
+    } finally {
+      setArmBusy(null);
+    }
+  }
+
   const publishedTotal = published ? published.socialTotal + published.webTotal : 0;
   const connectCard = cards.find((c) => c.destination === connecting) ?? null;
+
+  /**
+   * The connected/available SPLIT (s102 research pass — Apollo and Mercury
+   * both, and its top finding). One flat grid over every destination reads
+   * the same on day one as on day one hundred: the four seats the operator
+   * HAS sit mixed into the six they do not. `needs_reauth` and `expiring`
+   * are connected — a broken credential is something you own, not something
+   * you might add.
+   */
+  const isConnected = (card: WireIntegrationCard) =>
+    card.state === "connected" || card.state === "expiring" || card.state === "needs_reauth";
+  const connectedCards = cards.filter(isConnected);
+  const availableCards = cards.filter((card) => !isConnected(card));
+  /** The scope control governs the tick, so it appears only where a tick could act. */
+  const armableCount = connectedCards.filter((card) => card.armState !== null).length;
+
+  /**
+   * One destination card. Extracted from the old single `cards.map` so the
+   * connected and available groups render the SAME card — a split that grew
+   * a second copy would drift, and the honesty rules live in here.
+   */
+  const renderCard = (card: WireIntegrationCard) => {
+          const pill = statePill(card);
+          const armed = armedPill(card);
+          const probe = probes[card.destination];
+          const line = probe ? probeLine(probe) : null;
+          const error = actionErrors[card.destination];
+          // While the confirm line is up, the action it belongs to steps
+          // aside — one Disconnect on screen, never two.
+          const actions = cardActions(card).filter(
+            (action) => !(action.key === "disconnect" && confirming === card.destination),
+          );
+          return (
+            <div key={card.destination} className="int-card">
+              <div className="int-head">
+                <div className="plat-ico" aria-hidden>
+                  {platformGlyph(card.destination)}
+                </div>
+                <span className="int-name">{card.label}</span>
+                <span className={pill.className}>{pill.text}</span>
+                {armed && <span className={armed.className}>{armed.text}</span>}
+              </div>
+              <span className="int-sub">{subLine(card, readAt || undefined)}</span>
+              {armed && card.armedReason && (
+                // VISIBLE PROVENANCE: the pill states the fact, this states
+                // why — including an env force-arm, which is the one an
+                // operator most needs to see and cannot infer.
+                <span className="int-sub">{card.armedReason}</span>
+              )}
+              {capabilityNote(card) && (
+                // What this destination CAN do, stated before the paste —
+                // not discovered at publish time.
+                <span className="int-sub" style={{ color: "var(--warn)" }}>
+                  {capabilityNote(card)}
+                </span>
+              )}
+              {card.armState !== null && isConnected(card) && (
+                <ArmControl
+                  card={card}
+                  scope={postingScope}
+                  busy={armBusy === card.destination}
+                  error={actionErrors[card.destination]}
+                  onPick={(next) =>
+                    void runArm(
+                      card.destination,
+                      { platform: card.destination, armState: next },
+                      "Couldn’t change what the queue may do here.",
+                    )
+                  }
+                />
+              )}
+              {actions.length > 0 && (
+                <div className="int-actions">
+                  {actions.map((action) =>
+                    action.key === "blog" ? (
+                      <Link key={action.key} className="btn btn-ghost btn-sm" href="/blog">
+                        {action.label}
+                      </Link>
+                    ) : (
+                      <button
+                        key={action.key}
+                        type="button"
+                        className={`btn ${action.variant} btn-sm`}
+                        disabled={busy === card.destination}
+                        onClick={() => {
+                          if (action.key === "validate") void runValidate(card);
+                          if (action.key === "disconnect") {
+                            setConfirming(card.destination);
+                            // The confirm must count what disconnecting
+                            // strands: this platform's pending queue rows.
+                            if (card.class === "social") {
+                              void fetchPendingQueueCount(card.destination).then((count) =>
+                                setPendingCounts((c) => ({ ...c, [card.destination]: count })),
+                              );
+                            }
+                          }
+                          if (action.key === "connect") {
+                            setConnecting(card.destination);
+                            clearProbe(card.destination);
+                          }
+                        }}
+                      >
+                        {action.label}
+                      </button>
+                    ),
+                  )}
+                </div>
+              )}
+              {confirming === card.destination && (
+                <div className="int-confirm">
+                  <span className="int-sub">
+                    Disconnect {card.label}? The sealed credential is deleted; the ledger
+                    remembers what already went out.
+                    {(pendingCounts[card.destination] ?? 0) > 0
+                      ? ` ${pendingCounts[card.destination]} scheduled post${pendingCounts[card.destination] === 1 ? "" : "s"} in the queue will fail closed without it.`
+                      : ""}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    disabled={busy === card.destination}
+                    onClick={() => void runDisconnect(card)}
+                  >
+                    Disconnect
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-quiet btn-sm"
+                    disabled={busy === card.destination}
+                    onClick={() => setConfirming(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              {line && (
+                <span
+                  className="int-sub"
+                  role={line.tone === "bad" ? "alert" : "status"}
+                  style={
+                    line.tone === "bad"
+                      ? { color: "var(--err)" }
+                      : line.tone === "warn"
+                        ? { color: "var(--warn)" }
+                        : undefined
+                  }
+                >
+                  {line.text}
+                </span>
+              )}
+              {error && (
+                <span className="int-sub" role="alert" style={{ color: "var(--err)" }}>
+                  {error}
+                </span>
+              )}
+            </div>
+          );
+  };
 
   return (
     <div className="content settings-surface" style={{ gap: 16 }}>
@@ -345,130 +546,44 @@ export function Integrations() {
           </div>
         </div>
       ) : (
-        <div className="int-grid">
-          {cards.map((card) => {
-            const pill = statePill(card);
-            const armed = armedPill(card);
-            const probe = probes[card.destination];
-            const line = probe ? probeLine(probe) : null;
-            const error = actionErrors[card.destination];
-            // While the confirm line is up, the action it belongs to steps
-            // aside — one Disconnect on screen, never two.
-            const actions = cardActions(card).filter(
-              (action) => !(action.key === "disconnect" && confirming === card.destination),
-            );
-            return (
-              <div key={card.destination} className="int-card">
-                <div className="int-head">
-                  <div className="plat-ico" aria-hidden>
-                    {platformGlyph(card.destination)}
-                  </div>
-                  <span className="int-name">{card.label}</span>
-                  <span className={pill.className}>{pill.text}</span>
-                  {armed && <span className={armed.className}>{armed.text}</span>}
-                </div>
-                <span className="int-sub">{subLine(card, readAt || undefined)}</span>
-                {armed && card.armedReason && (
-                  // VISIBLE PROVENANCE: the pill states the fact, this states
-                  // why — including an env force-arm, which is the one an
-                  // operator most needs to see and cannot infer.
-                  <span className="int-sub">{card.armedReason}</span>
-                )}
-                {capabilityNote(card) && (
-                  // What this destination CAN do, stated before the paste —
-                  // not discovered at publish time.
-                  <span className="int-sub" style={{ color: "var(--warn)" }}>
-                    {capabilityNote(card)}
-                  </span>
-                )}
-                {actions.length > 0 && (
-                  <div className="int-actions">
-                    {actions.map((action) =>
-                      action.key === "blog" ? (
-                        <Link key={action.key} className="btn btn-ghost btn-sm" href="/blog">
-                          {action.label}
-                        </Link>
-                      ) : (
-                        <button
-                          key={action.key}
-                          type="button"
-                          className={`btn ${action.variant} btn-sm`}
-                          disabled={busy === card.destination}
-                          onClick={() => {
-                            if (action.key === "validate") void runValidate(card);
-                            if (action.key === "disconnect") {
-                              setConfirming(card.destination);
-                              // The confirm must count what disconnecting
-                              // strands: this platform's pending queue rows.
-                              if (card.class === "social") {
-                                void fetchPendingQueueCount(card.destination).then((count) =>
-                                  setPendingCounts((c) => ({ ...c, [card.destination]: count })),
-                                );
-                              }
-                            }
-                            if (action.key === "connect") {
-                              setConnecting(card.destination);
-                              clearProbe(card.destination);
-                            }
-                          }}
-                        >
-                          {action.label}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                )}
-                {confirming === card.destination && (
-                  <div className="int-confirm">
-                    <span className="int-sub">
-                      Disconnect {card.label}? The sealed credential is deleted; the ledger
-                      remembers what already went out.
-                      {(pendingCounts[card.destination] ?? 0) > 0
-                        ? ` ${pendingCounts[card.destination]} scheduled post${pendingCounts[card.destination] === 1 ? "" : "s"} in the queue will fail closed without it.`
-                        : ""}
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-danger btn-sm"
-                      disabled={busy === card.destination}
-                      onClick={() => void runDisconnect(card)}
-                    >
-                      Disconnect
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-quiet btn-sm"
-                      disabled={busy === card.destination}
-                      onClick={() => setConfirming(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-                {line && (
-                  <span
-                    className="int-sub"
-                    role={line.tone === "bad" ? "alert" : "status"}
-                    style={
-                      line.tone === "bad"
-                        ? { color: "var(--err)" }
-                        : line.tone === "warn"
-                          ? { color: "var(--warn)" }
-                          : undefined
-                    }
-                  >
-                    {line.text}
-                  </span>
-                )}
-                {error && (
-                  <span className="int-sub" role="alert" style={{ color: "var(--err)" }}>
-                    {error}
-                  </span>
-                )}
+        <>
+          <div className="int-group-head">
+            <span className="t-title">Connected</span>
+            <span className="pill pill-idle">{connectedCards.length}</span>
+            <div style={{ flex: 1 }} />
+            {armableCount > 0 && (
+              <PostingScopeControl
+                scope={postingScope}
+                busy={armBusy === SCOPE_KEY}
+                error={actionErrors[SCOPE_KEY]}
+                onPick={(next) =>
+                  void runArm(SCOPE_KEY, { postingScope: next }, "Couldn’t change the posting scope.")
+                }
+              />
+            )}
+          </div>
+          {connectedCards.length === 0 ? (
+            <div className="card">
+              <div className="row">
+                <span className="t-label">
+                  Nothing connected yet — connect a destination below and it moves up here.
+                </span>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          ) : (
+            <div className="int-grid">{connectedCards.map(renderCard)}</div>
+          )}
+
+          <div className="int-group-head">
+            <span className="t-title">Available</span>
+            <span className="pill pill-idle">{availableCards.length}</span>
+            <div style={{ flex: 1 }} />
+            <span className="t-label">connecting is not arming — every platform keeps its own GO</span>
+          </div>
+          {availableCards.length > 0 && (
+            <div className="int-grid">{availableCards.map(renderCard)}</div>
+          )}
+        </>
       )}
 
       {connectCard && (
@@ -651,6 +766,160 @@ function ConnectPanel({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Control-arc part A's per-destination gate, drawn (s103).
+ *
+ * A **seg**, not a toggle, and that is the whole design: a toggle cannot
+ * express `review`, and `review` — hold it for me, do not send it — is the
+ * state the finer gate exists to make sayable.
+ *
+ * The seg always shows the STORED value. Under `all` the stored value is
+ * still what renders, with the mode's effect stated beside it rather than
+ * folded into it — blank it or rewrite it and the overlay stops being
+ * legible, and flipping back stops looking lossless even though it is.
+ */
+function ArmControl({
+  card,
+  scope,
+  busy,
+  error,
+  onPick,
+}: {
+  card: WireIntegrationCard;
+  scope: WirePostingScope;
+  busy: boolean;
+  error?: string;
+  onPick: (next: "off" | "review" | "live") => void;
+}) {
+  const stored = card.armState ?? "off";
+  // What `all` actually does to THIS destination, in words, at the control it
+  // affects — including the two places `all` deliberately does not mean all.
+  //
+  // The `postingConfigured` arm is not a detail: `all` covers destinations set
+  // up for posting, so claiming this one posts because the mode says "all"
+  // would be the card contradicting the engine. Found by running it — the
+  // sentence read "this destination posts" on a destination the resolver
+  // leaves off.
+  const overlay =
+    scope !== "all"
+      ? null
+      : card.postingConfigured === false
+        ? "Scope is “all”, but it only covers destinations set up for posting — this one is not, so nothing goes out here."
+        : stored === "review"
+          ? "Scope is “all”, but a review you asked for is never overridden — this one still waits for you."
+          : stored === "off"
+            ? "Scope is “all” — this destination posts, even though its own setting says off."
+            : null;
+  return (
+    <div className="int-arm">
+      <div className="int-arm-head">
+        <span className="t-label">The queue may</span>
+        <div className="seg" role="group" aria-label={`What the queue may do with ${card.label}`}>
+          {ARM_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={stored === option.value}
+              className={stored === option.value ? "seg-opt on" : "seg-opt"}
+              disabled={busy}
+              title={option.hint}
+              onClick={() => {
+                if (option.value !== stored) onPick(option.value);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {busy && <span className="t-label">Saving…</span>}
+      </div>
+      {overlay && <span className="int-sub">{overlay}</span>}
+      {card.postingConfigured === false && (
+        // The widening, stated BEFORE the first flip rather than discovered
+        // after it: this destination has no posting entry yet, and creating
+        // one is also what lets you publish here by hand.
+        <span className="int-sub">
+          Not set up for posting yet — choosing Review or Live creates its posting settings, which
+          also lets you publish here by hand.
+        </span>
+      )}
+      {error && (
+        <span className="int-sub" role="alert" style={{ color: "var(--err)" }}>
+          {error}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Part A2's posting SCOPE — the founder's own ask ("a toggle on whether i
+ * want to post on all or just selectively"), and the head control above the
+ * per-destination segs it governs.
+ *
+ * Its two copy obligations are both here, and both are corrections earned by
+ * grounding rather than decoration:
+ *  · `all` is LIVE, not a snapshot — a destination configured later is
+ *    covered without coming back here. The spec's original sentence promised
+ *    this for channels you CONNECT; building it proved connecting writes no
+ *    posting entry, so the true word is "set up for posting".
+ *  · it sits UNDER the master key, so `all` can never arm what the box has
+ *    not. Said plainly, because a control named "all" that quietly obeys a
+ *    switch elsewhere is the kind of thing an operator should not have to
+ *    discover.
+ */
+function PostingScopeControl({
+  scope,
+  busy,
+  error,
+  onPick,
+}: {
+  scope: WirePostingScope;
+  busy: boolean;
+  error?: string;
+  onPick: (next: WirePostingScope) => void;
+}) {
+  return (
+    <div className="int-scope">
+      <div className="int-arm-head">
+        <span className="t-label">Post to</span>
+        <div className="seg" role="group" aria-label="Which connected destinations may post">
+          {(
+            [
+              { value: "selective", label: "Selected" },
+              { value: "all", label: "All" },
+            ] as const
+          ).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={scope === option.value}
+              className={scope === option.value ? "seg-opt on" : "seg-opt"}
+              disabled={busy}
+              onClick={() => {
+                if (option.value !== scope) onPick(option.value);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {busy && <span className="t-label">Saving…</span>}
+      </div>
+      <span className="int-sub">
+        {scope === "all"
+          ? "Every destination you’ve set up for posting goes live — including ones you set up later. Anything you set to Review still waits for you. Each destination keeps its own setting, so switching back to Selected restores exactly what you had."
+          : "Each destination below does what its own setting says."}
+      </span>
+      {error && (
+        <span className="int-sub" role="alert" style={{ color: "var(--err)" }}>
+          {error}
+        </span>
+      )}
     </div>
   );
 }

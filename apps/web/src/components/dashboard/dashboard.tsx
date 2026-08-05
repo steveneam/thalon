@@ -136,7 +136,7 @@ export function Dashboard({ initialView = "overview" }: { initialView?: HomeView
       });
     // The setup band's channel truth. Failure leaves the band unrendered.
     fetchIntegrationCards()
-      .then((cards) => {
+      .then(({ cards }) => {
         if (!cancelled) setChannelConnected(cards.some((c) => c.state === "connected"));
       })
       .catch(() => {

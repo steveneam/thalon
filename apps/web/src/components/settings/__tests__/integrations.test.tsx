@@ -19,6 +19,8 @@ function card(overrides: Partial<WireIntegrationCard>): WireIntegrationCard {
     expiresAt: null,
     envOverride: false,
     armed: null,
+    armState: null,
+    postingConfigured: null,
     armedReason: null,
     connectFlavor: "manual",
     fields: [{ key: "accessToken", optional: false }],
@@ -88,9 +90,12 @@ const PUBLISHED = {
   webTotal: 1,
 };
 
-function wire(cards: WireIntegrationCard[] = CARDS): void {
+function wire(
+  cards: WireIntegrationCard[] = CARDS,
+  postingScope: "selective" | "all" = "selective",
+): void {
   server.use(
-    http.get("/api/integrations", () => HttpResponse.json({ cards })),
+    http.get("/api/integrations", () => HttpResponse.json({ cards, postingScope })),
     http.get("/api/integrations/published", () => HttpResponse.json(PUBLISHED)),
   );
 }
@@ -379,5 +384,152 @@ describe("the arming rung and the capability caveat, on the card", () => {
     // Even ARMED, the driver cannot post — so the card must not say it does.
     expect(cardEl.textContent).toContain("Connected as @thalon");
     expect(cardEl.textContent).not.toContain("Posting as");
+  });
+});
+
+/**
+ * Control-arc parts A + A2 (s103): the arm control and the posting scope.
+ *
+ * The overlay case earned its own ratchet by SHIPPING WRONG for one render:
+ * an unconfigured destination read "this destination posts, even though its
+ * own setting says off" while the engine's resolver leaves exactly that
+ * destination `off`. Nothing in the suite could see it — the copy was valid,
+ * the state was right, and the card was simply asserting something the engine
+ * disagreed with. Caught by loading the page and reading it.
+ */
+describe("the queue's arm control and the posting scope", () => {
+  const CONNECTED_SOCIAL: WireIntegrationCard[] = [
+    card({
+      destination: "bluesky",
+      label: "Bluesky",
+      driver: "bluesky-post",
+      state: "connected",
+      connectedAs: "@steve",
+      armed: true,
+      armState: "review",
+      postingConfigured: true,
+    }),
+    card({
+      destination: "linkedin",
+      label: "LinkedIn",
+      driver: "linkedin-rest-posts",
+      state: "connected",
+      connectedAs: "Steven",
+      armed: true,
+      armState: "off",
+      postingConfigured: true,
+    }),
+    card({
+      destination: "instagram",
+      label: "Instagram",
+      driver: "instagram-text-refusal",
+      state: "connected",
+      connectedAs: "@steve",
+      armed: false,
+      armState: "off",
+      postingConfigured: false,
+    }),
+  ];
+
+  it("splits connected from available and counts each — not one flat grid", async () => {
+    wire();
+    render(<Integrations />);
+    expect(
+      await screen.findByText("Connected", { selector: ".t-title" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Available", { selector: ".t-title" })).toBeInTheDocument();
+  });
+
+  it("shows each destination's STORED state as a three-way seg, review included", async () => {
+    wire(CONNECTED_SOCIAL);
+    render(<Integrations />);
+
+    const bluesky = await screen.findByRole("group", {
+      name: "What the queue may do with Bluesky",
+    });
+    expect(within(bluesky).getByRole("button", { name: "Review" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(within(bluesky).getByRole("button", { name: "Off" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
+  it("under `all`, a destination keeps showing its STORED state — never blanked or rewritten", async () => {
+    wire(CONNECTED_SOCIAL, "all");
+    render(<Integrations />);
+
+    // LinkedIn is stored `off` and posts under `all`; the control still says
+    // `off`, which is what makes the flip back legibly lossless.
+    const linkedin = await screen.findByRole("group", {
+      name: "What the queue may do with LinkedIn",
+    });
+    expect(within(linkedin).getByRole("button", { name: "Off" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(destinationCard("LinkedIn")).toHaveTextContent(/this destination posts, even though/);
+  });
+
+  it("under `all`, a REVIEW says it is still held — the one place `all` does not mean all", async () => {
+    wire(CONNECTED_SOCIAL, "all");
+    render(<Integrations />);
+    await screen.findByText("Connected", { selector: ".t-title" });
+    expect(destinationCard("Bluesky")).toHaveTextContent(
+      /a review you asked for is never overridden/,
+    );
+    expect(destinationCard("Bluesky")).not.toHaveTextContent(/this destination posts/);
+  });
+
+  it("under `all`, an UNCONFIGURED destination never claims it posts — the card cannot contradict the engine", async () => {
+    wire(CONNECTED_SOCIAL, "all");
+    render(<Integrations />);
+    await screen.findByText("Connected", { selector: ".t-title" });
+
+    const instagram = destinationCard("Instagram");
+    // The resolver leaves an entry-less destination `off` under `all`, because
+    // a claimed row the publish door then refuses is marked failed — terminal.
+    expect(instagram).toHaveTextContent(/only covers destinations set up for posting/);
+    expect(instagram).not.toHaveTextContent(/this destination posts, even though/);
+  });
+
+  it("states the widening BEFORE the first flip: arming an unset destination also allows manual publishing", async () => {
+    wire(CONNECTED_SOCIAL);
+    render(<Integrations />);
+    await screen.findByText("Connected", { selector: ".t-title" });
+    expect(destinationCard("Instagram")).toHaveTextContent(
+      /Not set up for posting yet — choosing Review or Live creates its posting settings/,
+    );
+  });
+
+  it("sends ONE flip and re-reads — nothing renders as armed before the server stored it", async () => {
+    const user = userEvent.setup();
+    const bodies: unknown[] = [];
+    wire(CONNECTED_SOCIAL);
+    server.use(
+      http.patch("/api/integrations/arming", async ({ request }) => {
+        bodies.push(await request.json());
+        return HttpResponse.json({ social: {} });
+      }),
+    );
+    render(<Integrations />);
+
+    const bluesky = await screen.findByRole("group", {
+      name: "What the queue may do with Bluesky",
+    });
+    await user.click(within(bluesky).getByRole("button", { name: "Live" }));
+
+    expect(bodies).toEqual([{ platform: "bluesky", armState: "live" }]);
+  });
+
+  it("the scope control is absent when nothing connected can post — no gate over an empty set", async () => {
+    wire([card({ destination: "website_hosted", class: "website", label: "Hosted blog" })]);
+    render(<Integrations />);
+    await screen.findByText("Connected", { selector: ".t-title" });
+    expect(
+      screen.queryByRole("group", { name: "Which connected destinations may post" }),
+    ).not.toBeInTheDocument();
   });
 });

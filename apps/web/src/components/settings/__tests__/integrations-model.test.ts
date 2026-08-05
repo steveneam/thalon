@@ -26,6 +26,8 @@ function card(overrides: Partial<WireIntegrationCard> = {}): WireIntegrationCard
     expiresAt: null,
     envOverride: false,
     armed: null,
+    armState: null,
+    postingConfigured: null,
     armedReason: null,
     connectFlavor: "manual",
     fields: [{ key: "accessToken", optional: false }],

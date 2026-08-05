@@ -31,6 +31,15 @@ export interface WireIntegrationCard {
   armed: boolean | null;
   /** Why armed reads as it does, in the operator's words. */
   armedReason: string | null;
+  /**
+   * s103: the QUEUE's per-destination gate — what the unattended tick may do
+   * with this destination's due rows. A DIFFERENT fact from `armed` above,
+   * which also governs a manual publish. Always the STORED value; the posting
+   * scope's effect on it is stated beside it, never folded into it.
+   */
+  armState: "off" | "review" | "live" | null;
+  /** Whether an entry exists at all — a destination with none, and one set to `off`, both read `off`. */
+  postingConfigured: boolean | null;
   /** D1: "oauth2" cards connect via consent redirect; "app_password"/"manual" keep the guided paste. */
   connectFlavor: "manual" | "oauth2" | "app_password";
   fields: Array<{ key: string; optional: boolean }>;
@@ -68,9 +77,35 @@ export interface ConnectResult {
   probe: WireProbeOutcome;
 }
 
-export async function fetchIntegrationCards(): Promise<WireIntegrationCard[]> {
-  const { cards } = await asJson<{ cards: WireIntegrationCard[] }>(await fetch("/api/integrations"));
-  return cards;
+export type WirePostingScope = "selective" | "all";
+
+export interface WireIntegrationsRead {
+  cards: WireIntegrationCard[];
+  /** Part A2's tenant-wide mode the per-destination states are read under. */
+  postingScope: WirePostingScope;
+}
+
+export async function fetchIntegrationCards(): Promise<WireIntegrationsRead> {
+  return asJson<WireIntegrationsRead>(await fetch("/api/integrations"));
+}
+
+/**
+ * One arm flip: a destination's own state, or the tenant-wide scope above
+ * them. Separate shapes because they are separate facts — the door refuses a
+ * body that tries to be both or neither.
+ */
+export async function setIntegrationArming(
+  change:
+    | { platform: string; armState: "off" | "review" | "live" }
+    | { postingScope: WirePostingScope },
+): Promise<void> {
+  await asJson<{ social: unknown }>(
+    await fetch("/api/integrations/arming", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(change),
+    }),
+  );
 }
 
 export async function fetchPublishedView(): Promise<WirePublishedView> {

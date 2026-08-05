@@ -268,6 +268,8 @@ describe("keyed by entity — state must not outlive the entity it describes", (
       connectedAs: null,
       validatedAt: null,
       expiresAt: null,
+      armState: null,
+      postingConfigured: null,
       envOverride: false,
       // s78 lane 2 widened WireIntegrationCard with the arming rung, s83 with
       // the connect flavor; these keep this fixture compiling. COMPILE-ONLY —

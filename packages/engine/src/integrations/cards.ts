@@ -6,6 +6,7 @@ import {
   type CredentialCardState,
   type DestinationClass,
   type DestinationKey,
+  type ArmState,
   type EntitlementFeature,
   type SocialPublishConfig,
 } from "@thalon/contracts";
@@ -106,6 +107,34 @@ export interface IntegrationCard {
   /** Why armed reads as it does, in the operator's words. `null` alongside `armed: null`. */
   armedReason: string | null;
   /**
+   * s103 (control-arc part A): the QUEUE's per-destination gate — whether the
+   * unattended tick may send this destination's due rows by itself.
+   *
+   * ⛔ A DIFFERENT FACT from `armed` above, and the card renders both because
+   * conflating them is how an operator ends up surprised. `armed` answers
+   * "may this platform be published to at all" (credential + configuredness)
+   * and governs a MANUAL publish from Approve too; this answers only what the
+   * tick may do unattended. A destination can be `armed` with `armState:
+   * "off"` — perfectly publishable by hand, and never by itself.
+   *
+   * This is the STORED value, never the posting scope's overlay of it: the
+   * surface states the mode's effect beside the stored state rather than
+   * rewriting it, which is what keeps `all` legible and the flip back
+   * lossless. `null` for destinations that never post.
+   */
+  armState: ArmState | null;
+  /**
+   * s103: whether this destination has an ENTRY in the tenant's social block
+   * at all — the fact `armState` alone cannot carry, because a destination
+   * with no entry and one deliberately set to `off` both read `off`.
+   *
+   * The surface owes the difference in words: setting a state on a
+   * destination with no entry CREATES one, and an entry is also what
+   * authorizes a manual publish. Stating that at the control is the whole
+   * reason this rides the wire. `null` for destinations that never post.
+   */
+  postingConfigured: boolean | null;
+  /**
    * D1 (s83): how this destination CONNECTS — "oauth2" cards offer the
    * consent-redirect dance (one click, no paste), "app_password" and
    * "manual" keep the schema-derived guided paste. From the registry's
@@ -181,12 +210,16 @@ export async function listIntegrationCards(
     const entitled = feature === null ? true : opts.features[feature];
     const state = deriveCardState({ stored: row, entitled, now });
     // Arming is a SOCIAL fact — nothing else posts, so nothing else claims a
-    // rung it does not have.
+    // rung it does not have. The entry is read once here, narrowed, and both
+    // arming facts below are derived from it rather than re-indexing.
+    const entry = isSocialVaultDestination(destination)
+      ? opts.socialConfig?.[destination]
+      : undefined;
     const arming =
       isSocialVaultDestination(destination) && entitled
         ? socialArmed(deps.env, destination, {
             connected: state === "connected" || state === "expiring" || state === "needs_reauth",
-            configured: Boolean(opts.socialConfig?.[destination]),
+            configured: Boolean(entry),
           })
         : null;
     return {
@@ -201,6 +234,10 @@ export async function listIntegrationCards(
       envOverride: envOverridesDestination(deps.env, destination),
       armed: arming?.armed ?? null,
       armedReason: arming?.reason ?? null,
+      // The STORED gate, defaulting to `off` for a social seat with no entry —
+      // absence disarms here exactly as it does everywhere else in this block.
+      armState: arming ? (entry?.armState ?? "off") : null,
+      postingConfigured: arming ? Boolean(entry) : null,
       connectFlavor: def.connect?.flavor ?? "manual",
       fields: pasteFields(destination),
     };

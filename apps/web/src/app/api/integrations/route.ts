@@ -39,6 +39,11 @@ export async function GET() {
         validatedAt: card.validatedAt?.toISOString() ?? null,
         expiresAt: card.expiresAt?.toISOString() ?? null,
       })),
+      // s103 (part A2): the tenant-wide posting scope the per-destination
+      // states are read under. A malformed or absent block reads `selective`,
+      // the same answer the engine's resolver gives — the surface must never
+      // be the place that decides `all` on its own.
+      postingScope: (parsedSocial?.success ? parsedSocial.data.postingScope : null) ?? "selective",
     });
   } catch (err) {
     return toErrorResponse(err);
