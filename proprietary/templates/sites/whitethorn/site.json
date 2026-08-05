@@ -2,19 +2,19 @@
   "slug": "whitethorn",
   "name": "Whitethorn",
   "vertical": "veterinary-small-animal",
-  "oneLiner": "A small-animal practice on Whitethorn Green — the recovery measured, and the walk shown rather than claimed.",
+  "oneLiner": "A small-animal practice on Whitethorn Green \u2014 the recovery measured, and the walk shown rather than claimed.",
   "axes": {
     "primary": "otherworldly-animation",
     "secondary": "data-instrument"
   },
-  "paletteSeed": "oat paper, a soft meadow-wash band and sloe ink (a blue-green black, never pure black), with ONE accent — haw red, the hawthorn berry — reserved for live instrument readings and nothing decorative; the name section shows the berry the red is borrowed from",
-  "typeDirection": "Petrona (variable serif, warm and bookish at display scale) + Familjen Grotesk (humanist grotesk body) + DM Mono (instrument readings only) — all OFL, vendored, all portfolio-new",
-  "motionBudget": "one scroll clock and no second animation system: a kinematic gait study pins while its six chapters scroll past and drive it — the dog's lameness, gait, paw-trajectory loops, footfall trail and readouts all run off the same clock; the belt and trail move at the speed the dog would be travelling; reduced-motion freezes the walk and no-JS keeps every chapter's numbers in the markup; THE WINK lands at Day 84 only — the paw-prints wander up off the measured line under a note reading '(stopped to sniff something)', and the instrument then hands off to a photograph",
+  "paletteSeed": "oat paper, a soft meadow-wash band and sloe ink (a blue-green black, never pure black), with ONE accent \u2014 haw red, the hawthorn berry \u2014 reserved for live instrument readings and nothing decorative; the name section shows the berry the red is borrowed from",
+  "typeDirection": "Petrona (variable serif, warm and bookish at display scale) + Familjen Grotesk (humanist grotesk body) + DM Mono (instrument readings only) \u2014 all OFL, vendored, all portfolio-new",
+  "motionBudget": "one scroll clock and no second animation system: a kinematic gait study pins while its six chapters scroll past and drive it \u2014 the dog's lameness, gait, paw-trajectory loops, footfall trail and readouts all run off the same clock; the belt and trail move at the speed the dog would be travelling; reduced-motion freezes the walk and no-JS keeps every chapter's numbers in the markup; THE WINK lands at Day 84 only \u2014 the paw-prints wander up off the measured line under a note reading '(stopped to sniff something)', and the instrument then hands off to a photograph THAT MOVES: the same scroll scrubs 61 stills derived from one generated Seedance take (no timer, no autoplay, no second rAF loop \u2014 ONE clock read twice, so the added motion spends the existing budget rather than breaking it), the frames ship absolutely stacked with exactly one lit so no-JS shows a complete photograph, and reduced-motion holds that frame and never scrubs",
   "wave": 4,
   "built": "2026-08-05",
   "verdict": {
     "status": "approved",
-    "note": "'gogogo design is approved' (s105 boot) — approved after the s104 fix round that added the warmth, the open air and the restored wink. First site of the landing arc (docs/landing-arc/spec.md), and the first built under the founder's s103 amendment restoring the claude-design mock in front of the pre-plan. Banked lessons: a code-drawn instrument may be SCHEMATIC but never a drawing of a THING; a change of REGISTER drops the requirements that belonged to the old one.",
+    "note": "'gogogo design is approved' (s105 boot) \u2014 approved after the s104 fix round that added the warmth, the open air and the restored wink. First site of the landing arc (docs/landing-arc/spec.md), and the first built under the founder's s103 amendment restoring the claude-design mock in front of the pre-plan. Banked lessons: a code-drawn instrument may be SCHEMATIC but never a drawing of a THING; a change of REGISTER drops the requirements that belonged to the old one. | s108: the Day-84 handoff now MOVES, per his s105 direction (\"can you also apply that motion to the site A and site C too?\") \u2014 a 5s Seedance take grown from the already-approved Day-84 still as its single opening frame, deliberately an even trot rather than a bounding run so the picture cannot out-claim the instrument's 0/5 lameness. THE DESIGN VERDICT ABOVE IS HIS AND STANDS; the moving band is the one part of this page he has not yet seen.",
     "at": "2026-08-05"
   }
 }

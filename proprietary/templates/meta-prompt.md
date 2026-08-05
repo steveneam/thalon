@@ -200,6 +200,42 @@ every other frame, so one 3cr re-mint replaced what would have been a re-mint of
 the entire sequence. **Check the botany, the count and the species on the
 ANCHOR, before anything is derived from it** — the ㉑ hydrangea lesson moved one
 step earlier in the pipeline, where it is an order of magnitude cheaper.
+Corollary (⑳ Whitethorn, s108 — **CYCLIC motion has no end frame to mint, so
+do not mint one**): the s107 rule above ("mint the endpoints, let one take
+supply the middle") assumes a one-way transformation — Feb→Oct, bud→open — where
+the end state is genuinely a different picture. A **gait, a pour, a spin, a
+flame** are not transformations, they are *cycles*: the last frame of a sound
+trot looks like the first. The arc spec had scheduled this site as
+`start_image` + "the same dog mid-stride" as `end_image`, which would have
+bought a near-duplicate of the start frame AND paid s106's registration
+coin-flip (~50% of seeds drift) for the privilege. **A single `start_image`
+with no `end_image` is the correct instrument for cyclic motion** — zero
+registration risk by construction, one already-approved asset, one take.
+Landed first take at 17.50cr against a ~72cr budget line. **Ask which kind of
+motion it is BEFORE reaching for two keyframes.**
+Corollary (⑳, s108 — **a count proves a scrub is ALIVE; it does not prove it is
+AIMED**): s107's ratchet ("exactly one lit frame") passed perfectly on this
+build, and a visibility-bucketed sweep then showed the scrub was spending its
+resolution off-screen — mapping the sequence across the band's full centre
+travel put frames 0 and 60 at the clamps, so **34 of 61 frames, over half the
+shipped bytes, were only reachable while the band was under half in view**;
+in the prime window the reader saw frames 17–43 and nothing else. Ending the
+sweep a sixth of a viewport early at each end moved that to 10–50. **Measure
+WHICH frames are reachable while the element is actually visible, not just that
+one frame is lit** — the invariant check and the aim check are different
+questions, and only the first has a ratchet.
+Corollary (⑳, s108 — **frame density is set by the CAMERA, not by precedent**):
+㉑ ships 18 frames per sequence and ㉒ ships 36, so 36 looked like the house
+number. Both are **locked-off** shots where only the subject changes; this one
+**tracks**, so every pixel moves every frame and adjacent-frame difference
+measured **9.24 at the native 24fps against the shipped bloom's 1.26** — seven
+times the change per step before any decimation. Decimating it to ㉒'s 36 would
+have been visibly steppy. **Measure adjacent-frame difference against a shipped
+sequence that reads well before choosing a frame count**; a panning take needs
+roughly 3× the frames of a locked-off one. (Also: the vendor may answer a
+literal `generate_video` with a **preset recommendation and NO job** — the call
+returns a suggestion, nothing renders, and nothing is charged. Re-send with
+`declined_preset_id` and confirm a job id came back before waiting on it.)
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that

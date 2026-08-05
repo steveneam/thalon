@@ -124,6 +124,15 @@
 
   .close-fig img, .home-fig img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
   .grass-fig img { width: 100%; aspect-ratio: 5 / 2; object-fit: cover; }
+
+  /* The Day-84 handoff, moving. Frames are absolutely stacked so the band
+     never reflows; exactly one carries .on at any moment. The container holds
+     the box open (aspect-ratio), because absolute children contribute no
+     height — without it the caption would ride up over the picture. */
+  .trot { position: relative; width: 100%; aspect-ratio: 21 / 9; background: var(--far); }
+  .trot img { position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0; }
+  .trot img.on { opacity: 1; }
   figcaption { color: var(--ink-soft); }
 
   .foot { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; padding: 44px 0; }
@@ -289,7 +298,69 @@
 
 <!-- THE PAYOFF — the instrument has done its job; the animal is the point -->
 <figure class="close-fig" style="margin:0">
-  <img src="assets/close.webp" width="1600" height="686" alt="The same collie running at full stretch across open green land in late evening light." />
+  <div class="trot" id="trot">
+    <img class="on" src="assets/trot-00.webp" width="1204" height="516" alt="The same collie trotting evenly across open green land in late evening light, the hedge line and low sun behind him." />
+    <img src="assets/trot-01.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-02.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-03.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-04.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-05.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-06.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-07.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-08.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-09.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-10.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-11.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-12.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-13.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-14.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-15.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-16.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-17.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-18.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-19.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-20.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-21.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-22.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-23.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-24.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-25.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-26.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-27.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-28.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-29.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-30.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-31.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-32.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-33.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-34.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-35.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-36.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-37.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-38.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-39.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-40.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-41.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-42.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-43.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-44.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-45.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-46.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-47.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-48.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-49.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-50.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-51.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-52.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-53.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-54.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-55.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-56.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-57.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-58.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-59.webp" width="1204" height="516" alt="" aria-hidden="true" />
+    <img src="assets/trot-60.webp" width="1204" height="516" alt="" aria-hidden="true" />
+  </div>
   <figcaption class="wrap small" style="padding-top:14px;padding-bottom:4px">Day 84. This is what
     ninety-four percent looks like from the other end of a field.</figcaption>
 </figure>
@@ -712,6 +783,88 @@
   window.addEventListener("resize", function () { needScroll = true; }, { passive: true });
   readScroll();
   requestAnimationFrame(frame);
+})();
+
+/* ---- THE DAY-84 HANDOFF, SCRUBBED ----------------------------------------
+   The instrument has finished arguing; this is the dog itself, and the same
+   scroll that drove the gait drives him. Not a second animation system: no
+   timer, no autoplay, no rAF loop of its own — one clock, read twice, which
+   is the site's stated motion budget rather than an exception to it.        */
+(function () {
+  "use strict";
+  var stage  = document.getElementById("trot");
+  if (!stage) return;
+  var frames = [].slice.call(stage.querySelectorAll("img"));
+  if (frames.length < 2) return;
+
+  /* Seed `shown` FROM THE DOM. The static document ships one frame already
+     carrying .on so the no-JS reader is not handed an empty band. Starting
+     this at -1 would mean the first swap had nothing to clear, leaving that
+     frame lit — and since the frames are absolutely stacked, a lit frame
+     later in document order paints over every frame the scroll picks. That
+     is exactly how ㉒'s scrub was dead for a session while every screenshot
+     looked perfect (s107). Seeding costs one loop and removes the class. */
+  var shown = -1;
+  for (var i = 0; i < frames.length; i++) {
+    if (frames[i].classList.contains("on")) { shown = i; break; }
+  }
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;   // the still IS the resolved state, so freezing loses nothing
+
+  /* A stacked frame that has not DECODED yet paints nothing, so swapping to
+     it would blank the band mid-scrub. Walk out to the nearest decoded
+     neighbour instead. */
+  function usable(i) {
+    for (var d = 0; d <= frames.length; d++) {
+      var a = i - d, b = i + d;
+      if (a >= 0 && frames[a].complete && frames[a].naturalWidth > 0) return a;
+      if (b < frames.length && frames[b].complete && frames[b].naturalWidth > 0) return b;
+    }
+    return -1;
+  }
+
+  var queued = false;
+  function paint() {
+    queued = false;
+    var r  = stage.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+
+    /* CENTRE-to-centre, not top-to-top. Measuring off the top edge puts the
+       sequence a half-band out of step with what the reader is looking at —
+       the s107 clock/prose contradiction, in a figure instead of a readout.
+
+       The MARGIN is the second half of that lesson. Running p across the
+       full centre travel (vh) is the obvious mapping and it measured badly:
+       the sweep hit frame 0 and frame 60 while the band was under half on
+       screen, so 34 of the 61 frames — over half the bytes — were only ever
+       reachable in the corner of the reader's eye. Ending the sweep a sixth
+       of a viewport early at each end lands the whole walk inside the window
+       where the band is ~three-quarters visible or better. "Exactly one lit
+       frame" passes either way: a count proves the scrub is ALIVE, not that
+       it is AIMED. */
+    var m = vh / 6;
+    var span = vh - 2 * m;
+    var centre = r.top + r.height / 2;
+    var p = span > 0 ? (vh - m - centre) / span : 0;
+    if (p < 0) p = 0; else if (p > 1) p = 1;
+
+    var want = usable(Math.min(frames.length - 1, Math.round(p * (frames.length - 1))));
+    if (want < 0 || want === shown) return;
+    if (shown >= 0) frames[shown].classList.remove("on");
+    frames[want].classList.add("on");
+    shown = want;
+  }
+
+  function request() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(paint);
+  }
+
+  window.addEventListener("scroll", request, { passive: true });
+  window.addEventListener("resize", request, { passive: true });
+  paint();
 })();
 </script>
 </body>

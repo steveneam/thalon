@@ -7,13 +7,6 @@
     "quality": 82
   },
   {
-    "file": "close.webp",
-    "pinnedHash": "88cac8fad364c06603b5d13c7eada76d6a4165c52e2924139112d1548397f9bb",
-    "width": 1600,
-    "height": 686,
-    "quality": 82
-  },
-  {
     "file": "grass.webp",
     "pinnedHash": "1a040ca68312df498c2294780243676f6a598c4fe7a5b76ea2ca3b09c9cf9a82",
     "width": 1600,
@@ -56,5 +49,14 @@
     "width": 1600,
     "height": 686,
     "quality": 82
+  },
+  {
+    "file": "trot-%02d.webp",
+    "pinnedHash": "97743de7d4650c9215766fb68ab9c4df7e371ce04c3dedee27a20c084c71c89f",
+    "ext": "mp4",
+    "frames": 61,
+    "width": 1204,
+    "height": 516,
+    "quality": 55
   }
 ]

@@ -219,6 +219,73 @@ and one item was an outright defect:
 Spend across the whole site after the fix round: **20 generated, 8 kept,
 2.40cr.**
 
+## The Day-84 motion (s108) — the last item before the capstone
+
+Founder direction, s105 close: *"can you also apply that motion to the site A
+and site C too?"*. §6 of `docs/landing-arc/spec.md` defines "fully finished" as
+including each site's generated moment; B and C moved at s105–s107, A did not.
+**The page spent six chapters measuring a limp evening out and never once
+showed the dog walking.** Now it does. One take, **17.50cr** against the spec's
+~72cr line; the site total goes 2.40 → **19.90cr**.
+
+**The spec's own construction was wrong, and the repo's own corollary said so.**
+It scheduled `start_image` = the pinned Day-84 still, `end_image` = "the same
+dog mid-stride". But a trot is **cyclic locomotion, not a state change** — the
+last frame of a sound trot looks like the first — so that `end_image` would
+have been a near-duplicate of the start frame, bought at s106's registration
+coin-flip (~50% of seeds drift). s107 already ruled that one continuous take
+beats chained keyframes where the middle is one subject mid-motion; cyclic
+motion takes it one step further: **there is no second endpoint to mint at
+all.** Single `start_image`, no `end_image`, zero registration risk by
+construction. Banked as a meta-prompt corollary.
+
+**The pinned still was better than its own alt text.** `close.webp` was
+described in markup as the collie "running at full stretch", which would have
+been the bounding hero-dog the honesty constraint forbids. The picture is
+actually an even, side-on trot — so the approved asset already matched the
+instrument, and the alt text was the thing that was wrong. Corrected in the
+same change.
+
+**The honesty constraint drove the prompt, not just the review.** Day 84 reads
+lameness 0/5, symmetry 94%, weight-bearing 96%, so the brief demanded a *sound,
+even trot* and named the failure modes as explicit negatives — NOT galloping,
+NOT bounding, NOT leaping, feet low, all four never airborne at once. First
+take landed it. A video that over-claimed the recovery would undo the exact
+honesty (the Day-12 dip) the page was praised for.
+
+### Four finds, all from measurement, none visible in source
+
+1. **A count proves a scrub is ALIVE, not that it is AIMED.** The s107 ratchet
+   passed perfectly — 61/61 decoded, exactly one lit at every sampled position,
+   strictly monotonic 0→60. A visibility-bucketed sweep then showed the sequence
+   was mis-mapped: across the band's full centre travel, frames 0 and 60 sat at
+   the clamps and **34 of 61 frames — over half the shipped bytes — were only
+   reachable while the band was under half on screen.** In the prime window the
+   reader saw frames 17–43 and nothing else. Ending the sweep a sixth of a
+   viewport early at each end moved that to 10–50, 33 distinct frames.
+2. **Frame density is set by the camera, not by precedent.** ㉑ ships 18 frames
+   per sequence, ㉒ ships 36 — but both are locked-off. This one *tracks*, so
+   adjacent-frame difference measured **9.24 at native 24fps against the bloom's
+   1.26**. 61 frames (every 2nd source frame) rather than the house 36.
+3. **The vendor answered the literal call with a preset suggestion and no job.**
+   `generate_video` returned a recommendation for an unrelated preset ("IN THE
+   DARK") and rendered nothing. Re-sent with `declined_preset_id`. Nothing was
+   charged, but a build that assumed the mint was running would have waited on a
+   job that did not exist.
+4. **`close.webp` is gone, not orphaned.** trot-00 measured **6.41** against it —
+   less than one adjacent-frame step (11.88) — so the frame sequence's own first
+   image supersedes it, and the no-JS reader still gets essentially the shot the
+   founder approved. The asset bijection is manifest↔disk, so an unreferenced
+   asset would have passed the ratchets silently as dead weight.
+
+**The ratchet this bought:** the s107 static-stack check was keyed off an inert
+JSON data block, so it covered ㉒ and would have let ⑳'s stack ship uncovered —
+"a ratchet applied to three assets out of four is not applied". It now keys off
+the **manifest**, which every site has, and counts lit frames *per sequence* so a
+two-sequence page cannot pass by lighting two of one and none of the other.
+Proven to fail on both real defects (a second lit frame, a missing frame) before
+being trusted.
+
 ## Decision annotations
 
 - **The gait is the only animation on the page.** One clock. A page about

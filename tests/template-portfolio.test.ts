@@ -232,16 +232,62 @@ describe("template portfolio", () => {
         ).toBe(true);
       }
 
-      if (typeof data.frames === "number") {
-        const imgs = html.match(/<img[^>]*src="assets\/[\w-]*?\d\d\.webp"/g) ?? [];
+    }
+  });
+
+  /**
+   * The static frame-stack contract (s107, GENERALISED s108).
+   *
+   * A scrubbed sequence ships its frames absolutely stacked, and the runtime
+   * lights exactly one. Get that wrong and the page still looks perfect in
+   * every screenshot: ㉒'s scrub was dead for a whole session because the
+   * markup's initial frame stayed lit and — being last in document order —
+   * painted over every frame the scroll chose. Types, lint, 3,400 tests and
+   * the console were all silent. Only COUNTING the lit frames found it.
+   *
+   * s107 wrote that check against the site that found it, keyed off an inert
+   * JSON data block — so it covered exactly one site, and ⑳'s frame stack
+   * would have shipped uncovered. This version keys off the MANIFEST, which
+   * every site has, so every present and future frame sequence is covered by
+   * construction. ("A ratchet applied to three assets out of four is not
+   * applied" — meta-prompt, ㉑ s106.)
+   *
+   * Scope: sites that ship the stack STATICALLY, which is what makes the
+   * no-JS claim real. ㉑ builds its frames at runtime and ships a single
+   * `.still` fallback instead — a different technique with its own no-JS
+   * story, so it is skipped rather than forced into this shape.
+   */
+  it("a statically-stacked frame sequence carries every frame and lights exactly one", () => {
+    for (const slug of slugs) {
+      const siteDir = path.join(sitesDir, slug);
+      const manifestPath = path.join(siteDir, "assets", "manifest.json");
+      if (!existsSync(manifestPath)) continue;
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as Array<{
+        file: string;
+        frames?: number;
+      }>;
+      const html = readFileSync(path.join(siteDir, "index.html"), "utf8");
+
+      for (const entry of manifest) {
+        if (entry.frames === undefined) continue;
+        const names = frameFileNames(entry.file, entry.frames);
+        const present = names.filter((n) => html.includes(`src="assets/${n}"`));
+        if (present.length === 0) continue; // runtime-built stage (㉑), not a static stack
+
         expect(
-          imgs.length,
-          `${slug}: data block declares ${data.frames} frames but the markup carries ${imgs.length}`,
-        ).toBe(data.frames);
-        const lit = html.match(/<img class="on"/g) ?? [];
+          present.length,
+          `${slug}: ${entry.file} declares ${entry.frames} frames but the markup carries ${present.length} — a gap in the stack is a frame the scroll can select and never show`,
+        ).toBe(entry.frames);
+
+        // Exactly one lit, counted over THIS sequence's own frames, so a page
+        // carrying two sequences cannot pass by lighting two of one and none
+        // of the other.
+        const lit = names.filter((n) =>
+          new RegExp(`<img class="on" src="assets/${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`).test(html),
+        );
         expect(
           lit.length,
-          `${slug}: exactly one frame must carry .on in the static markup, found ${lit.length} — with none the no-JS stage is blank, with more than one the stacked frames composite and the scrub is dead`,
+          `${slug}: ${entry.file} must have exactly one frame carrying .on in the static markup, found ${lit.length} — with none the no-JS stage is blank, with more than one the stacked frames composite and the scrub is dead while every screenshot still looks correct`,
         ).toBe(1);
       }
     }

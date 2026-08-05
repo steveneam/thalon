@@ -1,11 +1,14 @@
 # Landing arc — three A+ sites, then Thalon's landing page, then two more on the remainder
 
-> **Status: IN BUILD. Site A ⑳ Whitethorn BUILT s104 and APPROVED s105
-> (`gogogo design is approved`). Site B ㉑ Aspect & Fall BUILT s105, awaiting
-> his glance. Site C (botanical perfumery) and the Thalon landing page are
-> UNSTARTED.** Founder-directed at the s103 close; order re-affirmed by him at
-> the s104 close and settled. Spec of record for the A+ animation family and
-> the Thalon landing page it feeds.
+> **Status: IN BUILD. All three A+ sites are now FULLY finished — built AND
+> moving — which was the stated precondition for the capstone.** Site A ⑳
+> Whitethorn BUILT s104, APPROVED s105 (`gogogo design is approved`), **its
+> Day-84 motion added s108**. Site B ㉑ Aspect & Fall BUILT s105, moving s107,
+> awaiting his glance. Site C ㉒ Small Hours BUILT and moving s107, awaiting his
+> glance. **→ THE THALON LANDING PAGE IS UNBLOCKED**, with its 180cr ring-fence
+> intact. Founder-directed at the s103 close; order re-affirmed by him at the
+> s104 close and settled. Spec of record for the A+ animation family and the
+> Thalon landing page it feeds.
 >
 > **Method note added by the build (s104–s105), because both sites hit it:** the
 > banked animation ideas are named as *pictures of things* ("a dog that walks",
@@ -122,7 +125,7 @@ story already turns on**, and in every case that moment is currently a still.
 
 | Site | The generated moving moment | Why it is that moment |
 |---|---|---|
-| **⑳ Whitethorn** (vet) | The **Day-84 handoff**. The gait instrument already ends by handing off to a photograph of the recovered dog — the emotional payoff of the whole page, and today it is a static image. It becomes the dog actually **moving soundly**: start frame the pinned Day-84 still, end frame the same dog mid-stride. | The page spends six chapters measuring a limp evening out. **The one thing it never shows is the dog walking.** The instrument proves it; the video lets you feel it. Nothing about the marker-and-trace plot changes — this is the payoff after it, not a replacement for it. |
+| **⑳ Whitethorn** (vet) ✅ **BUILT s108** | The **Day-84 handoff**. The gait instrument already ends by handing off to a photograph of the recovered dog — the emotional payoff of the whole page, and today it is a static image. It becomes the dog actually **moving soundly**: start frame the pinned Day-84 still, ~~end frame the same dog mid-stride~~ — **NO end frame, see the correction below.** | The page spends six chapters measuring a limp evening out. **The one thing it never shows is the dog walking.** The instrument proves it; the video lets you feel it. Nothing about the marker-and-trace plot changes — this is the payoff after it, not a replacement for it. |
 | **㉑ Aspect & Fall** (garden) | **Three season transitions** — Feb→May→Jul→Oct — in one locked-off corner, scroll-scrubbed. | Proved already (job `139d81f8`). The keyframes exist, are pinned, and are registered to each other. |
 | **Site C** (perfumery) | **The bloom**, bud → fully open, scroll-scrubbed — the arc's headline video, and the reason this vertical was chosen. | Bloom→scent is the whole pitch; it was always specced as the video slot. |
 
@@ -131,6 +134,33 @@ clinical outcome. The Day-84 state must match what the instrument says — a
 sound, even trot, not a bounding hero-dog — and the `/guide` must disclose it
 as generated like every other asset. **A video that over-claims the recovery
 would undo the exact honesty (the Day-12 dip) the page was praised for.**
+*(Held at build: the brief named the failure modes as explicit negatives and
+landed a sound trot first take; `/guide` discloses both the generation and the
+constraint. The pinned still turned out to already BE a trot — its alt text
+saying "running at full stretch" was the only thing over-claiming, and it was
+corrected.)*
+
+> **⚠ CORRECTION (s108) — this table specified a keyframe pair for a motion
+> that has no second keyframe.** ⑳ was scheduled as `start_image` = the pinned
+> Day-84 still, `end_image` = "the same dog mid-stride". But ㉑'s seasons and
+> ㉒'s bloom are **one-way transformations** — Feb genuinely differs from Oct, a
+> bud from an open flower — where an end frame is a real, different picture. A
+> **trot is a cycle**: its last frame looks like its first. That `end_image`
+> would have been a near-duplicate of the start frame, bought at s106's
+> registration coin-flip (~50% of seeds drift out of register).
+>
+> **Built instead as a single `start_image` with no `end_image`** — zero
+> registration risk by construction, one already-approved asset, one take,
+> **17.50cr against this spec's ~72cr line**. This extends s107's "the cheapest
+> registered edit is the one you never make" one step: where the motion is
+> cyclic, there is no second endpoint to mint *at all*.
+>
+> **This matters for site E, which is still unbuilt.** E's beans→grounds→pour is
+> correctly two chained segments — those ARE three genuinely different subjects,
+> so the chaining rule stands. But **the pour itself is cyclic**, and D's
+> veraison is a one-way transformation. Ask which kind each motion is before
+> reaching for a keyframe pair. Banked in
+> `proprietary/templates/meta-prompt.md`.
 
 ### 4. ㉑ Aspect & Fall — REBALANCE the stage (his critique, accepted)
 
