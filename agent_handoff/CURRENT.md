@@ -103,15 +103,19 @@ portfolio site: **stealth is unchanged, and where it is served and under what
 name is his separate call** — building it does not decide it. Its mint budget
 is **ring-fenced before the first A+ mint**.
 
-**⚠ ONE BLOCKING FACT — the EXPIRY DATE, and only he has it.** ≥3 weeks → his
-order (three sites → landing) · **<1 week → build the Thalon landing FIRST** off
-banked knowledge, because an unfinished front door is the one outcome we cannot
-buy back · in between → landing second, budget ring-fenced first. **Ask at the
-opener if he has not said.**
+**⚠ RUNNING ORDER, set by him at the s103 close: *"do the three sites first
+next session."* THE THREE A+ SITES LEAD s104** — then phase 0, then part B.
+The expiry-date question is **CLOSED** (it existed only to settle this order,
+and he settled it directly; a date would still help pace the spend, nothing
+waits on it). **The ring-fence survives and matters MORE now:** reserve the
+Thalon landing's mint budget BEFORE the first A+ mint, because with the sites
+leading, an over-running fix round is how the front door ends up unfunded.
 
-**Scope honesty:** 0+1+2 is a lot for one session. Phase 0 ≈ an hour; part B is
-a real build; the arc is three sites plus a capstone. **Expect the arc to run
-past s104** — the spec is written so it can.
+**Scope honesty, and the slip is named in advance:** the sites plus phase 0
+plus part B will not all fit. **Part B is the item that slips** — it has no
+clock and the credit does. Phase 0 is ~an hour and is a defect s103
+introduced, so it rides after the sites rather than competing with them.
+**Expect the arc to run past s104** — the spec is written so it can.
 
 **CARRIED, recorded not fixed (all with reasons, on their ledger rows):**
 Schedule's **month-density chips clip their own text** · the Intel

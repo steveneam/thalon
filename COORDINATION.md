@@ -234,9 +234,18 @@ sixteen sessions of gates never sat on it.
 
 ## Sprint 9 / s104 — **PLANNED at the s103 close, on his direction**
 
-His words: ***"go ahead with 1 and 2, next session. but also next session, i
-want you to plan to do more landing pages…"*** So s104 carries three things,
-and the third is now specced rather than pending.
+His words, in the order he gave them: ***"go ahead with 1 and 2, next
+session. but also next session, i want you to plan to do more landing
+pages…"*** then, closing the ordering question: ***"do the three sites first
+next session."***
+
+**⚠ THE ORDER HE SET, and it re-sequences this whole block: the THREE A+ SITES
+LEAD s104.** Phases below are listed in their original numbering for
+continuity, but the RUNNING ORDER is **phase 2's three sites → phase 0 → phase
+1**. Rationale, stated so it can be overruled: the credit work has a clock and
+part B does not, so **part B is the item that slips** if the session fills.
+**The expiry date is CLOSED as a blocker** — it was only ever asked to decide
+this order, and he decided it directly.
 
 ### Phase 0 — the honesty gap s103 opened (small, and it goes first)
 
@@ -295,12 +304,12 @@ where it is served and under what name is **his separate call**; building it
 does not decide it. Its mint budget is **ring-fenced before the first A+ mint**
 so a fix round cannot eat the front door.
 
-**⚠ THE ONE BLOCKING FACT — the EXPIRY DATE, and only he has it.** His order
-(three sites → landing) is right on the merits. **But if the credit dies inside
-a week the order INVERTS**, because an unfinished front door is the one outcome
-we cannot buy back. Ladder in the spec: ≥3 weeks → his order · <1 week →
-landing FIRST off banked knowledge · in between → landing second with its
-budget ring-fenced first.
+**THE ORDER IS DECIDED AND NOTHING BLOCKS IT** — *"do the three sites first
+next session."* The expiry-date question is CLOSED; it existed only to settle
+this, and he settled it directly. **The ring-fence survives and matters more:**
+the Thalon landing's mint budget is reserved BEFORE the first A+ mint, because
+with the sites leading, an over-running fix round is exactly how the front door
+ends up unfunded.
 
 **Honest scope note:** phases 0+1+2 is a lot for one session. Phase 0 is
 roughly an hour; part B is a real build; the landing arc is three sites plus a

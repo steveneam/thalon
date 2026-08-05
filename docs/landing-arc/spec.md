@@ -1,8 +1,8 @@
 # Landing arc — three A+ sites, then Thalon's own landing page
 
-> **Status: SPECCED s103, awaiting one founder fact (the expiry date) — build
-> opens s104.** Founder-directed at the s103 close. Spec of record for the
-> A+ animation family and the Thalon landing page it feeds.
+> **Status: SPECCED s103, ORDER DECIDED, nothing blocking — build opens s104
+> with the three sites.** Founder-directed at the s103 close. Spec of record
+> for the A+ animation family and the Thalon landing page it feeds.
 
 ## The ask, verbatim
 
@@ -40,25 +40,24 @@ Three founder decisions land here, and two of them amend standing method.
    sessions). This makes [[own-visual-engine-directive]] materially more
    urgent, and it puts a clock on every mint in this arc.
 
-## The one fact that decides the ORDER, and only he has it
+## The ORDER — DECIDED by him, s103 close
 
-**When does the credit actually expire?** His stated order is: three A+ sites
-first, then Thalon's landing page *"take in all that knowledge."* That order is
-right on the merits — the landing page is the capstone and should be built by
-someone who has just built three.
+> ***"do the three sites first next session"***
 
-**But if the expiry is inside a week, the order inverts**, because the Thalon
-landing is the artifact we cannot afford to have unfinished when the credit
-dies. A portfolio site is a portfolio option; the landing page is the product's
-front door.
+**The three A+ sites lead; the Thalon landing page is the capstone.** He set
+this directly rather than by the expiry date, so **the expiry question is
+CLOSED as a blocker** — it was only ever asked to decide this, and he decided
+it. (A date is still useful for pacing the spend and remains a nice-to-know on
+his board, but nothing waits on it.)
 
-- **Expiry ≥ 3 weeks away** → build in his order (three sites → landing).
-- **Expiry < 1 week** → build the **Thalon landing FIRST** off the banked
-  knowledge we already have, then spend what remains on the A+ sites.
-- **In between** → landing page second, but its mint budget is reserved and
-  ring-fenced BEFORE the first A+ mint, so it can never be crowded out.
+**The one protection that survives, and matters MORE now:** the Thalon landing
+page's mint budget is **ring-fenced before the first A+ mint**. With the sites
+going first, an over-running fix round on site B or C is exactly how the front
+door ends up unfunded. Reserve it, then spend the sites out of what remains.
 
-Everything below is written so either order works without a re-spec.
+**Within the session:** the sites lead. The s104 phase-0 honesty fix (~1hr, a
+defect s103 introduced) rides after them, and **control-arc part B is the item
+that slips** if the session fills — it has no clock, and the credit does.
 
 ## The three A+ sites
 
@@ -177,8 +176,9 @@ stealth posture changed without him saying so.
 
 ## Open calls — his, and each is one line
 
-1. **The expiry date.** The only genuinely blocking fact, and it sets the order
-   (see above). Everything else can proceed under assumption.
+1. ~~The expiry date.~~ **CLOSED — he set the order directly** (*"do the three
+   sites first next session"*), which is all the date was ever needed for. A
+   date would still help pace the spend; nothing waits on it.
 2. **The two verticals I chose** — garden design for the seasons-tree,
    botanical perfumery for the bloom. His *"and etc."* delegated these; both
    are one word to overrule and cheap to change before a mint.
