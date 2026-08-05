@@ -18,12 +18,15 @@
     font-weight: 500; font-style: normal; font-display: swap; }
 
   :root {
-    --paper: #F5F2EA;
-    --blossom: #FCFBF7;
+    --paper: #F6F3EB;
+    /* the alternating band is a soft MEADOW wash, not a clinical near-white —
+       the page should feel like a hedgerow, not a corridor */
+    --blossom: #EDF1E5;
     --paper-2: #EBE5D7;
     --ink: #1C231E;
     --ink-soft: #4E594F;
-    --rule: #CFC7B4;
+    --meadow: #55684A;
+    --rule: #CBCBB6;
     --haw: #9E2C18;
     --far: #B4BBB5;
     --pad: clamp(22px, 4vw, 40px);
@@ -45,7 +48,7 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--pad); }
   .narrow { max-width: 660px; }
   .eyebrow { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--ink-soft); }
+    text-transform: uppercase; color: var(--meadow); }
   .h1 { font-size: clamp(42px, 6.6vw, 92px); line-height: .96; letter-spacing: -.022em; }
   .h2 { font-size: clamp(31px, 4.2vw, 54px); line-height: 1.04; letter-spacing: -.016em; }
   .h3 { font-size: 21px; line-height: 1.22; font-weight: 500; }
@@ -102,6 +105,7 @@
   .chapter .day { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .1em;
     color: var(--haw); display: block; margin-bottom: 9px; }
   .chapter h3 { margin-bottom: 8px; }
+  .chapter p.small + p.small { margin-top: 11px; }
   .chapter .figures { font-family: "DM Mono", ui-monospace, monospace; font-size: 11px; color: var(--ink-soft);
     margin-top: 12px; letter-spacing: .02em; }
   .study-note { font-family: "DM Mono", ui-monospace, monospace; font-size: 11px; color: var(--haw);
@@ -118,8 +122,9 @@
   .stack { display: flex; flex-direction: column; gap: 16px; }
   .sec { padding: 84px 0; }
 
-  .close-fig img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
-  .haw-fig img { width: 100%; aspect-ratio: 16 / 5; object-fit: cover; }
+  .close-fig img, .home-fig img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
+  .grass-fig img { width: 100%; aspect-ratio: 5 / 2; object-fit: cover; }
+  figcaption { color: var(--ink-soft); }
 
   .foot { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; padding: 44px 0; }
 
@@ -191,7 +196,7 @@
       <!-- sticky instrument -->
       <div class="stage">
         <div class="stage-frame">
-          <svg id="gait" viewBox="178 104 512 208" role="img"
+          <svg id="gait" viewBox="178 104 512 228" role="img"
                aria-label="An animated kinematic diagram of a dog walking on a treadmill. The right hind limb is highlighted; the loop traced by each paw is drawn beside it.">
             <g id="g-grid"></g>
             <g id="g-traces"></g>
@@ -199,6 +204,9 @@
             <g id="g-far"></g>
             <g id="g-spine"></g>
             <g id="g-near"></g>
+            <text id="sniff" x="186" y="326" opacity="0"
+                  font-family="DM Mono, ui-monospace, monospace" font-size="11"
+                  fill="#55684A">(stopped to sniff something)</text>
           </svg>
           <div class="readout">
             <div><span class="k">Day</span><span class="v" id="r-day">0</span></div>
@@ -267,6 +275,8 @@
           <p class="small">Symmetry back to ninety-four percent, and the red loop sits back on top
             of its partner where it belongs. The number is the evidence; the walk is the point. He
             takes the long way home, which is the only outcome his owner ever asked for.</p>
+          <p class="small">He also stopped twice on the way back to sniff something, and wandered
+            off the line to do it. We counted that as a full recovery.</p>
           <p class="figures">lameness 0/5 · symmetry 94% · weight on limb 96%</p>
         </article>
 
@@ -276,6 +286,13 @@
     </div>
   </div>
 </section>
+
+<!-- THE PAYOFF — the instrument has done its job; the animal is the point -->
+<figure class="close-fig" style="margin:0">
+  <img src="assets/close.webp" width="1600" height="686" alt="The same collie running at full stretch across open green land in late evening light." />
+  <figcaption class="wrap small" style="padding-top:14px;padding-bottom:4px">Day 84. This is what
+    ninety-four percent looks like from the other end of a field.</figcaption>
+</figure>
 
 <!-- WHAT WE DO -->
 <section class="wrap sec" id="doing">
@@ -293,8 +310,8 @@
   </div>
 </section>
 
-<figure class="wrap haw-fig" style="margin:0 auto">
-  <img src="assets/haw.webp" width="1600" height="500" alt="Hawthorn berries and leaves in raking light against a dark hedge." />
+<figure class="grass-fig" style="margin:0">
+  <img src="assets/grass.webp" width="1600" height="640" alt="A dog rolling on its back in long sunlit meadow grass, all four legs in the air." />
 </figure>
 
 <!-- THE YARD — the dread counter -->
@@ -308,17 +325,36 @@
           walled garden with an arch straight through to the green — you wait outside on the
           grass, and we come and find you.</p>
         <p class="small">For cats there is a separate room off the far side of the yard, which
-          never has a dog in it and never smells of one.</p>
+          never has a dog in it and never smells of one. It gets the afternoon sun, and it is
+          usually the hardest room in the building to get anyone to leave.</p>
       </div>
       <figure style="margin:0">
-        <img src="assets/yard.webp" width="1500" height="1000" alt="A walled garden in full sun with a five-bar gate standing open onto green common land." />
+        <img src="assets/yard.webp" width="1500" height="1000" alt="A walled garden in full sun, with a brick archway standing open onto green common land." />
       </figure>
     </div>
   </div>
 </section>
 
+<!-- THE CAT ROOM — openness, and proof this is not only a dog place -->
+<section class="wrap sec" style="padding-top:0">
+  <div class="two">
+    <figure style="margin:0">
+      <img src="assets/cat.webp" width="1400" height="1000" alt="A tabby cat asleep in a broad patch of sun on a wide windowsill, one large pane of glass onto a green garden beyond." />
+    </figure>
+    <div class="stack">
+      <span class="eyebrow">The cat room</span>
+      <h2 class="h2">One big window, and no dogs.</h2>
+      <p class="lede">Cats do not find a waiting room stressful because it is busy. They find it
+        stressful because it smells of dogs. So theirs is a separate room on the quiet side, with
+        one wide pane onto the garden and somewhere high to sit.</p>
+      <p class="small">Carriers go on the floor, not the counter, and stay covered until we are
+        ready. Small things, and they are most of the difference.</p>
+    </div>
+  </div>
+</section>
+
 <!-- PRACTITIONER -->
-<section class="wrap sec">
+<section class="band"><div class="wrap sec">
   <div class="two">
     <figure style="margin:0">
       <img src="assets/vet.webp" width="1400" height="1000" alt="A vet in her sixties in profile, her hand deep in a collie's ruff, looking down at the dog." />
@@ -333,6 +369,26 @@
         assigned to a named vet, and if she is away, the person you see has read the whole file
         rather than the last line of it.</p>
     </div>
+  </div>
+</div></section>
+
+<!-- WHY WHITETHORN — the name earns the palette, and the berry is where the
+     one accent colour on this page comes from -->
+<section class="wrap sec">
+  <div class="two">
+    <div class="stack">
+      <span class="eyebrow">The name</span>
+      <h2 class="h2">Whitethorn is hawthorn.</h2>
+      <p class="lede">It is the tree in every hedge along the lanes here — the one that marks
+        where one field stops and the next begins, and that grows over gates until nobody can
+        remember which way they opened.</p>
+      <p class="small">It is also, and we did not plan this, an old remedy for the heart. The one
+        red on this page is borrowed from its berry, and we use it for nothing except a reading
+        we have actually taken.</p>
+    </div>
+    <figure style="margin:0">
+      <img src="assets/haw.webp" width="1400" height="1000" alt="Hawthorn berries and leaves in raking light against a dark hedge." />
+    </figure>
   </div>
 </section>
 
@@ -362,8 +418,10 @@
   </div>
 </section>
 
-<figure class="close-fig" style="margin:0">
-  <img src="assets/close.webp" width="1600" height="686" alt="The same collie running at full stretch across open green land in late evening light." />
+<figure class="home-fig" style="margin:0">
+  <img src="assets/home.webp" width="1600" height="686" alt="An older collie asleep in a wide patch of afternoon sun on a wooden floor, an open door to a green garden behind." />
+  <figcaption class="wrap small" style="padding-top:14px">And then, mostly, nothing happens for
+    a long time. That is the whole job.</figcaption>
 </figure>
 
 <footer class="wrap">
@@ -506,6 +564,8 @@
     var c = el("circle", { r: 3.2, fill: INK }); G.spine.appendChild(c); return c;
   });
 
+  var sniff = document.getElementById("sniff");
+
   // paw-strike trail — the data written on the ground
   var prints = [], printNodes = [];
   for (var pi = 0; pi < 26; pi++) {
@@ -592,9 +652,12 @@
     for (var i = 0; i < printNodes.length; i++) {
       var p = prints[i];
       if (!p) { printNodes[i].setAttribute("opacity", 0); continue; }
+      // a wandering print drifts further off the line the further it travels
+      var drift = p.wander ? Math.min(26, (p.x0 - p.x) * 0.2) : 0;
+      var py = GROUND + 2 - drift;
       printNodes[i].setAttribute("x1", (p.x - 5).toFixed(1));
       printNodes[i].setAttribute("x2", (p.x + 5).toFixed(1));
-      printNodes[i].setAttribute("y1", GROUND + 2); printNodes[i].setAttribute("y2", GROUND + 2);
+      printNodes[i].setAttribute("y1", py.toFixed(1)); printNodes[i].setAttribute("y2", py.toFixed(1));
       printNodes[i].setAttribute("stroke", p.hot ? HAW : INK);
       printNodes[i].setAttribute("opacity", p.hot ? 0.75 : 0.32);
     }
@@ -624,13 +687,17 @@
       }
       for (var j = 0; j < prints.length; j++) prints[j].x -= belt;
       while (prints.length && prints[0].x < LEFT - 10) prints.shift();
+      // THE WINK: once he is sound (and only then), the trail wanders off the
+      // measured line. A clinical instrument suddenly containing a real dog.
+      var sound = state.idx === stops.length - 1;
       ["LH", "RH", "LF", "RF"].forEach(function (k) {
         if (P.contact[k] && !lastContact[k]) {
-          prints.push({ x: P.legs[k].fx, hot: k === "RH" });
+          prints.push({ x: P.legs[k].fx, x0: P.legs[k].fx, hot: k === "RH", wander: sound });
           if (prints.length > printNodes.length) prints.shift();
         }
         lastContact[k] = P.contact[k];
       });
+      sniff.setAttribute("opacity", sound ? 0.9 : 0);
     }
 
     ["LH", "LF", "RF", "RH"].forEach(function (k) {

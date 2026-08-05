@@ -188,6 +188,37 @@ Reduced-motion gets the same. The scroll clock is a progressive enhancement
 over `transform`/`opacity` only; the default markup state is the complete
 static essay.
 
+## Fix round (founder-directed, same session)
+
+His verdict on the first build: it needed **more nature, openness and
+light-heartedness** — *"you dont want to give off a sterile hospital
+experience, but caring, warm and empathy and friendly place."* He was right,
+and one item was an outright defect:
+
+- **The page had NO WINK.** One was designed (the dog turning to look out at
+  Day 84) and it was silently lost when the instrument changed register from a
+  drawn dog to the kinematic plot. Restored in the vertical's own language:
+  at Day 84 only, the paw-prints wander up off the measured line under
+  *(stopped to sniff something)* — and it is written into the Day 84 copy too,
+  so it survives no-JS. **Lesson: a register change can quietly drop a
+  requirement that belonged to the old register. Re-check the checklist after
+  any change of approach, not just after a change of code.**
+- **The instrument now hands off to a photograph.** The recovery used to end
+  on a number with the running shot four sections below; it now ends on the
+  dog. Evidence gets you there, the animal is the point.
+- **Three new mints for warmth and open air** — a dog rolling on its back in
+  meadow grass, a cat asleep in sun behind one wide pane, and a close of a dog
+  asleep at home. The dark hawthorn band stopped being a divider and became
+  the **"Whitethorn is hawthorn"** section, which earns the image by
+  explaining where the page's one red comes from.
+- **The band went from clinical near-white to a soft meadow wash**, and
+  eyebrow labels went meadow green. Haw red stays instrument-only.
+- **Copy warmed** without softening any honesty — the Day-12 dip, the
+  fictional disclosure and the real 0–5 scale are untouched.
+
+Spend across the whole site after the fix round: **20 generated, 8 kept,
+2.40cr.**
+
 ## Decision annotations
 
 - **The gait is the only animation on the page.** One clock. A page about
