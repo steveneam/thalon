@@ -107,8 +107,8 @@
     The page has one moving part: a calendar year, driven by scrolling. It sets
     the coloured-pencil fill in the beds, which species are lit in their own
     colour, the shade the canopy throws across the terrace, the three readouts,
-    the playhead crossing the interest calendar, and which of four photographs of
-    the same garden corner is showing.
+    the playhead crossing the interest calendar, and how far the photograph of
+    the garden corner has moved through its own year.
   </p>
   <p>
     The original idea for this page was a naturalistic tree drawn in code, turning
@@ -123,20 +123,35 @@
     feeling, the diagram carries the evidence.</strong>
   </p>
 
-  <h2>The four seasons are one place</h2>
+  <h2>The seasons are one place, and now they move</h2>
   <p>
-    The four photographs beside the plan are deliberately the same corner: the
-    same paving, the same wall, the same bench, the same birches. They were made
-    by generating the July frame first and then editing that image into February,
-    May and October, so that the only thing changing is the season.
+    The photograph on the sheet is deliberately one corner: the same paving, the
+    same wall, the same bench, the same birches. Four keyframes were generated
+    first — July, then February, May and October edited out of it — and the page
+    then moves <em>between</em> them. Scrolling does not cut from one photograph
+    to the next; it scrubs three generated transitions, February to May to July
+    to October, in which the camera never moves and only the planting changes.
   </p>
   <p>
-    Two takes were rejected on the way, and both rejections are the honest kind
-    worth recording. The first February attempt drifted to a different viewpoint,
-    which would have quietly turned “the same corner” into a false caption. The
-    first May attempt came back with the hydrangea in full flower — botanically
-    wrong for May, and in direct contradiction of this page's own interest
-    calendar sitting six inches below it.
+    The transitions are generated video, but the page never plays a video. Each
+    one is decoded to a sequence of stills and the scroll position picks the
+    frame, because seeking a compressed video file lands on its keyframes and
+    stutters. Outside February to October the sequence holds at its nearest end:
+    that is the extent of the record, and it is not padded out.
+  </p>
+  <p>
+    Three takes were rejected on the way, and the rejections are the honest kind
+    worth recording. The first February keyframe drifted to a different
+    viewpoint, which would have quietly turned “the same corner” into a false
+    caption. The first May keyframe came back with the hydrangea in full flower —
+    botanically wrong for May, and in direct contradiction of this page's own
+    interest calendar. And the October keyframe, which shipped in the first
+    version of this page, turned out to be a <em>different camera</em>: lower,
+    further back, and lit by a hard backlight the other three do not have. A
+    cross-fade had been hiding it. Scrubbing between frames does not hide
+    anything, so the fault became obvious the moment the page started to move,
+    and October was regenerated to match. Two of the three defects on this page
+    were caught by making it move.
   </p>
 
   <h2>Provenance — every image on the page</h2>
@@ -149,13 +164,17 @@
       <tr><td>Hero — the garden at year eleven</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only, first take</td></tr>
       <tr><td>The site before</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only, first take</td></tr>
       <tr><td>The drawing on site</td><td class="mono">nano_banana_2</td><td class="mono">2.00</td><td>text-precise seat; the sheet in frame is blank by composition, not by instruction</td></tr>
-      <tr><td>Twin · July</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only — the anchor frame for the other three</td></tr>
-      <tr><td>Twin · February</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame; second take (first drifted viewpoint)</td></tr>
-      <tr><td>Twin · May</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame; second take (first flowered out of season)</td></tr>
-      <tr><td>Twin · October</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame, first take</td></tr>
+      <tr><td>Keyframe · July</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>text only — the anchor frame for the other three, and the static frame served without JavaScript</td></tr>
+      <tr><td>Keyframe · February</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame; second take (first drifted viewpoint)</td></tr>
+      <tr><td>Keyframe · May</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame; second take (first flowered out of season)</td></tr>
+      <tr><td>Keyframe · October <em>(superseded)</em></td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the July frame — measured 24px+ out of register against the other three; replaced</td></tr>
+      <tr><td>Keyframe · October, re-minted</td><td class="mono">seedream_v4_5</td><td class="mono">2.00</td><td>two candidates minted and measured; one landed within 1px, the other drifted the same 24px+ on the same prompt</td></tr>
+      <tr><td>Transition · February → May</td><td class="mono">seedance_2_0</td><td class="mono">22.50</td><td>5s, silent, generated between the two pinned keyframes; first take</td></tr>
+      <tr><td>Transition · May → July</td><td class="mono">seedance_2_0</td><td class="mono">22.50</td><td>first take</td></tr>
+      <tr><td>Transition · July → October</td><td class="mono">seedance_2_0</td><td class="mono">90.00</td><td>four attempts, 22.50 each. Two recomposed the shot at the first frame — both were aiming at the out-of-register October keyframe. One was charged and never returned a result. The fourth, generated after October was re-minted, joins the previous segment with a <strong>zero-pixel</strong> seam</td></tr>
       <tr><td>As built</td><td class="mono">seedream_v4_5</td><td class="mono">1.00</td><td>edited from the hero frame — same view, different hour</td></tr>
       <tr><td>The studio</td><td class="mono">nano_banana_2</td><td class="mono">2.00</td><td>text-precise seat, first take</td></tr>
-      <tr><td colspan="2"><strong>Kept 9 of 11 generated</strong></td><td class="mono"><strong>13.00</strong></td><td>two rejects, both named above</td></tr>
+      <tr><td colspan="2"><strong>Total across both build sessions</strong></td><td class="mono"><strong>150.00</strong></td><td>13.00 of stills, then 137.00 adding the motion — six rejects in all, every one named here</td></tr>
     </tbody>
   </table>
   </div>
@@ -174,14 +193,21 @@
         <strong>Sometype Mono</strong> for every piece of drawing-sheet
         apparatus. A real sheet has two lettering registers; so does this page.</li>
     <li>The plan, the survey, the interest calendar and the three maturity
-        diagrams are all drawn in SVG at load. They cost nothing to generate and
-        they can respond to the visitor, which a photograph cannot.</li>
+        diagrams are SVG, written into the page itself rather than drawn by
+        script — the script only moves what is already there. They cost nothing
+        to generate and they can respond to the visitor, which a photograph
+        cannot. That is the division: the drawings are computed and true, the
+        photograph is generated and honest about it.</li>
     <li>The one colour rule: <strong>saturated colour belongs to plants only</strong>,
         and it changes with the month. Nothing decorative on this page is coloured.</li>
     <li><strong>Reduced motion</strong> freezes the clock at high summer, shows every
-        chapter at once and runs no cross-fades. <strong>With JavaScript off</strong>,
-        every chapter, the whole interest calendar and the plan are all still there
-        in the markup — including the note on the terrace.</li>
+        chapter at once, and never builds the frame sequence at all — a reader who
+        asked for less motion is served the single static July photograph.
+        <strong>With JavaScript off</strong>, every chapter, the whole interest
+        calendar and the plan are all still there in the markup — including the note
+        on the terrace — and the photograph is that same static July frame. The
+        scrubbed transition is an enhancement layered on top; none of its frames are
+        in the document until the page decides to move.</li>
   </ul>
 
   <hr />

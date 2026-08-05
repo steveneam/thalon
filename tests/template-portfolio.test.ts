@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { frameFileNames } from "@thalon/engine";
 
 /**
  * Template-portfolio ratchets (2026-07-14, session 33 — the scaffolding
@@ -141,16 +142,30 @@ describe("template portfolio", () => {
       if (!existsSync(assetsDir)) continue;
       const manifest = JSON.parse(
         readFileSync(path.join(assetsDir, "manifest.json"), "utf8"),
-      ) as Array<{ file: string; pinnedHash: string; width: number; height: number }>;
-      const manifested = new Set(manifest.map((m) => m.file));
+      ) as Array<{
+        file: string;
+        pinnedHash: string;
+        width: number;
+        height: number;
+        frames?: number;
+      }>;
+      // A frame-sequence entry stands for all N of its files at once, so the
+      // bijection is checked against the EXPANDED names. Expansion goes
+      // through the same helper the exporter uses, so a manifest entry and
+      // the files on disk cannot drift apart on naming.
+      const expand = (e: { file: string; frames?: number }): string[] =>
+        e.frames === undefined ? [e.file] : frameFileNames(e.file, e.frames);
+      const manifested = new Set(manifest.flatMap(expand));
       for (const entry of manifest) {
         expect(entry.pinnedHash, `${slug}: ${entry.file} pinnedHash malformed`).toMatch(
           /^[0-9a-f]{64}$/,
         );
-        expect(
-          existsSync(path.join(assetsDir, entry.file)),
-          `${slug}: manifested file ${entry.file} missing — run export-template-assets`,
-        ).toBe(true);
+        for (const file of expand(entry)) {
+          expect(
+            existsSync(path.join(assetsDir, file)),
+            `${slug}: manifested file ${file} missing — run export-template-assets`,
+          ).toBe(true);
+        }
       }
       for (const file of readdirSync(assetsDir)) {
         if (file === "manifest.json") continue;

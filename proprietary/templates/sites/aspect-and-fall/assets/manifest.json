@@ -21,29 +21,8 @@
     "quality": 82
   },
   {
-    "file": "twin-feb.webp",
-    "pinnedHash": "1e325523fa480a89c15de12ee56aeac4816d85b30c0d1f58ce3624489f4e2157",
-    "width": 1600,
-    "height": 900,
-    "quality": 82
-  },
-  {
-    "file": "twin-may.webp",
-    "pinnedHash": "d3c94907ba54b345c8872f54bb2e020649a84ae9bb090361513e353727d07471",
-    "width": 1600,
-    "height": 900,
-    "quality": 82
-  },
-  {
     "file": "twin-jul.webp",
     "pinnedHash": "1ebc341a942dad08f3e5859fbe2cccd7acd9369f19bc33368b1106ad99ac7d98",
-    "width": 1600,
-    "height": 900,
-    "quality": 82
-  },
-  {
-    "file": "twin-oct.webp",
-    "pinnedHash": "8360da67d468f1dd2bbe43351d20d11a50e73876075ef4f905316ea17d9c2ee4",
     "width": 1600,
     "height": 900,
     "quality": 82
@@ -61,5 +40,32 @@
     "width": 1024,
     "height": 1024,
     "quality": 82
+  },
+  {
+    "file": "season-1-%02d.webp",
+    "pinnedHash": "f69daabea6bed6948ecd541a4445200468b99571b80064a895d784bf13288377",
+    "ext": "mp4",
+    "frames": 18,
+    "width": 940,
+    "height": 529,
+    "quality": 50
+  },
+  {
+    "file": "season-2-%02d.webp",
+    "pinnedHash": "76bed439285e7bfc8b806e9981cf20f2cf4d194f2a5f3a750ee91fb1cf6187ad",
+    "ext": "mp4",
+    "frames": 18,
+    "width": 940,
+    "height": 529,
+    "quality": 50
+  },
+  {
+    "file": "season-3-%02d.webp",
+    "pinnedHash": "bdb5855155fd1482ebffd4cbc4038714f9eb29d2634186d93c173bb3795ac54f",
+    "ext": "mp4",
+    "frames": 18,
+    "width": 940,
+    "height": 529,
+    "quality": 50
   }
 ]

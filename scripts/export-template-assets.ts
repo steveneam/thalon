@@ -10,11 +10,18 @@
  *
  * Usage (from repo root): npx tsx scripts/export-template-assets.ts <slug>
  */
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 import { getObjectStore } from "@thalon/platform";
-import { readPinnedAsset } from "@thalon/engine";
+import {
+  evenlySpacedIndices,
+  frameFileNames,
+  pinnedAssetKey,
+  readPinnedAsset,
+} from "@thalon/engine";
 
 interface ManifestEntry {
   file: string;
@@ -22,6 +29,20 @@ interface ManifestEntry {
   width: number;
   height: number;
   quality: number;
+  /** Extension of the PINNED ORIGINAL in the object store. Defaults to "png".
+   *  A video original ("mp4") is never emitted as-is — it must carry `frames`,
+   *  because the page scrubs a frame sequence, never the mp4 itself. */
+  ext?: string;
+  /** Frame-sequence derive: extract exactly this many evenly-spaced stills
+   *  from a pinned video and encode each to webp. `file` is then a printf
+   *  pattern carrying one `%0Nd` (e.g. "season-1-%03d.webp"), and the entry
+   *  stands for all N files at once.
+   *
+   *  Why frames and not the mp4: scrubbing an h264 file by setting
+   *  `video.currentTime` seeks to keyframes and janks. A frame sequence
+   *  decodes without seek cost and scrubs deterministically (s105 finding).
+   *  The mp4 stays the pinned original; the frames are the derive. */
+  frames?: number;
   /** Luminance→alpha conversion: white areas of the pinned matte become
    *  opaque, black transparent. For CSS mask-image assets — Safari's
    *  -webkit-mask reads alpha only, never luminance. */
@@ -31,6 +52,39 @@ interface ManifestEntry {
    *  Defaults to centre. Lets a derive keep a chosen band of the pinned
    *  original — still fully deterministic from manifest + store. */
   position?: string;
+}
+
+/**
+ * Emits a frame sequence from a pinned video: every source frame is decoded
+ * once, `entry.frames` of them are sampled evenly (endpoints always kept),
+ * and each is resized and encoded to webp under the entry's name pattern.
+ *
+ * Decoding the whole clip and then sampling — rather than asking ffmpeg for
+ * an fps — keeps the output a pure function of (pinned bytes, frames, size,
+ * quality), which is what makes the derive reproducible from manifest + store.
+ */
+async function emitFrames(assetsDir: string, entry: ManifestEntry, video: Buffer): Promise<string[]> {
+  const names = frameFileNames(entry.file, entry.frames!);
+  const work = mkdtempSync(path.join(tmpdir(), "thalon-frames-"));
+  try {
+    const src = path.join(work, "source.mp4");
+    writeFileSync(src, video);
+    execFileSync("ffmpeg", ["-v", "error", "-i", src, "-vsync", "0", path.join(work, "%05d.png")]);
+    const decoded = readdirSync(work)
+      .filter((f) => f.endsWith(".png"))
+      .sort();
+    const picked = evenlySpacedIndices(decoded.length, entry.frames!);
+    for (const [i, index] of picked.entries()) {
+      const out = await sharp(path.join(work, decoded[index]))
+        .resize(entry.width, entry.height, { fit: "cover", position: entry.position ?? "centre" })
+        .webp({ quality: entry.quality, effort: 6 })
+        .toBuffer();
+      writeFileSync(path.join(assetsDir, names[i]), out);
+    }
+    return names;
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
 }
 
 async function main() {
@@ -49,10 +103,23 @@ async function main() {
 
   const store = getObjectStore();
   for (const entry of entries) {
-    const key = `assets/${entry.pinnedHash}/asset.png`;
+    const ext = entry.ext ?? "png";
+    const key = pinnedAssetKey(entry.pinnedHash, ext);
     const original = await readPinnedAsset(store, key);
     if (!original) {
       throw new Error(`pinned original missing or hash-mismatched for "${entry.file}" (${key})`);
+    }
+    // A video original has no still derive: the page scrubs frames, so an
+    // entry pointing at one without `frames` is a manifest bug, not a resize.
+    if (ext === "mp4" && entry.frames === undefined) {
+      throw new Error(`"${entry.file}" pins an mp4 but declares no frames count`);
+    }
+    if (entry.frames !== undefined) {
+      const names = await emitFrames(path.join(siteDir, "assets"), entry, original);
+      console.log(
+        `${entry.file}: ${names.length} frames ${entry.width}x${entry.height} q${entry.quality} → ${names[0]} … ${names[names.length - 1]}`,
+      );
+      continue;
     }
     let out: Buffer;
     if (entry.alpha) {

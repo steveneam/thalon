@@ -151,6 +151,33 @@ botanically wrong and contradicted the interest calendar printed directly below
 it. Any generated image asserting a season, a count, a species or a time must
 be checked against what the page's own instrument says — §casting (3) extended
 from copy to DATA. It was cheaper to re-mint than to soften the calendar.
+Corollary (㉑, s106 — **a CROSS-FADE HIDES misregistration; a SCRUB exposes it,
+and a ratchet applied to three assets out of four is not applied**): the October
+keyframe shipped in ㉑ was a *different camera* — lower, further back, hard
+backlight — measured **24px+ out of register** against the other three while the
+page captioned all four "the same corner". A dissolve between differently-framed
+shots reads as a dissolve, so nothing looked wrong for a whole session. The
+cause was in the prompt and was already on the books: February and May had been
+minted with the layout-naming fix above, and **October still carried the exact
+phrasing the fix replaced** — *"keep the camera position, the framing …
+identical to the reference"*. Three rules come out of it. (1) **MEASURE
+registration, never eyeball it** — a greyscale mean-abs-difference search over a
+±24px window takes a minute and returns a number; two of the four pairs looked
+identical and were not. (2) **Mint TWO candidates for any registered edit**: on
+the re-mint, candidate A landed within **1px** and candidate B drifted the same
+24px+ on the same prompt and a different seed, so the technique is roughly a
+coin flip per seed and picking by measurement is the whole job. (3) When you
+write a mint corollary, **re-mint every asset in the batch that was made the old
+way**, or the batch quietly keeps the defect the corollary exists to stop.
+Corollary (㉑, s106 — **a generated transition is pulled by its END frame**):
+two attempts at a Jul→Oct segment recomposed the shot at *frame 0* and added
+lens flare, even when handed the previous segment's exact last frame as
+`start_image`. Both were interpolating honestly toward a misregistered
+`end_image`. **Do not chase a bad segment with prompt language — fix the
+keyframe it is aiming at.** Once October was re-minted in register, the segment
+had nothing to drift toward. Corollary to the corollary: chain segments
+**end-frame to start-frame** (upload the previous clip's last frame as the next
+one's `start_image`) so seams are exact by construction rather than by luck.
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that

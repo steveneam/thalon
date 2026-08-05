@@ -115,9 +115,16 @@
   .chap h3 { margin: 10px 0 8px; }
 
   .stage-col { position: relative; }
+  /* The photograph LEADS and the drawing proves (founder direction, s105: a
+     top-down plan does not show what the season actually does). The shot takes
+     the 1fr row — the largest band on the sheet — and the plan and calendar sit
+     under it at fixed heights. Before this the plan held 1fr and the photograph
+     a 150-268px strip, which ranked the evidence above the thing it is evidence
+     OF. Nothing about the instrument is weakened: it still drives every readout. */
   .stage {
     position: sticky; top: 0; height: 100svh;
-    display: grid; grid-template-rows: auto 1px minmax(0,1fr) clamp(150px,23vh,268px) auto;
+    display: grid;
+    grid-template-rows: auto 1px minmax(0,1fr) clamp(230px,31vh,340px);
     gap: 9px; padding: clamp(14px,1.5vw,22px) clamp(16px,2vw,30px) clamp(12px,1.4vw,20px);
   }
   .tblock { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: start; }
@@ -129,17 +136,29 @@
   .twin img {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     /* the bench, walls and drystone piers sit low in the frame, and they are
-       what proves all four months are the same corner — a centred crop cuts
+       what proves every month is the same corner — a centred crop cuts
        them off, so the crop is anchored low. */
-    object-position: 50% 72%;
-    opacity: 0; transition: opacity .55s ease;
+    object-position: 50% 68%;
   }
-  .twin img.on { opacity: 1; }
+  /* The static frame is what no-JS and reduced-motion readers get, and it is
+     the page's honest resting state. It stays in the markup and is only faded
+     out once the scrubbed sequence has a decoded frame to put in its place —
+     never before, or the stage flashes empty on a slow connection. */
+  .twin .still { opacity: 1; transition: opacity .4s ease; }
+  .twin.scrubbing .still { opacity: 0; }
+  /* No transition: a scrub swaps, it does not dissolve. Cross-fading stacked
+     frames puts two half-transparent images over a hidden still and lets it
+     bleed through on every step, which reads as a flicker in the wrong colour. */
+  .twin .fr { opacity: 0; }
+  .twin .fr.on { opacity: 1; }
   .twin figcaption {
     position: absolute; left: 10px; bottom: 8px; margin: 0;
     background: rgba(242,238,228,.86); padding: 3px 8px;
   }
-  .cal svg { width: 100%; display: block; }
+  /* preserveAspectRatio="none", so the calendar stretches to whatever height
+     it is given and must be TOLD one. Thirteen species need room: left to its
+     intrinsic 900x172 aspect the names collide. */
+  .cal svg { width: 100%; display: block; height: 268px; }
 
   /* ---------- 03 maturity ---------- */
   .three { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: clamp(14px,2vw,26px); }
@@ -184,10 +203,14 @@
     .year { display: flex; flex-direction: column; }
     .stage-col { order: -1; position: sticky; top: 0; z-index: 2; }
     .stage {
+      /* 52svh is not a taste call: the chapters below are 46svh tall, and the
+         band left under the pinned sheet has to stay TALLER than a chapter, or
+         a chapter is marked active while its own heading sits behind the
+         sheet — the defect site A shipped. Raising this to 56svh reintroduced
+         it by 17px. Any change here re-measures that. */
       position: static; height: 52svh;
-      grid-template-rows: auto 1px minmax(0,1fr) auto; gap: 7px;
+      grid-template-rows: auto 1px minmax(0,1fr) clamp(96px,13svh,136px); gap: 7px;
     }
-    .stage .twin, .stage .cal { display: none; }
     /* chapters pass UNDER the stage, so each one is sized to put its own
        heading in the visible lower half rather than behind the sheet. */
     .chap { min-height: 46svh; padding: 26px 0 22px; }
@@ -198,7 +221,7 @@
     .readouts { justify-content: space-between; gap: 10px; }
     .long { display: none; }
     .mobile-only { display: block; }
-    .mobile-only .cal svg { height: 190px; }
+    .cal svg { height: 190px; }
   }
   @media (min-width: 901px) { .mobile-only { display: none; } }
 
@@ -366,18 +389,23 @@
       </div>
       <hr class="rule" />
 
+      <figure class="twin" id="shot" style="margin:0">
+        <img class="still" src="assets/twin-jul.webp" alt="The same corner of the garden in July: full canopy, white hydrangea in flower, deep shade across the terrace edge." width="1600" height="900" />
+        <figcaption class="lbl" id="twin-cap">The same corner · summer, photographed in July</figcaption>
+      </figure>
+
       <div class="plan-box">
         <svg id="plan" viewBox="0 0 1180 520" preserveAspectRatio="xMidYMid meet" role="img"
              aria-label="Planting plan in plan view: the house and terrace, a hatched path curving across the plot, and 13 planting circles drawn at mature canopy spread.">
           <rect x="6" y="6" width="1168" height="508" fill="none" stroke="#26271F" stroke-width="1.1" opacity=".65" />
           <rect x="38" y="30" width="252" height="118" fill="#26271F" opacity=".08" stroke="#26271F" />
-          <text x="52" y="56" font-family="Sometype, monospace" font-size="11" fill="#56574C" letter-spacing="1.5">HOUSE</text>
+          <text x="52" y="56" font-family="Sometype, monospace" font-size="18" fill="#56574C" letter-spacing="1.5">HOUSE</text>
           <!-- the shade polygon covers only the part of the terrace the canopy
                actually reaches; the west end stays in sun, which is where the
                wink's note points. Geometry and copy have to agree. -->
           <rect id="shade" x="374" y="30" width="122" height="118" fill="#26271F" opacity=".33" />
           <rect x="290" y="30" width="206" height="118" fill="none" stroke="#26271F" stroke-dasharray="3 4" opacity=".5" />
-          <text x="304" y="140" font-family="Sometype, monospace" font-size="10" fill="#56574C" letter-spacing="1.3">TERRACE</text>
+          <text x="304" y="140" font-family="Sometype, monospace" font-size="18" fill="#56574C" letter-spacing="1.3">TERRACE</text>
           <path d="M168 148 C232 258 520 262 600 350 C664 420 830 456 1108 452"
                 fill="none" stroke="#26271F" stroke-width="14" opacity=".11" stroke-linecap="round" />
           <path d="M168 148 C232 258 520 262 600 350 C664 420 830 456 1108 452"
@@ -400,83 +428,30 @@
           <g id="wink" opacity="1">
             <circle cx="330" cy="112" r="3" fill="#26271F" />
             <line x1="330" y1="112" x2="516" y2="60" stroke="#26271F" stroke-width=".9" />
-            <text x="524" y="63" font-family="Sometype, monospace" font-size="11" fill="#26271F" letter-spacing="1.2">CAT SITS HERE</text>
+            <text x="524" y="63" font-family="Sometype, monospace" font-size="18" fill="#26271F" letter-spacing="1.2">CAT SITS HERE</text>
           </g>
           <g id="leaders">
           <line x1="488.0" y1="194.0" x2="532" y2="179" stroke="#26271F" stroke-width=".8" opacity=".7" />
-          <text x="538" y="176" font-family="Sometype, monospace" font-size="9.5" fill="#56574C" letter-spacing="1.1">MULTI-STEM · 4m SPREAD</text>
-          <line x1="932.4" y1="101.6" x2="974" y2="89" stroke="#26271F" stroke-width=".8" opacity=".7" />
-          <text x="980" y="86" font-family="Sometype, monospace" font-size="9.5" fill="#56574C" letter-spacing="1.1">WHITE BARK · WINTER</text>
-          <line x1="1023.4" y1="304.6" x2="1062" y2="295" stroke="#26271F" stroke-width=".8" opacity=".7" />
-          <text x="1068" y="292" font-family="Sometype, monospace" font-size="9.5" fill="#56574C" letter-spacing="1.1">BRACTS JUN–JUL</text>
+          <text x="538" y="176" font-family="Sometype, monospace" font-size="16" fill="#56574C" letter-spacing="1.1">MULTI-STEM · 4m SPREAD</text>
+          <line x1="932.4" y1="101.6" x2="960" y2="92" stroke="#26271F" stroke-width=".8" opacity=".7" />
+          <text x="966" y="89" font-family="Sometype, monospace" font-size="16" fill="#56574C" letter-spacing="1.1">WHITE BARK · WINTER</text>
+          <line x1="1023.4" y1="304.6" x2="1018" y2="299" stroke="#26271F" stroke-width=".8" opacity=".7" />
+          <text x="1024" y="296" font-family="Sometype, monospace" font-size="16" fill="#56574C" letter-spacing="1.1">BRACTS JUN–JUL</text>
           </g>
         </svg>
       </div>
 
-      <figure class="twin" style="margin:0">
-        <img src="assets/twin-feb.webp" alt="The same corner of the garden in February: bare stems, low light, structure visible." width="1600" height="900" loading="lazy" data-twin="2" />
-        <img src="assets/twin-may.webp" alt="The same corner in May: fresh growth, blossom above the bed." width="1600" height="900" loading="lazy" data-twin="5" />
-        <img src="assets/twin-jul.webp" class="on" alt="The same corner in July: full canopy, deep shade across the terrace edge." width="1600" height="900" loading="lazy" data-twin="7" />
-        <img src="assets/twin-oct.webp" alt="The same corner in October: seed heads, rust and gold, low autumn sun." width="1600" height="900" loading="lazy" data-twin="10" />
-        <figcaption class="lbl" id="twin-cap">The same corner · summer, photographed in July</figcaption>
-      </figure>
-
-      <div class="cal">
-        <div class="row" style="margin-bottom:3px">
-          <p class="lbl" style="margin:0">Sheet 05 · Interest calendar — what is doing something, and when</p>
-          <p class="lbl" style="margin:0"><span style="background:#4E7343;display:inline-block;width:8px;height:8px"></span> in flower &nbsp; <span style="background:rgba(38,39,31,.25);display:inline-block;width:8px;height:8px"></span> structure, bark, seed</p>
-        </div>
-        <svg id="cal" viewBox="0 0 900 172" preserveAspectRatio="none" role="img"
-             aria-label="Interest calendar: 13 species by twelve months, showing which are in flower and which carry structural interest in each month.">
-          <text x="0" y="10.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Amelanchier lamarckii</text>
-          <rect x="215.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="3.0" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="441.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="3.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="21.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Betula utilis jacquemontii</text>
-          <rect x="215.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="271.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="328.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="384.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="13.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" />
-          <text x="0" y="31.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Cornus kousa</text>
-          <rect x="215.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="24.6" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="554.0" y="24.6" width="54.5" height="8.2" fill="#9BB06A" opacity=".85" /><rect x="610.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="723.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="24.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="42.6" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Hydrangea quercifolia</text>
-          <rect x="215.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="610.5" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="667.0" y="35.4" width="54.5" height="8.2" fill="#4E7343" opacity=".85" /><rect x="723.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="35.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="53.4" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Molinia caerulea Transparent</text>
-          <rect x="215.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="46.2" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="667.0" y="46.2" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="723.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="780.0" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="46.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="64.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Salvia nemorosa Caradonna</text>
-          <rect x="215.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="497.5" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="57.0" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="57.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="75.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Allium Purple Sensation</text>
-          <rect x="215.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="67.8" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="497.5" y="67.8" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="610.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="667.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="67.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="85.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Geranium Rozanne</text>
-          <rect x="215.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="554.0" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="78.6" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="780.0" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="78.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="96.6" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Verbena bonariensis</text>
-          <rect x="215.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="610.5" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="667.0" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="723.5" y="89.4" width="54.5" height="8.2" fill="#7C6FA0" opacity=".85" /><rect x="780.0" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="89.4" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="107.4" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Anemone Honorine Jobert</text>
-          <rect x="215.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="667.0" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="723.5" y="100.2" width="54.5" height="8.2" fill="#C9BFA4" opacity=".85" /><rect x="780.0" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="100.2" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="118.2" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Sesleria autumnalis</text>
-          <rect x="215.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="384.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="111.0" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="723.5" y="111.0" width="54.5" height="8.2" fill="#B4763A" opacity=".85" /><rect x="780.0" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".25" /><rect x="836.5" y="111.0" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="0" y="129.0" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Helleborus argutifolius</text>
-          <rect x="215.0" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="271.5" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="328.0" y="121.8" width="54.5" height="8.2" fill="#8FA85C" opacity=".85" /><rect x="384.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="441.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="121.8" width="54.5" height="8.2" fill="#26271F" opacity=".25" />
-          <text x="0" y="139.8" font-family="Spectral, serif" font-size="10.5" font-style="italic" fill="#56574C">Narcissus Thalia</text>
-          <rect x="215.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="271.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="328.0" y="132.6" width="54.5" height="8.2" fill="#D4C79A" opacity=".85" /><rect x="384.5" y="132.6" width="54.5" height="8.2" fill="#D4C79A" opacity=".85" /><rect x="441.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="497.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="554.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="610.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="667.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="723.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="780.0" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" /><rect x="836.5" y="132.6" width="54.5" height="8.2" fill="#26271F" opacity=".055" />
-          <text x="242.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JAN</text>
-          <text x="298.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">FEB</text>
-          <text x="355.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">MAR</text>
-          <text x="411.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">APR</text>
-          <text x="468.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">MAY</text>
-          <text x="524.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JUN</text>
-          <text x="581.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">JUL</text>
-          <text x="637.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">AUG</text>
-          <text x="694.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">SEP</text>
-          <text x="750.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">OCT</text>
-          <text x="807.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">NOV</text>
-          <text x="863.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">DEC</text>
-          <line id="head" x1="581.2" x2="581.2" y1="0" y2="147.4" stroke="#26271F" stroke-width="1.4" />
-        </svg>
-      </div>
 
     </div>
   </div>
 </section>
 
-<!-- The interest calendar again, for narrow screens, where it will not fit
-     inside the pinned sheet. Same drawing, no playhead. -->
-<section class="sheet mobile-only" style="padding:44px 0 52px" aria-labelledby="s-cal-m">
+<!-- The interest calendar, full width. It was previously squeezed into the
+     pinned sheet as a third instrument, where thirteen species had 117px
+     between them and the names collided. The sheet now carries the two
+     things the founder ranked — the photograph, then the plan — and the
+     calendar gets the room it needs. The playhead still tracks the clock. -->
+<section class="sheet" style="padding:44px 0 52px" aria-labelledby="s-cal-m">
   <div class="wrap">
     <p class="lbl">Sheet 05 · Interest calendar</p>
     <h2 class="h3" id="s-cal-m" style="margin:12px 0 6px">What is doing something, and when.</h2>
@@ -525,6 +500,7 @@
         <text x="750.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">OCT</text>
         <text x="807.2" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">NOV</text>
         <text x="863.8" y="168" text-anchor="middle" font-family="Sometype, monospace" font-size="9" letter-spacing="1" fill="#8C8C7E">DEC</text>
+        <line id="head" x1="581.2" x2="581.2" y1="0" y2="147.4" stroke="#26271F" stroke-width="1.4" />
       </svg>
     </div>
   </div>
@@ -721,9 +697,80 @@
   var LX = 214, RX = 892, CW = (RX - LX) / 12;
 
   /* ---- the clock ---- */
-  var twins = [].slice.call(document.querySelectorAll(".twin img"));
   var chaps = [].slice.call(document.querySelectorAll(".chap"));
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* ---- the scrubbed photograph ----
+     Three generated transitions of ONE corner, chained end to start, whose
+     endpoints are the four pinned keyframes: Feb→May, May→Jul, Jul→Oct. The
+     visitor's scroll drives the timeline, so these are scrubbed frame
+     sequences and not video playback — seeking an mp4 by currentTime lands on
+     h264 keyframes and janks, where a frame sequence decodes without seek
+     cost. Outside Feb–Oct the sequence holds at its nearest end, which is
+     honest: the photographic record of this corner runs February to October. */
+  var SEG = [
+    { pre: "season-1-", n: 18, from: 2,  to: 5  },
+    { pre: "season-2-", n: 18, from: 5,  to: 7  },
+    { pre: "season-3-", n: 18, from: 7,  to: 10 }
+  ];
+  var shot = $("shot"), frames = {}, shown = null, ready = false;
+
+  function frameKey(m) {
+    if (m <= SEG[0].from) { return SEG[0].pre + "00"; }
+    for (var i = 0; i < SEG.length; i++) {
+      var s = SEG[i];
+      if (m <= s.to) {
+        var t = (m - s.from) / (s.to - s.from);
+        var ix = Math.round(clamp01(t) * (s.n - 1));
+        return s.pre + (ix < 10 ? "0" + ix : String(ix));
+      }
+    }
+    var L = SEG[SEG.length - 1];
+    return L.pre + String(L.n - 1);
+  }
+  function showFrame(m) {
+    if (!ready) { return; }
+    var k = frameKey(m), next = frames[k];
+    if (k === shown) { return; }
+    /* Hold the frame already on screen until its replacement has actually
+       decoded. Switching to an undecoded image paints NOTHING — and with the
+       static still faded out behind it, the stage would simply go blank in
+       the middle of the page's one feature. */
+    if (!next || !next.complete || !next.naturalWidth) { return; }
+    if (shown && frames[shown]) { frames[shown].classList.remove("on"); }
+    next.classList.add("on");
+    shown = k;
+  }
+  /* Built after load, never in the markup: 54 frames of a progressive
+     enhancement have no business in the document a no-JS reader is served.
+     The static July frame stays visible until the first one has decoded. */
+  function buildFrames() {
+    SEG.forEach(function (s) {
+      for (var i = 0; i < s.n; i++) {
+        var k = s.pre + (i < 10 ? "0" + i : String(i));
+        var img = new Image();
+        img.className = "fr";
+        img.alt = "";
+        img.setAttribute("aria-hidden", "true");
+        img.decoding = "async";
+        /* A frame arriving late must claim the stage if the clock has already
+           moved past it, or the scrub stalls on whatever loaded first. */
+        img.onload = function () { if (ready) { onScroll(); } };
+        img.src = "assets/" + k + ".webp";
+        frames[k] = img;
+        shot.insertBefore(img, shot.firstChild);
+      }
+    });
+    var first = frames[frameKey(7)];
+    var reveal = function () {
+      ready = true;
+      shot.classList.add("scrubbing");
+      onScroll();
+    };
+    if (first.decode) { first.decode().then(reveal, reveal); }
+    else if (first.complete) { reveal(); }
+    else { first.onload = reveal; }
+  }
 
   function setMonth(mf) {
     var m = Math.max(1, Math.min(12, mf)), flowering = 0;
@@ -758,18 +805,14 @@
     var hx = LX + (m - 1) * CW + CW / 2;
     head.setAttribute("x1", hx); head.setAttribute("x2", hx);
 
-    /* There are four photographs and twelve months, so the twin is labelled by
-       SEASON — otherwise the caption names a month the title block is not on,
-       and the sheet contradicts itself in the reader's eye. The month the
-       photograph was actually taken stays on the label, because it is a fact
-       about the photograph rather than about the clock. */
-    var pick = (m < 3 || m >= 12) ? 2 : m < 6 ? 5 : m < 9 ? 7 : 10;
-    twins.forEach(function (img) {
-      img.classList.toggle("on", Number(img.dataset.twin) === pick);
-    });
-    $("twin-cap").textContent = "The same corner · " +
-      ({ 2:"winter, photographed in February", 5:"spring, photographed in May",
-         7:"summer, photographed in July",     10:"autumn, photographed in October" })[pick];
+    /* The photograph now moves with the clock rather than snapping between
+       four stills, so the caption can name the month the sheet is actually on.
+       It still says GENERATED, because the honest thing to disclose is not
+       which month it is but that no camera was ever there. */
+    showFrame(m);
+    $("twin-cap").textContent = ready
+      ? "The same corner · " + MON[Math.round(m) - 1] + " · generated transition"
+      : "The same corner · summer, photographed in July";
   }
 
   var yr = $("year"), ticking = false;
@@ -825,14 +868,16 @@
   }
 
   if (reduce.matches) {
-    /* frozen at high summer, with the whole calendar readable and no fades */
+    /* Frozen at high summer, with the whole calendar readable and no fades.
+       The frame sequence is never built here: a reader who asked for reduced
+       motion is served the static July photograph, not 54 frames of one. */
     setMonth(7);
     chaps.forEach(function (c) { c.classList.add("on"); });
   } else {
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", function () { measure(); onScroll(); });
-    window.addEventListener("load", function () { measure(); onScroll(); });
+    window.addEventListener("load", function () { measure(); onScroll(); buildFrames(); });
     onScroll();
   }
 })();

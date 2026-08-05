@@ -232,6 +232,61 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s106 — **SHIPPED: ㉑'s video pass. The scrub component exists, and it found a defect the still page was hiding**
+
+**Boot was `gogogo`.** The inherited next action was item 1 of the s105 stamp —
+㉑ Aspect & Fall's video pass, first, because it is where the scroll-scrub
+machinery gets built once so site C inherits it. That is what shipped.
+
+**What the founder asked for, and what he got.** His two s105 directions were
+*"dont have to be stingy with the higgsfield credit"* and *"a top down view
+doesnt really display the full beauty and power"*. The stage is **rebalanced**:
+the photograph now holds **63% of the instrument area where it held 24%**, and
+it **moves** — three generated Seedance transitions (Feb→May→Jul→Oct) of one
+locked-off corner, decoded to frame sequences and **scrubbed by scroll
+position**, never played. Measured on the rendered page: sticky `top:0`,
+photograph 471px against the plan's 279px, plan annotation legible at 8.6–9.7px
+after its type was enlarged for the smaller size it is now issued at.
+
+**The find, and it is the session's real story.** Building the scrub exposed a
+defect that had shipped in s105 and that nothing could have caught on the still
+page: **the October keyframe was a different camera** — lower, further back,
+hard backlight — measured **24px+ out of register** against the other three,
+while the page captioned all four "the same corner". *A cross-fade between
+differently-framed shots reads as a dissolve, so it looked fine for a whole
+session.* The cause was already on the books and had simply not been applied to
+that one asset: February and May used the s105 layout-naming fix, October still
+carried the exact phrasing that fix replaced. Two Jul→Oct segments then
+recomposed their own first frame **because they were interpolating honestly
+toward a bad end frame** — chasing them with prompt language was the wrong move.
+Re-minting October in register made the third good segment land with a
+**zero-pixel seam**.
+
+**Ratchets left behind** (AGENTS.md rule 8, same change): executable —
+`packages/engine/src/assets/frames.ts` + 11 tests (frame-pattern expansion and
+even sampling that always keeps both endpoints), the `frames:N` manifest entry
+type in `scripts/export-template-assets.ts` (ext-aware pinned key; an mp4
+without `frames` fails loud), and the portfolio ratchet extended so a pattern
+entry expands to its N filenames and the manifest↔disk bijection still holds.
+Documentary — two meta-prompt corollaries: **measure registration, never eyeball
+it; mint two candidates because this edit is a coin flip per seed** (candidate A
+landed within 1px, candidate B drifted 24px+ on the same prompt), and **a
+generated transition is pulled by its END frame — fix the keyframe, not the
+video**; plus the rule that writing a mint corollary obliges you to re-mint
+every asset in the batch made the old way.
+
+**Spend: 137.00cr** (551.22 → 414.22, reconciled against the live balance).
+Six video jobs at 22.50 — two kept first-take, three rejected, **and one charged
+that never returned a result** — plus 2.00 of stills. That is over the ~108
+line and at the ~135 the stamp allowed; the ring-fenced 180 for the Thalon
+landing is **untouched**. Zero live posts, nothing armed.
+
+**Still open, unchanged:** site C, then the Thalon landing, then D+E on the
+leftover; ⑳'s Day-84 handoff still owes its motion; phase 0's disclosure;
+control-arc part B still owes a drawn sheet.
+
+---
+
 ## Sprint 9 / s105 — **SHIPPED: ⑳ approved + site B of three. C, the Thalon landing and phase 0 remain**
 
 **Boot was `gogogo design is approved`.** The one design loudly `awaiting` was
