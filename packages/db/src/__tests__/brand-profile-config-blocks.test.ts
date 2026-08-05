@@ -139,7 +139,42 @@ describe("brand profile config blocks (invariant: contract field ⇒ column ⇒ 
       string,
       unknown
     >;
-    expect(active.social).toEqual({ bluesky: { maxPostsPerDay: 1, armState: "review" } });
+    expect(active.social).toEqual({
+      bluesky: { maxPostsPerDay: 1, armState: "review" },
+      postingScope: "selective",
+    });
+  });
+
+  /**
+   * s103, part A2: the same field-level guard for the posting SCOPE, and it
+   * earns its own case because a dropped scope fails in the OPPOSITE
+   * direction to a dropped arm state. `armState` disappearing reads as "not
+   * armed" and silently stops posting; `postingScope: "all"` disappearing
+   * reads as `selective` and silently stops posting too — but the operator
+   * asked for the loud thing and would be told, by a card rendering stored
+   * state, that it was on. A round-trip is the only thing that catches it.
+   */
+  it("the posting SCOPE survives the round trip — a dropped `all` would lie on the card", async () => {
+    fx = await fixture();
+    const { repos } = fx.handle;
+    await repos.brandProfiles.create(fx.ctx, {
+      config: {
+        voice: {},
+        denylist: [],
+        platformProfiles: {},
+        social: { bluesky: { maxPostsPerDay: 1, armState: "off" }, postingScope: "all" },
+      } as BrandProfileConfigInput,
+      activate: true,
+    });
+
+    const active = (await repos.brandProfiles.getActive(fx.ctx)) as unknown as Record<
+      string,
+      unknown
+    >;
+    expect(active.social).toEqual({
+      bluesky: { maxPostsPerDay: 1, armState: "off" },
+      postingScope: "all",
+    });
   });
 
   /** Absence disarms INSIDE a block as well: a pre-s102 entry reads back unauthorized, never live. */
@@ -160,7 +195,10 @@ describe("brand profile config blocks (invariant: contract field ⇒ column ⇒ 
       string,
       unknown
     >;
-    expect(active.social).toEqual({ bluesky: { maxPostsPerDay: 1, armState: "off" } });
+    expect(active.social).toEqual({
+      bluesky: { maxPostsPerDay: 1, armState: "off" },
+      postingScope: "selective",
+    });
   });
 
   it("absent blocks stay NULL — absence disarms, and is never a stored default", async () => {

@@ -75,6 +75,47 @@ export type ArmState = (typeof ARM_STATES)[number];
 export const armStateSchema = z.enum(ARM_STATES);
 
 /**
+ * Control-arc part A2 (s103, founder directive): the tenant-level POSTING
+ * SCOPE above the per-destination arm states.
+ *
+ * ```
+ * selective  each destination's own armState governs — part A's behaviour, exactly
+ * all        every CONFIGURED destination's `off` is READ as `live`
+ * ```
+ *
+ * It is an OVERLAY, never a mutation: `all` changes how the stored states are
+ * READ, never what is stored. Flipping back to `selective` therefore restores
+ * precisely the arrangement the operator left, with no "which ones were on
+ * before?" to reconstruct — that property is what makes the mode safe to try.
+ *
+ * Three bindings, all load-bearing:
+ * 1. It sits UNDER the master key, never beside it. Three gates, all AND:
+ *    `SOCIAL_QUEUE_ARMED` → scope → (in `selective`) the destination's state.
+ *    `all` cannot arm anything the master key has not already armed.
+ * 2. **`all` never overrides an explicit `review`.** A hold the operator
+ *    deliberately asked for is not cancelled by a scope switch. `all` raises
+ *    `off` → `live` and leaves `review` alone — the one place `all`
+ *    deliberately does not mean *all*.
+ * 3. It is LIVE, not a snapshot: a platform configured next month is raised
+ *    by `all` without the operator touching this field again. A snapshot
+ *    calling itself "all" would be a lie with a delay on it.
+ *
+ * ⛔ CONFIGURED, not merely connected — corrected by grounding at build time,
+ * and the spec's prose said otherwise. A connected credential does NOT create
+ * an entry in this block (nothing in the connect path writes one; the only
+ * writer is a profile config write), and the publish door's rung (c) refuses a
+ * platform with no entry. Since a queue row that is CLAIMED and then refused
+ * is marked `failed` — TERMINAL by contract, no retry ladder — reading an
+ * absent entry as `live` would burn drafts that `off` merely holds. So an
+ * absent entry stays `off` under `all`, and the surface owes the true
+ * sentence ("channels you have configured for posting") rather than the
+ * spec's original "new channels you connect will post automatically".
+ */
+export const POSTING_SCOPES = ["selective", "all"] as const;
+export type PostingScope = (typeof POSTING_SCOPES)[number];
+export const postingScopeSchema = z.enum(POSTING_SCOPES);
+
+/**
  * Per-platform cadence knobs.
  *
  * `maxPostsPerDay: 0` and `armState: "off"` are NOT the same fact and must
@@ -112,6 +153,15 @@ export type SocialRedditCadence = z.infer<typeof socialRedditCadenceSchema>;
  * platform (never a record-over-enum: zod 4's exhaustive-record semantics
  * would demand every platform configured at once). An absent platform =
  * not configured = the refusal ladder's "unarmed platform" rung.
+ *
+ * `postingScope` (part A2) is the one NON-platform field here, and it is safe
+ * to sit beside them because every reader of this block is a KEYED lookup —
+ * `publish.ts` `config[platform]`, `social-arming.ts` and `cards.ts`
+ * `config?.[destination]` — and nothing anywhere iterates the block's own
+ * keys, so a scalar field can never be mistaken for a platform. Verified
+ * before it was specced, re-verified at build time; no migration (the column
+ * is jsonb, and the default makes a pre-A2 block read back as today's
+ * behaviour).
  */
 export const socialPublishConfigSchema = z.object({
   linkedin: socialCadenceSchema.optional(),
@@ -122,5 +172,6 @@ export const socialPublishConfigSchema = z.object({
   reddit: socialRedditCadenceSchema.optional(),
   bluesky: socialCadenceSchema.optional(),
   youtube: socialCadenceSchema.optional(),
+  postingScope: postingScopeSchema.default("selective"),
 });
 export type SocialPublishConfig = z.infer<typeof socialPublishConfigSchema>;

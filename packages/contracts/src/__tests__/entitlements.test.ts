@@ -67,7 +67,10 @@ describe("social contracts (Sprint-8 window)", () => {
   });
 
   it("config block: absent platforms stay absent (unarmed), configured ones validate", () => {
-    expect(socialPublishConfigSchema.parse({})).toEqual({});
+    // Part A2: the one non-platform field materializes its safe default, so a
+    // block written before A2 reads back as today's behaviour. Platforms
+    // themselves still stay absent — absence disarms.
+    expect(socialPublishConfigSchema.parse({})).toEqual({ postingScope: "selective" });
     const cfg = socialPublishConfigSchema.parse({ linkedin: { maxPostsPerDay: 2 } });
     expect(cfg.linkedin?.maxPostsPerDay).toBe(2);
     expect(cfg.x).toBeUndefined();

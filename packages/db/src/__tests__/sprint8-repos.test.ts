@@ -314,17 +314,19 @@ describe("brand profile config columns (Sprint-8 window 2 — the outreach + soc
         platformProfiles: {},
         // s102: the write door parses the block, so a config written without
         // an arm state reads back `off` — absence disarms, inside a block as
-        // well as at block level.
+        // well as at block level. s103 adds the same for the posting SCOPE,
+        // which defaults to `selective` — a pre-A2 block keeps its behaviour.
         social: { linkedin: { maxPostsPerDay: 2 } },
         outreach: { dailyBatchCap: 5 },
       },
       activate: true,
     });
-    expect(profile.social).toEqual({ linkedin: { maxPostsPerDay: 2, armState: "off" } });
+    const storedSocial = { linkedin: { maxPostsPerDay: 2, armState: "off" }, postingScope: "selective" };
+    expect(profile.social).toEqual(storedSocial);
     // The write door parses the block, so stored outreach carries the schema defaults.
     expect((profile.outreach as { dailyBatchCap: number }).dailyBatchCap).toBe(5);
     const active = await repos.brandProfiles.getActive(ctx);
-    expect(active?.social).toEqual({ linkedin: { maxPostsPerDay: 2, armState: "off" } });
+    expect(active?.social).toEqual(storedSocial);
     expect((active?.outreach as { dailyBatchCap: number }).dailyBatchCap).toBe(5);
   });
 

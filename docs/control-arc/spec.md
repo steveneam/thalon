@@ -284,6 +284,10 @@ makes the toggle safe to try.
    than quietly snapshot today's list and drift from our own name. **The
    alternative was considered and rejected**: a snapshot that calls itself
    "all" is a lie with a delay on it.
+   > ⛔ **CORRECTED AT BUILD TIME, s103 — the live-not-snapshot property holds,
+   > but the qualifying event is CONFIGURED, not connected, and the sentence
+   > quoted above is false.** See "BUILT s103" below; phase 2 must render the
+   > corrected copy, not this line.
 
 Underneath all three, the publish door's refusal ladder is untouched — `all`
 still cannot reach an unconnected or unconfigured platform, or exceed a cap,
@@ -321,6 +325,61 @@ or repost a duplicate.
 He can flip one control and have every connected channel post, flip it back
 and find exactly the arrangement he left, and read — before he flips it — what
 it will do to channels he has not connected yet.
+
+### BUILT s103 — and what building it corrected
+
+The engine half is **shipped and green**. The storage call held exactly as
+grounded (no migration; every reader is a keyed lookup and nothing iterates
+the block), and the engine change stayed inside `passArmStateResolver` with
+the consumer untouched, as specced. Three things this section got wrong or
+left unsaid were found by grounding at build time:
+
+1. **`all` covers CONFIGURED destinations, not connected ones — and binding
+   3's promised sentence was false.** The spec said *"New channels you connect
+   will post automatically"*. Grounding the connect path shows **nothing in it
+   writes an entry in `brand_profiles.social`** — the only writer is a profile
+   config write — so a connected channel is not a configured one. And the
+   publish door's rung (c) refuses a platform with no entry
+   (`publish.ts:245`). The consequence is not cosmetic: a queue row that is
+   CLAIMED and then refused is marked **`failed`, which is TERMINAL by
+   contract with no retry ladder** (`queue-consumer.ts:263`). So reading an
+   absent entry as `live` would have **burned the very drafts that `off`
+   merely holds** for the next tick. An absent entry therefore stays `off`
+   under `all` — which is also the only reading that keeps binding 1 true.
+   The live-not-snapshot property itself is intact: a platform configured next
+   month is raised by `all` with no second visit to the toggle.
+   **Phase 2's copy obligation changes accordingly** — the true sentence is
+   *"Every channel you've configured for posting will go live, including ones
+   you configure later"*, and a connected-but-unconfigured channel needs the
+   honest state saying `all` will not reach it until it is set up. That state
+   is worth rendering anyway: it is otherwise invisible.
+2. **`postingScope` uses `.default("selective")`, the house pattern its
+   neighbour `armState` already sets — so it MATERIALIZES on parse.** A stored
+   block gains the field explicitly rather than implying it by absence, which
+   is the right posture for a mode that governs whether everything posts. The
+   cost is that three exact-equality assertions over the block across the
+   suite had to change; each was **strengthened rather than relaxed** — they
+   now pin the default instead of merely tolerating it.
+3. **`passArmStateResolver` had NO direct test before this.** Part A's
+   ratchets exercise the CONSUMER's `resolveArmState` seam with stubs, which
+   is the right place for what the consumer does with the three states, but it
+   left the function that produces them — and that A2 changes entirely —
+   covered only indirectly. It now has real-db coverage of its own.
+
+**Ratchets landed:** `all` raises a configured `off` to `live` · `all` never
+overrides `review` · **`all` leaves an unconfigured destination `off`** · the
+overlay is proven to write nothing back (the stored block is re-read and
+asserted unchanged after resolving under `all`) · flipping back to `selective`
+restores every stored value · a pre-A2 config reads `selective` · a
+field-level round-trip for `postingScope` in the config-block ratchet
+(a dropped `all` fails in the OPPOSITE direction to a dropped `armState`:
+it silently reverts to `selective` while a card rendering stored state would
+still say it was on) · and, at the consumer, **every destination resolving
+`live` still publishes nothing while the master key is empty** — binding 1
+drawn where it can actually be observed.
+
+**Still owed (deliberately): the SURFACE half**, which rides phase 2 with part
+A's seg control — one card, one control surface.
 
 ---
 

@@ -170,7 +170,9 @@ describe("listIntegrationCards — the arming rung (s78)", () => {
       // `armState` is the QUEUE's per-destination gate (s102) and is a
       // different question from this card's `armed` — an entry in the block
       // still arms the platform for a manual publish whatever the tick may do.
-      socialConfig: { linkedin: { maxPostsPerDay: 1, armState: "off" } },
+      // The same holds for A2's `postingScope` (s103): the tick's scope has no
+      // say over whether an operator may publish this platform by hand.
+      socialConfig: { linkedin: { maxPostsPerDay: 1, armState: "off" }, postingScope: "selective" },
     });
     expect(armed.find((c) => c.destination === "linkedin")?.armed).toBe(true);
 

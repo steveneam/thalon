@@ -405,6 +405,34 @@ describe("runDuePublishes — the per-destination arm gate", () => {
     expect((await f.repos.publishQueue.get(f.ctx, row.id))?.status).toBe("pending");
   });
 
+  /**
+   * Part A2 (s103), binding 1 drawn at the consumer: the posting scope sits
+   * UNDER the master key, never beside it. `all` is exactly the state where
+   * every destination resolves `live` — so this pins that the mode cannot
+   * arm what the master key has not, which is the one risk in handing an
+   * operator a single control that says "post everywhere".
+   */
+  it("every destination LIVE still publishes nothing while the master key is empty — scope sits under it", async () => {
+    const f = await setup();
+    const row = await queueRow(f);
+    const publisher = createFakeSocialPublisher();
+
+    const result = await runDuePublishes(
+      {
+        repos: f.repos,
+        armed: false,
+        resolveArmState: () => "live",
+        resolvePublisher: fakeResolver(publisher),
+      },
+      NOW,
+    );
+
+    expect(result.published).toEqual([]);
+    expect(publisher.calls).toEqual([]);
+    expect(result.armed).toBe(false);
+    expect((await f.repos.publishQueue.get(f.ctx, row.id))?.status).toBe("pending");
+  });
+
   it("`review` HOLDS the row for the operator rather than sending or failing it", async () => {
     const f = await setup();
     const row = await queueRow(f);

@@ -1,10 +1,17 @@
-import { tenantCtx, type TenantCtx } from "@thalon/contracts";
+import {
+  tenantCtx,
+  type ArmState,
+  type PostingScope,
+  type SocialPlatform,
+  type TenantCtx,
+} from "@thalon/contracts";
 import { openTestDb, type DbHandle } from "@thalon/db";
 import { readEnv, type EnvSource } from "@thalon/platform";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isRefusingSocialPublisher } from "../../social/registry";
 import { VaultKeyMissingError } from "../errors";
 import {
+  passArmStateResolver,
   socialArmed,
   vaultSocialEnvView,
   vaultSocialPublisherResolver,
@@ -42,7 +49,11 @@ async function connectLinkedIn(token = "vault-token") {
 }
 
 /** The tenant's social config block — the arming rung's tenant-data half. */
-async function configureSocial(social: Record<string, { maxPostsPerDay: number }>) {
+async function configureSocial(
+  social: Partial<Record<SocialPlatform, { maxPostsPerDay: number; armState?: ArmState }>> & {
+    postingScope?: PostingScope;
+  },
+) {
   await handle.repos.brandProfiles.create(ctx, {
     config: { voice: {}, denylist: [], platformProfiles: {}, social },
     activate: true,
@@ -277,5 +288,112 @@ describe("D1 (s83): the proof pair arms through the same one ratchet", () => {
     const resolve = await vaultSocialPublisherResolver(deps());
     const publisher = resolve("bluesky");
     expect(isRefusingSocialPublisher(publisher)).toBe(true);
+  });
+});
+
+/**
+ * Control-arc part A (s102) / A2 (s103): the QUEUE's per-destination gate,
+ * tested against a real profile read rather than a stub. The consumer's own
+ * ratchets pin what it does with the three states; these pin where the states
+ * come from — which is the half A2 changes.
+ */
+describe("passArmStateResolver — the queue gate, read from tenant config", () => {
+  function resolveArm() {
+    const resolver = passArmStateResolver({
+      repos: handle.repos,
+      env: readEnv({ THALON_VAULT_MASTER_KEY: MASTER_B64 }),
+      ctxFor: (tenantId) => tenantCtx(tenantId),
+    });
+    return (platform: SocialPlatform) => resolver({ tenantId: ctx.tenantId, platform });
+  }
+
+  it("serves each destination's STORED state, and fails closed on one with no entry", async () => {
+    await configureSocial({
+      linkedin: { maxPostsPerDay: 1, armState: "live" },
+      x: { maxPostsPerDay: 1, armState: "review" },
+      bluesky: { maxPostsPerDay: 1 },
+    });
+    const arm = resolveArm();
+    expect(await arm("linkedin")).toBe("live");
+    expect(await arm("x")).toBe("review");
+    // Written before part A: no arm state stored, so the default disarms.
+    expect(await arm("bluesky")).toBe("off");
+    // Never configured at all.
+    expect(await arm("facebook")).toBe("off");
+  });
+
+  it("a tenant with no profile at all is off — absence disarms, at every level", async () => {
+    expect(await resolveArm()("linkedin")).toBe("off");
+  });
+
+  describe("part A2: the posting SCOPE overlay", () => {
+    it("`all` reads a configured destination's off as LIVE", async () => {
+      await configureSocial({
+        linkedin: { maxPostsPerDay: 1, armState: "off" },
+        x: { maxPostsPerDay: 1, armState: "live" },
+        postingScope: "all",
+      });
+      const arm = resolveArm();
+      expect(await arm("linkedin")).toBe("live");
+      expect(await arm("x")).toBe("live");
+    });
+
+    it("`all` NEVER overrides an explicit review — a hold the operator asked for survives the switch", async () => {
+      await configureSocial({
+        x: { maxPostsPerDay: 1, armState: "review" },
+        postingScope: "all",
+      });
+      expect(await resolveArm()("x")).toBe("review");
+    });
+
+    it("`all` leaves an UNCONFIGURED destination off — it covers what is configured, not what is merely connected", async () => {
+      // The correction grounding made to this spec: connecting a credential
+      // writes no entry here, and the publish door refuses a platform with
+      // none. A claimed-then-refused row is marked `failed`, which is
+      // TERMINAL — so reading an absent entry as live would burn the very
+      // drafts that `off` holds for the next tick.
+      await connectDestination(deps(), {
+        destination: "bluesky",
+        credentials: { identifier: "steve.bsky.social", appPassword: "app-pw" },
+      });
+      await configureSocial({ linkedin: { maxPostsPerDay: 1 }, postingScope: "all" });
+      expect(await resolveArm()("bluesky")).toBe("off");
+    });
+
+    it("is an OVERLAY, never a mutation: resolving under `all` writes nothing back", async () => {
+      await configureSocial({
+        linkedin: { maxPostsPerDay: 1, armState: "off" },
+        x: { maxPostsPerDay: 1, armState: "review" },
+        postingScope: "all",
+      });
+      const arm = resolveArm();
+      expect(await arm("linkedin")).toBe("live");
+      expect(await arm("x")).toBe("review");
+
+      // The stored arrangement is exactly what the operator left, so flipping
+      // back to `selective` has nothing to reconstruct.
+      const active = await handle.repos.brandProfiles.getActive(ctx);
+      expect(active?.social).toEqual({
+        linkedin: { maxPostsPerDay: 1, armState: "off" },
+        x: { maxPostsPerDay: 1, armState: "review" },
+        postingScope: "all",
+      });
+    });
+
+    it("back to `selective` and every stored value governs again, unchanged", async () => {
+      await configureSocial({
+        linkedin: { maxPostsPerDay: 1, armState: "off" },
+        x: { maxPostsPerDay: 1, armState: "review" },
+        postingScope: "selective",
+      });
+      const arm = resolveArm();
+      expect(await arm("linkedin")).toBe("off");
+      expect(await arm("x")).toBe("review");
+    });
+
+    it("a config written before A2 reads as selective — today's behaviour, exactly", async () => {
+      await configureSocial({ linkedin: { maxPostsPerDay: 1, armState: "off" } });
+      expect(await resolveArm()("linkedin")).toBe("off");
+    });
   });
 });

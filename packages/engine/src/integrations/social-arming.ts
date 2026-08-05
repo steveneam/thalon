@@ -162,6 +162,10 @@ async function readSocialConfig(deps: SocialArmingDeps): Promise<SocialPublishCo
  * Deliberately per-pass and no longer: an operator who flips a destination to
  * `off` must be obeyed by the next tick, not by whenever a process-wide cache
  * decided to expire.
+ *
+ * Part A2 (s103) adds the tenant's posting SCOPE as an overlay over the same
+ * memoized read — see `applyPostingScope`. The consumer is UNCHANGED: it
+ * still just asks this resolver, which is the seam holding.
  */
 export function passArmStateResolver(deps: {
   repos: SocialArmingRepos;
@@ -175,8 +179,48 @@ export function passArmStateResolver(deps: {
       config = readSocialConfig({ repos: deps.repos, env: deps.env, ctx: deps.ctxFor(tenantId) });
       perTenant.set(tenantId, config);
     }
-    return (await config)?.[platform]?.armState ?? "off";
+    return applyPostingScope(await config, platform);
   };
+}
+
+/**
+ * Control-arc part A2 (s103, founder directive: *"a toggle on whether i want
+ * to post on all or just selectively"*): the tenant's posting SCOPE, applied
+ * as an OVERLAY over the stored per-destination state.
+ *
+ * `selective` (the default, and every pre-A2 config) returns the stored state
+ * verbatim — part A's behaviour, untouched. `all` READS a configured
+ * destination's `off` as `live` without writing anything, so flipping back to
+ * `selective` restores exactly the arrangement the operator left.
+ *
+ * Two refusals inside `all`, and both are deliberate:
+ *
+ * 1. **`review` is left alone.** It is a hold the operator deliberately
+ *    asked for, and a scope switch must not silently cancel it.
+ *
+ * 2. **An absent entry stays `off`** — `all` covers the destinations the
+ *    tenant has CONFIGURED for posting, not every one it has connected.
+ *    Grounded at build time, against the spec's own prose: connecting a
+ *    credential does not write an entry in this block, and the publish door's
+ *    rung (c) refuses a platform that has none. A row the consumer CLAIMS and
+ *    then cannot publish is marked `failed` — terminal by contract, no retry
+ *    ladder — so reading an absent entry as `live` would burn the very drafts
+ *    that `off` merely holds for the next tick. Fail-closed is also the only
+ *    reading that keeps binding 1 true: `all` arms nothing the operator has
+ *    not already set up.
+ *
+ * Under all of it the master key still governs — this answers WHICH
+ * destinations a master-armed pass may touch, never whether one is armed.
+ */
+function applyPostingScope(
+  config: SocialPublishConfig | null,
+  platform: SocialPlatform,
+): ArmState {
+  const cadence = config?.[platform];
+  const stored = cadence?.armState ?? "off";
+  if (config?.postingScope !== "all") return stored;
+  if (!cadence) return "off";
+  return stored === "review" ? "review" : "live";
 }
 
 /**
