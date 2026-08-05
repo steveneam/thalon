@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Whitethorn — small-animal veterinary practice</title>
+<meta name="description" content="A small-animal practice on Whitethorn Green. We measure the walk, not the visit." />
+<style>
+  @font-face { font-family: "Petrona"; src: url("fonts/petrona-var.woff2") format("woff2-variations");
+    font-weight: 300 800; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Petrona"; src: url("fonts/petrona-italic-var.woff2") format("woff2-variations");
+    font-weight: 300 800; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Familjen"; src: url("fonts/familjen-grotesk-var.woff2") format("woff2-variations");
+    font-weight: 400 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: "DM Mono"; src: url("fonts/dm-mono-400.woff2") format("woff2");
+    font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "DM Mono"; src: url("fonts/dm-mono-500.woff2") format("woff2");
+    font-weight: 500; font-style: normal; font-display: swap; }
+
+  :root {
+    --paper: #F5F2EA;
+    --blossom: #FCFBF7;
+    --paper-2: #EBE5D7;
+    --ink: #1C231E;
+    --ink-soft: #4E594F;
+    --rule: #CFC7B4;
+    --haw: #9E2C18;
+    --far: #B4BBB5;
+    --pad: clamp(22px, 4vw, 40px);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Familjen", system-ui, sans-serif; font-size: 17px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: var(--haw); }
+  h1, h2, h3 { font-family: "Petrona", Georgia, serif; font-weight: 400; margin: 0; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--pad); }
+  .narrow { max-width: 660px; }
+  .eyebrow { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-soft); }
+  .h1 { font-size: clamp(42px, 6.6vw, 92px); line-height: .96; letter-spacing: -.022em; }
+  .h2 { font-size: clamp(31px, 4.2vw, 54px); line-height: 1.04; letter-spacing: -.016em; }
+  .h3 { font-size: 21px; line-height: 1.22; font-weight: 500; }
+  .lede { font-size: clamp(18px, 1.5vw, 20px); line-height: 1.52; color: var(--ink-soft); max-width: 56ch; }
+  .small { font-size: 15px; color: var(--ink-soft); }
+  .mono { font-family: "DM Mono", ui-monospace, monospace; }
+  hr.rule { height: 1px; background: var(--rule); border: 0; margin: 0; }
+  .band { background: var(--blossom); }
+
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 26px;
+    background: var(--ink); color: var(--blossom); font-size: 15px; font-weight: 500; }
+  .btn:hover { background: var(--haw); color: var(--blossom); }
+  .btn-2 { display: inline-flex; align-items: center; gap: 9px; padding: 15px 2px;
+    border-bottom: 1px solid var(--rule); font-size: 15px; font-weight: 500; }
+  .btn-2:hover { border-bottom-color: var(--haw); }
+
+  /* ---- nav ---- */
+  .nav { display: flex; justify-content: space-between; align-items: baseline; gap: 24px;
+    flex-wrap: wrap; padding: 24px 0; }
+  .mark { font-family: "Petrona", Georgia, serif; font-size: 22px; letter-spacing: .01em; }
+  .nav-links { display: flex; gap: 26px; font-size: 14px; }
+
+  /* ---- hero: display type interlocks with the photograph ---- */
+  .hero { padding: 16px 0 0; }
+  .hero-type { position: relative; z-index: 2; }
+  .hero-fig { position: relative; margin-top: -.28em; }
+  .hero-fig img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .hero-actions { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; margin-top: 26px; }
+
+  /* ---- the gait study ---- */
+  .study-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 48px;
+    align-items: start; }
+  /* the stage is a full-viewport sticky box with its frame centred inside it,
+     so the instrument sits at eye level instead of pinning to the top edge
+     and leaving a tall void beneath it */
+  .stage { position: sticky; top: 0; height: 100vh; display: flex;
+    flex-direction: column; justify-content: center; }
+  .stage-frame { background: var(--paper); border: 1px solid var(--rule); }
+  .stage svg { display: block; width: 100%; height: auto; }
+  .readout { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--rule); border-top: 1px solid var(--rule); }
+  .readout > div { background: var(--paper); padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+  .readout .k { font-family: "DM Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink-soft); }
+  .readout .v { font-family: "DM Mono", ui-monospace, monospace; font-size: 20px; color: var(--haw);
+    font-weight: 500; font-variant-numeric: tabular-nums; }
+  .stage-legend { display: flex; gap: 18px; flex-wrap: wrap; padding: 10px 2px 0;
+    font-family: "DM Mono", ui-monospace, monospace; font-size: 11px; color: var(--ink-soft); }
+  .swatch { display: inline-block; width: 16px; height: 2px; vertical-align: middle; margin-right: 6px; }
+  .sw-hot { background: var(--haw); } .sw-ink { background: var(--ink); } .sw-far { background: var(--far); }
+
+  .chapter { padding: 30px 0; border-top: 1px solid var(--rule); }
+  .chapter:last-of-type { border-bottom: 1px solid var(--rule); }
+  .chapter .day { font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .1em;
+    color: var(--haw); display: block; margin-bottom: 9px; }
+  .chapter h3 { margin-bottom: 8px; }
+  .chapter .figures { font-family: "DM Mono", ui-monospace, monospace; font-size: 11px; color: var(--ink-soft);
+    margin-top: 12px; letter-spacing: .02em; }
+  .study-note { font-family: "DM Mono", ui-monospace, monospace; font-size: 11px; color: var(--haw);
+    letter-spacing: .03em; margin-top: 18px; }
+
+  /* ---- services ---- */
+  .svc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); }
+  .svc > div { background: var(--paper); padding: 28px 24px; display: flex; flex-direction: column; gap: 9px; }
+
+  /* ---- two-up sections ---- */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .two img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .sec { padding: 84px 0; }
+
+  .close-fig img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
+  .haw-fig img { width: 100%; aspect-ratio: 16 / 5; object-fit: cover; }
+
+  .foot { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; padding: 44px 0; }
+
+  @media (max-width: 900px) {
+    .study-grid { grid-template-columns: 1fr; gap: 20px; }
+    .stage { position: sticky; top: 0; height: auto; padding: 10px 0;
+      background: var(--blossom); z-index: 3; }
+    .two { grid-template-columns: 1fr; gap: 28px; }
+    .svc { grid-template-columns: 1fr; }
+    .sec { padding: 60px 0; }
+    /* the mobile stage is pinned above the chapters, so every pixel it takes
+       is a pixel of chapter text it hides — keep it compact */
+    .stage svg { max-height: 27vh; }
+    .readout > div { padding: 8px 9px; }
+    .readout .k { font-size: 9px; letter-spacing: .08em; }
+    .readout .v { font-size: 15px; }
+    .stage-legend { gap: 10px; font-size: 10px; padding-top: 7px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="nav">
+    <a class="mark" href="#top">Whitethorn</a>
+    <div class="nav-links">
+      <a href="#study">The gait study</a>
+      <a href="#doing">What we do</a>
+      <a href="#yard">The yard</a>
+      <a href="#visit">Visiting</a>
+    </div>
+  </nav>
+</div>
+
+<!-- HERO -->
+<header class="wrap hero" id="top">
+  <div class="hero-type stack">
+    <span class="eyebrow">Small-animal practice · Whitethorn Green</span>
+    <h1 class="h1">Getting them back to<br />the long way round.</h1>
+    <p class="lede">Most of what we treat is not an emergency. It is a shortened walk, a skipped
+      stair, a dog who stopped meeting you at the door. Those are measurable — so we measure
+      them, and then we fix them.</p>
+    <div class="hero-actions">
+      <a class="btn" href="#visit">Book a consult</a>
+      <a class="btn-2" href="#study">Watch one recovery →</a>
+    </div>
+  </div>
+  <figure class="hero-fig" style="margin:34px 0 0">
+    <img src="assets/hero.webp" width="1600" height="900" alt="A collie mid-stride on a worn footpath through open downland at first light, a vet crouched at the path edge behind." />
+  </figure>
+</header>
+
+<div class="wrap" style="padding-top:84px"><hr class="rule" /></div>
+
+<!-- THE GAIT STUDY -->
+<section class="band" id="study">
+  <div class="wrap sec">
+    <div class="stack narrow" style="margin-bottom:40px">
+      <span class="eyebrow">The gait study</span>
+      <h2 class="h2">One dog, eighty-four days.</h2>
+      <p class="lede">This is Bracken, a nine-year-old collie who arrived favouring a hind leg.
+        Below is his gait, measured the way we measure it: markers on the joints, a slow belt
+        underfoot, and the path each paw travels drawn as a loop. Scroll, and he walks the way
+        he walked.</p>
+    </div>
+
+    <div class="study-grid">
+      <!-- sticky instrument -->
+      <div class="stage">
+        <div class="stage-frame">
+          <svg id="gait" viewBox="178 104 512 208" role="img"
+               aria-label="An animated kinematic diagram of a dog walking on a treadmill. The right hind limb is highlighted; the loop traced by each paw is drawn beside it.">
+            <g id="g-grid"></g>
+            <g id="g-traces"></g>
+            <g id="g-prints"></g>
+            <g id="g-far"></g>
+            <g id="g-spine"></g>
+            <g id="g-near"></g>
+          </svg>
+          <div class="readout">
+            <div><span class="k">Day</span><span class="v" id="r-day">0</span></div>
+            <div><span class="k">Lameness</span><span class="v" id="r-ls">4 / 5</span></div>
+            <div><span class="k">Stride symmetry</span><span class="v" id="r-sym">61%</span></div>
+            <div><span class="k">Weight on limb</span><span class="v" id="r-wt">38%</span></div>
+          </div>
+        </div>
+        <div class="stage-legend">
+          <span><i class="swatch sw-hot"></i>right hind — the affected limb</span>
+          <span><i class="swatch sw-ink"></i>near side</span>
+          <span><i class="swatch sw-far"></i>off side</span>
+        </div>
+      </div>
+
+      <!-- the chapters that drive it -->
+      <div class="chapters">
+        <article class="chapter" data-day="0" data-lame="1" data-gait="0" data-ls="4 / 5" data-sym="61%" data-wt="38%">
+          <span class="day">DAY 0</span>
+          <h3 class="h3">The limp you had stopped noticing</h3>
+          <p class="small">His owner booked for something else entirely. The shortened stride had
+            come on over about four months, which is slow enough that a household adjusts to it
+            without ever deciding to.</p>
+          <p class="figures">lameness 4/5 · symmetry 61% · weight on limb 38%</p>
+        </article>
+
+        <article class="chapter" data-day="1" data-lame="0.95" data-gait="0" data-ls="4 / 5" data-sym="62%" data-wt="39%">
+          <span class="day">DAY 1</span>
+          <h3 class="h3">Walking him, not examining him</h3>
+          <p class="small">A lameness exam starts on the ground — at a walk, then a trot, from
+            behind and from the side. Most of a diagnosis is in which beat of the cycle comes up
+            short, and you cannot hear that from a consulting table.</p>
+          <p class="figures">lameness 4/5 · symmetry 62% · weight on limb 39%</p>
+        </article>
+
+        <article class="chapter" data-day="6" data-lame="0.9" data-gait="0.05" data-ls="4 / 5" data-sym="64%" data-wt="41%">
+          <span class="day">DAY 6</span>
+          <h3 class="h3">What the images showed</h3>
+          <p class="small">Cruciate disease in the right stifle, with the wear pattern of a joint
+            that had been compensated for a long time. The other hind leg was carrying too much
+            and had started to say so.</p>
+          <p class="figures">lameness 4/5 · symmetry 64% · weight on limb 41%</p>
+        </article>
+
+        <article class="chapter" data-day="12" data-lame="0.98" data-gait="0" data-ls="5 / 5" data-sym="54%" data-wt="25%">
+          <span class="day">DAY 12</span>
+          <h3 class="h3">The repair — and it gets worse first</h3>
+          <p class="small">Surgery is a day. For the fortnight after it he is worse than he came
+            in, which is normal and which we tell you before you agree to it. The numbers beside
+            this dip here because his did.</p>
+          <p class="figures">lameness 5/5 · symmetry 54% · weight on limb 25%</p>
+        </article>
+
+        <article class="chapter" data-day="40" data-lame="0.35" data-gait="0.35" data-ls="2 / 5" data-sym="82%" data-wt="71%">
+          <span class="day">DAY 40</span>
+          <h3 class="h3">Rehabilitation, measured</h3>
+          <p class="small">Controlled lead work, then slopes, then water. We re-score the gait
+            every fortnight, because an owner cannot see a ten-percent gain and a number can.
+            The twelve weeks after the operation decide how he walks at eleven.</p>
+          <p class="figures">lameness 2/5 · symmetry 82% · weight on limb 71%</p>
+        </article>
+
+        <article class="chapter" data-day="84" data-lame="0" data-gait="0.85" data-ls="0 / 5" data-sym="94%" data-wt="96%">
+          <span class="day">DAY 84</span>
+          <h3 class="h3">The long way round</h3>
+          <p class="small">Symmetry back to ninety-four percent, and the red loop sits back on top
+            of its partner where it belongs. The number is the evidence; the walk is the point. He
+            takes the long way home, which is the only outcome his owner ever asked for.</p>
+          <p class="figures">lameness 0/5 · symmetry 94% · weight on limb 96%</p>
+        </article>
+
+        <p class="study-note">Bracken is a composite of cases at a practice that does not exist.
+          The scale is real: lameness is scored 0–5 in clinics every day.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE DO -->
+<section class="wrap sec" id="doing">
+  <div class="stack narrow" style="margin-bottom:36px">
+    <span class="eyebrow">What we do</span>
+    <h2 class="h2">Six things, done properly.</h2>
+  </div>
+  <div class="svc">
+    <div><h3 class="h3">Consulting</h3><p class="small">Twenty-five minute appointments as standard. The extra ten minutes is where the history actually comes out.</p></div>
+    <div><h3 class="h3">Orthopaedics &amp; gait</h3><p class="small">Cruciate, patella, hip and elbow work — with the rehabilitation planned before the surgery is booked.</p></div>
+    <div><h3 class="h3">Dentistry</h3><p class="small">Every dental under full anaesthetic, with radiographs. Scaling a tooth you have not imaged is guesswork.</p></div>
+    <div><h3 class="h3">Imaging</h3><p class="small">Digital radiography and ultrasound on site, so a same-day answer is usually a real option.</p></div>
+    <div><h3 class="h3">Senior care</h3><p class="small">Six-monthly reviews from nine years old, weighted toward mobility and pain — which is what actually shortens a good old age.</p></div>
+    <div><h3 class="h3">End of life</h3><p class="small">At home where you want that, unhurried, and with the vet who has known them. We do not book anything after it.</p></div>
+  </div>
+</section>
+
+<figure class="wrap haw-fig" style="margin:0 auto">
+  <img src="assets/haw.webp" width="1600" height="500" alt="Hawthorn berries and leaves in raking light against a dark hedge." />
+</figure>
+
+<!-- THE YARD — the dread counter -->
+<section class="band" id="yard">
+  <div class="wrap sec">
+    <div class="two">
+      <div class="stack">
+        <span class="eyebrow">The yard</span>
+        <h2 class="h2">There is no waiting room.</h2>
+        <p class="lede">A corridor of chairs is where a dog learns to dread the door. Ours is a
+          walled garden with an arch straight through to the green — you wait outside on the
+          grass, and we come and find you.</p>
+        <p class="small">For cats there is a separate room off the far side of the yard, which
+          never has a dog in it and never smells of one.</p>
+      </div>
+      <figure style="margin:0">
+        <img src="assets/yard.webp" width="1500" height="1000" alt="A walled garden in full sun with a five-bar gate standing open onto green common land." />
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- PRACTITIONER -->
+<section class="wrap sec">
+  <div class="two">
+    <figure style="margin:0">
+      <img src="assets/vet.webp" width="1400" height="1000" alt="A vet in her sixties in profile, her hand deep in a collie's ruff, looking down at the dog." />
+    </figure>
+    <div class="stack">
+      <span class="eyebrow">Who you will see</span>
+      <h2 class="h2">The same vet, each time.</h2>
+      <p class="lede">Continuity is not a nicety in this work — it is most of the diagnosis. The
+        vet who saw your dog eighteen months ago is the one who notices the quarter-inch he has
+        stopped putting down.</p>
+      <p class="small">Whitethorn is a two-vet practice and it will stay one. Every patient is
+        assigned to a named vet, and if she is away, the person you see has read the whole file
+        rather than the last line of it.</p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><hr class="rule" /></div>
+
+<!-- VISITING -->
+<section class="wrap sec" id="visit">
+  <div class="two" style="align-items:start">
+    <div class="stack">
+      <span class="eyebrow">Visiting</span>
+      <h2 class="h2">Come down the lane.</h2>
+      <p class="lede">Whitethorn Green, on the far side of the common. There is parking on the
+        verge, and the gate is the one with the hedge growing over it.</p>
+      <div><a class="btn" href="#visit">Book a consult</a></div>
+    </div>
+    <div class="stack" style="gap:26px">
+      <div class="stack" style="gap:7px">
+        <span class="eyebrow">Hours</span>
+        <p class="small mono" style="line-height:1.95">Mon–Fri &nbsp;08:00 – 18:30<br />Saturday &nbsp;08:30 – 13:00<br />Sunday &nbsp;closed, on call for our own patients</p>
+      </div>
+      <div class="stack" style="gap:7px">
+        <span class="eyebrow">Out of hours</span>
+        <p class="small">Overnight emergencies route to a dedicated night hospital eleven minutes
+          away, and we have their notes by morning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<figure class="close-fig" style="margin:0">
+  <img src="assets/close.webp" width="1600" height="686" alt="The same collie running at full stretch across open green land in late evening light." />
+</figure>
+
+<footer class="wrap">
+  <div class="foot">
+    <div class="stack" style="gap:8px">
+      <span class="mark">Whitethorn</span>
+      <p class="small">A fictional veterinary practice, built to demonstrate what this studio makes.</p>
+    </div>
+    <div class="stack" style="gap:8px">
+      <a class="small" href="guide/">Method note &amp; honesty page →</a>
+      <p class="small">Imagery on this page is AI-generated.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var svg = document.getElementById("gait");
+  if (!svg) return;
+
+  // ---- geometry (mirrors the pre-plan's gait model) ----------------------
+  var GROUND = 300, HIP = { x: 330, y: 205 }, SHO = { x: 560, y: 202 }, L1 = 48, L2 = 50;
+  var LEFT = 150, RIGHT = 710;
+
+  function ik(ax, ay, bx, by, l1, l2, bend) {
+    var dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy);
+    var max = l1 + l2 - 0.001, min = Math.abs(l1 - l2) + 0.001;
+    if (d > max) { var s = max / d; dx *= s; dy *= s; d = max; bx = ax + dx; by = ay + dy; }
+    if (d < min) { var s2 = min / (d || 1e-6); dx *= s2; dy *= s2; d = min; bx = ax + dx; by = ay + dy; }
+    var a = (l1 * l1 - l2 * l2 + d * d) / (2 * d);
+    var h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+    var ux = dx / d, uy = dy / d;
+    return { jx: ax + ux * a + bend * h * -uy, jy: ay + uy * a + bend * h * ux, fx: bx, fy: by };
+  }
+
+  function foot(p, duty, stride, lift, originX) {
+    p = ((p % 1) + 1) % 1;
+    if (p < duty) return { x: originX + stride * (0.5 - p / duty), y: GROUND, contact: true };
+    var t = (p - duty) / (1 - duty), e = t * t * (3 - 2 * t);
+    return { x: originX + stride * (-0.5 + e), y: GROUND - lift * Math.sin(Math.PI * t), contact: false };
+  }
+
+  function offsets(gait) {
+    var mix = function (a, b) { return a + (b - a) * gait; };
+    // RF ends at 1.0, not 0.0 — same phase, but lerping to 0 sweeps RF
+    // backwards through LF and the two forelegs briefly move as one.
+    return { LH: mix(0, 0), LF: mix(0.25, 0.5), RH: mix(0.5, 0.5), RF: mix(0.75, 1) };
+  }
+
+  function pose(cycle, lame, gait) {
+    var off = offsets(gait);
+    var stride = 54 + 34 * gait, lift = 16 + 16 * gait, duty = 0.62 - 0.14 * gait;
+    var rhDuty = duty * (1 - 0.45 * lame), rhStride = stride * (1 - 0.5 * lame), rhLift = lift * (1 + 0.5 * lame);
+    var t = {
+      LH: foot(cycle + off.LH, duty, stride, lift, HIP.x),
+      RH: foot(cycle + off.RH, rhDuty, rhStride, rhLift, HIP.x),
+      LF: foot(cycle + off.LF, duty, stride, lift, SHO.x),
+      RF: foot(cycle + off.RF, duty, stride, lift, SHO.x)
+    };
+    var bounce = (1.6 + 3.4 * gait) * Math.sin(2 * Math.PI * (cycle * 2 + 0.15));
+    // the pelvic hike: the hip lifts away from the sore limb as it loads
+    var hike = -7.5 * lame * (t.RH.contact ? 1 : 0);
+    var hip = { x: HIP.x, y: HIP.y + bounce + hike };
+    var sho = { x: SHO.x, y: SHO.y + bounce };
+    return {
+      hip: hip, sho: sho, lame: lame, gait: gait, stride: stride,
+      legs: {
+        LH: ik(hip.x, hip.y, t.LH.x, t.LH.y, L1, L2, -1),
+        RH: ik(hip.x, hip.y, t.RH.x, t.RH.y, L1, L2, -1),
+        LF: ik(sho.x, sho.y, t.LF.x, t.LF.y, L1, L2, 1),
+        RF: ik(sho.x, sho.y, t.RF.x, t.RF.y, L1, L2, 1)
+      },
+      contact: { LH: t.LH.contact, RH: t.RH.contact, LF: t.LF.contact, RF: t.RF.contact }
+    };
+  }
+
+  // ---- svg plumbing -------------------------------------------------------
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  var G = {
+    grid: document.getElementById("g-grid"), traces: document.getElementById("g-traces"),
+    prints: document.getElementById("g-prints"), far: document.getElementById("g-far"),
+    spine: document.getElementById("g-spine"), near: document.getElementById("g-near")
+  };
+
+  // measurement grid + belt — drawn once
+  (function () {
+    for (var y = 130; y < GROUND; y += 34) {
+      G.grid.appendChild(el("line", { x1: LEFT, y1: y, x2: RIGHT, y2: y,
+        stroke: "#CFC7B4", "stroke-width": 0.6, opacity: 0.4 }));
+    }
+    G.grid.appendChild(el("line", { x1: LEFT, y1: GROUND, x2: RIGHT, y2: GROUND,
+      stroke: "#CFC7B4", "stroke-width": 1.6 }));
+  })();
+
+  var beltTicks = [];
+  for (var i = 0; i < 40; i++) {
+    var tk = el("line", { x1: 0, y1: GROUND + 5, x2: 0, y2: GROUND + 11,
+      stroke: "#CFC7B4", "stroke-width": 1.2 });
+    G.grid.appendChild(tk);
+    beltTicks.push({ node: tk, x: LEFT + i * 16 });
+  }
+
+  function mkPath(cls, w, colour, opacity) {
+    var p = el("path", { fill: "none", stroke: colour, "stroke-width": w,
+      "stroke-linecap": "round", "stroke-linejoin": "round" });
+    if (opacity != null) p.setAttribute("opacity", opacity);
+    return p;
+  }
+  var INK = "#1C231E", HAW = "#9E2C18", FAR = "#B4BBB5";
+
+  var traceNodes = {};
+  ["LH", "LF", "RF", "RH"].forEach(function (k) {
+    var hot = k === "RH";
+    // the loops are the point of the whole instrument — they must READ
+    var p = mkPath("", hot ? 1.8 : 1.2, hot ? HAW : INK, hot ? 0.85 : 0.4);
+    traceNodes[k] = p; G.traces.appendChild(p);
+  });
+
+  function limbNodes(parent, colour, width) {
+    var seg = mkPath("", width, colour);
+    var j = el("circle", { r: 3.2, fill: colour });
+    var f = el("circle", { r: 3.2, fill: colour });
+    parent.appendChild(seg); parent.appendChild(j); parent.appendChild(f);
+    return { seg: seg, j: j, f: f };
+  }
+  var N = {
+    LH: limbNodes(G.far, FAR, 2.2), LF: limbNodes(G.far, FAR, 2.2),
+    RF: limbNodes(G.near, INK, 2.6), RH: limbNodes(G.near, HAW, 2.9)
+  };
+  var spineSeg = mkPath("", 2.2, INK);
+  var skull = el("circle", { r: 7, fill: "none", stroke: INK, "stroke-width": 2.2 });
+  G.spine.appendChild(spineSeg); G.spine.appendChild(skull);
+  var spineMarks = [0, 1, 2, 3].map(function () {
+    var c = el("circle", { r: 3.2, fill: INK }); G.spine.appendChild(c); return c;
+  });
+
+  // paw-strike trail — the data written on the ground
+  var prints = [], printNodes = [];
+  for (var pi = 0; pi < 26; pi++) {
+    var pn = el("line", { stroke: INK, "stroke-width": 2, "stroke-linecap": "round", opacity: 0 });
+    G.prints.appendChild(pn); printNodes.push(pn);
+  }
+
+  // ---- the scroll clock ---------------------------------------------------
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter"));
+  var stops = chapters.map(function (c) {
+    return {
+      el: c,
+      day: +c.dataset.day, lame: +c.dataset.lame, gait: +c.dataset.gait,
+      ls: c.dataset.ls, sym: c.dataset.sym, wt: c.dataset.wt
+    };
+  });
+  var R = {
+    day: document.getElementById("r-day"), ls: document.getElementById("r-ls"),
+    sym: document.getElementById("r-sym"), wt: document.getElementById("r-wt")
+  };
+
+  var state = { lame: 1, gait: 0, idx: 0 };
+  function readScroll() {
+    // progress is measured across the chapter column: whichever chapter's
+    // midpoint is nearest the viewport middle owns the readout.
+    var mid = window.innerHeight * 0.5, best = 0, bestD = Infinity;
+    for (var i = 0; i < stops.length; i++) {
+      var r = stops[i].el.getBoundingClientRect();
+      var d = Math.abs(r.top + r.height / 2 - mid);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    // blend toward the next chapter so the gait changes continuously
+    var cur = stops[best], rect = cur.el.getBoundingClientRect();
+    var t = Math.max(0, Math.min(1, (mid - rect.top) / (rect.height || 1)));
+    var nxt = stops[Math.min(best + 1, stops.length - 1)];
+    var lerp = function (a, b) { return a + (b - a) * Math.max(0, t - 0.5) * 2; };
+    state.lame = lerp(cur.lame, nxt.lame);
+    state.gait = lerp(cur.gait, nxt.gait);
+    if (best !== state.idx) {
+      state.idx = best;
+      R.day.textContent = String(cur.day);
+      R.ls.textContent = cur.ls; R.sym.textContent = cur.sym; R.wt.textContent = cur.wt;
+    }
+  }
+
+  // ---- render -------------------------------------------------------------
+  var lastContact = { LH: true, RH: true, LF: true, RF: true };
+
+  function traceFor(k, lame, gait) {
+    var d = "", n = 44;
+    for (var i = 0; i <= n; i++) {
+      var P = pose(i / n, lame, gait), L = P.legs[k];
+      d += (i ? " L " : "M ") + L.fx.toFixed(1) + " " + L.fy.toFixed(1);
+    }
+    return d;
+  }
+
+  function draw(P) {
+    ["LH", "LF", "RF", "RH"].forEach(function (k) {
+      var L = P.legs[k], a = (k === "LH" || k === "RH") ? P.hip : P.sho, n = N[k];
+      n.seg.setAttribute("d", "M " + a.x.toFixed(1) + " " + a.y.toFixed(1) +
+        " L " + L.jx.toFixed(1) + " " + L.jy.toFixed(1) +
+        " L " + L.fx.toFixed(1) + " " + L.fy.toFixed(1));
+      n.j.setAttribute("cx", L.jx.toFixed(1)); n.j.setAttribute("cy", L.jy.toFixed(1));
+      n.f.setAttribute("cx", L.fx.toFixed(1)); n.f.setAttribute("cy", L.fy.toFixed(1));
+    });
+    var withers = [P.sho.x - 6, P.sho.y - 38], croup = [P.hip.x + 6, P.hip.y - 36];
+    var sk = [P.sho.x + 52, P.sho.y - 52], nose = [P.sho.x + 84, P.sho.y - 44];
+    spineSeg.setAttribute("d",
+      "M " + croup[0] + " " + croup[1] + " L " + withers[0] + " " + withers[1] +
+      " M " + croup[0] + " " + croup[1] + " L " + P.hip.x + " " + P.hip.y.toFixed(1) +
+      " M " + withers[0] + " " + withers[1] + " L " + P.sho.x + " " + P.sho.y.toFixed(1) +
+      " M " + withers[0] + " " + withers[1] + " L " + sk[0] + " " + sk[1] +
+      " M " + sk[0] + " " + sk[1] + " L " + nose[0] + " " + nose[1]);
+    skull.setAttribute("cx", sk[0]); skull.setAttribute("cy", sk[1]);
+    [[withers[0], withers[1]], [croup[0], croup[1]], [P.hip.x, P.hip.y], [P.sho.x, P.sho.y]]
+      .forEach(function (pt, i) {
+        spineMarks[i].setAttribute("cx", pt[0].toFixed(1));
+        spineMarks[i].setAttribute("cy", pt[1].toFixed(1));
+      });
+  }
+
+  function drawPrints() {
+    for (var i = 0; i < printNodes.length; i++) {
+      var p = prints[i];
+      if (!p) { printNodes[i].setAttribute("opacity", 0); continue; }
+      printNodes[i].setAttribute("x1", (p.x - 5).toFixed(1));
+      printNodes[i].setAttribute("x2", (p.x + 5).toFixed(1));
+      printNodes[i].setAttribute("y1", GROUND + 2); printNodes[i].setAttribute("y2", GROUND + 2);
+      printNodes[i].setAttribute("stroke", p.hot ? HAW : INK);
+      printNodes[i].setAttribute("opacity", p.hot ? 0.75 : 0.32);
+    }
+  }
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var cycle = 0, last = 0, needScroll = true;
+
+  function frame(ts) {
+    var dt = last ? Math.min(0.05, (ts - last) / 1000) : 0;
+    last = ts;
+    if (needScroll) { readScroll(); needScroll = false; }
+
+    var rate = 0.55 + 0.65 * state.gait;
+    if (!reduce) cycle = (cycle + dt * rate) % 1;
+
+    var P = pose(cycle, state.lame, state.gait);
+
+    // belt + trail scroll at the speed the dog would be travelling
+    var belt = P.stride * rate * dt;
+    if (!reduce) {
+      for (var i = 0; i < beltTicks.length; i++) {
+        beltTicks[i].x -= belt;
+        if (beltTicks[i].x < LEFT) beltTicks[i].x += 40 * 16;
+        beltTicks[i].node.setAttribute("x1", beltTicks[i].x.toFixed(1));
+        beltTicks[i].node.setAttribute("x2", beltTicks[i].x.toFixed(1));
+      }
+      for (var j = 0; j < prints.length; j++) prints[j].x -= belt;
+      while (prints.length && prints[0].x < LEFT - 10) prints.shift();
+      ["LH", "RH", "LF", "RF"].forEach(function (k) {
+        if (P.contact[k] && !lastContact[k]) {
+          prints.push({ x: P.legs[k].fx, hot: k === "RH" });
+          if (prints.length > printNodes.length) prints.shift();
+        }
+        lastContact[k] = P.contact[k];
+      });
+    }
+
+    ["LH", "LF", "RF", "RH"].forEach(function (k) {
+      traceNodes[k].setAttribute("d", traceFor(k, state.lame, state.gait));
+    });
+    draw(P);
+    drawPrints();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("scroll", function () { needScroll = true; }, { passive: true });
+  window.addEventListener("resize", function () { needScroll = true; }, { passive: true });
+  readScroll();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

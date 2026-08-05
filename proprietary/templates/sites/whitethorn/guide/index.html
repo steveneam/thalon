@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How this page was made — Whitethorn</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='4' fill='%239e2c18'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:Petrona;src:url(../fonts/petrona-var.woff2) format('woff2-variations');font-weight:300 800;font-display:swap}
+@font-face{font-family:Familjen;src:url(../fonts/familjen-grotesk-var.woff2) format('woff2-variations');font-weight:400 700;font-display:swap}
+@font-face{font-family:'DM Mono';src:url(../fonts/dm-mono-400.woff2) format('woff2');font-weight:400;font-display:swap}
+:root{--paper:#F5F2EA;--ink:#1C231E;--ink-soft:#4E594F;--rule:#CFC7B4;--haw:#9E2C18}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Familjen,system-ui,sans-serif;color:var(--ink);background:var(--paper);line-height:1.62;font-size:17px}
+.wrap{max-width:44rem;margin:0 auto;padding:2.4rem 1.3rem 4.5rem}
+h1{font-family:Petrona,Georgia,serif;font-weight:400;font-size:clamp(2.1rem,6vw,3.2rem);line-height:1.02;letter-spacing:-.02em;margin-bottom:.5rem}
+h2{font-family:Petrona,Georgia,serif;font-weight:500;font-size:1.4rem;margin:2.2rem 0 .5rem;padding-top:.7rem;border-top:1px solid var(--rule)}
+p{margin:.7rem 0;max-width:66ch;text-wrap:pretty}
+a{color:var(--haw)}
+ul{margin:.6rem 0 .6rem 1.15rem}
+li{margin:.35rem 0;max-width:66ch}
+table{border-collapse:collapse;width:100%;margin:.9rem 0;font-family:'DM Mono',ui-monospace,monospace;font-size:.72rem}
+th,td{border:1px solid var(--rule);padding:.5rem .55rem;text-align:left;vertical-align:top}
+th{background:#EBE5D7;text-transform:uppercase;letter-spacing:.07em;font-weight:400}
+.back{font-family:'DM Mono',ui-monospace,monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.11em;text-decoration:none;display:inline-block;margin-bottom:1.7rem;color:var(--ink-soft)}
+.lede{color:var(--ink-soft);font-size:1.06rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="../">&larr; Whitethorn</a>
+<h1>How this page was made</h1>
+<p class="lede"><strong>Whitethorn is a fictional demonstration business.</strong> It has no
+premises, no staff and no patients. Every photograph on the landing page is AI-generated,
+the recovery it shows is a composite rather than a record, and this note explains the
+method honestly.</p>
+
+<h2>What is real and what is not</h2>
+<ul>
+  <li><strong>The practice is invented.</strong> The address, the hours, the two-vet
+    structure and the out-of-hours arrangement are all illustrative.</li>
+  <li><strong>Bracken is a composite.</strong> No single animal is being described. The
+    eighty-four-day arc, the day numbers and the figures are written to be typical of the
+    injury, not transcribed from a case file.</li>
+  <li><strong>The lameness scale is real.</strong> Lameness is scored 0–5 in clinics every
+    day, and marker-based gait analysis on a treadmill is a real veterinary technique. We
+    used a true scale rather than inventing one, because an invented scale is exactly the
+    dishonesty a page like this is most exposed to.</li>
+  <li><strong>The dip is deliberate.</strong> The numbers get worse at Day 12, after the
+    operation, because that is what actually happens. A recovery graph that only ever rises
+    would have been the easier page and the less truthful one.</li>
+  <li><strong>No testimonials, no counters, no urgency.</strong> There is no "500 happy
+    patients" strip anywhere on the page, because we would have had to make it up.</li>
+</ul>
+
+<h2>The design</h2>
+<p>The page is one idea: <em>a walk that gets better</em>. Its central claim — that a
+practice can return an animal to the life it had — is never asserted in a sentence. It is
+demonstrated by an instrument you scroll.</p>
+<p>The gait study pins to the side of the screen while its six chapters scroll past and
+drive it. Scroll position sets the day, the lameness score, the gait and the speed; from
+those, everything else follows on one clock — the limb positions, the loop each paw traces
+through a full cycle, the pelvic hike as the sore leg loads, the marks left on the belt
+behind, and the four readouts. There is no second animation system anywhere on the site.
+A page about measured movement should not itself be busy.</p>
+<p>The affected limb — the right hind — is drawn in haw red, and haw red is used for
+nothing else. Every live reading on the page is that colour, so the accent means one
+specific thing: <em>this number is being measured.</em></p>
+<p><strong>Why the diagram is a diagram.</strong> A first attempt drew a naturalistic dog
+and it read as a bad cartoon, which would have cheapened the whole page. A gait study,
+though, genuinely <em>is</em> a drawing in veterinary practice: markers on the joints, a
+belt underfoot, trajectories plotted. Building the honest version of the instrument turned
+out to be both truer and better-looking than an illustration of one. The photographs carry
+the feeling; the diagram carries the evidence.</p>
+<p><strong>Without JavaScript, or under reduced motion,</strong> nothing is lost: every
+chapter carries its own day, lameness score, symmetry and weight-bearing figures in the
+markup, so the whole recovery is readable as a static essay.</p>
+
+<h2>The imagery</h2>
+<p>Five photographs, all generated with Higgsfield Soul 2.0 at 2K and pinned with full
+provenance manifests (model, prompt, credits, licence tier). Twelve images were generated
+in total and five were kept — <strong>1.44 credits</strong> across the whole site.</p>
+<table>
+  <tr><th>Slot</th><th>Takes</th><th>Note</th></tr>
+  <tr><td>Hero — the path</td><td>1 of 2</td><td>First-take keeper</td></tr>
+  <tr><td>The yard</td><td>3rd take</td><td>Takes 1–2 rejected: the gate rendered as a mullioned lattice, which reads as bars</td></tr>
+  <tr><td>The vet</td><td>3rd take</td><td>Takes 1–2 rejected: an invented lanyard and badge carrying garbled lettering</td></tr>
+  <tr><td>Hawthorn</td><td>1 of 2</td><td>First-take keeper; the source of the page's one accent colour</td></tr>
+  <tr><td>The close</td><td>1 of 2</td><td>First-take keeper</td></tr>
+</table>
+<p><strong>Two rejections worth explaining,</strong> because both are honest limits of the
+tool rather than accidents:</p>
+<ul>
+  <li><strong>The yard gate came back as a grid of bars, twice.</strong> That image exists
+    to say the opposite of confinement, so a lattice across it quietly reintroduced the
+    exact feeling the section is there to dispel. The fix was to change what is in the
+    frame — a brick archway with the door swung flat open — rather than to keep asking for
+    "no bars".</li>
+  <li><strong>The vet arrived wearing a lanyard with a badge, twice,</strong> and the badge
+    carried invented pseudo-lettering. Asking for "no lanyard" did not remove it; cropping
+    the frame at the collarbone did. Image models add small printed surfaces to scenes that
+    imply them, and the reliable fix is to compose the surface out of shot.</li>
+</ul>
+<p><strong>Continuity is directed, not literal.</strong> The dog in the closing photograph
+is not pixel-identical to the dog in the hero — the coat markings differ. The two frames
+were composed as a pair in register and intent rather than as continuous footage, and we
+would rather say so here than quietly hope nobody looks twice.</p>
+
+<h2>The type</h2>
+<p>Petrona for display and long text, Familjen Grotesk for the body, DM Mono for every
+instrument reading. All three are open-licensed (SIL OFL) and served from this site's own
+files — the page loads nothing from anywhere else. Licences ship alongside the fonts.</p>
+
+<h2>What the page deliberately refuses</h2>
+<p>Veterinary landing pages converge hard on one look: mint-and-teal, a retriever staring
+down the lens, a folded-arms clinician in scrubs, a row of counted-up statistics, and a
+headline in the family of "Your Trusted Partner in Veterinary Care". This page refuses each
+of those by name. No teal appears anywhere on it, no subject meets the camera, and the only
+numbers on the page are the ones the instrument is actually measuring.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+[
+  {
+    "file": "hero.webp",
+    "pinnedHash": "8b1e42d1dedaf98b958c160ef33829ca7ee766fef5cef4a032cb07ee4ebef194",
+    "width": 1600,
+    "height": 900,
+    "quality": 82
+  },
+  {
+    "file": "yard.webp",
+    "pinnedHash": "72e6008b75c23ef26298f0b742b270d69fffa93cef1c0f7cb8b775c4fc6cdd36",
+    "width": 1500,
+    "height": 1000,
+    "quality": 82
+  },
+  {
+    "file": "vet.webp",
+    "pinnedHash": "9f39304f3e0153a6ce19999d14a27574664ab7cbdc0cefa52c3628baffac6696",
+    "width": 1400,
+    "height": 1000,
+    "quality": 82,
+    "position": "left"
+  },
+  {
+    "file": "haw.webp",
+    "pinnedHash": "17b3fed30e7fd2b3f0eb1d2206d27b355cc6fd51ac110ee2fbf28aa59c6d42ee",
+    "width": 1600,
+    "height": 500,
+    "quality": 82,
+    "position": "bottom"
+  },
+  {
+    "file": "close.webp",
+    "pinnedHash": "88cac8fad364c06603b5d13c7eada76d6a4165c52e2924139112d1548397f9bb",
+    "width": 1600,
+    "height": 686,
+    "quality": 82
+  }
+]

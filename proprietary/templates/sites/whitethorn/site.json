@@ -1,0 +1,20 @@
+{
+  "slug": "whitethorn",
+  "name": "Whitethorn",
+  "vertical": "veterinary-small-animal",
+  "oneLiner": "A small-animal practice on Whitethorn Green — the recovery measured, and the walk shown rather than claimed.",
+  "axes": {
+    "primary": "otherworldly-animation",
+    "secondary": "data-instrument"
+  },
+  "paletteSeed": "oat/chalk paper and sloe ink (a blue-green black, never pure black), with ONE accent — haw red, the hawthorn berry — reserved for live instrument readings and nothing decorative",
+  "typeDirection": "Petrona (variable serif, warm and bookish at display scale) + Familjen Grotesk (humanist grotesk body) + DM Mono (instrument readings only) — all OFL, vendored, all portfolio-new",
+  "motionBudget": "one scroll clock and no second animation system: a kinematic gait study pins while its six chapters scroll past and drive it — the dog's lameness, gait, paw-trajectory loops, footfall trail and readouts all run off the same clock; the belt and trail move at the speed the dog would be travelling; reduced-motion freezes the walk and no-JS keeps every chapter's numbers in the markup",
+  "wave": 4,
+  "built": "2026-08-05",
+  "verdict": {
+    "status": "awaiting",
+    "note": "First site of the landing arc (docs/landing-arc/spec.md), and the first built under the founder's s103 amendment restoring the claude-design mock in front of the pre-plan.",
+    "at": "2026-08-05"
+  }
+}

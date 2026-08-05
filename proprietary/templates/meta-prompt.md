@@ -45,6 +45,17 @@
    wanted before build. (History: the claude-design stage was the s51 loop,
    drifted out s53–54, was restored s61, and retired-to-optional the same
    day by this A/B.)
+   **AMENDED s104 (founder, s103 close): for LANDING-PAGE work the
+   claude-design initial mock is RESTORED and runs in FRONT of the pre-plan**
+   — *"i think using claude design for the initial mock actually did help the
+   landing page have a bit more clarity and structure."* This is not a
+   reversal of the A/B: the mandatory pre-plan stays exactly as it is and the
+   mock is added ahead of it. **Both, never either.** Whitethorn (⑳) is the
+   first site under the amended loop, and the mock earned its keep with a
+   structural finding the prose plan had missed — it showed the pinned
+   instrument scrolling away and leaving six chapters with nothing to drive,
+   which made "the instrument PINS and the chapters drive it" the build's
+   spine.
 4. Hand the instantiated prompt to the build agent as the task brief. The gates in
    §Non-negotiable gates are part of the prompt, not commentary.
 
@@ -106,7 +117,24 @@ the shirt. Corollary (Hartline re-pass, s62): FLAT METAL BLANKS are
 printable surfaces — modern key heads came back stamped with pseudo-brand
 text even under "no lettering" (and the wave-1 leather fob embossed
 itself); the compose-out is an object with no flat face at all (antique
-skeleton keys, turned-away heads, the fob hidden under the keys). A near-clean take with one small garbled patch may take a
+skeleton keys, turned-away heads, the fob hidden under the keys).
+Corollary (⑳ Whitethorn, s104): **LANYARDS AND BADGES grow on anyone the
+scene reads as a professional** — two takes of a vet returned a lanyard, the
+second carrying a garbled pseudo-text badge, against a prompt that said "no
+lanyard" in those words. Negative-prompting a printable surface does not
+remove it; the fix that worked first time was **cropping the chest out of
+frame** (a tight head-and-hands crop at the collarbone). Compose out, never
+negate — the rule generalises: name the FRAME you want, not the object you
+don't.
+Corollary (⑳, s104 — extends the s63 window-glazing rule beyond windows):
+**a prompted "gate" renders as a MULLIONED LATTICE and reads as BARS.** Two
+takes of an open garden gate came back as a grid filling the frame, on the
+one image whose whole job was to dispel the vertical's confinement dread.
+Any barrier object — gate, railing, fence, screen, grille — carries the cage
+risk, not just glazing. The compose-out is an opening with no leaf across it:
+**an archway with the door swung flat against the wall**, a gap in a hedge, a
+bare stone opening. Third take, first attempt at the new framing, keeper.
+A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that
 composes the patch out of frame is preferred over a blur when the defect sits
@@ -166,6 +194,21 @@ exists to beat. Prefer code-drawn instruments when the information is
 data-shaped (0cr, and it can respond to the visitor); mint when it is
 world-shaped; the perf floors, reduced-motion alternatives, and honesty gates
 apply unchanged.
+**Corollary — a code-drawn instrument may be SCHEMATIC but never a drawing of
+a THING (⑳ Whitethorn, s104, cost: three build rounds).** Hand-drawn
+naturalistic figures — animals, people, objects — do not converge in SVG: the
+gait model was correct on round one and the *dog* was still a bad cartoon on
+round three, and each round only moved the failure around. What converged
+immediately was changing register: the instrument became a **marker-and-trace
+kinematic plot** (joint markers, limb segments, the loop each paw traces, the
+footfall trail on the belt) — which is literally what veterinary gait analysis
+produces, so being a diagram is honest rather than a substitute for a picture.
+**The test before you draw anything: does the real discipline produce this
+drawing?** If yes, draw it and it will read as expertise. If no, you are
+illustrating, and illustration is a MINT. Division of labour that works: the
+photographs carry the feeling, the diagram carries the evidence. (Founder
+note, same session: *"definitely use higgsfield … if you need help with
+drawing or artwork."*)
 
 **Casting & social register (founder-taught, s55):** imagery is read
 socially before it is read aesthetically. (1) Cast for the audience's trust —
@@ -334,6 +377,15 @@ on a bare background fails the register even when technically clean.
 Draw rule: primary axis unique within the wave; secondary axis free; a
 vertical whose story fights its drawn axis may swap **once**, recorded in the
 wave plan with a one-line reason.
+
+**Amendment for an INSTRUMENT FAMILY (s104, the landing arc).** When a wave is
+commissioned as an animation family — every site existing for its scroll
+instrument, as the founder directed for the A+ arc — the sites share the
+animation primary by construction and the uniqueness rule cannot hold
+literally. In that case the **distinctness burden moves to the secondary axis,
+the palette, the type and the instrument's own grammar**, and each site instead
+records its axis PAIR as portfolio-unique (checked against every `site.json`).
+Stated so a re-charter can accept or reject it rather than inherit it silently.
 
 ---
 
