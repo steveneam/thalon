@@ -232,6 +232,102 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s105 — **SHIPPED: ⑳ approved + site B of three. C, the Thalon landing and phase 0 remain**
+
+**Boot was `gogogo design is approved`.** The one design loudly `awaiting` was
+⑳ Whitethorn after the s104 fix round, so it is verdicted **approved**
+(`bc58922`) and its board item is archived verbatim. **That settles more than
+one site:** the marker-and-trace instrument was the call flagged for his eye,
+so **the SCHEMATIC test is now founder-endorsed rather than only
+lead-ratcheted**, and B and C inherit it as method.
+
+**Two commits.** `bc58922` the approval · `b180be0` **㉑ Aspect & Fall**.
+Wrap verify on main: **exit 0, 3441 passed / 9 skipped** — unchanged from
+s102–s104, since this session added no engine code. Balance **568.72**
+(13.00 spent, verified live). Zero live posts, nothing armed.
+
+### ㉑ ASPECT & FALL — a studio whose page IS its drawing set
+
+**The ratchets paid for themselves before a line was drawn.** The banked idea
+was "one tree through four seasons". A naturalistic tree in SVG is a picture of
+a THING — precisely ⑳'s three wasted rounds — so it was **rejected without
+being attempted**, and the question became what a landscape practice actually
+issues. The answer, wall-to-wall in the reference sweep: a **plan-view planting
+drawing** (canopy circles at MATURE SPREAD, leader lines, hatched path, north
+point) and a **seasonal interest calendar**. The page is that set, in drafting
+register: paper, graphite, non-photo blue, numbered sheets, a title block.
+
+**One clock — the calendar year.** It sets the coloured-pencil fill, lights
+each of 13 species in its own colour in its *real* flowering months, deepens
+the terrace's shade as the canopy leafs, drives three live readouts, moves a
+playhead across the interest calendar, and cross-fades **four photographs of
+one garden corner** (Feb/May/Jul/Oct — same bench, same walls, same birches).
+Then a second chapter answers the objection a designer actually gets: **year 1
+/ 3 / 10 at true mature spread** — *"Year one looks thin. It is meant to."*
+
+**Distinctness, stated not hoped.** Pair `otherworldly-animation +
+editorial-print` is portfolio-new against all 21 `site.json`. Against
+`orchard-house` (the other seasons page): a working drawing vs painterly
+backdrops · drafting vs painterly · one paper + plants-only colour vs four
+season worlds · **a second clock (the years) it has no analogue of**.
+Type: Spectral + Sometype Mono, two families because a sheet has two lettering
+registers. Both portfolio-new against the ~40 faces already vendored.
+
+**THE MOCK EARNED ITS RESTORATION A SECOND TIME** — four faults before any
+build code, including **two silent killers of `position:sticky`**.
+
+### The expensive lessons, all found by RUNNING IT — sixth session running
+
+**A pinned instrument has FOUR silent killers, and a page whose instrument
+does not pin has no product at all.** (1) a flex row with
+`align-items:flex-start` cancels stretch, leaving the sticky column one
+viewport tall inside a 4,290px section; (2) **`overflow-x:hidden` on any
+ancestor computes `overflow-y:auto` and breaks sticky against the viewport
+outright** — measured `top:-1843px`, invisible in source, survives every other
+fix; (3) the single-column layout collapses the travel again, on phones only;
+(4) a reading line measured from `0` marks chapters active while their headings
+sit *behind* the sheet — the mobile defect ⑳ shipped.
+
+**The clock must follow the PROSE, not the scrollbar.** Driving it linearly
+against section progress put the sheet on OCTOBER while the reader was still on
+the July chapter — the instrument contradicting the words beside it, which is
+the one failure a data-instrument page cannot survive. Chapters now carry their
+month and the clock interpolates between them.
+
+**Static-first is an HONESTY gate, not a perf gate.** Built JS-first, the page
+rendered an empty frame with JavaScript off **while `/guide` claimed the
+opposite in writing** — a false statement on the honesty page, worse than the
+missing feature. Fixed with a single source of truth: the plant schedule is one
+inert JSON block, the static SVG is generated from it, the runtime reads the
+same block. **Verified with the script stripped.** General rule now on the
+books: *every claim `/guide` makes is a claim that has to be TESTED.*
+
+**Coherence bugs only a render shows:** the wink's leader line pointed into the
+*shaded* half of the terrace while the copy called it the sunny end · the twin
+caption named a month the title block was not on (APR vs MAY) · **May read
+`0 in flower` under a chapter claiming everything blooms** — the allium was in
+the May photograph but missing from the schedule, so the fix improved both.
+And the portfolio ratchet caught a real docroot leak: an internal method-doc
+name in a page comment.
+
+**Mint lessons, both new corollaries:** the **edit seat holds MATERIALS but not
+VIEWPOINT** — *"keep the camera position … identical to the reference"* kept
+paving, walls, bench and trees and still recomposed the shot; what worked first
+time was naming the composition as a *layout* ("a drystone pier at the left
+edge and another at the right, the rendered wall across the middle, the bench
+against it on the left, paving filling the lower third"). And **generated
+botany lies**: a "mid-May" edit returned the hydrangea in full flower, wrong
+for May and contradicting the calendar printed below it — re-minted rather
+than softening the calendar.
+
+**9 kept of 11, 13.00cr.** Ring-fence intact — the ~180cr for the Thalon
+landing was not touched.
+
+**Not done, named plainly:** site C (botanical perfumery), the **Thalon landing
+page**, **phase 0**, and control-arc part B.
+
+---
+
 ## Sprint 9 / s104 — **SHIPPED: site A of three. B, C, the Thalon landing and phase 0 all remain** (the plan block below is what was written)
 
 **One commit, `4bc9604`: ⑳ WHITETHORN — the landing arc's first site.** His

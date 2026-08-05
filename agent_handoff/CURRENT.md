@@ -2,255 +2,222 @@
 
 ## Stamp
 
-2026-08-05 close of session 104 (syd4 — boot was "gogogo" alone). Wrap verify
-on main: **exit 0, 3441 passed / 9 skipped** (unchanged from s102/s103 — this
-session added no engine code).
+2026-08-05 close of session 105 (syd4 — boot was `gogogo design is approved`).
+Wrap verify on main: **exit 0, 3441 passed / 9 skipped** (unchanged from
+s102–s104 — this session added no engine code).
 
-**Four commits.** `4bc9604` ⑳ Whitethorn · `c1ec0ed` the s104 record ·
-`90f0f0c` **his fix round** (warmth + the missing wink) · plus this restamp.
-**The check that matters is not the sha but the state: tree clean, main ==
-origin, verified at wrap.**
+**Three commits.** `bc58922` ⑳ approved · `b180be0` **㉑ Aspect & Fall** ·
+plus this record. **The check that matters is not the sha but the state: tree
+clean, main == origin, verified at wrap.**
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
-**Credits: 581.72** (was 584.12 — 2.40 spent, verified live at wrap).
+**Credits: 568.72** (13.00 spent, verified live at wrap).
 
-## HIS TWO CALLS THIS SESSION, BOTH SETTLED
+## HIS ONE WORD, AND WHAT IT SETTLED
 
-▎ **1 — THE ORDER STANDS.** I recommended bringing the Thalon landing page
-forward ahead of sites B and C (the sunset puts unbounded risk on whatever is
-scheduled last, and site A already banked the transferable lesson). **He
-declined:** *"i would still stick to the orginial order of doing the sites
-first, then learn, then the thalon landing page."* **Settled — do not
-re-litigate it.** Sites B and C, then the capstone.
+▎ **`design is approved` → ⑳ WHITETHORN IS VERDICTED `approved`.** It was the
+one design loudly `awaiting`, after the s104 fix round. **It settles more than
+one site:** the marker-and-trace instrument was the exact call I flagged for
+his eye, so **the SCHEMATIC test is now founder-endorsed rather than only
+lead-ratcheted** — *does the real discipline produce this drawing? if not it is
+illustration, and illustration is a MINT.* Its board item is archived verbatim.
 
-▎ **2 — WHITETHORN GOT A WARMTH FIX ROUND, and it found a real defect.** His
-verdict: more nature, openness and light-heartedness — *"you dont want to
-give off a sterile hospital experience, but caring, warm and empathy and
-friendly place."* See §THE FIX ROUND below.
+## WHAT SHIPPED — ㉑ ASPECT & FALL, site B of three
 
-## WHAT SHIPPED — one of the three sites, not three
+**A garden & landscape design studio whose page IS its drawing set.** The
+banked idea was "one tree through four seasons" — and **a naturalistic tree in
+SVG was rejected without being attempted**, because that is a picture of a
+THING and is precisely what cost ⑳ three rounds. The question became what a
+landscape practice actually issues: a **plan-view planting drawing** (canopy
+circles at MATURE SPREAD, leader lines, hatched path, north point) and a
+**seasonal interest calendar**. So the page is that set, in drafting register —
+paper, graphite, non-photo blue, numbered sheets, a title block.
 
-**His running order was followed exactly** — *"do the three sites first next
-session"* — and **site A is built and site A only.** COORDINATION §s104
-(SHIPPED block) carries the full record.
+**One clock, the calendar year.** It sets the coloured-pencil fill, lights each
+of 13 species in its own colour in its *real* flowering months, deepens the
+terrace's shade as the canopy leafs, drives three live readouts, moves a
+playhead across the interest calendar, and cross-fades **four photographs of
+ONE garden corner** (Feb/May/Jul/Oct — same bench, same walls, same birches).
+Then the objection a designer actually gets: **year 1 / 3 / 10 at true mature
+spread** — *"Year one looks thin. It is meant to."*
 
-**⑳ WHITETHORN — a veterinary practice whose central claim is never written
-in a sentence.** The banked scroll-dog idea moved one vertical sideways and
-became a **recovery**. A gait study pins beside six chapters that scroll past
-and drive it; one clock sets the day, the lameness score, the gait, the
-pelvic hike as the sore limb loads, the loop each paw traces, the marks left
-on the belt, and four readouts. Day 0 is a three-beat limp, Day 84 a trot.
-**The numbers dip at Day 12** because a real post-op recovery does.
+Pair `otherworldly-animation + editorial-print` is portfolio-new against all 21
+`site.json`. Type: Spectral + Sometype Mono, two families because a real sheet
+has two lettering registers.
 
-**The expensive lesson, three build rounds: a code-drawn instrument may be
-SCHEMATIC but never a drawing of a THING.** The gait mathematics was right on
-round one; the naturalistic dog was still a bad cartoon on round three, and
-each round only moved the failure around. Switching register — to a
-marker-and-trace kinematic plot, which is *what veterinary gait analysis
-actually produces* — converged at once and is honest besides. **Ratcheted
-test: does the real discipline produce this drawing? If not it is
-illustration, and illustration is a MINT.**
+**9 kept of 11, 13.00cr. The ~180cr ring-fence for the Thalon landing is
+UNTOUCHED.**
 
-▎ **YOUR MID-SESSION NOTE IS NOW STANDING METHOD** — *"definitely use
-higgsfield … if you need help with drawing or artwork."* Recorded as the
-division of labour: **photographs carry the feeling, the diagram carries the
-evidence.** It landed exactly as I hit that wall.
+## THE RATCHETS THIS SESSION BOUGHT — read before site C
 
-**Two mint lessons, both re-proving that negative prompts fail:** lanyards and
-badges (with pseudo-text on them) grow on anyone a scene reads as a
-professional — *"no lanyard"* did nothing across two takes, a
-crop-at-the-collarbone worked first time; and **a prompted "gate" renders as a
-mullioned lattice and reads as BARS**, on the one image whose whole job was to
-dispel this vertical's confinement dread (extends the s63 glazing rule to
-every barrier object). **Name the FRAME you want, not the object you don't.**
-(First-build figures; the fix round took the site to 20 generated,
-8 kept, 2.40cr — see below.)
+All in `proprietary/templates/meta-prompt.md`. **Every one was found by
+RENDERING; none was visible to types, lint or 3,441 tests. Sixth session.**
 
-**Your claude-design restoration earned itself** — the mock surfaced a
-structural fault the prose plan had missed (the instrument scrolling away,
-leaving six chapters with nothing to drive), which became the build's spine.
+▎ **A PINNED INSTRUMENT HAS FOUR SILENT KILLERS**, and a page whose instrument
+does not pin has no product at all — the chapters scroll past driving nothing.
+Measure `getBoundingClientRect().top`; it must read `0`. (1) a flex row with
+`align-items:flex-start` cancels stretch, leaving the sticky column one
+viewport tall in a 4,290px section; (2) **`overflow-x:hidden` on ANY ancestor
+computes `overflow-y:auto` and breaks sticky outright** — measured
+`top:-1843px`, invisible in source, survives every other fix; (3) the
+single-column layout collapses the travel again, **on phones only**; (4) a
+reading line measured from `0` marks chapters active while their headings sit
+*behind* the sheet — the mobile defect ⑳ actually shipped.
 
-**Every real defect came from RUNNING IT — fifth session running.** A
-viewport-tall void under the sticky stage · the two forelegs briefly
-synchronising mid-blend · the mobile stage hiding each chapter's own heading ·
-copy claiming a gate the photograph no longer had. Types, lint and 3441 tests
-saw none of them.
+▎ **THE CLOCK FOLLOWS THE PROSE, NOT THE SCROLLBAR.** Linear scroll-driving put
+the sheet on OCTOBER while the reader was on the July chapter. Chapters carry
+their month; the clock interpolates between them.
 
-## THE FIX ROUND (`90f0f0c`) — and the defect it caught
+▎ **STATIC-FIRST IS AN HONESTY GATE.** Built JS-first, the page rendered an
+empty frame with JS off **while `/guide` claimed the opposite in writing.**
+Fixed with one source of truth — the schedule is an inert JSON block, the SVG
+is generated from it, the script only animates. Verified with the script
+stripped. **General rule now on the books: every claim `/guide` makes is a
+claim that has to be TESTED.**
 
-**The page had NO WINK.** One was designed — the dog turning to look out at
-Day 84 — and it was **silently lost when the instrument changed register**
-from a drawn dog to the kinematic plot. The house rule is one deliberate
-playful moment per page; it shipped with zero, and nothing flagged it because
-it was never a code defect: **it was a requirement that lost its host.**
-Ratcheted into meta-prompt §casting(6) — *a change of REGISTER drops the
-requirements that belonged to the old one; re-run the checklist after any
-change of APPROACH, not only after a change of code.* This is the most
-transferable thing the session produced and **sites B and C should open with
-it in hand.**
+▎ **Two mint corollaries.** The **edit seat holds MATERIALS but not VIEWPOINT**
+— *"keep the camera position identical to the reference"* kept paving, walls,
+bench and trees and still recomposed the shot; naming the composition as a
+*layout* worked first time. And **generated botany lies**: a "mid-May" edit
+returned a hydrangea in full flower, contradicting the calendar printed below
+it — re-minted rather than softening the calendar.
 
-Restored in the vertical's own language: at Day 84 only, the paw-prints wander
-up off the measured line under *"(stopped to sniff something)"* — written into
-the copy too, so it survives no-JS.
-
-**The rest:** the instrument **hands off to a photograph** at Day 84 (it used
-to end on a number) · three new mints for open air — a dog rolling on its back
-in meadow grass, a cat asleep behind one wide pane, a dog asleep at home in a
-sun patch · the dark hawthorn band became the **"Whitethorn is hawthorn"**
-section, earning the image by explaining where the page's one red comes from ·
-the alternating band went from clinical near-white to a **soft meadow wash** ·
-copy warmed throughout. **No honesty was softened** — the Day-12 dip, the
-fictional disclosure and the real 0–5 scale are untouched.
-
-One take rejected on a rule already on the books: the cat's window came back
-with a rail and frame member across the glass — the one-large-pane rule, in
-the section about not making animals feel shut in.
-
-**Site total: 20 generated, 8 kept, 2.40cr.**
-
-## WHAT DID NOT SHIP — named plainly
-
-**Site B (garden design), site C (botanical perfumery), the THALON LANDING
-PAGE, and phase 0.** Control-arc part B was already the named slip and it
-stays slipped. The arc running past s104 was written into the spec in
-advance; it is running past it by more than planned because site A took three
-rounds to find its register. **That cost is now a ratchet, so B and C should
-not repeat it** — they open knowing the schematic test.
-
-**The ring-fence HELD** — nothing near the reserved 180cr was touched.
-
-## Resume prompt (session 105, syd4)
+## Resume prompt (session 106, syd4)
 
 **Resume · Thalon** — nothing is mid-flight. **The plan is COORDINATION §s104
-(the PLANNED block), minus what shipped.** Running order unchanged from his
-direction:
+(the PLANNED block), minus what shipped.** His running order is unchanged and
+settled: sites first, then the capstone.
 
-**⚠ Open with the s104 ratchets in hand — they exist so B and C do not repeat
-site A's three wasted rounds:** the SCHEMATIC test (does the real discipline
-produce this drawing? if not it is illustration, and illustration is a MINT) ·
-compose the defect OUT, never negate it · **and re-run the design checklist
-after any change of APPROACH — that is how ⑳ lost its wink.** All three are in
-`proprietary/templates/meta-prompt.md`.
+**⚠ Open with the ratchets above in hand.** They exist so site C does not
+repeat what A and B each paid for.
 
-**1 — SITE B: garden & landscape design studio** (`seasons-tree` idea, one
-tree through four seasons on scroll — the instrument IS the pitch: a designer
-sells what a space becomes over a year). Loop per `docs/landing-arc/spec.md`
-§Method: **claude-design mock → PREPLAN.md → code-direct → mint → /guide →
-fix round.** Precedent to copy in every respect:
-`proprietary/templates/sites/whitethorn/`. **Draw a portfolio-unique axis
-PAIR** — `orchard-house` already holds otherworldly+cinematic and
-`whitethorn` now holds otherworldly+data-instrument.
+**1 — SITE C: botanical perfumery** (`bloom video`, Seedance ~17.5cr — the only
+slot in the arc with a real video cost). Loop per `docs/landing-arc/spec.md`
+§Method: **claude-design mock → PREPLAN.md → code-direct → mint → /guide → fix
+round.** Precedent to copy in every respect:
+`proprietary/templates/sites/aspect-and-fall/`. **Draw a portfolio-unique axis
+PAIR** — `orchard-house` holds otherworldly+cinematic, `whitethorn`
+otherworldly+data-instrument, `aspect-and-fall` otherworldly+editorial-print.
+**Note the spec's new method line:** C's banked idea is a *video*, not a
+drawing, so it dodges the picture-of-a-thing trap — its equivalent question is
+what a perfumer's own document looks like (a formula? a note pyramid? a
+maceration log?).
 
-**2 — SITE C: botanical perfumery** (bloom video scrub, Seedance ~17.5cr —
-the only slot in the arc with a real video cost).
+**2 — THE THALON LANDING PAGE**, the capstone and the reason for the order —
+**his order, re-affirmed at the s104 close, and settled.** NOT a portfolio
+site. Stealth unchanged; **where it is served and under what name is his
+separate call** and building it does not decide it. Mint budget **ring-fenced
+at ~180cr and still intact.**
 
-**3 — THE THALON LANDING PAGE**, the capstone and the reason for the order —
-**his order, re-affirmed at the s104 close, and settled.**
-NOT a portfolio site. Stealth unchanged; **where it is served and under what
-name is his separate call** and building it does not decide it. Mint budget
-**ring-fenced at ~180cr and still intact.**
-
-**4 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
+**3 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
 out on their own"**, which is not true while the queue's master key is empty
 and **nothing in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the
 DISCLOSURE, not a door.** Arming the queue from the UI is his sequence-gate
 call and is NOT in scope.
 
-**5 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
+**4 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
 (DOCTRINE 0). Both MIT deps approved. Shaping finding banked in
 `docs/control-arc/spec.md`: not a segment-builder surface but three additions
 to a list that already exists.
 
 **CARRIED, recorded not fixed:** Schedule's month-density chips clip their own
-text · the Intel **dossier-absence REASON does not reach the wire** (unarmed
-vs model failure vs denylist all read the same — a contract-window ask) ·
-Intel dismiss reversibility · the sweep schedule's missing door · the
-add-chip's missing keyword path.
+text · the Intel **dossier-absence REASON does not reach the wire** (unarmed vs
+model failure vs denylist all read the same — a contract-window ask) · Intel
+dismiss reversibility · the sweep schedule's missing door · the add-chip's
+missing keyword path.
 
-**WAITING ON HIM — none blocking:** ⑳ Whitethorn's verdict **after the fix
-round** (its `site.json` is loudly `awaiting`) · the two verticals picked under his *"and etc."*
-(garden design · botanical perfumery — one word each, and **site B is about to
-spend on the first of them**, so this is the cheapest moment to overrule) ·
-the Higgsfield **expiry date** (still only a pacing aid, blocks nothing) · the
-three s101 staged design calls. All on NEEDS-STEVEN.
+**WAITING ON HIM — none blocking:** ㉑ Aspect & Fall's verdict (its `site.json`
+is loudly `awaiting`) · **the casting reversal inside it** — the studio's one
+human is an experienced WOMAN at the board, one word to flip · the last
+un-spent vertical (**botanical perfumery**, and site C is about to spend on it,
+so this is the cheapest moment to overrule) · the Higgsfield **expiry date**
+(pacing aid only, blocks nothing) · the three s101 staged design calls. All on
+NEEDS-STEVEN.
 
-▎ ▸ **Lead judgement calls made in ⑳, each a one-line reversal:** the vet cast
-as an older WOMAN (§casting 7 gives two answers for a vertical that is both
-professional-serious and warmth; the spec's own note said "older/calmer") ·
-the Day-12 honest dip · the practice named Whitethorn (hawthorn: a hedgerow
-tree that is also a real heart remedy — the palette's one accent comes from
-its berry).
-▎ ▸ **The lesson, fifth session running: RUN IT AND READ IT.** Every
-highest-severity finding this session was invisible to the suite and obvious
-on screen within seconds.
+▎ ▸ **Lead judgement calls made in ㉑, each a one-line reversal:** the studio's
+practitioner cast as an experienced woman (§casting 7 leads male on
+professional-serious, but this is equally a craft/warmth vertical and the trust
+signal is the drawing under her hands) · the studio named **Aspect & Fall**
+after the two facts every landscape design starts from, which earns its own
+survey section · the honest February chapter and the year-1-looks-thin chapter,
+both of which sell by conceding.
+▎ ▸ **The lesson, SIXTH session running: RUN IT AND READ IT.** Every
+highest-severity finding this session was invisible to the suite and obvious on
+screen within seconds — including two that made the page's central feature
+silently do nothing.
 ▎ ▸ **Traps worth keeping:** `next dev` at `localhost:3111` (`npm run dev`),
 **not started this session** · **the Bash tool's cwd PERSISTS between calls —
 `cd` to the repo root in the same command** · scripts need `set -a; source
 apps/web/.env.local; set +a` · chrome-devtools `fill` does NOT reach React
 controlled inputs · **`html{scroll-behavior:smooth}` silently defeats
-`window.scrollTo` in an evaluate — set `scrollBehavior='auto'` first** ·
-**a sticky element inside a tall grid cell pins to the TOP and leaves a
-viewport-tall void; give it `height:100vh` + centred flex** · do NOT run
+`window.scrollTo` in an evaluate — set `scrollBehavior='auto'` first** · **a
+sticky element inside a tall grid cell pins to the TOP and leaves a
+viewport-tall void; give it `height:100vh` + centred flex** · **NEVER edit
+nested SVG/HTML with non-greedy regex — it matched the first inner `</g>` and
+silently duplicated 11 elements; depth-count the tags instead** · do NOT run
 `npm run verify` in the background while still editing · **read the logged
 `VERIFY EXIT` line — the exit code is the gate** · vitest does NOT typecheck
 (`npx tsc --noEmit -p apps/web` FROM THE REPO ROOT) · eslint runs from
-`apps/web` · one workspace `.data` root, NEVER re-pin · **portfolio sites
-trip the impeccable design hook on fonts/colours — false positive by
-construction: every site draws its own type and palette; the hook governs
-Thalon's own surfaces** · `packages/db` exposes `repos` as its ONLY query API
-· vendor mint URLs expire in 30–60 min — **download and pin immediately** ·
-`export-template-assets` always emits **.webp** whatever the source ext.
+`apps/web` · one workspace `.data` root, NEVER re-pin · **portfolio sites trip
+the impeccable design hook on fonts/colours — false positive by construction** ·
+**the portfolio ratchet's docroot-leak check is real: naming an internal method
+doc in a page comment fails the build** · `packages/db` exposes `repos` as its
+ONLY query API · vendor mint URLs expire in 30–60 min — **download and pin
+immediately** · `export-template-assets` always emits **.webp**.
 ▎ ▸ **⛔ SEQUENCE GATE, unchanged:** post = ARMED (founder GO s98); page still
 409s at `POST /api/create`; bluesky is the one platform granted for live
 testing; the queue consumer's key rests EMPTY. Two live posts total, both
-bluesky. **This session spent 1.68 credits and posted nothing.**
+bluesky. **This session spent 13.00 credits and posted nothing.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** tree clean and main == origin (verified at wrap) · staging
-rolls s93–s104 with the next auto-deploy · **no new migration this session** ·
-four social channels connected · dev PG live · 8899 preview + sweeper user
-units keep running — NEVER hand-start the sweeper.
+▎ ▸ **State:** tree clean and main == origin (verified at wrap) · staging rolls
+s93–s105 with the next auto-deploy · **no new migration this session** · four
+social channels connected · dev PG live · 8899 preview + sweeper user units
+keep running — NEVER hand-start the sweeper.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
-s105 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
-`docs/landing-arc/spec.md` is the spec of record — **site A BUILT, B and C
-and the Thalon landing UNSTARTED.**
+s106 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
+`docs/landing-arc/spec.md` is the spec of record — **sites A and B BUILT, C and
+the Thalon landing UNSTARTED.**
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    verify` before any new work.
 
-CLAUDE.md → this file → COORDINATION.md (**§s104 = what shipped AND the plan**)
-→ `docs/landing-arc/spec.md` (**site A BUILT; B, C, capstone next**) →
-`proprietary/templates/meta-prompt.md` (**READ BEFORE ANY MINT — it gained
-three ratchets this session**) → `proprietary/templates/sites/whitethorn/`
+CLAUDE.md → this file → COORDINATION.md (**§s105 = what shipped · §s104 = the
+plan**) → `docs/landing-arc/spec.md` (**A + B BUILT; C and the capstone next**)
+→ `proprietary/templates/meta-prompt.md` (**READ BEFORE ANY MINT — it gained
+five ratchets this session**) → `proprietary/templates/sites/aspect-and-fall/`
 (the precedent to copy) → `docs/control-arc/spec.md` (**A + A2 BUILT; B owes a
 SHEET**) → `docs/research/ux-refinement-program.md` →
 agent_handoff/NEEDS-STEVEN.md → `docs/research/prior-art-portal-automation-s84.md`
 (BEFORE ANY PORTAL WORK). `docs/video-arc/spec.md` is a CLOSED record.
 
-## Delta (session 104)
+## Delta (session 105)
 
-One site of three, and the honest headline is that **the shortfall bought
-something the other two now inherit.**
+Two sites of three now stand, and the honest headline is that **site A's
+expensive lesson paid for itself on the very next build.**
 
-Three build rounds went into drawing a dog in SVG that never stopped looking
-like a bad cartoon, while the gait mathematics underneath it had been correct
-since round one. The tell was rule 11's shape — escalating the same approach
-rather than changing it — and the change, when it finally came, was not more
-craft but a different register: stop drawing a picture of a thing, draw the
-instrument the real discipline produces. A marker-and-trace kinematic plot is
-what a gait lab actually outputs, so it reads as expertise instead of as a
-failed illustration, and it converged immediately.
+㉑'s banked idea was a tree drawn in code, turning through four seasons — the
+same shape of trap that cost ⑳ three rounds. This time it was killed before a
+line was written, by the test ⑳ bought: *does the real discipline produce this
+drawing?* It does not draw naturalistic trees; it draws planting plans with
+circles at mature spread, and interest calendars. Ten minutes of looking at
+what landscape architects actually issue replaced what would have been another
+three rounds. That is the first time one of these ratchets has visibly saved
+its own cost.
 
-That is now a test in the meta-prompt rather than a memory, which is the only
-reason the three rounds were worth spending: **does the real discipline
-produce this drawing?** If not, it is illustration, and illustration is a
-mint. The founder said the same thing in his own words mid-session, which
-means the rule arrived twice from two directions on the same afternoon.
+What the session then spent its time on instead was subtler and worth carrying:
+**a scroll instrument that silently fails to pin.** Two independent causes on
+desktop, a third on mobile only, and a fourth that hid chapter headings behind
+the sheet. None threw an error. None was visible to 3,441 tests. All four were
+obvious within one screenshot — and any one of them would have shipped a page
+whose entire product does nothing while the copy describes it working.
 
-The second thing worth carrying is smaller and keeps recurring: every defect
-that mattered — the void under the sticky stage, two forelegs moving as one,
-a heading hidden on mobile, copy describing a gate the photograph no longer
-had — was invisible to the type checker, the linter and 3441 tests, and
-obvious within seconds of loading the page. Fifth session in a row.
+The most transferable thing, though, is smaller and sharper. The page was
+built JS-first, and `/guide` said in writing that it worked without
+JavaScript. It did not. **The honesty page had become the least-tested page on
+the site**, which inverts what it is for. It is now generated from one source
+of truth and was checked with the script stripped out. The rule that came out
+of it is general and belongs to every site from here: a claim on `/guide` is
+not a description, it is an assertion — and assertions get tested.

@@ -1,8 +1,20 @@
 # Landing arc — three A+ sites, then Thalon's own landing page
 
-> **Status: SPECCED s103, ORDER DECIDED, nothing blocking — build opens s104
-> with the three sites.** Founder-directed at the s103 close. Spec of record
-> for the A+ animation family and the Thalon landing page it feeds.
+> **Status: IN BUILD. Site A ⑳ Whitethorn BUILT s104 and APPROVED s105
+> (`gogogo design is approved`). Site B ㉑ Aspect & Fall BUILT s105, awaiting
+> his glance. Site C (botanical perfumery) and the Thalon landing page are
+> UNSTARTED.** Founder-directed at the s103 close; order re-affirmed by him at
+> the s104 close and settled. Spec of record for the A+ animation family and
+> the Thalon landing page it feeds.
+>
+> **Method note added by the build (s104–s105), because both sites hit it:** the
+> banked animation ideas are named as *pictures of things* ("a dog that walks",
+> "one tree through four seasons"), and both times the picture was the wrong
+> instrument. The test that resolved both — *does the real discipline produce
+> this drawing?* — belongs at the TOP of each remaining site's pre-plan, not
+> after a build round. Site C's banked idea is a bloom VIDEO, which is a mint
+> rather than a drawing, so it does not hit this trap; its equivalent question
+> is what a perfumer's own document looks like.
 
 ## The ask, verbatim
 
@@ -68,9 +80,9 @@ option. His example sets the pattern; the other two are my recommendation under
 
 | # | The banked idea | Its current home | **The new vertical** | Why it carries |
 |---|---|---|---|---|
-| A | **scroll-dog** — a dog that walks as you scroll | wagtail-and-co (dog walking) | **Veterinary practice** (his call) | The same walk cycle, but the scroll now carries a *care* story rather than a service list — and a vet is a higher-trust, higher-value vertical than a walker, so the archetype shifts older/calmer per meta-prompt §casting (7) |
-| B | **seasons-tree** — one tree through four seasons on scroll | orchard-house (orchard) | **Garden & landscape design studio** | The instrument *is* the pitch: a garden designer sells what a space becomes over a year, which is precisely what the scrubbed tree shows. Orchard sold fruit; this sells time |
-| C | **bloom video** — scroll-scrubbed bloom transition (Seedance, ~17.5cr) | stem-and-vow (florist) | **Botanical perfumery** | Bloom → scent is the oldest move in fragrance, and it rescues the idea from being "a florist again." Also the strongest case for the exceptional-palette axis, which the wave-4 anchors already wanted |
+| A ✅ | **scroll-dog** — a dog that walks as you scroll | wagtail-and-co (dog walking) | **Veterinary practice** (his call) — BUILT ⑳ `whitethorn`, APPROVED s105 | The same walk cycle, but the scroll now carries a *care* story rather than a service list — and a vet is a higher-trust, higher-value vertical than a walker, so the archetype shifts older/calmer per meta-prompt §casting (7) |
+| B ✅ | **seasons-tree** — one tree through four seasons on scroll | orchard-house (orchard) | **Garden & landscape design studio** — BUILT ㉑ `aspect-and-fall` s105, awaiting verdict | The instrument *is* the pitch: a garden designer sells what a space becomes over a year, which is precisely what the scrubbed tree shows. Orchard sold fruit; this sells time |
+| C | **bloom video** — scroll-scrubbed bloom transition (Seedance, ~17.5cr) | stem-and-vow (florist) | **Botanical perfumery** — NEXT | Bloom → scent is the oldest move in fragrance, and it rescues the idea from being "a florist again." Also the strongest case for the exceptional-palette axis, which the wave-4 anchors already wanted |
 
 **Naming, casting and the house style are NOT re-derived here** — they come
 from `proprietary/templates/meta-prompt.md` and the standing doctrines already
@@ -132,8 +144,8 @@ Estimates, not commitments; `get_cost` preflight governs every actual mint.
 
 | Line | Estimate | Note |
 |---|---|---|
-| Site A (vet) — stills + scroll instrument | ~60cr | stills historically ~0.72cr first-take; the instrument is the cost |
-| Site B (garden design) — stills + seasons scrub | ~60cr | |
+| Site A (vet) — stills + scroll instrument | ~60cr → **ACTUAL 2.40cr** | stills historically ~0.72cr first-take; the instrument is the cost |
+| Site B (garden design) — stills + seasons scrub | ~60cr → **ACTUAL 13.00cr** | the four-season twin sequence is where the takes went |
 | Site C (perfumery) — stills + **bloom video** | ~90cr | the Seedance video (~17.5cr) plus variants; the most expensive of the three |
 | Fix rounds ×3 | ~90cr | every site has had one; budgeting it is not pessimism |
 | **Thalon landing — RING-FENCED** | **~180cr** | reserved first, spent last |
