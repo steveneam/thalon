@@ -184,7 +184,7 @@ credits ever spent.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (`<this wrap>`) · staging rolls s93–s102
+▎ ▸ **State:** main = origin (`2dc6896`, this wrap) · staging rolls s93–s102
 with the next auto-deploy · **migration 0027 ships with it and is applied to
 dev PG already** · four social channels connected · dev PG live · 8899 preview
 + sweeper user units keep running — NEVER hand-start the sweeper.
