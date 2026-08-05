@@ -6,13 +6,27 @@
 on main: **exit 0, 3441 passed / 9 skipped** (unchanged from s102/s103 — this
 session added no engine code).
 
-**Two commits.** `4bc9604` ⑳ Whitethorn, the landing arc's first site (plus
-the meta-prompt ratchets it earned), and this stamp + the s104 record.
+**Four commits.** `4bc9604` ⑳ Whitethorn · `c1ec0ed` the s104 record ·
+`90f0f0c` **his fix round** (warmth + the missing wink) · plus this restamp.
 **The check that matters is not the sha but the state: tree clean, main ==
 origin, verified at wrap.**
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
-**Credits: 582.44** (was 584.12 — 1.68 spent, verified live at wrap).
+**Credits: 581.72** (was 584.12 — 2.40 spent, verified live at wrap).
+
+## HIS TWO CALLS THIS SESSION, BOTH SETTLED
+
+▎ **1 — THE ORDER STANDS.** I recommended bringing the Thalon landing page
+forward ahead of sites B and C (the sunset puts unbounded risk on whatever is
+scheduled last, and site A already banked the transferable lesson). **He
+declined:** *"i would still stick to the orginial order of doing the sites
+first, then learn, then the thalon landing page."* **Settled — do not
+re-litigate it.** Sites B and C, then the capstone.
+
+▎ **2 — WHITETHORN GOT A WARMTH FIX ROUND, and it found a real defect.** His
+verdict: more nature, openness and light-heartedness — *"you dont want to
+give off a sterile hospital experience, but caring, warm and empathy and
+friendly place."* See §THE FIX ROUND below.
 
 ## WHAT SHIPPED — one of the three sites, not three
 
@@ -49,7 +63,8 @@ crop-at-the-collarbone worked first time; and **a prompted "gate" renders as a
 mullioned lattice and reads as BARS**, on the one image whose whole job was to
 dispel this vertical's confinement dread (extends the s63 glazing rule to
 every barrier object). **Name the FRAME you want, not the object you don't.**
-14 images generated, 5 kept, 1.68cr, all pinned with provenance.
+(First-build figures; the fix round took the site to 20 generated,
+8 kept, 2.40cr — see below.)
 
 **Your claude-design restoration earned itself** — the mock surfaced a
 structural fault the prose plan had missed (the instrument scrolling away,
@@ -60,6 +75,38 @@ viewport-tall void under the sticky stage · the two forelegs briefly
 synchronising mid-blend · the mobile stage hiding each chapter's own heading ·
 copy claiming a gate the photograph no longer had. Types, lint and 3441 tests
 saw none of them.
+
+## THE FIX ROUND (`90f0f0c`) — and the defect it caught
+
+**The page had NO WINK.** One was designed — the dog turning to look out at
+Day 84 — and it was **silently lost when the instrument changed register**
+from a drawn dog to the kinematic plot. The house rule is one deliberate
+playful moment per page; it shipped with zero, and nothing flagged it because
+it was never a code defect: **it was a requirement that lost its host.**
+Ratcheted into meta-prompt §casting(6) — *a change of REGISTER drops the
+requirements that belonged to the old one; re-run the checklist after any
+change of APPROACH, not only after a change of code.* This is the most
+transferable thing the session produced and **sites B and C should open with
+it in hand.**
+
+Restored in the vertical's own language: at Day 84 only, the paw-prints wander
+up off the measured line under *"(stopped to sniff something)"* — written into
+the copy too, so it survives no-JS.
+
+**The rest:** the instrument **hands off to a photograph** at Day 84 (it used
+to end on a number) · three new mints for open air — a dog rolling on its back
+in meadow grass, a cat asleep behind one wide pane, a dog asleep at home in a
+sun patch · the dark hawthorn band became the **"Whitethorn is hawthorn"**
+section, earning the image by explaining where the page's one red comes from ·
+the alternating band went from clinical near-white to a **soft meadow wash** ·
+copy warmed throughout. **No honesty was softened** — the Day-12 dip, the
+fictional disclosure and the real 0–5 scale are untouched.
+
+One take rejected on a rule already on the books: the cat's window came back
+with a rail and frame member across the glass — the one-large-pane rule, in
+the section about not making animals feel shut in.
+
+**Site total: 20 generated, 8 kept, 2.40cr.**
 
 ## WHAT DID NOT SHIP — named plainly
 
@@ -78,6 +125,13 @@ not repeat it** — they open knowing the schematic test.
 (the PLANNED block), minus what shipped.** Running order unchanged from his
 direction:
 
+**⚠ Open with the s104 ratchets in hand — they exist so B and C do not repeat
+site A's three wasted rounds:** the SCHEMATIC test (does the real discipline
+produce this drawing? if not it is illustration, and illustration is a MINT) ·
+compose the defect OUT, never negate it · **and re-run the design checklist
+after any change of APPROACH — that is how ⑳ lost its wink.** All three are in
+`proprietary/templates/meta-prompt.md`.
+
 **1 — SITE B: garden & landscape design studio** (`seasons-tree` idea, one
 tree through four seasons on scroll — the instrument IS the pitch: a designer
 sells what a space becomes over a year). Loop per `docs/landing-arc/spec.md`
@@ -90,7 +144,8 @@ PAIR** — `orchard-house` already holds otherworldly+cinematic and
 **2 — SITE C: botanical perfumery** (bloom video scrub, Seedance ~17.5cr —
 the only slot in the arc with a real video cost).
 
-**3 — THE THALON LANDING PAGE**, the capstone and the reason for the order.
+**3 — THE THALON LANDING PAGE**, the capstone and the reason for the order —
+**his order, re-affirmed at the s104 close, and settled.**
 NOT a portfolio site. Stealth unchanged; **where it is served and under what
 name is his separate call** and building it does not decide it. Mint budget
 **ring-fenced at ~180cr and still intact.**
@@ -112,8 +167,8 @@ vs model failure vs denylist all read the same — a contract-window ask) ·
 Intel dismiss reversibility · the sweep schedule's missing door · the
 add-chip's missing keyword path.
 
-**WAITING ON HIM — none blocking:** ⑳ Whitethorn's verdict (its `site.json`
-is loudly `awaiting`) · the two verticals picked under his *"and etc."*
+**WAITING ON HIM — none blocking:** ⑳ Whitethorn's verdict **after the fix
+round** (its `site.json` is loudly `awaiting`) · the two verticals picked under his *"and etc."*
 (garden design · botanical perfumery — one word each, and **site B is about to
 spend on the first of them**, so this is the cheapest moment to overrule) ·
 the Higgsfield **expiry date** (still only a pacing aid, blocks nothing) · the

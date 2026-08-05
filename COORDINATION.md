@@ -288,7 +288,50 @@ data-instrument — a pair no other site holds.
 
 **Not done, and named plainly:** site B (garden design), site C (botanical
 perfumery), the **Thalon landing page**, and **phase 0**. The ring-fence held —
-nothing near the reserved 180cr was touched, and **582.44cr** remain (verified live).
+nothing near the reserved 180cr was touched.
+
+### The fix round — HIS verdict, same session (`90f0f0c`)
+
+He read the built page and called it: it needed **more nature, openness and
+light-heartedness** — *"you dont want to give off a sterile hospital
+experience, but caring, warm and empathy and friendly place."* Correct, and
+one item was an outright defect.
+
+**THE DEFECT: the page had NO WINK.** One was designed — the dog turning to
+look out at Day 84 — and it was **silently lost when the instrument changed
+register** from a drawn dog to the kinematic plot. The house rule is one
+deliberate playful moment per page; this shipped with zero and nothing
+flagged it, because it was not a code defect — it was a requirement that lost
+its host. **Ratcheted into the meta-prompt §casting(6): a change of REGISTER
+drops the requirements that belonged to the old one; re-run the checklist
+after any change of APPROACH, not only after a change of code.** Restored in
+the vertical's own language: at Day 84 only, the paw-prints wander up off the
+measured line under *"(stopped to sniff something)"*, written into the copy
+too so it survives no-JS.
+
+**The rest:** the instrument now **hands off to a photograph** (the recovery
+ended on a number with the running shot four sections below; it ends on the
+dog) · three new mints for open air — a dog rolling on its back in meadow
+grass, a cat asleep behind one wide pane, a close of a dog asleep at home ·
+the dark hawthorn band stopped being a divider and became the **"Whitethorn is
+hawthorn"** section, earning the image by explaining where the page's one red
+comes from · the alternating band went from clinical near-white to a **soft
+meadow wash** · copy warmed throughout. **No honesty softened** — the Day-12
+dip, the fictional disclosure and the real 0–5 scale are untouched.
+
+One take rejected on a rule already on the books: the cat's window returned
+with a rail and frame member across the glass — the one-large-pane rule, in
+the section about not making animals feel shut in.
+
+**Site total: 20 generated, 8 kept, 2.40cr. Balance 581.72, verified live.**
+
+**⚠ HIS ORDERING CALL, RE-AFFIRMED s104:** the lead recommended bringing the
+Thalon landing page forward ahead of sites B and C (the sunset puts unbounded
+risk on whatever is scheduled last, and site A already banked the
+transferable lesson). **He declined and kept the original order** — *"i would
+still stick to the orginial order of doing the sites first, then learn, then
+the thalon landing page."* That is settled; the recommendation is on the
+record and is not to be re-litigated.
 
 ---
 

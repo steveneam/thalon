@@ -227,7 +227,17 @@ than the cap so the overshoot lands inside it. (6) Leave room for one small
 deliberate imperfection or wink per page — the Houselights one-letter neon
 flicker (founder-suggested) is the register: a single playful flaw that makes
 a page feel alive and hand-made rather than rendered. Budget for it; don't
-polish it out. (7) **Lead archetypes are cast per vertical (founder
+polish it out. **A CHANGE OF REGISTER SILENTLY DROPS THE REQUIREMENTS THAT
+BELONGED TO THE OLD ONE (⑳ Whitethorn, s104 — founder-caught).** The wink was
+designed as "the drawn dog turns and looks at you"; when the instrument was
+re-registered from a drawn dog to a kinematic plot, the wink went with it and
+the page shipped with none. Nothing flagged it — it was not a code defect, it
+was a requirement that lost its host. **Re-run this checklist after any change
+of APPROACH, not only after a change of code**, and re-home every item that
+belonged to the thing you replaced. (Whitethorn's replacement: at the final
+scroll stop only, the paw-print trail wanders off the measured line under
+*"(stopped to sniff something)"* — a clinical instrument that suddenly
+contains a real animal.) (7) **Lead archetypes are cast per vertical (founder
 direction, s59):** professional/serious verticals (dental, legal, finance,
 trades like electrical or roofing) lead MALE — older, with visible
 experience, where wisdom itself is the trust signal (the ⑫ silver-bearded
