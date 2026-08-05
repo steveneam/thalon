@@ -232,6 +232,76 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s108 — **SHIPPED: ⑳'s Day-84 motion. THE ARC'S THREE SITES ARE FULLY FINISHED AND THE CAPSTONE IS UNBLOCKED**
+
+**Boot was `gogogo`.** The inherited next action was item 1 of the s107 stamp —
+**⑳ Whitethorn's Day-84 handoff, moving** — and that is what shipped. It was the
+last precondition on the Thalon landing page, so **A, B and C are now finished
+*including their generated moments* and the capstone is unblocked with its
+180cr ring-fence untouched.**
+
+**One mint, one take, 17.50cr** against the spec's ~72cr line. Balance
+**379.22 → 361.72**, reconciled live. Zero live posts, nothing armed.
+
+**The spec's construction was wrong, and the repo's own corollary said so.**
+The arc spec scheduled ⑳ as `start_image` = the pinned Day-84 still,
+`end_image` = "the same dog mid-stride". ㉑'s seasons and ㉒'s bloom are
+**one-way transformations** where an end frame is a genuinely different
+picture — but **a trot is a CYCLE**, and its last frame looks like its first.
+That `end_image` would have bought a near-duplicate of the start frame at
+s106's registration coin-flip (~50% of seeds drift). Built as a **single
+`start_image` with no `end_image`**: zero registration risk by construction,
+one already-approved asset, first take. s107 said "the cheapest registered edit
+is the one you never make"; cyclic motion takes it one step further — **there
+is no second endpoint to mint at all.** Recorded as a correction block in the
+spec because **site E's pour is cyclic too** while its beans→grounds→pour
+chaining stands.
+
+**The honesty constraint drove the prompt, not the review.** Day 84 reads 0/5
+lameness / 94% symmetry, so the brief named the failure modes as explicit
+negatives — not galloping, not bounding, feet low, never all four airborne — and
+landed a sound even trot first take. **The pinned still turned out to already BE
+a trot**; the only thing over-claiming was its alt text ("running at full
+stretch"), now corrected. `/guide` discloses the generation and the constraint.
+
+### The find — the count passed, and the scrub was still wrong
+
+**s107 learned to COUNT the lit frames. s108's correction: a count proves a
+scrub is ALIVE, not that it is AIMED.** The new ratchet passed perfectly —
+61/61 decoded, exactly one lit at every sampled position, strictly monotonic
+0→60. A **visibility-bucketed** sweep then showed the sequence was mis-mapped:
+across the band's full centre travel, frames 0 and 60 sat at the clamps, and
+**34 of 61 frames — over half the shipped bytes — were only reachable while the
+band was under half on screen.** In the prime window the reader saw frames
+17–43 and nothing else. Ending the sweep a sixth of a viewport early at each end
+moved that to **10–50, 33 distinct frames**. The invariant check and the aim
+check are different questions, and only the first has a ratchet.
+
+**Three more, all measured:**
+- **Frame density is set by the CAMERA, not by precedent.** ㉑ ships 18 frames
+  per sequence and ㉒ ships 36, so 36 looked like the house number — but both are
+  **locked-off**. This take **tracks**, so adjacent-frame difference measured
+  **9.24 at native 24fps against the shipped bloom's 1.26**. Shipped 61.
+- **The vendor answered the literal call with a preset suggestion and NO job.**
+  `generate_video` returned a recommendation for an unrelated preset and
+  rendered nothing. Nothing was charged — but a build that assumed the mint was
+  running would have waited on a job that did not exist. Re-send with
+  `declined_preset_id` and confirm a job id came back.
+- **`close.webp` is deleted, not orphaned.** trot-00 measured **6.41** against
+  it, less than one adjacent-frame step (11.88), so the sequence's own first
+  frame supersedes it. The asset bijection is manifest↔disk, so an unreferenced
+  asset would have passed every ratchet silently as dead weight.
+
+**The ratchet.** s107's static-stack check keyed off an inert JSON data block,
+so it covered ㉒ alone and **⑳'s stack would have shipped uncovered** — "a
+ratchet applied to three assets out of four is not applied". It now keys off the
+**manifest**, which every site has, and counts lit frames **per sequence**, so a
+two-sequence page cannot pass by lighting two of one and none of the other. ㉑
+is skipped by design (it builds frames at runtime behind a `.still` fallback).
+**Proven to fail on both real defects before being trusted.**
+
+Verify at wrap: **exit 0, 3454 passed / 9 skipped** (3453 → 3454).
+
 ## Sprint 9 / s107 — **SHIPPED: site C. The arc's headline video, and the scrub that looked perfect and was dead**
 
 **Boot was `gogogo`.** The inherited next action was item 1 of the s106 stamp —
