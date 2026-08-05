@@ -241,6 +241,36 @@ is approved with its deps approved; part C is unstarted.
 **The ordering principle, unchanged: a SHEET before a build.** DOCTRINE 0, and
 the s101 staged rebuild is the precedent.
 
+**HIS DIRECTIVE AT THE s102 CLOSE, verbatim: *"there can be an option for the
+posting, like a toggle on whether i want to post on all or just selectively.
+the rest we can go with your recommendations."*** That becomes **part A2**
+(`docs/control-arc/spec.md` §Part A2) and it **runs FIRST in s103**, ahead of
+part B — it completes the thing he just approved and used, and B is a larger
+build that has not started. The rest of the s103 order stands as recommended.
+
+### Phase 0 — part A2: posting SCOPE (his directive; runs first)
+
+0. **`postingScope = "selective" | "all"`, defaulting to `selective`.** Part A
+   gave every destination its own state, which is what makes a GO narrow — but
+   it left no way to say "yes, all of them" except flipping each one, and
+   again for every channel connected afterwards. Full wiring in spec §Part A2.
+   **NO MIGRATION** (grounded at the s102 close: every reader of
+   `brand_profiles.social` is a KEYED lookup — `publish.ts:244`,
+   `social-arming.ts:128`, `cards.ts:189` — and nothing iterates the block's
+   keys, so a scalar field cannot be mistaken for a platform).
+   **The three bindings that keep it safe, all in the spec:** it sits UNDER
+   the master key (three gates, all AND — `all` cannot arm anything
+   `SOCIAL_QUEUE_ARMED` has not) · **`all` never overrides an explicit
+   `review`** (a hold the operator asked for is not cancelled by a scope
+   switch) · `all` is LIVE rather than a snapshot **and says so in words**,
+   because a snapshot calling itself "all" is a lie with a delay on it.
+   **It is an OVERLAY, never a mutation** — flipping back to `selective`
+   restores exactly the arrangement he left, which is what makes it safe to
+   try. Engine change is confined to `passArmStateResolver`; the consumer is
+   untouched, which is the seam holding.
+   **Its surface half rides phase 2 below** (same control, same card, one
+   pass).
+
 ### Phase 1 — control-arc part B, opening with the DRAWN SHEET
 
 1. **Draw part B's sheet, lead-direct** (design work = Fable 5, never
@@ -263,13 +293,21 @@ the s101 staged rebuild is the precedent.
 
 ### Phase 2 — part A's SURFACE half (the prerequisite is now cleared)
 
-3. **The arm control on the Integrations channel cards.** s102 phase 5 ran
-   that surface's research pass, so the control can now be drawn honestly. It
-   is a **seg** (`live | review | off`) in the shell's own `.seg` vocabulary —
-   a toggle cannot express `review`, and `review` is the whole point. Spec
-   §Part A carries the drawn shape (Mistral's per-row Enabled column · Base44's
-   state word UNDER the name, never a bare coloured dot · WRITER's inert
-   control that states its reason and points at its unlock).
+3. **The arm control on the Integrations channel cards, and A2's scope toggle
+   above it — ONE pass, because they are one control surface.** s102 phase 5
+   ran that surface's research pass, so both can now be drawn honestly. The
+   per-destination control is a **seg** (`live | review | off`) in the shell's
+   own `.seg` vocabulary — a toggle cannot express `review`, and `review` is
+   the whole point. The SCOPE mode is the head control above them, on the
+   connected group. Spec §Part A carries the drawn shape (Mistral's per-row
+   Enabled column · Base44's state word UNDER the name, never a bare coloured
+   dot · WRITER's inert control that states its reason and points at its
+   unlock); §Part A2 carries the mode's two copy obligations — the
+   future-channels sentence at the toggle, and a held destination saying why
+   `all` is not touching it.
+   **Each destination's seg keeps showing its STORED value** with the mode's
+   effect stated beside it — never blanked, never rewritten. That is what
+   makes the overlay legible and the flip back lossless.
 4. **Land the connected/available SPLIT in the same pass** — it is the research
    pass's own top finding, and an arm control reads better on a split list than
    in a flat grid of every destination that exists.

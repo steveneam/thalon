@@ -238,6 +238,92 @@ calls not ready.
 
 ---
 
+## Part A2 — posting SCOPE: all, or selectively (founder directive, s102 close)
+
+### The ask, verbatim
+> *"there can be an option for the posting, like a toggle on whether i want to
+> post on all or just selectively."*
+
+### The gap it names, and it is real
+Part A gave every destination its own `off`/`review`/`live` — which is the
+right granularity and is exactly what makes a GO narrow. But it left **no way
+to say "yes, all of them"** except flipping each destination one at a time,
+and doing it again for every channel connected afterwards. Granularity without
+a bulk answer is a chore, and a chore is how operators end up leaving things
+armed that they meant to review.
+
+### The shape
+One tenant-level mode above the per-destination states:
+
+```
+postingScope = "selective" | "all"       (default: "selective")
+  selective   each destination's own armState governs — today's behaviour, exactly
+  all         every CONNECTED destination is treated as live
+```
+
+**It is an OVERLAY, never a mutation.** `all` does not rewrite anybody's
+stored `armState` — it changes how the stored values are READ. So flipping
+back to `selective` restores precisely the arrangement the operator had, with
+no "which ones were on before?" to reconstruct. This is the property that
+makes the toggle safe to try.
+
+### Three bindings that keep it safe
+1. **It sits UNDER the master key, never beside it.** Three gates now, all
+   AND: `SOCIAL_QUEUE_ARMED` → `postingScope` → (in `selective`) the
+   destination's own state. **`all` cannot arm anything the master key has not
+   already armed**, and the master key still rests EMPTY.
+2. **`all` never overrides an explicit `review`.** `review` is a hold the
+   operator deliberately asked for, and a scope switch must not silently
+   cancel it. `all` raises `off` → `live` and leaves `review` alone. This is
+   the one place `all` deliberately does not mean *all*, and the surface says
+   so at the destination that is holding.
+3. **`all` is LIVE, not a snapshot — and it says so in words.** A channel
+   connected next month posts automatically under `all`. That is what the word
+   means; the honest thing is to state it at the toggle (*"New channels you
+   connect will post automatically"*) and again at the connect door, rather
+   than quietly snapshot today's list and drift from our own name. **The
+   alternative was considered and rejected**: a snapshot that calls itself
+   "all" is a lie with a delay on it.
+
+Underneath all three, the publish door's refusal ladder is untouched — `all`
+still cannot reach an unconnected or unconfigured platform, or exceed a cap,
+or repost a duplicate.
+
+### Wiring
+- **Contract**: `POSTING_SCOPES` (new) + `postingScopeSchema` (new) in
+  `packages/contracts/src/social.ts`, beside `ARM_STATES` — same file, same
+  reason (`publish-queue.ts` already imports this one).
+- **Storage — NO MIGRATION, grounded s102.** `postingScope` is a scalar field
+  on `socialPublishConfigSchema` (`packages/contracts/src/social.ts`),
+  alongside the per-platform keys in the same `brand_profiles.social` jsonb
+  column. **Verified safe before speccing**: every reader of that block is a
+  KEYED lookup — `publish.ts:244` `config[platform]`,
+  `social-arming.ts:128` and `cards.ts:189` `config?.[destination]` — and
+  nothing anywhere iterates the block's own keys, so a non-platform field
+  cannot be mistaken for a platform. Default `"selective"`, so **a config
+  written before this reads back as today's behaviour**.
+- **Engine**: `passArmStateResolver`
+  (`packages/engine/src/integrations/social-arming.ts`) reads the scope from
+  the same memoized per-pass profile read it already does, and resolves
+  `all` + stored `off` → `live`, `all` + stored `review` → `review`. The
+  consumer (`queue-consumer.ts`) is UNCHANGED — it still just asks the
+  resolver, which is the seam holding.
+- **Surface**: the mode is the HEAD control of the Integrations channel list —
+  above the per-destination segs it governs, on the connected group whose
+  split lands in the same pass. Each destination's seg keeps showing its
+  STORED value with the mode's effect stated beside it, never a blank or a
+  rewritten value.
+- **Ratchets**: `all` + `review` stays held · `all` cannot publish while the
+  master key is empty · flipping `all` → `selective` restores every stored
+  value untouched · a pre-A2 config reads `selective`.
+
+### Done when
+He can flip one control and have every connected channel post, flip it back
+and find exactly the arrangement he left, and read — before he flips it — what
+it will do to channels he has not connected yet.
+
+---
+
 ## Part B — saved segments
 
 ### The problem, already on the books

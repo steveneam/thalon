@@ -178,7 +178,25 @@ describe("x metrics reader", () => {
     expect(auth.startsWith("OAuth ")).toBe(true);
     expect(auth).toContain("oauth_signature=");
     expect(seen[0].url).not.toContain(TOKEN);
-    expect(auth).not.toContain("ks");
+
+    /*
+     * The secret must not ride in PLAINTEXT — and the check deliberately
+     * excludes the signature value, which is an HMAC *of* that secret and is
+     * random per request (`randomBytes` nonce + wall-clock timestamp,
+     * oauth1.ts:79).
+     *
+     * `expect(auth).not.toContain("ks")` used to assert over the whole header
+     * including that random base64 blob, so a signature that happened to
+     * contain the two characters "ks" failed the run. Measured: **0.67%, about
+     * one run in 148** — a test that fails a hundred and forty-seventh of the
+     * time and passes the moment you re-run it, which is the worst kind to
+     * inherit. Second flake of this class in two sessions (s101: a fixture
+     * time derived from Date.now() colliding with a slot pinned to 11:00);
+     * both are an assertion sitting where the data is random.
+     */
+    const withoutSignature = auth.replace(/oauth_signature="[^"]*"/, 'oauth_signature="…"');
+    expect(withoutSignature).not.toContain("ks");
+    expect(withoutSignature).not.toContain("ts");
   });
 });
 

@@ -56,6 +56,27 @@ on one card.
 **Resume · Thalon** — nothing is mid-flight; the s102 plan is fully executed.
 **The full ordered plan is COORDINATION §s103**; the short form:
 
+**PHASE 0 — part A2, his directive at the s102 close, and it runs FIRST.**
+Verbatim: ***"there can be an option for the posting, like a toggle on whether
+i want to post on all or just selectively. the rest we can go with your
+recommendations."*** It goes ahead of part B because it completes the thing he
+just approved and used, and B is a larger build that has not started.
+`postingScope = "selective" | "all"`, defaulting to `selective`; full wiring
+in `docs/control-arc/spec.md` §Part A2. **NO MIGRATION — grounded at the s102
+close**: every reader of `brand_profiles.social` is a KEYED lookup
+(`publish.ts:244`, `social-arming.ts:128`, `cards.ts:189`) and nothing
+iterates the block's keys, so a scalar field cannot be mistaken for a
+platform. **Three bindings, all in the spec and all recorded on his board so
+he can overrule any of them:** it sits UNDER the master key (three gates, all
+AND — `all` cannot arm anything `SOCIAL_QUEUE_ARMED` has not, and that key
+still rests empty) · **`all` never overrides an explicit `review`** · `all` is
+LIVE rather than a snapshot **and says so in words before he flips it**.
+**It is an OVERLAY, never a mutation** — flipping back to `selective` restores
+exactly the arrangement he left, which is what makes it safe to try. The
+engine change is confined to `passArmStateResolver`; the consumer is
+untouched. **Its surface half rides phase 2's pass** (same card, one control
+surface).
+
 **PHASE 1 — control-arc part B, and it opens with a DRAWN SHEET.** B is
 approved and its two MIT deps are approved (`@react-querybuilder/core` +
 `@react-querybuilder/drizzle`), but **DOCTRINE 0 says the sheet comes first**
@@ -69,14 +90,19 @@ modal recorded as the ANTI-pattern). **Its only migration was laid at s102**
 extends was built at s61 — B is an extension, not a new family.
 **Design work = Fable 5 lead-direct, never delegated** (standing s51).
 
-**PHASE 2 — part A's SURFACE half, now unblocked.** Phase 5 cleared the
-prerequisite: Integrations has had its research pass. The arm control is a
-**seg** (`live | review | off`) in the shell's `.seg` vocabulary — not a
-toggle, which cannot express `review`, and `review` is the whole point. Spec
-§Part A carries the drawn shape (Mistral's per-row Enabled column · Base44's
-state word UNDER the name, never a bare dot · WRITER's inert-control-states-
-its-reason). **Land the connected/available SPLIT in the same pass** — it is
-the pass's own top finding and the control lands better on a split list.
+**PHASE 2 — part A's SURFACE half + A2's scope toggle, ONE pass.** They are
+one control surface, and s102 phase 5 cleared the prerequisite: Integrations
+has had its research pass. The per-destination control is a **seg**
+(`live | review | off`) in the shell's `.seg` vocabulary — not a toggle, which
+cannot express `review`, and `review` is the whole point; the SCOPE mode is
+the head control above them. Spec §Part A carries the drawn shape (Mistral's
+per-row Enabled column · Base44's state word UNDER the name, never a bare dot ·
+WRITER's inert-control-states-its-reason); §Part A2 carries the mode's two
+copy obligations. **Each destination's seg keeps showing its STORED value**
+with the mode's effect stated beside it — never blanked, never rewritten, or
+the overlay stops being legible and the flip back stops being lossless.
+**Land the connected/available SPLIT in the same pass** — it is the research
+pass's own top finding and both controls land better on a split list.
 
 **PHASE 3 — the Integrations p1 the research pass earned.** The other three
 takes: the **blast-radius disclosure** on a `needs_reauth` seat (its rows are
@@ -97,10 +123,17 @@ add-chip's missing keyword path.
 
 **WAITING ON HIM — still just ONE item, and it blocks nothing:** the three
 s101 staged design calls (live-chain editing · the dropped "low-res stub"
-title · one-scene-open-at-a-time).
+title · one-scene-open-at-a-time). **A2 is NOT waiting on him** — he
+delegated its details ("the rest we can go with your recommendations"), the
+three calls are made and recorded on his board as FYI, and any of them is a
+one-line reversal if he disagrees when he sees it.
 
-▎ ▸ **Founder calls made THIS session:** none — s102 executed the s101 plan as
-given, under his standing *"A first, config, yes to the deps"*.
+▎ ▸ **Founder call made at the s102 CLOSE:** ***"there can be an option for the
+posting, like a toggle on whether i want to post on all or just selectively.
+the rest we can go with your recommendations."*** → **part A2**, specced and
+first in the s103 order. The three judgement calls it delegated are made,
+stated on his board, and each reversible in a line. The build itself executed
+the s101 plan as given under his standing *"A first, config, yes to the deps"*.
 ▎ ▸ **The lesson worth keeping:** **three of the five phases were bugs that
 every automated check agreed were fine.** A capture id that resolves to the
 wrong row, a saved view whose 400 is caught by design, a copy button that
@@ -129,7 +162,18 @@ from `apps/web` · one workspace `.data` root, NEVER re-pin · sheet-verbatim CS
 = impeccable findings intentional (DOCTRINE 0) · **a drizzle-generated CHECK
 migration FAILS on rows that violate the new constraint — the data move goes
 BETWEEN the drop and the add** · **a React state flag cannot guard a
-double-submit** (both presses read the same rendered value; use a ref).
+double-submit** (both presses read the same rendered value; use a ref) ·
+**never assert a substring over RANDOM data** — `readers.test.ts` checked
+`expect(auth).not.toContain("ks")` across a whole OAuth 1.0a header *including
+the signature*, an HMAC blob that is random per request, so a signature that
+happened to contain "ks" failed the run: **measured at 0.67%, about one run in
+148** (found + fixed s102 when it fired during the wrap; the fix made the test
+STRONGER — it now also catches a plaintext leak of the access-token secret,
+which it never checked). **Second flake of this class in two sessions** — s101's
+was a fixture time derived from `Date.now()` colliding with slots pinned at
+11:00, so it failed every afternoon and healed each morning. Both are an
+assertion sitting where the data is random; when a test fails once and passes
+on re-run, find the randomness before re-running.
 ▎ ▸ **⛔ SEQUENCE GATE, current truth — UNCHANGED and now NARROWER:** **post =
 ARMED** (founder GO s98); **page still 409s** at `POST /api/create` until his
 word; bluesky = the one platform granted for live testing; the queue
@@ -140,7 +184,7 @@ credits ever spent.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** main = origin (`ea7b4cb`, this wrap) · staging rolls s93–s102
+▎ ▸ **State:** main = origin (`<this wrap>`) · staging rolls s93–s102
 with the next auto-deploy · **migration 0027 ships with it and is applied to
 dev PG already** · four social channels connected · dev PG live · 8899 preview
 + sweeper user units keep running — NEVER hand-start the sweeper.
