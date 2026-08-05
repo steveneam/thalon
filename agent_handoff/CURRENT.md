@@ -6,9 +6,14 @@
 Wrap verify on main: **exit 0, 3441 passed / 9 skipped** (unchanged from
 s102–s104 — this session added no engine code).
 
-**Three commits.** `bc58922` ⑳ approved · `b180be0` **㉑ Aspect & Fall** ·
-plus this record. **The check that matters is not the sha but the state: tree
-clean, main == origin, verified at wrap.**
+**Five commits.** `bc58922` ⑳ approved · `b180be0` **㉑ Aspect & Fall** ·
+`34db9af` the s105 record · `7b6365f` **the video turn** (his three closing
+messages) · `5065827` **sites D + E specced**. **The check that matters is not
+the sha but the state: tree clean, main == origin, verified at wrap.**
+
+**⚠ THE ARC IS NOW FIVE SITES + THE LANDING, AND ITS ORDER IS HIS:**
+⑳ ✅ approved → ㉑ ✅ built (owes its video pass) → **site C** → **THE THALON
+LANDING** → then **D (vineyard) and E (café) on leftover credit only.**
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
 **Credits: 551.22** (13.00 on the site + 17.50 on the video proof, verified live).
