@@ -11,7 +11,7 @@ plus this record. **The check that matters is not the sha but the state: tree
 clean, main == origin, verified at wrap.**
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
-**Credits: 568.72** (13.00 spent, verified live at wrap).
+**Credits: 551.22** (13.00 on the site + 17.50 on the video proof, verified live).
 
 ## HIS ONE WORD, AND WHAT IT SETTLED
 
@@ -91,31 +91,86 @@ settled: sites first, then the capstone.
 **⚠ Open with the ratchets above in hand.** They exist so site C does not
 repeat what A and B each paid for.
 
-**1 — SITE C: botanical perfumery** (`bloom video`, Seedance ~17.5cr — the only
-slot in the arc with a real video cost). Loop per `docs/landing-arc/spec.md`
-§Method: **claude-design mock → PREPLAN.md → code-direct → mint → /guide → fix
-round.** Precedent to copy in every respect:
+**⚠ THE ARC TURNED AT THE S105 CLOSE — two founder messages, both binding, and
+the full amendment is `docs/landing-arc/spec.md` §THE VIDEO TURN.**
+
+▎ **1 — "dont have to be stingy with the higgsfield credit."** Owned: A and B
+spent 2.40 and 13.00cr against a ~120cr line while the balance evaporates. The
+error was not choosing code instruments over video — that was right — it was
+**not doing BOTH**. Every site in this arc now carries a generated moving
+moment. **The technique is CONFIRMED and proved**: Seedance 2.0 takes
+`start_image` + `end_image`; job `139d81f8` ran ㉑'s already-pinned Feb and May
+frames for **17.50cr** and returned a locked-off camera with the season
+genuinely turning — frost melting, birch leafing, alliums opening — decisively
+better than the cross-fade it replaces. **Engineering note: do NOT scrub the
+mp4 with `currentTime` (seek jank). Extract to a frame sequence and scrub that**
+— 121 frames for 5s; the mp4 stays the pinned original, the frames are the
+derive through the existing manifest chain.
+
+▎ **2 — "a top down view doesnt really display the full beauty and power."**
+Accepted; ㉑'s stage REBALANCES. Today the code-drawn plan takes ~55% of the
+sheet and the photograph ~24%. **That ranking inverts:** the photograph leads at
+full size running a generated, scroll-scrubbed Feb→May→Jul→Oct transition in one
+locked-off place, and the plan becomes the reading instrument beside or inset
+over it — still exact, still driving the readouts and calendar. Both, correctly
+ranked: the generated half sells, the drawing proves. **Nothing about the
+schematic test is walked back** — it is what made the page credible, and he
+endorsed it the same session. (Accuracy note for the record: `orchard-house` is
+**not** 3D trees either — four painterly stills that *cross-fade*. Neither
+seasons page has ever shown generated motion. That is the gap in both.)
+
+**1 — ㉑ ASPECT & FALL, the video pass FIRST (~135cr).** Three transitions off
+keyframes that are already minted, pinned and registered to each other, so
+there is no new mint risk — and **it is where the scroll-scrub machinery gets
+built ONCE**, so site C reuses it instead of inventing it under video cost.
+That is the fastest path to his "gets things out faster", not a detour.
+
+**2 — SITE C: botanical perfumery (~135cr)** (`bloom video` — the arc's
+headline video, and it now inherits a proven scrub component). Loop per
+`docs/landing-arc/spec.md` §Method: **claude-design mock → PREPLAN.md →
+code-direct → mint → /guide → fix round.** Precedent:
 `proprietary/templates/sites/aspect-and-fall/`. **Draw a portfolio-unique axis
 PAIR** — `orchard-house` holds otherworldly+cinematic, `whitethorn`
 otherworldly+data-instrument, `aspect-and-fall` otherworldly+editorial-print.
-**Note the spec's new method line:** C's banked idea is a *video*, not a
-drawing, so it dodges the picture-of-a-thing trap — its equivalent question is
-what a perfumer's own document looks like (a formula? a note pyramid? a
-maceration log?).
+C's banked idea is a *video*, so it dodges the picture-of-a-thing trap; its
+equivalent question is what a perfumer's own document looks like (a formula? a
+note pyramid? a maceration log?).
 
-**2 — THE THALON LANDING PAGE**, the capstone and the reason for the order —
-**his order, re-affirmed at the s104 close, and settled.** NOT a portfolio
-site. Stealth unchanged; **where it is served and under what name is his
-separate call** and building it does not decide it. Mint budget **ring-fenced
-at ~180cr and still intact.**
+**2b — ⑳ WHITETHORN, the Day-84 handoff MOVING (~90cr).** His third message:
+*"can you also apply that motion to the site A and site C too?"* — so all three
+sites get it, and in each case **the motion is the moment the story already
+turns on, which is currently a still.** ⑳'s is the payoff: the page spends six
+chapters measuring a limp evening out and **never once shows the dog walking.**
+Start frame = the pinned Day-84 still, end frame = the same dog mid-stride.
+**One honesty constraint the other two do not carry:** it depicts a clinical
+outcome, so the Day-84 state must match what the instrument says — a sound,
+even trot, never a bounding hero-dog — and `/guide` discloses it like every
+other asset. **A video that over-claims the recovery would undo the exact
+honesty (the Day-12 dip) the page was praised for.** Budget allows two takes
+because a retake is likely.
 
-**3 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
+**3 — THE THALON LANDING PAGE**, the capstone. **His order re-affirmed at the
+s105 close and now with "fully" defined:** A, B and C complete *including their
+generated moments*, so the landing inherits a proven scrub component and three
+finished pages to learn from — *"rather than just mock."* NOT a portfolio site.
+Stealth unchanged; **where it is served and under what name is his separate
+call.** Mint budget **ring-fenced at 180cr and still intact.**
+
+**Budget, fully allocated against 551.22 — the sunset means SPEND, not save:**
+㉑ three season transitions ~135 · site C bloom + stills ~100 · ⑳ Day-84 moving
+~90 · **Thalon landing 180 RING-FENCED** · ~46 reserve for retakes and variant
+coverage (spend down at the end, do not bank). **The ≥40cr ping rule as the lead
+reads it:** *"dont be stingy"* raises the ceiling rather than deleting the rule,
+so ≥40cr mints get **named in the session summary** instead of stopping the
+build for each. One word reverses that.
+
+**4 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
 out on their own"**, which is not true while the queue's master key is empty
 and **nothing in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the
 DISCLOSURE, not a door.** Arming the queue from the UI is his sequence-gate
 call and is NOT in scope.
 
-**4 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
+**5 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
 (DOCTRINE 0). Both MIT deps approved. Shaping finding banked in
 `docs/control-arc/spec.md`: not a segment-builder surface but three additions
 to a list that already exists.
@@ -167,7 +222,7 @@ immediately** · `export-template-assets` always emits **.webp**.
 ▎ ▸ **⛔ SEQUENCE GATE, unchanged:** post = ARMED (founder GO s98); page still
 409s at `POST /api/create`; bluesky is the one platform granted for live
 testing; the queue consumer's key rests EMPTY. Two live posts total, both
-bluesky. **This session spent 13.00 credits and posted nothing.**
+bluesky. **This session spent 30.50 credits and posted nothing.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.

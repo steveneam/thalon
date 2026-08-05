@@ -71,6 +71,127 @@ door ends up unfunded. Reserve it, then spend the sites out of what remains.
 defect s103 introduced) rides after them, and **control-arc part B is the item
 that slips** if the session fills — it has no clock, and the credit does.
 
+## THE VIDEO TURN — founder direction, s105 close (amends this spec)
+
+His two messages at the s105 close, and both change the build.
+
+> *"dont have to be stingy with the higgsfield credit"* · *"is that a top /
+> birds eye view of a map, or will it be actual 3D trees … I feel like a top
+> down view doesnt really display the full beauty and power of the animation
+> transition and the capability of image generation"*
+
+### 1. The technique is CONFIRMED, and proved on our own assets
+
+His model of how a scroll transition is made is correct. **Seedance 2.0 takes
+`start_image` AND `end_image`** and interpolates between them. Proved at the
+s105 close on ㉑'s already-pinned February and May frames (job
+`139d81f8`, 5s, 720p fast, silent, **17.50cr**): the camera stays locked to the
+pixel — bench, rendered wall, drystone piers and paving are identical
+throughout — while frost melts off the ground, the birch leafs out, hostas
+emerge and the alliums rise and open. It is decisively better than the
+cross-fade it would replace.
+
+**One engineering refinement to carry into the build:** do NOT scrub the mp4 by
+setting `video.currentTime` on scroll. Seeking an h264 file lands on keyframes,
+so it janks. Extract the render to a **frame sequence** (the 5s/720p test is
+121 frames, 2.9MB as mp4) and scrub that — canvas or swapped `<img>`. It is
+deterministic, it decodes without seek cost, and it rides the existing pinning
+chain (`pin-mint` → manifest → `export-template-assets`, which already emits
+webp). The mp4 stays the pinned original; the frames are the derive.
+
+### 2. Where video belongs, and where it does not
+
+The division already on the books stands and is not in tension with his note:
+**photographs carry the feeling, the diagram carries the evidence.** Video is
+the *moving half of the photograph*, so it belongs wherever the payload is
+feeling, material, light or growth. It cannot replace a code-drawn instrument
+where the payload is information that must be TRUE and must RESPOND — a video
+cannot recompute "5 of 13 in flower", or the pelvic hike at Day 12.
+
+**But the s105 gap was real and is owned:** sites A and B spent 2.40cr and
+13.00cr against a ~120cr budget line while the balance evaporates. The error
+was not choosing instruments over video — that was right — it was **not doing
+BOTH**. Every site in this arc should carry a generated moving moment.
+
+### 3. ALL THREE SITES GET THE MOTION — founder direction, same close
+
+> *"can you also apply that motion to the site A and site C too?"*
+
+Not a video bolted onto each page: **each site's motion is the moment its own
+story already turns on**, and in every case that moment is currently a still.
+
+| Site | The generated moving moment | Why it is that moment |
+|---|---|---|
+| **⑳ Whitethorn** (vet) | The **Day-84 handoff**. The gait instrument already ends by handing off to a photograph of the recovered dog — the emotional payoff of the whole page, and today it is a static image. It becomes the dog actually **moving soundly**: start frame the pinned Day-84 still, end frame the same dog mid-stride. | The page spends six chapters measuring a limp evening out. **The one thing it never shows is the dog walking.** The instrument proves it; the video lets you feel it. Nothing about the marker-and-trace plot changes — this is the payoff after it, not a replacement for it. |
+| **㉑ Aspect & Fall** (garden) | **Three season transitions** — Feb→May→Jul→Oct — in one locked-off corner, scroll-scrubbed. | Proved already (job `139d81f8`). The keyframes exist, are pinned, and are registered to each other. |
+| **Site C** (perfumery) | **The bloom**, bud → fully open, scroll-scrubbed — the arc's headline video, and the reason this vertical was chosen. | Bloom→scent is the whole pitch; it was always specced as the video slot. |
+
+**⑳'s motion carries one honesty constraint the others do not:** it depicts a
+clinical outcome. The Day-84 state must match what the instrument says — a
+sound, even trot, not a bounding hero-dog — and the `/guide` must disclose it
+as generated like every other asset. **A video that over-claims the recovery
+would undo the exact honesty (the Day-12 dip) the page was praised for.**
+
+### 4. ㉑ Aspect & Fall — REBALANCE the stage (his critique, accepted)
+
+He is right that a top-down plan does not show what the factory can do, and the
+current stage ranks it first: the code-drawn plan takes ~55% of the sheet and
+the photographic band ~24%. **That ranking inverts.**
+
+*(Noted for accuracy, because his question assumed otherwise: `orchard-house`
+is not 3D trees either — its `motionBudget` is "four same-composition painterly
+backdrops **cross-fade**". Neither existing seasons page has ever shown
+generated MOTION. This is the gap in both.)*
+
+**The direction (final composition decided at build, via the claude-design mock
+per standing method):** the photograph leads the stage at full width and real
+size, running a **generated, scroll-scrubbed seasonal transition** through
+Feb → May → Jul → Oct in one locked-off place. The planting plan becomes the
+reading instrument beside or inset over it — smaller, still exact, still
+driving the readouts and the interest calendar. **Both, correctly ranked:** the
+generated half sells, the drawing proves. Nothing about the schematic test is
+walked back — it is what made the page credible as a landscape practice, and
+the founder endorsed it in the same session.
+
+**The keyframes already exist, are pinned, and are registered to each other**,
+so this is three transitions off assets we own, not a re-shoot.
+
+### 5. Budget — the sunset means the balance is SPENT, not saved
+
+Balance **551.22** at the s105 close. Allocation:
+
+| Line | Allocation | Note |
+|---|---|---|
+| ㉑ Aspect & Fall — 3 season transitions @1080p | ~135cr | 45cr each; keyframes already pinned, no new mint risk |
+| **Site C** — stills + the bloom centrepiece | ~100cr | 2 takes @1080p + ~10cr of stills |
+| **⑳ Whitethorn** — the Day-84 handoff, moving | ~90cr | 2 takes; the honesty constraint above makes a retake likely |
+| **Thalon landing — RING-FENCED** | **180cr** | reserved first, spent last, still intact |
+| Reserve — retakes + variant coverage | ~46cr | spend down at the end, do not bank |
+
+**The ≥40cr-per-mint ping rule, as read by the lead:** his *"dont have to be
+stingy"* raises the ceiling rather than deleting the rule. 1080p video is 45cr
+and crosses it, so the lead will **name every ≥40cr mint in the session
+summary** rather than stopping the build to ask for each one. One word reverses
+this back to per-mint approval.
+
+### 6. ORDER — re-affirmed by him, unchanged, and now with "fully" defined
+
+> *"you build it after fully building site A, B and C first … so that way, you
+> have the full landing page to learn from rather than just mock. plus it gets
+> things out faster too."*
+
+**Sites A, B and C are all FULLY finished before the Thalon landing starts** —
+and after this amendment "fully" includes each site's generated moving moment,
+not just its stills. The landing page then inherits a **proven scroll-scrub
+component and three finished pages to learn from**, which is exactly his stated
+reason for the order.
+
+**Build the scrub machinery ONCE, on ㉑**, where the keyframes already exist and
+carry no new mint risk; site C's bloom then reuses it rather than inventing it
+under video cost. That is the fastest path to his "gets things out faster", not
+a detour from it.
+
+
 ## The three A+ sites
 
 Each takes a banked animation idea and moves it one vertical sideways — near
