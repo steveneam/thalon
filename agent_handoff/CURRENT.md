@@ -164,8 +164,19 @@ call.** Mint budget **ring-fenced at 180cr and still intact.**
 **4 — SITES D AND E, on the leftover, and ONLY after the landing is finished.**
 His direction at the close: a **vineyard/winery** (site D — the seasons idea as
 real generated motion, hero beat **veraison**, when the grapes turn colour) and
-a **café** (site E — his motion, verbatim: **beans → ground coffee → coffee
-pouring into a cup**). **They are the SPEND-DOWN TARGET, which upgrades the
+a **coffee brand** (site E — his motion, verbatim: **beans → ground coffee →
+coffee pouring into a cup**). **His follow-up is the architecture: *"the coffee
+animation takes center stage"*** — so on E the transformation is the **SPINE**,
+not a section: beans / grounds / pour are three acts top to bottom and
+everything else hangs off them. **E is the only site in the arc whose animation
+IS the page.** He offered "café or a coffee brand like Campos"; **lead pick is
+the BRAND**, because bean→grind→pour is a product story and a café page would
+want the room and the people instead. **Stated cost of that pick: it moves E
+CLOSER to `first-crack`**, so separation rests on register — first-crack is the
+EXPERT page (roast curve, instrument); **E carries no data-instrument at all.**
+**It also raises E's floor to ~75cr** (the two segments are the page and cannot
+be cut) where D can degrade to ~40cr — so with ~109 projected, **E alone fits
+comfortably, both only if the earlier sites land near first take.** **They are the SPEND-DOWN TARGET, which upgrades the
 disposal rule** — two more portfolio sites beat alternate crops of the landing
 page, and it matches his own reason for the arc: *"so that we have more
 options."* Full brief: `docs/landing-arc/spec.md` §SITES D AND E.
@@ -193,8 +204,9 @@ ample for a scrubbed transition since the visitor drives the timeline — so
 **36cr is the default unit, and it sits under the ≥40cr ping threshold.**
 ㉑ 3 transitions ~108 · site C bloom + stills ~82 · ⑳ Day-84 moving ~72 ·
 **Thalon landing 180 RING-FENCED** · **→ ~109 left for D + E.**
-Scope tiers so the plan degrades instead of breaking: full ~110 · lean ~60 ·
-minimum ~40 (one motion sequence, stills at ~1cr, everything else code-drawn).
+Scope tiers, and **they differ per site**: D full ~110 / lean ~60 / **floor
+~40** (one segment — veraison, the beat that matters) · E full ~120 / lean ~85 /
+**floor ~75, below which it has no spine and should not be built at all**.
 **If only one fits, build E** — D's seasons motion repeats a beat ㉑ will already
 have shipped. **If the earlier sites overrun, D and E do not happen, and that is
 correct: the landing's ring-fence is never raided to fund a portfolio site.** **The ≥40cr ping rule as the lead

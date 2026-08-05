@@ -282,31 +282,56 @@ chaining is what ㉑'s Feb→May→Jul→Oct already needs.
 | **Overlap to beat** | `orchard-house` (seasons, fruit) — differentiate on register: a winery sells a **vintage**, i.e. one specific year that will never repeat, where the orchard sells a repeating cycle |
 | **Schematic test** | What the discipline itself produces: **Brix / sugar-ripeness readings and a harvest window.** Available as the instrument — but keep it LIGHTER than ㉑'s, because on this site the motion is the hero and a second full data-instrument would repeat site B |
 
-### Site E — café
+### Site E — a coffee brand (or a café). **THE ANIMATION IS THE PAGE.**
+
+> *"Site E is a cafe. or a coffee brand like campos coffee if it makes things
+> easier. the coffee animation takes center stage."*
+
+**That last sentence is the architecture, not a preference**, and it makes E
+structurally different from every other site in the arc. Elsewhere the motion is
+a chapter *inside* the page. Here **the transformation IS the scroll spine, top
+to bottom**, and every other element hangs off its three beats:
+
+| Beat | The frame | What the page says there |
+|---|---|---|
+| **1 · BEANS** | whole roasted beans, the hero | who the brand is · origin · the roast |
+| **2 · GROUNDS** *(the dwell)* | the middle frame — minted ONCE and reused as the end of segment 1 and the start of segment 2 | grind, freshness, the thing most people get wrong |
+| **3 · THE POUR** | coffee going into the cup, the payoff | the cup itself · where to buy it / where to sit |
+
+**The dwell on the grounds is the reason two chained segments beat one call.**
+It is a real pause the reader controls, and it is exactly where the copy about
+grind wants to land.
 
 | | |
 |---|---|
-| **The motion (his, verbatim)** | **beans → ground coffee → coffee pouring into a cup**, as two chained scrubbed segments |
-| **Axis pair** | `otherworldly-animation` + `soft-organic` — **portfolio-new** (verified) |
+| **Vertical — LEAD RECOMMENDATION, one word to overrule** | **a coffee brand**, not a café. He offered either. The motion he specified is a **product transformation**, and the business whose front door that story actually serves is the one selling the bean — a café page would want the room, the table and the people, which is a different story than the one the animation tells. A brand page can still carry its cafés as a section; a café page cannot make bean→grind→pour its spine without it feeling borrowed |
+| **Axis pair** | `otherworldly-animation` + `soft-organic` — **portfolio-new** (verified). Soft-organic deliberately *supports* rather than competes: physics-interaction would have been a lovely fit for a granular material like beans, but **a second motion system would fight the spine**, and the motion budget is one clock |
 | **Name candidates** | decided at pre-plan per method; *Slow Pour* · *Bell & Bird* · *Morningside* |
-| **Overlap to beat — this one is REAL and must be answered in the pre-plan** | `first-crack` is already a coffee ROASTERY (data-instrument + cinematic; its signature is the roast curve). **His motion is the differentiator and should be leaned on hard:** first-crack shows *production* (the roast), site E shows *what the customer receives* (bean → grind → pour). Per the social-register dial a café is a SOCIAL purchase — humans in frame, the room, warmth — where first-crack is instrument-led craft. Different buyer, different register |
-| **Why the motion is a good portfolio addition** | it is a **material transformation**, not a time-lapse. Every motion in this arc so far is time passing (a recovery, a year, a bloom). Beans→grounds→pour is matter changing state, which is a genuinely new motion grammar for the portfolio |
+| **Overlap to beat — REAL, and the brand choice makes it HARDER, so it is answered here** | `first-crack` is already a coffee **roastery** (data-instrument + cinematic; its signature is the roast curve). Choosing "brand" over "café" moves E *closer* to it, so the differentiation cannot rest on the vertical — **it rests on the register.** first-crack is an EXPERT page: an instrument, a curve, production, for someone who wants to know *how*. E is a PRODUCT page: one continuous transformation, no instrument at all, for someone who just wants the cup. **E deliberately has no data-instrument** — that is what keeps the two apart, and it is why the motion has to carry the whole page |
+| **Why the motion is a good portfolio addition** | it is a **material transformation**, not a time-lapse. Every other motion in this arc is time passing (a recovery, a year, a bloom, a vintage). Matter changing state is a genuinely new motion grammar, and it is the only site whose animation is the spine rather than a chapter |
 
 ### Honest arithmetic — both may not fit, and that is the correct outcome
 
 Leftover after the four committed lines is **~109cr**, and that assumes takes
 land. Scope tiers, so the plan degrades instead of breaking:
 
-| Tier | Per site | What it is |
-|---|---|---|
-| **Full** | ~110cr | hero + supporting stills + 3 motion segments |
-| **Lean** | ~60cr | hero + 2–3 stills + 2 motion segments + code-drawn instrument |
-| **Minimum** | ~40cr | **one** motion sequence — the one that matters — plus stills at ~1cr each and everything else code-drawn |
+**⚠ E's floor is HIGHER than D's, and the s105 tier table was wrong about it.**
+Once the animation is the spine, **the two chained segments are not a feature
+that can be cut — they are the page.** So E cannot degrade to a one-segment
+minimum the way D can.
 
-**If only one fits, build E.** D's seasons motion is the same beat ㉑ will
-already have shipped, whereas E's bean→grind→pour is a new motion grammar the
-portfolio does not own. **If the earlier sites overrun, D and E do not happen
-at all** — the Thalon landing is the priority and its ring-fence is never
+| | Site D (vineyard) | Site E (coffee) |
+|---|---|---|
+| **Full** | ~110cr — 3 segments + stills | ~120cr — 2 segments at several takes + stills + a hero |
+| **Lean** | ~60cr — 2 segments + stills + light instrument | ~85cr — 2 segments, one retake allowed, ~6 stills |
+| **Floor** | **~40cr** — one segment (veraison, the beat that matters) + ~1cr stills | **~75cr** — 2 segments, no retake margin, minimum stills. **Below this E has no spine and should not be built at all** |
+
+**If only one fits, build E** — D's seasons motion repeats a beat ㉑ will already
+have shipped, whereas E's bean→grind→pour is a grammar the portfolio does not
+own, and it is the only site in the arc whose animation *is* the page. With
+~109cr projected, **E alone fits comfortably; both fit only if the earlier sites
+land close to first take.** **If the earlier sites overrun, D and E do not
+happen at all** — the Thalon landing is the priority and its ring-fence is never
 raided to fund a portfolio site.
 
 **Two lean sites beat one full site here**, on his own stated rationale for the
