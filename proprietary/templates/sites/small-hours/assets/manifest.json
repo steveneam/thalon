@@ -1,0 +1,39 @@
+[
+  {
+    "file": "hero.webp",
+    "pinnedHash": "c59e02a0d03aeb795377ff362b72087c0e51633a3cd5967f36de69e13ea87691",
+    "width": 1600,
+    "height": 893,
+    "quality": 82
+  },
+  {
+    "file": "bell.webp",
+    "pinnedHash": "f9864e6fa688f884a2d1450d86537083a0550de82a948407b067bf75baa3adb4",
+    "width": 1100,
+    "height": 821,
+    "quality": 82
+  },
+  {
+    "file": "picker.webp",
+    "pinnedHash": "bc6b382da39ac8751b041dea5acdbab434ae372f2462f92d4732782e89204fbb",
+    "width": 900,
+    "height": 1117,
+    "quality": 82
+  },
+  {
+    "file": "bottles.webp",
+    "pinnedHash": "b45d783d3d9ee238d7636ced0c058b1a4adaeca6ed36be13d80e1afdb3f7ba81",
+    "width": 900,
+    "height": 1205,
+    "quality": 82
+  },
+  {
+    "file": "bloom-%02d.webp",
+    "pinnedHash": "993c58d914af47a0a1e00cd7f503c80a4ac409286042fc12eb8071d2f21ec2af",
+    "ext": "mp4",
+    "frames": 36,
+    "width": 1000,
+    "height": 563,
+    "quality": 55
+  }
+]

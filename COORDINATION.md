@@ -232,6 +232,77 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s107 — **SHIPPED: site C. The arc's headline video, and the scrub that looked perfect and was dead**
+
+**Boot was `gogogo`.** The inherited next action was item 1 of the s106 stamp —
+**site C, botanical perfumery** — and that is what shipped, as
+`proprietary/templates/sites/small-hours/` (**Small Hours**, wave 4, verdict
+`awaiting`).
+
+**⚠ The landing is NOT unblocked yet, and the stamp must not imply it is.** All
+three A+ sites are now BUILT, but the founder's s105 direction was *"can you
+also apply that motion to the site A and site C too?"* and §6 of the spec
+defines "fully finished" as **including each site's generated moving moment**.
+B and C move; **⑳ Whitethorn still owes its Day-84 handoff.** That is the
+remaining precondition for the capstone, and it is the next action.
+
+**The instrument.** The SCHEMATIC test rejected the note pyramid — real in the
+industry, but it is the *sales sheet*, not the bench document — and moved the
+instrument to **headspace analysis**, the one candidate that shares a clock with
+the mandated bloom video. That is the structural point: the video is the
+specimen under the bell and the instrument is what the bell reads, so the
+photograph leads and the diagram reads off it *by construction*, rather than by
+a rebalance after a founder critique the way ㉑ needed. Axis pair
+**otherworldly + exceptional-palette**, portfolio-new, and load-bearing rather
+than decorative — every compound owns a colour, so the page's colour world *is*
+the emission profile and changes on the same scroll clock.
+
+**Cost: 35.00 credits** (414.22 → **379.22**), against the spec's ~82cr line for
+site C. 17.50 was the bloom; 17.50 was eleven still generations including four
+rejects. Seedance at **720p/5s/fast/silent measures 17.50**, not the 22.50 the
+s106 stamp projected. **The 180cr Thalon-landing ring-fence is untouched.**
+
+**One plan correction, made mid-build and recorded not applied silently:** the
+pre-plan first specified two chained segments; the spec's own budget line
+(*"2 takes × 36"*) means two attempts at ONE segment. Building it as one take
+removes the entire seam class that cost ㉑ a session — the half-open state is a
+frame partway through one continuous take, so it cannot be out of register by
+construction — and saves 17.50cr. Registration measured anyway: the bud edit
+landed **1px** off the anchor and the camera holds to **1–2px** across the take.
+
+**⚠ THE FIND, and it is the one to carry:** the scrub **was completely dead**
+and the page looked perfect. The static markup ships one frame lit so the no-JS
+stage is not blank; the runtime's index started at `-1`, so the first swap
+cleared nothing, that frame stayed lit, and being last in DOM order it painted
+over every frame the scroll chose. Types, lint and 3,452 tests were silent; so
+were the console and every screenshot; the clock and readouts moved *correctly*
+the whole time. **It was found by counting lit frames across a scroll sweep.**
+s106's lesson was "make it move"; s107's is that **watching it move is not
+enough either — the thing that catches a compositing bug is a COUNT.** Four more
+defects came out of the same measured sweeps (the clock contradicting the prose,
+`margin:0 auto` shrink-wrapping a grid item, a one-chapter mobile lag, and the
+discovery that shrinking the mobile sheet steals from the photograph rather than
+buying reading room). All five are written up in the site's PREPLAN.
+
+**Ratchets.** Executable: a new case in `tests/template-portfolio.test.ts` —
+static instrument markup ↔ inert data block, shares summing to 100, frame count,
+and **exactly one lit frame** — and it was **proven to fail against both real
+defects before being trusted** (the s84 `doctor` lesson: a green ratchet that
+cannot fail is a lie). Documentary: three corollaries in the meta-prompt (the
+fifth silent killer; the cheapest registered edit is the one you never make;
+count the countable on the ANCHOR before the batch inherits it), and a
+**correction block in `docs/landing-arc/spec.md`** — the spec had assigned
+`exceptional-palette` to BOTH site C and site D, verified against the repo but
+not against its own earlier table. C takes it; D's secondary is an open draw at
+D's pre-plan.
+
+**Carried, recorded not fixed:** the mobile stage's vertical rhythm is airier
+than it should be — a heading clears the sheet at some scroll positions and not
+others. Every correctness invariant holds there; it is ergonomics, and it is the
+first thing a fix round should buy.
+
+---
+
 ## Sprint 9 / s106 — **SHIPPED: ㉑'s video pass. The scrub component exists, and it found a defect the still page was hiding**
 
 **Boot was `gogogo`.** The inherited next action was item 1 of the s105 stamp —

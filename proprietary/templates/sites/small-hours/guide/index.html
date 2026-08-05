@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Method note — Small Hours</title>
+<meta name="description" content="How the Small Hours page was designed and built, and what in it is real." />
+<style>
+  @font-face { font-family: "Alegreya"; src: url("../fonts/alegreya-var.woff2") format("woff2");
+    font-weight: 400 900; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Alegreya"; src: url("../fonts/alegreya-italic-var.woff2") format("woff2");
+    font-weight: 400 900; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Azeret"; src: url("../fonts/azeret-mono-var.woff2") format("woff2");
+    font-weight: 400 700; font-style: normal; font-display: swap; }
+
+  :root { --paper:#F4F1E8; --ink:#21232B; --ink-soft:#5C5A52; --ink-label:#8A877C;
+          --lamp:#B9832A; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Alegreya", Palatino, Georgia, serif;
+    font-size: 18px; line-height: 1.62; text-wrap: pretty; }
+  .wrap { max-width: 78ch; margin: 0 auto; padding: clamp(40px,7vw,88px) clamp(20px,5vw,40px); }
+  a { color: var(--ink); text-underline-offset: 3px; }
+  a:hover { color: var(--lamp); }
+  h1 { font-weight: 500; font-size: clamp(30px,4vw,44px); line-height: 1.06;
+       letter-spacing: -.018em; margin: 14px 0 8px; }
+  h2 { font-weight: 500; font-size: clamp(20px,2.2vw,26px); margin: 40px 0 10px;
+       letter-spacing: -.012em; }
+  p { color: var(--ink-soft); margin: 0 0 14px; }
+  li { color: var(--ink-soft); margin-bottom: 7px; }
+  .lbl { font-family: "Azeret", monospace; font-size: 10px; letter-spacing: .18em;
+         text-transform: uppercase; color: var(--ink-label); margin: 0; }
+  hr { height: 1px; background: var(--ink); opacity: .2; border: 0; margin: 34px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 12px 9px 0;
+           border-bottom: 1px solid rgba(33,35,43,.15); vertical-align: top;
+           color: var(--ink-soft); }
+  th { font-family: "Azeret", monospace; font-size: 10px; letter-spacing: .12em;
+       text-transform: uppercase; color: var(--ink-label); font-weight: 400; }
+  code { font-family: "Azeret", monospace; font-size: 13px; }
+  .note { border-left: 2px solid var(--lamp); padding-left: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="lbl">Method note</p>
+<h1>How this page was made</h1>
+
+<p><strong>Small Hours is not a real business.</strong> It is a demonstration
+page — a fictional botanical perfumery invented to show how a landing page can
+be built around a working instrument rather than around a photograph of a
+bottle. Nothing on it is for sale, there is no bench and there are no Thursdays.</p>
+
+<p><strong>Every photograph and the moving sequence on this page are
+AI-generated.</strong> None of them is a photograph of a real place, a real
+person or a real plant. They were generated to order for this page, and the
+models and prompts are listed below.</p>
+
+<hr />
+
+<h2>What is real</h2>
+
+<p>The chemistry is. The compounds named in the instrument are genuine
+constituents of jasmine flower scent, and the broad shape the instrument
+shows — leaf-green volatiles dominating a closed bud, benzyl acetate and
+linalool arriving as the corolla opens, jasmone and indole peaking in the small
+hours, total emission falling once the sun is on the row — is the real
+behaviour of the real plant. Headspace analysis is a real technique: a bell
+over a living, uncut flower, the air drawn off and read.</p>
+
+<p><strong>But the exact numbers are illustrative.</strong> They are plausible
+and internally consistent — each hour's shares sum to 100, and the page's own
+test suite asserts that the figures printed in the markup are the same figures
+the script reads — but no gas chromatograph was run for this page, and "bell
+040" is a fiction. Treat the instrument as an honest diagram of a real
+phenomenon, not as data.</p>
+
+<p>Indole is the one detail worth keeping: it genuinely smells of jasmine at a
+whisper and of decay at a shout, and it genuinely is a large part of why
+jasmine is difficult. That is not a flourish invented for the page.</p>
+
+<hr />
+
+<h2>The instrument</h2>
+
+<p>The stage is one clock. Scrolling the four chapters moves the night from
+22:00 to 05:20, and that single clock drives the scrubbed bloom, all seven
+compound bars, the stacked colour band, the four readouts and the chapter
+marker. There is no second animation system anywhere on the page.</p>
+
+<p><strong>The clock follows the prose, not the scrollbar.</strong> Each chapter
+carries its own hour as a <code>data-hour</code> attribute and the readout shows
+the anchor the reader is actually on — so the instrument can never be reporting
+04:00 while the words beside it are still describing one in the morning.</p>
+
+<p class="note">The moving image is <strong>not a video element</strong>. Seeking
+a compressed video by setting <code>currentTime</code> lands on keyframes and
+janks, so the generated take was decoded once into 36 stills and the page swaps
+between those under scroll. The mp4 stays the pinned original; the frames are
+the derive. A frame that has not finished decoding paints nothing, so the swap
+walks back to the nearest decoded neighbour rather than letting the stage go
+blank.</p>
+
+<h2>Without JavaScript</h2>
+
+<p>The page is built static-first and this claim is tested, not asserted: the
+compound table, all four chapters, every readout, the wink and the fully-open
+frame are real markup in the document. With scripting off you get the whole page
+and a still flower instead of a moving one. With <code>prefers-reduced-motion</code>
+set, the same — nothing is animated and nothing is withheld.</p>
+
+<hr />
+
+<h2>What made which asset</h2>
+
+<table>
+  <tr><th>Asset</th><th>Model</th><th>Vendor</th><th>Credits</th></tr>
+  <tr><td>The bloom — one 5s take, 720p, silent, decoded to 36 frames</td>
+      <td><code>seedance_2_0</code></td><td>Higgsfield (paid tier)</td><td>17.50</td></tr>
+  <tr><td>Hero — the field at first light</td>
+      <td><code>nano_banana_flash</code></td><td>Higgsfield (paid tier)</td><td>~1.5</td></tr>
+  <tr><td>The bell over a living flower</td>
+      <td><code>nano_banana_flash</code></td><td>Higgsfield (paid tier)</td><td>~1.5</td></tr>
+  <tr><td>The picker's hands under a lamp</td>
+      <td><code>nano_banana_flash</code></td><td>Higgsfield (paid tier)</td><td>~1.5</td></tr>
+  <tr><td>The bottles on the bench</td>
+      <td><code>nano_banana_flash</code></td><td>Higgsfield (paid tier)</td><td>~1.5</td></tr>
+</table>
+
+<p>The bloom was generated between two of our own still mints — a closed bud as
+the start frame and the fully-open flower as the end frame — so the sequence
+interpolates between two images we made rather than being invented whole. Both
+of those keyframes, and four discarded candidates, were also minted here; the
+session's total spend was <strong>35.00 credits</strong>, of which 17.50 was the
+moving sequence and 17.50 was eleven still generations including the rejects.
+Individual image prices are marked with a tilde because the batch price is exact
+and the per-image split is not.</p>
+
+<p>Every asset was pinned at mint time with its full provenance — model, prompt,
+parameters, credits, licence tier and job id — before it reached this page. No
+image on this page is a stock photograph, and no vendor URL is served from it;
+everything is a local file.</p>
+
+<hr />
+
+<h2>Two things the build got wrong first</h2>
+
+<p><strong>The instrument was invisible.</strong> Drawn first as vertical bars
+with rotated labels, the bars resolved to zero height and the most important
+element on the page rendered as nothing — while the source read perfectly well.
+It was rebuilt as horizontal rows, which is both legible and the shape the
+discipline's own documents have always had: a name on the left, a quantity on
+the right.</p>
+
+<p><strong>The flower had the wrong number of petals.</strong> The first
+anchor image came back with eight, where <em>Jasminum grandiflorum</em> has
+five. Since the whole page names one species, it was re-generated with the count
+stated explicitly rather than left to be noticed by anyone who grows the plant.
+The camera position of every frame was then measured rather than eyeballed —
+the bud and the open flower sit within about a pixel of each other, which is why
+the sequence does not swim as you scroll it.</p>
+
+<hr />
+
+<p class="lbl">Small Hours · a fictional demonstration · <a href="../">back to the page</a></p>
+
+</div>
+</body>
+</html>

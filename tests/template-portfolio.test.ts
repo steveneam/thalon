@@ -184,6 +184,69 @@ describe("template portfolio", () => {
     }
   });
 
+  /**
+   * A site whose instrument is drawn from an inert JSON block has TWO copies of
+   * the same numbers: the static markup a no-JS reader gets, and the block the
+   * runtime interpolates from. `/guide` claims the page works without
+   * JavaScript, so the static copy is a load-bearing claim and not a fallback —
+   * and "every claim the /guide makes is a claim that has to be TESTED, not
+   * intended" (㉑ s105). This is the drift alarm for that pair.
+   */
+  it("a site's static instrument markup agrees with its inert data block", () => {
+    for (const slug of slugs) {
+      const html = readFileSync(path.join(sitesDir, slug, "index.html"), "utf8");
+      const block = /<script type="application\/json" id="([\w-]+)">([\s\S]*?)<\/script>/.exec(html);
+      if (!block) continue; // not every site drives an instrument from JSON
+
+      const data = JSON.parse(block[2]) as {
+        compounds?: { id: string; peak: number }[];
+        hours?: { at: string; shares: Record<string, number> }[];
+        frames?: number;
+      };
+      if (!data.compounds || !data.hours) continue;
+
+      for (const hour of data.hours) {
+        const sum = Object.values(hour.shares).reduce((a, b) => a + b, 0);
+        expect(
+          Math.abs(sum - 100) < 0.05,
+          `${slug}: shares at ${hour.at} sum to ${sum}, not 100 — the instrument would be reporting a total it cannot justify`,
+        ).toBe(true);
+        for (const c of data.compounds) {
+          expect(
+            typeof hour.shares[c.id],
+            `${slug}: ${c.id} has no share at ${hour.at}`,
+          ).toBe("number");
+        }
+      }
+
+      // The static rows must print the values the page opens on, which is the
+      // peak hour each compound records.
+      for (const c of data.compounds) {
+        const row = new RegExp(
+          `data-row="${c.id}"[\\s\\S]*?<span class="vl">([\\d.]+)</span>`,
+        ).exec(html);
+        expect(row, `${slug}: no static row for ${c.id}`).not.toBeNull();
+        expect(
+          Math.abs(Number(row![1]) - c.peak) < 0.05,
+          `${slug}: static row ${c.id} prints ${row![1]} but the data block says ${c.peak}`,
+        ).toBe(true);
+      }
+
+      if (typeof data.frames === "number") {
+        const imgs = html.match(/<img[^>]*src="assets\/[\w-]*?\d\d\.webp"/g) ?? [];
+        expect(
+          imgs.length,
+          `${slug}: data block declares ${data.frames} frames but the markup carries ${imgs.length}`,
+        ).toBe(data.frames);
+        const lit = html.match(/<img class="on"/g) ?? [];
+        expect(
+          lit.length,
+          `${slug}: exactly one frame must carry .on in the static markup, found ${lit.length} — with none the no-JS stage is blank, with more than one the stacked frames composite and the scrub is dead`,
+        ).toBe(1);
+      }
+    }
+  });
+
   it("the factory method docs stay OUT of sites/ (the docroot leak boundary)", () => {
     for (const slug of slugs) {
       for (const file of htmlFiles(slug)) {

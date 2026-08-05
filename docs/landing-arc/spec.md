@@ -277,10 +277,37 @@ chaining is what ㉑'s Feb→May→Jul→Oct already needs.
 |---|---|
 | **Banked idea** | `seasons-tree` again, but as **generated motion** rather than the cross-fade `orchard-house` actually ships |
 | **The motion** | **VERAISON** — the moment the grapes turn from green to purple. One chained sequence through the vine's year, with veraison as the hero beat |
-| **Axis pair** | `otherworldly-animation` + `exceptional-palette` — **portfolio-new** (verified: nothing holds this pair; `orchard-house` is +cinematic, `whitethorn` +data-instrument, `aspect-and-fall` +editorial-print) |
+| **Axis pair** | ~~`otherworldly-animation` + `exceptional-palette`~~ — **REASSIGNED TO SITE C at s107, see the correction below. D's secondary is a re-draw at D's own pre-plan.** |
 | **Name candidates** | **Veraison** (the term IS the motion, and it earns its own section the way *Whitethorn* and *Aspect & Fall* do — but it is a common industry word and may collide, so check) · *Southfacing* · *Marl & Cane* |
 | **Overlap to beat** | `orchard-house` (seasons, fruit) — differentiate on register: a winery sells a **vintage**, i.e. one specific year that will never repeat, where the orchard sells a repeating cycle |
 | **Schematic test** | What the discipline itself produces: **Brix / sugar-ripeness readings and a harvest window.** Available as the instrument — but keep it LIGHTER than ㉑'s, because on this site the motion is the hero and a second full data-instrument would repeat site B |
+
+> **⚠ CORRECTION (s107) — this spec assigned one axis to two sites.** The s103
+> site table gives **exceptional-palette to site C** (*"the strongest case for
+> the exceptional-palette axis"*); the s105 block above then gave the same
+> secondary to **D**, asserting the pair was portfolio-new "(verified)" —
+> verified against the shipped `site.json` files, but not against C's prior
+> claim four hundred lines earlier in this same document. That is an internal
+> contradiction in the spec, not a fact about the portfolio.
+>
+> **C takes it**, decided at C's pre-plan and recorded here rather than left to
+> be re-discovered: C claimed it first and in the founder-facing table; C was
+> built at s107 while D is conditional on credit remaining *after* the Thalon
+> landing; and this spec's own arithmetic says **"if only one fits, build E"**,
+> which makes D the site most likely never to exist. Shipped as
+> `small-hours` — and the axis is load-bearing there rather than decorative,
+> because each tracked compound owns a colour and the page's colour world *is*
+> the instrument's output.
+>
+> **D's secondary is therefore an open draw**, to be made at D's own pre-plan.
+> `otherworldly+physics-interaction` and `otherworldly+brutalist-raw` are both
+> still portfolio-new, and a concrete cellar is a real winery register — but
+> that is D's call to make with the portfolio in front of it, not this spec's to
+> pre-empt a second time.
+>
+> The general lesson, which is rule 12's inherited-plan trap inside a spec:
+> **an axis table is ground truth and has to be checked against the whole
+> document, not just against the repo.**
 
 ### Site E — a coffee brand (or a café). **THE ANIMATION IS THE PAGE.**
 

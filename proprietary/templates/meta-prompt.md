@@ -178,6 +178,28 @@ keyframe it is aiming at.** Once October was re-minted in register, the segment
 had nothing to drift toward. Corollary to the corollary: chain segments
 **end-frame to start-frame** (upload the previous clip's last frame as the next
 one's `start_image`) so seams are exact by construction rather than by luck.
+Corollary (Small Hours, s107 — **the cheapest registered edit is the one you
+never make**): ㉑ built a four-state sequence as four separately-minted
+keyframes and spent a session on the seam between them. This site needed three
+states and minted **two** — the endpoints — then let one continuous
+`start_image`→`end_image` take supply everything between. The middle state is a
+frame partway through that take, so it cannot be out of register *by
+construction*, and the whole measure-and-re-mint loop applies to one pair
+instead of three. **Chain segments only where the intermediate state is a
+genuinely different SUBJECT** (site E's beans→grounds→pour, where the grounds
+are their own shot); where it is one subject in the middle of one motion, a
+single take is both cheaper and strictly safer. Read the budget line before
+assuming otherwise — this spec's *"2 takes × 36"* meant two attempts at ONE
+segment, and reading it as two segments would have bought a seam nobody wanted.
+Corollary (Small Hours, s107 — **count the countable BEFORE the batch inherits
+it**): the anchor keyframe came back with eight petals where *Jasminum
+grandiflorum* has five, on a page that names the species. §casting (5)
+count-anchoring fixed it first try ("EXACTLY FIVE … not six, not eight"), but
+the point is *when*: the anchor was about to become the generation input for
+every other frame, so one 3cr re-mint replaced what would have been a re-mint of
+the entire sequence. **Check the botany, the count and the species on the
+ANCHOR, before anything is derived from it** — the ㉑ hydrangea lesson moved one
+step earlier in the pipeline, where it is an order of magnitude cheaper.
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that
@@ -407,6 +429,22 @@ measuring `getBoundingClientRect().top` of the pinned element — it must read
    top of the viewport, a chapter-activation test measured from `0` marks a
    chapter active while its heading is still *behind* the sheet (⑳ shipped this
    on mobile). Measure the line from the stage's bottom edge on narrow screens.
+
+**A STACKED FRAME SEQUENCE HAS A FIFTH KILLER, AND IT LOOKS LIKE SUCCESS
+(Small Hours, s107).** A scrub built as absolutely-stacked `<img>` needs exactly
+ONE frame lit at a time. The static markup must ship one already lit (or the
+no-JS stage is blank) — and if the runtime's "currently shown" index starts at
+a sentinel like `-1` instead of being **seeded from the markup**, the first swap
+has nothing to clear, that initial frame stays lit, and since it is later in DOM
+order it keeps painting on top of every frame the scroll selects. **The scrub is
+then completely dead while every still screenshot looks perfect**, the clock and
+the readouts move correctly, and the console is silent. Found only by counting
+lit frames at a series of scroll positions. Two rules: **seed the index from the
+DOM**, and make the swap clear *every* other frame so "exactly one is on" is
+true by construction rather than by bookkeeping. Ratcheted in
+`tests/template-portfolio.test.ts` (static markup ↔ inert data block, including
+the lit-frame count) — and that test was proven to FAIL against both defects
+before it was trusted.
 
 **THE CLOCK FOLLOWS THE PROSE, NOT THE SCROLLBAR (㉑, s105).** Driving the
 instrument linearly against section progress put the sheet on OCTOBER while the

@@ -1,0 +1,21 @@
+{
+  "slug": "small-hours",
+  "name": "Small Hours",
+  "vertical": "botanical-perfumery",
+  "oneLiner": "A botanical perfumery whose page is the reading itself — one jasmine flower opening through one night, and the list of molecules the air above it gives up hour by hour.",
+  "axes": {
+    "primary": "otherworldly-animation",
+    "secondary": "exceptional-palette",
+    "secondaryReason": "the palette is not applied, it is the instrument's output — each tracked compound owns a colour, the stacked reading bar is the whole emission of that moment expressed as one band, and because the emission changes as the flower opens the page's colour changes on the same scroll clock; Piesse's 1857 odophone done honestly"
+  },
+  "paletteSeed": "three grounds — night (a blue-black, never pure black), lamp (the sodium-amber a picker carries) and paper (a warm unbleached off-white) — and against them the SEVEN COMPOUND COLOURS, which are the only saturated colour on the page; the one colour rule, stated so it can be checked: a swatch on this page always means a molecule, never a decoration, and the page runs LIGHT everywhere except the instrument, because the instrument is the only part that happens at night",
+  "typeDirection": "Alegreya (roman + italic — the italic carries the Latin binomials; its calligraphic warmth is the deliberate opposite of the high-contrast fashion serif the vertical defaults to) + Azeret Mono (every piece of instrument apparatus: compound names, values, readouts, hour stamps) — TWO families, honest to a discipline with exactly two documents, the ledger and the readout; both OFL, vendored, both portfolio-new",
+  "motionBudget": "one scroll clock and no second animation system: the night runs 22:00 → 05:20 across a pinned stage, and one clock sets the scrubbed bloom (36 frames derived from a single generated Seedance take, scrubbed by scroll position rather than played, because seeking a compressed video lands on keyframes and janks), all seven compound bars, the stacked reading band, four live readouts and the chapter marker; the PHOTOGRAPH leads the stage and the instrument reads off it, never a diagram ranked above the thing it describes; the clock follows the PROSE — each chapter carries its own data-hour and the hour shown is the anchor the reader is on, never a value interpolated off the scrollbar; reduced-motion and no-JS both get the fully-open frame as a still with every chapter, the whole compound table and the wink still in the markup; THE WINK lands at 05:20 only — the house admitting that the four o'clock reading is always the best and it has never once got that one into a bottle",
+  "wave": 4,
+  "built": "2026-08-05",
+  "verdict": {
+    "status": "awaiting",
+    "note": "Site C of the landing arc (docs/landing-arc/spec.md) and the arc's headline video. The SCHEMATIC test rejected the note pyramid outright — it is real in the industry but it is the sales sheet, not the bench document — and moved the instrument to HEADSPACE ANALYSIS, the one candidate that shares a clock with the mandated bloom video: the video is the specimen under the bell and the instrument is what the bell reads, so neither survives without the other. Built as ONE generated segment rather than the two chained ones the pre-plan first specified, which removes the seam class that bit ㉑ at s106 entirely (the half-open state is a frame partway through one continuous take, not a separately-minted keyframe needing registration). Keyframe registration measured, not eyeballed: the bud edit landed 1px off the anchor and the camera holds to 1–2px across the whole take. Botanical count-anchoring caught a real defect pre-build — the first anchor came back with eight petals where Jasminum grandiflorum has five, and it was re-minted rather than softened.",
+    "at": "2026-08-05"
+  }
+}

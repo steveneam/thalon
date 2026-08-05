@@ -2,249 +2,234 @@
 
 ## Stamp
 
-2026-08-05 close of session 106 (syd4 — boot was `gogogo`).
-Wrap verify on main: **exit 0, 3452 passed / 9 skipped** (3441 → 3452: eleven
-new frame-helper tests).
+2026-08-05 close of session 107 (syd4 — boot was `gogogo`).
+Wrap verify on main: **exit 0, 3453 passed / 9 skipped** (3452 → 3453: the new
+static-markup↔data-block ratchet).
 
-**One substantive commit.** ㉑ Aspect & Fall's **video pass** — the item the
-s105 stamp put first, and the one that builds the scroll-scrub machinery ONCE
-so site C inherits it instead of inventing it under video cost. **The check
-that matters is not the sha but the state: tree clean, main == origin, verify
-exit 0, all confirmed at wrap.**
+**One substantive commit.** ㉒ **Small Hours** — botanical perfumery, site C of
+the landing arc and the arc's headline video. **The check that matters is not
+the sha but the state: tree clean, main == origin, verify exit 0, all confirmed
+at wrap.**
 
-**⚠ THE ARC IS STILL FIVE SITES + THE LANDING, AND ITS ORDER IS HIS:**
-⑳ ✅ approved (owes its Day-84 motion) → ㉑ ✅ built **and now moving** →
-**site C** → **THE THALON LANDING** → then **D (vineyard) and E (café) on
-leftover credit only.**
+**⚠ THE ARC'S ORDER IS HIS, AND THE CAPSTONE IS STILL BLOCKED BY ONE ITEM:**
+⑳ ✅ built, approved — **still owes its Day-84 motion** → ㉑ ✅ built and moving
+→ ㉒ ✅ **built and moving (this session)** → **⑳'S MOTION** → **THE THALON
+LANDING** → then **D (vineyard) and E (café) on leftover credit only.**
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
-**Credits: 414.22** (spent 137.00, reconciled live). **The 180cr ring-fence for
+**Credits: 379.22** (spent 35.00, reconciled live). **The 180cr ring-fence for
 the Thalon landing is UNTOUCHED.**
 
-## WHAT SHIPPED — ㉑'s stage now leads with the photograph, and the photograph moves
+## WHAT SHIPPED — the instrument reads the photograph, instead of sitting beside it
 
-**Both of his s105 directions are answered.** *"Dont have to be stingy"* and
-*"a top down view doesnt really display the full beauty and power"*:
+▎ **The schematic test did real work before a line was written.** The obvious
+instrument for a perfume page is the **top/heart/base pyramid** — and it FAILS,
+in the subtle way: it is real in the industry but it is the *sales sheet*, not
+the bench document, and it is static by construction. The instrument became
+**headspace analysis** — a bell over a living, uncut flower, the air drawn off
+and read as a list of volatiles.
 
-▎ **The stage is REBALANCED.** The photograph holds **63% of the instrument
-area where it held 24%** — measured on the rendered page, not estimated: sticky
-`top:0`, photograph 471px against the plan's 279px. The plan is not weakened;
-it still drives every readout, the shade polygon and the calendar playhead.
+▎ **That choice is structural, not clever.** With a formula or a pyramid, the
+mandated bloom video sits *beside* the instrument as decoration. With headspace,
+**the video IS the specimen under the bell and the instrument is what the bell
+reads** — one clock, and neither survives without the other. So the photograph
+leads and the diagram reads off it *by construction*, rather than by a rebalance
+after a founder critique the way ㉑ needed.
 
-▎ **The photograph MOVES** — three generated Seedance transitions
-(Feb→May→Jul→Oct) of one locked-off corner, **scrubbed by scroll position, never
-played**. The mp4s are the pinned originals; the frames are the derive.
+▎ **The palette axis is load-bearing.** Every compound owns a colour, the
+stacked band is the whole emission of that moment as one strip, and because
+emission changes as the flower opens **the page's colour changes on the same
+scroll clock.** Nothing is themed. Pair `otherworldly + exceptional-palette`,
+portfolio-new.
 
-▎ **Three things had to give way to make it fit**, each a real call: the plan's
-annotation type was **enlarged** (it is issued at half the sheet size now, and
-at 4px it was decoration) · the interest calendar **left the pinned sheet** for
-its own full-width section, because thirteen species in 117px collided — it is
-no longer a mobile-only fallback · and mobile **now shows the photograph at
-all**, which it never did (the old rule hid it outright, so a phone reader saw
-the drawing of the garden and never the garden).
+▎ **35.00 credits** against the spec's ~82cr line. **Seedance at 720p/5s/fast/
+silent measures 17.50**, not the 22.50 the s106 stamp projected.
 
-## THE FIND — and it is the part worth reading before site C
+## THE FIND — and it is sharper than last session's
 
-▎ **A CROSS-FADE HIDES MISREGISTRATION; A SCRUB EXPOSES IT.** ㉑ shipped at
-s105 with an **October keyframe that was a different camera** — lower, further
-back, hard backlight — measured **24px+ out of register** against the other
-three, under a caption reading "the same corner". Nothing was visibly wrong on
-the still page, because a dissolve between differently-framed shots reads as a
-dissolve. **Making the page move is what found it.**
+▎ **THE SCRUB WAS COMPLETELY DEAD AND THE PAGE LOOKED PERFECT.** The static
+markup ships one frame lit so the no-JS stage is not blank; the runtime's index
+started at `-1`, so the first swap cleared nothing, that frame stayed lit, and —
+the frames being absolutely stacked — it painted over every frame the scroll
+chose. **The flower never moved.** Types, lint and 3,452 tests: silent. Console:
+silent. Every screenshot: correct. The clock and all four readouts moved
+*correctly* the entire time.
 
-▎ **The cause was a ratchet applied to three assets out of four.** Feb and May
-used the s105 layout-naming fix; **October still carried the exact phrasing that
-fix replaced** (*"keep the camera position … identical to the reference"*).
-Writing a mint corollary now obliges you to **re-mint every asset in the batch
-made the old way**.
+▎ **s106 said "make it move." s107's correction: WATCHING it move is not enough
+either.** The readouts moving is exactly what made it look alive. What caught it
+was **counting the lit frames across a scroll sweep** — two were lit, 32 and 35.
+*When a bug is a compositing bug, only a count finds it.*
 
-▎ **A generated transition is pulled by its END frame.** Two Jul→Oct segments
-recomposed their own first frame **even when handed the previous segment's exact
-last frame as `start_image`** — they were interpolating honestly toward a bad
-end frame. **Do not chase a bad segment with prompt language; fix the keyframe
-it aims at.** Once October was re-minted in register, the next segment landed
-with a **zero-pixel seam** (measured dx=0, dy=0).
-
-▎ **MEASURE registration, never eyeball it — and mint TWO.** A greyscale
-mean-abs-difference search over a ±24px window takes a minute and returns a
-number; two of four pairs looked identical and were not. On the re-mint,
-**candidate A landed within 1px and candidate B drifted the same 24px+ on the
-same prompt** — so the technique is roughly a coin flip per seed and picking by
-measurement IS the job.
+▎ **Four more, all from measured sweeps, none visible in source:** the clock
+contradicting the prose (01:00 beside *"the bud is shut"*) because the scroll
+fraction was measured top-to-top rather than centre-to-centre · `margin:0 auto`
+on a **grid item** shrink-wraps it (the hero bar was 418px in a 1440px viewport)
+· a one-chapter mobile clock lag · and the discovery that **shrinking the mobile
+sheet steals from the photograph rather than buying reading room** (62svh→54svh
+dropped it 32%→22%). All five written up in the site's PREPLAN.
 
 ## The ratchets this session bought
 
-**Executable:** `packages/engine/src/assets/frames.ts` + **11 tests** —
-frame-pattern expansion (refuses a pattern too narrow for its count, which would
-silently collide two frames onto one name) and even sampling that **always keeps
-both endpoints**, because those are the pinned keyframes the scrub must land on.
-· `frames:N` manifest entries in `scripts/export-template-assets.ts` (ext-aware
-pinned key; **an mp4 without `frames` fails loud**) · the portfolio ratchet
-extended so a pattern entry expands to its N filenames and the manifest↔disk
-bijection still holds.
-**Documentary:** two corollaries in `proprietary/templates/meta-prompt.md`
-(**READ BEFORE ANY MINT**).
+**Executable:** a new case in `tests/template-portfolio.test.ts` — static
+instrument markup ↔ inert data block, shares summing to 100, frame count, and
+**exactly one lit frame** — **proven to FAIL against both real defects before it
+was trusted** (the s84 `doctor` lesson: a green ratchet that cannot fail is a
+lie).
+**Documentary:** three corollaries in `proprietary/templates/meta-prompt.md`
+(**READ BEFORE ANY MINT**) — the fifth silent killer · *the cheapest registered
+edit is the one you never make* · *count the countable on the ANCHOR before the
+batch inherits it*. Plus a **correction block in `docs/landing-arc/spec.md`**:
+the spec had given `exceptional-palette` to BOTH C and D, verified against the
+repo but never against its own earlier table. C takes it; D's secondary is an
+open draw at D's pre-plan.
 
-## Resume prompt (session 107, syd4)
+## Resume prompt (session 108, syd4)
 
 **Resume · Thalon** — nothing is mid-flight. **The plan is COORDINATION §s104
-(the PLANNED block), minus what shipped.** His running order is settled: sites
-first, then the capstone.
+(the PLANNED block), minus what shipped.**
 
-**⚠ Open with the meta-prompt in hand.** It gained two corollaries this session
-that exist so site C does not pay ㉑'s bill again.
+**⚠ Open with the meta-prompt in hand.** It gained three corollaries this
+session that exist so ⑳'s motion does not pay ㉒'s bill again.
 
-**1 — SITE C: botanical perfumery (~82cr)** (`bloom video` — the arc's headline
-video). **It now inherits a proven scrub component**: `frames.ts`, the `frames:N`
-manifest entry, and a working stage pattern in
-`proprietary/templates/sites/aspect-and-fall/`. Loop per
-`docs/landing-arc/spec.md` §Method: **claude-design mock → PREPLAN.md →
-code-direct → mint → /guide → fix round.** **Draw a portfolio-unique axis PAIR**
-— `orchard-house` holds otherworldly+cinematic, `whitethorn`
-otherworldly+data-instrument, `aspect-and-fall` otherworldly+editorial-print.
-C's banked idea is a *video*, so it dodges the picture-of-a-thing trap; its
-equivalent question is what a perfumer's own document looks like (a formula? a
-note pyramid? a maceration log?). **Budget the segments at 22.50 each at 720p/5s
-— NOT the 36/45 in the spec table, which is the 1080p price** (§5 of the video
-turn predates the measurement; 720p is ample for a ~940px-wide derive).
+**1 — ⑳ WHITETHORN, the Day-84 handoff MOVING (~35cr at the measured 720p
+price, 2 takes). THIS IS THE LAST THING BETWEEN HERE AND THE CAPSTONE.** His
+s105 direction was *"can you also apply that motion to the site A and site C
+too?"*, and §6 of the spec defines "fully finished" as including each site's
+generated moment. B and C move; **A does not yet.** ⑳'s is the payoff — the page
+spends six chapters measuring a limp evening out and **never once shows the dog
+walking**. Start frame = the pinned Day-84 still, end frame = the same dog
+mid-stride. **One honesty constraint the others do not carry:** it depicts a
+clinical outcome, so the Day-84 state must match what the instrument says — a
+sound, even trot, never a bounding hero-dog — and `/guide` discloses it. **A
+video that over-claims the recovery would undo the exact honesty (the Day-12
+dip) the page was praised for.** ⚠ **Measure ⑳'s keyframes against each other
+BEFORE minting** — and note ㉒'s cheaper finding: **one `start→end` take beats
+chained segments** wherever the intermediate state is the same subject mid-motion,
+because the middle frame then cannot be out of register by construction.
 
-**2 — ⑳ WHITETHORN, the Day-84 handoff MOVING (~68cr, 3 takes).** His third
-s105 message: *"can you also apply that motion to the site A and site C too?"*
-⑳'s is the payoff — the page spends six chapters measuring a limp evening out
-and **never once shows the dog walking**. Start frame = the pinned Day-84 still,
-end frame = the same dog mid-stride. **One honesty constraint the others do not
-carry:** it depicts a clinical outcome, so the Day-84 state must match what the
-instrument says — a sound, even trot, never a bounding hero-dog — and `/guide`
-discloses it. **A video that over-claims the recovery would undo the exact
-honesty (the Day-12 dip) the page was praised for.** ⚠ **Check ⑳'s keyframes
-are mutually registered BEFORE minting any segment** — that is precisely what
-bit ㉑, and ⑳ has never been measured.
+**2 — THE THALON LANDING PAGE**, the capstone, unblocked the moment ⑳ moves.
+A, B and C complete *including their generated moments*, so the landing inherits
+a proven scrub component and three finished pages — *"rather than just mock."*
+NOT a portfolio site. Stealth unchanged; **where it is served and under what
+name is his separate call.** Mint budget **ring-fenced at 180cr, still intact.**
 
-**3 — THE THALON LANDING PAGE**, the capstone. A, B and C complete *including
-their generated moments*, so the landing inherits a proven scrub component and
-three finished pages — *"rather than just mock."* NOT a portfolio site. Stealth
-unchanged; **where it is served and under what name is his separate call.** Mint
-budget **ring-fenced at 180cr and still intact.**
+**3 — SITES D AND E**, on the leftover, **ONLY after the landing is finished.**
+D = vineyard (hero beat **veraison**; **its secondary axis is now an OPEN DRAW**
+— C took exceptional-palette) · E = a coffee **brand**, whose **animation IS the
+page**. **E's floor is ~75cr and D can degrade to ~40**, and at the measured
+720p price both fit comfortably. **If only one fits, build E.** Full brief:
+`docs/landing-arc/spec.md` §SITES D AND E.
 
-**4 — SITES D AND E**, on the leftover, **ONLY after the landing is finished.**
-D = vineyard/winery (hero beat **veraison**) · E = a coffee **brand**, whose
-**animation IS the page** (beans → grounds → pour as three acts top to bottom;
-two chained transitions, middle frame minted once). **E's floor is ~75cr and D
-can degrade to ~40.** With ~130 projected after the landing, **both now fit**
-where the s105 stamp said only one would — the 720p price is the reason. **If
-only one fits, build E.** Full brief: `docs/landing-arc/spec.md` §SITES D AND E.
+**4 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
+out on their own"**, untrue while the queue's master key is empty and **nothing
+in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the DISCLOSURE, not a
+door.** Arming from the UI is his sequence-gate call, NOT in scope.
 
-**5 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
-out on their own"**, untrue while the queue's master key is empty and
-**nothing in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the DISCLOSURE,
-not a door.** Arming from the UI is his sequence-gate call, NOT in scope.
+**5 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
+(DOCTRINE 0). Both MIT deps approved. Finding banked in `docs/control-arc/spec.md`.
 
-**6 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
-(DOCTRINE 0). Both MIT deps approved. Shaping finding banked in
-`docs/control-arc/spec.md`.
+**CARRIED, recorded not fixed:** ㉒'s **mobile vertical rhythm is airier than it
+should be** — a chapter heading clears the pinned sheet at some scroll positions
+and not others, so a reader can meet a paragraph before its title; every
+correctness invariant holds there (hour always equals the highlighted chapter,
+exactly one lit frame, monotonic bloom, no horizontal scroll), so this is
+ergonomics and it is the first thing a fix round should buy · Schedule's
+month-density chips clip their own text · the Intel **dossier-absence REASON
+does not reach the wire** (a contract-window ask) · Intel dismiss reversibility ·
+the sweep schedule's missing door · the add-chip's missing keyword path ·
+**㉑'s July hydrangea reads as a round mophead where the calendar names
+*Hydrangea quercifolia*** (oakleaf, conical) — cosmetic, inherited from s105.
 
-**CARRIED, recorded not fixed:** Schedule's month-density chips clip their own
-text · the Intel **dossier-absence REASON does not reach the wire** (a
-contract-window ask) · Intel dismiss reversibility · the sweep schedule's
-missing door · the add-chip's missing keyword path · **㉑'s July hydrangea reads
-as a round mophead where the calendar names *Hydrangea quercifolia* (oakleaf,
-conical)** — inherited from the s105 still, cosmetic, a landscape architect
-would catch it.
-
-**WAITING ON HIM — none blocking:** ㉑'s verdict (its `site.json` is still
-loudly `awaiting`, now with the video pass in it) · **the casting reversal
-inside it** — the studio's one human is an experienced WOMAN at the board, one
-word to flip · the last un-spent vertical (**botanical perfumery**, and site C
-is about to spend on it, so this is the cheapest moment to overrule) · the
+**WAITING ON HIM — none blocking:** ㉒'s verdict (`site.json` is loudly
+`awaiting`) · ㉑'s verdict, and **the casting reversal inside it** — the studio's
+one human is an experienced WOMAN at the board, one word to flip · the
 Higgsfield **expiry date** (pacing aid only) · the three s101 staged design
-calls. All on NEEDS-STEVEN.
+calls. All on NEEDS-STEVEN. **The last un-spent vertical is now SPENT** —
+botanical perfumery shipped as Small Hours, so that open call is closed.
 
-▎ ▸ **The lesson, SEVENTH session running: RUN IT AND READ IT.** The
-highest-severity find this session was invisible to types, lint and 3,452 tests
-**and invisible on the still page too** — it took making the thing move. The
-generalisation: *a defect can hide inside a transition you chose for its
-softness.*
-▎ ▸ **Traps worth keeping:** `next dev` at `localhost:3111`, **not started this
-session — the portfolio serves off the 8899 preview unit instead** ·
-**`npm run verify | tail` REPORTS TAIL'S EXIT CODE, not verify's — a pipeline
-masks the gate; redirect to a file and echo `$?`** (cost a false green this
-session) · **`pgrep -f <pattern>` MATCHES ITS OWN COMMAND LINE — a wait-loop
-polling `pgrep -f "vitest run"` never exits, because the loop's own bash `-c`
-string contains that text; it read as a hung build twice. Use `pgrep -x <exe>`
-or check for a sentinel in the log instead** · **the Bash tool's cwd PERSISTS between calls — `cd` to the repo root
-in the same command** (bit twice) · scripts need `set -a; source
-apps/web/.env.local; set +a` · **`json.dump` escapes non-ASCII by default —
-pass `ensure_ascii=False` or every em-dash becomes `—`** · chrome-devtools
-`fill` does NOT reach React controlled inputs · **`html{scroll-behavior:smooth}`
-silently defeats `window.scrollTo` in an evaluate — set `scrollBehavior='auto'`
-first** · **NEVER edit nested SVG/HTML with non-greedy regex — index-slice on a
-unique anchor instead** · **an SVG with `preserveAspectRatio="none"` and no
-height keeps its intrinsic aspect and overflows its grid row** · **a stacked
-frame that has not DECODED paints nothing — guard the swap or the stage goes
-blank** · **seedance ignores `width`/`height`; resolution is the `resolution` +
-`mode` params, and it defaults to 720p WITH audio** · vitest does NOT typecheck
-(`npx tsc --noEmit -p apps/web` FROM THE REPO ROOT) · eslint runs from
+▎ ▸ **The lesson, EIGHTH session running, and it moved again: RUN IT, MOVE IT,
+then COUNT IT.** s105 said render it. s106 said a still page hides what a scrub
+exposes. s107: **a moving page hides what only a count exposes** — every visible
+signal said the scrub was alive, and it had never once advanced a frame.
+▎ ▸ **Traps worth keeping:** **a stacked `<img>` scrub needs its "shown" index
+SEEDED FROM THE DOM — starting at `-1` strands the markup's initial frame lit
+and it composites over everything** · **`margin:0 auto` on a GRID ITEM
+shrink-wraps it — add `width:100%`** · **an rAF-scheduled scroll handler has NOT
+run when you read the DOM straight after `scrollTo` — await two frames or you
+will measure the previous state and chase a phantom** · **seedance ignores
+`width`/`height`; resolution is `resolution`+`mode`, it defaults to 720p WITH
+audio, and 720p/5s/fast/silent = 17.50cr** · **the vendor MCP SUBSTITUTES the
+model — asked for `nano_banana_pro`, got `nano_banana_2`, then `nano_banana_flash`
+on later calls; record what RAN, not what you requested, or `/guide` lies** ·
+`npm run verify | tail` REPORTS TAIL'S EXIT CODE — redirect to a file and echo
+`$?` · `pgrep -f <pattern>` MATCHES ITS OWN COMMAND LINE — use `pgrep -x` · the
+Bash tool's cwd PERSISTS between calls · scripts need `set -a; source
+apps/web/.env.local; set +a` · `html{scroll-behavior:smooth}` silently defeats
+`window.scrollTo` in an evaluate — set `scrollBehavior='auto'` first ·
+chrome-devtools `fill` does NOT reach React controlled inputs · vitest does NOT
+typecheck (`npx tsc --noEmit -p apps/web` FROM THE REPO ROOT) · eslint runs from
 `apps/web` · **portfolio sites trip the impeccable design hook — false positive
 by construction** · vendor mint URLs expire in 30–60 min — **download and pin
 immediately** · `packages/db` exposes `repos` as its ONLY query API.
 ▎ ▸ **⛔ SEQUENCE GATE, unchanged:** post = ARMED (founder GO s98); page still
 409s at `POST /api/create`; bluesky is the one platform granted for live
 testing; the queue consumer's key rests EMPTY. Two live posts total, both
-bluesky. **This session spent 137.00 credits and posted nothing.**
+bluesky. **This session spent 35.00 credits and posted nothing.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
 ▎ ▸ **State:** tree clean and main == origin (verified at wrap) · staging rolls
-s93–s106 with the next auto-deploy · **no new migration this session** · four
+s93–s107 with the next auto-deploy · **no new migration this session** · four
 social channels connected · dev PG live · 8899 preview + sweeper user units keep
 running — NEVER hand-start the sweeper.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
-s107 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
-`docs/landing-arc/spec.md` is the spec of record — **sites A and B BUILT (B now
-MOVING), C and the Thalon landing UNSTARTED.**
+s108 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
+`docs/landing-arc/spec.md` is the spec of record — **A, B and C all BUILT; B and
+C MOVING; ⑳'s motion is the last item before the capstone.**
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    verify` before any new work.
 
-CLAUDE.md → this file → COORDINATION.md (**§s106 = what shipped · §s104 = the
-plan**) → `docs/landing-arc/spec.md` (**A + B BUILT; C and the capstone next**)
-→ `proprietary/templates/meta-prompt.md` (**READ BEFORE ANY MINT — it gained
-two corollaries this session**) → `proprietary/templates/sites/aspect-and-fall/`
-(the precedent to copy, now including the scrub) → `docs/control-arc/spec.md`
-(**A + A2 BUILT; B owes a SHEET**) → `docs/research/ux-refinement-program.md` →
-agent_handoff/NEEDS-STEVEN.md → `docs/research/prior-art-portal-automation-s84.md`
-(BEFORE ANY PORTAL WORK). `docs/video-arc/spec.md` is a CLOSED record.
+CLAUDE.md → this file → COORDINATION.md (**§s107 = what shipped · §s104 = the
+plan**) → `docs/landing-arc/spec.md` (**A+B+C BUILT; read the s107 CORRECTION
+block on the D axis**) → `proprietary/templates/meta-prompt.md` (**READ BEFORE
+ANY MINT — three new corollaries**) → `proprietary/templates/sites/small-hours/`
+(the newest precedent, and its PREPLAN carries the five build finds) →
+`proprietary/templates/sites/aspect-and-fall/` (the scrub's first home) →
+`docs/control-arc/spec.md` (**A + A2 BUILT; B owes a SHEET**) →
+`docs/research/ux-refinement-program.md` → agent_handoff/NEEDS-STEVEN.md →
+`docs/research/prior-art-portal-automation-s84.md` (BEFORE ANY PORTAL WORK).
+`docs/video-arc/spec.md` is a CLOSED record.
 
-## Delta (session 106)
+## Delta (session 107)
 
-The page that was already built is the one that taught the lesson.
+The page that looked finished was the one that had never worked.
 
-㉑ shipped last session looking finished, and it was — as a still page. Adding
-the motion the founder asked for did two things at once: it answered his
-critique (the drawing no longer outranks the thing it describes; the photograph
-leads at 63% where it held 24%, and it moves), and it **broke a claim the page
-had been making all along**. The four photographs were captioned "the same
-corner". Three of them were. The October frame was a different camera — a
-measurable 24 pixels and more out of register — and the cross-fade that joined
-them was soft enough to hide it for a whole session.
+Site C shipped its instrument, its clock, its four readouts and its colour world
+all moving correctly under the scroll — and the flower at the centre of it, the
+one asset the entire page exists to show, never advanced a single frame. Not
+once. The static markup lights one frame so a reader without JavaScript still
+sees something; the runtime tracked "which frame is showing" from a sentinel
+rather than from the DOM, so its first swap cleared nothing, and that first
+frame — last in document order, absolutely positioned — quietly painted over
+every frame the scroll ever chose.
 
-That is the transferable part, and it is sharper than the usual version of the
-lesson. *Run it and read it* has been the finding for six sessions, but this
-time running it was not enough: the still page ran fine and read fine. **The
-defect only surfaced once the transition between two states became something the
-reader controls.** A dissolve is a place where two images are allowed to
-disagree. A scrub is not.
+Nothing reported it. Not the type checker, not the linter, not 3,452 tests, not
+the console, and not a screenshot at any scroll position, because a screenshot
+of the correct frame and a screenshot of a stuck frame are the same picture when
+the stuck frame is the one you would have chosen anyway. Even watching it move
+was not enough: the readouts, the bars and the hour stamp were all animating
+perfectly, and they are what the eye checks.
 
-The second-order finding is the more useful one for the next site. The two
-failed Jul→Oct segments were not badly prompted — they were **aimed at a bad
-target**, and no amount of prompt language was going to fix a model
-interpolating faithfully toward a misregistered end frame. Two takes went into
-rewriting the prompt before the right question got asked, which was not *"why is
-this segment wrong"* but *"what is it interpolating toward"*. Fix the keyframe,
-not the video.
+What found it was counting. Sweeping the scroll and asking, at each position,
+*how many frames are lit* — and getting two.
 
-And the cheapest habit to carry: **measure, and mint two.** The re-minted
-October's two candidates came off the same prompt with different seeds; one
-landed within a pixel and the other reproduced the original 24px drift exactly.
-Eyeballing would have picked either. A minute of arithmetic picked the right one.
+That is the eighth session in a row that the finding has been some version of
+*run it and read it*, and it has now sharpened twice in three sessions. s106
+learned that a still page hides what a scrub exposes. s107 learned that **a
+moving page hides what only a count exposes** — that when every visible signal
+says a thing is alive, the signal to trust is an invariant you can count, not a
+picture you can look at. The ratchet that came out of it was deliberately broken
+first, twice, to confirm it actually fails on both defects. A green check that
+has never been shown to go red is not evidence of anything.
