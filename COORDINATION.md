@@ -232,7 +232,50 @@ sixteen sessions of gates never sat on it.
 
 ---
 
-## Sprint 9 / s103 — **PLANNED** (the arc continues under his standing *"A first, config, yes to the deps"*; no new verdict needed)
+## Sprint 9 / s103 — **SHIPPED: phases 0 and 2** (the plan below is what was written; this block is what happened)
+
+**Three commits.** `353f8b9` part A2's engine · `6944e9d` the arm control's
+write door · `37cbce5` the surface (part A's half + A2's toggle + the split).
+Wrap verify on main: **exit 0, 3441 passed / 9 skipped** (s102 was 3414/9).
+Zero credits, zero live posts, nothing armed, master key still empty.
+
+**PHASE 2 WAS PROMOTED AHEAD OF PHASE 1 (part B), and the reason is the
+plan's own.** The plan put part B — a recommendation of mine — ahead of the
+surface that makes his own directive usable. But the plan's stated reason for
+running A2 first was *"it completes the thing he just approved and used"*, and
+by that reasoning the surface outranks B: part A's engine shipped at s102 with
+no door, A2's shipped this session with no door, and a toggle he cannot flip
+is not his ask delivered. He delegated the ordering (*"the rest we can go with
+your recommendations"*). **Part B is untouched and is the s104 opener.**
+
+**A FOUNDER CALL WAS TAKEN MID-BUILD — the storage shape of an arm flip.**
+`brand_profiles` is append-only, so writing an arm state the obvious way mints
+a new brand-profile version per toggle flip and floods the Profiles version
+history with writes that say nothing about the brand. His answer: **update the
+active row in place, and put the history on the events spine** — one
+`brand_profile.social_updated` per flip. `updateSocialConfig` is that repo's
+one in-place write; proven live at 5 profiles / version 5 after two flips.
+
+**THE LESSON, for the fourth session running: run it and read it.** Under
+`all`, an unconfigured destination's card rendered *"this destination posts,
+even though its own setting says off"* — the exact opposite of what the engine
+does with it, and a contradiction of the correction this same session had made
+one commit earlier. Types, lint and 3400 tests all agreed it was fine. It was
+visible in about four seconds of looking at the page. That is s100's guessed
+clamp, s101's `xl:` breakpoint and s102's three bugs, a fourth time.
+
+**Grounding corrected the spec again (rule 12), and this one was load-bearing:
+part A2's binding 3 promised copy the product cannot honour.** The spec said
+`all` would cover *"new channels you connect"*. Nothing in the connect path
+writes a posting entry — the only writer is a profile config write — and the
+publish door refuses a platform without one. Since a claimed-then-refused row
+is marked `failed`, which is **terminal with no retry ladder**, reading an
+absent entry as `live` would have **burned the drafts that `off` merely
+holds**. `all` covers what is CONFIGURED; the surface says so.
+
+---
+
+## Sprint 9 / s103 — the plan as it was written (the arc continues under his standing *"A first, config, yes to the deps"*; no new verdict needed)
 
 **Spec of record: `docs/control-arc/spec.md`** — part A's engine half is BUILT
 (its build record and the four grounding corrections are in the spec); part B

@@ -378,8 +378,52 @@ still say it was on) · and, at the consumer, **every destination resolving
 `live` still publishes nothing while the master key is empty** — binding 1
 drawn where it can actually be observed.
 
-**Still owed (deliberately): the SURFACE half**, which rides phase 2 with part
-A's seg control — one card, one control surface.
+**The SURFACE half — BUILT s103**, in the same session, together with part A's.
+See "The surface, BUILT s103" below.
+
+---
+
+## The surface — BUILT s103 (parts A + A2, one pass)
+
+Both arm controls landed together with the connected/available split, because
+they are one control surface. What building it added or corrected:
+
+1. **A write door had to exist first, and its storage shape was a founder
+   call.** Neither engine half had any way to set what it read. `brand_profiles`
+   is append-only, so the obvious write mints a version per toggle flip and
+   buries the Profiles history under writes that say nothing about the brand.
+   His call: **update the active row's social block IN PLACE and put the
+   history on the events spine** (`brand_profile.social_updated`, one per flip
+   with its summary). `updateSocialConfig` is now that repo's one in-place
+   write. Proven live: two flips, two events, still 5 profiles at version 5.
+2. **The card carries TWO new facts, and the second is the one that matters.**
+   `armState` is the stored gate; `postingConfigured` says whether an entry
+   exists at all — which `armState` alone cannot, since a destination with no
+   entry and one deliberately set to `off` both read `off`.
+3. **THE BUG, found by loading the page and reading it.** Under `all`, an
+   unconfigured destination rendered *"this destination posts, even though its
+   own setting says off"* — the exact opposite of what the resolver does with
+   it (correction 1 of the engine half). The card was contradicting the engine
+   on the single point this session had already corrected once. Valid code,
+   correct state, green suite, invisible to every check. **Fourth session
+   running that the highest-severity finding was only visible by running the
+   thing** (s100's guessed clamp, s101's `xl:` breakpoint, s102's three).
+4. **Arming an unconfigured destination CREATES its entry**, and an entry also
+   authorizes a MANUAL publish. That widening is stated at the control before
+   the first flip rather than discovered after it. The alternative — writing
+   the state without the entry — would be a dead control, because nothing else
+   in the product creates one.
+
+**Ratchets landed:** the split renders with counts · the seg shows the stored
+value under `all` rather than a rewritten one · `review` under `all` says it is
+still held · **an unconfigured destination under `all` never claims it posts** ·
+the widening is stated before the first flip · one flip per interaction, sent
+and re-read (nothing renders armed before the server stored it) · no scope
+control when nothing connected can post.
+
+**Still owed:** part A's `holds` are not yet surfaced as the blast-radius
+disclosure on a `needs_reauth` seat — that is the Integrations p1 (phase 3),
+and part A2 makes it richer, not blocked.
 
 ---
 
