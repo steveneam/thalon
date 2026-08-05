@@ -2,230 +2,200 @@
 
 ## Stamp
 
-2026-08-05 close of session 103 (syd4 — boot was "gogogo" alone). Wrap verify
-on main: **exit 0, 3441 passed / 9 skipped** (s102 was 3414/9).
+2026-08-05 close of session 104 (syd4 — boot was "gogogo" alone). Wrap verify
+on main: **exit 0, 3441 passed / 9 skipped** (unchanged from s102/s103 — this
+session added no engine code).
 
-**Six commits.** Three code: `353f8b9` part A2's engine · `6944e9d` the arm
-control's write door · `37cbce5` the surface. Three docs: `921a124` the s103
-record · `648318a` the landing-arc spec · `791a0ba` his ordering call — plus
-this stamp fix, which is necessarily the tip. **The check that matters is not
-the sha but the state: tree clean, main == origin, verified at wrap.**
+**Two commits.** `4bc9604` ⑳ Whitethorn, the landing arc's first site (plus
+the meta-prompt ratchets it earned), and this stamp + the s104 record.
+**The check that matters is not the sha but the state: tree clean, main ==
+origin, verified at wrap.**
 
-Zero credits, zero live posts, nothing armed, the queue consumer's master key
-still EMPTY.
+Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
+**Credits: 582.44** (was 584.12 — 1.68 spent, verified live at wrap).
 
-## WHAT SHIPPED (COORDINATION §s103 carries the full record)
+## WHAT SHIPPED — one of the three sites, not three
 
-**His directive from the s102 close is DELIVERED END TO END** — engine, write
-door and surface. He can open Integrations, flip **Post to: Selected | All**,
-and flip it back to find exactly the arrangement he left.
+**His running order was followed exactly** — *"do the three sites first next
+session"* — and **site A is built and site A only.** COORDINATION §s104
+(SHIPPED block) carries the full record.
 
-**1 — part A2's engine** (`353f8b9`). `postingScope = "selective" | "all"` as
-an OVERLAY inside `passArmStateResolver`; the consumer is untouched and nothing
-stored is ever rewritten. No migration, as grounded. **Grounding corrected the
-spec's binding 3, and it mattered:** the spec promised `all` would cover *"new
-channels you connect"*, but nothing in the connect path writes a posting entry
-and the publish door refuses a platform without one — and a claimed-then-
-refused row is marked `failed`, **terminal, no retry ladder**. Reading an
-absent entry as `live` would have **burned drafts that `off` merely holds**.
-So `all` covers what is CONFIGURED. `passArmStateResolver` had no direct test
-before this; it has real-db coverage now.
+**⑳ WHITETHORN — a veterinary practice whose central claim is never written
+in a sentence.** The banked scroll-dog idea moved one vertical sideways and
+became a **recovery**. A gait study pins beside six chapters that scroll past
+and drive it; one clock sets the day, the lameness score, the gait, the
+pelvic hike as the sore limb loads, the loop each paw traces, the marks left
+on the belt, and four readouts. Day 0 is a three-beat limp, Day 84 a trot.
+**The numbers dip at Day 12** because a real post-op recovery does.
 
-**2 — the write door** (`6944e9d`). Neither engine half could be set by
-anything in the product. **Founder call taken mid-build:** `brand_profiles` is
-append-only, so the obvious write mints a version per toggle flip and buries
-the Profiles history — he chose **in-place on the active row + the events
-spine** (`brand_profile.social_updated`). `updateSocialConfig` is that repo's
-one in-place write. Arming an unconfigured destination CREATES its entry,
-which also authorizes a manual publish — stated at the control before the
-first flip.
+**The expensive lesson, three build rounds: a code-drawn instrument may be
+SCHEMATIC but never a drawing of a THING.** The gait mathematics was right on
+round one; the naturalistic dog was still a bad cartoon on round three, and
+each round only moved the failure around. Switching register — to a
+marker-and-trace kinematic plot, which is *what veterinary gait analysis
+actually produces* — converged at once and is honest besides. **Ratcheted
+test: does the real discipline produce this drawing? If not it is
+illustration, and illustration is a MINT.**
 
-**3 — the surface** (`37cbce5`). Part A's seg (`Off · Review · Live` — a
-toggle cannot say `review`), A2's scope head control, and the
-connected/available SPLIT with counts (the s102 research pass's top finding).
-Each seg keeps showing its STORED value with the mode's effect stated beside
-it. **ONE BUG, catchable only by running it:** under `all`, an unconfigured
-destination's card claimed *"this destination posts"* while the engine leaves
-it `off` — the card contradicting the engine, one commit after that very
-correction. Green suite, clean types, clean lint. **Fourth session running.**
+▎ **YOUR MID-SESSION NOTE IS NOW STANDING METHOD** — *"definitely use
+higgsfield … if you need help with drawing or artwork."* Recorded as the
+division of labour: **photographs carry the feeling, the diagram carries the
+evidence.** It landed exactly as I hit that wall.
 
-**Proven live against dev Postgres** (not just tests): flipped bluesky to
-review — its cap of 2 survived untouched; flipped scope to `all` — every
-stored state unchanged, each card explaining itself; flipped back — precisely
-the arrangement left behind; two events on the spine, still 5 profiles at
-version 5. **Workspace restored to its as-found state.**
+**Two mint lessons, both re-proving that negative prompts fail:** lanyards and
+badges (with pseudo-text on them) grow on anyone a scene reads as a
+professional — *"no lanyard"* did nothing across two takes, a
+crop-at-the-collarbone worked first time; and **a prompted "gate" renders as a
+mullioned lattice and reads as BARS**, on the one image whose whole job was to
+dispel this vertical's confinement dread (extends the s63 glazing rule to
+every barrier object). **Name the FRAME you want, not the object you don't.**
+14 images generated, 5 kept, 1.68cr, all pinned with provenance.
 
-## Resume prompt (session 104, syd4)
+**Your claude-design restoration earned itself** — the mock surfaced a
+structural fault the prose plan had missed (the instrument scrolling away,
+leaving six chapters with nothing to drive), which became the build's spine.
 
-**Resume · Thalon** — nothing is mid-flight; s103's phases 0 and 2 are executed
-and pushed. **The plan is COORDINATION §s104**, set by his direction at the
-s103 close: ***"go ahead with 1 and 2, next session. but also next session, i
-want you to plan to do more landing pages…"***
+**Every real defect came from RUNNING IT — fifth session running.** A
+viewport-tall void under the sticky stage · the two forelegs briefly
+synchronising mid-blend · the mobile stage hiding each chapter's own heading ·
+copy claiming a gate the photograph no longer had. Types, lint and 3441 tests
+saw none of them.
 
-**PHASE 0 — the honesty gap s103 OPENED (small, ~an hour, and it goes first).**
-The seg shipped at s103 offers **Live — "Due posts go out on their own."** That
-is **not true today**: the queue's master key rests empty, and **nothing in
-`apps/web` mentions `SOCIAL_QUEUE_ARMED`** (verified — it lives only in
-`packages/platform/src/env.ts`, the engine, the tick route, the scripts). Same
-defect class s103 caught twice: a control asserting what the engine will not
-do. **Ship the DISCLOSURE, not a door** — say the queue is off at the box level
-and that Live takes effect when it is armed. **Arming the queue from the UI is
-his sequence-gate call and is NOT in scope.**
+## WHAT DID NOT SHIP — named plainly
 
-**PHASE 1 — control-arc part B, and it OPENS WITH A DRAWN SHEET.** Untouched at
-s103 by design (phase 2 was promoted because it completed his own directive).
-Approved, both MIT deps approved (`@react-querybuilder/core` +
-`@react-querybuilder/drizzle`), but **DOCTRINE 0 says the sheet comes first**
-and B has none — the s101 staged rebuild is the precedent. Mobbin sweep banked
-in `docs/control-arc/spec.md`; the shaping finding: **not a segment-builder
-surface** but three additions to a list that already exists — view strip · chips
-that read as sentences · "Save as a new view" in the filter row. Contractbook
-TAKEN whole; AutoSend's three-naked-dropdowns modal = the recorded ANTI-pattern.
-Migration laid s102 (window 0027), primitive built s61 — B is an extension.
-**Design work = Fable 5 lead-direct, never delegated** (standing s51).
+**Site B (garden design), site C (botanical perfumery), the THALON LANDING
+PAGE, and phase 0.** Control-arc part B was already the named slip and it
+stays slipped. The arc running past s104 was written into the spec in
+advance; it is running past it by more than planned because site A took three
+rounds to find its register. **That cost is now a ratchet, so B and C should
+not repeat it** — they open knowing the schematic test.
 
-**PHASE 2 — the LANDING ARC. SPEC OF RECORD: `docs/landing-arc/spec.md`**
-(written s103, ground-truth ratchet green). Three founder decisions, two
-amending standing method:
-· **The A+ family becomes NEW SITES, not upgrades** — spend each banked
-animation idea on a NEW vertical so the portfolio gains OPTIONS, not polish.
-`wagtail-and-co`, `orchard-house` and `stem-and-vow` are **untouched** and keep
-their verdicts.
-· **claude-design RESTORED for the initial mock** — *"actually did help the
-landing page have a bit more clarity and structure."* **AMENDS** the s62
-loop-A/B call that retired it to OPTIONAL (meta-prompt §How-to step 3).
-**Not a reversal: the mandatory pre-plan stays, the mock comes back in FRONT of
-it. Both, never either.**
-· **HIGGSFIELD IS BEING SUNSET** (*"i plan to not continue it"*) → the balance
-is **use-it-or-lose-it: 584.12 credits, Plus** (verified live s103, unchanged
-since s79). **Unspent credit at the end gets spent DOWN on variant coverage,
-not banked** — the normal disposal rule inverts.
+**The ring-fence HELD** — nothing near the reserved 180cr was touched.
 
-The three sites: scroll-dog → **veterinary practice** (his call) · seasons-tree
-→ **garden & landscape design studio** · bloom video → **botanical perfumery**.
-The last two are my recommendation under *"and etc."* — each a one-word
-overrule, and cheap to change **before a mint**. Then the **Thalon landing
-page** as the capstone, which is the whole reason for that order. It is NOT a
-portfolio site: **stealth is unchanged, and where it is served and under what
-name is his separate call** — building it does not decide it. Its mint budget
-is **ring-fenced before the first A+ mint**.
+## Resume prompt (session 105, syd4)
 
-**⚠ RUNNING ORDER, set by him at the s103 close: *"do the three sites first
-next session."* THE THREE A+ SITES LEAD s104** — then phase 0, then part B.
-The expiry-date question is **CLOSED** (it existed only to settle this order,
-and he settled it directly; a date would still help pace the spend, nothing
-waits on it). **The ring-fence survives and matters MORE now:** reserve the
-Thalon landing's mint budget BEFORE the first A+ mint, because with the sites
-leading, an over-running fix round is how the front door ends up unfunded.
+**Resume · Thalon** — nothing is mid-flight. **The plan is COORDINATION §s104
+(the PLANNED block), minus what shipped.** Running order unchanged from his
+direction:
 
-**Scope honesty, and the slip is named in advance:** the sites plus phase 0
-plus part B will not all fit. **Part B is the item that slips** — it has no
-clock and the credit does. Phase 0 is ~an hour and is a defect s103
-introduced, so it rides after the sites rather than competing with them.
-**Expect the arc to run past s104** — the spec is written so it can.
+**1 — SITE B: garden & landscape design studio** (`seasons-tree` idea, one
+tree through four seasons on scroll — the instrument IS the pitch: a designer
+sells what a space becomes over a year). Loop per `docs/landing-arc/spec.md`
+§Method: **claude-design mock → PREPLAN.md → code-direct → mint → /guide →
+fix round.** Precedent to copy in every respect:
+`proprietary/templates/sites/whitethorn/`. **Draw a portfolio-unique axis
+PAIR** — `orchard-house` already holds otherworldly+cinematic and
+`whitethorn` now holds otherworldly+data-instrument.
 
-**CARRIED, recorded not fixed (all with reasons, on their ledger rows):**
-Schedule's **month-density chips clip their own text** · the Intel
-**dossier-absence REASON does not reach the wire** (unarmed vs model failure
-vs **denylist** all read the same; carrying the reason is a contract-window
-ask) · Intel dismiss reversibility · the sweep schedule's missing door · the
+**2 — SITE C: botanical perfumery** (bloom video scrub, Seedance ~17.5cr —
+the only slot in the arc with a real video cost).
+
+**3 — THE THALON LANDING PAGE**, the capstone and the reason for the order.
+NOT a portfolio site. Stealth unchanged; **where it is served and under what
+name is his separate call** and building it does not decide it. Mint budget
+**ring-fenced at ~180cr and still intact.**
+
+**4 — PHASE 0** (~1hr): the seg shipped at s103 offers **Live — "Due posts go
+out on their own"**, which is not true while the queue's master key is empty
+and **nothing in `apps/web` mentions `SOCIAL_QUEUE_ARMED`**. **Ship the
+DISCLOSURE, not a door.** Arming the queue from the UI is his sequence-gate
+call and is NOT in scope.
+
+**5 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
+(DOCTRINE 0). Both MIT deps approved. Shaping finding banked in
+`docs/control-arc/spec.md`: not a segment-builder surface but three additions
+to a list that already exists.
+
+**CARRIED, recorded not fixed:** Schedule's month-density chips clip their own
+text · the Intel **dossier-absence REASON does not reach the wire** (unarmed
+vs model failure vs denylist all read the same — a contract-window ask) ·
+Intel dismiss reversibility · the sweep schedule's missing door · the
 add-chip's missing keyword path.
 
-**WAITING ON HIM — one BLOCKING, two not:** ⚠ **the Higgsfield EXPIRY DATE**
-(blocks only the landing arc's ORDER, nothing else — ask at the opener) · the
-two verticals I picked under his *"and etc."* (garden design · botanical
-perfumery — one word each, cheap until the first mint) · the three s101 staged
-design calls (live-chain editing · the dropped "low-res stub" title ·
-one-scene-open-at-a-time). All three are on NEEDS-STEVEN.
+**WAITING ON HIM — none blocking:** ⑳ Whitethorn's verdict (its `site.json`
+is loudly `awaiting`) · the two verticals picked under his *"and etc."*
+(garden design · botanical perfumery — one word each, and **site B is about to
+spend on the first of them**, so this is the cheapest moment to overrule) ·
+the Higgsfield **expiry date** (still only a pacing aid, blocks nothing) · the
+three s101 staged design calls. All on NEEDS-STEVEN.
 
-**CORRECTED ON HIS BOARD, s103:** the A2 FYI written at the s102 close told him
-*"a channel you add next month posts automatically."* **That was wrong** and
-building it found out — connecting writes no posting entry, and honouring the
-sentence would have burned posts terminally. NEEDS-STEVEN now carries the
-correction beside the original claim rather than quietly replacing it.
-
-▎ ▸ **Founder call made DURING s103:** the arm flip's storage shape — **in
-place on the active row + one event per flip**, rather than a new brand-profile
-version each time. Proven: 5 profiles / version 5 after two flips.
-▎ ▸ **A2's three delegated judgement calls are made and live** (under the
-master key · `all` never overrides `review` · live-not-snapshot, said in
-words). Each is a one-line reversal if he disagrees now that he can see them.
-▎ ▸ **The lesson, fourth session running: RUN IT AND READ IT.** s100's guessed
-clamp, s101's `xl:` breakpoint, s102's three bugs, and now a card asserting the
-opposite of its own engine. Every one was valid, idiomatic, passing code. The
-suite is at 3441 and could not see any of them.
-▎ ▸ **Grounding before building corrected the spec again** (rule 12) — and
-this one would have burned drafts terminally, not just read wrong.
+▎ ▸ **Lead judgement calls made in ⑳, each a one-line reversal:** the vet cast
+as an older WOMAN (§casting 7 gives two answers for a vertical that is both
+professional-serious and warmth; the spec's own note said "older/calmer") ·
+the Day-12 honest dip · the practice named Whitethorn (hawthorn: a hedgerow
+tree that is also a real heart remedy — the palette's one accent comes from
+its berry).
+▎ ▸ **The lesson, fifth session running: RUN IT AND READ IT.** Every
+highest-severity finding this session was invisible to the suite and obvious
+on screen within seconds.
 ▎ ▸ **Traps worth keeping:** `next dev` at `localhost:3111` (`npm run dev`),
-**started and STOPPED in-session (s103 left it stopped)** · **the Bash tool's
-cwd PERSISTS between calls — an earlier `cd apps/web` made later repo-root
-greps report "no such file"; `cd` to the root in the same command** · scripts
-need `set -a; source apps/web/.env.local; set +a` · chrome-devtools `fill`
-does NOT reach React controlled inputs (click works) · **`screen.findByText`
-on a word the surface uses twice is ambiguous — scope it (`{selector}`)** ·
-**do NOT run `npm run verify` in the background while still editing** ·
-**`npm run verify`'s exit code is the gate — read the logged `VERIFY EXIT`
-line** · vitest does NOT typecheck (`npx tsc --noEmit -p apps/web` FROM THE
-REPO ROOT) — it caught every hand-built `SocialPublishConfig` literal when the
-new field became required · eslint runs from `apps/web` · one workspace `.data`
-root, NEVER re-pin · sheet-verbatim CSS = impeccable findings intentional
-(DOCTRINE 0) · **a zod `.default()` on a config block MATERIALIZES on parse —
-three exact-equality assertions moved; strengthen them, never loosen** ·
-`packages/db` exposes `repos` as its ONLY query API (no raw select in a test)
-· a drizzle-generated CHECK migration FAILS on rows violating it · a React
-state flag cannot guard a double-submit (use a ref) · never assert a substring
-over RANDOM data.
-▎ ▸ **⛔ SEQUENCE GATE, current truth — UNCHANGED and NARROWER STILL:** **post
-= ARMED** (founder GO s98); **page still 409s** at `POST /api/create` until his
-word; bluesky = the one platform granted for live testing; the queue
-consumer's key rests EMPTY. Parts A + A2 only ever NARROW a GO — absent config
-is off everywhere, and `all` cannot arm what the master key has not. **Two live
-posts total, both bluesky, both under the grant. Zero credits ever spent.**
+**not started this session** · **the Bash tool's cwd PERSISTS between calls —
+`cd` to the repo root in the same command** · scripts need `set -a; source
+apps/web/.env.local; set +a` · chrome-devtools `fill` does NOT reach React
+controlled inputs · **`html{scroll-behavior:smooth}` silently defeats
+`window.scrollTo` in an evaluate — set `scrollBehavior='auto'` first** ·
+**a sticky element inside a tall grid cell pins to the TOP and leaves a
+viewport-tall void; give it `height:100vh` + centred flex** · do NOT run
+`npm run verify` in the background while still editing · **read the logged
+`VERIFY EXIT` line — the exit code is the gate** · vitest does NOT typecheck
+(`npx tsc --noEmit -p apps/web` FROM THE REPO ROOT) · eslint runs from
+`apps/web` · one workspace `.data` root, NEVER re-pin · **portfolio sites
+trip the impeccable design hook on fonts/colours — false positive by
+construction: every site draws its own type and palette; the hook governs
+Thalon's own surfaces** · `packages/db` exposes `repos` as its ONLY query API
+· vendor mint URLs expire in 30–60 min — **download and pin immediately** ·
+`export-template-assets` always emits **.webp** whatever the source ext.
+▎ ▸ **⛔ SEQUENCE GATE, unchanged:** post = ARMED (founder GO s98); page still
+409s at `POST /api/create`; bluesky is the one platform granted for live
+testing; the queue consumer's key rests EMPTY. Two live posts total, both
+bluesky. **This session spent 1.68 credits and posted nothing.**
 ▎ ▸ **Standing:** stealth · hermes-relay = founder · GATE ON EXIT CODE ·
 verify-on-main = THE gate · rules 10/11/12 · platform logins live durably in
 `.context` · no AGPL embedded · wrap = verify+commit+push+restamp.
-▎ ▸ **State:** tree clean and main == origin (verified at wrap; the tip is this stamp fix) · staging rolls s93–s103
-with the next auto-deploy · **no new migration this session** (A2 and the write
-door are both migration-free) · four social channels connected · dev PG live ·
-8899 preview + sweeper user units keep running — NEVER hand-start the sweeper.
+▎ ▸ **State:** tree clean and main == origin (verified at wrap) · staging
+rolls s93–s104 with the next auto-deploy · **no new migration this session** ·
+four social channels connected · dev PG live · 8899 preview + sweeper user
+units keep running — NEVER hand-start the sweeper.
 ▎ ▸ **✅ SAFE TO CLEAR** — nothing in flight; no lanes; tree clean and pushed;
-s104 boots on "gogogo" alone. **The PLAN is COORDINATION §s103** and
-`docs/control-arc/spec.md` is the spec of record — **part A BUILT (engine +
-surface), A2 BUILT (engine + surface), B is next and owes a SHEET, C
-unstarted**.
+s105 boots on "gogogo" alone. **The PLAN is COORDINATION §s104** and
+`docs/landing-arc/spec.md` is the spec of record — **site A BUILT, B and C
+and the Thalon landing UNSTARTED.**
 
 0. **Self-check** — tmux `thalon` · `pg_isready` · both user units (needs
    `XDG_RUNTIME_DIR=/run/user/$(id -u)`) · `git status` + this stamp · `npm run
    verify` before any new work.
 
-CLAUDE.md → this file → COORDINATION.md (**§s103 = what shipped AND the plan**)
-→ `docs/control-arc/spec.md` (**A + A2 BUILT; B is next and owes a SHEET**) →
-`docs/research/ux-refinement-program.md` (**Integrations row now carries its
-first p1 and names what it still owes**) → `docs/research/mock-sheets/README.md`
-→ agent_handoff/NEEDS-STEVEN.md → `docs/research/prior-art-portal-automation-s84.md`
+CLAUDE.md → this file → COORDINATION.md (**§s104 = what shipped AND the plan**)
+→ `docs/landing-arc/spec.md` (**site A BUILT; B, C, capstone next**) →
+`proprietary/templates/meta-prompt.md` (**READ BEFORE ANY MINT — it gained
+three ratchets this session**) → `proprietary/templates/sites/whitethorn/`
+(the precedent to copy) → `docs/control-arc/spec.md` (**A + A2 BUILT; B owes a
+SHEET**) → `docs/research/ux-refinement-program.md` →
+agent_handoff/NEEDS-STEVEN.md → `docs/research/prior-art-portal-automation-s84.md`
 (BEFORE ANY PORTAL WORK). `docs/video-arc/spec.md` is a CLOSED record.
 
-## Delta (session 103)
+## Delta (session 104)
 
-The session delivered one directive end to end — engine, a write door that did
-not exist, and the surface — and the thing worth carrying is that **the same
-mistake was made twice in one session, in two different layers, and only one
-of them was caught by thinking.**
+One site of three, and the honest headline is that **the shortfall bought
+something the other two now inherit.**
 
-The first was caught by grounding before building: the spec promised `all`
-would cover "channels you connect", and the connect path writes no posting
-entry, so `all` would have raised destinations the publish door then refuses —
-and a refused row is marked `failed`, terminally. That correction went into
-the contract, the resolver, and the spec.
+Three build rounds went into drawing a dog in SVG that never stopped looking
+like a bad cartoon, while the gait mathematics underneath it had been correct
+since round one. The tell was rule 11's shape — escalating the same approach
+rather than changing it — and the change, when it finally came, was not more
+craft but a different register: stop drawing a picture of a thing, draw the
+instrument the real discipline produces. A marker-and-trace kinematic plot is
+what a gait lab actually outputs, so it reads as expertise instead of as a
+failed illustration, and it converged immediately.
 
-The second was the *same claim*, rendered. One commit later the card said
-"this destination posts" over a destination the resolver leaves off. Nothing
-caught it: not the types, not the linter, not 3441 tests. Loading the page and
-reading the card caught it in seconds.
+That is now a test in the meta-prompt rather than a memory, which is the only
+reason the three rounds were worth spending: **does the real discipline
+produce this drawing?** If not, it is illustration, and illustration is a
+mint. The founder said the same thing in his own words mid-session, which
+means the rule arrived twice from two directions on the same afternoon.
 
-So the fourth session running, the highest-severity finding was invisible to
-every automated check and obvious to a person looking at the product. The
-difference this time is that the bug was a *contradiction of a correction the
-same session had already made* — which says the risk is not just untested
-code, but a fact that is fixed in one layer and left stale in another. Fixing
-a claim means finding everywhere the product makes it.
+The second thing worth carrying is smaller and keeps recurring: every defect
+that mattered — the void under the sticky stage, two forelegs moving as one,
+a heading hidden on mobile, copy describing a gate the photograph no longer
+had — was invisible to the type checker, the linter and 3441 tests, and
+obvious within seconds of loading the page. Fifth session in a row.

@@ -232,6 +232,66 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s104 — **SHIPPED: site A of three. B, C, the Thalon landing and phase 0 all remain** (the plan block below is what was written)
+
+**One commit, `4bc9604`: ⑳ WHITETHORN — the landing arc's first site.** His
+running order was followed exactly (the three A+ sites lead), and **one of the
+three is built, not three.** Verify green on main at wrap, 3441/9 unchanged —
+this session added no engine code.
+
+**What it is.** A veterinary practice whose central claim is never written in a
+sentence. The banked scroll-dog idea moved one vertical sideways and became a
+**recovery**: a gait study pins beside six chapters that scroll past and drive
+it, and one clock sets the day, the lameness score, the gait, the pelvic hike
+as the sore limb loads, the loop each paw traces, the marks left on the belt
+and four readouts. Day 0 is a three-beat limp; Day 84 is a trot. **The numbers
+dip at Day 12** because a real post-op recovery does — the easier page would
+have drawn a line that only rises.
+
+**The expensive lesson, and it cost three build rounds: a code-drawn instrument
+may be SCHEMATIC but never a drawing of a THING.** The gait mathematics was
+correct on round one; the naturalistic dog was still a bad cartoon on round
+three, and each round only moved the failure around. Changing register — to a
+marker-and-trace kinematic plot, which is what veterinary gait analysis
+actually produces — converged immediately and is *honest* rather than a
+substitute for a picture. **The test now ratcheted into the meta-prompt: does
+the real discipline produce this drawing? If not, it is illustration, and
+illustration is a MINT.** The founder said the same thing mid-session in his
+own words — *"definitely use higgsfield … if you need help with drawing or
+artwork"* — which is now the recorded division of labour: **photographs carry
+the feeling, the diagram carries the evidence.**
+
+**Two mint lessons, both re-confirmations that negative-prompting fails:**
+lanyards and badges (with pseudo-text on them) grow on anyone a scene reads as
+a professional — *"no lanyard"* did nothing across two takes and a
+crop-at-the-collarbone worked first time; and **a prompted "gate" renders as a
+mullioned lattice and reads as BARS**, on the one image whose entire job was to
+dispel this vertical's confinement dread. That extends the s63 window-glazing
+rule to every barrier object. **Name the FRAME you want, not the object you
+don't.** 14 images generated, 5 kept, **1.68cr**.
+
+**The claude-design mock earned its restoration** (his s103 amendment, now
+written into meta-prompt §How-to step 3): it surfaced a structural fault the
+prose plan had missed — the instrument scrolling away and leaving six chapters
+with nothing to drive — which became the build's spine.
+
+**Every real defect came from RUNNING IT, fifth session in a row.** A
+viewport-tall void under the sticky stage · the two forelegs briefly
+synchronising mid-blend (`RF` lerped through `LF`) · the mobile stage hiding
+each chapter's own heading · and copy claiming a gate the photograph no longer
+had. Types, lint and 3441 tests saw none of them.
+
+**Also amended:** an animation-family wave shares its primary axis by
+construction, so distinctness moves to the axis PAIR, palette, type and
+instrument grammar. `whitethorn` draws otherworldly-animation +
+data-instrument — a pair no other site holds.
+
+**Not done, and named plainly:** site B (garden design), site C (botanical
+perfumery), the **Thalon landing page**, and **phase 0**. The ring-fence held —
+nothing near the reserved 180cr was touched, and **582.44cr** remain (verified live).
+
+---
+
 ## Sprint 9 / s104 — **PLANNED at the s103 close, on his direction**
 
 His words, in the order he gave them: ***"go ahead with 1 and 2, next
