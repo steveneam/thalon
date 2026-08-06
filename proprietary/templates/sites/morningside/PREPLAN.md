@@ -227,6 +227,51 @@ now**, which is the whole lesson.
 6. `/guide` — mandatory, honest, and it must disclose the mint provenance, the
    seam method, and the frame counts.
 
+## ⚠ THE MOTION IS ALREADY MINTED — read this before spending anything
+
+**s110 minted and verified the whole three-beat spine.** The bytes are in
+**`.context/mints/morningside/`** (gitignored, durable) with a full record in
+`PROVENANCE.md` there: job ids, the model that RAN for each call, costs,
+rejected candidates and the measurements. **Do not re-mint** — every re-mint
+draws a new seed and the registration chain would have to be re-earned.
+
+They are not in this directory yet because `tests/template-portfolio.test.ts`
+requires an unbuilt site to hold **only** `PREPLAN.md`; they move into
+`assets/` as part of the build, with the provenance record.
+
+Spend: **57.24cr** (343.98 → 286.74), against E's ~120cr full tier.
+
+Three findings that change what the build does:
+
+1. **The site scrubs the VIDEO's frames, and beat 1's hero still is the take's
+   own frame 0 — NOT `k1a.png`.** Measured, S1's first frame differs from the
+   K1 anchor by MAD 7.36: Seedance recomposes slightly off the still it is
+   given. The keyframes were directing instruments, not shipping assets. (Same
+   as the landing: *"the still is frame 0 of the same take"*.)
+2. **The seam was re-derived and that is why it is exact.** K3 was first edited
+   off the *still*, which carried the still's wider framing and would have made
+   the camera pull back across the whole second beat. Re-derived from S1's
+   ACTUAL last frame (s106's end-frame-to-start-frame rule), it registers at
+   **dx=0, dy=−2**. The superseded 2cr K3 is the cost of finding it.
+3. **Frame density is far lower than the landing's — ship 41 per segment.**
+   Adjacent-frame difference against ㉒'s 1.26 benchmark — S1: 121 native →
+   0.47, 61 → 0.69, **41 → 0.82**, 31 → 0.79. S2: 121 → 0.51, 61 → 0.80,
+   **41 → 1.00**, 31 → 1.12. **41 is the decision for both** (both under the
+   benchmark), so the whole spine ships **82 frames** where the landing's
+   turbulent water needed 81 for one segment. Measured, not inherited.
+4. **THE SEAM NEEDS A TONE MATCH, and it is free.** Chaining end-frame to
+   start-frame bought exact GEOMETRY (offset dx=0, dy=0) but not exact GRADE:
+   S2 comes back ~5 RGB units darker with contrast unchanged. A per-channel
+   mean/std match onto the seam frame takes it 6.87 → 4.53 at 0cr, and the
+   residual is real content. **The assembly recipe carries that match** — do not
+   re-mint to chase it, and do not cross-fade over it. Banked as a meta-prompt
+   corollary.
+
+And one copy constraint the picture imposes: **the grind renders finer than a
+medium pour-over grind.** Beat 2's copy must not assert a brew method the frame
+contradicts (the ㉑ hydrangea class of defect) — write it about grinding fresh
+versus buying pre-ground, which is method-agnostic and true to the picture.
+
 ## Budget
 
 Spec tiers: full ~120cr · lean ~85cr · **floor ~75cr — below which E has no

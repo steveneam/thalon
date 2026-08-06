@@ -253,6 +253,25 @@ s108 predicted — nothing rendered, nothing charged — and re-sending with
 `declined_preset_id` returned a real job id. It also **substituted the model
 twice**: `soul_2` ran as `text2image_soul_v2` and `seedance_2_0` ran as
 `seedance_2_0_fast`. Record what RAN.)
+Corollary (Morningside/site E, s110 — **end-frame-to-start-frame chaining buys
+exact GEOMETRY, not exact GRADE**): s106's rule says chaining segments by
+uploading the previous clip's last frame as the next one's `start_image` makes
+the seam *"exact by construction"*. Measured on a two-segment chain, that is
+**half true, and the failing half is the half nobody looks for.** Handed S1's
+exact last frame, S2's first frame came back **geometrically exact** — best
+offset dx=0, dy=0, no recompose — and **tonally shifted**: MAD 6.96, spread
+evenly across the static linen (5.52) and the subject (6.69), with mean RGB
+dropping 101/93/83 → 96/87/78 while every standard deviation held. Same
+contrast, ~5 units darker. **The model re-grades.** Because it is a global
+exposure shift rather than a shift in the frame, it is fixable **locally and at
+0cr** — a per-channel mean/std match of the later segment onto the seam frame
+took the seam 6.87 → 4.53, the residual being real content change. **Measure a
+seam's OFFSET and its EXPOSURE separately; only one of them is free.** (Same
+session, the reason to check at all: **Seedance does not start exactly on the
+still it is given** — S1's first frame sat MAD 7.36 off its own anchor
+keyframe. So keyframes are DIRECTING instruments, not shipping assets: the
+hero still is the take's frame 0, and any later keyframe must be derived from
+the take rather than from the still that made it.)
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that
