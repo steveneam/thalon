@@ -1,5 +1,45 @@
 # Marl & Cane — pre-plan (meta-prompt §How-to step 3)
 
+> ## ⚠ REBUILT s112 — THE FOUNDER REJECTED THE SPINE, AND HE WAS RIGHT
+>
+> The first build shipped an 81-frame **veraison** scrub: one bunch ripening
+> green to black. It was technically the best-measured thing in the arc and it
+> was the wrong idea.
+>
+> > *"i think you didnt need a transition video of the grape turning ripe. did
+> > you not learn that my taste is not precise or scientific but imaginative and
+> > abstract … a better animaton would have been grapes, then them
+> > bursting/squashed to extract their juices, the juices then land into a wine
+> > bottle then poured into a wine glass. the morning side coffee bean
+> > transition was good, but that was under my direction. so that's the kind of
+> > abstraction i want."*
+>
+> **The distinction, now in the meta-prompt as §THE HOUSE TASTE: a TIME-LAPSE
+> versus a JOURNEY.** A time-lapse observes one subject while nature acts on it
+> — a bunch ripening, a tree through four seasons. It documents, and it is what
+> a botanist would film. A journey follows a *material* through states, by an
+> act, to a payoff — beans → grounds → cup, or grapes → burst → bottle → glass.
+> Morningside, the one he liked, is a journey. Veraison was a time-lapse. **The
+> arc's other three motions are time-lapses too**, which is likely why Aspect &
+> Fall and Small Hours came back as *"ok, but not memorable."*
+>
+> He also called the copy out — *"wasnt the ratchet for these, dont be too wordy
+> or verbose?"* He is right and it was already written down: *"less is more, but
+> still with the same effect"* and *"more visual, fewer words"* (s90), living in
+> `docs/research/ux-refinement-program.md`, a workspace-UX doc nobody opens
+> during a portfolio build. This page shipped **851 words, third-wordiest of 25,
+> against a 628 median and Morningside's 594.** Now **371**, and the budget is
+> executable in `tests/template-portfolio.test.ts`.
+>
+> And the wine-glass photograph he flagged for compression is **gone rather than
+> re-encoded**: the pour sequence ends on a glass, so the still was saying the
+> same thing twice. (The re-encode was measured first — q80 left max error 21 on
+> the flat concrete; the real answer was that the picture was redundant.)
+>
+> Everything below the §0 sweep is the ORIGINAL pre-plan and is left standing as
+> the record of what was decided and why. §BUILT carries the first build's
+> findings; §REBUILT carries the second's.
+
 **Site D of the landing arc** (`docs/landing-arc/spec.md` §SITES D AND E), and
 the last site in the arc. The founder's brief, verbatim:
 
@@ -300,3 +340,95 @@ $ec`) and read the log, never the summary.**
 
 `/favicon.ico` 404s — **portfolio-wide, 0 of 25 sites ship one**, pre-existing
 and out of this build's scope.
+
+---
+
+## §REBUILT — the juice journey (2026-08-06, s112, after the founder's review)
+
+**Four beats, three takes, 140 frames, 371 words.** Grapes → burst → bottle →
+glass, exactly as he described it. Spend for the rebuild: **93.20cr** (12 stills,
+2 registered edits, 4 takes of which 3 shipped). Balance **247.18 → 153.98**.
+
+### 1. Ask what KIND of motion each beat is, per beat — not per site
+
+s108 says a pour is a **cycle**, not a transformation, so it needs one start
+frame and no end frame. This spine contains **both kinds**, and treating them
+identically would have wasted money and bought risk:
+
+| beat | kind | instrument | registration risk |
+|---|---|---|---|
+| the crush | transformation | two keyframes, the second a registered EDIT of the first | real, and it bit |
+| the bottle fill | **cycle** (a pour) | single `start_image`, no end | none by construction |
+| the glass filling | **cycle** | single `start_image`, no end | none by construction |
+
+Two of the three beats needed no end frame at all. **The question is per-shot,
+not per-site.**
+
+### 2. The first crush take was discarded — and the cause was the KEYFRAME, not the prompt
+
+Take one recomposed itself across native frames 31–59: measured steps to
+**7.62 against a 0.54 median**, a smeared shot change rather than a clean cut.
+A scrub exposes exactly what a dissolve hides (s106).
+
+The instinct is to write a sterner prompt. The rule says otherwise — **a
+generated transition is pulled by its END frame** — and it was right: the end
+keyframe had been minted independently and sat at a *wider framing*, so the
+model had to reframe to reach it. Re-minting it as a **registered edit of the
+start frame** (dx=0, dy=−1) fixed it outright: **0 cut candidates, median 0.33,
+max 0.93.** Cost of the lesson: one 22.50cr take.
+
+**Generalised: when a chained take drifts, look at what it is aiming at before
+you touch the words.** The anti-cut language went in as well, but it is not what
+fixed it — the second take of the *same prompt* against a badly-framed end frame
+would have drifted again.
+
+### 3. Negating a label still does not remove it
+
+Two bottle stills came back wearing invented labels against a prompt that said
+"NO label and NO capsule anywhere on it — plain unbroken glass". The s52 rule
+applies unchanged and the fix is never a firmer negation: **crop the printable
+surface out of frame.** Reframing to the neck and shoulder alone, with the body
+below the bottom edge, worked first attempt — and is a better shot, because it
+is about the liquid rather than the packaging.
+
+### 4. A multi-sequence stack needs `.is-live`, or it must ship blank or double-lit
+
+Three sequences in one stage cannot each carry a lit frame *and* show only one.
+The portfolio ratchet caught this immediately (`fill` and `pour` had zero lit
+frames). Morningside's answer is the pattern: **every sequence carries its own
+lit frame so no-JS is never blank, and a `.is-live` class on the container
+decides which one paints.** Adopted, and the runtime now toggles both.
+
+### 5. A chapter that drives no frames still needs runway
+
+With the chapters as written, the reading line crossed chapter one's bottom edge
+while the season was barely in view, and **the first eight frames were spent
+before the stage was on screen** — s108's aim problem in a new place. The first
+chapter's job is to *hold* frame 0, so it gets 26vh of top padding and drives
+nothing. Verified: the stage is visible and still on frame 0.
+
+Related: the crush originally drove **71 of 140 frames from a single chapter**,
+which left ~2,400px of empty column beside the picture. Split into two chapters
+so text runs the length of the sequence.
+
+### 6. Measured on the shipped page
+
+| | desktop 1440×900 | phone 390×844 |
+|---|---|---|
+| frames reachable | **140 / 140** | **140 / 140** |
+| frames starved of scroll | 0 | 0 |
+| exactly one frame lit | 0 violations | 0 violations |
+| exactly one live sequence | 0 violations | 0 violations |
+| pin held (`top === 0`) | **0 / 943** | **0 / 591** |
+| px of scroll per frame | 42–54 (median 42) | 24–30 |
+
+Shipped adjacent-frame difference: crush **1.73**, fill **1.60**, pour **1.29**
+against the house references (small-hours 1.52, morningside 1.51).
+
+### 7. What the review says about the arc, not just this site
+
+He called Aspect & Fall and Small Hours *"ok, but not memorable"* and Whitethorn's
+kinematic plot *"too scientific"* — and asked to **keep** Whitethorn regardless.
+Those are three of the arc's four other motions, and all three are time-lapses or
+diagrams. The correction is recorded at the top of the meta-prompt rather than
+here, because it governs the next site rather than this one.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Marl &amp; Cane — a single-vineyard estate</title>
-<meta name="description" content="Marl &amp; Cane is a single-vineyard estate. This page is the 2024 vintage: one bunch turning colour, and the numbers that decided when to pick it.">
+<meta name="description" content="Marl &amp; Cane is a single-vineyard estate. One year, one block, one wine — followed from the fruit to the glass.">
 <style>
   @font-face { font-family: "Syne"; src: url("fonts/syne-var.woff2") format("woff2");
     font-weight: 400 800; font-style: normal; font-display: swap; }
@@ -14,197 +14,145 @@
     font-weight: 100 900; font-style: normal; font-display: swap; }
 
   :root {
-    /* An achromatic page holding exactly one chromatic event. The ground and
-       the ink never change; --fruit is the ONLY colour, and it walks with the
-       scrub because it is read off the frames the scrub is showing. */
+    /* An achromatic page holding exactly one chromatic event. --fruit is the
+       ONLY colour, and its hue is read off the frames the scrub is showing:
+       the whole fruit is cool blue-violet, and the page warms to garnet as the
+       juice is let out of it. Lightness is solved per hue for a constant
+       4.85:1 on bone, because a fixed lightness fails AA somewhere on any hue
+       sweep. */
     --bone: #ede9e1;
     --bone-2: #e3ded4;
     --ink: #16161a;
     --ink-2: #4a4a4f;
     --rule: #c9c3b7;
-    --fruit: #626836;          /* frame 0 — hue measured off the fruit */
-    --fruit-h: 68;
-    --fruit-l: 31.0%;
-    --stage-max-h: 62vh;
-    --px-per-frame: 30px;
+    --fruit: #6759aa;
+    --stage-max-h: 64vh;
+    --px-per-frame: 34px;
   }
 
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
+  /* NO overflow-x anywhere on an ancestor: it computes overflow-y:auto and
+     silently kills every position:sticky against the viewport (㉑ s105). */
   body {
     margin: 0; background: var(--bone); color: var(--ink);
     font-family: "Geist", system-ui, sans-serif;
     font-size: 17px; line-height: 1.6; font-weight: 350;
-    font-variant-numeric: tabular-nums;
-    text-wrap: pretty;
-    /* NO overflow-x here, ever: overflow-x:hidden computes overflow-y:auto and
-       silently kills every position:sticky on the page against the viewport
-       (㉑ s105, killer 2). Wide children are constrained instead. */
+    font-variant-numeric: tabular-nums; text-wrap: pretty;
   }
-  h1, h2, h3, .display { font-family: "Syne", system-ui, sans-serif; font-weight: 700;
+  h1, h2 { font-family: "Syne", system-ui, sans-serif; font-weight: 700;
     letter-spacing: -0.02em; line-height: 1.02; margin: 0; }
-  .mono { font-family: "Geist Mono", ui-monospace, monospace; font-weight: 400;
-    letter-spacing: 0.02em; }
   a { color: var(--fruit); text-underline-offset: 3px; }
   a:hover { color: var(--ink); }
   img { display: block; max-width: 100%; }
-
   .wrap { width: min(1180px, 100% - 2.5rem); margin-inline: auto; }
   .rule { border: 0; border-top: 1px solid var(--rule); margin: 0; }
   .lab { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px;
     letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2); }
 
-  /* ---- masthead ------------------------------------------------------- */
-  .top { position: relative; z-index: 3; padding: 1.25rem 0; }
+  .top { padding: 1.25rem 0; }
   .top .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
   .mark { font-family: "Syne", sans-serif; font-weight: 800; font-size: 15px;
-    letter-spacing: 0.08em; text-transform: uppercase; }
+    letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; color: inherit; }
   .mark span { font-weight: 400; }
 
-  /* ---- hero ----------------------------------------------------------- */
-  .hero { position: relative; }
-  .hero-img { width: 100%; height: clamp(320px, 58vh, 560px); object-fit: cover;
-    filter: saturate(0.92); }
-  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem;
-    padding: 2.5rem 0 3rem; }
+  .hero-img { width: 100%; height: clamp(300px, 56vh, 540px); object-fit: cover; }
+  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; padding: 2.5rem 0 3rem; }
   .hero h1 { font-size: clamp(2.6rem, 8.5vw, 6.2rem); }
   .hero h1 em { font-style: normal; display: block; color: var(--ink-2); font-weight: 400; }
-  .lede { font-size: clamp(1.05rem, 2vw, 1.3rem); max-width: 44ch; color: var(--ink-2); }
-  .vint { display: flex; gap: 2rem; flex-wrap: wrap; align-items: baseline; }
-  .vint b { font-family: "Syne", sans-serif; font-size: 2.4rem; font-weight: 700;
-    color: var(--fruit); }
+  .lede { font-size: clamp(1.05rem, 2vw, 1.28rem); max-width: 40ch; color: var(--ink-2); }
+  .figs { display: flex; gap: 2rem; flex-wrap: wrap; align-items: baseline; margin-top: 1.75rem; }
+  .figs b { font-family: "Syne", sans-serif; font-size: 2.3rem; font-weight: 700; color: var(--fruit); }
 
-  /* ---- the pinned stage ----------------------------------------------- */
-  /* The stage row must STRETCH. align-items:flex-start cancels flex's default
-     stretch and leaves the sticky column one viewport tall inside a 4,000px
-     section, with no travel at all (㉑ s105, killer 1). */
-  /* The season runs wider than the reading measure: in a two-column layout a
-     16:9 stage is bound by COLUMN WIDTH, not by --stage-max-h, so the width is
-     what decides how big the picture actually gets. Measured at 1440x900, a
-     1180px wrap at 52% gave a 328px-tall stage in a 900px viewport. */
+  /* ---- the pinned spine ------------------------------------------------ */
+  /* The row must STRETCH — align-items:flex-start leaves the sticky column one
+     viewport tall inside a long section and it has no travel at all. And the
+     season runs wider than the reading measure because a 16:9 stage is bound
+     by COLUMN WIDTH, not by --stage-max-h. */
   .season { width: min(1400px, 100% - 3rem); margin-inline: auto;
     display: flex; gap: clamp(1.5rem, 3vw, 3rem); align-items: stretch; }
   .stage-col { flex: 1 1 58%; min-width: 0; }
-  .stage {
-    position: sticky; top: 0;
-    height: 100vh;
-    display: flex; align-items: center;
-  }
+  .stage { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
   .frames {
     position: relative; width: 100%;
-    /* Bounded on VIEWPORT HEIGHT as well as width, so the stage can never
-       outgrow a short laptop window (s110's pin-fit failure, made structurally
-       impossible here rather than guarded against). */
-    max-height: var(--stage-max-h);
+    max-height: var(--stage-max-h);          /* bounded on HEIGHT as well as width */
     aspect-ratio: 900 / 506;
     max-width: calc(var(--stage-max-h) * 900 / 506);
-    margin-inline: auto;
-    background: var(--bone-2);
+    margin-inline: auto; background: var(--bone-2);
   }
-  .frames img {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-    opacity: 0;
-  }
-  .frames img.on { opacity: 1; }
+  /* Each sequence carries its OWN lit frame in the static markup, and only the
+     live one paints. Without this a multi-sequence stack must either ship a
+     blank no-JS stage or composite two frames at once (morningside s111). */
+  .seq { position: absolute; inset: 0; opacity: 0; }
+  .seq.is-live { opacity: 1; }
+  .seq img { position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0; }
+  .seq img.on { opacity: 1; }
   .stamp { position: absolute; left: 0; bottom: -1.9rem; display: flex; gap: 1.25rem; }
 
-  .chapters { flex: 1 1 48%; min-width: 0; }
-  .ch {
-    /* The trailing space is DERIVED from how many frames this chapter drives:
-       a chapter only long enough to give its beat 17px per frame skips five or
-       six frames on one wheel notch (s111). --span is this anchor minus the
-       previous one, and the anchor is the chapter's BOTTOM edge, so this
-       padding is exactly the runway those frames are paced over. */
-    padding: 8vh 0 calc(6vh + var(--span, 0) * var(--px-per-frame));
-    display: flex; flex-direction: column; gap: 1rem;
-  }
+  .chapters { flex: 1 1 42%; min-width: 0; }
+  /* Trailing space DERIVED from the frames each chapter drives — the anchor is
+     the chapter's BOTTOM edge, so --span (this anchor minus the previous) is
+     exactly the runway those frames are paced over. */
+  /* The first chapter drives no frames — its job is to HOLD frame 0 until the
+     stage is actually on screen. Without the extra top runway the reading line
+     crosses its bottom edge while the season is barely in view and the first
+     eight frames are spent where nobody can see them (s108). */
+  .ch:first-child { padding-top: 26vh; }
+  .ch { padding: 8vh 0 calc(6vh + var(--span, 0) * var(--px-per-frame));
+    display: flex; flex-direction: column; gap: 1rem; }
   .ch h2 { font-size: clamp(1.9rem, 4vw, 3rem); }
   .ch .n { color: var(--fruit); }
-  .ch p { max-width: 46ch; }
-  .ch .note { color: var(--ink-2); font-size: 0.95rem; }
+  .ch p { max-width: 42ch; }
 
-  /* ---- the instrument -------------------------------------------------- */
-  .instr { padding: 5rem 0; }
-  .instr-head { display: flex; justify-content: space-between; align-items: end;
-    gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  /* ---- the record ------------------------------------------------------ */
+  .rec { padding: 4.5rem 0; }
+  .rec-head { display: flex; justify-content: space-between; align-items: end;
+    gap: 2rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
   .plot { width: 100%; overflow-x: auto; }
-  .plot svg { width: 100%; min-width: 520px; height: auto; display: block; }
+  .plot svg { width: 100%; min-width: 480px; height: auto; display: block; }
   .ax { stroke: var(--rule); stroke-width: 1; }
-  .gr { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.75; }
+  .gr { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 5; opacity: .75; }
   .l-brix { fill: none; stroke: var(--fruit); stroke-width: 2.5; }
   .l-ta { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 4; }
-  .win { fill: var(--fruit); opacity: 0.10; }
+  .win { fill: var(--fruit); opacity: .10; }
   .win-e { stroke: var(--fruit); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
   .pick { stroke: var(--ink); stroke-width: 1.5; }
   .tk { font-family: "Geist Mono", monospace; font-size: 10px; fill: var(--ink-2); }
   .tk-b { font-family: "Geist Mono", monospace; font-size: 11px; fill: var(--ink); font-weight: 600; }
   .rain { font-family: "Geist Mono", monospace; font-size: 10.5px; fill: var(--ink-2); }
-  .readout { display: flex; gap: 2.5rem; flex-wrap: wrap; }
-  .readout div b { display: block; font-family: "Syne", sans-serif; font-size: 2rem; }
-  .tbl { width: 100%; border-collapse: collapse; margin-top: 2rem; font-size: 14px; }
-  .tbl th, .tbl td { text-align: right; padding: 0.5rem 0.75rem; border-top: 1px solid var(--rule); }
-  .tbl th:first-child, .tbl td:first-child { text-align: left; }
-  .tbl thead th { border-top: 0; }
-  .tbl tr[data-in] td { color: var(--fruit); font-weight: 500; }
 
-  /* ---- plain sections -------------------------------------------------- */
-  .band { padding: 4.5rem 0; }
+  .band { padding: 4rem 0; }
   .two { display: grid; grid-template-columns: 1fr; gap: 2.5rem; align-items: center; }
-  .two h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); margin-bottom: 0.9rem; }
-  .two p { max-width: 48ch; }
-  .two img { width: 100%; }
-  .fig { border: 1px solid var(--rule); }
-  .fig figcaption { padding: 0.6rem 0.75rem; border-top: 1px solid var(--rule);
+  .two h2 { font-size: clamp(1.6rem, 3.2vw, 2.3rem); margin-bottom: .8rem; }
+  .two p { max-width: 44ch; }
+  .fig { border: 1px solid var(--rule); margin: 0; }
+  .fig figcaption { padding: .6rem .75rem; border-top: 1px solid var(--rule);
     font-family: "Geist Mono", monospace; font-size: 11px; color: var(--ink-2); }
-
-  .pick-band { background: var(--ink); color: var(--bone); padding: 5rem 0; }
-  .pick-band .lab, .pick-band .note { color: #9a978f; }
-  .pick-band h2 { font-size: clamp(2rem, 6vw, 4rem); }
-  .pick-band .big { font-family: "Syne", sans-serif; font-size: clamp(3rem, 12vw, 8rem);
-    font-weight: 800; line-height: 0.9; }
 
   footer { padding: 3rem 0 4rem; }
   footer .wrap { display: flex; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+  .note { color: var(--ink-2); font-size: .95rem; }
 
-  /* ---- wide screens ---------------------------------------------------- */
   @media (min-width: 900px) {
     .hero-grid { grid-template-columns: 1.15fr 1fr; align-items: end; }
-    .two { grid-template-columns: 1fr 1fr; gap: 4rem; }
-    .two.flip > :first-child { order: 2; }
+    .two { grid-template-columns: 1fr 1fr; gap: 3.5rem; }
   }
 
-  /* ---- narrow ---------------------------------------------------------- */
-  /* The narrow layout collapses the sticky column's travel unless the section
-     becomes a COLUMN flex container and sticky moves onto the column itself
-     (㉑ s105, killer 3). And every rule here is written longhand: a `padding`
-     shorthand would silently discard the calc() that paces the frames, which
-     made 31 of 82 frames unreachable on a phone while desktop was perfect
-     (s111). Same for height — resetting position without height leaves a
-     sticky column taller than the viewport and the pin is simply dead. */
+  /* The sticky moves onto the COLUMN here. In the single-column layout
+     .stage-col is `flex: 0 0 auto`, so the sticky element's containing block
+     is exactly its own height and there is no travel — the pin is dead, and
+     desktop hides it because align-items:stretch makes the column tall.
+     Every rule below is LONGHAND: a `padding` shorthand would silently drop
+     the calc() that paces the frames. */
   @media (max-width: 899px) {
-    :root { --px-per-frame: 26px; --stage-max-h: 40vh; }
+    :root { --px-per-frame: 25px; --stage-max-h: 40vh; }
     .season { flex-direction: column; gap: 0; }
-    /* THE STICKY MOVES ONTO THE COLUMN (㉑ s105, killer 3). In the single-column
-       layout .stage-col is `flex: 0 0 auto`, so its height is exactly its own
-       content — the sticky element's containing block is the same size as the
-       sticky element, there is no travel, and the pin is dead. Measured at
-       390x844 before this fix: 724 of 724 in-view samples had the stage off 0.
-       Desktop escapes it only because align-items:stretch makes the column as
-       tall as the whole section. The column sticks inside .season instead. */
     .stage-col { flex: 0 0 auto; position: sticky; top: 0; z-index: 2;
       background: var(--bone); padding-top: 1.5vh; padding-bottom: 3.4rem; }
-    /* Both position AND height are restated, because resetting position without
-       height leaves a column taller than the viewport and the pin is dead in a
-       different way (s111). The paddings above and below are LONGHAND: a
-       `padding` shorthand would silently discard the calc() that paces the
-       frames, which made 31 of 82 unreachable on a phone last session. */
     .stage { position: static; height: auto; align-items: center; }
     .ch { padding-top: 5vh; padding-bottom: calc(4vh + var(--span, 0) * var(--px-per-frame)); }
     .stamp { bottom: -1.6rem; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { scroll-behavior: auto !important; }
   }
 </style>
 </head>
@@ -212,24 +160,23 @@
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="#" style="text-decoration:none;color:inherit">Marl <span>&amp;</span> Cane</a>
+    <a class="mark" href="#">Marl <span>&amp;</span> Cane</a>
     <span class="lab">Single vineyard · est. 1974</span>
   </div>
 </header>
 
 <section class="hero">
   <img class="hero-img" src="assets/hero.webp" width="1600" height="900"
-       alt="One bunch of unripe wine grapes on the vine, every berry still hard and dull green, in low raking sunlight.">
+       alt="A heap of whole dark wine grapes on a concrete floor in a shaft of low sunlight.">
   <div class="wrap hero-grid">
     <h1>The 2024<em>never happens again</em></h1>
     <div>
-      <p class="lede">Four hectares of Cabernet on marl over limestone. We make one
-        wine a year, from one block, and the year decides what it is. This page is
-        the 2024: one bunch turning colour, and the numbers that told us when to pick.</p>
-      <div class="vint" style="margin-top:1.75rem">
+      <p class="lede">Four hectares of Cabernet on marl over limestone. One block,
+        one wine, once a year — and the year decides what it is.</p>
+      <div class="figs">
         <div><span class="lab">Picked</span><br><b>26 Mar</b></div>
         <div><span class="lab">At</span><br><b>24.2°</b><span class="lab"> Brix</span></div>
-        <div><span class="lab">Hang</span><br><b>65 days</b></div>
+        <div><span class="lab">Made</span><br><b>2,900</b><span class="lab"> btl</span></div>
       </div>
     </div>
   </div>
@@ -237,198 +184,228 @@
 
 <hr class="rule">
 
-<!-- ===================== the pinned season ============================= -->
+<!-- ============ the spine: follow the juice out of the fruit ============ -->
 <section class="season" id="season">
   <div class="stage-col">
     <div class="stage">
       <div class="frames" id="stack">
-        <img class="on" src="assets/veraison-00.webp" width="900" height="506" alt="The same bunch of grapes, its berries changing colour from green to black through veraison." fetchpriority="high">
-        <img src="assets/veraison-01.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-02.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-03.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-04.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-05.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-06.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-07.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-08.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-09.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-10.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-11.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-12.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-13.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-14.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-15.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-16.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-17.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-18.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-19.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-20.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-21.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-22.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-23.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-24.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-25.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-26.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-27.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-28.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-29.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-30.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-31.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-32.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-33.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-34.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-35.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-36.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-37.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-38.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-39.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-40.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-41.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-42.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-43.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-44.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-45.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-46.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-47.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-48.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-49.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-50.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-51.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-52.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-53.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-54.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-55.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-56.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-57.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-58.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-59.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-60.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-61.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-62.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-63.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-64.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-65.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-66.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-67.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-68.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-69.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-70.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-71.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-72.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-73.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-74.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-75.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-76.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-77.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-78.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-79.webp" width="900" height="506" alt="" loading="lazy">
-        <img src="assets/veraison-80.webp" width="900" height="506" alt="" loading="lazy">
-        <!-- The lay twin, on the SAME clock as the instrument below. An expert
-             instrument has to be paired with a reading of the same information
-             on the same scroll — and the chart is a section further down, so
-             while the scrub is running it is off screen and the pairing would
-             never actually happen. These are the chart's own numbers,
-             interpolated from the same data block, beside the picture they
-             describe. -->
-        <div class="stamp">
-          <span class="lab" id="st-day">Day 1</span>
-          <span class="lab" id="st-col">Colour · none</span>
-          <span class="lab" id="st-num" style="color:var(--fruit)">8.4° Brix · 21.8 g/L</span>
+        <div class="seq is-live" data-seq="crush">
+          <img class="on" src="assets/crush-00.webp" width="900" height="506" fetchpriority="high"
+               alt="A heap of whole grapes gives way and dark juice spreads across the concrete beneath it.">
+          <img src="assets/crush-01.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-02.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-03.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-04.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-05.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-06.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-07.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-08.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-09.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-10.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-11.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-12.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-13.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-14.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-15.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-16.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-17.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-18.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-19.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-20.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-21.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-22.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-23.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-24.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-25.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-26.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-27.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-28.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-29.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-30.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-31.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-32.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-33.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-34.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-35.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-36.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-37.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-38.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-39.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-40.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-41.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-42.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-43.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-44.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-45.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-46.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-47.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-48.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-49.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-50.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-51.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-52.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-53.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-54.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-55.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-56.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-57.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-58.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-59.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-60.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-61.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-62.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-63.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-64.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-65.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-66.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-67.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-68.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-69.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-70.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/crush-71.webp" width="900" height="506" alt="" loading="lazy">
         </div>
+        <div class="seq" data-seq="fill">
+          <img class="on" src="assets/fill-00.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-01.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-02.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-03.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-04.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-05.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-06.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-07.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-08.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-09.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-10.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-11.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-12.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-13.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-14.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-15.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-16.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-17.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-18.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-19.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-20.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-21.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-22.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-23.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-24.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-25.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-26.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/fill-27.webp" width="900" height="506" alt="" loading="lazy">
+        </div>
+        <div class="seq" data-seq="pour">
+          <img class="on" src="assets/pour-00.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-01.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-02.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-03.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-04.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-05.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-06.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-07.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-08.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-09.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-10.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-11.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-12.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-13.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-14.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-15.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-16.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-17.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-18.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-19.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-20.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-21.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-22.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-23.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-24.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-25.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-26.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-27.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-28.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-29.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-30.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-31.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-32.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-33.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-34.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-35.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-36.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-37.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-38.webp" width="900" height="506" alt="" loading="lazy">
+          <img src="assets/pour-39.webp" width="900" height="506" alt="" loading="lazy">
+        </div>
+        <div class="stamp"><span class="lab" id="st">Whole fruit</span></div>
       </div>
     </div>
   </div>
 
   <div class="chapters">
-    <article class="ch" data-frame="0" data-day="1" style="--span:0">
-      <span class="lab">Chapter one</span>
-      <h2><span class="n">Marl,</span> and cane</h2>
-      <p>The soil is marl — limestone clay, pale and cold, and slow to give
-        anything up. It holds water in a dry February and drains in a wet one.
-        We cane-prune, which means every winter we cut the vine back to one
-        year-old shoot and start again.</p>
-      <p class="note">Neither of these things changed this year. They are why the
-        estate is called what it is: they are the part that stays put.</p>
+    <article class="ch" data-frame="0" style="--span:0">
+      <span class="lab">Marl &amp; Cane</span>
+      <h2>It is all <span class="n">in there</span></h2>
+      <p>Everything the wine will ever be is already inside the fruit — the
+        colour, the sugar, the acid, the tannin. Nothing gets added later.</p>
     </article>
 
-    <article class="ch" data-frame="20" data-day="18" style="--span:20">
-      <span class="lab">Chapter two</span>
-      <h2><span class="n">Véraison</span></h2>
-      <p>The word for the turn. Until now the berry has been a hard green thing
-        that does nothing but grow — no sugar to speak of, and acid enough to
-        strip your teeth. Then, over about a fortnight, it stops growing and
-        starts ripening.</p>
-      <p>It does not happen to the bunch. It happens to <em>each berry</em>, one
-        at a time, in no order anyone has ever been able to predict. For a couple
-        of weeks a single bunch carries green, rose, red and near-black fruit at
-        once, and that is the only time of year it looks like this.</p>
+    <article class="ch" data-frame="36" style="--span:36">
+      <span class="lab">One</span>
+      <h2>So we <span class="n">break it</span></h2>
+      <p>Whole bunches into concrete, and the weight of the fruit above does most
+        of the work. No press, no pumping, no hurry.</p>
     </article>
 
-    <article class="ch" data-frame="44" data-day="38" style="--span:24">
-      <span class="lab">Chapter three</span>
-      <h2>What the colour <span class="n">is</span></h2>
-      <p>The colour is not decoration and it is not a ripeness gauge you can
-        drink from. It is anthocyanin arriving in the skin, and it turns up on
-        roughly the same clock as the sugar — which is why a grower can stand in
-        a row and know, near enough, where the block is.</p>
-      <p class="note">Near enough is not a number, though. For the number you
-        pick fruit and crush it, every week, and write it down.</p>
+    <article class="ch" data-frame="71" style="--span:35">
+      <span class="lab">Two</span>
+      <h2>A year of weather,<br><span class="n">in a puddle</span></h2>
+      <p>What runs out is not wine yet. Everything that happened outside last
+        summer is dissolved in it, and none of it can be changed now.</p>
     </article>
 
-    <article class="ch" data-frame="80" data-day="68" style="--span:36">
-      <span class="lab">Chapter four</span>
-      <h2>And then it <span class="n">stops</span></h2>
-      <p>By the end of February the fruit is as dark as it is going to get. The
-        picture stops changing — this one genuinely does; there is nothing more
-        to watch.</p>
-      <p>Everything that decides the vintage happens in the five weeks after
-        that, and none of it is visible. So the rest of this page is the
-        laboratory book.</p>
+    <article class="ch" data-frame="99" style="--span:28">
+      <span class="lab">Three</span>
+      <h2>Then we <span class="n">wait</span></h2>
+      <p>Wild ferment, eighteen months in old oak, no fining and no filtering.
+        The cellar is cold and nothing is asked of it.</p>
+    </article>
+
+    <article class="ch" data-frame="139" style="--span:40">
+      <span class="lab">Four</span>
+      <h2>And you <span class="n">open it</span></h2>
+      <p>Dark, dusty and firm for two years, and then it lets go. Cellar door
+        Friday to Sunday. When it is gone we wait a year, like everyone else.</p>
     </article>
   </div>
 </section>
 
 <hr class="rule">
 
-<!-- ===================== the instrument =============================== -->
-<section class="instr">
+<!-- ============ the one number that decided the year ============ -->
+<section class="rec">
   <div class="wrap">
-    <div class="instr-head">
+    <div class="rec-head">
       <div>
         <span class="lab">The 2024 ripening record</span>
-        <h2 style="font-size:clamp(1.7rem,3.5vw,2.6rem);margin-top:0.5rem">Sugar up, acid down,<br>and the fortnight where they cross</h2>
-      </div>
-      <div class="readout">
-        <div><span class="lab">Picked at</span><b style="color:var(--fruit)">24.2°</b><span class="lab">Brix</span></div>
-        <div><span class="lab">Acidity</span><b>6.1</b><span class="lab">g/L</span></div>
+        <h2 style="font-size:clamp(1.6rem,3.2vw,2.3rem);margin-top:.5rem">Sugar up, acid down,<br>and the fortnight where they cross</h2>
       </div>
     </div>
-
     <div class="plot">
       <svg viewBox="0 0 660 328" role="img"
-           aria-label="Sugar rising from 8.4 to 24.6 degrees Brix and titratable acidity falling from 21.8 to 5.9 grams per litre between 21 January and 31 March 2024, with the picking window opening on 17 March and the fruit picked on 26 March.">
-        <!-- picking window: both readings inside their target band -->
+           aria-label="Sugar rising from 8.4 to 24.6 degrees Brix and acidity falling from 21.8 to 5.9 grams per litre between 21 January and 31 March 2024, with the picking window opening on 17 March and the fruit picked on 26 March.">
         <rect class="win" x="508.8" y="28" width="111.2" height="224"></rect>
         <rect class="win-e" x="508.8" y="28" width="111.2" height="224"></rect>
-        <!-- gridlines -->
         <line class="gr" x1="64" y1="28"  x2="620" y2="28"></line>
         <line class="gr" x1="64" y1="84"  x2="620" y2="84"></line>
         <line class="gr" x1="64" y1="140" x2="620" y2="140"></line>
         <line class="gr" x1="64" y1="196" x2="620" y2="196"></line>
-        <!-- axes -->
         <line class="ax" x1="64" y1="252" x2="620" y2="252"></line>
         <line class="ax" x1="64" y1="28"  x2="64"  y2="252"></line>
         <line class="ax" x1="620" y1="28" x2="620" y2="252"></line>
-        <!-- the two readings -->
         <polyline class="l-ta" points="64.0,52.6 119.6,90.7 175.2,127.7 230.8,155.7 286.4,181.4 342.0,197.1 397.6,209.4 453.2,217.3 508.8,222.9 564.4,227.4 620.0,230.7"></polyline>
         <polyline class="l-brix" points="64.0,225.1 119.6,193.8 175.2,161.3 230.8,131.0 286.4,106.4 342.0,88.5 397.6,73.9 453.2,63.8 508.8,56.0 564.4,49.3 620.0,43.7"></polyline>
-        <!-- the pick -->
         <line class="pick" x1="580.3" y1="20" x2="580.3" y2="252"></line>
         <text class="tk-b" x="580.3" y="14" text-anchor="middle">PICKED 26 MAR</text>
-        <!-- the reader's position on the season, moved by the scrub -->
-        <line id="cursor" x1="64" y1="28" x2="64" y2="252"
-              stroke="var(--fruit)" stroke-width="1.5" opacity="0.9"></line>
-        <!-- axis labels -->
         <text class="tk" x="58" y="46"  text-anchor="end">26</text>
         <text class="tk" x="58" y="256" text-anchor="end">6</text>
         <text class="tk" x="626" y="46">24</text>
@@ -437,36 +414,15 @@
         <text class="tk" x="342" y="272" text-anchor="middle">25 Feb</text>
         <text class="tk" x="620" y="272" text-anchor="end">31 Mar</text>
         <text class="tk" x="64"  y="292" fill="var(--fruit)">— °Brix (sugar)</text>
-        <text class="tk" x="190" y="292">- - g/L (titratable acidity)</text>
+        <text class="tk" x="190" y="292">- - g/L (acidity)</text>
         <text class="tk" x="620" y="292" text-anchor="end">picking window opens 17 Mar</text>
-        <!-- the wink: the one hand-written line in an otherwise typeset page -->
+        <!-- the one hand-written line on the page -->
         <text class="rain" x="620" y="312" text-anchor="end">22 Mar · 14 mm — held off four days ↑</text>
       </svg>
     </div>
-
-    <table class="tbl">
-      <thead>
-        <tr><th>Week</th><th>°Brix</th><th>g/L acid</th><th>pH</th><th>In window</th></tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td>21 Jan</td><td>8.4</td><td>21.8</td><td>2.81</td><td>—</td></tr>
-        <tr><td>28 Jan</td><td>11.2</td><td>18.4</td><td>2.92</td><td>—</td></tr>
-        <tr><td>4 Feb</td><td>14.1</td><td>15.1</td><td>3.04</td><td>—</td></tr>
-        <tr><td>11 Feb</td><td>16.8</td><td>12.6</td><td>3.15</td><td>—</td></tr>
-        <tr><td>18 Feb</td><td>19.0</td><td>10.3</td><td>3.25</td><td>—</td></tr>
-        <tr><td>25 Feb</td><td>20.6</td><td>8.9</td><td>3.33</td><td>—</td></tr>
-        <tr><td>3 Mar</td><td>21.9</td><td>7.8</td><td>3.41</td><td>—</td></tr>
-        <tr><td>10 Mar</td><td>22.8</td><td>7.1</td><td>3.47</td><td>—</td></tr>
-        <tr data-in="1"><td>17 Mar</td><td>23.5</td><td>6.6</td><td>3.52</td><td>yes</td></tr>
-        <tr data-in="1"><td>24 Mar</td><td>24.1</td><td>6.2</td><td>3.56</td><td>yes</td></tr>
-        <tr data-in="1"><td>31 Mar</td><td>24.6</td><td>5.9</td><td>3.60</td><td>yes</td></tr>
-      </tbody>
-    </table>
-    <p class="note" style="margin-top:1rem;color:var(--ink-2);font-size:0.95rem;max-width:60ch">
-      One 200-berry sample from the same twelve vines, every Monday at seven in
-      the morning. The window opens when sugar clears 23.5° and acid is still
-      above 5.8 g/L — after that the acid goes before the sugar stops, and you
-      are making a different wine than you meant to.</p>
+    <p class="note" style="margin-top:1rem;max-width:52ch">We would have picked on
+      the 22nd. It rained. Wet fruit is dilute fruit, so we waited four days and
+      paid two tenths of acid for them — which is the whole vintage, really.</p>
   </div>
 </section>
 
@@ -474,60 +430,20 @@
 
 <section class="band">
   <div class="wrap two">
-    <figure class="fig" style="margin:0">
+    <figure class="fig">
       <img src="assets/soil.webp" width="1200" height="800" loading="lazy"
-           alt="A fist-sized piece of pale chalky marl resting on dry stony vineyard ground in raking light.">
+           alt="A fist-sized piece of pale chalky marl on dry stony vineyard ground in raking light.">
       <figcaption>Marl — limestone clay. Block 3, 40 cm down.</figcaption>
     </figure>
     <div>
-      <span class="lab">The half that does not change</span>
-      <h2>Cold soil buys you time</h2>
+      <span class="lab">The half that never changes</span>
+      <h2>Cold soil buys time</h2>
       <p>Marl warms slowly and holds its water deep, so the vine is never in a
-        hurry. In a hot year that is worth more than anything we could do in the
-        winery: the sugar climbs at a walk instead of a run, and the acid is
-        still there when the flavour arrives.</p>
-      <p class="note">It is also why our picking window tends to open a fortnight
-        after everyone else's, which has caused arguments.</p>
+        hurry. The sugar climbs at a walk instead of a run, and the acid is still
+        there when the flavour arrives.</p>
+      <p class="note">It is why our window opens a fortnight after everyone
+        else's, which has caused arguments.</p>
     </div>
-  </div>
-</section>
-
-<section class="pick-band">
-  <div class="wrap">
-    <span class="lab">The decision</span>
-    <div class="big" style="margin:1rem 0 1.5rem">26 March</div>
-    <div class="two" style="align-items:start">
-      <p>The window opened on the 17th. We would have picked on the 22nd, and
-        then 14 millimetres fell overnight on the 21st. Fruit picked wet is
-        fruit picked dilute, so we waited four days for the block to dry and
-        gave up two tenths of acid doing it.</p>
-      <p class="note">That is the whole vintage, really. One decision, made on a
-        weather forecast, that cannot be made again — and the reason this label
-        will never taste the way it did in 2023.</p>
-    </div>
-    <img src="assets/pick.webp" width="1400" height="790" loading="lazy"
-         style="margin-top:2.5rem;grid-column:1/-1"
-         alt="Just-picked wine grapes filling the frame, deep blue-black and still carrying their pale bloom, with one vine leaf lying among them.">
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap two flip">
-    <div>
-      <span class="lab">What is in the bottle</span>
-      <h2>One wine, 2,900 bottles</h2>
-      <p>Whole bunches into concrete, wild ferment, eighteen months in old oak
-        and no fining. It is dark, dusty and firm for the first two years and
-        then it lets go.</p>
-      <p class="note">Cellar door open Friday to Sunday. There is no mailing
-        list and no allocation — when it is gone, we wait a year like everyone
-        else.</p>
-    </div>
-    <figure class="fig" style="margin:0">
-      <img src="assets/glass.webp" width="1200" height="900" loading="lazy"
-           alt="A plain stemmed glass a third full of dark red wine on a raw concrete surface, with a pool of garnet light thrown beside it.">
-      <figcaption>2024 Cabernet Sauvignon · 13.4% · one block</figcaption>
-    </figure>
   </div>
 </section>
 
@@ -537,39 +453,32 @@
   <div class="wrap">
     <div>
       <span class="mark">Marl <span>&amp;</span> Cane</span>
-      <p class="note" style="color:var(--ink-2);font-size:0.9rem;margin:.5rem 0 0">
-        A fictional estate, built to demonstrate a page.</p>
+      <p class="note" style="margin:.5rem 0 0">A fictional estate, built to demonstrate a page.</p>
     </div>
-    <div>
-      <a class="lab" href="guide/" style="color:var(--ink)">How this page was made →</a>
-    </div>
+    <div><a class="lab" href="guide/" style="color:var(--ink)">How this page was made →</a></div>
   </div>
 </footer>
 
-<!-- The single source of truth. The static SVG above is drawn from these
-     numbers and the runtime interpolates from the same block, so the two
-     cannot drift (㉑ s105: static-first is an honesty gate, not a perf gate).
-     `plot` carries the exact geometry the polylines were computed with. -->
+<!-- One source of truth: the chart above is drawn from these numbers and the
+     runtime interpolates from the same block, so the two cannot drift. -->
 <script type="application/json" id="season-data">
 {
-  "frames": 81,
-  "days": 36,
+  "frames": 140,
   "plot": { "left": 64, "right": 620, "top": 28, "bottom": 252,
             "brix": [6, 26], "ta": [4, 24] },
-  "window": { "opens": "17 Mar", "picked": "26 Mar", "pickedAt": 9.2857 },
   "accents": [
-    { "frame": 0,  "hue": 68,  "light": 31.0 },
-    { "frame": 20, "hue": 58,  "light": 31.0 },
-    { "frame": 44, "hue": 22,  "light": 39.2 },
-    { "frame": 61, "hue": 4,   "light": 44.2 },
-    { "frame": 80, "hue": 310, "light": 43.5 }
+    { "frame": 0,   "hue": 250, "light": 50.7 },
+    { "frame": 71,  "hue": 355, "light": 45.3 },
+    { "frame": 99,  "hue": 12,  "light": 42.0 },
+    { "frame": 139, "hue": 22,  "light": 39.2 }
   ],
-  "colour": [
-    { "frame": 0,  "says": "none" },
-    { "frame": 18, "says": "first berries" },
-    { "frame": 26, "says": "mixed" },
-    { "frame": 47, "says": "mostly turned" },
-    { "frame": 67, "says": "complete" }
+  "states": [
+    { "frame": 0,   "says": "Whole fruit" },
+    { "frame": 30,  "says": "Giving way" },
+    { "frame": 60,  "says": "Free run" },
+    { "frame": 72,  "says": "Into the dark" },
+    { "frame": 100, "says": "Eighteen months later" },
+    { "frame": 128, "says": "Poured" }
   ],
   "readings": [
     { "at": "21 Jan", "brix": 8.4,  "ta": 21.8 },
@@ -590,41 +499,54 @@
 <script>
 (function () {
   var data = JSON.parse(document.getElementById("season-data").textContent);
-  var stack = document.getElementById("stack");
-  var imgs = stack ? Array.prototype.slice.call(stack.querySelectorAll("img")) : [];
-  var chapters = Array.prototype.slice.call(document.querySelectorAll(".ch[data-frame]"));
-  if (!imgs.length || !chapters.length) return;
+  var seqs = [].slice.call(document.querySelectorAll("#stack .seq")).map(function (el) {
+    return { el: el, imgs: [].slice.call(el.querySelectorAll("img")) };
+  });
+  var chapters = [].slice.call(document.querySelectorAll(".ch[data-frame]"));
+  if (!seqs.length || !chapters.length) return;
+  var TOTAL = seqs.reduce(function (n, s) { return n + s.imgs.length; }, 0);
 
-  // Seed the shown index FROM THE DOM, never from a sentinel. A -1 sentinel
-  // leaves the markup's lit frame with nothing to clear on the first swap, and
-  // because it is later in document order it then paints on top of every frame
-  // the scroll selects — the scrub is dead while every screenshot looks perfect
-  // (Small Hours s107, the fifth killer).
-  var shown = 0;
-  for (var i = 0; i < imgs.length; i++) if (imgs[i].classList.contains("on")) shown = i;
-
-  function show(n) {
-    n = n < 0 ? 0 : n > imgs.length - 1 ? imgs.length - 1 : n;
-    if (n === shown) return;
-    // Clear EVERY other frame rather than just the last one, so "exactly one is
-    // on" is true by construction and not by bookkeeping.
-    for (var i = 0; i < imgs.length; i++) {
-      if (i !== n) imgs[i].classList.remove("on");
+  // Seed the shown index FROM THE DOM, never from a -1 sentinel: the first swap
+  // would then clear nothing, the markup's lit frame would stay on, and being
+  // last in document order it composites over every frame the scroll selects —
+  // a dead scrub that screenshots perfectly (Small Hours s107).
+  // Every sequence carries a lit frame in the markup so no-JS is never blank;
+  // the LIVE one is the only one that paints, so the seed reads from it.
+  var shown = 0, base = 0;
+  for (var s = 0; s < seqs.length; s++) {
+    for (var k = 0; k < seqs[s].imgs.length; k++) {
+      if (seqs[s].imgs[k].classList.contains("on") && seqs[s].el.classList.contains("is-live")) {
+        shown = base + k;
+      }
     }
-    imgs[n].classList.add("on");
-    shown = n;
+    base += seqs[s].imgs.length;
   }
 
-  function lerpAt(list, frame, key) {
-    if (frame <= list[0].frame) return list[0][key];
+  function show(g) {
+    g = g < 0 ? 0 : g > TOTAL - 1 ? TOTAL - 1 : g;
+    if (g === shown) return;
+    var off = 0;
+    for (var i = 0; i < seqs.length; i++) {
+      var seq = seqs[i], local = g - off, live = local >= 0 && local < seq.imgs.length;
+      seq.el.classList.toggle("is-live", live);
+      // Clear EVERY frame in this stack and light at most one, so "exactly one
+      // is on" is true by construction rather than by bookkeeping.
+      for (var k = 0; k < seq.imgs.length; k++) {
+        seq.imgs[k].classList.toggle("on", live && k === local);
+      }
+      off += seq.imgs.length;
+    }
+    shown = g;
+  }
+
+  function lerp(list, f, key) {
+    if (f <= list[0].frame) return list[0][key];
     for (var i = 1; i < list.length; i++) {
-      if (frame <= list[i].frame) {
-        var a = list[i - 1], b = list[i];
-        var t = (frame - a.frame) / (b.frame - a.frame);
-        // shortest way round the hue circle
+      if (f <= list[i].frame) {
+        var a = list[i - 1], b = list[i], t = (f - a.frame) / (b.frame - a.frame);
         if (key === "hue") {
-          var d = ((b.hue - a.hue + 180) % 360 + 360) % 360 - 180;
-          return ((a.hue + d * t) % 360 + 360) % 360;
+          var d = (((b.hue - a.hue + 180) % 360) + 360) % 360 - 180;
+          return (((a.hue + d * t) % 360) + 360) % 360;
         }
         return a[key] + (b[key] - a[key]) * t;
       }
@@ -632,46 +554,34 @@
     return list[list.length - 1][key];
   }
 
-  function saysAt(frame) {
-    var out = data.colour[0].says;
-    for (var i = 0; i < data.colour.length; i++) {
-      if (frame >= data.colour[i].frame) out = data.colour[i].says;
-    }
+  function stateAt(f) {
+    var out = data.states[0].says;
+    for (var i = 0; i < data.states.length; i++) if (f >= data.states[i].frame) out = data.states[i].says;
     return out;
   }
 
-  var root = document.documentElement;
-  var stDay = document.getElementById("st-day");
-  var stCol = document.getElementById("st-col");
-  var stNum = document.getElementById("st-num");
-  var cursor = document.getElementById("cursor");
-  var rows = Array.prototype.slice.call(document.querySelectorAll("#tbody tr"));
-  var last = -1;
-
   var anchors = chapters.map(function (el) { return Number(el.getAttribute("data-frame")); });
+  var root = document.documentElement;
+  var stEl = document.getElementById("st");
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var narrowQ = window.matchMedia("(max-width: 899px)");
-  var stageEl = document.querySelector(".stage");
+  var narrow = window.matchMedia("(max-width: 899px)");
+  var stage = document.querySelector(".stage");
 
-  // The reading line, in viewport coordinates. On narrow screens the pinned
-  // stage covers the top of the viewport, so a line measured from 0 sits
-  // BEHIND the stage and marks a chapter active while its heading is still
-  // hidden (㉑ s105, killer 4). Measure from the stage's bottom edge instead.
+  // On narrow screens the pinned stage covers the top of the viewport, so a
+  // line measured from 0 marks a chapter active while its heading is still
+  // behind the sheet (㉑ s105). Measure from the stage's bottom edge.
   function lineOffset() {
     var vh = window.innerHeight;
-    if (!narrowQ.matches) return vh * 0.62;
-    var b = stageEl ? stageEl.getBoundingClientRect().bottom : 0;
+    if (!narrow.matches) return vh * 0.62;
+    var b = stage ? stage.getBoundingClientRect().bottom : 0;
     var floor = Math.max(0, Math.min(vh, b));
     return floor + (vh - floor) * 0.55;
   }
 
   function frameNow() {
-    // THE CLOCK FOLLOWS THE PROSE, NOT THE SCROLLBAR (㉑ s105), and each
-    // chapter's anchor is its BOTTOM edge: the frame arrives at that chapter's
-    // state as the chapter finishes, so the turn happens while the turn is
-    // being read. That is also what makes --span (= this anchor minus the
-    // previous one) the right amount of trailing space to buy: the span paces
-    // the frames this chapter's own extent drives.
+    // The clock follows the PROSE, not the scrollbar, and each chapter's anchor
+    // is its BOTTOM edge — the picture arrives at that state as the chapter
+    // finishes, which is also what makes --span the right runway to buy.
     var line = window.scrollY + lineOffset();
     var pos = chapters.map(function (el) {
       return el.getBoundingClientRect().bottom + window.scrollY;
@@ -680,10 +590,7 @@
     if (line >= pos[pos.length - 1]) return anchors[anchors.length - 1];
     for (var i = 0; i < pos.length - 1; i++) {
       if (line >= pos[i] && line <= pos[i + 1]) {
-        var span = pos[i + 1] - pos[i];
-        var t = span > 0 ? (line - pos[i]) / span : 0;
-        // Reduced motion gets the same states as discrete steps, so nothing
-        // moves continuously under the reader.
+        var span = pos[i + 1] - pos[i], t = span > 0 ? (line - pos[i]) / span : 0;
         return reduce.matches
           ? (t < 0.5 ? anchors[i] : anchors[i + 1])
           : anchors[i] + t * (anchors[i + 1] - anchors[i]);
@@ -696,54 +603,20 @@
     var f = frameNow();
     if (isNaN(f)) f = 0;
     show(Math.round(f));
-
-    var h = lerpAt(data.accents, f, "hue");
-    var l = lerpAt(data.accents, f, "light");
+    var h = lerp(data.accents, f, "hue"), l = lerp(data.accents, f, "light");
     root.style.setProperty("--fruit", "hsl(" + h.toFixed(1) + " 32% " + l.toFixed(1) + "%)");
-
-    var day = Math.max(1, Math.round(1 + (f / (data.frames - 1)) * (data.days - 1)));
-    if (stDay) stDay.textContent = "Day " + day;
-    if (stCol) stCol.textContent = "Colour · " + saysAt(f);
-
-    // The twin's numbers come from the SAME readings the chart is drawn from.
-    // The scrub covers the colour change only — readings 0 to 5, 21 Jan to
-    // 25 Feb — because the fruit finishes turning five weeks before the pick.
-    var wkF = (f / (data.frames - 1)) * 5;
-    if (stNum) {
-      var i0 = Math.min(4, Math.floor(wkF)), t = wkF - i0;
-      var a = data.readings[i0], b = data.readings[i0 + 1];
-      var brix = a.brix + (b.brix - a.brix) * t;
-      var ta = a.ta + (b.ta - a.ta) * t;
-      stNum.textContent = brix.toFixed(1) + "° Brix · " + ta.toFixed(1) + " g/L";
-    }
-
-    // The instrument follows the same clock: the scrub covers the first six
-    // readings, because the fruit finishes colouring long before the pick.
-    if (cursor) {
-      var p = data.plot;
-      var span = (data.readings.length - 1);
-      var idx = (f / (data.frames - 1)) * 5;              // frames 0..80 -> weeks 0..5
-      var x = p.left + (p.right - p.left) * (idx / span);
-      cursor.setAttribute("x1", x.toFixed(1));
-      cursor.setAttribute("x2", x.toFixed(1));
-    }
-    var wk = Math.round((f / (data.frames - 1)) * 5);
-    if (wk !== last) {
-      for (var i = 0; i < rows.length; i++) {
-        rows[i].style.background = i === wk ? "var(--bone-2)" : "";
-      }
-      last = wk;
-    }
+    if (stEl) stEl.textContent = stateAt(f);
   }
 
   var ticking = false;
   function onScroll() {
     if (ticking) return;
     ticking = true;
-    requestAnimationFrame(function () { paint(); ticking = false; });
+    requestAnimationFrame(function () { ticking = false; paint(); });
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll, { passive: true });
+  if (reduce.addEventListener) reduce.addEventListener("change", onScroll);
   paint();
 })();
 </script>

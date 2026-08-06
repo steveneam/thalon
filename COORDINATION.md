@@ -232,6 +232,53 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s112b — **FOUNDER REVIEW: THE SITE D SPINE WAS REJECTED AND REBUILT** (**+93.20 credits**; balance **153.98**)
+
+**He reviewed the arc and the verdict was about TASTE, not craft.** Verbatim:
+*"did you not learn that my taste is not precise or scientific but imaginative
+and abstract"* · *"i think you didnt need a transition video of the grape
+turning ripe"* · a better animation would be *"grapes, then them
+bursting/squashed to extract their juices, the juices then land into a wine
+bottle then poured into a wine glass"* · *"the morningside coffee bean
+transition was good, but that was under my direction. so that's the kind of
+abstraction i want."*
+
+**The distinction, now §THE HOUSE TASTE at the top of the meta-prompt: a
+TIME-LAPSE versus a JOURNEY.** A time-lapse observes one subject while nature
+acts on it and DOCUMENTS; a journey follows a material through states, by an
+act, to a payoff. Morningside is a journey. Veraison was a time-lapse. **So are
+the arc's three other motions** — which is the likeliest reason Aspect & Fall
+and Small Hours came back *"ok, but not memorable"*, and Whitethorn's kinematic
+plot *"too scientific"* for a warmth vertical (he asked to KEEP it regardless).
+
+**Site D is rebuilt to his sequence:** 140 frames, three takes — the heap
+giving way and bleeding across concrete, the stream falling into a bottle, the
+glass filling. **Copy cut 851 → 371 words**, because he also called that out
+(*"wasnt the ratchet for these, dont be too wordy or verbose?"*) and he was
+right: *"less is more, but still with the same effect"* has been on record since
+s90, in a workspace-UX doc nobody opens during a portfolio build. **Now an
+executable budget** in `tests/template-portfolio.test.ts` (whitethorn recorded
+as an explicit grandfathered exceedance at 1,119, because he said keep it).
+
+**Three build findings.** (1) **Ask what KIND of motion each BEAT is, not each
+site** — this spine holds one transformation and two pours, and s108 says a pour
+is a cycle, so two of three takes needed no end frame and carried no
+registration risk at all. (2) **A chained take drifts because of the frame it
+AIMS at, not its prompt** — the first crush take recomposed across native frames
+31–59 (steps to 7.62 against a 0.54 median) because its end keyframe was minted
+independently at a wider framing; re-minting it as a registered EDIT of the
+start (dx=0, dy=−1) fixed it outright (0 cuts, max 0.93). One 22.50cr take spent
+on the lesson. (3) **Negating a label still does not remove it** — two bottles
+came back labelled; cropping to the neck worked first attempt.
+
+**Measured on the shipped page:** 140/140 frames reachable and none starved at
+both 1440×900 and 390×844 · one lit frame and one live sequence everywhere ·
+pin held 0/943 desktop and 0/591 phone · 42–54px of scroll per frame. The
+wine-glass still he flagged for compression was **deleted, not re-encoded** —
+the pour sequence ends on a glass, so the photograph was redundant.
+
+---
+
 ## Sprint 9 / s112 — **SHIPPED: SITE D (`marl-and-cane`). THE LANDING ARC IS COMPLETE** (boot "gogogo"; **38.96 credits**, zero live posts)
 
 **The arc's last site is built, passed and green.** A single-vineyard estate

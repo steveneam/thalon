@@ -303,6 +303,17 @@ chaining is what ㉑'s Feb→May→Jul→Oct already needs.
 
 ### Site D — vineyard / winery
 
+> **⚠ SPINE REJECTED AND REBUILT s112, on founder review.** The first build's
+> veraison time-lapse is gone; the page now follows **grapes → burst for their
+> juice → into the bottle → poured into the glass**, his own sequence, over 140
+> frames and three takes. *"did you not learn that my taste is not precise or
+> scientific but imaginative and abstract."* **This is the arc's governing
+> correction and it is not about site D alone** — three of the arc's other four
+> motions are time-lapses, and his verdicts match: Aspect & Fall and Small Hours
+> *"ok, but not memorable"*, Whitethorn's kinematic plot *"too scientific"* for
+> a warmth vertical. Rule now at the top of the meta-prompt (§THE HOUSE TASTE);
+> record in `proprietary/templates/sites/marl-and-cane/PREPLAN.md` §REBUILT.
+>
 > **✅ BUILT s112 as `marl-and-cane`** — the arc's last site, and **the arc is
 > now complete**. Named against the spec's own collision check, which **failed
 > on *Veraison***: multiple live trading names (a London wine bar, an Iowa wine

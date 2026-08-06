@@ -2,33 +2,61 @@
 
 ## Stamp
 
-2026-08-06 close of session 112 (syd4 — boot was `gogogo`, no other founder
-input this session).
+2026-08-06 close of session 112 (syd4 — boot `gogogo`, **then a founder design
+review that rejected and rebuilt site D's spine**).
 
-Wrap verify on main: **exit 0, 3488 passed / 9 skipped, 0 lint errors**
-(3481 → 3488: six `resolveFrameRange` contracts and one plotted-instrument
-drift alarm).
+> ## ⚠ READ THIS FIRST — THE TASTE CORRECTION IS THE SESSION'S REAL OUTPUT
+>
+> *"did you not learn that my taste is not precise or scientific but imaginative
+> and abstract"*
+>
+> Site D shipped an 81-frame veraison time-lapse — the best-measured thing in
+> the arc, and the wrong idea. He supplied the replacement himself: **grapes →
+> burst for their juice → into the bottle → poured into the glass**, and named
+> Morningside as the standard (*"but that was under my direction. so that's the
+> kind of abstraction i want"* — i.e. generating that abstraction is the bar,
+> not executing his).
+>
+> **TIME-LAPSE vs JOURNEY**, now §THE HOUSE TASTE at the top of the meta-prompt.
+> A time-lapse observes one subject while nature acts on it. A journey follows a
+> MATERIAL through states, by an act, to a payoff. **Three of the arc's four
+> other motions are time-lapses**, and his verdicts track exactly that: Aspect &
+> Fall and Small Hours *"ok, but not memorable"*; Whitethorn's kinematic plot
+> *"too scientific"* for a vet, where he wanted **a dog walking across the
+> screen** — playful, not clinical. He said **keep Whitethorn** ("i cant be
+> bothered to review the changes"), so it is untouched.
+>
+> He also caught the copy: *"wasnt the ratchet for these, dont be too wordy or
+> verbose?"* It was already on record (*"less is more, but still with the same
+> effect"*, s90) in a workspace-UX doc no portfolio build opens. **Site D was
+> 851 words, third-wordiest of 25, against a 628 median and Morningside's 594.
+> Now 371, and the budget is executable.**
+
+Wrap verify on main: **exit 0, 3489 passed / 9 skipped, 0 lint errors**
+(3481 → 3489: six `resolveFrameRange` contracts, a plotted-instrument drift
+alarm, and the copy budget).
 
 **THE LANDING ARC IS COMPLETE. ALL SIX SITES ARE BUILT.**
 ⑳ ✅ → ㉑ ✅ → ㉒ ✅ → the landing ✅ + its three passes ✅ → ㉓ ✅ →
 **㉔ `marl-and-cane` BUILT, passed and green (this session).** **Nothing in the
 arc remains.**
 
-**Credits: 247.18** (286.14 − **38.96**). The site came in at roughly a third of
-its ~110cr tier, because the spec's three-segment budget was written before
-s107 and one take was the correct instrument.
+**Credits: 153.98** (286.14 − 38.96 first build − **93.20 rebuild**). The
+rebuild is where the money went: 12 stills, 2 registered edits and 4 takes, one
+of which was discarded.
 
 Zero live posts, nothing armed, the queue consumer's master key still EMPTY.
 
 ## WHAT SHIPPED — site D, `marl-and-cane`
 
-▎ **A single-vineyard estate whose page is one year of one bunch.** 81 scrubbed
-frames of **veraison** — the fruit going green → rose → blue-black under the
-reader's scroll — and underneath it the laboratory record that decided the
-picking date. The masthead names the two things that never change (marl, the
-clay-limestone soil; cane, the one-year wood cane-pruning leaves) and the page
-argues the one year that never repeats, which is how it differentiates from
-`orchard-house`'s repeating cycle.
+▎ **A single-vineyard estate whose page follows the juice out of the fruit.**
+140 scrubbed frames across three takes — a heap of whole grapes giving way and
+bleeding across concrete, the stream falling into a bottle, the glass filling.
+The masthead names the two things that never change (marl, the clay-limestone
+soil; cane, the one-year wood cane-pruning leaves) and the page argues the one
+year that never repeats, which is how it differentiates from `orchard-house`'s
+repeating cycle. **(The first build's veraison spine is described in the FINDS
+below; it was rejected on review and replaced — see the addendum.)**
 
 ▎ **The name was decided by killing the spec's own favourite.** *Veraison*
 **fails a collision check** — several live trading names, a near-homophone
@@ -44,10 +72,13 @@ is what the discipline actually produces, and the lay twin is free and unusually
 honest: veraison IS the visible proxy for sugar accumulation, so the curve and
 the fruit are two readings of one process.
 
-▎ **38.96cr:** ten stills (five kept), one 8s take at 36cr. Type is **Syne +
-Geist + Geist Mono**, all OFL, all portfolio-new.
+▎ **132.16cr across both builds.** Type is **Syne + Geist + Geist Mono**, all
+OFL, all portfolio-new.
 
-## THE FINDS
+## THE FINDS — from the FIRST build (the veraison spine, since replaced)
+
+Findings 1, 3, 4, 5 and 6 are about the pipeline and stand unchanged; 2, 7 and 8
+concern the veraison sequence specifically and are kept as the record.
 
 1. **A GENERATED TAKE DOES NOT SPREAD ITS TRANSFORMATION EVENLY ACROSS ITS OWN
    DURATION.** The 8s take is 193 frames; measured against its own final state
@@ -139,9 +170,13 @@ DISCLOSURE, not a door.**
 **3 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
 (DOCTRINE 0). Both MIT deps approved.
 
-**4 — 247.18cr remain on a use-it-or-lose-it subscription.** No site needs them.
-Worth a founder steer: more portfolio sites, variant crops for the existing
-ones, or stop spending.
+**4 — WHITETHORN HAS A LIVE REDESIGN BRIEF IN HIS OWN WORDS** whenever he wants
+it: *"a dog (real or cartoon) on the side bar or at the top of the screen walking
+or running across the screen, making the vet more playful and fun."* He said keep
+it for now. Its 1,119 words are also the portfolio's worst. **Aspect & Fall and
+Small Hours are "ok, but not memorable"** — both time-lapses, neither re-briefed.
+
+**5 — 153.98cr remain on a use-it-or-lose-it subscription.** No site needs them.
 
 **CARRIED, recorded not fixed:** **`/favicon.ico` 404s on every site — 0 of 25
 ship one**, portfolio-wide and pre-existing · **`/blog` and `/brand` still scope
@@ -156,6 +191,12 @@ served and under what name — still his call** · ㉑'s, ㉒'s, ㉓'s and now
 **㉔'s** verdicts · ㉑'s casting reversal · the Higgsfield expiry date · the
 three s101 staged design calls. All on NEEDS-STEVEN.
 
+▎ ▸ **THE LESSON THE FOUNDER ADDED, and it outranks the rest: MEASURING A THING
+PERFECTLY DOES NOT MAKE IT THE RIGHT THING.** Site D's veraison spine was the
+most carefully measured artefact in the arc — live range, density, registration,
+grade, contrast, pacing, all instrumented — and it was the wrong idea, because
+nobody asked whether a time-lapse was what the page wanted. **Run the taste
+question BEFORE the measurement questions: is this a journey or a documentary?**
 ▎ ▸ **The lesson, THIRTEENTH session running: RUN IT, MOVE IT, COUNT IT, CHECK
 WHERE IT LANDS, CHECK THE AXIS, CHECK WHETHER THE FIX GENERALISES — and now,
 CHECK THAT YOUR CHECK ACTUALLY RAN.** Three times this session a measurement
@@ -249,3 +290,57 @@ pattern worth naming: each session's lesson has been true and each has been
 about a different cause, so the ratchet that matters is not the fix but the
 measurement — check the pin at a phone width every time, because the desktop
 result carries no information about it.
+
+---
+
+## ADDENDUM — the s112 founder review and the rebuild
+
+**What changed on the page.** The spine is now **140 frames across three takes**
+— a heap of whole grapes giving way and bleeding across concrete, the stream
+falling into a bottle neck, the glass filling — over five chapters (anchors
+0 · 36 · 71 · 99 · 139). Copy **371 words**. The Brix/acid chart stays (it is
+*visual*, and "more visual, fewer words" cuts words not pictures); its 11-row
+table and explanatory paragraphs are gone. The wine-glass still he flagged for
+compression is **deleted, not re-encoded** — the pour sequence ends on a glass,
+so the photograph was saying the same thing twice.
+
+**Three findings worth carrying.**
+
+1. **Ask what KIND of motion each BEAT is, not each SITE.** This spine holds one
+   transformation and two pours. s108 says a pour is a *cycle*, so two of three
+   takes needed only a start frame — no end keyframe, no registration risk, less
+   money. The question is per-shot.
+2. **A chained take drifts because of what it AIMS at, not its prompt.** The
+   first crush take recomposed across native frames 31–59 (steps to **7.62**
+   against a 0.54 median). The instinct is a sterner prompt; the rule (s106) says
+   fix the keyframe, and the rule was right — the end frame had been minted
+   independently at a wider framing. Re-minting it as a **registered edit of the
+   start** gave dx=0/dy=−1 and a clean take (0 cuts, max 0.93). One 22.50cr take
+   spent proving it.
+3. **A multi-sequence stack needs `.is-live`.** Three sequences cannot each carry
+   a lit frame *and* show only one. Every sequence keeps its own lit frame so
+   no-JS is never blank; a class on the container decides which paints. The
+   portfolio ratchet caught this the moment the third sequence landed.
+
+**Measured on the shipped page** — 140/140 frames reachable and **none starved**
+at 1440×900 and 390×844 · exactly one lit frame and one live sequence at every
+sampled position · pin held **0/943** desktop, **0/591** phone · **42–54px of
+scroll per frame**. Shipped adjacent-frame difference: crush 1.73, fill 1.60,
+pour 1.29 against house references of 1.51–1.52.
+
+**Ratchets added on the review:** an executable **copy budget** (900 words,
+visible copy only) with whitethorn recorded as an explicit grandfathered
+exceedance *because he said keep it* — the exceedance is visible in the test
+rather than hidden behind a loose threshold. Broken deliberately and confirmed
+red, as were the drift alarm, the anchor contract and the frame-stack contract
+against the rebuilt page.
+
+**Open for the next session, in his words:**
+- **Whitethorn is untouched by his instruction** but he described what he
+  wanted: *"a dog (real or cartoon) on the side bar or at the top of the screen
+  walking or running across the screen, making the vet more playful and fun."*
+  That is a live redesign brief whenever he wants it — and its 1,119 words are
+  the portfolio's worst.
+- **Aspect & Fall and Small Hours are "ok, but not memorable."** Both are
+  time-lapses. Neither has been re-briefed.
+- **153.98cr remain** on a sunsetting subscription.

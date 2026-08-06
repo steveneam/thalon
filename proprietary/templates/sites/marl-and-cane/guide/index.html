@@ -51,25 +51,32 @@
   <h2>The picture is generated, and it is one continuous take</h2>
   <p>Every image on this site is <strong>AI-generated</strong>. None of it is a
   photograph of a real vineyard, and no third-party or stock imagery was used.</p>
-  <p>The scroll sequence — the bunch changing colour — is <strong>81 stills taken
-  from a single eight-second generated video clip</strong>, not 81 separate
-  images. Two keyframes were generated first: the bunch unripe, and the same
-  bunch with the fruit turned. One clip was then generated between them, and the
-  page scrubs its frames against your scroll position. That is why the berries
-  stay in exactly the same places while their colour changes: they are the same
-  shot, not a slideshow of near-misses.</p>
+  <p>The scroll sequence is <strong>140 stills taken from three generated video
+  clips</strong> — the fruit giving way, the stream falling into a bottle, the
+  glass filling — not 140 separate images. The page scrubs their frames against
+  your scroll position, which is why nothing jumps: within each beat you are
+  looking at one continuous shot.</p>
+  <p>The first clip was generated between two keyframes (the heap whole, the heap
+  crushed). The other two needed only a start frame: <strong>a pour is a cycle,
+  not a transformation</strong> — its last moment looks like its first — so
+  asking for an end frame would have bought a near-duplicate and a registration
+  risk for nothing.</p>
 
   <h2>What was measured rather than guessed</h2>
   <ul>
-    <li><strong>The take was two-thirds useful.</strong> The clip runs 193
-      frames; the fruit stops changing at about frame 126, and everything after
-      that is one still picture. Sampling evenly across the whole clip would
-      have spent a third of this page's scroll on a frozen image, so the page
-      ships only the live range. The range is recorded in the asset manifest,
-      not trimmed by hand.</li>
-    <li><strong>81 frames, not 41 or 121.</strong> Frame count was chosen by
-      measuring how much changes between neighbouring frames and comparing it
-      against sequences on two other sites that already read smoothly.</li>
+    <li><strong>Each clip is only partly useful.</strong> They run 121 frames
+      each and stop changing well before the end — the crush is finished by about
+      frame 95. Sampling evenly across a whole clip would spend real scroll on a
+      frozen picture, so each one's live range is measured and recorded in the
+      asset manifest rather than trimmed by hand.</li>
+    <li><strong>The first attempt at the crush was thrown away.</strong> Its two
+      keyframes were photographed separately, so the clip between them quietly
+      re-framed itself half way through — a cut, which a scroll-scrub exposes
+      where a dissolve would hide it. Re-making the second keyframe as an edit of
+      the first, same camera, fixed it.</li>
+    <li><strong>140 frames, not 108.</strong> Frame count was chosen by measuring
+      how much changes between neighbouring frames and comparing it against
+      sequences on two other sites that already read smoothly.</li>
     <li><strong>Each chapter's length is derived from the frames it drives</strong>
       rather than from how long its paragraph happened to be. Driven in a real
       browser and counted frame by frame, that works out at 40–60 pixels of
@@ -84,43 +91,42 @@
   <h2>The colour of the page</h2>
   <p>The page is deliberately achromatic — bone and ink — and holds exactly one
   colour, which moves as you scroll. <strong>Its hue is measured off the frames
-  themselves</strong>: the lit fruit reads about 68° (yellow-green) at the start,
-  40° as it turns, and 4° (red) as it darkens.</p>
-  <p class="note">Two honest caveats. The <em>lightness</em> of that accent is not
-  taken from the photograph — it is solved per hue so the colour keeps a constant
+  themselves</strong>: the whole fruit reads about 250° (a cool blue-violet), and
+  the page warms through 355° and 12° to 22° as the juice comes out of it. The
+  colour is released by the crush rather than applied to the page.</p>
+  <p class="note">One honest caveat: the <em>lightness</em> of that accent is not
+  taken from the photographs. It is solved per hue so the colour holds a constant
   contrast ratio against the background (never below 4.8:1), because a fixed
-  lightness across a hue sweep fails legibility at the green end: measured, 29 of
-  the 81 frames failed it before that fix. And the closing <strong>red-violet is a
-  design choice, not a measurement</strong>: by the last frames the fruit is too
-  desaturated for a hue to mean anything, so that one number was chosen rather
-  than read.</p>
+  lightness across a hue sweep fails legibility somewhere on the arc every
+  time.</p>
 
   <h2>The ripening chart</h2>
   <p>The sugar and acid readings are <strong>invented data for a fictional
   vintage</strong>, chosen to be plausible for Cabernet Sauvignon. They are not
   measurements from a real block.</p>
   <p>The chart is drawn as real markup from a single block of numbers embedded in
-  the page, and the script that animates it reads the <em>same</em> block. With
-  JavaScript switched off you still get the whole chart, the whole table, every
+  the page. With JavaScript switched off you still get the whole chart, every
   chapter and one frame of the sequence — nothing here is drawn by script that
-  isn't already in the page.</p>
+  isn't already in the page. A test recomputes the drawn curve from those numbers
+  on every build, so the picture and the data cannot drift apart.</p>
 
   <h2>What made what</h2>
   <table>
     <thead><tr><th>Asset</th><th class="mono">Model</th><th class="mono">Credits</th></tr></thead>
     <tbody>
-      <tr><td>Unripe bunch (keyframe, and the hero still)</td><td class="mono">text2image_soul_v2</td><td class="mono">0.12 ×4</td></tr>
-      <tr><td>Turned bunch (keyframe)</td><td class="mono">seedream_v4_5</td><td class="mono">1.00 ×2</td></tr>
-      <tr><td>The veraison clip — 8s, 720p</td><td class="mono">seedance_2_0</td><td class="mono">36.00</td></tr>
-      <tr><td>Marl, harvest, glass</td><td class="mono">text2image_soul_v2</td><td class="mono">0.12 ×4</td></tr>
+      <tr><td>Keyframes — the heap, the crush, the bottle, the glass</td><td class="mono">text2image_soul_v2</td><td class="mono">0.12 ×12</td></tr>
+      <tr><td>The crushed heap, re-made in register</td><td class="mono">seedream_v4_5</td><td class="mono">1.00 ×2</td></tr>
+      <tr><td>Three clips — 5s each, 720p</td><td class="mono">seedance_2_0</td><td class="mono">22.50 ×4</td></tr>
+      <tr><td>Marl</td><td class="mono">text2image_soul_v2</td><td class="mono">0.12</td></tr>
     </tbody>
   </table>
   <p class="note" style="margin-top:1rem">The models named are the ones that
   actually ran, which is not always the one requested — this vendor sometimes
-  substitutes a faster variant. Ten stills were generated and five kept. The
-  harvest photograph carried a small artefact near its lower edge; rather than
-  retouch it, the published crop composes it out of frame, and that crop is part
-  of the recorded recipe.</p>
+  substitutes a faster variant. Four clips were generated and three kept; the
+  discarded one is the re-framed crush described above. Two bottle photographs
+  came back wearing invented labels no matter how firmly the prompt forbade
+  them — the fix was not a sterner instruction but a tighter crop, framing the
+  label out of shot entirely.</p>
 
   <h2>The one thing that is hand-written</h2>
   <p>The pencilled note under the chart — <em>22 Mar · 14 mm — held off four

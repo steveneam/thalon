@@ -1,49 +1,101 @@
 [
   {
     "file": "hero.webp",
-    "pinnedHash": "11b7b3fd523dab83aaddc99354471f58a12b237a330bf07868f875b8892fb899",
+    "pinnedHash": "7f4238880248d74972e6dbd5961898dabab5f9306ea71099eb22db9616242f76",
     "ext": "mp4",
     "frame": 0,
     "width": 1600,
     "height": 900,
-    "quality": 82,
+    "quality": 88,
     "gradeFlatten": {
       "patch": [
-        130,
-        535,
-        300,
-        160
+        60,
+        40,
+        320,
+        120
       ],
       "target": [
-        45.01,
-        56.08,
-        28.62
+        87.32,
+        76.96,
+        71.12
       ]
     }
   },
   {
-    "file": "veraison-%02d.webp",
-    "pinnedHash": "11b7b3fd523dab83aaddc99354471f58a12b237a330bf07868f875b8892fb899",
+    "file": "crush-%02d.webp",
+    "pinnedHash": "7f4238880248d74972e6dbd5961898dabab5f9306ea71099eb22db9616242f76",
     "ext": "mp4",
-    "frames": 81,
+    "frames": 72,
     "range": [
       0,
-      126
+      95
     ],
     "width": 900,
     "height": 506,
-    "quality": 54,
+    "quality": 62,
     "gradeFlatten": {
       "patch": [
-        130,
-        535,
-        300,
-        160
+        60,
+        40,
+        320,
+        120
       ],
       "target": [
-        45.01,
-        56.08,
-        28.62
+        87.32,
+        76.96,
+        71.12
+      ]
+    }
+  },
+  {
+    "file": "fill-%02d.webp",
+    "pinnedHash": "552d9b8d31278528e7eb626f5d42753ad77672cf0dfaf1d4e644d8e9d647b98b",
+    "ext": "mp4",
+    "frames": 28,
+    "range": [
+      0,
+      118
+    ],
+    "width": 900,
+    "height": 506,
+    "quality": 62,
+    "gradeFlatten": {
+      "patch": [
+        60,
+        40,
+        300,
+        140
+      ],
+      "target": [
+        177.92,
+        162.2,
+        128.23
+      ]
+    }
+  },
+  {
+    "file": "pour-%02d.webp",
+    "pinnedHash": "65d52e9e35d9770ab207b1eeeb1ab29eff982f93f61b6937596f7d4d3a67d5a0",
+    "ext": "mp4",
+    "frames": 40,
+    "range": [
+      0,
+      95
+    ],
+    "width": 900,
+    "height": 506,
+    "quality": 62,
+    "gradeFlatten": {
+      "patch": [
+        60,
+        40,
+        300,
+        130
+      ],
+      "target": [
+        61.57,
+        53.24,
+        41.75
       ]
     }
   },
@@ -52,21 +104,6 @@
     "pinnedHash": "f695c96d87876332288f7ef072e6da5721678a8bfaf967d32d1199eff538e40e",
     "width": 1200,
     "height": 800,
-    "quality": 80
-  },
-  {
-    "file": "pick.webp",
-    "pinnedHash": "be37e904679769b18454dd16e251353df254d596df3fdd22ab7f8ffb3395e992",
-    "width": 1400,
-    "height": 790,
-    "quality": 80,
-    "position": "top"
-  },
-  {
-    "file": "glass.webp",
-    "pinnedHash": "9f1b1caa5aaa1b093fb207206fa5229d924c9def8b49daf3f4799bd59514ef81",
-    "width": 1200,
-    "height": 900,
-    "quality": 80
+    "quality": 86
   }
 ]

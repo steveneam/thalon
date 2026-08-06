@@ -236,6 +236,53 @@ describe("template portfolio", () => {
   });
 
   /**
+   * The copy budget (founder, s112 — "dont be too wordy or verbose").
+   *
+   * "less is more, but still with the same effect" and "more visual, fewer
+   * words" have been standing founder steers since s90, but they lived only in
+   * `docs/research/ux-refinement-program.md` — a workspace-UX document nobody
+   * opens while building a portfolio site. Site D duly shipped 851 words, the
+   * third-wordiest of 25, while Morningside (which he praised) is 594. That is
+   * a documentary ratchet rotting exactly the way AGENTS.md rule 8 predicts,
+   * so it becomes an executable one here.
+   *
+   * The cap is deliberately generous — this is a guard against a page drifting
+   * into an essay, not a house style enforced to the word. It counts only
+   * VISIBLE body copy: script, style and comments are stripped, because a long
+   * explanatory comment is a cost to the next builder, not to the reader.
+   */
+  it("a site's visible copy stays inside the portfolio's word budget", () => {
+    const BUDGET = 900;
+    /**
+     * Recorded exceedances, not a loophole. Listing a site here is a claim that
+     * someone decided to leave it, with the reason — which is why the entry
+     * carries one. Loosening BUDGET instead would hide the same fact.
+     */
+    const GRANDFATHERED: Record<string, string> = {
+      // Founder, s112, reviewing the site: "white thorn the moving skeleton on
+      // the scroll was too scientific. but keep since i cant be bothered to
+      // review the changes." He asked for it to be left alone, so its 1,119
+      // words stand until he next wants that page touched.
+      whitethorn: "founder said keep (s112); wordiest in the portfolio at ~1119",
+    };
+    for (const slug of slugs) {
+      if (slug in GRANDFATHERED) continue;
+      const html = readFileSync(path.join(sitesDir, slug, "index.html"), "utf8");
+      const visible = html
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<!--[\s\S]*?-->/g, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&[a-z]+;/gi, " ");
+      const words = visible.split(/\s+/).filter(Boolean).length;
+      expect(
+        words,
+        `${slug}: ${words} words of visible copy exceeds the ${BUDGET}-word budget — "less is more, but still with the same effect" (founder, s90/s112). Show it instead of explaining it, or cut.`,
+      ).toBeLessThanOrEqual(BUDGET);
+    }
+  });
+
+  /**
    * The plotted-instrument drift alarm (Marl & Cane, s112).
    *
    * The sibling test above pins the small-hours SHAPE (compounds + hours). A
@@ -299,8 +346,14 @@ describe("template portfolio", () => {
         ).toBe(expected);
       }
 
-      // Every reading must also be printed in the static table, so the no-JS
-      // reader gets the same numbers the curve was drawn from.
+      // If the page ALSO prints the readings as a table, that is a third copy
+      // of the same truth and it has to agree too. A page that ships only the
+      // drawn curve is fine — the SVG is static markup, so a no-JS reader
+      // already gets every number the chart encodes, and the polyline check
+      // above is the drift guard that matters. (Site D dropped its table at
+      // s112 on the founder's "more visual, fewer words".)
+      const hasTable = /<tbody[\s\S]*?<\/tbody>/.test(html);
+      if (!hasTable) continue;
       for (const r of data.readings) {
         expect(
           html.includes(`<td>${r.at}</td>`),

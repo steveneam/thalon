@@ -80,6 +80,43 @@ what you are capable of, within the gates below.
 - Palette seed: {{palette_seed}} · Type direction: {{type_direction}} ·
   Motion budget: {{motion_budget}}.
 
+## §THE HOUSE TASTE — founder, s112, and it governs everything below
+
+> *"did you not learn that my taste is not precise or scientific but
+> imaginative and abstract"* · *"the morningside coffee bean transition was
+> good, but that was under my direction. so that's the kind of abstraction i
+> want"* · *"less is more, but still with the same effect"*
+
+**IMAGINATIVE AND ABSTRACT, NOT PRECISE AND SCIENTIFIC.** Stated after
+reviewing four sites, and it is a correction to how this file was being read —
+several rules below optimise for rigour and were being applied as if rigour
+were the goal. It is not. Rigour is how a thing is BUILT; it is not what the
+page is FOR.
+
+**The test for a motion, before any mint: is it a TIME-LAPSE or a JOURNEY?**
+
+- ✗ **Time-lapse** — one subject observed while nature does something to it: a
+  bunch ripening, a tree through four seasons, a flower opening. It documents.
+  It is what a botanist would film. Site D shipped a technically excellent
+  81-frame veraison scrub and the founder's verdict was *"i think you didnt
+  need a transition video of the grape turning ripe."*
+- ✓ **Journey** — a material transformed through states by an act, arriving
+  somewhere: beans → grounds → poured cup (⑳ Morningside, the one he liked);
+  grapes → burst for their juice → into the bottle → poured into the glass
+  (his own rewrite of site D, built at s112). It has agency, consequence and a
+  payoff. **Follow the MATERIAL, not the calendar.**
+
+Three named verdicts to calibrate against: **Morningside = good** (and note he
+supplied that abstraction, so generating it is the bar to clear).
+**Aspect & Fall and Small Hours = "ok, but not memorable"** — competent is a
+failure grade in this portfolio. **Whitethorn's kinematic plot = "too
+scientific"** for a warmth vertical.
+
+**And the copy half, which is the same instruction:** *more visual, fewer
+words.* Site D shipped 851 words against a 628-site median while Morningside —
+praised — is 594. **A page over the median is over-written until proven
+otherwise**; ratcheted in `tests/template-portfolio.test.ts`.
+
 You have total creative freedom inside the assigned axes — structure, layout,
 composition, copy tone (honest claims only), and how far to push each technique
 are yours to decide. Design in the way you believe best illustrates the
@@ -440,6 +477,20 @@ illustrating, and illustration is a MINT. Division of labour that works: the
 photographs carry the feeling, the diagram carries the evidence. (Founder
 note, same session: *"definitely use higgsfield … if you need help with
 drawing or artwork."*)
+**⚠ FOUNDER CORRECTION (s112) — this test answers "HOW do I draw it?" and was
+being used to answer "SHOULD this be a diagram at all?", which it cannot.**
+Reviewing ⑳ he called the kinematic plot **"too scientific"** and said what he
+had wanted was *"something like a dog (real or cartoon) on the side bar or at
+the top of the screen walking or running across the screen, making the vet more
+playful and fun."* The rule converged the CRAFT and got the REGISTER wrong: it
+is the right test once you have decided the page wants evidence, and the wrong
+first question on a warmth vertical, where the same scroll budget should have
+bought delight. **Ask the register question first — is this page arguing from
+evidence, or is it trying to be liked? — and only then ask what the discipline
+draws.** Precision/expert verticals (science, logistics, legal, an expert
+coffee page) earn the instrument; warmth verticals (vet, pet care, childcare,
+hospitality) earn the wink, and a diagram there reads clinical. See §THE HOUSE
+TASTE above, which governs this whole section.
 
 **Casting & social register (founder-taught, s55):** imagery is read
 socially before it is read aesthetically. (1) Cast for the audience's trust —
