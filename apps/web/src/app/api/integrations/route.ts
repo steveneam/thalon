@@ -1,5 +1,5 @@
 import { socialPublishConfigSchema } from "@thalon/contracts";
-import { listIntegrationCards } from "@thalon/engine";
+import { listIntegrationCards, publishQueueArmed, SOCIAL_QUEUE_ARM_KEY } from "@thalon/engine";
 import { readEnv } from "@thalon/platform";
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/http-errors";
@@ -29,8 +29,9 @@ export async function GET() {
       profile?.social === undefined || profile.social === null
         ? null
         : socialPublishConfigSchema.safeParse(profile.social);
+    const env = readEnv();
     const cards = await listIntegrationCards(
-      { repos, ctx, env: readEnv() },
+      { repos, ctx, env },
       { features, socialConfig: parsedSocial?.success ? parsedSocial.data : null },
     );
     return NextResponse.json({
@@ -44,6 +45,23 @@ export async function GET() {
       // the same answer the engine's resolver gives — the surface must never
       // be the place that decides `all` on its own.
       postingScope: (parsedSocial?.success ? parsedSocial.data.postingScope : null) ?? "selective",
+      /**
+       * Phase 0 (s112): the MASTER key, the third gate and the one the surface
+       * has never been able to see. `SOCIAL_QUEUE_ARMED` lives in the env, so
+       * until now the arm control could offer "Live — due posts go out on
+       * their own" while the tick was incapable of sending anything at all: a
+       * control asserting what the engine will not do.
+       *
+       * It ships as a DISCLOSURE and never as a door. Nothing here can change
+       * it — arming the queue is a deployment act and the founder's
+       * sequence-gate call — but the surface must stop claiming an outcome the
+       * box cannot produce. Same derivation the consumer uses, so the page and
+       * the tick can never disagree about it.
+       */
+      // The validated env is a typed object, so hand the predicate exactly the
+      // one key it reads - same function and same key as the consumer, so the
+      // page and the tick cannot disagree about whether the queue is armed.
+      queueArmed: publishQueueArmed({ [SOCIAL_QUEUE_ARM_KEY]: env[SOCIAL_QUEUE_ARM_KEY] }),
     });
   } catch (err) {
     return toErrorResponse(err);

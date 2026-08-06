@@ -79,6 +79,37 @@ describe("GET /api/integrations (the cards read)", () => {
     expect(cards.map((c) => c.destination)).toEqual(DESTINATION_KEYS);
     for (const card of cards) expect(card.state).toBe("not_connected");
   });
+
+  /**
+   * Phase 0 (s112): the MASTER key reaches the surface, so the arm control can
+   * stop offering "Live — due posts go out on their own" on a deployment whose
+   * tick cannot send anything. It is a disclosure and the read is the only way
+   * the page can learn it — if this stops being served the surface silently
+   * goes back to claiming an outcome the box cannot produce.
+   */
+  it("discloses the queue's MASTER key, and reads it exactly like the consumer does", async () => {
+    const saved = process.env.SOCIAL_QUEUE_ARMED;
+    try {
+      delete process.env.SOCIAL_QUEUE_ARMED;
+      const off = (await (await GET()).json()) as { queueArmed: boolean };
+      expect(off.queueArmed, "absent must read as NOT armed").toBe(false);
+
+      // The exactly-"true" rule the consumer uses: anything that merely looks
+      // affirmative must never arm a seam.
+      for (const nearly of ["1", "TRUE", "yes", "", "true "]) {
+        process.env.SOCIAL_QUEUE_ARMED = nearly;
+        const res = (await (await GET()).json()) as { queueArmed: boolean };
+        expect(res.queueArmed, `"${nearly}" must not arm the queue`).toBe(false);
+      }
+
+      process.env.SOCIAL_QUEUE_ARMED = "true";
+      const on = (await (await GET()).json()) as { queueArmed: boolean };
+      expect(on.queueArmed).toBe(true);
+    } finally {
+      if (saved === undefined) delete process.env.SOCIAL_QUEUE_ARMED;
+      else process.env.SOCIAL_QUEUE_ARMED = saved;
+    }
+  });
 });
 
 describe("POST /api/integrations/:destination/connect (mode-2 guided connect)", () => {

@@ -232,6 +232,48 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s112c — **PHASE 0 SHIPPED: the arm control stops promising what the box cannot do** (0 credits)
+
+**The honesty gap s103 opened is closed.** The queue's three gates are AND —
+`SOCIAL_QUEUE_ARMED` (env, box-level) → posting scope (tenant) → the
+destination's own arm state — and the surface could only ever see the bottom
+two. So it offered **"Live — due posts go out on their own"** on a deployment
+whose tick cannot send anything: a control asserting what the engine will not
+do, which is the exact defect class this surface exists to prevent (s103 caught
+it twice).
+
+**Shipped as a DISCLOSURE, never a door**, per the plan — arming the queue is a
+deployment act and the founder's sequence-gate call, and nothing added here can
+change it.
+
+- `GET /api/integrations` now serves **`queueArmed`**, derived by the engine's
+  own `publishQueueArmed` with the engine's own `SOCIAL_QUEUE_ARM_KEY`, so the
+  page and the tick cannot disagree. The validated env is a typed object, so the
+  predicate is handed exactly the one key it reads.
+- **One standing line at the head control** (not repeated per card — fewer
+  words): *"Unattended posting is switched off for this deployment, so nothing
+  goes out on its own yet. What you set here is saved and takes effect when it
+  is switched on."*
+- **The `Live` hint is now a function of the master key**, not a constant.
+- **A per-card `Held:` line only where the control actually promises a send**
+  (stored `live`, or `off` raised by scope `all`) — and it **outranks the scope
+  overlay**, because "this destination posts" is false while the master key is
+  off. An existing test asserted that now-false sentence; it was updated to arm
+  the gate above it, and a new test pins the precedence.
+
+**Driven in the real app, not just jsdom:** the disclosure renders once, every
+Live tooltip carries the honest sentence, and flipping LinkedIn to Live produced
+the `Held:` line on that card alone — then restored to `off`, verified through
+the API. Client state defaults `queueArmed` to **false**, so a failed or pending
+read never claims the queue is live.
+
+**Ratchets:** a route test pinning the exactly-`"true"` rule (`""`, `"1"`,
+`"TRUE"`, `"yes"`, `"true "` all read NOT armed) and four component tests.
+**Broken three ways and confirmed red** — reverting the flat hint, serving
+`queueArmed: true`, and letting the scope claim outrank the master key.
+
+---
+
 ## Sprint 9 / s112b — **FOUNDER REVIEW: THE SITE D SPINE WAS REJECTED AND REBUILT** (**+93.20 credits**; balance **153.98**)
 
 **He reviewed the arc and the verdict was about TASTE, not craft.** Verbatim:

@@ -93,9 +93,13 @@ const PUBLISHED = {
 function wire(
   cards: WireIntegrationCard[] = CARDS,
   postingScope: "selective" | "all" = "selective",
+  // The master key. Defaults to FALSE because that is the deployment's real
+  // state — the queue has never been armed — so every existing expectation in
+  // this file is asserted against the honest surface.
+  queueArmed = false,
 ): void {
   server.use(
-    http.get("/api/integrations", () => HttpResponse.json({ cards, postingScope })),
+    http.get("/api/integrations", () => HttpResponse.json({ cards, postingScope, queueArmed })),
     http.get("/api/integrations/published", () => HttpResponse.json(PUBLISHED)),
   );
 }
@@ -431,6 +435,78 @@ describe("the queue's arm control and the posting scope", () => {
     }),
   ];
 
+  /**
+   * Phase 0 (s112). The three gates are AND — master key, then scope, then the
+   * destination's own state — and the surface could only ever see the bottom
+   * two. So it offered "Live: due posts go out on their own" on a deployment
+   * whose tick cannot send anything, which is a control asserting what the
+   * engine will not do.
+   *
+   * These pin the DISCLOSURE, not a door: nothing here arms the queue, and
+   * there is deliberately no control that does.
+   */
+  it("discloses that unattended posting is off for the deployment, once, at the head control", async () => {
+    wire(CONNECTED_SOCIAL, "selective", false);
+    render(<Integrations />);
+    expect(
+      await screen.findByText(/Unattended posting is switched off for this deployment/i),
+    ).toBeInTheDocument();
+    // Said ONCE. Repeating it on every card would be noise, and the founder's
+    // standing steer is fewer words.
+    expect(
+      screen.getAllByText(/Unattended posting is switched off for this deployment/i),
+    ).toHaveLength(1);
+  });
+
+  it("drops the disclosure the moment the master key is armed", async () => {
+    wire(CONNECTED_SOCIAL, "selective", true);
+    render(<Integrations />);
+    await screen.findByRole("group", { name: "What the queue may do with Bluesky" });
+    expect(
+      screen.queryByText(/Unattended posting is switched off for this deployment/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("stops promising Live sends while the queue is unarmed, and promises it when armed", async () => {
+    wire(CONNECTED_SOCIAL, "selective", false);
+    const view = render(<Integrations />);
+    const seg = await screen.findByRole("group", { name: "What the queue may do with Bluesky" });
+    expect(within(seg).getByRole("button", { name: "Live" })).toHaveAttribute(
+      "title",
+      expect.stringContaining("once unattended posting is switched on"),
+    );
+    view.unmount();
+
+    wire(CONNECTED_SOCIAL, "selective", true);
+    render(<Integrations />);
+    const armedSeg = await screen.findByRole("group", {
+      name: "What the queue may do with Bluesky",
+    });
+    expect(within(armedSeg).getByRole("button", { name: "Live" })).toHaveAttribute(
+      "title",
+      "Due posts go out on their own.",
+    );
+  });
+
+  it("says HELD on a destination that would send — and only on those", async () => {
+    // Bluesky is `review` (waits for the operator either way, so no claim to
+    // correct); LinkedIn is `live` and IS promising an unattended send.
+    wire(
+      [
+        CONNECTED_SOCIAL[0],
+        { ...CONNECTED_SOCIAL[1], armState: "live" },
+        CONNECTED_SOCIAL[2],
+      ],
+      "selective",
+      false,
+    );
+    render(<Integrations />);
+    await screen.findByRole("group", { name: "What the queue may do with LinkedIn" });
+    const held = screen.getAllByText(/Held: unattended posting is switched off/i);
+    expect(held).toHaveLength(1);
+    expect(destinationCard("LinkedIn")).toContainElement(held[0]);
+  });
+
   it("splits connected from available and counts each — not one flat grid", async () => {
     wire();
     render(<Integrations />);
@@ -458,7 +534,11 @@ describe("the queue's arm control and the posting scope", () => {
   });
 
   it("under `all`, a destination keeps showing its STORED state — never blanked or rewritten", async () => {
-    wire(CONNECTED_SOCIAL, "all");
+    // ARMED, deliberately: the `all` overlay says "this destination posts",
+    // and that is only true once the master key is on. s112 made the master
+    // key's line take precedence for exactly that reason, so testing the
+    // scope overlay in isolation means arming the gate above it.
+    wire(CONNECTED_SOCIAL, "all", true);
     render(<Integrations />);
 
     // LinkedIn is stored `off` and posts under `all`; the control still says
@@ -471,6 +551,20 @@ describe("the queue's arm control and the posting scope", () => {
       "true",
     );
     expect(destinationCard("LinkedIn")).toHaveTextContent(/this destination posts, even though/);
+  });
+
+  /**
+   * The precedence itself, pinned: while the master key is off, "this
+   * destination posts" is FALSE, so the scope overlay must not be the sentence
+   * the operator reads. This is the exact claim the phase-0 fix exists to stop.
+   */
+  it("under `all` and UNARMED, the master key supersedes the scope's posting claim", async () => {
+    wire(CONNECTED_SOCIAL, "all", false);
+    render(<Integrations />);
+    await screen.findByRole("group", { name: "What the queue may do with LinkedIn" });
+    const linkedin = destinationCard("LinkedIn");
+    expect(linkedin).not.toHaveTextContent(/this destination posts, even though/);
+    expect(linkedin).toHaveTextContent(/Held: unattended posting is switched off/i);
   });
 
   it("under `all`, a REVIEW says it is still held — the one place `all` does not mean all", async () => {

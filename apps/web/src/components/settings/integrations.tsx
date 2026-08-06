@@ -45,11 +45,26 @@ const PUBLISHED_SHOWN = 12;
  */
 const SCOPE_KEY = "__posting_scope__";
 
-/** The queue gate's three states, in ladder order: safest end first. */
+/**
+ * The queue gate's three states, in ladder order: safest end first.
+ *
+ * `live`'s hint is a FUNCTION of the master key, not a constant. Written flat
+ * it read "Due posts go out on their own" on a deployment whose tick cannot
+ * send anything — the control asserting what the engine will not do, which is
+ * the one defect class this surface exists to avoid (s103 caught it twice,
+ * s112 fixed it here).
+ */
 const ARM_OPTIONS = [
-  { value: "off", label: "Off", hint: "Due posts are held and say so." },
-  { value: "review", label: "Review", hint: "Due posts wait for you in Approve." },
-  { value: "live", label: "Live", hint: "Due posts go out on their own." },
+  { value: "off", label: "Off", hint: () => "Due posts are held and say so." },
+  { value: "review", label: "Review", hint: () => "Due posts wait for you in Approve." },
+  {
+    value: "live",
+    label: "Live",
+    hint: (queueArmed: boolean) =>
+      queueArmed
+        ? "Due posts go out on their own."
+        : "Due posts would go out on their own — once unattended posting is switched on for this deployment.",
+  },
 ] as const;
 
 /**
@@ -84,6 +99,9 @@ export function Integrations() {
   const [busy, setBusy] = useState<string | null>(null);
   /** Part A2's tenant-wide mode. The server is the record; this mirrors the last read. */
   const [postingScope, setPostingScope] = useState<WirePostingScope>("selective");
+  /** The master key (`SOCIAL_QUEUE_ARMED`), read-only. Defaults to FALSE so a
+   *  failed or pending read never claims the queue is live. */
+  const [queueArmed, setQueueArmed] = useState(false);
   /** Which arm control is mid-write — keyed by entity, so one card's spinner never sits on another (the s77 rule). */
   const [armBusy, setArmBusy] = useState<string | null>(null);
   const [probes, setProbes] = useState<Record<string, WireProbeOutcome>>({});
@@ -126,6 +144,7 @@ export function Integrations() {
         .then((payload) => {
           setCards(payload.cards);
           setPostingScope(payload.postingScope);
+          setQueueArmed(payload.queueArmed === true);
           setReadAt(Date.now());
           setCardsStatus("success");
         })
@@ -274,6 +293,7 @@ export function Integrations() {
                 <ArmControl
                   card={card}
                   scope={postingScope}
+                  queueArmed={queueArmed}
                   busy={armBusy === card.destination}
                   error={actionErrors[card.destination]}
                   onPick={(next) =>
@@ -554,6 +574,7 @@ export function Integrations() {
             {armableCount > 0 && (
               <PostingScopeControl
                 scope={postingScope}
+                queueArmed={queueArmed}
                 busy={armBusy === SCOPE_KEY}
                 error={actionErrors[SCOPE_KEY]}
                 onPick={(next) =>
@@ -785,12 +806,14 @@ function ConnectPanel({
 function ArmControl({
   card,
   scope,
+  queueArmed,
   busy,
   error,
   onPick,
 }: {
   card: WireIntegrationCard;
   scope: WirePostingScope;
+  queueArmed: boolean;
   busy: boolean;
   error?: string;
   onPick: (next: "off" | "review" | "live") => void;
@@ -804,7 +827,7 @@ function ArmControl({
   // would be the card contradicting the engine. Found by running it — the
   // sentence read "this destination posts" on a destination the resolver
   // leaves off.
-  const overlay =
+  const scopeOverlay =
     scope !== "all"
       ? null
       : card.postingConfigured === false
@@ -814,6 +837,17 @@ function ArmControl({
           : stored === "off"
             ? "Scope is “all” — this destination posts, even though its own setting says off."
             : null;
+  /**
+   * Would this destination send by itself, if the master key allowed it? That
+   * is the only case where the control is promising an outcome, so it is the
+   * only case that needs the master key restated here — the head control
+   * carries the standing disclosure and repeating it on every card would be
+   * noise. `all` raises `off` to `live` but never `review` (part A2).
+   */
+  const wouldSend = stored === "live" || (scope === "all" && stored === "off" && card.postingConfigured !== false);
+  const overlay = !queueArmed && wouldSend
+    ? "Held: unattended posting is switched off for this deployment, so nothing goes out here by itself yet."
+    : scopeOverlay;
   return (
     <div className="int-arm">
       <div className="int-arm-head">
@@ -826,7 +860,7 @@ function ArmControl({
               aria-pressed={stored === option.value}
               className={stored === option.value ? "seg-opt on" : "seg-opt"}
               disabled={busy}
-              title={option.hint}
+              title={option.hint(queueArmed)}
               onClick={() => {
                 if (option.value !== stored) onPick(option.value);
               }}
@@ -874,11 +908,13 @@ function ArmControl({
  */
 function PostingScopeControl({
   scope,
+  queueArmed,
   busy,
   error,
   onPick,
 }: {
   scope: WirePostingScope;
+  queueArmed: boolean;
   busy: boolean;
   error?: string;
   onPick: (next: WirePostingScope) => void;
@@ -910,6 +946,20 @@ function PostingScopeControl({
         </div>
         {busy && <span className="t-label">Saving…</span>}
       </div>
+      {/*
+        The MASTER key, disclosed once and at the head of the controls it
+        governs. It is the outer AND gate, so while it is off every setting
+        below is a stored intention rather than a behaviour — and saying that
+        plainly is the whole fix: the operator should not have to discover
+        that a control named "Live" obeys a switch elsewhere. Deliberately not
+        a door; arming is a deployment act.
+      */}
+      {!queueArmed && (
+        <span className="int-sub">
+          Unattended posting is switched off for this deployment, so nothing goes out on its own
+          yet. What you set here is saved and takes effect when it is switched on.
+        </span>
+      )}
       <span className="int-sub">
         {scope === "all"
           ? "Every destination you’ve set up for posting goes live — including ones you set up later. Anything you set to Review still waits for you. Each destination keeps its own setting, so switching back to Selected restores exactly what you had."

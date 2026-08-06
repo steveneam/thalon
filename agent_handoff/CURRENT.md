@@ -32,9 +32,9 @@ review that rejected and rebuilt site D's spine**).
 > 851 words, third-wordiest of 25, against a 628 median and Morningside's 594.
 > Now 371, and the budget is executable.**
 
-Wrap verify on main: **exit 0, 3489 passed / 9 skipped, 0 lint errors**
-(3481 → 3489: six `resolveFrameRange` contracts, a plotted-instrument drift
-alarm, and the copy budget).
+Wrap verify on main: **exit 0, 3495 passed / 9 skipped, 0 lint errors**
+(3481 → 3495: six `resolveFrameRange` contracts, a plotted-instrument drift
+alarm, the copy budget, and six phase-0 honesty pins).
 
 **THE LANDING ARC IS COMPLETE. ALL SIX SITES ARE BUILT.**
 ⑳ ✅ → ㉑ ✅ → ㉒ ✅ → the landing ✅ + its three passes ✅ → ㉓ ✅ →
@@ -163,12 +163,15 @@ rules) · site D's PREPLAN §BUILT · arc spec · COORDINATION §s112.
 one.** Six sites and the front door are built and awaiting verdicts. The
 standing candidates, in the order I'd take them:
 
-**2 — PHASE 0** (~1hr): the s103 seg still offers **Live — "Due posts go out on
-their own"**, untrue while the queue's master key is empty. **Ship the
-DISCLOSURE, not a door.**
+**2 — PHASE 0 IS DONE (s112c).** The arm control no longer promises what the box
+cannot do: `queueArmed` reaches the surface from the engine's own predicate, the
+head control carries one standing disclosure, the `Live` hint is conditional, and
+a `Held:` line outranks the scope claim wherever a control would otherwise
+promise an unattended send. Disclosure only — nothing added arms the queue.
 
-**3 — CONTROL-ARC PART B**, which owes a DRAWN SHEET before any code
-(DOCTRINE 0). Both MIT deps approved.
+**3 — CONTROL-ARC PART B is now the next build item**, and it owes a DRAWN SHEET
+before any code (DOCTRINE 0). Both MIT deps approved. Design work is Fable 5
+lead-direct, never delegated.
 
 **4 — WHITETHORN HAS A LIVE REDESIGN BRIEF IN HIS OWN WORDS** whenever he wants
 it: *"a dog (real or cartoon) on the side bar or at the top of the screen walking
@@ -344,3 +347,31 @@ against the rebuilt page.
 - **Aspect & Fall and Small Hours are "ok, but not memorable."** Both are
   time-lapses. Neither has been re-briefed.
 - **153.98cr remain** on a sunsetting subscription.
+
+---
+
+## ADDENDUM 2 — phase 0 shipped (s112c, 0 credits)
+
+**The arm control stops asserting what the engine will not do.** Three gates are
+AND — `SOCIAL_QUEUE_ARMED` (env) → posting scope → the destination's state — and
+the surface could only see the bottom two, so it offered *"Live — due posts go
+out on their own"* on a deployment whose tick cannot send. Fixed as a
+**disclosure, never a door**: arming stays a deployment act and the founder's
+sequence-gate call.
+
+- `GET /api/integrations` serves **`queueArmed`** from the engine's own
+  `publishQueueArmed` + `SOCIAL_QUEUE_ARM_KEY`, so page and tick cannot disagree.
+- **One** standing line at the head control; the `Live` hint is now a function of
+  the master key; a per-card `Held:` line **only** where a control would
+  otherwise promise a send, and it **outranks the scope overlay** because "this
+  destination posts" is false while the master key is off.
+- Client state defaults to **not armed**, so a failed read never claims live.
+
+**Driven in the real app**, not only jsdom: disclosure renders once, every Live
+tooltip carries the honest sentence, flipping LinkedIn to Live produced the
+`Held:` line on that card alone — then restored to `off` and confirmed through
+the API. One existing test asserted the now-false scope sentence; it was updated
+to arm the gate above it, and a new test pins the precedence.
+
+**Five ratchets, broken three ways and confirmed red** (flat hint restored,
+`queueArmed: true` served, scope claim outranking the master key).

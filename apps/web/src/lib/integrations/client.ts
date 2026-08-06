@@ -83,6 +83,14 @@ export interface WireIntegrationsRead {
   cards: WireIntegrationCard[];
   /** Part A2's tenant-wide mode the per-destination states are read under. */
   postingScope: WirePostingScope;
+  /**
+   * The MASTER key (`SOCIAL_QUEUE_ARMED`), read-only. It sits ABOVE both the
+   * scope and the per-destination states, and all three are AND — so while
+   * this is false nothing goes out unattended whatever the controls below it
+   * say. Disclosed so the surface stops promising an outcome the deployment
+   * cannot produce; there is deliberately no door here that changes it.
+   */
+  queueArmed: boolean;
 }
 
 export async function fetchIntegrationCards(): Promise<WireIntegrationsRead> {
