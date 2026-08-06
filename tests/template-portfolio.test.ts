@@ -236,6 +236,81 @@ describe("template portfolio", () => {
   });
 
   /**
+   * The plotted-instrument drift alarm (Marl & Cane, s112).
+   *
+   * The sibling test above pins the small-hours SHAPE (compounds + hours). A
+   * site whose instrument is a PLOTTED CURVE has the same two copies of one
+   * truth and the same way of rotting: an SVG `points` list hand-written into
+   * the markup, and the inert JSON block the runtime interpolates from.
+   * Because the polyline is just a string of numbers, a reading edited in the
+   * data block leaves the drawn line exactly where it was, and the page then
+   * shows a curve that disagrees with its own table while every other test
+   * here passes.
+   *
+   * So the geometry is RECOMPUTED from the data and compared, using the plot
+   * rectangle the data block itself declares. That makes the static SVG a
+   * derived artifact in fact and not merely by intention — which is what
+   * "static-first is an honesty gate" (㉑ s105) actually requires, since
+   * /guide claims in writing that the chart is drawn from these numbers.
+   */
+  it("a plotted instrument's static polylines are recomputable from its data block", () => {
+    for (const slug of slugs) {
+      const html = readFileSync(path.join(sitesDir, slug, "index.html"), "utf8");
+      const block = /<script type="application\/json" id="[\w-]+">([\s\S]*?)<\/script>/.exec(html);
+      if (!block) continue;
+
+      const data = JSON.parse(block[1]) as {
+        plot?: { left: number; right: number; top: number; bottom: number;
+                 [series: string]: number | [number, number] };
+        readings?: Array<Record<string, string | number>>;
+      };
+      if (!data.plot || !data.readings) continue; // not a plotted instrument
+
+      const { left, right, top, bottom } = data.plot;
+      const n = data.readings.length;
+      expect(n, `${slug}: a plotted instrument needs at least two readings`).toBeGreaterThan(1);
+
+      for (const [series, scale] of Object.entries(data.plot)) {
+        if (!Array.isArray(scale)) continue; // left/right/top/bottom, not a series
+        const [lo, hi] = scale;
+        const expected = data.readings
+          .map((r, i) => {
+            const v = Number(r[series]);
+            expect(
+              Number.isFinite(v),
+              `${slug}: reading ${i} has no numeric "${series}" but the plot declares that scale`,
+            ).toBe(true);
+            const x = left + ((right - left) * i) / (n - 1);
+            const y = bottom - ((bottom - top) * (v - lo)) / (hi - lo);
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          })
+          .join(" ");
+
+        const drawn = new RegExp(
+          `class="l-${series}"[^>]*\\bpoints="([^"]+)"`,
+        ).exec(html);
+        expect(
+          drawn,
+          `${slug}: the data block declares a "${series}" scale but no polyline carries class "l-${series}"`,
+        ).not.toBeNull();
+        expect(
+          drawn![1].trim(),
+          `${slug}: the drawn "${series}" curve does not match the one its own data block computes — the chart and the table are telling the reader different things`,
+        ).toBe(expected);
+      }
+
+      // Every reading must also be printed in the static table, so the no-JS
+      // reader gets the same numbers the curve was drawn from.
+      for (const r of data.readings) {
+        expect(
+          html.includes(`<td>${r.at}</td>`),
+          `${slug}: reading "${r.at}" is in the data block but not in the static table`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  /**
    * The static frame-stack contract (s107, GENERALISED s108).
    *
    * A scrubbed sequence ships its frames absolutely stacked, and the runtime

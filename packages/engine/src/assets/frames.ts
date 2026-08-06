@@ -68,3 +68,40 @@ export function evenlySpacedIndices(total: number, want: number): number[] {
   if (want === 1) return [0];
   return Array.from({ length: want }, (_, i) => Math.round((i * (total - 1)) / (want - 1)));
 }
+
+/**
+ * Resolves a manifest `range` to inclusive source-frame bounds, defaulting to
+ * the whole clip.
+ *
+ * Why a range exists at all (Marl & Cane / site D, s112): **a generated take
+ * does not spread its transformation evenly across its own duration.** Measured
+ * on an 8s `start_image`→`end_image` veraison take, the bunch's distance from
+ * its final state sat flat at ~100% for the first ~48 native frames, fell over
+ * the next ~75, and was then pinned within noise for the last ~65 — frames 128,
+ * 144, 168 and 192 are visibly the same picture. Sampling evenly across all 193
+ * frames, which is what `frames: N` alone means and what every prior site did,
+ * would have spent a third of the page's scroll on a still image and squeezed
+ * the beat the page exists for into the middle.
+ *
+ * The dead range is a property of the pinned bytes, so it is recorded here
+ * rather than trimmed by hand: the derive stays a pure function of
+ * (pinned bytes, range, frames, size, quality) and the next session can see
+ * which part of the take was paid for and never shipped.
+ */
+export function resolveFrameRange(
+  total: number,
+  range?: readonly [number, number],
+): [number, number] {
+  if (!Number.isInteger(total) || total < 1) throw new Error(`total must be >= 1, got ${total}`);
+  if (!range) return [0, total - 1];
+  const [lo, hi] = range;
+  if (!Number.isInteger(lo) || !Number.isInteger(hi)) {
+    throw new Error(`range must be two integers, got [${lo}, ${hi}]`);
+  }
+  if (lo < 0 || hi < 0) throw new Error(`range must not be negative, got [${lo}, ${hi}]`);
+  if (lo >= hi) throw new Error(`range must ascend, got [${lo}, ${hi}]`);
+  if (hi > total - 1) {
+    throw new Error(`range [${lo}, ${hi}] runs past the take's last frame (${total - 1})`);
+  }
+  return [lo, hi];
+}

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method note — Marl &amp; Cane</title>
+<meta name="description" content="How the Marl &amp; Cane page was designed and built, which models minted which assets, and what is real and what is not.">
+<style>
+  @font-face { font-family: "Syne"; src: url("../fonts/syne-var.woff2") format("woff2");
+    font-weight: 400 800; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Geist"; src: url("../fonts/geist-var.woff2") format("woff2");
+    font-weight: 100 900; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Geist Mono"; src: url("../fonts/geistmono-var.woff2") format("woff2");
+    font-weight: 100 900; font-style: normal; font-display: swap; }
+  :root { --bone:#ede9e1; --ink:#16161a; --ink-2:#4a4a4f; --rule:#c9c3b7; --fruit:#8c5839; }
+  *,*::before,*::after { box-sizing:border-box; }
+  body { margin:0; background:var(--bone); color:var(--ink);
+    font-family:"Geist",system-ui,sans-serif; font-size:17px; line-height:1.65;
+    font-weight:350; text-wrap:pretty; }
+  h1,h2 { font-family:"Syne",sans-serif; font-weight:700; letter-spacing:-0.02em;
+    line-height:1.05; margin:0 0 0.6rem; }
+  h1 { font-size:clamp(2rem,5vw,3.2rem); }
+  h2 { font-size:clamp(1.2rem,2.4vw,1.5rem); margin-top:2.75rem; }
+  .wrap { width:min(760px,100% - 2.5rem); margin-inline:auto; padding:3rem 0 5rem; }
+  .lab { font-family:"Geist Mono",ui-monospace,monospace; font-size:11px;
+    letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-2); }
+  a { color:var(--fruit); text-underline-offset:3px; }
+  a:hover { color:var(--ink); }
+  p { max-width:66ch; }
+  .note { color:var(--ink-2); }
+  table { width:100%; border-collapse:collapse; margin-top:1rem; font-size:14px; }
+  th,td { text-align:left; padding:0.55rem 0.6rem; border-top:1px solid var(--rule);
+    vertical-align:top; }
+  thead th { border-top:0; }
+  td.mono, th.mono { font-family:"Geist Mono",monospace; font-size:12.5px; }
+  hr { border:0; border-top:1px solid var(--rule); margin:2.5rem 0 0; }
+  ul { max-width:66ch; padding-left:1.1rem; }
+  li { margin-bottom:0.5rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="lab"><a href="../" style="color:var(--ink-2)">← Marl &amp; Cane</a></p>
+  <h1>How this page was made</h1>
+
+  <p class="note">Marl &amp; Cane is a <strong>fictional estate</strong>. It does not
+  exist, the wine does not exist, and nobody can visit the cellar door. The page
+  is a demonstration of a build method, and everything on it that looks like a
+  claim about a real business is invented for that purpose.</p>
+
+  <h2>The picture is generated, and it is one continuous take</h2>
+  <p>Every image on this site is <strong>AI-generated</strong>. None of it is a
+  photograph of a real vineyard, and no third-party or stock imagery was used.</p>
+  <p>The scroll sequence — the bunch changing colour — is <strong>81 stills taken
+  from a single eight-second generated video clip</strong>, not 81 separate
+  images. Two keyframes were generated first: the bunch unripe, and the same
+  bunch with the fruit turned. One clip was then generated between them, and the
+  page scrubs its frames against your scroll position. That is why the berries
+  stay in exactly the same places while their colour changes: they are the same
+  shot, not a slideshow of near-misses.</p>
+
+  <h2>What was measured rather than guessed</h2>
+  <ul>
+    <li><strong>The take was two-thirds useful.</strong> The clip runs 193
+      frames; the fruit stops changing at about frame 126, and everything after
+      that is one still picture. Sampling evenly across the whole clip would
+      have spent a third of this page's scroll on a frozen image, so the page
+      ships only the live range. The range is recorded in the asset manifest,
+      not trimmed by hand.</li>
+    <li><strong>81 frames, not 41 or 121.</strong> Frame count was chosen by
+      measuring how much changes between neighbouring frames and comparing it
+      against sequences on two other sites that already read smoothly.</li>
+    <li><strong>Each chapter's length is derived from the frames it drives</strong>
+      rather than from how long its paragraph happened to be. Driven in a real
+      browser and counted frame by frame, that works out at 40–60 pixels of
+      scroll per frame on a desktop (median 50) and 35–60 on a phone (median
+      45), with no frame starved of scroll and none unreachable.</li>
+    <li><strong>Exposure is levelled frame by frame.</strong> Generated clips
+      drift in brightness over their first second. Each frame is corrected onto
+      one measured reference patch of the background, so the picture does not
+      quietly warm up as you scroll.</li>
+  </ul>
+
+  <h2>The colour of the page</h2>
+  <p>The page is deliberately achromatic — bone and ink — and holds exactly one
+  colour, which moves as you scroll. <strong>Its hue is measured off the frames
+  themselves</strong>: the lit fruit reads about 68° (yellow-green) at the start,
+  40° as it turns, and 4° (red) as it darkens.</p>
+  <p class="note">Two honest caveats. The <em>lightness</em> of that accent is not
+  taken from the photograph — it is solved per hue so the colour keeps a constant
+  contrast ratio against the background (never below 4.8:1), because a fixed
+  lightness across a hue sweep fails legibility at the green end: measured, 29 of
+  the 81 frames failed it before that fix. And the closing <strong>red-violet is a
+  design choice, not a measurement</strong>: by the last frames the fruit is too
+  desaturated for a hue to mean anything, so that one number was chosen rather
+  than read.</p>
+
+  <h2>The ripening chart</h2>
+  <p>The sugar and acid readings are <strong>invented data for a fictional
+  vintage</strong>, chosen to be plausible for Cabernet Sauvignon. They are not
+  measurements from a real block.</p>
+  <p>The chart is drawn as real markup from a single block of numbers embedded in
+  the page, and the script that animates it reads the <em>same</em> block. With
+  JavaScript switched off you still get the whole chart, the whole table, every
+  chapter and one frame of the sequence — nothing here is drawn by script that
+  isn't already in the page.</p>
+
+  <h2>What made what</h2>
+  <table>
+    <thead><tr><th>Asset</th><th class="mono">Model</th><th class="mono">Credits</th></tr></thead>
+    <tbody>
+      <tr><td>Unripe bunch (keyframe, and the hero still)</td><td class="mono">text2image_soul_v2</td><td class="mono">0.12 ×4</td></tr>
+      <tr><td>Turned bunch (keyframe)</td><td class="mono">seedream_v4_5</td><td class="mono">1.00 ×2</td></tr>
+      <tr><td>The veraison clip — 8s, 720p</td><td class="mono">seedance_2_0</td><td class="mono">36.00</td></tr>
+      <tr><td>Marl, harvest, glass</td><td class="mono">text2image_soul_v2</td><td class="mono">0.12 ×4</td></tr>
+    </tbody>
+  </table>
+  <p class="note" style="margin-top:1rem">The models named are the ones that
+  actually ran, which is not always the one requested — this vendor sometimes
+  substitutes a faster variant. Ten stills were generated and five kept. The
+  harvest photograph carried a small artefact near its lower edge; rather than
+  retouch it, the published crop composes it out of frame, and that crop is part
+  of the recorded recipe.</p>
+
+  <h2>The one thing that is hand-written</h2>
+  <p>The pencilled note under the chart — <em>22 Mar · 14 mm — held off four
+  days</em> — is the page's single deliberate informality, and the reason the
+  picking date is the 26th and not the 22nd. Growers really do annotate their
+  lab books like that.</p>
+
+  <h2>Type and licensing</h2>
+  <p class="note">Syne, Geist and Geist Mono, all under the SIL Open Font
+  License, served from this site — no external fonts, no CDN, no analytics and
+  no third-party requests of any kind. The page is a single HTML file with its
+  styles and script inline.</p>
+
+  <hr>
+  <p class="lab" style="margin-top:1.5rem"><a href="../">← Back to Marl &amp; Cane</a></p>
+</div>
+</body>
+</html>

@@ -303,6 +303,36 @@ chaining is what ㉑'s Feb→May→Jul→Oct already needs.
 
 ### Site D — vineyard / winery
 
+> **✅ BUILT s112 as `marl-and-cane`** — the arc's last site, and **the arc is
+> now complete**. Named against the spec's own collision check, which **failed
+> on *Veraison***: multiple live trading names (a London wine bar, an Iowa wine
+> shop), a near-homophone winery (*Varaison Vineyards*) and a registered
+> trademark holder, *Veraison Wine Cellars, Inc.* *Southfacing* was also
+> rejected — a south-facing slope is the warm aspect only in the northern
+> hemisphere, and `aspect-and-fall` already owns "aspect". **Marl & Cane** takes
+> it: both words are real viticulture (a clay-limestone soil; the one-year wood
+> cane-pruning leaves) and neither collides. Secondary axis drawn as
+> **`brutalist-raw`** over `physics-interaction`, on the motion budget —
+> physics would have been a second motion system competing with the spine for
+> one clock, brutalism costs none of it.
+>
+> **The ~110cr three-segment tier in the table below is SUPERSEDED.** Veraison
+> is a one-way transformation of a SINGLE subject, so s107 applies exactly: mint
+> the two endpoints, let one take supply the middle. **One take, 36cr; the whole
+> site cost 38.96cr.** Chaining would have bought a seam nobody wanted and paid
+> s106's registration coin-flip for it.
+>
+> Ships the light Brix/acid instrument this table proposed — the opposite call
+> to Morningside's none, because nothing in the portfolio plots ripeness and
+> veraison IS the visible proxy for sugar accumulation, which makes the lay twin
+> free and unusually honest. Record:
+> `proprietary/templates/sites/marl-and-cane/PREPLAN.md` §BUILT.
+> **The spine method below gains one correction the meta-prompt now carries: a
+> generated take does not spread its transformation evenly across its duration**
+> — this one finished at native frame ~126 of 193 and the last third is one
+> still picture, so the manifest ships a measured `range` and the dead tail is
+> never spent on scroll.
+
 | | |
 |---|---|
 | **Banked idea** | `seasons-tree` again, but as **generated motion** rather than the cross-fade `orchard-house` actually ships |

@@ -18,6 +18,7 @@ import sharp from "sharp";
 import { getObjectStore } from "@thalon/platform";
 import {
   evenlySpacedIndices,
+  resolveFrameRange,
   frameFileNames,
   pinnedAssetKey,
   readPinnedAsset,
@@ -91,6 +92,17 @@ interface ManifestEntry {
     /** The reference grade that patch is levelled onto: [r, g, b]. */
     target: [number, number, number];
   };
+  /** The take's LIVE RANGE as inclusive zero-based source frames: `frames` are
+   *  sampled evenly within it instead of across the whole clip. Defaults to the
+   *  whole clip.
+   *
+   *  Marl & Cane / site D, s112: a generated take does not spread its
+   *  transformation evenly across its own duration. Measured on this site's 8s
+   *  veraison take, the fruit finished colouring at native frame ~126 and the
+   *  remaining ~65 frames are visibly one still image. Sampling evenly across
+   *  all 193 would have spent a third of the page's scroll on a frozen picture.
+   *  See `resolveFrameRange` for the measurement and the reasoning. */
+  range?: [number, number];
 }
 
 /**
@@ -137,9 +149,11 @@ async function flattenGrade(
 async function emitFrames(assetsDir: string, entry: ManifestEntry, video: Buffer): Promise<string[]> {
   const names = frameFileNames(entry.file, entry.frames!);
   await withDecodedFrames(video, async (decoded) => {
-    const picked = evenlySpacedIndices(decoded.length, entry.frames!);
+    const [lo, hi] = resolveFrameRange(decoded.length, entry.range);
+    const window = decoded.slice(lo, hi + 1);
+    const picked = evenlySpacedIndices(window.length, entry.frames!);
     for (const [i, index] of picked.entries()) {
-      writeFileSync(path.join(assetsDir, names[i]), await encodeFrame(decoded[index], entry));
+      writeFileSync(path.join(assetsDir, names[i]), await encodeFrame(window[index], entry));
     }
   });
   return names;
@@ -224,6 +238,11 @@ async function main() {
     }
     if (entry.frames !== undefined && entry.frame !== undefined) {
       throw new Error(`"${entry.file}" declares both frames and frame — pick one`);
+    }
+    // `range` narrows a SEQUENCE. `frame` is an absolute source-frame index and
+    // stays absolute, so pairing the two would make its number mean two things.
+    if (entry.range !== undefined && entry.frames === undefined) {
+      throw new Error(`"${entry.file}" declares range without frames — range narrows a sequence`);
     }
     if (entry.frame !== undefined) {
       const file = await emitStillFromVideo(path.join(siteDir, "assets"), entry, original);

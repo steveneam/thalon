@@ -232,6 +232,83 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s112 — **SHIPPED: SITE D (`marl-and-cane`). THE LANDING ARC IS COMPLETE** (boot "gogogo"; **38.96 credits**, zero live posts)
+
+**The arc's last site is built, passed and green.** A single-vineyard estate
+whose page is one year of one bunch: **81 scrubbed frames of veraison**, the
+fruit going green → rose → blue-black under the reader's scroll, with the
+laboratory record that decided the picking date underneath it. ⑳ ✅ → ㉑ ✅ →
+㉒ ✅ → the landing ✅ → ㉓ ✅ → **㉔ `marl-and-cane` ✅. A + B + C + capstone +
+D + E are ALL BUILT.**
+
+**It cost 38.96cr against a ~110cr tier, and the saving is a rule, not luck.**
+The spec budgeted three segments; s107 says a one-way transformation of a single
+subject takes ONE take with two minted endpoints. **One take, 36cr.** Balance
+286.14 → 247.66.
+
+**Named against the spec's own open question.** *Veraison* was checked and
+**fails** — several live trading names, a near-homophone winery, and a
+registered trademark holder. *Southfacing* picks a hemisphere and collides with
+`aspect-and-fall`. **Marl & Cane** — a clay-limestone vineyard soil and the
+one-year wood cane-pruning leaves — collides with nothing, and lets the masthead
+hold the two constants while the page argues the one year that never repeats.
+Secondary axis **`brutalist-raw`**, drawn over `physics-interaction` because
+physics would have been a second motion system competing for one clock.
+
+**The session's find: a generated take does not spread its transformation evenly
+across its own duration.** The 8s take runs 193 frames; measured against its own
+final state the subject is flat for the first ~48, changes across ~75, and is
+**pinned within noise for the last ~65** — frames 128/144/168/192 are visibly
+one picture. `frames: N` samples the whole clip, which is what every prior site
+did, so it would have spent **a third of the page's scroll on a still image**.
+Ratcheted as a manifest `range` resolved by `resolveFrameRange` (engine,
+unit-tested, broken three ways). The take reaching its end early is real biology,
+so the PAGE says so — its last chapter is "and then it stops".
+
+**And the density benchmark this repo has been quoting does not reproduce.**
+㉒'s bloom is recorded in the meta-prompt at "mean 1.19"; measured off the
+shipped bytes it is **1.52**, and Morningside's shipped beans are **1.51** — two
+shipped sequences that read well, both ≈1.5. The gap is the ENCODER: encoding is
+deterministic, but two slightly-different frames land on different quantisation
+decisions and a true 1.18 measures **2.25 at webp q54**, an additive ~1.0 with
+nothing to do with motion. **Measure in one space and say which.**
+
+**Four the browser found.** The **mobile pin was dead at 724 of 724 in-view
+samples** — and NOT for the s111 reason: both `position` and `height` were
+restated, but `.stage-col { flex: 0 0 auto }` makes the sticky element's
+containing block exactly its own height, so there is no travel; desktop escapes
+it only because `align-items: stretch` hides it. 0 of 688 after the sticky moved
+onto the column. The stage was **bound by column width, not `--stage-max-h`**
+(328px in a 900px viewport). A **fixed HSL lightness cannot survive a hue
+sweep** — 29 of 81 frames failed AA at the green end until L was solved per hue
+for a constant 4.85:1. And the **colour readout lagged the picture by ~20
+frames** because its thresholds were guessed rather than read off the frames,
+which is Morningside's "grinding" mistake exactly.
+
+**The docroot-leak ratchet then caught a leak of MINE**, which is the best
+evidence this session that the boundary is load-bearing: a source comment in the
+shipped `index.html` named an internal method doc while explaining the twin.
+Every site-level ratchet and every browser measurement was green. **And the run
+that found it reported itself as passing** — `verify > log; echo $?` exits the
+wrapper 0, so the harness summarised a two-failure gate as "exit code 0"; the
+log said `VERIFY EXIT: 1`. The other red was `b-int0-repos`, untouched since
+s67, at 10.6s under a load average of 25.75 — passes in 5.2s isolated, and the
+opening verify passed it on the same code.
+
+**Ratchets bought:** `resolveFrameRange` + the manifest `range` field
+(executable, engine-side, unit-tested) · a **plotted-instrument drift alarm** in
+`tests/template-portfolio.test.ts` that RECOMPUTES the static SVG polylines from
+the page's own data block and checks every reading reaches the static table.
+**Both broken deliberately and confirmed red** (three ways each), as were the
+four existing portfolio ratchets against this new site — where the first attempt
+at breaking them was itself a **no-op perl substitution that silently changed
+nothing**, which is indistinguishable from a ratchet that does not fire. Break
+tests now assert the file actually changed.
+
+**Verdict: awaiting.** ㉔ of the portfolio.
+
+---
+
 ## Sprint 9 / s111 — **SHIPPED: SITE E (`morningside`). The landing arc's fourth site; only D remains** (boot "gogogo"; **0.60 credits**, zero live posts)
 
 **Site E is built, passed and green.** A coffee brand whose page IS its

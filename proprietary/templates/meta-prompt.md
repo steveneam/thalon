@@ -145,6 +145,19 @@ and their positions in frame** ("a drystone pier at the left edge and another
 at the right, the rendered wall running horizontally across the middle, the
 bench against it on the left, paving filling the lower third"). Describe the
 FRAME as a layout, not as a reference to obey.
+Corollary (Marl & Cane, s112 — **A COLOUR WORD MAY NAME A VARIETY RATHER THAN A
+STAGE, and getting that wrong breaks the whole sequence, not one frame**): two
+anchor takes asking for "hard, unripe, pale yellow-green celadon" berries
+returned **ripe WHITE wine grapes** — translucent and golden — because the model
+resolved "green grape" to the colour of a white variety at maturity, not to the
+colour of unripe fruit. The trap is that a white variety **has no veraison to
+purple at all**, so chaining a blue-black end frame off it would have asserted
+something the plant cannot do. **Pin the attribute that DETERMINES the colour**
+(name a red variety: "unripe Cabernet Sauvignon … weeks before it colours") and
+describe the stage by *hardness and opacity* rather than by the colour word
+("opaque and dull blue-green like an unripe olive, matte chalky bloom, no
+translucency"). Keeper on the first attempt after the correction, for 0.24cr,
+because §the-anchor rule below caught it before anything derived from it.
 Corollary (㉑, s105 — **generated botany lies, and the page's own data catches
 it**): a "mid-May" edit came back with the hydrangea in full flower, which is
 botanically wrong and contradicted the interest calendar printed directly below
@@ -307,6 +320,51 @@ still it is given** — S1's first frame sat MAD 7.36 off its own anchor
 keyframe. So keyframes are DIRECTING instruments, not shipping assets: the
 hero still is the take's frame 0, and any later keyframe must be derived from
 the take rather than from the still that made it.)
+Corollary (Marl & Cane/site D, s112 — **A GENERATED TAKE DOES NOT SPREAD ITS
+TRANSFORMATION EVENLY ACROSS ITS OWN DURATION, so `frames: N` alone can spend a
+third of a page's scroll on a still image**): an 8s `start_image`→`end_image`
+veraison take returned 193 native frames. Measured per frame against its own
+final state, the subject sat flat at ~100% for the first ~48 frames, changed
+across the next ~75, and was then **pinned within noise for the last ~65** —
+frames 128, 144, 168 and 192 are visibly one picture, confirmed on a contact
+sheet. Sampling evenly across the whole clip, which is what every prior site
+did, would have paid full scroll for a frozen image and squeezed the beat the
+page exists for into the middle. **Measure the LIVE RANGE before choosing a
+frame count**, and record it: `range: [lo, hi]` is now a manifest field
+(`resolveFrameRange`, engine-side and unit-tested), so the range is a property
+of the pinned bytes and not a hand-trim. The corollary to the corollary: a take
+that reaches its end state early is not a bad take — this one's dead tail is
+real biology, the fruit genuinely stops changing — so let the PAGE say so
+rather than padding the motion (site D's last chapter is "and then it stops",
+and the instrument carries the five weeks after).
+Corollary (s112 — **ADJACENT-FRAME DIFFERENCE IS NOT COMPARABLE ACROSS
+MEASUREMENT SPACES, and the benchmark this file records does not reproduce**):
+the density rule above says compare against ㉒'s shipped bloom at "mean 1.19,
+peak 2.09". Measured off the shipped bytes it is **1.52 / 2.44 / 2.14**, at both
+1000×563 and 900×506 — not a resize artifact. Morningside's shipped beans measure
+**1.51 / 2.05 / 1.83**. Two independent shipped-and-accepted sequences both sit
+at **≈1.5 mean**, which is the number to use. The discrepancy is the ENCODER:
+encoding is deterministic (the same frame twice differs by exactly 0), but two
+slightly-different frames land on different quantisation decisions, and a true
+1.18 measures **2.25 at webp q54** — an additive ~1.0 that has nothing to do
+with motion and barely moves with quality (still 0.75 at q82). **Measure in ONE
+space and say which; compare shipped bytes to shipped bytes**, because every
+sequence known to read well is a shipped one. Prefer re-deriving the benchmark
+from the shipped assets at measure time over quoting a remembered constant —
+a documentary number that nobody re-runs is exactly the ratchet that rots.
+Corollary (s112 — **a REGISTERED EDIT buys exact geometry and not exact grade,
+and the patch you measure it on decides what you conclude**): two end-frame
+candidates edited from one anchor on `seedream_v4_5` both came back in register
+(dx=0 dy=0 and dx=0 dy=+1 on a ±24px search), so layout-naming held viewpoint on
+both seeds where s106 measured that technique as a coin flip. But the exposure
+check disagreed with itself: a "static" patch containing the subject's vine leaf
+said the edit had lifted the frame +5.3/+7.3/−4.2, while **three pure-background
+patches all said R and G barely move and BLUE drops ~6.5** — consistently, on
+both candidates, so it is a property of the model and not the seed. The leaf had
+been re-lit by the very edit being measured. **Choose the static patch to
+contain nothing the edit touched and nothing adjacent to it**, and note that the
+shift can live in a SINGLE CHANNEL rather than as an exposure offset. Fix it the
+s111 way — flatten per frame in the derive — never by hand on the mint.
 A near-clean take with one small garbled patch may take a
 disclosed local blur pre-pin instead of another take — the /guide must say so;
 a deterministic manifest crop (position + tighter aspect in the derive) that
@@ -502,6 +560,27 @@ minted states crossfading in sync with the graph's stages. The instrument
 earns the expert's trust; the twin carries everyone else. One clock, two
 readings; the twin is never decoration — it must track the instrument's
 state exactly (reduced-motion/no-JS get the complete twin too).
+**Corollary (Marl & Cane, s112 — the twin has to share a SCREEN, not just a
+clock):** site D put its ripeness curve in a section BELOW the pinned scrub, so
+the two readings were on one clock and never once visible together — the reader
+watches the fruit, then several screens later meets the chart. That satisfies
+the letter of this rule and none of its point. The fix was to put the
+instrument's own interpolated numbers into the stage's stamp, beside the picture
+they describe and out of the same data block ("Day 19 · Colour · mixed · 15.8°
+Brix · 13.5 g/L"). **Check that the twin and the instrument are co-visible at
+some scroll position; if they never are, one of them is decoration.**
+**Corollary (s112 — an accent that walks a HUE ARC cannot hold a fixed
+lightness):** site D's one accent is read off the frames and travels green (68°)
+→ rose (22°) → red (4°) → red-violet. At a constant HSL `L`, contrast against
+the page ground swings wildly, because HSL lightness is not perceptual
+lightness: at L=34% the yellow-greens measured **3.67:1 and 29 of 81 frames
+failed AA**, while the reds and violets passed at 5.9–7.3:1. **Solve L per hue
+for a constant contrast ratio** (bisection against the real WCAG formula takes
+ten lines) rather than picking one L and checking the ends — every frame then
+passes AND the accent keeps a constant visual weight as it travels, which is
+also the better design. This is the s111 "an accent can fail at the END of its
+own arc" trap generalised: on a hue sweep it can fail at either end or in the
+middle, so check EVERY step, not the endpoints.
 
 **Hero register rule (founder direction 2026-07-15 s37):** the first
 impression must be *real*. A code-drawn model, schematic, or illustration
@@ -531,7 +610,16 @@ measuring `getBoundingClientRect().top` of the pinned element — it must read
 3. **The narrow layout collapses the travel.** In a single-column layout the
    stage's own cell is only as tall as the stage, so the same failure returns
    on phones only. Move `position:sticky` onto the column and make the section
-   a column flex container.
+   a column flex container. **(s112: this is the one that keeps coming back, and
+   it is invisible on desktop BY CONSTRUCTION.** Site D restated both `position`
+   AND `height` in its narrow query, per the s111 lesson, and the pin was still
+   dead at **724 of 724 in-view samples** — because the cause was neither: with
+   `.stage-col { flex: 0 0 auto }` the sticky element's containing block is
+   *exactly its own height*, so there is nothing to travel through. Desktop
+   escapes it only because `align-items: stretch` silently makes the column as
+   tall as the whole section. **Measure the pin at a phone width every time —
+   the desktop result carries no information about it.** 0 of 688 after the
+   sticky moved onto the column.)
 4. **The reading line is measured from zero.** When the pinned stage covers the
    top of the viewport, a chapter-activation test measured from `0` marks a
    chapter active while its heading is still *behind* the sheet (⑳ shipped this

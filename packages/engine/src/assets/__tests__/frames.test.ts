@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evenlySpacedIndices, frameFileNames, isFramePattern } from "../frames";
+import { evenlySpacedIndices, frameFileNames, isFramePattern, resolveFrameRange } from "../frames";
 
 describe("isFramePattern", () => {
   it("recognises a %0Nd pattern and leaves plain filenames alone", () => {
@@ -62,5 +62,41 @@ describe("evenlySpacedIndices", () => {
 
   it("refuses to sample more frames than the source has", () => {
     expect(() => evenlySpacedIndices(10, 11)).toThrow(/cannot sample/);
+  });
+});
+
+describe("resolveFrameRange", () => {
+  it("defaults to the whole clip when no range is declared", () => {
+    expect(resolveFrameRange(193)).toEqual([0, 192]);
+  });
+
+  it("keeps a declared live range inclusive at both ends", () => {
+    // Site D's veraison take: the fruit stops changing at native frame ~126 and
+    // the last ~65 frames are one still picture. Both ends are shipped.
+    expect(resolveFrameRange(193, [0, 126])).toEqual([0, 126]);
+  });
+
+  it("narrows the sample so a dead tail is never spent on scroll", () => {
+    // The point of the range: sampling within it must land entirely inside it,
+    // and must reach its last frame rather than the clip's.
+    const [lo, hi] = resolveFrameRange(193, [0, 126]);
+    const picked = evenlySpacedIndices(hi - lo + 1, 61).map((i) => i + lo);
+    expect(picked[0]).toBe(0);
+    expect(picked[picked.length - 1]).toBe(126);
+    expect(Math.max(...picked)).toBeLessThanOrEqual(126);
+  });
+
+  it("refuses a range that runs past the take's last frame", () => {
+    expect(() => resolveFrameRange(193, [0, 193])).toThrow(/past the take's last frame/);
+  });
+
+  it("refuses a range that does not ascend", () => {
+    expect(() => resolveFrameRange(193, [126, 126])).toThrow(/must ascend/);
+    expect(() => resolveFrameRange(193, [126, 10])).toThrow(/must ascend/);
+  });
+
+  it("refuses a negative or non-integer range", () => {
+    expect(() => resolveFrameRange(193, [-1, 126])).toThrow(/must not be negative/);
+    expect(() => resolveFrameRange(193, [0.5, 126])).toThrow(/must be two integers/);
   });
 });
