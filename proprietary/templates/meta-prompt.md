@@ -247,7 +247,24 @@ so "locked-off" predicted nothing. Measured adjacent-frame difference against
 61 → 1.56, **81 → 1.24**, 121 (native) → 0.93. **Restated: density is set by
 how much of the frame is MOVING** — a locked-off shot of a turbulent subject
 needs tracking-take density, and the only way to know is the measurement, which
-takes a minute. (Same session, second confirmation: the vendor answered the
+takes a minute. **Refinement (Morningside, s111): measure the PEAK adjacent
+difference, not only the mean.** A take whose subject transforms in one short
+burst inside an otherwise calm shot passes easily on the mean while being
+under-sampled exactly where the reader is looking — Morningside's grind occupies
+about six of segment one's forty-one frames, so the mean says almost nothing
+about it. Checked on the peak against ㉒'s shipped bloom (mean 1.19, **peak
+2.09**), both segments cleared it (S1 peak 0.95, S2 peak 1.88), so 41 held — but
+the mean alone could not have told you that. Report mean, peak and p90.
+**And a frame count is not a frame RATE: separately from density, check how much
+SCROLL each frame gets.** This build shipped correct density and still stuttered,
+because the chapters were only long enough to give the grind 17px per frame —
+a ~100px wheel notch skipping five or six frames of the beat the page exists
+for. Make each chapter's trailing space proportional to how many frames it
+drives (~40–55px per frame reads smoothly on a wheel; a touch device tolerates
+~25), so pacing derives from the sequence rather than from however long the
+prose happened to be. Ratcheted in `tests/template-portfolio.test.ts` (the
+anchors must start at 0, end at the last frame, strictly advance, and each
+declared span must equal its anchor delta — all four proven red before trusted). (Same session, second confirmation: the vendor answered the
 literal `generate_video` with a **preset recommendation and NO job** exactly as
 s108 predicted — nothing rendered, nothing charged — and re-sending with
 `declined_preset_id` returned a real job id. It also **substituted the model
@@ -266,7 +283,25 @@ contrast, ~5 units darker. **The model re-grades.** Because it is a global
 exposure shift rather than a shift in the frame, it is fixable **locally and at
 0cr** — a per-channel mean/std match of the later segment onto the seam frame
 took the seam 6.87 → 4.53, the residual being real content change. **Measure a
-seam's OFFSET and its EXPOSURE separately; only one of them is free.** (Same
+seam's OFFSET and its EXPOSURE separately; only one of them is free.**
+**AMENDED at the build (Morningside, s111) — the correction above is aimed at an
+accident of the ONE frame pair it was derived from.** Measured per frame on a
+static patch instead of once at the join, the shift is not a constant re-grade
+of the later take at all: it is a **settling transient at the HEAD of every
+take**. S2 opens ~5 units dark and recovers by native frame ~16; S1 does the
+same thing over its first ~86. A single constant match onto the seam frame
+therefore levels the join and **over-brightens everything after it** — measured,
+it drifts S2's last frame, the payoff shot, +5.8/+3.1/+3.4 off the reference
+grade. Flattening EVERY frame of BOTH takes onto one measured reference instead
+holds that to −0.2/+0.1/+0.4, fixes the seam identically (6.93 → 4.41 raw, and
+≤0.6 per channel on the shipped bytes), and removes the opening ramp of each
+take — which matters because the hero still IS the first take's frame 0, and
+uncorrected it is the darkest frame of its own take. Same 0cr arithmetic, three
+defects instead of one. **Restated: a correction derived from one measured
+frame pair inherits that pair's accidents — measure the whole take before you
+generalise from its seam.** Shipped as the manifest's `gradeFlatten`
+(`scripts/export-template-assets.ts`), so the derive stays a pure function of
+(pinned bytes, patch, target). (Same
 session, the reason to check at all: **Seedance does not start exactly on the
 still it is given** — S1's first frame sat MAD 7.36 off its own anchor
 keyframe. So keyframes are DIRECTING instruments, not shipping assets: the

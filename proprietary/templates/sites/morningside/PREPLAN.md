@@ -272,6 +272,48 @@ medium pour-over grind.** Beat 2's copy must not assert a brew method the frame
 contradicts (the ㉑ hydrangea class of defect) — write it about grinding fresh
 versus buying pre-ground, which is method-agnostic and true to the picture.
 
+## ✅ BUILT — s111 (2026-08-06)
+
+The site is built and shipped: `site.json`, `index.html`, `guide/index.html`,
+`assets/` (82 frames + hero + 3 stills + manifest), `fonts/` (Piazzolla +
+Onest, both OFL, both portfolio-new). **Spend this session: 0.60cr** on five
+stills (286.74 → 286.14); the motion cost nothing because it was already minted.
+
+**What the build changed about the plan**
+
+1. **The s110 seam corollary was WRONG in its correction, and the build caught
+   it.** The pre-plan carried "a per-channel mean/std match onto the seam frame,
+   6.87 → 4.53". Measured *per frame* on a static patch rather than once at the
+   join, the tonal shift is not a constant re-grade of segment two — it is a
+   **settling transient at the head of every take** (S2 opens 5 units dark and
+   recovers by native frame ~16; S1 does the same over ~86). A constant match
+   would have levelled the seam and pushed the payoff shot +5.8/+3.1/+3.4 off
+   grade. The derive **flattens every frame of both takes onto one measured
+   reference** instead: seam fixed identically, payoff held to −0.2/+0.1/+0.4,
+   and the hero still — which is the take's own frame 0 and was the darkest
+   frame of its own take — brought onto grade too. Shipped as the manifest's
+   `gradeFlatten`; meta-prompt corollary amended.
+2. **41 frames confirmed on the PEAK, not just the mean.** The grind occupies
+   only ~6 of segment one's 41 frames, so the mean adjacent difference says
+   little about it. Against ㉒'s bloom (mean 1.19, peak 2.09): S1 peak 0.95,
+   S2 peak 1.88. Both clear. 41 holds.
+3. **The stutter was scroll pacing, not density** — measured 17.1px/frame
+   through the grind. Chapter length is now derived from frame span.
+4. **The hero carries the first anchor.** Anchors are 0 · 18 · 27 · 45 · 81,
+   read off a contact sheet of all 82 frames (beans whole at 18, ground by 24,
+   first water ~44, full by 77) rather than guessed — an earlier guess had the
+   readout announcing a grind while the cup plainly held whole beans.
+
+**The wink shipped** as budgeted: the house admits it has argued about the
+grind every week since it opened and settled nothing.
+
+**Gates, all measured not eyeballed** — exactly one frame lit at every 5px of
+an 8,507px document · all 82 frames reachable · pin fits at 1440×900 (106px
+headroom) and at **950×620**, the viewport that broke the landing at s110 (78px
+headroom) · no horizontal overflow at 390/620/900/1440 · reduced motion shows
+only the five anchor frames · all four rail links land their heading visible ·
+86/86 images carry alt text · every accent on its arc clears AA.
+
 ## Budget
 
 Spec tiers: full ~120cr · lean ~85cr · **floor ~75cr — below which E has no

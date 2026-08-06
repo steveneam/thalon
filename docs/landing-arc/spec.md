@@ -341,6 +341,20 @@ chaining is what ㉑'s Feb→May→Jul→Oct already needs.
 
 ### Site E — a coffee brand (or a café). **THE ANIMATION IS THE PAGE.**
 
+> **✅ BUILT s111 as `morningside`** — coffee BRAND, decided against the repo
+> (`fern-and-crumb` already holds `hospitality-cafe` AND already spends
+> `soft-organic`, so a café E would have collided on vertical and secondary axis
+> both). Spine minted s110 for 57.24cr; the build itself cost **0.60cr** in
+> stills. 82 scrubbed frames, two chained takes, four chapter anchors
+> (0 · 18 · 27 · 45 · 81) read off the frames rather than guessed. Ships **no
+> data instrument** on purpose — see §the schematic test in its pre-plan.
+> Record: `proprietary/templates/sites/morningside/PREPLAN.md` §BUILT.
+> **The spec's seam method below is superseded**: chaining end-frame to
+> start-frame buys exact geometry and not exact grade, and s110's own correction
+> for that (a constant match onto the seam frame) was itself corrected at the
+> build — the shift is a settling transient at the head of every take, so the
+> derive flattens grade PER FRAME across both takes. Meta-prompt carries it.
+
 > *"Site E is a cafe. or a coffee brand like campos coffee if it makes things
 > easier. the coffee animation takes center stage."*
 

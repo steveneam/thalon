@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Morningside — whole bean coffee</title>
+<meta name="description" content="Whole bean coffee, roasted in small batches for the first hour of the day. Coffee is three things before it is a drink; we only make the first one." />
+
+<style>
+  @font-face { font-family: "Piazzolla"; src: url("fonts/piazzolla-var.woff2") format("woff2");
+    font-weight: 300 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Piazzolla"; src: url("fonts/piazzolla-italic-var.woff2") format("woff2");
+    font-weight: 300 700; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Onest"; src: url("fonts/onest-var.woff2") format("woff2");
+    font-weight: 300 800; font-style: normal; font-display: swap; }
+
+  :root {
+    /* Read off the photograph rather than chosen against it. The page runs
+       LIGHT because the picture is a morning — a dark page would be arguing
+       with its own hero. */
+    --linen:    #F2EDE3;   /* the cloth: warm unbleached off-white */
+    --linen-2:  #E8E1D3;   /* the cloth in half-shadow */
+    --linen-3:  #DCD3C2;
+    --shadow:   #23201C;   /* what the raking light leaves behind — never black */
+    --shadow-2: #5E574D;   /* the same, spent */
+    --slate:    #6E7681;   /* the ONE cool note the frames contain */
+    /* The pour. Used where coffee is present and nowhere else — and it is the
+       one value on this page that MOVES: the runtime warms it from roasted
+       brown to full amber on the same clock that drives the spine, so the
+       page's only colour arrives as the coffee does. The static value here is
+       the end of that arc, so a reader without JavaScript gets the palette at
+       full strength rather than a half-brewed one. */
+    /* #9C5619 and not the brighter #A9601F it started as: measured on this
+       linen, that amber is 4.11:1 — under AA for normal text — and it carries
+       the 11.5px state readout as well as the order button's hover background.
+       The failure only appears at the END of the scroll, once the accent has
+       fully warmed, which is exactly the kind a static screenshot never shows.
+       This one is 4.79:1, and the arc's cool end (#7A5233) is 5.84:1, so every
+       point on the arc passes. */
+    --amber:    #9C5619;
+    /* Focus is NOT on that arc. An outline that dims with the scroll is an
+       accessibility regression dressed as a flourish. */
+    --focus:    #9C5619;
+    --rule:     rgba(35,32,28,.15);
+    --rule-2:   rgba(35,32,28,.28);
+
+    /* The stage's own chrome budget — how much vertical room the caption,
+       the top offset and the breathing take. The media is then bounded on
+       VIEWPORT HEIGHT with this subtracted, which is what makes the s110
+       failure (a sheet taller than a short laptop window) impossible here
+       rather than merely guarded against. */
+    --stage-top: clamp(14px, 7vh, 64px);
+    --stage-chrome: 190px;
+
+    /* HOW MUCH SCROLL ONE FRAME IS WORTH. The chapters' lengths are not
+       hand-tuned: each carries a `--span` equal to how many frames it drives
+       (its own anchor minus the previous chapter's), and its trailing space is
+       that span times this number. Pacing therefore derives from the sequence
+       rather than from whatever the prose happened to be long enough to buy.
+       Measured first at 17.1 px/frame through the grind and 20.5 through the
+       pour — a 100px wheel notch was jumping five or six frames at a time
+       across the two beats that ARE this page. */
+    --px-per-frame: 40px;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0; color: var(--shadow);
+    /* A woven grain, so the linen the photographs are shot on carries onto the
+       paper they sit on. Inline SVG turbulence — no request, no external host,
+       a few hundred bytes, and it is the difference between "an off-white
+       fill" and "a cloth". It goes BEHIND the content as a background rather
+       than over it as a blended overlay: tried that way first and it sanded
+       the photographs too, dulling the one thing on this page that must stay
+       clean. Fixed attachment so the weave belongs to the page, not the scroll. */
+    background-color: var(--linen);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='.055'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    font-family: "Piazzolla", Palatino, Georgia, serif;
+    font-size: 18px; line-height: 1.62;
+    font-optical-sizing: auto;
+    /* NOTE: no `overflow` rule here or on ANY ancestor of the stage.
+       `overflow-x:hidden` computes overflow-y:auto, which makes the element a
+       scroll container and silently breaks position:sticky against the
+       viewport — invisible in the source, survives every other fix.
+       (㉑ s105, pinned-instrument killer 2.) */
+  }
+
+  img { max-width: 100%; height: auto; display: block; }
+  h1, h2, h3 { font-weight: 500; margin: 0; letter-spacing: -.012em; }
+  p { margin: 0 0 1.05em; max-width: 60ch; }
+  a { color: inherit; }
+  em { font-style: italic; }
+
+  .wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px); }
+
+  /* Everything the brand states as FACT rides Onest; everything it says in
+     its own voice rides Piazzolla. Deliberately no monospace — a mono is the
+     instrument register, and not being an instrument is this page's whole
+     differentiation from the portfolio's other coffee site. */
+  .fact { font-family: "Onest", ui-sans-serif, system-ui, sans-serif;
+    font-size: 11.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
+
+  .skip { position: absolute; left: -9999px; top: 0; z-index: 99;
+    background: var(--shadow); color: var(--linen); padding: 12px 18px; }
+  .skip:focus { left: 8px; top: 8px; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+  /* ---------------------------------------------------------------- hero -- */
+  /* The photograph is a wide, quiet landscape whose subject is one small cup.
+     Covering a near-square viewport with it — the first build — cropped the
+     cup down to a speck, put the headline across it and left the masthead
+     unreadable on dark cloth. So the picture is given its own band at close to
+     its own shape and the type sits under it, crossing the bottom edge just
+     far enough to interlock. */
+  header.hero { position: relative; padding-bottom: 3vh; }
+  .masthead { display: flex; justify-content: space-between; align-items: baseline;
+    gap: 20px; flex-wrap: wrap; padding: 26px 0 20px; color: var(--shadow-2); }
+  .hero-media { position: relative; }
+  /* 56svh, not more: the band plus the headline plus the lede plus the scroll
+     cue all have to clear the fold, or the page's invitation to scroll is
+     itself below the fold. */
+  .hero-img { width: 100%; aspect-ratio: 16 / 9; max-height: 52svh;
+    object-fit: cover; object-position: 50% 56%; }
+  /* A short fade at the FOOT of the band only — enough to seat the headline,
+     nowhere near the subject. The first build washed 34-82% of the frame. */
+  .hero-media::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 22%; background: linear-gradient(transparent, var(--linen) 86%);
+    pointer-events: none; }
+  .hero-text { position: relative; z-index: 2; }
+
+  h1 { font-size: clamp(56px, 11vw, 148px); line-height: .84; letter-spacing: -.03em;
+    font-weight: 400; margin: -.18em 0 18px; }
+  .lede { font-size: clamp(19px, 2.1vw, 25px); line-height: 1.44; max-width: 30ch;
+    color: var(--shadow); }
+  .lede em { color: var(--amber); font-style: italic; }
+  .cue { margin-top: 30px; display: flex; align-items: center; gap: 12px;
+    color: var(--shadow-2); }
+  .cue span { display: block; width: 46px; height: 1px; background: var(--rule-2); }
+
+  /* --------------------------------------------------------------- spine -- */
+  /* The transformation IS the page. Everything else hangs off its three
+     states, which is why this is one section and not three. */
+  /* The stage and the chapters share ONE grid cell and overlap, rather than
+     sitting in two columns. Two columns were tried first and are wrong here:
+     a chapter's trailing space is proportional to how many frames it drives,
+     so for long stretches the text column is deliberately empty — and a page
+     with an empty half reads as broken, however intentional it is. Sharing a
+     cell lets the photograph stay full width and centred the whole way down,
+     which is what "the transformation IS the page" actually looks like, and
+     the writing passes over it on cards.
+     NO `align-items` here: `align-items:start` cancels the default stretch,
+     the sticky item gets a one-viewport-tall containing block inside a
+     6,000px section, and it has no travel to pin through (㉑ s105, killer 1). */
+  .spine { display: grid; grid-template-columns: minmax(0, 1fr); padding: 8px 0 0; }
+  .spine > * { grid-area: 1 / 1; }
+
+  /* Full-height and centred: the photograph is held in the middle of the
+     screen for the whole spine, so a stretch with no text over it reads as
+     the thing you are meant to be watching rather than as a gap. */
+  .stage { position: sticky; top: 0; height: 100svh; z-index: 0;
+    display: flex; flex-direction: column; justify-content: center; }
+  .stage-media {
+    position: relative; width: 100%; margin-inline: auto; aspect-ratio: 16 / 9;
+    /* Bounded on HEIGHT, not only width. s109 fixed this failure once and
+       guarded it on WIDTH, which was an accident of where it was found; a
+       950x620 laptop window then still overflowed. Here the media simply
+       cannot exceed the viewport minus its own chrome. */
+    max-width: min(100%, calc((100svh - var(--stage-chrome)) * 16 / 9));
+    background: var(--linen-3); overflow: hidden; border-radius: 2px;
+    box-shadow: 0 1px 0 rgba(35,32,28,.10), 0 18px 44px -30px rgba(35,32,28,.5);
+  }
+  /* Two takes, two stacks. Exactly one stack is live and exactly one frame
+     inside each stack carries `.on`, so the static markup satisfies both
+     halves of the frame-stack contract without ever compositing two lit
+     frames — the failure that killed ㉒'s scrub for a whole session while
+     every screenshot still looked perfect (s107). */
+  .frames { position: absolute; inset: 0; opacity: 0; }
+  .frames.is-live { opacity: 1; }
+  .frames img { position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0; }
+  .frames img.on { opacity: 1; }
+
+  /* Both readouts sit LEFT. Pushed apart, the rail landed under the right-hand
+     chapter cards and was invisible whenever any chapter was on screen — a
+     progress indicator you can only see when there is nothing to progress
+     through. */
+  .stage-foot { display: flex; justify-content: flex-start; align-items: center;
+    gap: 20px; padding: 14px 2px 0; color: var(--shadow-2); }
+  .state { color: var(--shadow); }
+  .state b { font-weight: 700; color: var(--amber); }
+  /* Each mark keeps a 26px rule but carries a 22px-tall hit area, so it is a
+     real pointer and keyboard target rather than a 2px sliver. */
+  .rail { display: flex; gap: 5px; align-items: center; }
+  .rail a { display: flex; align-items: center; height: 22px; width: 26px; }
+  .rail a::before { content: ""; display: block; width: 100%; height: 2px;
+    background: var(--rule-2); border-radius: 2px; transition: background .25s; }
+  .rail a.lit::before { background: var(--amber); }
+  .rail a:hover::before { background: var(--shadow); }
+  .rail span { position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .rail a::before { transition: none; } }
+
+  /* The reading column rides at the right, clear of the cup — which sits at
+     roughly 40% of the frame's width, so a card here never covers the subject. */
+  .chapters { position: relative; z-index: 2; width: min(430px, 100%);
+    margin-left: auto; padding-bottom: 4vh; }
+  /* The trailing space is the chapter's SPAN made visible: while it scrolls
+     past, the pinned stage is doing exactly the work this chapter describes.
+     It is not empty — it is the transformation. */
+  /* A rail jump must land the heading in the reading area, not flush with the
+     top of the window where the stage's own chrome lives. */
+  .ch { padding: 0 0 calc(6vh + var(--span, 0) * var(--px-per-frame));
+    scroll-margin-top: 14vh; }
+  .ch-body { background: var(--linen); padding: 30px 32px 22px; border-radius: 2px;
+    box-shadow: 0 1px 0 rgba(35,32,28,.07), 0 22px 50px -34px rgba(35,32,28,.55); }
+  .ch:first-child { padding-top: 12vh; }
+  .ch-no { color: var(--shadow-2); display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px; }
+  .ch-no span { display: block; width: 22px; height: 1px; background: var(--rule-2); }
+  .ch h2 { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.04; margin-bottom: 20px;
+    font-weight: 400; }
+  .ch h3 { font-size: 20px; margin: 30px 0 12px; font-weight: 600; }
+  .ch p { color: #35312B; }
+
+  figure { margin: 26px 0 0; }
+  figure img { width: 100%; border-radius: 2px; }
+  /* A portrait figure at full column width out-shouts the stage it is meant
+     to support — the beans macro ran 1,093px tall beside a 580px stage. */
+  figure.tall img { max-width: 68%; }
+  figcaption { margin-top: 10px; color: var(--shadow-2); font-size: 14.5px;
+    line-height: 1.45; font-style: italic; max-width: 42ch; }
+
+  /* ---------------------------------------------------------------- exit -- */
+  .exit { margin-top: 2vh; padding: 0 0 90px; }
+  /* Held inside the measure rather than full-bleed. Bled to the window edge,
+     the first thing that arrived out of a bright linen page was the ~200px of
+     near-black wall along this photograph's top edge — a sensory jump, and the
+     one Lane A check the scroll can fail while every section is fine alone.
+     Framed in linen the same picture reads as a photograph ON the page. */
+  .exit-img { position: relative; }
+  .exit-img img { width: 100%; max-height: 66svh; object-fit: cover;
+    object-position: 50% 64%; border-radius: 2px; }
+  .exit-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+    gap: clamp(30px, 5vw, 76px); padding-top: clamp(40px, 6vw, 72px); align-items: start; }
+  .exit h2 { font-size: clamp(34px, 4.6vw, 62px); line-height: .98; margin-bottom: 22px;
+    font-weight: 400; }
+
+  .lot { border-top: 1px solid var(--rule-2); }
+  .lot div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 14px;
+    padding: 13px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .lot dt { color: var(--shadow-2); }
+  .lot dd { margin: 0; }
+  .buy { margin-top: 30px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .buy a { display: inline-block; background: var(--shadow); color: var(--linen);
+    text-decoration: none; padding: 15px 30px; border-radius: 2px; }
+  .buy a:hover { background: var(--amber); }
+  .price { color: var(--shadow-2); }
+
+  .wink { margin-top: 46px; padding: 26px 30px; background: var(--linen-2);
+    border-left: 2px solid var(--amber); border-radius: 2px; }
+  .wink p { font-style: italic; margin: 0; max-width: 52ch; }
+
+  footer { border-top: 1px solid var(--rule); padding: 34px 0 60px; color: var(--shadow-2); }
+  .foot-row { display: flex; justify-content: space-between; gap: 22px; flex-wrap: wrap;
+    align-items: baseline; }
+  footer a { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ------------------------------------------------------------- narrow -- */
+  @media (max-width: 899px) {
+    .spine { display: block; }
+    /* In a single-column layout the stage's own cell is only as tall as the
+       stage, so sticky-on-the-inner-element loses all its travel and the pin
+       dies on phones only (㉑ s105, killer 3). The COLUMN sticks instead. */
+    .stage-col { position: sticky; top: 0; z-index: 3; background: var(--linen);
+      padding: 10px 0 10px; }
+    /* `height` and `display` must be reset too, not just `position`. Left at
+       the desktop rule's `height:100svh`, the sticky column was TALLER than the
+       viewport, so it had nothing to stick against and the stage simply floated
+       mid-page — the pin was dead on phones while the desktop pin was perfect. */
+    .stage { position: static; height: auto; display: block; }
+    /* Room to read: the stage never takes more than 44svh on a phone. */
+    .stage-media { max-width: min(100%, calc(44svh * 16 / 9)); }
+    /* A phone scrolls continuously rather than in ~100px wheel notches, so a
+       frame is worth less scroll here — but it is NOT worth zero. This rule
+       first read `padding: 12vh 0 5vh`, which quietly cancelled the whole
+       span-proportional mechanism on narrow screens: measured at 390x844, 31
+       of the 82 frames became unreachable while the desktop layout was
+       perfect. A shorthand that drops a calc() is invisible in review. */
+    :root { --px-per-frame: 26px; }
+    /* Clear of the pinned stage, which owns the top of a narrow window. */
+    .ch { padding: 6vh 0 calc(4vh + var(--span, 0) * var(--px-per-frame));
+      max-width: none; scroll-margin-top: calc(44svh + 96px); }
+    .ch:first-child { padding-top: 7vh; }
+    .chapters { width: 100%; }
+    .ch-body { padding: 24px 22px 16px; }
+    .exit-grid { display: block; }
+    .lot { margin-top: 34px; }
+  }
+  @media (max-width: 620px) {
+    body { font-size: 17px; }
+    .lot div { grid-template-columns: 1fr; gap: 2px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The scrub's alternative is not "no picture" — it is the same three
+       states as DISCRETE steps. The runtime stops interpolating and snaps to
+       each chapter's own anchor frame, so the reader still sees beans,
+       grounds and the cup, with nothing moving continuously under them. */
+    .frames, .frames img { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap masthead">
+    <p class="fact" style="margin:0">Morningside — whole bean coffee</p>
+    <p class="fact" style="margin:0">Roasted Tuesdays</p>
+  </div>
+  <div class="hero-media">
+    <img class="hero-img" src="assets/hero.webp" width="1600" height="900" fetchpriority="high"
+         alt="A pale ceramic cup heaped with whole roasted coffee beans, on rumpled unbleached linen in low morning light." />
+  </div>
+  <!-- The hero carries the sequence's FIRST anchor. Without it the first
+       chapter's anchor would be frame 0, every frame below it would be
+       clamped-unreachable, and the whole grind would have to happen inside
+       chapter one — which is about the farm. With it, chapter one drifts
+       0→18 (all of it whole beans, so nothing visibly moves while you read
+       about the roast) and the grind itself lands on the chapter that
+       describes the grind. Measured off the frames: beans are still whole at
+       18 and fully ground by 24. -->
+  <div class="wrap hero-text" data-frame="0">
+    <h1>Morningside</h1>
+    <p class="lede">Coffee is three things before it is a drink. We only make
+      <em>the first one</em> — the other two happen in your kitchen, in about four
+      minutes, and that is where most of it is won or lost.</p>
+    <p class="cue fact"><span></span> Scroll. The cup keeps going.</p>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <section class="spine">
+
+      <div class="stage-col">
+        <div class="stage">
+          <div class="stage-media">
+            <div class="frames is-live" data-seq="beans">
+              <img class="on" src="assets/beans-00.webp" width="900" height="506" decoding="async" alt="A pale ceramic cup of whole roasted coffee beans on unbleached linen, the first state of the sequence this page scrubs through." />
+              <img src="assets/beans-01.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-02.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-03.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-04.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-05.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-06.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-07.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-08.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-09.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-10.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-11.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-12.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-13.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-14.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-15.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-16.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-17.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-18.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-19.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-20.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-21.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-22.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-23.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-24.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-25.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-26.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-27.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-28.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-29.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-30.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-31.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-32.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-33.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-34.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-35.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-36.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-37.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-38.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-39.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/beans-40.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+            </div>
+            <div class="frames" data-seq="pour">
+              <img class="on" src="assets/pour-00.webp" width="900" height="506" loading="lazy" decoding="async" alt="The same cup, its bed of ground coffee about to take water." />
+              <img src="assets/pour-01.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-02.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-03.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-04.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-05.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-06.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-07.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-08.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-09.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-10.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-11.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-12.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-13.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-14.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-15.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-16.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-17.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-18.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-19.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-20.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-21.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-22.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-23.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-24.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-25.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-26.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-27.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-28.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-29.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-30.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-31.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-32.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-33.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-34.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-35.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-36.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-37.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-38.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-39.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+              <img src="assets/pour-40.webp" width="900" height="506" loading="lazy" decoding="async" alt="" />
+            </div>
+          </div>
+          <div class="stage-foot">
+            <p class="state fact" style="margin:0" aria-live="off">One cup —
+              <b data-state>whole bean</b></p>
+            <!-- Four marks that were decoration until pass three. On a page
+                 this long a progress indicator you cannot act on is a wasted
+                 affordance, so each mark is a real link to its chapter: the
+                 rail now reports position AND returns you to any of it. -->
+            <nav class="rail" aria-label="The four states">
+              <a class="lit" data-mark="0" href="#bean"><span>The bean</span></a><a
+                 data-mark="1" href="#grind"><span>The grind</span></a><a
+                 data-mark="2" href="#yours"><span>Your part</span></a><a
+                 data-mark="3" href="#cup"><span>The cup</span></a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="chapters">
+
+        <article class="ch" id="bean" data-frame="18" style="--span:18">
+          <div class="ch-body">
+            <p class="ch-no fact" style="margin:0"><span></span> One — the bean</p>
+            <h2>It starts as fruit.</h2>
+            <p>Every bean in that cup was the seed of a small red fruit, picked by hand on a
+              hillside high enough that the nights stay cold and the cherry takes its time
+              about ripening. We buy from three farms and we name all three. Nothing here is
+              a blend of whatever was cheap that month.</p>
+            <figure>
+              <img src="assets/origin.webp" width="1200" height="800" loading="lazy" decoding="async"
+                   alt="Ripe red coffee cherries on the branch at a highland farm, mist lying in the valley behind them at sunrise." />
+              <figcaption>The fruit, on the branch. The bean is its seed — two of them, flat
+                faces together, inside each cherry.</figcaption>
+            </figure>
+            <h3>The roast</h3>
+            <p>We roast in twelve-kilo batches on the Tuesday before we ship, and we stop
+              earlier than most: far enough in to lose the grassiness, not so far that
+              everything on the table tastes of the roaster instead of the farm. What arrives
+              is brown, not black.</p>
+            <figure class="tall">
+              <img src="assets/roast.webp" width="820" height="1093" loading="lazy" decoding="async"
+                   alt="Close macro of whole roasted coffee beans, the pale centre crease of each bean against its darker face." />
+              <figcaption>Stopped short. The crease still pale, the surface barely beginning
+                to take on oil.</figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <article class="ch" id="grind" data-frame="27" style="--span:9">
+          <div class="ch-body">
+            <p class="ch-no fact" style="margin:0"><span></span> Two — the grind</p>
+            <h2>Then we take it apart.</h2>
+            <p>Whole, a roasted bean keeps nearly everything worth tasting locked in oil
+              behind a hard shell, and it will hold onto it for weeks on a shelf.</p>
+            <p>Ground, the same coffee has hours. Breaking it up multiplies its surface area
+              by something close to a thousand, and every volatile thing in it starts leaving
+              immediately — which is most of what you were going to taste.</p>
+          </div>
+        </article>
+
+        <article class="ch" id="yours" data-frame="45" style="--span:18">
+          <div class="ch-body">
+            <p class="ch-no fact" style="margin:0"><span></span> Three — the part that is yours</p>
+            <h2>This is the bit we can't do for you.</h2>
+            <p>So here is the only thing we would actually ask you to change, and it costs
+              nothing: grind it when you are about to drink it, rather than when you buy it.</p>
+            <p>A week-old bag of whole beans beats a day-old bag of pre-ground, and it is not
+              close. That holds whatever you brew it in — which is why we don't sell it ready
+              ground. Not as a principle. We would just be selling you the worse half of our
+              own work.</p>
+          </div>
+        </article>
+
+        <article class="ch" id="cup" data-frame="81" style="--span:36">
+          <div class="ch-body">
+            <p class="ch-no fact" style="margin:0"><span></span> Four — the cup</p>
+            <h2>Then, water.</h2>
+            <p>Hot water goes in and everything the hillside put there comes back out: first
+              as a bloom lifting off the bed, then as colour, then as the only part of any of
+              this that was ever the point.</p>
+            <p>We are not going to tell you a ratio. There is one printed on the bag. It is a
+              starting place, and it is wrong for somebody.</p>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </div>
+
+  <section class="exit">
+    <div class="wrap exit-img">
+      <img src="assets/table.webp" width="1400" height="933" loading="lazy" decoding="async"
+           alt="A linen-covered table in early morning, a shaft of low sun raking across the cloth past a pale cup of black coffee and a sprig of leaves." />
+    </div>
+    <div class="wrap exit-grid">
+      <div>
+        <p class="fact" style="color:var(--shadow-2)">The name</p>
+        <h2>The first hour.</h2>
+        <p>That is what Morningside is named for. Not a place — a time of day. It is when
+          we drink it, it is what we roast towards, and it is the only claim on this page
+          we would defend without a single qualification.</p>
+        <div class="wink">
+          <p>We have argued about the grind, in this building, every week, since we opened.
+            Every batch gets re-ground and re-tasted and it has settled nothing at all. If
+            you work it out, please tell us.</p>
+        </div>
+      </div>
+      <div>
+        <dl class="lot">
+          <div><dt class="fact">Origin</dt><dd>Three farms, 1,750–2,050 m</dd></div>
+          <div><dt class="fact">Process</dt><dd>Washed, dried on raised beds</dd></div>
+          <div><dt class="fact">Roast</dt><dd>Medium — stopped short</dd></div>
+          <div><dt class="fact">Ships</dt><dd>The Tuesday after roasting</dd></div>
+          <div><dt class="fact">Format</dt><dd>Whole bean, 250 g or 1 kg</dd></div>
+        </dl>
+        <p class="buy">
+          <a href="#main">Order whole bean</a>
+          <span class="price">250 g £14 · 1 kg £46</span>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <p class="fact" style="margin:0">Morningside — a fictional business</p>
+    <p style="margin:0"><a href="guide/">How this page was made</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var stage = document.querySelector('.stage-media');
+  /* Anchors are every [data-frame] in document order, which is the hero plus
+     the four chapters — NOT the chapters alone. The hero holds frame 0 so that
+     nothing below the first chapter's anchor is clamped out of reach. */
+  var anchorEls = [].slice.call(document.querySelectorAll('[data-frame]'));
+  var chapters = [].slice.call(document.querySelectorAll('.ch'));
+  if (!stage || anchorEls.length < 2) return;
+
+  var seqs = [].slice.call(stage.querySelectorAll('.frames')).map(function (el) {
+    return { el: el, imgs: [].slice.call(el.querySelectorAll('img')) };
+  });
+  var TOTAL = seqs.reduce(function (n, s) { return n + s.imgs.length; }, 0);
+  if (!TOTAL) return;
+
+  /* Seed the shown index FROM THE DOM, never from a sentinel like -1. With a
+     sentinel the first swap has nothing to clear, the markup's initial frame
+     stays lit, and — being earlier in document order inside a live stack — it
+     keeps painting under every frame the scroll picks. The scrub is then dead
+     while every screenshot looks perfect. (Small Hours s107.) */
+  var shown = (function () {
+    var base = 0;
+    for (var i = 0; i < seqs.length; i++) {
+      var k = seqs[i].imgs.findIndex(function (img) { return img.classList.contains('on'); });
+      if (k >= 0 && seqs[i].el.classList.contains('is-live')) return base + k;
+      base += seqs[i].imgs.length;
+    }
+    return 0;
+  })();
+
+  var stateEl = document.querySelector('[data-state]');
+  var marks = [].slice.call(document.querySelectorAll('[data-mark]'));
+  var anchors = anchorEls.map(function (el) { return +el.dataset.frame; });
+
+  /* Named states, keyed off the global frame index. The thresholds are READ
+     OFF THE FRAMES, not guessed: on a contact sheet of all 82, the beans are
+     still whole at 18 and fully ground by 24; the grounds stay dry until the
+     first water appears around 44; the cup is full by 77. An earlier guess put
+     "grinding" at 16, which had the readout announcing a grind while the cup
+     plainly still held whole beans. The sequence is 41 frames of one take
+     (0–40) then 41 of the next (41–81), and no label changes at that boundary,
+     so the join is never announced. */
+  function stateOf(g) {
+    if (g < 19) return 'whole bean';
+    if (g < 26) return 'grinding';
+    if (g < 44) return 'ground';
+    if (g < 77) return 'brewing';
+    return 'brewed';
+  }
+
+  function show(g) {
+    g = Math.max(0, Math.min(TOTAL - 1, g));
+    if (g === shown) return;
+    var base = 0;
+    for (var i = 0; i < seqs.length; i++) {
+      var s = seqs[i], local = g - base, live = local >= 0 && local < s.imgs.length;
+      s.el.classList.toggle('is-live', live);
+      /* Clear EVERY frame in this stack and light at most one, so "exactly one
+         is on" is true by construction rather than by bookkeeping. */
+      for (var k = 0; k < s.imgs.length; k++) s.imgs[k].classList.toggle('on', live && k === local);
+      base += s.imgs.length;
+    }
+    shown = g;
+    if (stateEl) stateEl.textContent = stateOf(g);
+    warm(g / (TOTAL - 1));
+    return g;
+  }
+
+  /* The page's one accent, warmed along the same clock as the spine: roasted
+     brown at the whole bean, full amber by the poured cup. It is the single
+     deliberate intensification this page allows itself, it costs nothing, and
+     it is honest — the colour is doing what the picture is doing. */
+  var ROAST = [0x7A, 0x52, 0x33], AMBER = [0x9C, 0x56, 0x19];
+  function warm(t) {
+    t = Math.max(0, Math.min(1, t));
+    var c = ROAST.map(function (v, i) { return Math.round(v + (AMBER[i] - v) * t); });
+    document.documentElement.style.setProperty(
+      '--amber', 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')');
+  }
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var narrow = window.matchMedia('(max-width: 899px)');
+
+  /* The reading line, in viewport coordinates. On narrow screens the pinned
+     stage covers the top of the viewport, so a line measured from 0 would sit
+     BEHIND the stage and mark a chapter active while its heading is still
+     hidden (㉑ s105, killer 4). Measure from the stage's bottom edge instead. */
+  function lineOffset() {
+    var vh = window.innerHeight;
+    if (!narrow.matches) return vh * 0.62;
+    var b = stage.getBoundingClientRect().bottom;
+    var floor = Math.max(0, Math.min(vh, b));
+    return floor + (vh - floor) * 0.55;
+  }
+
+  function update() {
+    var line = window.scrollY + lineOffset();
+    /* Each chapter's anchor is its BOTTOM edge: the frame arrives at that
+       chapter's state as the chapter finishes, so the grind happens while the
+       grind is being read. THE CLOCK FOLLOWS THE PROSE, NOT THE SCROLLBAR
+       (㉑ s105) — the chapters are the score and the picture follows them. */
+    var pos = anchorEls.map(function (el) {
+      return el.getBoundingClientRect().bottom + window.scrollY;
+    });
+
+    var active = 0, g;
+    if (line <= pos[0]) { g = anchors[0]; active = 0; }
+    else if (line >= pos[pos.length - 1]) { g = anchors[anchors.length - 1]; active = anchors.length - 1; }
+    else {
+      for (var i = 0; i < pos.length - 1; i++) {
+        if (line >= pos[i] && line <= pos[i + 1]) {
+          var span = pos[i + 1] - pos[i];
+          var t = span > 0 ? (line - pos[i]) / span : 0;
+          /* Reduced motion gets the same three states as discrete steps: no
+             interpolation, so nothing moves continuously under the reader. */
+          g = reduce.matches
+            ? (t < 0.5 ? anchors[i] : anchors[i + 1])
+            : Math.round(anchors[i] + t * (anchors[i + 1] - anchors[i]));
+          active = t < 0.5 ? i : i + 1;
+          break;
+        }
+      }
+    }
+    show(g);
+    /* Anchor 0 is the hero, so the rail's four marks map to anchors 1..4. */
+    var chIdx = Math.max(0, Math.min(chapters.length - 1, active - 1));
+    for (var m = 0; m < marks.length; m++) marks[m].classList.toggle('lit', m <= chIdx);
+  }
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { ticking = false; update(); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  if (reduce.addEventListener) reduce.addEventListener('change', onScroll);
+  /* show() returns early when the frame has not changed, so the accent has to
+     be seeded here — otherwise the page opens on the CSS default (the END of
+     the arc) and only warms once something moves. */
+  warm(shown / (TOTAL - 1));
+  update();
+})();
+</script>
+</body>
+</html>

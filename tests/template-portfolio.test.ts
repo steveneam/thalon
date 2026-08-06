@@ -293,6 +293,70 @@ describe("template portfolio", () => {
     }
   });
 
+  /**
+   * The scroll-anchor contract (Morningside, s111).
+   *
+   * A scrubbed sequence driven by chapter anchors interpolates the frame
+   * index between them and CLAMPS outside them, so the anchor list decides
+   * which frames a reader can ever reach. Two ways that silently rots:
+   *
+   *  - the first anchor is not 0, or the last is not the final frame — then
+   *    the head or tail of the sequence is clamped out of reach and the page
+   *    ships bytes nobody can see. s108 found the aim half of this by sweeping
+   *    a browser ("a count proves a scrub is ALIVE, it does not prove it is
+   *    AIMED"); the endpoints half is decidable from the markup alone.
+   *  - a `--span` drifts from the anchor delta it is supposed to equal. Span
+   *    is what buys each chapter its scroll length, so a stale one makes the
+   *    motion race through the beat it was meant to pace — measured on this
+   *    build at 17 px/frame through the beat the whole page exists for, a
+   *    wheel notch skipping five or six frames at a time.
+   *
+   * Both are invisible to every other test here: the markup is well-formed,
+   * exactly one frame is lit, and every asset is manifested.
+   */
+  it("scroll anchors span the whole sequence and each --span matches its anchor delta", () => {
+    for (const slug of slugs) {
+      const siteDir = path.join(sitesDir, slug);
+      const html = readFileSync(path.join(siteDir, "index.html"), "utf8");
+      const tags = html.match(/<[a-z][^>]*\bdata-frame="\d+"[^>]*>/gi) ?? [];
+      if (tags.length === 0) continue; // not an anchor-driven site
+
+      const anchors = tags.map((tag) => ({
+        frame: Number(/\bdata-frame="(\d+)"/.exec(tag)![1]),
+        span: /--span:\s*(\d+)/.exec(tag) ? Number(/--span:\s*(\d+)/.exec(tag)![1]) : undefined,
+      }));
+
+      const manifestPath = path.join(siteDir, "assets", "manifest.json");
+      const manifest = existsSync(manifestPath)
+        ? (JSON.parse(readFileSync(manifestPath, "utf8")) as Array<{ frames?: number }>)
+        : [];
+      const total = manifest.reduce((n, e) => n + (e.frames ?? 0), 0);
+
+      expect(anchors.length, `${slug}: an anchor-driven scrub needs at least two anchors`).
+        toBeGreaterThan(1);
+      expect(
+        anchors[0].frame,
+        `${slug}: the first scroll anchor must be frame 0 — anything above it is clamped unreachable`,
+      ).toBe(0);
+      expect(
+        anchors[anchors.length - 1].frame,
+        `${slug}: the last scroll anchor must be frame ${total - 1} (the manifest declares ${total} frames) — anything beyond it is clamped unreachable`,
+      ).toBe(total - 1);
+
+      for (let i = 1; i < anchors.length; i++) {
+        expect(
+          anchors[i].frame,
+          `${slug}: anchor ${i} (frame ${anchors[i].frame}) does not advance on anchor ${i - 1} (frame ${anchors[i - 1].frame}) — the clock would run backwards or stall`,
+        ).toBeGreaterThan(anchors[i - 1].frame);
+        if (anchors[i].span === undefined) continue;
+        expect(
+          anchors[i].span,
+          `${slug}: anchor ${i} declares --span:${anchors[i].span} but drives ${anchors[i].frame - anchors[i - 1].frame} frames — the span buys the scroll length that paces those frames, so a stale one races the motion through its own beat`,
+        ).toBe(anchors[i].frame - anchors[i - 1].frame);
+      }
+    }
+  });
+
   it("the factory method docs stay OUT of sites/ (the docroot leak boundary)", () => {
     for (const slug of slugs) {
       for (const file of htmlFiles(slug)) {

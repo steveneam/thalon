@@ -232,6 +232,61 @@ sixteen sessions of gates never sat on it.
 
 ---
 
+## Sprint 9 / s111 — **SHIPPED: SITE E (`morningside`). The landing arc's fourth site; only D remains** (boot "gogogo"; **0.60 credits**, zero live posts)
+
+**Site E is built, passed and green.** A coffee brand whose page IS its
+animation: one ceramic cup holds the centre of the screen from the first screen
+to the last while its contents go beans → grounds → poured cup across **82
+scrubbed frames** of two chained Seedance takes. Everything the brand says hangs
+off those three states. It is the only site in the arc whose animation is the
+page rather than a chapter inside it, and — deliberately, against the house
+pattern — it ships **no data instrument at all**, because `first-crack` already
+IS the expert coffee page and the differentiation had to rest on register.
+
+**It cost 0.60cr.** The spine was minted at s110 (57.24cr) and this session
+spent five stills at 0.12 each, keeping three. Balance **286.74 → 286.14**, so
+site D's ~110cr tier remains comfortably funded.
+
+**The session's real find corrects s110's own corollary.** s110 measured the
+chained seam once, found segment 2 came back ~5 units dark, and banked
+"per-channel mean/std match onto the seam frame". Measured **per frame** on a
+static patch at the build, that is aimed at an accident of the single pair it
+came from: the shift is not a constant re-grade, it is a **settling transient at
+the head of every take** — S2 recovers within ~16 native frames, S1 over ~86.
+The banked constant fix would have levelled the join and pushed the payoff shot
+(the full cup, the page's last image) **+5.8/+3.1/+3.4 off grade**. Shipped
+instead: a per-frame flatten of both takes onto one measured reference, as the
+manifest's `gradeFlatten`. Seam fixed identically, payoff held to
+−0.2/+0.1/+0.4, and the hero still — which is the take's own frame 0 and was the
+**darkest frame of its own take** — brought onto grade too. Same 0cr arithmetic,
+three defects instead of one. **A correction derived from one measured frame
+pair inherits that pair's accidents.**
+
+**Two more the browser found that no test could.** (1) The scroll was moving
+**17.1px per frame** through the grind — a 100px wheel notch skipping five or
+six frames of the beat the page exists for. Chapter length is now *derived* from
+how many frames each chapter drives. (2) The narrow-screen rules re-declared
+`.ch { padding }` as a shorthand, silently discarding that calculation: **31 of
+82 frames were unreachable on a phone** while desktop was perfect, and the same
+block reset the stage's `position` but not its `height`, so the mobile pin was
+dead. Both invisible in markup and in every screenshot.
+
+**Ratchets bought:** `gradeFlatten` + a single-frame `frame` derive in
+`scripts/export-template-assets.ts` (the s110 "the hero still IS the take's
+frame 0" finding made a first-class manifest concept), and a new
+**scroll-anchor contract** in `tests/template-portfolio.test.ts` — anchors must
+start at 0, end at the last manifested frame, strictly advance, and each
+declared `--span` must equal its anchor delta. **All four broken deliberately
+and confirmed red**, then restored green. Meta-prompt amended twice: the seam
+corollary corrected, and the density rule extended to **measure the PEAK, not
+only the mean** (Morningside's grind is ~6 of 41 frames, so the mean says
+nothing about it; on the peak, 41 still held).
+
+**Verdict: awaiting.** ㉓ of the portfolio. `docs/landing-arc/spec.md` now has
+A + B + C + capstone + E built; **site D (vineyard) is the last one**.
+
+---
+
 ## Sprint 9 / s109 — **SHIPPED: THE CAPSTONE. Thalon's landing page is rebuilt on a real recorded run** (boot "gogogo"; 17.74 credits, zero live posts)
 
 **The arc's capstone is built.** `/` is no longer the dark-cinematic AI-default

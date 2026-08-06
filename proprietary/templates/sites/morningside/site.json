@@ -1,0 +1,21 @@
+{
+  "slug": "morningside",
+  "name": "Morningside",
+  "vertical": "food-coffee-brand",
+  "oneLiner": "A coffee brand whose page is one continuous transformation — a single cup of whole beans becoming grounds becoming coffee, top to bottom, with everything the brand has to say hanging off its three states.",
+  "axes": {
+    "primary": "otherworldly-animation",
+    "secondary": "soft-organic",
+    "secondaryReason": "the softness is not a decorative treatment applied over the page, it is what the subject IS — unbleached linen in loose folds, a matte unglazed cup, a granular material collapsing into a finer one, and light that rakes rather than lights; the type carries the same quality (Piazzolla's flared old-style stems against Onest's rounded terminals), and the page's only hard edges are the two rules that mark the reading column"
+  },
+  "paletteSeed": "read straight off the photograph rather than chosen against it — LINEN (a warm unbleached off-white, the page's ground), SHADOW (the deep warm brown-black the raking light leaves behind, the page's ink), and the one cool note the frames actually contain, a DUSTY BLUE-GREY in the background cloth, which is the only thing on the page allowed to be cold; against them a single accent, the AMBER of the pour, used exactly where coffee is present and nowhere else — the page runs LIGHT throughout because the photograph is a morning and a dark page would be arguing with its own picture",
+  "typeDirection": "Piazzolla (variable, roman + italic — a flared old-style with an optical-size axis, warm and slightly rustic at display size, which is the opposite of the high-contrast fashion serif a coffee brand defaults to) for every word the brand says in its own voice, and Onest (variable) for everything the brand states as fact: the lot panel, the chapter marks, the figures. TWO families and deliberately NO monospace — a mono is the instrument register and this page's whole differentiation from the portfolio's other coffee site is that it is not an instrument. Both OFL, vendored, both portfolio-new",
+  "motionBudget": "ONE scroll clock and no second animation system: an 82-frame scrub of two chained Seedance takes, beans → grounds → pour, running as the page's spine from the hero to the exit rather than as a chapter inside it; the clock FOLLOWS THE PROSE — four chapters carry their own frame anchors (0 · 34 · 45 · 81) and the clock interpolates between them, so the grind happens while you read about the grind and the seam is crossed during the dwell where there is least motion; the stage is bounded on VIEWPORT HEIGHT as well as width so it cannot outgrow a short laptop window (the s110 failure, made structurally impossible rather than guarded); reduced-motion and no-JS both get the full stack with one frame lit, every chapter, the lot panel and the wink present in the markup",
+  "wave": 4,
+  "built": "2026-08-06",
+  "verdict": {
+    "status": "awaiting",
+    "note": "Site E of the landing arc (docs/landing-arc/spec.md). Built from a spine minted and measured a session earlier, so this session spent 0.60cr on three supporting stills and nothing on motion. Coffee BRAND not café, decided against the repo rather than argued: fern-and-crumb already holds hospitality-cafe AND already spends soft-organic, so a café E would have collided on vertical and secondary axis both; the axis pair otherworldly-animation + soft-organic is portfolio-new against all 23 shipped site.json files. Deliberately ships NO data instrument — coffee has excellent ones (roast curve, brew table, extraction chart) and first-crack already IS that page, so the differentiation rests on register: first-crack is the expert page, this is the product page. The consequence is stated in the pre-plan and is the reason the floor budget was set high: with no instrument, the motion carries the entire page. The s110 seam corollary was re-measured here and corrected — the tonal shift between chained segments is not a constant re-grade but a settling transient at the head of every take, so the derive flattens grade per frame instead of matching once onto the seam frame.",
+    "at": "2026-08-06"
+  }
+}

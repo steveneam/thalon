@@ -1,0 +1,53 @@
+[
+  {
+    "file": "hero.webp",
+    "pinnedHash": "672cb9a024566549b22ec117a8e8472f0da877da0eecacfa28f48de03118c69b",
+    "ext": "mp4",
+    "frame": 0,
+    "width": 1600,
+    "height": 900,
+    "quality": 82,
+    "gradeFlatten": { "patch": [624, 608, 320, 96], "target": [76.9, 72.8, 67.9] }
+  },
+  {
+    "file": "beans-%02d.webp",
+    "pinnedHash": "672cb9a024566549b22ec117a8e8472f0da877da0eecacfa28f48de03118c69b",
+    "ext": "mp4",
+    "frames": 41,
+    "width": 900,
+    "height": 506,
+    "quality": 54,
+    "gradeFlatten": { "patch": [624, 608, 320, 96], "target": [76.9, 72.8, 67.9] }
+  },
+  {
+    "file": "pour-%02d.webp",
+    "pinnedHash": "2932fe41938da4f85475f155085ada541f706c862165b742eddad65f38c4df98",
+    "ext": "mp4",
+    "frames": 41,
+    "width": 900,
+    "height": 506,
+    "quality": 54,
+    "gradeFlatten": { "patch": [624, 608, 320, 96], "target": [76.9, 72.8, 67.9] }
+  },
+  {
+    "file": "origin.webp",
+    "pinnedHash": "23ccd4a37c8cbf9c5c6073a98096c6acceba0b27ee60c919b09c1c4a3afc385b",
+    "width": 1200,
+    "height": 800,
+    "quality": 80
+  },
+  {
+    "file": "roast.webp",
+    "pinnedHash": "3412462e53f753c3e01909df5596eab47d6df0129c8ca7124a0c8612e53f7b68",
+    "width": 820,
+    "height": 1093,
+    "quality": 80
+  },
+  {
+    "file": "table.webp",
+    "pinnedHash": "5807e3f793a75e1e37e346cc4f437213b669b13b82074e7145f6be249894675e",
+    "width": 1400,
+    "height": 933,
+    "quality": 80
+  }
+]

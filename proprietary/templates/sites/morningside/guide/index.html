@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Method note — Morningside</title>
+<meta name="description" content="How the Morningside page was designed and built, which models minted which assets, and what in it is real." />
+<style>
+  @font-face { font-family: "Piazzolla"; src: url("../fonts/piazzolla-var.woff2") format("woff2");
+    font-weight: 300 700; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Piazzolla"; src: url("../fonts/piazzolla-italic-var.woff2") format("woff2");
+    font-weight: 300 700; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Onest"; src: url("../fonts/onest-var.woff2") format("woff2");
+    font-weight: 300 800; font-style: normal; font-display: swap; }
+
+  :root {
+    --linen: #F2EDE3; --linen-2: #E8E1D3; --shadow: #23201C; --shadow-2: #5E574D;
+    --amber: #A9601F; --rule: rgba(35,32,28,.15); --rule-2: rgba(35,32,28,.28);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--linen); color: var(--shadow);
+    font-family: "Piazzolla", Palatino, Georgia, serif; font-size: 17.5px; line-height: 1.62;
+    font-optical-sizing: auto; }
+  .wrap { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  a { color: inherit; }
+  img { max-width: 100%; height: auto; }
+  h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.02; font-weight: 400;
+    letter-spacing: -.025em; margin: 0 0 18px; }
+  h2 { font-size: 23px; font-weight: 600; margin: 46px 0 14px; letter-spacing: -.01em; }
+  h3 { font-size: 17px; font-weight: 600; margin: 28px 0 8px; }
+  p { margin: 0 0 1.05em; }
+  .fact { font-family: "Onest", ui-sans-serif, system-ui, sans-serif; font-size: 11.5px;
+    font-weight: 600; letter-spacing: .13em; text-transform: uppercase; color: var(--shadow-2); }
+  header { padding: 40px 0 0; }
+  main { padding-bottom: 80px; }
+  .lede { font-size: 20px; line-height: 1.5; }
+  .note { background: var(--linen-2); border-left: 2px solid var(--amber);
+    padding: 20px 24px; border-radius: 2px; margin: 26px 0; }
+  .note p:last-child { margin-bottom: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 18px 0 26px; font-size: 15.5px; }
+  th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule);
+    vertical-align: top; }
+  th { font-family: "Onest", ui-sans-serif, system-ui, sans-serif; font-size: 11.5px;
+    font-weight: 600; letter-spacing: .11em; text-transform: uppercase; color: var(--shadow-2);
+    border-bottom: 1px solid var(--rule-2); }
+  ul { padding-left: 20px; } li { margin-bottom: .5em; }
+  footer { border-top: 1px solid var(--rule); padding: 26px 0 60px; color: var(--shadow-2); }
+  .back { display: inline-block; margin-bottom: 30px; text-decoration: underline;
+    text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <a class="back fact" href="../">← Morningside</a>
+  <h1>How this page was made</h1>
+  <p class="lede">Morningside is a <strong>fictional business</strong>. It does not exist,
+    you cannot buy anything from it, and the three farms, the prices and the roast schedule
+    are written to demonstrate a page, not to describe a company. Every photograph on it is
+    <strong>AI-generated</strong>. This note says exactly how, because a page that argues
+    for honesty about coffee should not be quietly dishonest about itself.</p>
+</header>
+
+<main class="wrap">
+
+  <h2>The idea</h2>
+  <p>Almost every scroll-driven page treats its animation as a chapter: you scroll, something
+    performs, you carry on. Here the animation <em>is</em> the page. One ceramic cup holds the
+    middle of the screen from the first screen to the last, and its contents change from whole
+    beans to ground coffee to a poured cup as you read. The writing hangs off those three
+    states — the origin section belongs to the beans, the freshness argument belongs to the
+    grounds, the payoff belongs to the pour.</p>
+  <p>That was chosen before anything was built, and it set a high floor: with the motion
+    carrying the whole page there is no instrument, no chart and no diagram to fall back on.
+    Coffee has excellent instruments — a roast curve, a brew-ratio table, an extraction chart —
+    and this page deliberately ships none of them, because a page for someone who just wants
+    the cup should not open with a control chart.</p>
+
+  <h2>The pictures</h2>
+  <p>Five assets were minted, all on the paid tier, all pinned to content-addressed storage
+    with their model, prompt, parameters and credit cost recorded at mint time. Nothing on this
+    page is stock photography and nothing was downloaded from the web.</p>
+
+  <table>
+    <thead><tr><th>What</th><th>Model</th><th>How it is used</th></tr></thead>
+    <tbody>
+      <tr><td>Segment one — beans becoming grounds</td><td>Seedance 2.0</td>
+        <td>5s take, 121 native frames, shipped as 41 stills</td></tr>
+      <tr><td>Segment two — grounds becoming coffee</td><td>Seedance 2.0</td>
+        <td>5s take, 121 native frames, shipped as 41 stills</td></tr>
+      <tr><td>The hero</td><td>Seedance 2.0</td>
+        <td>frame 0 of segment one, at full resolution</td></tr>
+      <tr><td>Coffee cherries on the branch</td><td>Soul 2 <span class="fact">(ran as text2image_soul_v2)</span></td>
+        <td>still</td></tr>
+      <tr><td>Roasted beans, macro</td><td>Soul 2 <span class="fact">(ran as text2image_soul_v2)</span></td>
+        <td>still</td></tr>
+      <tr><td>The morning table</td><td>Soul 2 <span class="fact">(ran as text2image_soul_v2)</span></td>
+        <td>still</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Why the hero is a frame and not a photograph</h3>
+  <p>Each video segment was directed by still "keyframes" — an image of the beans, an image of
+    the grounds — handed to the model as the take's start and end. Those keyframes are
+    <em>directing instruments</em>, not shipping assets: measured, the take does not start
+    exactly on the still it was given. Its first frame sat about 7 units of average brightness
+    away from the keyframe that produced it, because the model recomposes slightly. So the
+    hero image at the top of the page is frame 0 <em>of the take</em>, not the still that
+    directed it. It is the same picture the sequence begins on, which is the only way the hero
+    and the first scrubbed frame can be the same thing.</p>
+
+  <h3>The seam between the two takes</h3>
+  <p>Two segments means one join. It was made by taking segment one's <em>actual last frame</em>
+    and handing that to the model as segment two's start, so the two takes share a frame by
+    construction rather than by luck. Measured, that bought an exactly matching geometry — the
+    camera did not move and the frame did not recompose, offset zero pixels in both axes — and
+    <em>not</em> a matching exposure: segment two came back about five units darker.</p>
+  <div class="note">
+    <p>Measured per frame rather than once, that darkness turned out not to be a constant
+      re-grade of the second take at all. It is a settling transient at the <em>head</em> of
+      every take: segment two opens five units dark and recovers within about sixteen frames,
+      and segment one does the same thing over its first eighty. Correcting the seam with a
+      single constant — the obvious fix — would have levelled the join and over-brightened the
+      whole poured cup at the end by about six units.</p>
+    <p>So every frame of both takes is levelled individually onto one reference exposure,
+      measured on a patch of the linen that does not move. That is arithmetic on our side, it
+      costs nothing, and it fixes the join, the opening of each take, and the hero still at
+      once. No frame on this page is more than one unit off that reference.</p>
+  </div>
+
+  <h3>How many frames, and why that many</h3>
+  <p>Frame count is not a house number, it is a measurement. Each take was decimated to several
+    candidate counts and the average difference between neighbouring frames compared against a
+    sequence known to read smoothly. At 41 frames each take lands under that benchmark, so both
+    ship at 41 — <strong>82 frames for the whole page</strong>. A more turbulent subject needs
+    twice that; a cup of settling grounds does not.</p>
+
+  <h2>What happens without JavaScript</h2>
+  <p>All 82 frames are real markup, stacked, with exactly one of each sequence marked as lit.
+    With scripting off you get the page's first state as a still image, every chapter of the
+    writing, the lot panel and the closing photograph — everything except the scrubbing itself.
+    With <em>reduced motion</em> requested, the sequence does not interpolate: it steps between
+    the four chapter states instead, so the three states are all still shown and nothing moves
+    continuously under you.</p>
+
+  <h2>Type and colour</h2>
+  <p>Two families, both open-licensed and served from this site rather than a font CDN:
+    <strong>Piazzolla</strong> for everything the brand says in its own voice and
+    <strong>Onest</strong> for everything it states as fact. There is deliberately no monospaced
+    face anywhere, because a monospace reads as instrumentation and this page is a product page,
+    not an instrument.</p>
+  <p>The palette was read off the photograph rather than chosen against it: the linen, the warm
+    shadow the raking light leaves, and one amber that appears only where coffee appears.</p>
+
+  <h2>What is honest here</h2>
+  <ul>
+    <li>The business is invented. So are the farms, the altitudes and the prices.</li>
+    <li>Every image is generated. None is a photograph of real coffee.</li>
+    <li>The page makes no claim about grind size or brew method, on purpose: the generated
+      grounds render finer than the page would need to claim, and writing copy the picture
+      contradicts is the one thing an image-led page must not do.</li>
+    <li>There is no countdown, no "only three left", and no testimonial. Nothing on the page
+      is designed to hurry you.</li>
+    <li>The credits, models and prompts behind each asset are recorded with the asset, not
+      summarised from memory.</li>
+  </ul>
+
+  <h2>Build log</h2>
+  <p>Three full passes, each running both a fault-hunt lane and an ambition lane. Every
+    fault below was found by driving the page in a browser and measuring it — none of them
+    were visible in the markup, and none would have failed a screenshot.</p>
+  <table>
+    <thead><tr><th>Pass</th><th>What the fault lane caught</th><th>What the ambition lane added</th></tr></thead>
+    <tbody>
+      <tr><td>One</td><td data-pass="1-a">The hero covered a near-square window with a wide
+        photograph, cropping the cup down to a speck and putting the headline across it. And
+        the scroll was moving <strong>17 pixels per frame</strong> through the grind — a
+        single wheel notch skipping five or six frames of the two beats this page exists
+        for. Chapter lengths are now derived from how many frames each one drives.</td>
+        <td data-pass="1-b">The page's one accent warms from roasted brown to amber along
+        the same clock as the spine, so its only colour arrives as the coffee does.</td></tr>
+      <tr><td>Two</td><td data-pass="2-a">The narrow-screen rules re-declared the chapter
+        padding as a shorthand, which silently discarded the pacing calculation:
+        <strong>31 of the 82 frames were unreachable on a phone</strong> while the desktop
+        layout was perfect. The same rules reset the stage's position but not its height, so
+        the sticky column was taller than the window and the pin was simply dead on
+        phones.</td>
+        <td data-pass="2-b">A woven grain behind the whole page, so the linen the
+        photographs are shot on carries onto the paper they sit on.</td></tr>
+      <tr><td>Three</td><td data-pass="3-a">The accent failed contrast at the end of its own
+        arc — <strong>4.11:1</strong> against the paper, under the 4.5 minimum, on the state
+        readout and the order button. Only wrong once fully warmed, which is why a static
+        check misses it. And the closing photograph, bled to the window edge, arrived out of
+        a bright page as 200 pixels of near-black wall.</td>
+        <td data-pass="3-b">The four marks under the picture became four real links, so a
+        very long page can be navigated and returned to rather than only scrolled.</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<footer class="wrap">
+  <p class="fact" style="margin:0">Morningside — a fictional business · imagery AI-generated</p>
+</footer>
+
+</body>
+</html>
