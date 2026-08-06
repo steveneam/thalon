@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { canPin } from "@/lib/landing/pin-fit";
 import { CHAPTERS, decidedAt, LEDGER, TOTALS } from "@/lib/landing/run-snapshot";
 
 /**
@@ -34,6 +35,11 @@ import { CHAPTERS, decidedAt, LEDGER, TOTALS } from "@/lib/landing/run-snapshot"
  * 5. **THE READING LINE IS MEASURED FROM THE STAGE'S BOTTOM ON NARROW SCREENS**
  *    (㉑ s105, killer 4) — measured from 0 it marks a chapter active while its
  *    heading is still behind the pinned sheet.
+ * 6. **PINNING IS GATED ON FIT, NOT ON WIDTH (s110, pass 3).** The condition
+ *    lives in `@/lib/landing/pin-fit` and is shared with the stylesheet: a
+ *    viewport too SHORT for the ledger clips the run's totals off both ends
+ *    of the pinned sheet, which s109's width-only rule let through at
+ *    950×620. See that module for the measurements.
  *
  * `live` is false until mount, so the first paint IS the static document and
  * a reader with JS disabled never sees a half-filled instrument. The stage
@@ -42,27 +48,22 @@ import { CHAPTERS, decidedAt, LEDGER, TOTALS } from "@/lib/landing/run-snapshot"
 export function GateInstrument() {
   const [live, setLive] = useState(false);
   const [seg, setSeg] = useState(CHAPTERS.length - 1);
-  const stageRef = useRef<HTMLDivElement>(null);
   const chapRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     let raf = 0;
 
-    const readingLine = () => {
-      // Wide: the middle of the viewport. Narrow: the pinned stage covers the
-      // top, so the line is measured DOWN FROM the stage's bottom edge — and
-      // high in the remaining band, because the anchor is a heading and its
-      // paragraph needs somewhere to flow before the fold.
-      if (window.innerWidth > 900) return window.innerHeight * 0.5;
-      const rect = stageRef.current?.getBoundingClientRect();
-      const top = Math.max(0, rect?.bottom ?? 0);
-      return top + (window.innerHeight - top) * 0.3;
-    };
+    // The middle of the viewport. There is no narrow branch: the instrument
+    // only reaches this line when `canPin` has already passed, and the stage
+    // is beside the prose there rather than above it. (Until s110 this
+    // carried a second branch measuring down from the stage's bottom edge,
+    // for a narrow-and-pinned case that the guard below makes unreachable.)
+    const readingLine = () => window.innerHeight * 0.5;
 
     const tick = () => {
       raf = 0;
 
-      /* ── NARROW SCREENS DO NOT PIN, AND THE REASON IS MEASURED ──────────
+      /* ── A VIEWPORT THAT CANNOT HOLD THE LEDGER DOES NOT PIN IT ─────────
          The ledger is a table of eight claims with their reasons. On a
          390×844 phone it measured **1087px tall inside an 844px viewport** —
          243px MORE than the screen — so the sticky sheet covered everything
@@ -71,12 +72,19 @@ export function GateInstrument() {
          heading sat behind the sheet while the instrument claimed the reader
          was on it. Killer 4 (㉑ s105) with no room left to measure from.
 
-         A pinned sheet plus scrolling prose is the wrong pattern on a phone
-         regardless of the arithmetic, so the instrument stops pinning and
-         shows the COMPLETED run instead. The mobile reader loses the reveal
-         and keeps the whole argument — the same trade the no-JS reader
-         makes, and for the same reason. */
-      if (window.innerWidth <= 900) {
+         ⚠ AND s109 GUARDED IT ON THE WRONG AXIS. Width was only ever a proxy
+         for "the ledger does not fit"; the constraint is HEIGHT. A 950×620
+         laptop window sailed past the width-only test while pinning an 849px
+         ledger into a 620px viewport, and because `.gs-stage` centres its
+         content the overflow was clipped at BOTH ends — the caption stating
+         the sample bound off the top, and all four readouts (including "sent
+         unreviewed: 0") off the bottom, at every one of the six chapters.
+
+         So the condition is stated on both axes, in `@/lib/landing/pin-fit`,
+         and the stylesheet reads the same two numbers. A reader who fails it
+         loses the reveal and keeps the whole argument — the same trade the
+         no-JS reader and the phone reader already make. */
+      if (!canPin(window.innerWidth, window.innerHeight)) {
         setLive(false);
         return;
       }
@@ -135,7 +143,7 @@ export function GateInstrument() {
 
         <div className="gs-spine">
           {/* ── the pinned instrument ─────────────────────────────────── */}
-          <div className="gs-stage" ref={stageRef}>
+          <div className="gs-stage">
             <div className="gs-ledger">
               <div className="gs-cap">
                 <span>

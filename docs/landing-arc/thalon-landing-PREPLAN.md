@@ -342,3 +342,97 @@ adjacent-frame difference against the bloom's 1.26: 41 → 1.88, 61 → 1.56,
   reachable while the band is ≥75% visible · 0 reachable only under half
   visible** (Whitethorn's defect was 34 of 61)
 - mobile: no horizontal overflow, ledger complete, exactly one frame lit
+
+---
+
+## ITERATION PASS 3 — s110, the pass that was owed
+
+The meta-prompt mandates **three** two-lane passes per page
+(`proprietary/templates/iteration-pass-checklist.md`); s109 ran two and said so
+in writing. This is the third, run before sites D and E as the s109 wrap
+required. Both lanes, driven in a real browser.
+
+### Lane A — what was wrong
+
+1. **THE PINNED SHEET CLIPPED ITS OWN TOTALS, AND s109 GUARDED THE WRONG
+   AXIS.** s109 measured the phone and concluded "do not pin below 900px of
+   WIDTH". Width was only ever a proxy: the constraint is HEIGHT. Driven at
+   **950 × 620** — an ordinary laptop window — the stage still pinned an
+   **849px ledger into a 620px viewport**, and because `.gs-stage` centres its
+   content the overflow was clipped at **both ends**. Measured at every one of
+   the six chapters, the reader never saw the caption stating the sample bound,
+   never saw the progress bar, and **never saw the four readouts** — 681 judged
+   / 635 cleared / 46 stopped / **sent unreviewed 0**. Those totals are the
+   page's actual argument: they are what stops the sample of eight being read
+   as a rate, and "sent unreviewed: 0" is the sequence-gate claim. The page
+   quietly made a weaker and less honest case than the one it was built to
+   make, on a large share of real screens, and looked perfect doing it.
+   *The previous session's fix was the next session's blind spot, again.*
+2. **THE BAND SPENT 2.65 MB TO ANIMATE A THUMBNAIL.** At 390×844 the scrub
+   pulled **all 81 frames — 2,712 KB — into a box measuring 350 × 197**.
+3. **Three lines of prose sat outside the page's own type scale.** The waitlist
+   hint and the footer's two lines come from retained components speaking the
+   WORKSPACE's utility scale, where `text-xs` is a 10px token — right for a
+   dense instrument panel, wrong for serif prose on paper. It was the only
+   serif on the page below 13.5px, and it carries an actual promise.
+
+**Clean on inspection, and worth recording as clean:** zero AA contrast
+failures across every text pairing on their real backgrounds; zero saturated
+colours outside the verdict vocabulary (the one-colour rule holds); no console
+errors; no horizontal overflow at any width walked; the instrument correct at
+6/6 chapters; **81/81 band frames reachable with exactly one lit at every
+scroll position and the band never below 74% visible across the whole sweep**
+(the s108 check, re-run and still aimed); focus visible on 28 of 30 controls,
+the other two being the email inputs, which trade the outline for a full-ink
+border and read clearly — judged adequate rather than written up.
+
+### Lane B — the ambition item
+
+**The hero now delivers the axis it has claimed since the day it was built.**
+`page.tsx` described it as *"display type interlocking with the photographic
+subject"*; measured at 1440 it did nothing of the kind — the type ran down the
+left, the photograph sat underneath at full width, and there was a **604px dead
+column** beside the sub and the form, more than half the content width, holding
+nothing. The photograph now rises into exactly that column with its top edge on
+the sub and **its bottom edge on the foot of the form to the pixel**, so the
+type block and the picture block share both edges. Dead column: 604px → 32px.
+
+A first attempt narrowed the headline to make room and was thrown away: it cost
+the 82px line, which is the page's strongest gesture and the one thing about it
+unlike the category. The headline keeps the full measure; the picture takes only
+the room the 48ch prose measure was already leaving over.
+
+### The ratchets, each broken on purpose before being trusted
+
+`pin-fit.ts` is a pure predicate — the same shape as s109's `decidedAt()`
+derive — and **the stylesheet and the component now read the same two numbers**,
+because a JS breakpoint that drifts from its CSS breakpoint shows up as "the
+instrument reports itself live while nothing is pinned" and is invisible to
+every test that only renders markup. `pin-fit.test.ts` (11 assertions) pins the
+predicate, the CSS/JS agreement, the band's payload door, and the width/height
+split. All four guards were **deliberately broken and confirmed red**: reverting
+`canPin` to the s109 width-only rule reds 4; drifting the CSS query reds 1;
+dropping the band's narrow clause reds 1; folding the width-only rules back into
+the pinning query reds 1.
+
+**The split is itself a finding.** The pinning rules gained a height clause, and
+the width-only rules — collapsing the pricing tiers, the proof band and the hero
+art — were sitting in the same block. Folded in, a **1920 × 650** window would
+have dropped the tiers to two columns and squashed the hero art to 4:3 purely
+because the window was short. They were only ever the same number by
+coincidence; they are now two queries and a test says so.
+
+### Verified at the close, by driving it
+
+| viewport | pins? | outcome |
+|---|---|---|
+| 1440 × 900 | yes | 6/6 chapters correct, **caption and readouts visible at every stop** |
+| 1101 × 900 | yes | tightest two-column; hero and proof band both resolve |
+| 950 × 620 | **no** | completed run, readouts reachable — *was the defect* |
+| 1920 × 650 | **no** | tiers 3-col, stats 4-col, hero art 16:7 — the split holds |
+| 390 × 844 | no | **81 frame requests → 1**, no overflow, completed run |
+
+Ledger height, measured: 868px → **723px** compacted at the narrow edge, 777px
+→ **592px** at ≥1280. `display: none` on a `loading="lazy"` image genuinely
+prevents the fetch — verified with a cache-busted probe rather than assumed,
+because the whole payload saving rests on it.

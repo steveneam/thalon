@@ -81,6 +81,18 @@
   max-width: 520px;
 }
 
+/* The waitlist hint and the footer's two lines come from retained components
+   that speak the WORKSPACE's utility scale, where `text-xs` is a 10px token.
+   That is the right size for a dense dark instrument panel and the wrong one
+   here: on paper, in Newsreader, 10px was the only serif prose on the page
+   below 13.5px, and it carries an actual promise ("no spam — one email when
+   it's your turn"). Pulled onto the landing's own smallest prose step. The
+   components keep their utility classes; only this register overrides them. */
+.landing-surface .lp-form p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .landing-surface .lp-heroart {
   margin: clamp(36px, 4.5vw, 60px) 0 0;
   border: 1px solid var(--lp-rule);
@@ -93,6 +105,69 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* ── THE HERO INTERLOCK (s110, pass 3 — the ambition item) ────────────────
+   `page.tsx` has described this hero from the day it was built as "the
+   secondary axis, used ONCE: display type interlocking with the photographic
+   subject". Measured at 1440, it did no such thing: the type ran down the
+   left, the photograph sat underneath it at full width, and there was a
+   **604px dead column** to the right of the sub and the form — more than half
+   the content width, holding nothing.
+
+   So the photograph comes up beside the type and the two key into each other:
+   the image column starts at the kicker's line and runs to the foot of the
+   form, so the type block and the picture block share both edges instead of
+   being stacked strangers. That is the interlock the comment promised, and it
+   is the axis the page is supposed to be spending.
+
+   Wide screens only. Below the two-column threshold the stacked order is
+   already right, and it is the order the markup is written in — no directional
+   CSS reordering, so the reading order and the tab order stay the source
+   order everywhere. */
+@media (min-width: 1101px) {
+  .landing-surface.lp-hero .gs-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+    column-gap: clamp(36px, 4vw, 64px);
+  }
+
+  /* The kicker and the headline keep the FULL measure. The 82px line is the
+     page's strongest single gesture and the one thing here that is unlike the
+     category; narrowing it to make room for a picture traded the best asset
+     for the cheaper one, which a first attempt at this proved by doing it. */
+  .landing-surface.lp-hero .gs-kicker {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .landing-surface .lp-h1 {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  /* The prose keeps its 48ch measure; the picture takes the room that measure
+     leaves over — which is exactly where the dead column was. */
+  .landing-surface .lp-sub {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .landing-surface.lp-hero .lp-form {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  /* Top edge on the sub's first line, bottom edge on the foot of the form:
+     the type block and the picture block share both, which is the interlock
+     rather than two things that merely sit near each other. */
+  .landing-surface .lp-heroart {
+    grid-column: 2;
+    grid-row: 3 / 5;
+    align-self: stretch;
+    margin: 0;
+    aspect-ratio: auto;
+  }
 }
 
 /* ── proof band ────────────────────────────────────────────────────── */
@@ -588,16 +663,62 @@
    Killer 3 (㉑ s105): in one column the stage's own cell is only as tall as
    the stage, so sticky has no travel. The stage keeps `position: sticky` and
    pins to the top of the viewport while the chapters scroll beneath it. */
-@media (max-width: 900px) {
+/* ── THE LEDGER IS COMPACTED WHEN THE VIEWPORT IS SHORT ────────────────────
+   Measured, pinned, before this block: the ledger is 777px tall at ≥1280px
+   wide and 868px at 901px wide (it is TALLEST at the narrow end of the pinned
+   range, where each claim wraps to more lines). Against real laptop viewport
+   heights — 1366×768 gives ~640px of page, 1280×800 gives ~670px — that meant
+   the pinned sheet clipped its own totals on a large share of actual screens.
+
+   Rather than simply refusing to pin on all of them, the rows tighten so the
+   sheet fits more viewports and the reveal survives. Only spacing and the
+   reason's leading move; nothing is hidden, and no claim is dropped. Below
+   `PIN_MIN_HEIGHT` even the compact sheet cannot fit and the instrument stops
+   pinning altogether (see `@/lib/landing/pin-fit`). */
+@media (min-width: 1101px) and (max-height: 900px) {
+  .landing-surface .gs-ledger {
+    padding: clamp(12px, 1.4vw, 16px);
+  }
+
+  .landing-surface .gs-row {
+    padding: 7px 0;
+  }
+
+  .landing-surface .gs-quote {
+    font-size: 14px;
+    line-height: 1.34;
+  }
+
+  .landing-surface .gs-verdict i {
+    line-height: 1.35;
+  }
+
+  .landing-surface .gs-readouts {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .landing-surface .gs-bar {
+    margin-top: 12px;
+  }
+}
+
+/* The spine stops pinning on EITHER axis: too narrow for two columns, or too
+   short to hold the sheet. `pin-fit.ts` carries the measurements and the JS
+   half of this rule; `pin-fit.test.ts` asserts the two never drift apart. */
+@media (max-width: 1100px), (max-height: 699px) {
   .landing-surface .gs-spine {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
   }
 
-  /* NOT sticky below 900px. Measured at 390×844 the ledger is 1087px tall —
-     243px taller than the viewport — so pinning it leaves a reading band of
-     zero and the chapter headings render behind the sheet. The instrument
-     shows its completed state here instead (see gate-instrument.tsx). */
+  /* NOT sticky here. Measured at 390×844 the ledger is 1087px tall — 243px
+     taller than the viewport — so pinning it leaves a reading band of zero and
+     the chapter headings render behind the sheet. And measured at 950×620 —
+     an ordinary laptop window that passed s109's width-only guard — an 849px
+     ledger pinned into 620px is clipped at BOTH ends, taking the caption off
+     the top and all four readouts off the bottom at every chapter. The
+     instrument shows its completed state here instead. */
   .landing-surface .gs-stage {
     position: static;
     height: auto;
@@ -617,7 +738,18 @@
   .landing-surface .gs-chapters {
     margin-top: 28px;
   }
+}
 
+/* ── NARROW LAYOUT — WIDTH ONLY, DELIBERATELY ──────────────────────────────
+   These rules answer "the column is too narrow for this shape", which has
+   nothing to do with how SHORT the window is. They stayed behind a width-only
+   query when the pinning rules above gained their height clause: folded into
+   that query instead, a 1920×650 window — wide, merely short — would have
+   dropped the pricing tiers and the proof band to two columns and squashed the
+   hero art to 4:3 for no reason a reader could see. Splitting the two
+   concerns is the whole point; they were only ever the same number by
+   coincidence. */
+@media (max-width: 900px) {
   .landing-surface .gs-row {
     grid-template-columns: 14px minmax(0, 1fr);
   }
@@ -694,8 +826,22 @@
    the poster is hidden outright, so there is nothing for the scroll to
    select. `:not(:first-child)` beats `.is-on` on specificity here because it
    is a compound of the same weight declared later — kept explicit rather
-   than relying on order alone. */
-@media (prefers-reduced-motion: reduce) {
+   than relying on order alone.
+
+   ── AND THIS IS ALSO THE PAYLOAD DOOR (s110, pass 3) ────────────────────
+   `display: none` on a `loading="lazy"` image means the browser never fetches
+   it: a hidden element has no box, so it never intersects and the lazy loader
+   never fires. Verified directly rather than assumed — a cache-busted probe
+   image was requested when shown and NOT requested when hidden — because the
+   whole saving rests on it.
+
+   That matters beyond reduced motion. Driven at 390×844 the band pulled all
+   81 frames — **2,712 KB** — into a box measuring 350×197. The scrub is the
+   page's one moving moment and it is worth its bytes on a laptop; it is not
+   worth 2.6 MB of cellular data to animate a thumbnail. Narrow screens now
+   hold the poster frame, which is the same trade the instrument makes when it
+   stops pinning, and the same one reduced motion makes. */
+@media (prefers-reduced-motion: reduce), (max-width: 900px) {
   .landing-surface .wb-band img:not(:first-of-type) {
     display: none;
   }

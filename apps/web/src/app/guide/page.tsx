@@ -167,6 +167,15 @@ export default function GuidePage() {
             Motion respects <code>prefers-reduced-motion</code>: the band holds one frame and never
             scrubs.
           </p>
+          <p className="lp-lede">
+            The same trade is made whenever the window cannot hold the instrument. The ledger is a
+            sheet of a fixed height, and pinning one that is taller than the viewport clips it at
+            both ends — quietly taking the run&rsquo;s totals off the bottom of the screen while
+            everything still looks right. So the sheet is pinned only where it fits, and on a phone,
+            on a narrow window, or on a short one it is shown complete and scrolls with the page
+            instead. The band holds its poster frame on narrow screens too, which also means a phone
+            is not asked to download eighty-one frames to animate a picture the width of a hand.
+          </p>
 
           <p className="lp-stamp" style={{ marginTop: "48px" }}>
             Run recorded {RECORDED_ON}. <Link href="/">Back to the landing page</Link>.
